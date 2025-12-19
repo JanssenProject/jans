@@ -46,7 +46,7 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 |`https://jans.io/scim/all-resources.search`|Access the root .search endpoint|
 |`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
 
-In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
+In order to facilitate the process of getting, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
 ## Where to locate SCIM-related logs
 
@@ -80,6 +80,7 @@ You can refer to [here](../../janssen-server/config-guide/scim-config/user-confi
 You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#retrieve-existing-user) for this topic
 
 ## Creating Resource
+
 ### Create an User
 
 You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#create-an-user) for this topic
@@ -134,10 +135,12 @@ The second is a stronger approach that turns off validation of incoming members 
 
 
 ## User Registration Process with SCIM
+
 SCIM service has many use cases. One interesting and often arising is that of coding your own user registration process. With your SCIM endpoints you can build a custom application to maintain user entries in your database.
 
 
 ### Important Considerations
+
 Here, you have some useful tips before you start:
 
 1. Choose a toolset you feel comfortable to work with. Keep in mind that you have to leverage the capabilities of your language/framework to issue complex HTTPS requests. Be sure that:
