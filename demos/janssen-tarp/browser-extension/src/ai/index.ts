@@ -173,7 +173,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
 async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
   try {
     const oidcClient = await mcpService.getClientByClientId(args.client_id);
-    if (!oidcClient) {
+    if (!oidcClient?.clientId) {
       throw new Error(`Client with ID ${args.client_id} not found`);
     }
 

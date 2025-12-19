@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 export interface LLMProvider {
     value: string;
     label: string;
-    icon: JSX.Element;
+    icon: ReactNode;
     description: string;
     apiKeyFormat: string;
     apiKeyPlaceholder: string;

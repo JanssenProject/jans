@@ -558,7 +558,7 @@ app.put("/api/keys", async (req, res) => {
     }
 
     if (!existingKey) {
-      return res.status(409).json({
+      return res.status(404).json({
         error: "API key does not exists"
       });
     }
@@ -585,7 +585,7 @@ app.put("/api/keys", async (req, res) => {
       keyPreview: `...${key.slice(-4)}` // Show only last 4 chars
     };
 
-    res.status(201).json(response);
+    res.status(200).json(response);
   } catch (error) {
     console.error("Error storing API key:", error);
     res.status(500).json({

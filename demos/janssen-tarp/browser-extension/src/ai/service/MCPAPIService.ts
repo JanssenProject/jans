@@ -76,7 +76,6 @@ class MCPApiService {
 
   // Update an existing API key
   async updateApiKey(id: string, key: string): Promise<ApiKeyData> {
-    // For simplicity, we'll delete and recreate
     const provider = await this.getProviderFromId(id);
     const model = await this.getModelFromId(id);
 
@@ -95,7 +94,7 @@ class MCPApiService {
     });
 
     if (!response.ok) {
-      if (response.status === 409) {
+      if (response.status === 404) {
         throw new Error('API key does not exists for this provider');
       }
       throw new Error(`Failed to create API key: ${response.statusText}`);
