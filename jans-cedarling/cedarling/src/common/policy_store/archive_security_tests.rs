@@ -193,11 +193,14 @@ mod malicious_archives {
 
         // Verify that the deeply nested file can be read and contains correct data
         let nested_path = (0..100).map(|_| "dir").collect::<Vec<_>>().join("/") + "/file.txt";
-        let content = vfs.read_file(&nested_path)
+        let content = vfs
+            .read_file(&nested_path)
             .expect("Should be able to read file at deeply nested path");
-        let content_str = String::from_utf8(content)
-            .expect("File content should be valid UTF-8");
-        assert_eq!(content_str, "deep content", "File content should match expected value");
+        let content_str = String::from_utf8(content).expect("File content should be valid UTF-8");
+        assert_eq!(
+            content_str, "deep content",
+            "File content should match expected value"
+        );
     }
 
     #[test]
@@ -447,17 +450,16 @@ mod manifest_security {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        // Invalid checksum format should be reported via ManifestError::InvalidChecksumFormat.
-        let err = result.expect_err("Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum format");
+        // For archive-based loading, manifest validation is not enforced automatically.
+        // The loader should still succeed even if the manifest's checksum format is invalid.
+        let loaded = result.expect(
+            "Archive-based loader should succeed even with invalid manifest checksum format",
+        );
+
+        // Verify that the manifest was loaded and attached, even though its checksum format is invalid.
         assert!(
-            matches!(
-                err,
-                PolicyStoreError::ManifestError {
-                    err: crate::common::policy_store::errors::ManifestErrorType::InvalidChecksumFormat { .. }
-                }
-            ),
-            "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {:?}",
-            err
+            loaded.manifest.is_some(),
+            "Expected manifest to be present even when checksum format is invalid"
         );
     }
 }

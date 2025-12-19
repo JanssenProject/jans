@@ -34,14 +34,23 @@ use std::path::Path;
 pub async fn load_policy_store_directory(
     path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    let vfs = super::vfs_adapter::PhysicalVfs::new();
-    let loader = DefaultPolicyStoreLoader::new(vfs);
+    // Use the PhysicalVfs-specific loader for directory-based stores.
+    let loader = DefaultPolicyStoreLoader::new_physical();
     let path_str = path
         .to_str()
         .ok_or_else(|| PolicyStoreError::PathNotFound {
             path: path.display().to_string(),
         })?;
-    loader.load_directory(path_str)
+
+    // Load all components from the directory.
+    let loaded = loader.load_directory(path_str)?;
+
+    // If a manifest is present, validate it against the physical filesystem.
+    if let Some(ref manifest) = loaded.manifest {
+        loader.validate_manifest(path_str, &loaded.metadata, manifest)?;
+    }
+
+    Ok(loaded)
 }
 
 /// Load a policy store from a directory path (WASM stub).
@@ -554,12 +563,11 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Load a directory-based policy store.
     ///
-    /// Note: Manifest validation is automatically performed ONLY for PhysicalVfs.
-    /// For other VFS types (MemoryVfs, WASM, custom implementations), users should
-    /// call ManifestValidator::validate() directly if validation is needed.
-    ///
-    /// This design follows the Interface Segregation Principle: manifest validation
-    /// is only available where it makes sense (native filesystem).
+    /// This method is generic over the underlying `VfsFileSystem` and **does not**
+    /// perform manifest validation. For backends that need manifest validation
+    /// (e.g., `PhysicalVfs`), callers should use higher-level helpers such as
+    /// `load_policy_store_directory` or call `validate_manifest` explicitly on
+    /// `DefaultPolicyStoreLoader<PhysicalVfs>`.
     pub fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
@@ -567,26 +575,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         // Load all components
         let metadata = self.load_metadata(dir)?;
         let manifest = self.load_manifest(dir)?;
-
-        // Validate manifest if present (only for PhysicalVfs)
-        // This uses runtime type checking to avoid leaking PhysicalVfs-specific
-        // behavior into the generic interface
-        #[cfg(not(target_arch = "wasm32"))]
-        if let Some(ref manifest_data) = manifest {
-            use std::any::TypeId;
-
-            // Only validate for PhysicalVfs - this avoids forcing all VFS implementations
-            // to support manifest validation when it may not be meaningful
-            if TypeId::of::<V>() == TypeId::of::<super::vfs_adapter::PhysicalVfs>() {
-                // We need to cast self to the PhysicalVfs-specific type to call validate_manifest
-                // Safety: We've verified V is PhysicalVfs via TypeId check
-                let physical_loader = unsafe {
-                    &*(self as *const Self
-                        as *const DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs>)
-                };
-                physical_loader.validate_manifest(dir, &metadata, manifest_data)?;
-            }
-        }
 
         let schema = self.load_schema(dir)?;
         let policies = self.load_policies(dir)?;
