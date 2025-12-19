@@ -50,7 +50,7 @@ In order to facilitate the process of getting an access token, your Janssen inst
 
 ## Where to locate SCIM-related logs
 
-Please see [here](https://docs.jans.io/v1.0.14/admin/scim/logs/) for additional logs:
+Please see [Janssen SCIM logs documentation](https://docs.jans.io/v1.0.14/admin/scim/logs/) for additional logs:
 
 * SCIM log is located at `/opt/jans/jetty/jans-scim/logs/scim.log`
 * If you use SCIM custom script aslo see `/opt/jans/jetty/jans-scim/logs/scim_script.log`
