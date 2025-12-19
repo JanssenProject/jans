@@ -1,6 +1,6 @@
 {
   "name": "janssen-tarp-mcp-server",
-  "version": "1.0.0",
+  "version": "1.15.0",
   "description": "The MCP server of Janssen-Tarp for addressing handling requests from AI Agents (inside Janssen Tarp)",
   "main": "dist/server.js",
   "scripts": {
