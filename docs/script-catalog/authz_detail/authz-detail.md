@@ -101,7 +101,7 @@ If at least one element from `authorization_details` array fails validation erro
 - Get full HTTP Request - `context.getHttpRequest()`
 
 
-## Simple Use Case: validate authz details is present and return string representation
+## Simple Use Case: validate that authz details are present and return string representation
 
 ### Script Type: Java
 

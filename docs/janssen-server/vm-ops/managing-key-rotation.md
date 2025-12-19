@@ -32,7 +32,7 @@ Key alias or `kid` has following format (example `connect_76297462-a3f8-498e-afc
   - in signature case it can be `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
   - in encryption case case it can be `RSA1_5`, `RSA-OAEP`
 
-Key rotation means that new keys are generated and old one are removed for given algorithm (full replacement).
+Key rotation means that new keys are generated and old ones are removed for given algorithm (full replacement).
 
 Keys are stored in:
 - key store file (specified by `keyStoreFile`)
