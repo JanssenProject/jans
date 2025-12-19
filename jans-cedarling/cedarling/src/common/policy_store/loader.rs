@@ -17,39 +17,6 @@
 //! - Works in WASM (no temp file extraction needed)
 //! - Is efficient (reads files on-demand from archive)
 //! - Is secure (no temp file cleanup concerns)
-//!
-//! ## Example: Loading an archive (native, internal)
-//!
-//! ```ignore
-//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
-//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
-//!
-//! // Create archive VFS (validates format during construction)
-//! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
-//!
-//! // Create loader with archive VFS
-//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-//!
-//! // Load policy store from root directory of archive
-//! let loaded = loader.load_directory(".")?;
-//! ```
-//!
-//! ## Example: Loading archive in WASM (internal)
-//!
-//! ```ignore
-//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
-//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
-//!
-//! // Get archive bytes (from network, storage, etc.)
-//! let archive_bytes: Vec<u8> = fetch_archive_bytes()?;
-//!
-//! // Create archive VFS from bytes
-//! let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
-//!
-//! // Load as normal
-//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-//! let loaded = loader.load_directory(".")?;
-//! ```
 
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
@@ -62,26 +29,7 @@ use std::path::Path;
 ///
 /// This function uses `PhysicalVfs` to read from the local filesystem.
 /// It is only available on native platforms (not WASM).
-///
-/// # Example
-///
-/// ```text
-/// use crate::common::policy_store::loader::load_policy_store_directory;
-/// use std::path::Path;
-///
-/// async fn example() -> Result<(), Box<dyn std::error::Error>> {
-///     let loaded = load_policy_store_directory(Path::new("./policy_store")).await?;
-///     println!("Loaded store: {}", loaded.metadata.policy_store.name);
-///     Ok(())
-/// }
-/// ```
-///
-/// # Errors
-///
-/// Returns an error if:
-/// - The directory does not exist
-/// - Required files are missing (metadata.json, schema.cedarschema)
-/// - Files contain invalid content
+
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_directory(
     path: &Path,
@@ -113,27 +61,7 @@ pub async fn load_policy_store_directory(
 ///
 /// This function uses `ArchiveVfs` to read from a zip archive.
 /// It is only available on native platforms (not WASM).
-///
-/// # Example
-///
-/// ```text
-/// use crate::common::policy_store::loader::load_policy_store_archive;
-/// use std::path::Path;
-///
-/// async fn example() -> Result<(), Box<dyn std::error::Error>> {
-///     let loaded = load_policy_store_archive(Path::new("./policy_store.cjar")).await?;
-///     println!("Loaded store: {}", loaded.metadata.policy_store.name);
-///     Ok(())
-/// }
-/// ```
-///
-/// # Errors
-///
-/// Returns an error if:
-/// - The file does not exist
-/// - The file is not a valid zip archive
-/// - Required files are missing (metadata.json, schema.cedarschema)
-/// - Files contain invalid content
+
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
     use super::archive_handler::ArchiveVfs;
@@ -161,29 +89,7 @@ pub async fn load_policy_store_archive(
 /// - WASM environments where file system access is not available
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
-///
-/// # Example
-///
-/// ```text
-/// use crate::common::policy_store::loader::load_policy_store_archive_bytes;
-///
-/// async fn example() -> Result<(), Box<dyn std::error::Error>> {
-///     // Fetch archive bytes from network, storage, etc.
-///     let archive_bytes: Vec<u8> = fetch_from_network().await?;
-///     let loaded = load_policy_store_archive_bytes(archive_bytes)?;
-///     println!("Loaded store: {}", loaded.metadata.policy_store.name);
-///     Ok(())
-/// }
-///
-/// async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
-/// ```
-///
-/// # Errors
-///
-/// Returns an error if:
-/// - The bytes are not a valid zip archive
-/// - Required files are missing (metadata.json, schema.cedarschema)
-/// - Files contain invalid content
+
 pub fn load_policy_store_archive_bytes(
     bytes: Vec<u8>,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {

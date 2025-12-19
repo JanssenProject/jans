@@ -33,33 +33,7 @@ pub struct DirEntry {
 /// Trait for virtual filesystem operations.
 ///
 /// This trait abstracts filesystem operations to enable testing and cross-platform support.
-///
-/// # Examples
-///
-/// Using `open_file` with `BufReader` for efficient reading:
-///
-/// ```text
-/// use std::io::{BufRead, BufReader};
-/// use crate::common::policy_store::vfs_adapter::{PhysicalVfs, VfsFileSystem};
-///
-/// let vfs = PhysicalVfs::new();
-/// let reader = vfs.open_file("/path/to/file.txt")?;
-/// let buf_reader = BufReader::new(reader);
-///
-/// for line in buf_reader.lines() {
-///     println!("{}", line?);
-/// }
-/// ```
-///
-/// Using `read_file` for small files:
-///
-/// ```text
-/// use crate::common::policy_store::vfs_adapter::{PhysicalVfs, VfsFileSystem};
-///
-/// let vfs = PhysicalVfs::new();
-/// let content = vfs.read_file("/path/to/small-file.txt")?;
-/// let text = String::from_utf8(content)?;
-/// ```
+
 pub trait VfsFileSystem: Send + Sync + 'static {
     /// Open a file and return a reader.
     ///
@@ -67,19 +41,7 @@ pub trait VfsFileSystem: Send + Sync + 'static {
     /// - Read incrementally (memory efficient for large files)
     /// - Use standard I/O traits like `BufReader`
     /// - Control buffer sizes
-    ///
-    /// # Examples
-    ///
-    /// ```text
-    /// use std::io::BufReader;
-    /// use crate::common::policy_store::vfs_adapter::{PhysicalVfs, VfsFileSystem};
-    ///
-    /// let vfs = PhysicalVfs::new();
-    /// let reader = vfs.open_file("/path/to/file.json")?;
-    /// let buf_reader = BufReader::new(reader);
-    ///
-    /// // Can now use serde_json::from_reader, etc.
-    /// ```
+    
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>>;
 
     /// Read the entire contents of a file into memory.

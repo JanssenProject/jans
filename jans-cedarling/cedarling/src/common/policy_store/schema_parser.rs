@@ -66,25 +66,6 @@ impl SchemaParser {
     /// Parses the schema content using Cedar's schema parser and returns
     /// a `ParsedSchema` with metadata. The schema is validated for correct
     /// syntax and structure during parsing.
-    ///
-    /// # Errors
-    /// Returns `PolicyStoreError::CedarSchemaError` if schema syntax is invalid,
-    /// structure is malformed, or validation fails.
-    ///
-    /// # Example
-    /// ```ignore
-    /// let content = r#"
-    ///     namespace MyApp {
-    ///         entity User;
-    ///         entity File;
-    ///         action "view" appliesTo {
-    ///             principal: [User],
-    ///             resource: [File]
-    ///         };
-    ///     }
-    /// "#;
-    /// let parsed = SchemaParser::parse_schema(content, "schema.cedarschema")?;
-    /// ```
     pub fn parse_schema(content: &str, filename: &str) -> Result<ParsedSchema, PolicyStoreError> {
         // Parse the schema using Cedar's schema parser
         // Cedar uses SchemaFragment to parse human-readable schema syntax

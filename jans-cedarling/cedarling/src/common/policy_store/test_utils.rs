@@ -21,22 +21,7 @@ use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
 
 /// Builder for creating test policy stores programmatically.
-///
-/// # Example
-///
-/// ```ignore
-/// let builder = PolicyStoreTestBuilder::new("test-store")
-///     .with_schema(r#"namespace TestApp { entity User; }"#)
-///     .with_policy("policy1", r#"@id("policy1") permit(principal, action, resource);"#)
-///     .with_entity("users/alice", r#"{"uid":{"type":"User","id":"alice"},"attrs":{},"parents":[]}"#)
-///     .with_trusted_issuer("issuer1", r#"{"issuer1":{"name":"Test","oidc_endpoint":"https://example.com"}}"#);
-///
-/// // Create directory structure
-/// builder.build_directory(temp_dir.path())?;
-///
-/// // Or create archive
-/// let archive_bytes = builder.build_archive()?;
-/// ```
+
 pub struct PolicyStoreTestBuilder {
     /// Store ID (hex string)
     pub id: String,

@@ -20,38 +20,6 @@
 //! - Use `ArchiveVfs::from_buffer()` with bytes you fetch (works now)
 //! - Use `ArchiveSource::Url` with `load_policy_store()` (once URL fetching is implemented)
 //! - Only `from_file()` is native-only (requires file system access)
-//!
-//! # Internal API Note
-//!
-//! This module is part of the internal implementation. External users should use the
-//! `Cedarling` API with `BootstrapConfig` to load policy stores. The examples below
-//! illustrate internal usage patterns.
-//!
-//! # Example: Native (internal)
-//!
-//! ```ignore
-//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
-//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
-//!
-//! // Load from file path (native only - file I/O not available in WASM)
-//! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
-//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-//! let loaded = loader.load_directory(".")?;
-//! ```
-//!
-//! # Example: WASM (or Native) (internal)
-//!
-//! ```ignore
-//! use cedarling::common::policy_store::archive_handler::ArchiveVfs;
-//! use cedarling::common::policy_store::loader::DefaultPolicyStoreLoader;
-//!
-//! // Load from bytes - works in both native and WASM!
-//! let archive_bytes: Vec<u8> = fetch_from_network().await?;
-//! let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
-//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-//! let loaded = loader.load_directory(".")?;
-//! ```
-
 use super::errors::ArchiveError;
 use super::vfs_adapter::{DirEntry, VfsFileSystem};
 use std::io::{Cursor, Read, Seek};

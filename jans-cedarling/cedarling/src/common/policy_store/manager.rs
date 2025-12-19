@@ -18,22 +18,6 @@
 //! ├── trusted_issuers           →  trusted_issuers: HashMap<String, TrustedIssuer>
 //! └── entities                  →  default_entities: HashMap<String, Value>
 //! ```
-//!
-//! # Usage
-//!
-//! ```text
-//! use crate::common::policy_store::loader::DefaultPolicyStoreLoader;
-//! use crate::common::policy_store::vfs_adapter::PhysicalVfs;
-//! use crate::common::policy_store::manager::PolicyStoreManager;
-//!
-//! // Load using new loader
-//! let vfs = PhysicalVfs::new();
-//! let loader = DefaultPolicyStoreLoader::new(vfs);
-//! let loaded = loader.load_directory("/path/to/store")?;
-//!
-//! // Convert to legacy format
-//! let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
-//! ```
 
 use super::entity_parser::EntityParser;
 use super::issuer_parser::IssuerParser;

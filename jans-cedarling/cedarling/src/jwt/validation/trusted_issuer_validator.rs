@@ -128,22 +128,6 @@ const MAX_JWKS_CACHE_DURATION_SECS: u64 = 86400;
 /// - Required claims validation based on token metadata
 /// - JWKS fetching and caching with configurable TTL
 /// - JWT signature verification
-///
-/// # Example
-///
-/// ```ignore
-/// use cedarling::{TrustedIssuerValidator, TrustedIssuer};
-/// use std::collections::HashMap;
-///
-/// let trusted_issuers: HashMap<String, TrustedIssuer> = // ... load from policy store
-/// let validator = TrustedIssuerValidator::with_logger(trusted_issuers, None);
-///
-/// // Find a trusted issuer
-/// let issuer = validator.find_trusted_issuer("https://issuer.example.com")?;
-///
-/// // Full async validation with JWKS loading
-/// let (claims, issuer) = validator.preload_and_validate_token(&token, "access_token").await?;
-/// ```
 pub struct TrustedIssuerValidator {
     /// Map of issuer identifiers to their configurations
     trusted_issuers: HashMap<String, Arc<TrustedIssuer>>,
