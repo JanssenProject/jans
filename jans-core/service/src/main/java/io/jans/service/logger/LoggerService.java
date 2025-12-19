@@ -235,8 +235,8 @@ public abstract class LoggerService {
         Level level = getCurrentLogLevel();
         LoggingLayoutType loggingLayout = getCurrentLoggingLayout();
 
-        String msgPattern = isLoggerUpdateEvent ? "Starting layout and loggers level periodic update. Layout: '{}`, level: `{}'. Previous Layout: '{}`, level: `{}'" :
-        	"Starting layout and loggers level after configuration update. Layout: '{}`, level: `{}' ";
+        String msgPattern = isLoggerUpdateEvent ? "Starting layout and loggers level periodic update. Layout: '{}', level: '{}'. Previous Layout: '{}', level: '{}'" :
+        	"Starting layout and loggers level after configuration update. Layout: '{}', level: '{}' ";
     	log.info(msgPattern, loggingLayout, level, prevLogLoggingLayout, prevLogLevel);
 
         updateAppendersAndLogLevel(prevLogLoggingLayout, loggingLayout, prevLogLevel, level);
