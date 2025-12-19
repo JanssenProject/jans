@@ -381,7 +381,12 @@ impl JwtService {
             if let Some(token_type) = token_type {
                 // Get token metadata for this token type
                 if let Some(token_metadata) = trusted_iss.token_metadata.get(token_type) {
-                    // Use TrustedIssuerValidator's validate_required_claims function
+                    // NOTE: This is the ONLY place where trusted-issuer-driven "required claims"
+                    //       validation occurs. Standard JWT validation (signature, expiration,
+                    //       audience, etc.) happens earlier in the validation pipeline (via the
+                    //       JWT validator). The policy-driven required_claims are validated only
+                    //       here, once per token, after we've resolved the TrustedIssuer and
+                    //       token_metadata for that token type.
                     if let Err(err) =
                         validate_required_claims(&validated_jwt.claims, token_type, token_metadata)
                     {
