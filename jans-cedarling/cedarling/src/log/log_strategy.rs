@@ -77,6 +77,24 @@ impl LogStrategy {
         &self.logger
     }
 
+    fn log_entry<T: Loggable>(&self, entry: T) {
+        let entry =
+            LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
+        if let Some(lock_service) = self
+            .lock_service
+            .read()
+            .expect("obtain lock_service read lock")
+            .as_ref()
+        {
+            lock_service.log_any(entry.clone());
+        }
+        match &self.logger {
+            LogStrategyLogger::Off(log) => log.log_any(entry),
+            LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
+            LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+        }
+    }
+
     pub fn set_lock_service(&self, lock_service: LockService) {
         *self
             .lock_service
@@ -129,21 +147,7 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
 // Implementation of LogWriter
 impl LogWriter for LogStrategy {
     fn log_any<T: Loggable>(&self, entry: T) {
-        let entry =
-            LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
-        if let Some(lock_service) = self
-            .lock_service
-            .read()
-            .expect("obtain lock_service read lock")
-            .as_ref()
-        {
-            lock_service.log_any(entry.clone());
-        }
-        match &self.logger {
-            LogStrategyLogger::Off(log) => log.log_any(entry),
-            LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
-            LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
-        }
+        self.log_entry(entry);
     }
 }
 
