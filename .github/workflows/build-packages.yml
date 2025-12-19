@@ -156,7 +156,7 @@ jobs:
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
         if [[ "${TAG_NAME}" == "nightly" ]]; then
-          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
+          echo "version=1.15.0" >> $GITHUB_OUTPUT
         else
           echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')-stable" >> $GITHUB_OUTPUT
         fi
@@ -307,7 +307,7 @@ jobs:
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
         if [[ "${TAG_NAME}" == "nightly" ]]; then
-          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
+          echo "version=1.15.0" >> $GITHUB_OUTPUT
         else
           echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')-stable" >> $GITHUB_OUTPUT
         fi
@@ -396,7 +396,7 @@ jobs:
         NPM_TAG=latest
         if [ "${TAG}" == "nightly" ]; then
           NPM_TAG=nightly
-          TAG="0.0.0"
+          TAG="1.15.0"
           LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || echo "Failed to get last nightly version"
           NEW_NPM_VERSION=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
           sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
@@ -412,7 +412,7 @@ jobs:
   
         # Build for Node.js target with modified version
         NODEJS_VERSION="${TAG}-nodejs"
-        if [ "${TAG}" == "0.0.0" ]; then
+        if [ "${TAG}" == "1.15.0" ]; then
           NODEJS_VERSION="${NEW_NPM_VERSION}-nodejs"
         fi
         sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
@@ -432,7 +432,7 @@ jobs:
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="1.15.0"
         fi
         
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
@@ -474,7 +474,7 @@ jobs:
         
         TAG=$(echo "${VER}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="1.15.0"
           RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
           jq --arg version "0.0.$RANDOM_NUMBER" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
           echo "Replaced  $RANDOM_NUMBER in manifest.json"
@@ -542,7 +542,7 @@ jobs:
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="1.15.0"
         fi
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
@@ -605,7 +605,7 @@ jobs:
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
-            TAG="0.0.0"
+            TAG="1.15.0"
           fi
           
           cargo build -r -p cedarling_go
@@ -637,7 +637,7 @@ jobs:
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
-            TAG="0.0.0"
+            TAG="1.15.0"
           fi
   
           FILE_LIB=""
@@ -703,7 +703,7 @@ jobs:
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="1.15.0"
         fi
         
         echo TAG=${TAG} >> $GITHUB_ENV
@@ -776,7 +776,7 @@ jobs:
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="1.15.0"
         fi
         
         cargo build -r -p cedarling_uniffi
@@ -796,7 +796,7 @@ jobs:
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
+          TAG="1.15.0"
         fi
         
         cargo build -r -p cedarling_uniffi
