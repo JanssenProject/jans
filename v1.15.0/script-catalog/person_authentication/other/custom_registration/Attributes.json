@@ -1,0 +1,10 @@
+{
+    "en": {
+        "givenName": "First Name",
+        "sn": "Last Name",
+        "mail": "Email",
+        "familyName": "Middle Name"
+	    },
+"passStrength":2,
+"domains": []
+}
