@@ -33,7 +33,6 @@ pub struct DirEntry {
 /// Trait for virtual filesystem operations.
 ///
 /// This trait abstracts filesystem operations to enable testing and cross-platform support.
-
 pub trait VfsFileSystem: Send + Sync + 'static {
     /// Open a file and return a reader.
     ///
@@ -41,7 +40,6 @@ pub trait VfsFileSystem: Send + Sync + 'static {
     /// - Read incrementally (memory efficient for large files)
     /// - Use standard I/O traits like `BufReader`
     /// - Control buffer sizes
-    
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>>;
 
     /// Read the entire contents of a file into memory.

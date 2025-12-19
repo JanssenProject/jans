@@ -29,7 +29,6 @@ use std::path::Path;
 ///
 /// This function uses `PhysicalVfs` to read from the local filesystem.
 /// It is only available on native platforms (not WASM).
-
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_directory(
     path: &Path,
@@ -59,7 +58,6 @@ pub async fn load_policy_store_directory(
 ///
 /// This function uses `ArchiveVfs` to read from a zip archive.
 /// It is only available on native platforms (not WASM).
-
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
     use super::archive_handler::ArchiveVfs;
@@ -85,7 +83,6 @@ pub async fn load_policy_store_archive(
 /// - WASM environments where file system access is not available
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
-
 pub fn load_policy_store_archive_bytes(
     bytes: Vec<u8>,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
