@@ -5,14 +5,22 @@ import com.google.common.cache.CacheBuilder;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +46,42 @@ public class RateLimitService {
 
     @Inject
     private RegisterService registerService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
+    public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
+        // if rate_limit flag is disabled immediately return
+        if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.RATE_LIMIT)){
+            return httpRequest;
+        }
+
+        final String requestUrl = httpRequest.getRequestURL().toString();
+
+        boolean isRegisterEndpoint = requestUrl.endsWith("/register");
+
+        if (isRegisterEndpoint) {
+            CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(httpRequest);
+            final RegisterRequest registerRequest = parseRegisterRequest(cachedRequest.getCachedBodyAsString());
+            String key = "no_key";
+            if (registerRequest != null) {
+                final String ssa = registerRequest.getSoftwareStatement();
+                final List<String> redirectUris = registerRequest.getRedirectUris();
+
+                if (StringUtils.isNotBlank(ssa)) {
+                    // hash ssa to save memory
+                    key = DigestUtils.sha256Hex(ssa);
+                } else if (CollectionUtils.isNotEmpty(redirectUris) && StringUtils.isNotBlank(redirectUris.get(0))) {
+                    key = redirectUris.get(0);
+                }
+            }
+
+            validateRateLimitForRegister(key);
+            return cachedRequest;
+        }
+
+        return httpRequest;
+    }
 
     public void validateRateLimitForRegister(String key) throws RateLimitedException {
         int requestLimit = getRequestLimit(appConfiguration.getRateLimitRegistrationRequestCount());
