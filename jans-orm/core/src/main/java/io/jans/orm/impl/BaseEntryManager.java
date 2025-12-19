@@ -249,12 +249,13 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		// Load entry
 		List<AttributeData> attributesFromLdap = null;
+		List<String> currentLdapReturnAttributesList = null;
 		if (isSchemaUpdate || forceUpdate) {
 			// If it's schema modification request we don't need to load
 			// attributes from LDAP
 			attributesFromLdap = new ArrayList<AttributeData>();
 		} else {
-			List<String> currentLdapReturnAttributesList = buildAttributesListForUpdate(entry, objectClasses, propertiesAnnotations);
+			currentLdapReturnAttributesList = buildAttributesListForUpdate(entry, objectClasses, propertiesAnnotations);
 			if (!isConfigurationUpdate) {
 				currentLdapReturnAttributesList.add("objectClass");
 			}
@@ -267,6 +268,41 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			dumpAttributes("attributesToPersist", attributesToPersist);
 		}
 
+		List<AttributeDataModification> attributeDataModifications = prepareAttributeDataModifications(entryClass, dnValue,
+				entry, propertiesAnnotations, attributesToPersistMap, attributesFromLdap, schemaModificationType, isSchemaUpdate,
+				isConfigurationUpdate, forceUpdate);
+
+		merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
+		
+		if (isValidateAfterUpdate()) {
+			if (!isSchemaUpdate) {
+				// Compare loaded entry data after merge
+				
+				// Step 1. Rebuild map with attributes which we planned to persist
+				attributesToPersistMap = getAttributesMap(attributesToPersist);
+
+				// Step 2. Load current entry from DB
+				List<AttributeData> attributesAfterMergeFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+
+				// Step 3. Compare loaded entry data with initial entry data
+				List<AttributeDataModification> attributeDataModificationsAftermerge = prepareAttributeDataModifications(entryClass,
+						dnValue, entry, propertiesAnnotations, attributesToPersistMap, attributesAfterMergeFromLdap, schemaModificationType,
+						isSchemaUpdate, isConfigurationUpdate, forceUpdate);
+
+				if (attributeDataModificationsAftermerge.size() > 0) {
+					LOG.warn("Detected changes which not exists in enry after merge. Entry DN: {}, missing changes: {}",
+							dnValue, attributeDataModificationsAftermerge);
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private List<AttributeDataModification> prepareAttributeDataModifications(Class<?> entryClass, Object dnValue,
+			Object entry, List<PropertyAnnotation> propertiesAnnotations, Map<String, AttributeData> attributesToPersistMap,
+			List<AttributeData> attributesFromLdap, AttributeModificationType schemaModificationType, boolean isSchemaUpdate,
+			boolean isConfigurationUpdate, boolean forceUpdate) {
 		Map<String, AttributeData> attributesFromLdapMap = getAttributesMap(attributesFromLdap);
 
 		// Prepare list of modifications
@@ -288,9 +324,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		LOG.debug(String.format("LDAP attributes for merge: %s", attributeDataModifications));
 
-		merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
-
-		return null;
+		return attributeDataModifications;
 	}
 
 	protected List<String> buildAttributesListForUpdate(Object entry, String[] objectClasses, List<PropertyAnnotation> propertiesAnnotations) {
@@ -2547,6 +2581,11 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		return sb.toString();
 	}
+
+	protected boolean isValidateAfterUpdate() {
+		return false;
+	}
+
     
 	@Override
 	public PersistenceMetadata getPersistenceMetadata(String primaryKey) {
