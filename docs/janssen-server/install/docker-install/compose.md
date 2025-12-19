@@ -67,7 +67,7 @@ Download the compose file of your chosen persistence from mysql or postgres.
     wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
     ```
 
-Download the script files 
+Download the script files
 
 ```bash
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh /
@@ -80,14 +80,14 @@ Give execute permission to the scripts
 
 ## Create and Start Containers
 
-`up.sh` script invokes the appropriate compose file based on parameter passed. 
+`up.sh` script invokes the appropriate compose file based on parameter passed.
 You can pass `mysql` or `postgres` as an argument to the script. If you don't pass any, it will default to mysql.
 
-It creates two containers, a janssen monolith container and a container for 
+It creates two containers, a janssen monolith container and a container for
 persistence.
 
 !!! Troubleshooting Tip
-    Sometimes the command below runs into an error regarding TLS handshake 
+    Sometimes the command below runs into an error regarding TLS handshake
     timeout while trying to connect
     to docker registry. Try restarting docker services. Root-cause of this error
     is not known.

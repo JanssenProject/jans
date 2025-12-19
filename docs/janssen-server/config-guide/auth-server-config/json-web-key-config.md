@@ -128,9 +128,9 @@ It will return all the jwk configuration information as below:
 
 ### Adds new JSON Web key (JWK)
 
-To add a new key, we can use `post-config-jwks-key` operation id. 
+To add a new key, we can use `post-config-jwks-key` operation id.
 As shown in the [output](#using-command-line) for `--info` command, the
- `post-config-jwks-key` operation requires data to be sent 
+ `post-config-jwks-key` operation requires data to be sent
  according to `JSONWebKey` schema.
 
 To see the schema, use the command below:
@@ -138,7 +138,7 @@ To see the schema, use the command below:
 ```bash title="Command"
 jans cli --schema JSONWebKey
 ```
-The Janssen Server also provides an example of data that adheres to 
+The Janssen Server also provides an example of data that adheres to
 the above schema. To fetch the example, use the command below.
 
 ```bash title="Command"
@@ -188,9 +188,9 @@ To get the schema file:
  jans cli --schema WebKeysConfiguration
 ```
 
-As suggested in the schema, we have to provide an array of keys in a json 
-file containing `key-value` pairs. The properties in the key are defined by 
-the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), 
+As suggested in the schema, we have to provide an array of keys in a json
+file containing `key-value` pairs. The properties in the key are defined by
+the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517),
 and for algorithm-specific properties, in [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
 
 #### Properties
@@ -341,10 +341,10 @@ Operation ID: patch-config-jwks
 ```
 
 To use this operation, specify the id of the key that needs to be updated using the `--url-suffix`
-and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch). 
+and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
 Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
-In this example; We will change the value of the property `use` from `enc` to `sig`. 
+In this example; We will change the value of the property `use` from `enc` to `sig`.
 
 ```json title="Input"
 [
@@ -425,5 +425,5 @@ You can view Key's list on this page. You cannot perform any operations in text-
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
-and configuring the Json Web key. Endpoint details are published in the 
+and configuring the Json Web key. Endpoint details are published in the
 [Swagger document](./../../reference/openapi.md).

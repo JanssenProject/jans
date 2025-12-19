@@ -1,10 +1,4 @@
 # =================================
-# Cloud SQL JDBC Socket Factory
-# =================================
-# Pre-built fat JARs from GHCR for Cloud SQL connectivity
-FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
-
-# =================================
 # Main Image
 # =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
@@ -49,8 +43,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-11-03 11:54'
+ENV CN_VERSION=1.15.0
+ENV CN_BUILD_DATE='2025-12-19 07:55'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -80,7 +74,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
+ENV JANS_SOURCE_VERSION=e9fea40a2f3627e51747143abdfaf82661b58f48
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -237,7 +231,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.15.0-1" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
@@ -245,13 +239,10 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
 # Custom libs
 # ===========
 
-# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/libs
-COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-config-api/custom/libs/
-
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
+    ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \

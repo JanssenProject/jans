@@ -100,6 +100,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
+    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).")
+    private Boolean includeRequestedClaimsInIdToken = false;
+
     @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
     private Boolean allowClientAssertionAudWithoutStrictIssuerMatch = false;
 
@@ -570,6 +573,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
     private Boolean disablePromptConsent = false;
+
+    @DocProperty(description = "Boolean value specifying whether to run all Update Token scripts", defaultValue = "false")
+    private Boolean runAllUpdateTokenScripts = false;
 
     @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day", defaultValue = "86400")
     private Integer logoutStatusJwtLifetime = DEFAULT_LOGOUT_STATUS_JWT_LIFETIME;
@@ -1442,6 +1448,15 @@ public class AppConfiguration implements Configuration {
         this.disablePromptConsent = disablePromptConsent;
     }
 
+    public Boolean getRunAllUpdateTokenScripts() {
+        if (runAllUpdateTokenScripts == null) runAllUpdateTokenScripts = false;
+        return runAllUpdateTokenScripts;
+    }
+
+    public void setRunAllUpdateTokenScripts(Boolean runAllUpdateTokenScripts) {
+        this.runAllUpdateTokenScripts = runAllUpdateTokenScripts;
+    }
+
     public Boolean getIncludeSidInResponse() {
         if (includeSidInResponse == null) includeSidInResponse = false;
         return includeSidInResponse;
@@ -2042,6 +2057,15 @@ public class AppConfiguration implements Configuration {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getIncludeRequestedClaimsInIdToken() {
+        if (includeRequestedClaimsInIdToken == null) includeRequestedClaimsInIdToken = false;
+        return includeRequestedClaimsInIdToken;
+    }
+
+    public void setIncludeRequestedClaimsInIdToken(Boolean includeRequestedClaimsInIdToken) {
+        this.includeRequestedClaimsInIdToken = includeRequestedClaimsInIdToken;
     }
 
     public Boolean getAllowClientAssertionAudWithoutStrictIssuerMatch() {

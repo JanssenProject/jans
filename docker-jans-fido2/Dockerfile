@@ -1,10 +1,4 @@
 # =================================
-# Cloud SQL JDBC Socket Factory
-# =================================
-# Pre-built fat JARs from GHCR for Cloud SQL connectivity
-FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
-
-# =================================
 # Main Image
 # =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
@@ -50,8 +44,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =====
 
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-11-03 12:03'
+ENV CN_VERSION=1.15.0
+ENV CN_BUILD_DATE='2025-12-19 07:46'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -73,7 +67,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
+ENV JANS_SOURCE_VERSION=e9fea40a2f3627e51747143abdfaf82661b58f48
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -214,7 +208,7 @@ EXPOSE $CN_FIDO2_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="1.15.0-1" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
@@ -222,12 +216,9 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
 # Custom libs
 # ===========
 
-# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
-RUN mkdir -p ${JETTY_BASE}/jans-fido2/custom/libs
-COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-fido2/custom/libs/
-
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/logs \
+    ${JETTY_BASE}/jans-fido2/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java

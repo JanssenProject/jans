@@ -7,4 +7,4 @@ tags:
 
 # Generic tables structure
 
-![](../../../assets/database-rdbms-erwin.png)
+![ERwin RDBMS data model diagram showing entities and relationships](../../../assets/database-rdbms-erwin.png)
