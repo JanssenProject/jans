@@ -439,26 +439,18 @@ mod manifest_security {
         let loader = DefaultPolicyStoreLoader::new(vfs);
         let result = loader.load_directory(".");
 
-        // Manifest validation is optional - loader may succeed even with invalid manifest.
-        // Currently, invalid checksum format is reported via ManifestError::InvalidChecksumFormat.
-        match &result {
-            Ok(_) => {
-                // Loader succeeded - manifest validation is not enforced
-            },
-            Err(err) => {
-                // If it fails, it should be a manifest-related error with invalid checksum format
-                assert!(
-                    matches!(
-                        err,
-                        PolicyStoreError::ManifestError {
-                            err: crate::common::policy_store::errors::ManifestErrorType::InvalidChecksumFormat { .. }
-                        }
-                    ),
-                    "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {:?}",
-                    err
-                );
-            },
-        }
+        // Invalid checksum format should be reported via ManifestError::InvalidChecksumFormat.
+        let err = result.expect_err("Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum format");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreError::ManifestError {
+                    err: crate::common::policy_store::errors::ManifestErrorType::InvalidChecksumFormat { .. }
+                }
+            ),
+            "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {:?}",
+            err
+        );
     }
 }
 
