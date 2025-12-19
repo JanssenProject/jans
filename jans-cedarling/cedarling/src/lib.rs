@@ -146,7 +146,7 @@ impl Cedarling {
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
-            log_policy_store_metadata(&log, &metadata);
+            log_policy_store_metadata(&log, metadata);
         }
 
         Ok(Cedarling {
