@@ -25,7 +25,7 @@ pub struct LogStrategy {
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
 #[allow(clippy::large_enum_variant)]
-pub enum LogStrategyLogger {
+pub(crate) enum LogStrategyLogger {
     Off(NopLogger),
     MemoryLogger(MemoryLogger),
     StdOut(StdOutLogger),
