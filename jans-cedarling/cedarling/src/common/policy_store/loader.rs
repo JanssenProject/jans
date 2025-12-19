@@ -52,9 +52,7 @@ pub async fn load_policy_store_directory(
 pub async fn load_policy_store_directory(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    Err(PolicyStoreError::PathNotFound {
-        path: "Directory loading not supported in WASM".to_string(),
-    })
+    Err(super::errors::ArchiveError::WasmUnsupported.into())
 }
 
 /// Load a policy store from a Cedar Archive (.cjar) file.
@@ -78,9 +76,7 @@ pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore,
 pub async fn load_policy_store_archive(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    Err(PolicyStoreError::PathNotFound {
-        path: "File-based archive loading not supported in WASM".to_string(),
-    })
+    Err(super::errors::ArchiveError::WasmUnsupported.into())
 }
 
 /// Load a policy store from archive bytes.

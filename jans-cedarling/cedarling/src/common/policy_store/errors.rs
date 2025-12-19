@@ -328,4 +328,9 @@ pub enum ArchiveError {
     /// Path traversal attempt detected
     #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
+
+    /// Unsupported operation on this platform
+    #[cfg(target_arch = "wasm32")]
+    #[error("Archive operations are not supported on this platform")]
+    WasmUnsupported,
 }
