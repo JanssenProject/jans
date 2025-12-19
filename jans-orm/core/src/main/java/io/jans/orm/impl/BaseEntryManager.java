@@ -275,7 +275,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
 		
 		if (isValidateAfterUpdate()) {
-			if (!isSchemaUpdate) {
+			if (!isSchemaUpdate && !forceUpdate) {
 				// Compare loaded entry data after merge
 				
 				// Step 1. Rebuild map with attributes which we planned to persist

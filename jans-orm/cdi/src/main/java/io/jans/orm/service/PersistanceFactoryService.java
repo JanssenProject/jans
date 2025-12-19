@@ -232,7 +232,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
         if (additionalKeys != null) {
         	for (String key : additionalKeys) {
     			if (System.getProperty(key) != null) {
-    				propertiesConfiguration.setProperty(key, System.getenv(key));
+    				propertiesConfiguration.setProperty(key, System.getProperty(key));
     			}
 
         	}
