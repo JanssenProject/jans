@@ -190,6 +190,14 @@ mod malicious_archives {
         // Verify VFS is usable for a deeply nested archive
         vfs.read_dir(".")
             .expect("Deeply nested archive paths should be readable");
+
+        // Verify that the deeply nested file can be read and contains correct data
+        let nested_path = (0..100).map(|_| "dir").collect::<Vec<_>>().join("/") + "/file.txt";
+        let content = vfs.read_file(&nested_path)
+            .expect("Should be able to read file at deeply nested path");
+        let content_str = String::from_utf8(content)
+            .expect("File content should be valid UTF-8");
+        assert_eq!(content_str, "deep content", "File content should match expected value");
     }
 
     #[test]
