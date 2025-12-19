@@ -41,7 +41,7 @@ Subsequently, when the client uses the access token to access the protected reso
 attaches the DPoP Proof with the request. The resource server checks the validity of the request by ensuring that the
 access token used is bound to the same public key which is presented in the DPoP proof in the request. The resource
 server uses steps laid out in the
-[specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to acertain 
+[specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to ascertain
 this.
 
 ```mermaid
@@ -63,7 +63,7 @@ AS->AS: Validates DPoP JWT
 AS->AS: Validates dpop_jkt against DPoP JWT if it's authz code
 
 AS->AS: Creates access_token bound to public key cnf/jkt
-note right of AS: if AT is bearer cnf/jkt is available via introspection 
+note right of AS: if AT is bearer cnf/jkt is available via introspection
 AS->RP: Returns DPoP-bound access_token with cnf/jkt (response token_type=DPoP)
 RP->RS: Request resource with access_token and DPoP JWT (with "ath" - AT hash)
 RS->RS: Validates access_token against DPoP (public key match cnf/jkt)
@@ -156,5 +156,4 @@ While this documentation is in progress, you can ask questions through [GitHub D
 
 ## Want to contribute?
 
-If you have content you'd
-like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

@@ -107,4 +107,11 @@ public final class Fido2MetricsConstants {
     public static final String CURRENT_PERIOD = "currentPeriod";
     public static final String PREVIOUS_PERIOD = "previousPeriod";
     public static final String COMPARISON = "comparison";
+    
+    // Fallback method constants
+    public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";
+    
+    // Error message keywords
+    public static final String ERROR_KEYWORD_TIMEOUT = "timeout";
+    public static final String ERROR_KEYWORD_EXPIRED = "expired";
 }

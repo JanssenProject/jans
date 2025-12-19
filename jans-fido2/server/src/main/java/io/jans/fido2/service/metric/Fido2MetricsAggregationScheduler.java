@@ -10,14 +10,23 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.cluster.Fido2ClusterNodeService;
 import io.jans.model.cluster.ClusterNode;
+import io.jans.service.timer.QuartzSchedulerManager;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ResourceBundle;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -48,8 +57,13 @@ public class Fido2MetricsAggregationScheduler {
     @Inject
     private Fido2ClusterNodeService clusterNodeService;
 
+    @Inject
+    private QuartzSchedulerManager quartzSchedulerManager;
+
     // Scheduled executor for periodic lock updates during aggregation
     private final ScheduledExecutorService updateExecutor = Executors.newScheduledThreadPool(1);
+
+    private static final ResourceBundle METRICS_CONFIG = ResourceBundle.getBundle("fido2-metrics");
 
     /**
      * Helper method to execute aggregation job with distributed locking
@@ -344,6 +358,109 @@ public class Fido2MetricsAggregationScheduler {
             return;
         }
         log.info("FIDO2 metrics aggregation enabled - locks will be acquired on-demand");
+    }
+
+    /**
+     * Initialize and register Quartz jobs for metrics aggregation
+     * Called during application startup
+     */
+    public void initTimer() {
+        if (!isAggregationEnabled()) {
+            log.info("FIDO2 metrics aggregation is disabled, skipping scheduler initialization");
+            return;
+        }
+
+        try {
+            // Prepare JobDataMap with required services
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put(Fido2MetricsConstants.METRICS_SERVICE, metricsService);
+            jobDataMap.put(Fido2MetricsConstants.SCHEDULER, this);
+
+            // Register hourly aggregation job
+            if (isAggregationTypeEnabled(Fido2MetricsConstants.HOURLY)) {
+                String hourlyCron = getConfigString("fido2.metrics.aggregation.hourly.cron", "0 5 * * * *");
+                registerAggregationJob("HourlyAggregation", HourlyAggregationJob.class, hourlyCron, jobDataMap);
+                log.info("Registered hourly FIDO2 metrics aggregation job with cron: {}", hourlyCron);
+            }
+
+            // Register daily aggregation job
+            if (isAggregationTypeEnabled(Fido2MetricsConstants.DAILY)) {
+                String dailyCron = getConfigString("fido2.metrics.aggregation.daily.cron", "0 10 1 * * *");
+                registerAggregationJob("DailyAggregation", DailyAggregationJob.class, dailyCron, jobDataMap);
+                log.info("Registered daily FIDO2 metrics aggregation job with cron: {}", dailyCron);
+            }
+
+            // Register weekly aggregation job
+            if (isAggregationTypeEnabled(Fido2MetricsConstants.WEEKLY)) {
+                String weeklyCron = getConfigString("fido2.metrics.aggregation.weekly.cron", "0 15 1 * * MON");
+                registerAggregationJob("WeeklyAggregation", WeeklyAggregationJob.class, weeklyCron, jobDataMap);
+                log.info("Registered weekly FIDO2 metrics aggregation job with cron: {}", weeklyCron);
+            }
+
+            // Register monthly aggregation job
+            if (isAggregationTypeEnabled(Fido2MetricsConstants.MONTHLY)) {
+                String monthlyCron = getConfigString("fido2.metrics.aggregation.monthly.cron", "0 20 1 1 * *");
+                registerAggregationJob("MonthlyAggregation", MonthlyAggregationJob.class, monthlyCron, jobDataMap);
+                log.info("Registered monthly FIDO2 metrics aggregation job with cron: {}", monthlyCron);
+            }
+
+            log.info("FIDO2 metrics aggregation scheduler initialized successfully");
+        } catch (Exception e) {
+            log.error("Failed to initialize FIDO2 metrics aggregation scheduler: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Register a Quartz job with cron trigger
+     */
+    private void registerAggregationJob(String jobName, Class<? extends Job> jobClass, String cronExpression, JobDataMap jobDataMap) {
+        try {
+            JobDetail jobDetail = JobBuilder.newJob(jobClass)
+                    .withIdentity("Fido2Metrics_" + jobName, "Fido2MetricsGroup")
+                    .usingJobData(jobDataMap)
+                    .build();
+
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .withIdentity("Fido2Metrics_" + jobName + "_Trigger", "Fido2MetricsGroup")
+                    .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+                    .build();
+
+            quartzSchedulerManager.schedule(jobDetail, trigger);
+        } catch (Exception e) {
+            log.error("Failed to register {} job: {}", jobName, e.getMessage(), e);
+            if (e instanceof IllegalStateException) {
+                throw (IllegalStateException) e;
+            }
+            throw new IllegalStateException("Failed to register " + jobName + " job", e);
+        }
+    }
+
+    /**
+     * Check if a specific aggregation type is enabled
+     */
+    private boolean isAggregationTypeEnabled(String aggregationType) {
+        try {
+            String key = "fido2.metrics.aggregation." + aggregationType.toLowerCase() + ".enabled";
+            return Boolean.parseBoolean(getConfigString(key, "true"));
+        } catch (Exception e) {
+            log.warn("Failed to check if {} aggregation is enabled, defaulting to true: {}", aggregationType, e.getMessage());
+            return true;
+        }
+    }
+
+    /**
+     * Get configuration string with default value
+     */
+    private String getConfigString(String key, String defaultValue) {
+        try {
+            if (METRICS_CONFIG != null && METRICS_CONFIG.containsKey(key)) {
+                return METRICS_CONFIG.getString(key);
+            }
+            return defaultValue;
+        } catch (Exception e) {
+            log.warn("Failed to get config string for key {}, using default: {}", key, defaultValue);
+            return defaultValue;
+        }
     }
 
     /**

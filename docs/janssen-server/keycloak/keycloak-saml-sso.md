@@ -69,7 +69,7 @@ In this tutorial, we are going to use [Iamshowcase](https://sptest.iamshowcase.c
 ![image](../../assets/SAML-Service-provider.png)
 
 - Release some attributes, for example: `email`, `username`
-  
+
 ![image](../../assets/SAML-release-attribute.png)
 
 - Finally Save it.
@@ -87,8 +87,8 @@ Since We are done at Janssen Server side, now let's connect SP with the IDP:
 
 ### Test SSO
 
-Copy that link and open it in a browser. You can open it in incognito mode to avoid session issue. So, It will redirect you to janssen login page. Once you logged in with user credentials it will redirect back to the SP's protected page and show the user session details. 
-  
+Copy that link and open it in a browser. You can open it in incognito mode to avoid cached session conflicts. This will redirect you to the Janssen login page. Once you log in with user credentials, it will redirect back to the SP's protected page and show the user session details.
+
 ### FAQ
 
 * Check KC scheduler log for any TR issue `/opt/kc-scheduler/logs/scheduler.log`

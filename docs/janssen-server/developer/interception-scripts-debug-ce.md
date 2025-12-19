@@ -82,7 +82,7 @@ if REMOTE_DEBUG:
 ```
 if REMOTE_DEBUG:   
     pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True) 
-``` 
+```
 9. Save basic.py
 
 10. Within one minute, jans-auth should load the changed file. Check the following log file again to make sure there are no load errors: /opt/jans/jetty/jans-auth/logs/jans-auth_script.log
