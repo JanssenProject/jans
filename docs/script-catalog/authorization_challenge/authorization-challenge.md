@@ -51,8 +51,8 @@ The Authorization Challenage script implements the [AuthorizationChallenageType]
 If parameters is not present then error has to be created and `false` returned.
 If all is good script has to return `true` and it's strongly recommended to set user `context.getExecutionContext().setUser(user);` so AS can keep tracking what exactly user is authenticated.
 
-`prepareAuthzRequest` should typically be used for authorization request manipulation before `authorize` method is invoked. 
-Also if there is multi-step flow where some data are stored in `session` object, it is good place to restore data from session into request (please find example in sample below). 
+`prepareAuthzRequest` should typically be used for authorization request manipulation before `authorize` method is invoked.
+Also if there is multi-step flow where some data are stored in `session` object, it is good place to restore data from session into request (please find example in sample below).
 
 ### Objects
 | Object name | Object description |
@@ -61,7 +61,7 @@ Also if there is multi-step flow where some data are stored in `session` object,
 |`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java) |
 
 
-## Common Use Case: Authorize user by username/password 
+## Common Use Case: Authorize user by username/password
 
 ### Script Type: Java
 
@@ -259,7 +259,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
 
 ```
 
-## Multi-step authorization by username and OTP 
+## Multi-step authorization by username and OTP
 
 ### Script Type: Java
 

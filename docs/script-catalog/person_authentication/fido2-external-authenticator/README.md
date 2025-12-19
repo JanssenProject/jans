@@ -4,7 +4,7 @@
 
 FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
 
-This document explains how to use the Janssen Auth Server's built-in 
+This document explains how to use the Janssen Auth Server's built-in
 [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py)
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
@@ -14,7 +14,7 @@ to implement a two-step, two-factor authentication (2FA) with username / passwor
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
-Some well known FIDO2 devices and manufacturers include:           
+Some well known FIDO2 devices and manufacturers include:
 
 - [Yubico](https://www.yubico.com/)      
 - [Vasco DIGIPASS SecureClick](https://www.vasco.com/products/two-factor-authenticators/hardware/one-button/digipass-secureclick.html)   
@@ -65,10 +65,10 @@ Follow the steps below to enable FIDO2 authentication:
 
 
 !!! Note
-    If FIDO2 is set as a default authentication mechanism users will **not** be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).  
-    
-    
-### Test the feature 
+    If FIDO2 is set as a default authentication mechanism users will **not** be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).
+
+
+### Test the feature
 To test, enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
 
 An example of a complete URL looks like this -

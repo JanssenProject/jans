@@ -6,7 +6,7 @@ tags:
   - certificates
 ---
 
-# Janssen Certificates 
+# Janssen Certificates
 
 Janssen components have cryptographic keys and X.509 certificates that are stored on the filesystem at the time of installation. Details for certificates associated with each component are provided below. The following certificates are available in the `/etc/certs` folder.
 

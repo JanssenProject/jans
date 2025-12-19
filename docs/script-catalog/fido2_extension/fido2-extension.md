@@ -11,7 +11,7 @@ tags:
 # Fido2 Extension
 
 
-FIDO2 implements attestation and assertion with next endpoints:  
+FIDO2 implements attestation and assertion with next endpoints:
 
 ```
 https://<myjans-server>/jans-fido2/restv1/attestation/options   (register) 

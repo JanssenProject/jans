@@ -1,5 +1,5 @@
 
-This is a person authentication module for oxAuth that allows user to authenticate against Azure AD. 
+This is a person authentication module for oxAuth that allows user to authenticate against Azure AD.
 
 Required Custom property (key/value) -
 1) azure_tenant_id  (Azure AD's Tenant ID)

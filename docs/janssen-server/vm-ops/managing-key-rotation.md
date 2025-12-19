@@ -8,7 +8,7 @@ tags:
 # Managing Key Rotation
 
 
-"Key-rotation" is a standard procedure for all OpenID Connect deployment. "Key-rotation" means replacing existing signing key with newer cryptographic key. For Janssen server, that specific cryptographic key is `jans-auth-keys.pkcs12`. 
+"Key-rotation" is a standard procedure for all OpenID Connect deployment. "Key-rotation" means replacing existing signing key with newer cryptographic key. For Janssen server, that specific cryptographic key is `jans-auth-keys.pkcs12`.
 
 There are two possible ways to manage key rotation:
 - built-in key rotation
@@ -32,9 +32,9 @@ Key alias or `kid` has following format (example `connect_76297462-a3f8-498e-afc
   - in signature case it can be `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
   - in encryption case case it can be `RSA1_5`, `RSA-OAEP`
 
-Key rotation means that new keys are generated and old one are removed for given algorithm (full replacement).  
+Key rotation means that new keys are generated and old one are removed for given algorithm (full replacement).
 
-Keys are stored in:  
+Keys are stored in:
 - key store file (specified by `keyStoreFile`)
 - on persistence level jwks representation of the key are stored in `jansConfWebKeys` attribute of `jansAppConf` entity
 
@@ -47,7 +47,7 @@ Configuration properties related to key store file:
 
 ## Built-in key rotation
 
-`jans-auth-server` has [KeyGeneratorTimer](https://github.com/JanssenProject/jans/blob/70a566b67f660750bf742f19ee127f79b2db8930/jans-auth-server/client/src/main/java/io/jans/as/client/util/KeyGenerator.java) 
+`jans-auth-server` has [KeyGeneratorTimer](https://github.com/JanssenProject/jans/blob/70a566b67f660750bf742f19ee127f79b2db8930/jans-auth-server/client/src/main/java/io/jans/as/client/util/KeyGenerator.java)
 which is responsible for key rotation. Built-in rotation can be switch on/off via `keyRegenerationEnabled` AS configuration property (by setting `true` or `false` value).
 
 ```mermaid
@@ -80,7 +80,7 @@ Expiration date during built-in rotation is set as `now` + `keyRegenerationInter
 ## External key rotation
 
 External rotation means that keys are rotated by script. In this case `keyRegenerationEnabled` must be set to `false` value.
-Script can be scheduled to run periodically. Such script must invoke `KeyGenerator` class from `jans-auth-client-jar-with-dependencies.jar` which will keep keys in key store and in AS persistence consistent. 
+Script can be scheduled to run periodically. Such script must invoke `KeyGenerator` class from `jans-auth-client-jar-with-dependencies.jar` which will keep keys in key store and in AS persistence consistent.
 See [Key Generation](../auth-server/crypto/key-generation.md) page for more details how to generate keys externally.
 
 ```commandLine

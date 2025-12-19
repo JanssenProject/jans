@@ -6,7 +6,7 @@ tags:
 # Script Debugging
 ## Setup
 
-For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you trough a setup using Minikube with docker driver, and [ksync](https://ksync.github.io/ksync/) for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.  
+For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you trough a setup using Minikube with docker driver, and [ksync](https://ksync.github.io/ksync/) for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.
 
 ### System Requirements
 
@@ -25,19 +25,19 @@ The minimum system requirement for running all jans services are `8GB RAM`, `4 C
     ```bash
     minikube start --driver=docker
     ```
-        
+
 1. If not automatically set configure `kubectl` to use the cluster:
 
     ```bash
     kubectl config use-context minikube
     ```
-        
+
 1. Enable ingress on minikube
 
     ```bash
     minikube addons enable ingress
     ```
-    
+
 ### Install Janssen
 
 1. Install [Helm3](https://helm.sh/docs/using_helm/)
@@ -62,19 +62,19 @@ Once Janssen is fully running we want to create an active sync between a local f
         kubectl exec -ti $pod -n $JANS_NAMESPACE -- mkdir -p /deploy/interception-scripts-ksync
     done        
     ```
-    
+
 1. Install ksync
 
     ```bash
     curl https://ksync.github.io/gimme-that/gimme.sh | bash
     ```
-    
+
 1. Initialize ksync
 
     ```bash
     ksync init -n <jans-namespace>
     ```
-    
+
 1. Start ksync.
 
     ```bash
@@ -194,7 +194,7 @@ Once Janssen is fully running we want to create an active sync between a local f
 
 ### Install an IDE
 
-The IDE can be of choice but must contain PyDev. We chose [Liclipse](https://www.liclipse.com/download.html) for this demonstration. 
+The IDE can be of choice but must contain PyDev. We chose [Liclipse](https://www.liclipse.com/download.html) for this demonstration.
 
 Once complete, start the PyDev debug server:
 
@@ -208,7 +208,7 @@ Once complete, start the PyDev debug server:
 
 1. From the menu: go to `File` -> `Open File` and choose the interception script that will be debugged in `$(pwd)/interception-scripts-ksync`.
 
- 
+
 1. When opening the Python file for the first time, we need to instruct Liclipse to use a specific interpreter. Follow these steps:
   
     - Press the "Manual Config" button in the dialog box after opening the Python file
@@ -292,7 +292,7 @@ For Jython scripts, we need additional steps to enable breakpoints.
             print "Failed to import pydevd: %s" % ex
             raise
     ```     
-      
+
 1. Add the following lines wherever breakpoints are needed:   
   
     ```
@@ -397,7 +397,7 @@ For Jython scripts, we need additional steps to enable breakpoints.
     ```
 
 1. Make sure to have an LDAP browser available. We recommend [Apache Directory Studio](https://directory.apache.org/studio/).
-    
+
 1. Port forward the opendj pod. 
 
     ```bash
@@ -413,11 +413,11 @@ For Jython scripts, we need additional steps to enable breakpoints.
 1. In the results that appear click on the `Dn` that has a `displayName` of `basic`.
 
     ![LDAP basic script ](../../../assets/basic_script.png)
-   
+
 1. Choose to load the script from file instead of db. Inside the browser change `jansModuleProperty` with value `{"value1":"location_type","value2":"db","description":""}` to `{"value1":"location_type","value2":"file","description":""}`
 
 1. Specify the `Script Path` location to the location of the folder inside auth server pods: `/deploy/interception-scripts-ksync/basic.py`. Right click the upper `jansModuleProperty` and click `New Value`. A new entry for `jansModuleProperty` will be created. Insert the following for the value: `{"value1":"location_path","value2":"/deploy/interception-scripts-ksync/basic.py","description":""}`
-  
+
 1. Enable the script by settings `jansEnabled` to `true`. The following is an example of how the basic script entry should look.  
 
     ![LDAP basic script ](../../../assets/basic_script_enabled.png)
@@ -444,9 +444,9 @@ For Jython scripts, we need additional steps to enable breakpoints.
     ```
     wget https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.2/jython-standalone-2.7.2.jar
     ```
-    
+
 1. From the IDE (Liclipse) menu: navigate  to `File` -> `Open File` and choose the interception script that will be debugged in `$(pwd)/interception-scripts-ksync/basic.py`
- 
+
 1. When opening the Python file for the first time, we need to instruct Liclipse to use a specific interpreter. Follow these steps:
   
     - Press the "Manual Config" button in the dialog box after opening the Python file
@@ -484,9 +484,9 @@ For Jython scripts, we need additional steps to enable breakpoints.
 1. Save `basic.py`
 
 1. Within one minute, the auth server should load the changed file. Check the following log file again to make sure there are no load errors: `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`
-    
+
 1. To check if the script works, update the default authentication method to Basic Authentication. Preform this in the LDAP browser. Navigate to `o=jans,ou=configuration`. Change the `jansAuthMode` to `basic` instead of `simple_password_auth`.
-     
+
 1. After executing `pydevd.settrace` the script will transfer execution control to the PyDev server in Liclipse. You can use any debug commands. For example: Step Over (F6), Resume (F8), etc
-     
+
 1. After debugging is finished, resume script execution to transfer execution control back to the auth server. 
