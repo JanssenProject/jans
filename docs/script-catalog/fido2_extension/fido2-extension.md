@@ -14,7 +14,7 @@ tags:
 FIDO2 implements attestation and assertion with next endpoints:
 
 ```
-https://<myjans-server>/jans-fido2/restv1/attestation/options   (register) 
+https://<myjans-server>/jans-fido2/restv1/attestation/options   (register)
 https://<myjans-server>/jans-fido2/restv1/attestation/result   (verify registration)
 https://<myjans-server>/jans-fido2/restv1/assertion/options   (authenticate)
 https://<myjans-server>/jans-fido2/restv1/assertion/result   (verify authentication)
@@ -83,7 +83,7 @@ class Fido2Extension(Fido2ExtensionType):
     def init(self, customScript, configurationAttributes):
         print "Fido2Extension. Initialization"
         print "Fido2Extension. Initialized successfully"
-        return True   
+        return True
 
     def destroy(self, configurationAttributes):
         print "Fido2Extension. Destroy"
@@ -154,14 +154,14 @@ class Fido2Extension(Fido2ExtensionType):
     def verifyAssertionStart(self, paramAsJsonNode, context):
         print "Fido2Extension. verifyAssertionStart"
         assertionService = CdiUtil.bean(AssertionService)
-        
+
         return True
 
     # This method is called in Assertion verify endpoint after finish the authentication verification process
     def verifyAssertionFinish(self, paramAsJsonNode, context):
         print "Fido2Extension. verifyAssertionFinish"
         assertionService = CdiUtil.bean(AssertionService)
-        
+
         return True
 
 ```
@@ -214,35 +214,35 @@ public class Fido2Extension implements Fido2ExtensionType {
     @Override
     public boolean registerAttestationStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Attestation Register (start)...");
-        
+
         return true;
     }
 
     @Override
     public boolean registerAttestationFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Attestation Register (finish)...");
-        
+
         return true;
     }
 
     @Override
     public boolean verifyAttestationStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Attestation Verify (start)...");
-        
+
         return true;
     }
 
     @Override
     public boolean verifyAttestationFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Attestation Verify (finish)...");
-        
+
         return true;
     }
 
     @Override
     public boolean authenticateAssertionStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Assertion Authenticate (start)...");
-        
+
         JsonNode jsonNodeUser = paramsAsJsonNode.get("username");
         if (jsonNodeUser != null) {
             log.info("Fido2Interception. printing username: {}", jsonNodeUser.asText());
@@ -250,31 +250,31 @@ public class Fido2Extension implements Fido2ExtensionType {
                 throwBadRequestException("Fido2Interception interceptAuthenticateAssertion : test_user", "Description Error from script : test_user", context);
             }
         }
-	    
+
         return true;
     }
 
     @Override
     public boolean authenticateAssertionFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Assertion Authenticate (finish)...");
-	    
+
         return true;
     }
 
     @Override
     public boolean verifyAssertionStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Assertion Verify (start)...");
-        
+
         return true;
     }
 
     @Override
     public boolean verifyAssertionFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception Script. Assertion Verify (finish)...");
-        
+
         return true;
     }
-    
+
     private void throwBadRequestException(String title, String message, ExternalFido2InterceptionContext context) {
         log.info("Fido2Interception. setting Bad request exception");
         WebApplicationException errorClaimException = Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.BAD_REQUEST_INTERCEPTION, title, message, ThreadContext.get(Constants.CORRELATION_ID_HEADER));

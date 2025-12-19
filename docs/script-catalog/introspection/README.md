@@ -7,7 +7,7 @@ OAuth reference tokens don't convey any information. They are by their very natu
  - approved scopes, 
  - information about the context in which the token was issued. 
 
-Access token data is essential for the resource server to evaluate policies that determine whether or not to allow the request. Token introspection therefore enables a client to trade an OAuth reference token for its JSON equivalent by making a request per [OAuth 2.0 Token Introspection Guide - (RFC 7662)](https://datatracker.ietf.org/doc/html/rfc7662).
+Access token data is essential for the resource server to evaluate policies that determine whether to allow the request. Token introspection therefore enables a client to trade an OAuth reference token for its JSON equivalent by making a request per [OAuth 2.0 Token Introspection Guide - (RFC 7662)](https://datatracker.ietf.org/doc/html/rfc7662).
 
 The use of Introspection scripts allows the ability to modify the response of Introspection Endpoint [spec](https://datatracker.ietf.org/doc/html/rfc7662) and provide additional information in the JSON response.
 

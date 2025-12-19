@@ -77,7 +77,7 @@ You can refer to [here](../../janssen-server/config-guide/scim-config/user-confi
 
 ### Retrieve existing User
 
-You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#retrive-existing-user) for this topic
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#retrieve-existing-user) for this topic
 
 ## Creating Resource
 ### Create an User

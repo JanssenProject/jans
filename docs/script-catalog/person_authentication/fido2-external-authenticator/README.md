@@ -14,7 +14,7 @@ to implement a two-step, two-factor authentication (2FA) with username / passwor
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
-Some well known FIDO2 devices and manufacturers include:
+Some well-known FIDO2 devices and manufacturers include:
 
 - [Yubico](https://www.yubico.com/)      
 - [Vasco DIGIPASS SecureClick](https://www.vasco.com/products/two-factor-authenticators/hardware/one-button/digipass-secureclick.html)   

@@ -51,8 +51,9 @@ The Authorization Challenage script implements the [AuthorizationChallenageType]
 If parameters is not present then error has to be created and `false` returned.
 If all is good script has to return `true` and it's strongly recommended to set user `context.getExecutionContext().setUser(user);` so AS can keep tracking what exactly user is authenticated.
 
-`prepareAuthzRequest` should typically be used for authorization request manipulation before `authorize` method is invoked.
-Also if there is multi-step flow where some data are stored in `session` object, it is good place to restore data from session into request (please find example in sample below).
+The `prepareAuthzRequest` method should typically be used to manipulate the authorization request before the authorize method is invoked.
+If your flow is multi-step and stores data in the session object, restore that data into the request inside prepareAuthzRequest (see sample
+below).
 
 ### Objects
 | Object name | Object description |

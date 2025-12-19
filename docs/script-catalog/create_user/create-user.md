@@ -37,7 +37,7 @@ https://sample.as.com/jans-auth/createUser.htm?
     response_type=code+token&
     redirect_uri=https%3A%2F%2Fcb.example.com&
     state=0ba6bba8-d2a4-44e6-8192-57012e41d506&
-    nonce=963ecc9f-b1d8-4bb0-a0b5-d53be34e7e4e&    
+    nonce=963ecc9f-b1d8-4bb0-a0b5-d53be34e7e4e&
     client_id=9999
 ```
 
