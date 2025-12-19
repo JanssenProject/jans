@@ -155,7 +155,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cloudtools" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.15.0" \
+    org.opencontainers.image.version="1.15.0-1" \
     org.opencontainers.image.title="Janssen Cloud Tools" \
     org.opencontainers.image.description="Tools to run various helper commands for the cluster"
 
