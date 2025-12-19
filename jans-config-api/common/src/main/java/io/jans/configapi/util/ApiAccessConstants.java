@@ -103,14 +103,14 @@ public class ApiAccessConstants {
     public static final String SUPER_ADMIN_DELETE_ACCESS  = "https://jans.io/oauth/config/delete-all";
     
     // Feature Scope
-    public static final String OPENID_READ_ACCESS  = "https://jans.io/oauth/config/openid/openid-read";
-    public static final String OPENID_WRITE_ACCESS = "https://jans.io/oauth/config/openid/openid-write";
-    public static final String OPENID_DELETE_ACCESS = "https://jans.io/oauth/config/openid/openid-delete";
+    public static final String OPENID_READ_ACCESS  = "https://jans.io/oauth/config/openid/openid.readonly";
+    public static final String OPENID_WRITE_ACCESS = "https://jans.io/oauth/config/openid/openid.write";
+    public static final String OPENID_DELETE_ACCESS = "https://jans.io/oauth/config/openid/openid.delete";
     
-    public static final String UMA_READ_ACCESS  = "https://jans.io/oauth/config/uma-read";
-    public static final String UMA_WRITE_ACCESS = "https://jans.io/oauth/config/uma-write";
-    public static final String UMA_DELETE_ACCESS = "https://jans.io/oauth/config/uma-delete";
-    public static final String UMA_ADMIN_ACCESS = "https://jans.io/oauth/config/uma-admin";
+    public static final String UMA_READ_ACCESS  = "https://jans.io/oauth/config/uma.readonly";
+    public static final String UMA_WRITE_ACCESS = "https://jans.io/oauth/config/uma.write";
+    public static final String UMA_DELETE_ACCESS = "https://jans.io/oauth/config/uma.delete";
+    public static final String UMA_ADMIN_ACCESS = "https://jans.io/oauth/config/uma.admin";
     
     public static final String PLUGIN_READ_ACCESS = "https://jans.io/oauth/config/plugin.readonly";
     public static final String PLUGIN_ADMIN_ACCESS = "https://jans.io/oauth/config/plugin.admin";
@@ -126,12 +126,10 @@ public class ApiAccessConstants {
     public static final String APP_VERSION_READ_ACCESS = "https://jans.io/oauth/config/app-version.readonly";
     public static final String APP_DATA_READ_ACCESS = "https://jans.io/oauth/config/data.readonly";
     
-    public static final String JANS_ASSET_READ_ACCESS  = "https://jans.io/oauth/config/jans_asset-read";
-    public static final String JANS_ASSET_WRITE_ACCESS = "https://jans.io/oauth/config/jans_asset-write";
-    public static final String JANS_ASSET_DELETE_ACCESS = "https://jans.io/oauth/config/jans_asset-delete";
-    public static final String JANS_ASSET_ADMIN_ACCESS = "https://jans.io/oauth/config/jans_asset-admin";
-    
-    public static final String JANS_AUDIT_READ_ACCESS  = "https://jans.io/oauth/config/audit-read";
+    public static final String ASSET_READ_ACCESS  = "https://jans.io/oauth/config/asset.readonly";
+    public static final String ASSET_WRITE_ACCESS = "https://jans.io/oauth/config/asset.write";
+    public static final String ASSET_DELETE_ACCESS = "https://jans.io/oauth/config/asset.admin";
+    public static final String ASSET_ADMIN_ACCESS = "https://jans.io/oauth/config/asset.admin";
     
     public static final String SSA_READ_ACCESS = "https://jans.io/oauth/config/ssa.readonly";
     public static final String SSA_WRITE_ACCESS = "https://jans.io/oauth/config/ssa.write";

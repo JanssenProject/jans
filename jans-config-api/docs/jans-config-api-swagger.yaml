@@ -763,11 +763,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-read
+        - https://jans.io/oauth/config/asset.readonly
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -810,9 +810,7 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-delete
-      - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/delete-all
   /api/v1/jans-assets/name/{name}:
@@ -856,11 +854,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-read
+        - https://jans.io/oauth/config/asset.readonly
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -897,11 +895,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-read
+        - https://jans.io/oauth/config/asset.readonly
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -1023,11 +1021,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-read
+        - https://jans.io/oauth/config/asset.readonly
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -1064,11 +1062,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-read
+        - https://jans.io/oauth/config/asset.readonly
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -1105,11 +1103,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-read
+        - https://jans.io/oauth/config/asset.readonly
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -1167,9 +1165,9 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
   /api/v1/jans-assets/upload:
@@ -1240,9 +1238,9 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
     post:
@@ -1303,9 +1301,9 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-write
+        - https://jans.io/oauth/config/asset.write
       - oauth2:
-        - https://jans.io/oauth/config/jans_asset-admin
+        - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
   /api/v1/attributes:
@@ -3566,7 +3564,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.write
       - oauth2:
-        - https://jans.io/oauth/config/openid/openid-read
+        - https://jans.io/oauth/config/openid/openid.readonly
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.admin
       - oauth2:
@@ -3791,7 +3789,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.write
       - oauth2:
-        - https://jans.io/oauth/config/openid/openid-write
+        - https://jans.io/oauth/config/openid/openid.write
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.admin
       - oauth2:
@@ -4011,7 +4009,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.write
       - oauth2:
-        - https://jans.io/oauth/config/openid/openid-write
+        - https://jans.io/oauth/config/openid/openid.write
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.admin
       - oauth2:
@@ -4198,7 +4196,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.delete
       - oauth2:
-        - https://jans.io/oauth/config/openid/openid-delete
+        - https://jans.io/oauth/config/openid/openid.delete
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.admin
       - oauth2:
@@ -4366,7 +4364,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.write
       - oauth2:
-        - https://jans.io/oauth/config/openid/openid-write
+        - https://jans.io/oauth/config/openid/openid.write
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.admin
       - oauth2:
@@ -14638,7 +14636,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/token.delete
       - oauth2:
-        - https://jans.io/oauth/config/openid/openid-delete
+        - https://jans.io/oauth/config/openid/openid.delete
       - oauth2:
         - https://jans.io/oauth/config/token.admin
       - oauth2:
@@ -14994,11 +14992,11 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-read
+        - https://jans.io/oauth/config/uma.readonly
       - oauth2:
-        - https://jans.io/oauth/config/uma-write
+        - https://jans.io/oauth/config/uma.write
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -15066,9 +15064,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-write
+        - https://jans.io/oauth/config/uma.write
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
     post:
@@ -15130,9 +15128,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-write
+        - https://jans.io/oauth/config/uma.write
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
   /api/v1/uma/resources/{id}:
@@ -15182,11 +15180,11 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-read
+        - https://jans.io/oauth/config/uma.readonly
       - oauth2:
-        - https://jans.io/oauth/config/uma-write
+        - https://jans.io/oauth/config/uma.write
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -15215,9 +15213,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-delete
+        - https://jans.io/oauth/config/uma.delete
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/delete-all
     patch:
@@ -15278,9 +15276,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-write
+        - https://jans.io/oauth/config/uma.write
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/write-all
   /api/v1/uma/resources/clientId/{clientId}:
@@ -15348,11 +15346,11 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/uma-read
+        - https://jans.io/oauth/config/uma.readonly
       - oauth2:
-        - https://jans.io/oauth/config/uma-write
+        - https://jans.io/oauth/config/uma.write
       - oauth2:
-        - https://jans.io/oauth/config/uma-admin
+        - https://jans.io/oauth/config/uma.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
       - oauth2:
@@ -15693,19 +15691,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -17458,10 +17456,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -18479,8 +18477,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18491,6 +18487,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
         accessToken:
           type: boolean
     TokenEntityPagedResult:
@@ -18617,12 +18615,12 @@ components:
             https://jans.io/oauth/config/read-all: Admin read scope
             https://jans.io/oauth/config/write-all: Admin write scope
             https://jans.io/oauth/config/delete-all: Admin delete scope
-            https://jans.io/oauth/config/openid/openid-read: View OpenID functionality
-            https://jans.io/oauth/config/openid/openid-write: Manage OpenID functionality
-            https://jans.io/oauth/config/openid/openid-delete: Delete OpenID functionality
-            https://jans.io/oauth/config/uma-read: View UMA functionality
-            https://jans.io/oauth/config/uma-write: Manage UMA functionality
-            https://jans.io/oauth/config/uma-delete: Delete UMA functionality
+            https://jans.io/oauth/config/openid/openid.readonly: View OpenID functionality
+            https://jans.io/oauth/config/openid/openid.write: Manage OpenID functionality
+            https://jans.io/oauth/config/openid/openid.delete: Delete OpenID functionality
+            https://jans.io/oauth/config/uma.readonly: View UMA functionality
+            https://jans.io/oauth/config/uma.write: Manage UMA functionality
+            https://jans.io/oauth/config/uma.delete: Delete UMA functionality
             https://jans.io/oauth/config/plugin.readonly: View Plugin information
             https://jans.io/oauth/config/properties.readonly: View Config-API related
               configuration properties
@@ -18630,14 +18628,13 @@ components:
               configuration properties
             https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
             https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
-            https://jans.io/oauth/config/jans_asset-read: View Jans Assets
-            https://jans.io/oauth/config/jans_asset-write: Manage Jans Assets
-            https://jans.io/oauth/config/jans_asset-delete: Delete Jans Assets
+            https://jans.io/oauth/config/asset.readonly: View Jans Assets
+            https://jans.io/oauth/config/asset.write: Manage Jans Assets
+            https://jans.io/oauth/config/asset.admin: Admin for Jans Assets management
             https://jans.io/oauth/config/token.readonly: View Token details
             https://jans.io/oauth/config/token.write: Manage Token details
             https://jans.io/oauth/config/token.delete: Delete Token details
             https://jans.io/oauth/config/data.readonly: View Config-API related data
-            https://jans.io/oauth/config/audit-read: View Audit Log related data
             https://jans.io/oauth/config/ssa.readonly: View SSA details
             https://jans.io/oauth/config/ssa.write: Manage SSA details
             https://jans.io/oauth/config/ssa.delete: Delete SSA details
@@ -18662,11 +18659,10 @@ components:
             https://jans.io/oauth/config/agama.admin: Admin for Agama flow management
             https://jans.io/oauth/jans-auth-server/session.admin: Admin for Session
               management
-            https://jans.io/oauth/config/uma-admin: Admin for UMA management
+            https://jans.io/oauth/config/uma.admin: Admin for UMA management
             https://jans.io/oauth/config/plugin.admin: Admin for Plugin management
             https://jans.io/oauth/config/properties.admin: Admin for Config-API management
             https://jans.io/oauth/client/authorizations.admin: Admin for Client Authorizations
               management
-            https://jans.io/oauth/config/jans_asset-admin: Admin for Jans Assets management
             https://jans.io/auth/ssa.admin: Admin for SSA management
             https://jans.io/oauth/config/health.admin: Admin for Health API management

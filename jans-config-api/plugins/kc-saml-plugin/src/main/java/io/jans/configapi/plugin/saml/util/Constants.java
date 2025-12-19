@@ -74,6 +74,7 @@ public class Constants {
                     "postBindingAuthnRequest", SINGLE_SIGN_ON_SERVICE_URL, "wantAuthnRequestsSigned",
                     "signingCertificate", "addExtensionsElementWithKeyInfo"));
 
+    //admin
     public static final String SAML_ADMIN_ACCESS = "https://jans.io/oauth/config/saml.admin";
     
     // Scopes
@@ -84,18 +85,7 @@ public class Constants {
     public static final String SAML_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/saml-config.readonly";
     public static final String SAML_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/saml-config.write";
 
-    public static final String SAML_SCOPE_READ_ACCESS = "https://jans.io/oauth/config/saml-scope.readonly";
-    public static final String SAML_SCOPE_WRITE_ACCESS = "https://jans.io/oauth/config/saml-scope.write";
-
-    public static final String JANS_IDP_CONFIG_READ_ACCESS = "https://jans.io/idp/config.readonly";
-    public static final String JANS_IDP_CONFIG_WRITE_ACCESS = "https://jans.io/idp/config.write";
-
-    public static final String JANS_IDP_REALM_READ_ACCESS = "https://jans.io/idp/realm.readonly";
-    public static final String JANS_IDP_REALM_WRITE_ACCESS = "https://jans.io/idp/realm.write";
-
-    public static final String JANS_IDP_REALM_DELETE_ACCESS = "https://jans.io/idp/realm.delete";
-    public static final String JANS_IDP_SAML_READ_ACCESS = "https://jans.io/idp/saml.readonly";
-
-    public static final String JANS_IDP_SAML_WRITE_ACCESS = "https://jans.io/idp/saml.write";
-    public static final String JANS_IDP_SAML_DELETE_ACCESS = "https://jans.io/idp/saml.delete";
+    public static final String IDP_SAML_READ_ACCESS = "https://jans.io/idp/saml.readonly";
+    public static final String IDP_SAML_WRITE_ACCESS = "https://jans.io/idp/saml.write";
+    public static final String IDP_SAML_DELETE_ACCESS = "https://jans.io/idp/saml.delete";
 }
