@@ -48,10 +48,10 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		}
 	}
 	
-	public static String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
-	public static String DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE = "orm.validate-after-update";
+	private static final String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
+	private static final String DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE = "orm.validate-after-update";
 	
-	public static List<String> ADDIONAL_ENV_DB_PROPERTIES = Arrays.asList(DB_PROPERTY_MYSQL_SIMPLE_JSON, DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE);
+	private static final List<String> ADDIONAL_ENV_DB_PROPERTIES = Arrays.asList(DB_PROPERTY_MYSQL_SIMPLE_JSON, DB_PROPERTY_ORM_VALIDATE_AFTER_UPDATE);
 
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
@@ -203,7 +203,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		Iterator<?> keys = propertiesConfiguration.getKeys();
         while (keys.hasNext()) {
             String key = (String) keys.next();
-            String envKey = key.toUpperCase().replaceAll("\\.", "\\_").replaceAll("\\-", "\\_");
+            String envKey = key.toUpperCase().replace('.', '_').replace('-', '_');
 			if (System.getenv(envKey) != null) {
 				propertiesConfiguration.setProperty(key, System.getenv(envKey));
 			}
@@ -211,7 +211,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
 
         if (additionalKeys != null) {
         	for (String key : additionalKeys) {
-                String envKey = key.toUpperCase().replaceAll("\\.", "\\_").replaceAll("\\-", "\\_");
+                String envKey = key.toUpperCase().replace('.', '_').replace('-', '_');
     			if (System.getenv(envKey) != null) {
     				propertiesConfiguration.setProperty(key, System.getenv(envKey));
     			}
