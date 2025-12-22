@@ -34,23 +34,39 @@ use std::path::Path;
 pub async fn load_policy_store_directory(
     path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    // Use the PhysicalVfs-specific loader for directory-based stores.
-    let loader = DefaultPolicyStoreLoader::new_physical();
     let path_str = path
         .to_str()
         .ok_or_else(|| PolicyStoreError::PathNotFound {
             path: path.display().to_string(),
-        })?;
+        })?
+        .to_string();
 
-    // Load all components from the directory.
-    let loaded = loader.load_directory(path_str)?;
+    // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
+    // `load_directory` is intentionally synchronous because it performs blocking filesystem I/O.
+    // Using `spawn_blocking` ensures these operations don't block the async executor.
+    tokio::task::spawn_blocking(move || {
+        // Use the PhysicalVfs-specific loader for directory-based stores.
+        let loader = DefaultPolicyStoreLoader::new_physical();
 
-    // If a manifest is present, validate it against the physical filesystem.
-    if let Some(ref manifest) = loaded.manifest {
-        loader.validate_manifest(path_str, &loaded.metadata, manifest)?;
-    }
+        // Load all components from the directory.
+        let loaded = loader.load_directory(&path_str)?;
 
-    Ok(loaded)
+        // If a manifest is present, validate it against the physical filesystem.
+        if let Some(ref manifest) = loaded.manifest {
+            loader.validate_manifest(&path_str, &loaded.metadata, manifest)?;
+        }
+
+        Ok(loaded)
+    })
+    .await
+    .map_err(|e| {
+        // If the blocking task panicked, convert to an IO error.
+        // This should be rare and typically indicates a bug in the loader code.
+        PolicyStoreError::Io(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Blocking task panicked: {}", e),
+        ))
+    })?
 }
 
 /// Load a policy store from a directory path (WASM stub).
@@ -71,10 +87,27 @@ pub async fn load_policy_store_directory(
 
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    use super::archive_handler::ArchiveVfs;
-    let archive_vfs = ArchiveVfs::from_file(path)?;
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    loader.load_directory(".")
+    let path = path.to_path_buf();
+    
+    // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
+    // `load_directory` is intentionally synchronous because it performs blocking filesystem I/O
+    // (reading from zip archive). Using `spawn_blocking` ensures these operations don't block
+    // the async executor.
+    tokio::task::spawn_blocking(move || {
+        use super::archive_handler::ArchiveVfs;
+        let archive_vfs = ArchiveVfs::from_file(&path)?;
+        let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+        loader.load_directory(".")
+    })
+    .await
+    .map_err(|e| {
+        // If the blocking task panicked, convert to an IO error.
+        // This should be rare and typically indicates a bug in the loader code.
+        PolicyStoreError::Io(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Blocking task panicked: {}", e),
+        ))
+    })?
 }
 
 /// Load a policy store from a Cedar Archive (.cjar) file (WASM stub).
