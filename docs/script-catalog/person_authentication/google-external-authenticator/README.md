@@ -54,7 +54,7 @@ Place this file in `/etc/certs/google_client_secret.json`
 
 ### Properties
 
-The custom script has the following properties:    
+The custom script has the following properties:
 
 |	Property	|	Description		| Input value     |
 |-----------------------|-------------------------------|---------------|
@@ -103,7 +103,3 @@ An example of a complete URL looks like this -
 https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_uri=https://<your.jans.server>/admin&client_id=<replace_with_inum_client_id>&scope=openid+profile+email+user_name&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
 ```
 
-
-
-
- 

@@ -13,14 +13,14 @@ The Janssen logs can be viewed via SSH access to the server running the Janssen 
 ## Log Levels
 The following log levels can be configured through the configuration CLI:
 
-| Log Level | Messages Logged |  
-|---------- |------------                  |  
-|Trace      | All messages                 |  
-|Debug      | Debug level and above        |  
-|Info       | Informational level and above|  
-|Warn       | Warning level and above      |  
-|Error      | Error level and above        |  
-|Fatal      | Only fatal errors            |  
+| Log Level | Messages Logged |
+|---------- |------------                  |
+|Trace      | All messages                 |
+|Debug      | Debug level and above        |
+|Info       | Informational level and above|
+|Warn       | Warning level and above      |
+|Error      | Error level and above        |
+|Fatal      | Only fatal errors            |
 |Off        | Logging is disabled          |
 
 ### Configuring Log Levels
@@ -101,7 +101,7 @@ The available logs for Jans server are listed below:
 ### Config API logs
 `/opt/jans/jetty/jans-config-api/logs/`
 
-| Log File | Description |  
+| Log File | Description |
 |--------- |-------------|
 | **configapi.log** | Config API main log |
 | **configapi_persistence.log** | Config API persistence log |

@@ -156,7 +156,7 @@ jobs:
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
         if [[ "${TAG_NAME}" == "nightly" ]]; then
-          echo "version=1.15.0" >> $GITHUB_OUTPUT
+          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
         else
           echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')-stable" >> $GITHUB_OUTPUT
         fi
@@ -307,7 +307,7 @@ jobs:
 
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
         if [[ "${TAG_NAME}" == "nightly" ]]; then
-          echo "version=1.15.0" >> $GITHUB_OUTPUT
+          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
         else
           echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')-stable" >> $GITHUB_OUTPUT
         fi
@@ -370,8 +370,6 @@ jobs:
         toolchain: stable
 
     - name: Build WASM build
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
@@ -408,9 +406,11 @@ jobs:
   
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
-        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
-        npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}" || {
+          echo "npm publish failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
         cd ..
   
         # Build for Node.js target with modified version
@@ -419,7 +419,10 @@ jobs:
         echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
-        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
+          echo "npm publish (nodejs) failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
 
     - name: Archive and sign pkg contents
       id: archive_pkg
@@ -433,14 +436,16 @@ jobs:
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="1.15.0"
+          TAG="0.0.0"
         fi
         
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" *.tar.gz *.asc
+        gh release upload "${VERSION}" *.tar.gz *.asc --clobber || {
+          echo "gh release upload failed (assets may already exist), continuing..."
+        }
 
   build_demo_packages:
     if: |
@@ -474,12 +479,19 @@ jobs:
         cd janssen-tarp
         
         TAG=$(echo "${VER}" | sed 's/^v//')
+        VERSION_TO_SET="${TAG}"
+        
         if [ "${TAG}" == "nightly" ]; then
-          TAG="1.15.0"
+          TAG="0.0.0"
           RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
-          jq --arg version "0.0.$RANDOM_NUMBER" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
-          echo "Replaced  $RANDOM_NUMBER in manifest.json"
+          VERSION_TO_SET="0.0.${RANDOM_NUMBER}"
         fi
+        
+        # Update version in all manifest and package files
+        echo "Setting extension version to ${VERSION_TO_SET}"
+        jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
+        jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/chrome/manifest.json > temp.json && mv temp.json src/static/chrome/manifest.json
+        jq --arg version "${VERSION_TO_SET}" '.version = $version' package.json > temp.json && mv temp.json package.json
         
         wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
         mkdir -p wasm
@@ -543,7 +555,7 @@ jobs:
         
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="1.15.0"
+          TAG="0.0.0"
         fi
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
@@ -606,7 +618,7 @@ jobs:
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
-            TAG="1.15.0"
+            TAG="0.0.0"
           fi
           
           cargo build -r -p cedarling_go
@@ -638,7 +650,7 @@ jobs:
           fi
           TAG=$(echo "${VERSION}" | sed 's/^v//')
           if [ "${TAG}" == "nightly" ]; then
-            TAG="1.15.0"
+            TAG="0.0.0"
           fi
   
           FILE_LIB=""
@@ -704,7 +716,7 @@ jobs:
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="1.15.0"
+          TAG="0.0.0"
         fi
         
         echo TAG=${TAG} >> $GITHUB_ENV
@@ -777,7 +789,7 @@ jobs:
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="1.15.0"
+          TAG="0.0.0"
         fi
         
         cargo build -r -p cedarling_uniffi
@@ -797,7 +809,7 @@ jobs:
         fi
         TAG=$(echo "${VERSION}" | sed 's/^v//')
         if [ "${TAG}" == "nightly" ]; then
-          TAG="1.15.0"
+          TAG="0.0.0"
         fi
         
         cargo build -r -p cedarling_uniffi
