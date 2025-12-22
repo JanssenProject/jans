@@ -78,7 +78,7 @@ public class PluginResource extends ConfigBaseResource {
      * @param pluginName the plugin name to check; comparison is case-insensitive
      * @return `true` if a plugin with the given name is deployed, `false` otherwise
      */
-    @Operation(summary = "Get plugin by name", description = "Get plugin by name", operationId = "get-plugin-by-name", tags = {
+    @Operation(summary = "Check if plugin is deployed", description = "Check if plugin is deployed", operationId = "get-plugin-by-name", tags = {
             "Plugins" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_ADMIN_ACCESS }),
