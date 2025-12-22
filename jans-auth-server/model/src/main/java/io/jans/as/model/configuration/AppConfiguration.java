@@ -16,9 +16,9 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.jans.doc.annotation.DocProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.*;
 
@@ -100,6 +100,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
+    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).")
+    private Boolean includeRequestedClaimsInIdToken = false;
+
     @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
     private Boolean allowClientAssertionAudWithoutStrictIssuerMatch = false;
 
@@ -177,6 +180,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint", defaultValue = "false")
     private Boolean allowRevokeForOtherClients = false;
+
+    @DocProperty(description = "Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)")
+    private Boolean skipSessionAuthnTimeCheckDuringPromptLogin = false;
+
+    @DocProperty(description = "Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms.")
+    private Integer sessionAuthnTimeCheckDuringPromptLoginThresholdMs = 500;
 
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
@@ -564,6 +573,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
     private Boolean disablePromptConsent = false;
+
+    @DocProperty(description = "Boolean value specifying whether to run all Update Token scripts", defaultValue = "false")
+    private Boolean runAllUpdateTokenScripts = false;
 
     @DocProperty(description = "The lifetime of Logout Status JWT. If not set falls back to 1 day", defaultValue = "86400")
     private Integer logoutStatusJwtLifetime = DEFAULT_LOGOUT_STATUS_JWT_LIFETIME;
@@ -1077,6 +1089,24 @@ public class AppConfiguration implements Configuration {
         this.allowRevokeForOtherClients = allowRevokeForOtherClients;
     }
 
+    public Boolean getSkipSessionAuthnTimeCheckDuringPromptLogin() {
+        if (skipSessionAuthnTimeCheckDuringPromptLogin == null) skipSessionAuthnTimeCheckDuringPromptLogin = false;
+        return skipSessionAuthnTimeCheckDuringPromptLogin;
+    }
+
+    public void setSkipSessionAuthnTimeCheckDuringPromptLogin(Boolean skipSessionAuthnTimeCheckDuringPromptLogin) {
+        this.skipSessionAuthnTimeCheckDuringPromptLogin = skipSessionAuthnTimeCheckDuringPromptLogin;
+    }
+
+    public Integer getSessionAuthnTimeCheckDuringPromptLoginThresholdMs() {
+        if (sessionAuthnTimeCheckDuringPromptLoginThresholdMs == null) sessionAuthnTimeCheckDuringPromptLoginThresholdMs = 500;
+        return sessionAuthnTimeCheckDuringPromptLoginThresholdMs;
+    }
+
+    public void setSessionAuthnTimeCheckDuringPromptLoginThresholdMs(Integer sessionAuthnTimeCheckDuringPromptLoginThresholdMs) {
+        this.sessionAuthnTimeCheckDuringPromptLoginThresholdMs = sessionAuthnTimeCheckDuringPromptLoginThresholdMs;
+    }
+
     public Boolean getReturnDeviceSecretFromAuthzEndpoint() {
         return returnDeviceSecretFromAuthzEndpoint;
     }
@@ -1416,6 +1446,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDisablePromptConsent(Boolean disablePromptConsent) {
         this.disablePromptConsent = disablePromptConsent;
+    }
+
+    public Boolean getRunAllUpdateTokenScripts() {
+        if (runAllUpdateTokenScripts == null) runAllUpdateTokenScripts = false;
+        return runAllUpdateTokenScripts;
+    }
+
+    public void setRunAllUpdateTokenScripts(Boolean runAllUpdateTokenScripts) {
+        this.runAllUpdateTokenScripts = runAllUpdateTokenScripts;
     }
 
     public Boolean getIncludeSidInResponse() {
@@ -2018,6 +2057,15 @@ public class AppConfiguration implements Configuration {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getIncludeRequestedClaimsInIdToken() {
+        if (includeRequestedClaimsInIdToken == null) includeRequestedClaimsInIdToken = false;
+        return includeRequestedClaimsInIdToken;
+    }
+
+    public void setIncludeRequestedClaimsInIdToken(Boolean includeRequestedClaimsInIdToken) {
+        this.includeRequestedClaimsInIdToken = includeRequestedClaimsInIdToken;
     }
 
     public Boolean getAllowClientAssertionAudWithoutStrictIssuerMatch() {

@@ -380,15 +380,7 @@ mod tests {
         };
         trusted_issuers.insert("company".to_string(), company_issuer);
 
-        EntityBuilder::new(
-            config,
-            &trusted_issuers,
-            None,
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
-        )
-        .unwrap()
+        EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap()
     }
 
     fn create_test_token(
@@ -655,15 +647,8 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder = EntityBuilder::new(
-            config,
-            &trusted_issuers,
-            None,
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
-        )
-        .unwrap();
+        let builder =
+            EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -723,15 +708,8 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder = EntityBuilder::new(
-            config,
-            &trusted_issuers,
-            None,
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
-        )
-        .unwrap();
+        let builder =
+            EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -807,9 +785,7 @@ mod tests {
             config,
             &trusted_issuers,
             Some(&validator_schema),
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("could not build EntityBuilder");
 
@@ -953,9 +929,7 @@ mod tests {
             config,
             &trusted_issuers,
             Some(&validator_schema),
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .unwrap();
 

@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.saml.rest;
 import io.jans.configapi.core.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.core.rest.BaseApiApplication;
 import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;
@@ -29,9 +30,16 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
 @OAuthScope(name = Constants.SAML_READ_ACCESS, description = "View SAML related information"),
 @OAuthScope(name = Constants.SAML_WRITE_ACCESS, description = "Manage SAML related information"),
+@OAuthScope(name = Constants.SAML_DELETE_ACCESS, description = "Delete SAML related information"),
 @OAuthScope(name = Constants.SAML_CONFIG_READ_ACCESS, description = "View SAML configuration related information"),
 @OAuthScope(name = Constants.SAML_CONFIG_WRITE_ACCESS, description = "Manage SAML configuration related information"),
+@OAuthScope(name = Constants.IDP_SAML_READ_ACCESS, description = "View SAML IDP related information"),
+@OAuthScope(name = Constants.IDP_SAML_WRITE_ACCESS, description = "Manage SAML IDP related information"),
+@OAuthScope(name = Constants.IDP_SAML_DELETE_ACCESS, description = "Delete SAML IDP related information"),
 @OAuthScope(name = Constants.SAML_ADMIN_ACCESS, description = "Admin to manage SAML configuration related information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
 }
 )))
 public class ApiApplication extends BaseApiApplication {

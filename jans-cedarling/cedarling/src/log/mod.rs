@@ -73,7 +73,10 @@ use std::sync::LazyLock;
 use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
+pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
+#[cfg(all(not(target_arch = "wasm32"), not(test)))]
+pub(crate) use log_strategy::LogStrategyLogger;
 
 use crate::LockServiceConfig;
 use crate::app_types::{ApplicationName, PdpID};
@@ -84,6 +87,7 @@ use crate::lock::{InitLockServiceError, LockService};
 pub(crate) type Logger = Arc<LogStrategy>;
 pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
 
@@ -104,6 +108,7 @@ pub(crate) async fn init_logger(
     Ok(logger)
 }
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) fn init_test_logger() -> Logger {
     Arc::new(
@@ -117,4 +122,40 @@ pub(crate) fn init_test_logger() -> Logger {
         )
         .unwrap(),
     )
+}
+
+/// Logs an entry, offloading to a background thread on native (except MemoryLogger), synchronously on WASM and during tests.
+///
+/// This function offloads synchronous log serialization to a background thread (via `tokio::task::spawn_blocking`)
+/// in native builds to avoid blocking the authorization response path. The MemoryLogger remains synchronous
+/// even on native to ensure logs are immediately available for retrieval. In WASM builds and during unit tests,
+/// logging is performed synchronously in the calling thread to maintain deterministic behavior.
+///
+/// # Arguments
+///
+/// * `logger` - The logger instance to use
+/// * `entry` - The log entry to write
+#[cfg(all(not(target_arch = "wasm32"), not(test)))]
+pub(crate) fn log_async<T>(logger: &Logger, entry: T)
+where
+    T: interface::Loggable + Send + 'static,
+{
+    if matches!(logger.logger(), LogStrategyLogger::MemoryLogger(_)) {
+        // Memory logger must remain synchronous so clients can immediately read logs.
+        logger.log_any(entry);
+        return;
+    }
+
+    let logger = logger.clone();
+    tokio::task::spawn_blocking(move || {
+        logger.log_any(entry);
+    });
+}
+
+#[cfg(any(target_arch = "wasm32", test))]
+pub(crate) fn log_async<T>(logger: &Logger, entry: T)
+where
+    T: interface::Loggable + Send + 'static,
+{
+    logger.log_any(entry);
 }

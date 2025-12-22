@@ -42,6 +42,8 @@ paths:
         - https://jans.io/oauth/config/scim.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     patch:
       tags:
       - SCIM - Config Management
@@ -142,3 +144,9 @@ components:
             https://jans.io/scim/config.write: Manage SCIM configuration related information
             https://jans.io/oauth/config/scim.admin: Admin to manage SCIM configuration
               related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

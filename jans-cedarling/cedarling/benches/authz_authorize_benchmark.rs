@@ -107,7 +107,6 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
-        token_cache_max_ttl_secs: 60,
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -146,6 +145,7 @@ async fn prepare_cedarling_with_jwt_validation(
             jwt_sig_validation: true,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+            ..Default::default()
         },
         authorization_config: AuthorizationConfig {
             use_user_principal: true,
@@ -158,7 +158,6 @@ async fn prepare_cedarling_with_jwt_validation(
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
-        token_cache_max_ttl_secs: 60,
     };
 
     Cedarling::new(&bootstrap_config).await

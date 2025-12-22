@@ -863,3 +863,9 @@ components:
             https://jans.io/oauth/config/fido2.readonly: View fido2 related information
             https://jans.io/oauth/config/fido2.write: Manage fido2 related information
             https://jans.io/oauth/config/fido2.delete: Delete fido2 related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

@@ -34,7 +34,7 @@ If a flow crashes, its parent flows (or flow) if they exist, crash as well. Tryi
 
 ## Internationalization labels
 
-When using [localization and internationalization](./advanced-usages.md#localization-and-internationalization) use meaningful label keys and prefix all of them with the name of the project in question. If your project is called `magicAuthnJourneys`, then `magicAuthnJourneys.image.caption` and `magicAuthnJourneys.start_button_label` are good examples. This is a strategy that avoids possible name collisions in labels. 
+When using [localization and internationalization](./advanced-usages.md#localization-and-internationalization) use meaningful label keys and prefix all of them with the name of the project in question. If your project is called `magicAuthnJourneys`, then `magicAuthnJourneys.image.caption` and `magicAuthnJourneys.start_button_label` are good examples. This is a strategy that avoids possible name collisions in labels.
 
 ## OOP prose warning
 
@@ -61,6 +61,6 @@ Carefully decide how use the [`Finish`](../../../agama/language-reference.md#flo
 
 As an example, suppose several flows exist for OTP (one-time passcode) authentication, like SMS, e-mail, token-based, etc. These would receive the user identifier as an input and act accordingly by verifying the passcode the user has entered at the browser. A parent flow can be used to prompt for a username and password first, and then forward the user to the OTP flow that better matches the user's preferences. This sounds fine, however, since any flow can be triggered by means of an authentication request by default, a skilled individual might try to launch one of the OTP flows directly passing proper parameters. This would result in authentications using a single factor (i.e. no password) which is undesirable.
 
-Thus, it is recommended to include `userId` in `Finish` only when there is a reason to do so, that is, when the authentication carried out by the flow is strong enough. This largely depends on the defined organization policies, but using a two-factor authentication is often a good sign of strength. Another approach is explicitly state which flows  should not be triggered from a browser directly. This can be done in the Agama [project descriptor](../../../agama/gama-format.md#metadata), `project.json`. 
+Thus, it is recommended to include `userId` in `Finish` only when there is a reason to do so, that is, when the authentication carried out by the flow is strong enough. This largely depends on the defined organization policies, but using a two-factor authentication is often a good sign of strength. Another approach is explicitly state which flows  should not be triggered from a browser directly. This can be done in the Agama [project descriptor](../../../agama/gama-format.md#metadata), `project.json`.
 
 Recall the simplest way to express a positive authentication outcome is just `Finish true`.

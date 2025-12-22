@@ -59,9 +59,9 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Return all session", description = "Return all session", operationId = "get-sessions", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
@@ -69,8 +69,8 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAllSessions() {
 
@@ -98,9 +98,9 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Search session", description = "Search session", operationId = "search-session", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
@@ -108,8 +108,8 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.SEARCH)
     public Response searchSessionEntries(
@@ -144,9 +144,9 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Get session by id.", description = "Get session by id.", operationId = "get-session-by-id", tags = {
             "Auth - Session Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
@@ -155,8 +155,8 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
     public Response getSessionById(
@@ -178,19 +178,19 @@ public class SessionResource extends ConfigBaseResource {
      */
     @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
             "Auth - Session Management" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
-                            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
+                            ApiAccessConstants.AUTH_REVOKE_SESSION }),
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
-                    ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
+            ApiAccessConstants.AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
+                    ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.USER + ApiConstants.USERDN_PATH)
     public Response deleteUsersSession(
             @Parameter(description = "User domain name") @PathParam(ApiConstants.USERDN) @NotNull String userDn) {
@@ -210,19 +210,19 @@ public class SessionResource extends ConfigBaseResource {
      */
     @Operation(summary = "Delete a session.", description = "Delete a session.", operationId = "delete-session", tags = {
             "Auth - Session Management" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
-                            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
+                            ApiAccessConstants.AUTH_REVOKE_SESSION }),
                     @SecurityRequirement(name = "oauth2", scopes = {
-                            ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS }),
+                            ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
-                    ApiAccessConstants.JANS_AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
+            ApiAccessConstants.AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
+                    ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
     public Response deleteSessionBySid(
             @Parameter(description = "Session identifier.") @PathParam(ApiConstants.SID) @NotNull String sid) {

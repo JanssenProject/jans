@@ -52,7 +52,8 @@ public class ScimConfigResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SCIM_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -60,7 +61,7 @@ public class ScimConfigResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.SCIM_READ_ACCESS }, groupScopes = {
             Constants.SCIM_WRITE_ACCESS }, superScopes = { Constants.SCIM_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = scimConfigService.find();
         log.debug("SCIM appConfiguration:{}", appConfiguration);

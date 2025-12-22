@@ -32,6 +32,9 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = ApiAccessConstants.USER_WRITE_ACCESS, description = "Manage user related information"),
 @OAuthScope(name = ApiAccessConstants.USER_DELETE_ACCESS, description = "Delete user related information"),
 @OAuthScope(name = ApiAccessConstants.USER_ADMIN_ACCESS, description = "Admin to manage user related information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
 }
 )))
 public class ApiApplication extends Application {

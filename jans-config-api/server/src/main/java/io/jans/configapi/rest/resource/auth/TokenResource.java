@@ -206,7 +206,7 @@ public class TokenResource extends ConfigBaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.TOKEN_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

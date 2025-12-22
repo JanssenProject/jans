@@ -53,9 +53,9 @@ public class AdminUIResource {
     public static final String ADMINUI_CONF_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write";
 
     //Admin Scopes
-    static final String SCOPE_ROLE_ADMIN = "https://jans.io/oauth/config/adminui/role.admin";
-    static final String SCOPE_PERMISSION_ADMIN = "https://jans.io/oauth/config/adminui/permission.admin";
-    static final String SCOPE_ROLE_PERMISSION_MAPPING_ADMIN = "https://jans.io/oauth/config/adminui/rolePermissionMapping.admin";
+    static final String SCOPE_ROLE_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin";
+    static final String SCOPE_PERMISSION_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin";
+    static final String SCOPE_ROLE_PERMISSION_MAPPING_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin";
     
     
     @Inject

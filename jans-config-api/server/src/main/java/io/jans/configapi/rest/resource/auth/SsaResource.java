@@ -45,7 +45,7 @@ public class SsaResource extends ConfigBaseResource {
     @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
             "Software Statement Assertion (SSA)" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SSA_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SSA_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SSA_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Success"),
@@ -53,7 +53,7 @@ public class SsaResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "422", description = "Unprocessable Entity"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS, ApiAccessConstants.AUTH_SSA_ADMIN }, groupScopes = {
+    @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS, ApiAccessConstants.AUTH_SSA_ADMIN_ACCESS }, groupScopes = {
             ApiAccessConstants.SSA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SSA_WRITE_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response revokeSsa(

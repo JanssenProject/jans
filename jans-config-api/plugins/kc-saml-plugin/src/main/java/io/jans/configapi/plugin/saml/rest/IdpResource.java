@@ -82,8 +82,8 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Retrieves SAML Identity Provider", description = "Retrieves SAML Identity Provider", operationId = "get-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -91,8 +91,8 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }, groupScopes = {
-            Constants.JANS_IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { Constants.IDP_SAML_READ_ACCESS }, groupScopes = {
+            Constants.IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllSamlIdentityProvider(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -123,8 +123,8 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Get SAML Identity Provider by Inum", description = "Get SAML Identity Provider by Inum", operationId = "get-saml-identity-provider-by-inum", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -133,8 +133,8 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(Constants.INUM_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }, groupScopes = {
-            Constants.JANS_IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { Constants.IDP_SAML_READ_ACCESS }, groupScopes = {
+            Constants.IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getSamlIdentityProviderByInum(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
@@ -154,8 +154,8 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Get SAML SP Metadata as Json", description = "Get SAML SP Metadata as Json", operationId = "get-saml-sp-metadata-json", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -164,8 +164,8 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(Constants.SP_METADATA_PATH + Constants.INUM_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }, groupScopes = {
-            Constants.JANS_IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { Constants.IDP_SAML_READ_ACCESS }, groupScopes = {
+            Constants.IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getSamlSPMetadataJson(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
@@ -193,8 +193,8 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Get SAML SP Metadata Endpoint URL", description = "Get SAML SP Metadata Endpoint URL", operationId = "get-saml-sp-metadata-url", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -203,8 +203,8 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(Constants.SP_METADATA_FILE_PATH + Constants.INUM_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_READ_ACCESS }, groupScopes = {
-            Constants.JANS_IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { Constants.IDP_SAML_READ_ACCESS }, groupScopes = {
+            Constants.IDP_SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getSamlSPMetadataURL(
@@ -231,7 +231,7 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "post-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/post-saml-identity-provider.json")))
@@ -243,7 +243,7 @@ public class IdpResource extends BaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(Constants.UPLOAD_PATH)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { Constants.IDP_SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createSamlIdentityProvider(@MultipartForm BrokerIdentityProviderForm brokerIdentityProviderForm)
             throws IOException {
@@ -299,7 +299,7 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Update SAML Identity Provider", description = "Update SAML Identity Provider", operationId = "put-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = BrokerIdentityProviderForm.class), examples = @ExampleObject(name = "Response json example", value = "example/idp/trust-idp/put-saml-identity-provider.json")))
@@ -312,7 +312,7 @@ public class IdpResource extends BaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
     @Path(Constants.UPLOAD_PATH)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { Constants.IDP_SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateSamlIdentityProvider(@MultipartForm BrokerIdentityProviderForm brokerIdentityProviderForm)
             throws IOException {
@@ -371,7 +371,7 @@ public class IdpResource extends BaseResource {
      */
     @Operation(summary = "Delete SAML Identity Provider", description = "Delete SAML Identity Provider", operationId = "delete-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.JANS_IDP_SAML_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
@@ -380,7 +380,7 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_DELETE_ACCESS }, groupScopes = {
+    @ProtectedApi(scopes = { Constants.IDP_SAML_DELETE_ACCESS }, groupScopes = {
             Constants.SAML_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteIdentityProvider(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) throws IOException {

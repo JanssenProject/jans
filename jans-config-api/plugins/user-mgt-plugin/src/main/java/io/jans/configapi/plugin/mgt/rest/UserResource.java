@@ -438,9 +438,6 @@ public class UserResource extends BaseResource {
             users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
             logger.debug("Users fetched  - users:{}", users);
 
-            // parse birthdate if present
-            users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
-
             // get customUser()
             List<CustomUser> customUsers = getCustomUserList(users, removeNonLDAPAttributes);
             pagedCustomUser.setStart(pagedResult.getStart());
