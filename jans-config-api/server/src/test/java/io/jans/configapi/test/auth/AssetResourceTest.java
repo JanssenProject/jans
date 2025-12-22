@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.Response.Status;
 public class AssetResourceTest extends ConfigServerBaseTest {
 	
 	private static final String INVALID_SCOPE = ApiAccessConstants.ATTRIBUTES_READ_ACCESS;
-	private static final String ASSET_ADMIN_SCOPE = ApiAccessConstants.JANS_ASSET_ADMIN_ACCESS;
+	private static final String ASSET_ADMIN_SCOPE = ApiAccessConstants.ASSET_ADMIN_ACCESS;
 
     @Parameters({ "test.issuer", "assetUrl" })
     @Test
