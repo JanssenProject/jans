@@ -10796,9 +10796,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#retrive-existing-user" class="md-nav__link">
+  <a href="#retrieve-existing-user" class="md-nav__link">
     <span class="md-ellipsis">
-      Retrive existing User
+      Retrieve existing User
     </span>
   </a>
   
@@ -14656,9 +14656,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#retrive-existing-user" class="md-nav__link">
+  <a href="#retrieve-existing-user" class="md-nav__link">
     <span class="md-ellipsis">
-      Retrive existing User
+      Retrieve existing User
     </span>
   </a>
   
@@ -14831,7 +14831,7 @@
 <li>Run <code>python3 /opt/jans/jans-setup/setup.py --install-scim</code></li>
 </ol>
 <h2 id="about-api-endpoints">About API endpoints<a class="headerlink" href="#about-api-endpoints" title="Permanent link">#</a></h2>
-<p>Throughout this document, you will notice endpoints are prefixed with path: 
+<p>Throughout this document, you will notice endpoints are prefixed with path:
 <code>/jans-scim/restv1/v2</code></p>
 <h2 id="api-protection">API Protection<a class="headerlink" href="#api-protection" title="Permanent link">#</a></h2>
 <p>Clearly, this API must not be anonymously accessed. However, the basic SCIM standard does not define a specific mechanism to prevent unauthorized requests to endpoints. There are just a few guidelines in section 2 of <a href="https://datatracker.ietf.org/doc/html/rfc7644">RFC 7644</a> concerned with authentication and authorization.</p>
@@ -14890,9 +14890,9 @@
 </tr>
 </tbody>
 </table>
-<p>In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the <code>client_credentials</code> grant type and <code>client_secret_basic</code> mechanism to authenticate to the token endpoint.</p>
+<p>In order to facilitate the process of getting, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the <code>client_credentials</code> grant type and <code>client_secret_basic</code> mechanism to authenticate to the token endpoint.</p>
 <h2 id="where-to-locate-scim-related-logs">Where to locate SCIM-related logs<a class="headerlink" href="#where-to-locate-scim-related-logs" title="Permanent link">#</a></h2>
-<p>Please see <a href="https://docs.jans.io/v1.0.14/admin/scim/logs/">here</a> besides </p>
+<p>Please see <a href="https://docs.jans.io/v1.0.14/admin/scim/logs/">Janssen SCIM logs documentation</a> for additional logs:</p>
 <ul>
 <li>SCIM log is located at <code>/opt/jans/jetty/jans-scim/logs/scim.log</code></li>
 <li>If you use SCIM custom script aslo see <code>/opt/jans/jetty/jans-scim/logs/scim_script.log</code></li>
@@ -14901,13 +14901,13 @@
 <p><a href="https://docs.jans.io/v1.0.14/admin/reference/openapi/">SCIM API</a> doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested. Find yaml files <a href="https://github.com/JanssenProject/jans/blob/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml">here</a>.</p>
 <h2 id="working-in-oauth-mode">Working in OAuth mode<a class="headerlink" href="#working-in-oauth-mode" title="Permanent link">#</a></h2>
 <p>To know more about OAuth protection mode please visit <a href="https://docs.jans.io/v1.0.14/admin/scim/oauth-protection/">here</a>.
-The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token. </p>
+The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token.</p>
 <h3 id="get-scim-client">Get SCIM Client<a class="headerlink" href="#get-scim-client" title="Permanent link">#</a></h3>
 <p>You can refer to <a href="../../config-guide/scim-config/user-config/#get-scim-client">here</a> for this topic</p>
 <h3 id="get-access-token">Get Access token<a class="headerlink" href="#get-access-token" title="Permanent link">#</a></h3>
 <p>You can refer to <a href="../../config-guide/scim-config/user-config/#get-access-token">here</a> for this topic</p>
-<h3 id="retrive-existing-user">Retrive existing User<a class="headerlink" href="#retrive-existing-user" title="Permanent link">#</a></h3>
-<p>You can refer to <a href="../../config-guide/scim-config/user-config/#retrive-existing-user">here</a> for this topic</p>
+<h3 id="retrieve-existing-user">Retrieve existing User<a class="headerlink" href="#retrieve-existing-user" title="Permanent link">#</a></h3>
+<p>You can refer to <a href="../../config-guide/scim-config/user-config/#retrieve-existing-user">here</a> for this topic</p>
 <h2 id="creating-resource">Creating Resource<a class="headerlink" href="#creating-resource" title="Permanent link">#</a></h2>
 <h3 id="create-an-user">Create an User<a class="headerlink" href="#create-an-user" title="Permanent link">#</a></h3>
 <p>You can refer to <a href="../../config-guide/scim-config/user-config/#create-an-user">here</a> for this topic</p>
@@ -14993,7 +14993,7 @@ The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. De
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 28, 2025 10:27:29 UTC"><span class="timeago" datetime="2025-03-28T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 28, 2025 10:27:29 UTC">2025-03-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
   </span>
 
     

@@ -14628,7 +14628,7 @@
 
 <h1 id="script-debugging">Script Debugging<a class="headerlink" href="#script-debugging" title="Permanent link">#</a></h1>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">#</a></h2>
-<p>For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you trough a setup using Minikube with docker driver, and <a href="https://ksync.github.io/ksync/">ksync</a> for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.  </p>
+<p>For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you through a setup using Minikube with docker driver, and <a href="https://ksync.github.io/ksync/">ksync</a> for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.</p>
 <h3 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">#</a></h3>
 <p>The minimum system requirement for running all jans services are <code>8GB RAM</code>, <code>4 CPU</code>, and <code>50GB disk</code>. This can be dropped to <code>4GB RAM</code>, <code>4CPU</code> and <code>20GB</code> disk space if operating with required services auth-server, and LDAP.</p>
 <h3 id="setup-minikube">Setup Minikube<a class="headerlink" href="#setup-minikube" title="Permanent link">#</a></h3>
@@ -14679,7 +14679,7 @@ helm<span class="w"> </span>install<span class="w"> </span>jans-auth<span class=
 <div class="highlight"><pre><span></span><code><span class="nv">JANS_NAMESPACE</span><span class="o">=</span>&lt;jans-namespace&gt;
 <span class="k">for</span><span class="w"> </span>pod<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span><span class="nv">$JANS_NAMESPACE</span><span class="w"> </span>--selector<span class="o">=</span><span class="nv">APP_NAME</span><span class="o">=</span>auth-server<span class="w"> </span>--output<span class="o">=</span><span class="nv">jsonpath</span><span class="o">={</span>.items..metadata.name<span class="o">}</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">    </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-ti<span class="w"> </span><span class="nv">$pod</span><span class="w"> </span>-n<span class="w"> </span><span class="nv">$JANS_NAMESPACE</span><span class="w"> </span>--<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/deploy/interception-scripts-ksync
-<span class="k">done</span><span class="w">        </span>
+<span class="k">done</span>
 </code></pre></div>
 </li>
 <li>
@@ -14708,7 +14708,7 @@ helm<span class="w"> </span>install<span class="w"> </span>jans-auth<span class=
 </code></pre></div>
 </li>
 <li>
-<p>Check the status. Also check the terminal where the <code>watch</code> command is running. </p>
+<p>Check the status. Also check the terminal where the <code>watch</code> command is running.</p>
 <p><div class="highlight"><pre><span></span><code>ksync<span class="w"> </span>get
 </code></pre></div>
 1. Move the interception script to the local folder <code>$(pwd)/interception-scripts-ksync</code>. In the below example we copied the following script as <code>basic.py</code>:</p>
@@ -14733,7 +14733,7 @@ helm<span class="w"> </span>install<span class="w"> </span>jans-auth<span class=
     <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span>  <span class="n">configurationAttributes</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Basic. Initialization&quot;</span>
         <span class="nb">print</span> <span class="s2">&quot;Basic. Initialized successfully&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span>   
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Basic. Destroy&quot;</span>
@@ -14804,7 +14804,7 @@ helm<span class="w"> </span>install<span class="w"> </span>jans-auth<span class=
 </li>
 </ol>
 <h3 id="install-an-ide">Install an IDE<a class="headerlink" href="#install-an-ide" title="Permanent link">#</a></h3>
-<p>The IDE can be of choice but must contain PyDev. We chose <a href="https://www.liclipse.com/download.html">Liclipse</a> for this demonstration. </p>
+<p>The IDE can be of choice but must contain PyDev. We chose <a href="https://www.liclipse.com/download.html">Liclipse</a> for this demonstration.</p>
 <p>Once complete, start the PyDev debug server:</p>
 <ol>
 <li>
@@ -14834,7 +14834,7 @@ helm<span class="w"> </span>install<span class="w"> </span>jans-auth<span class=
 <p>Click "OK", then confirm the settings by clicking "OK" again, then "Apply and Close"</p>
 </li>
 <li>
-<p>In the final dialog, confirm the settings by clicking "OK" </p>
+<p>In the final dialog, confirm the settings by clicking "OK"</p>
 </li>
 </ul>
 </li>
@@ -15025,7 +15025,7 @@ if REMOTE_DEBUG:
 <p>Choose to load the script from file instead of db. Inside the browser change <code>jansModuleProperty</code> with value <code>{"value1":"location_type","value2":"db","description":""}</code> to <code>{"value1":"location_type","value2":"file","description":""}</code></p>
 </li>
 <li>
-<p>Specify the <code>Script Path</code> location to the location of the folder inside auth server pods: <code>/deploy/interception-scripts-ksync/basic.py</code>. Right click the upper <code>jansModuleProperty</code> and click <code>New Value</code>. A new entry for <code>jansModuleProperty</code> will be created. Insert the following for the value: <code>{"value1":"location_path","value2":"/deploy/interception-scripts-ksync/basic.py","description":""}</code></p>
+<p>Specify the <code>Script Path</code> location to the location of the folder inside auth server pods: <code>/deploy/interception-scripts-ksync/basic.py</code>. Right-click the upper <code>jansModuleProperty</code> and click <code>New Value</code>. A new entry for <code>jansModuleProperty</code> will be created. Insert the following for the value: <code>{"value1":"location_path","value2":"/deploy/interception-scripts-ksync/basic.py","description":""}</code></p>
 </li>
 <li>
 <p>Enable the script by settings <code>jansEnabled</code> to <code>true</code>. The following is an example of how the basic script entry should look.  </p>
@@ -15065,7 +15065,7 @@ if REMOTE_DEBUG:
 <p>Click "OK", then confirm the settings by clicking "OK" again, then "Apply and Close"</p>
 </li>
 <li>
-<p>In the final dialog, confirm the settings by clicking "OK" </p>
+<p>In the final dialog, confirm the settings by clicking "OK"</p>
 </li>
 </ul>
 </li>
@@ -15126,7 +15126,7 @@ if REMOTE_DEBUG:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 28, 2025 10:27:29 UTC"><span class="timeago" datetime="2025-03-28T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 28, 2025 10:27:29 UTC">2025-03-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
   </span>
 
     

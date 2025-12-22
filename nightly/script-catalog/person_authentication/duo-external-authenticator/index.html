@@ -14446,7 +14446,7 @@
   <h1>Index</h1>
 
 <h2 id="integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server">Integrating DUO's Universal Prompt as an authentication method in Janssen server<a class="headerlink" href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" title="Permanent link">#</a></h2>
-<p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. </p>
+<p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.</p>
 <h2 id="authentication-flow">Authentication flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h2>
 <pre class="mermaid"><code>sequenceDiagram
 title Integrating DUO's Universal Prompt as an authentication method in Janssen server
@@ -14470,7 +14470,7 @@ end
 Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 <h2 id="administrator-prerequisites">Administrator prerequisites<a class="headerlink" href="#administrator-prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li><a href="https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> (included in the default Janssen Server distribution);</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> (included in the default Janssen Server distribution);</li>
 <li>An account with <a href="https://duo.com/">Duo Security</a>.   </li>
 </ul>
 <h2 id="user-prerequisites">User prerequisites<a class="headerlink" href="#user-prerequisites" title="Permanent link">#</a></h2>
@@ -14489,7 +14489,7 @@ Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 <p>Click Protect an Application and locate Web SDK in the applications list. Click Protect this Application to get your client ID, secret key, and API hostname.</p>
 </li>
 </ol>
-<p>For additional info for the steps refer to Duo's Web SDK 4, check <a href="https://duo.com/docs/duoweb-v4">this article</a>. </p>
+<p>For additional info for the steps refer to Duo's Web SDK 4, check <a href="https://duo.com/docs/duoweb-v4">this article</a>.</p>
 <h2 id="configure-jans-auth-server-as">Configure Jans-auth server (AS)<a class="headerlink" href="#configure-jans-auth-server-as" title="Permanent link">#</a></h2>
 <h3 id="1-add-the-duo-universal-dependency-to-your-jans-auth-server">1. Add the duo-universal Dependency to your jans-auth server<a class="headerlink" href="#1-add-the-duo-universal-dependency-to-your-jans-auth-server" title="Permanent link">#</a></h3>
 <p>The dependencies have to be added separately as mentioned in the steps below. Using a fat jar (duo-universal-sdk-1.0.3-with-dependencies.jar leads to conflicts.)</p>
@@ -14579,13 +14579,13 @@ Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 3. Add the custom script 
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
 </code></pre></div></p>
-<p>Now Duo is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request Duo authentication for users. </p>
+<p>Now Duo is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request Duo authentication for users.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>. </p>
+<p>To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>.</p>
 </div>
 <h2 id="make-duo-the-default-authentication-mechanism">Make Duo the Default Authentication Mechanism<a class="headerlink" href="#make-duo-the-default-authentication-mechanism" title="Permanent link">#</a></h2>
-<p>For CURL commands, use this <a href="https://github.com/JanssenProject/jans/blob/nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script">link</a> as a reference.</p>
+<p>For CURL commands, use this <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>duo-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -14596,7 +14596,7 @@ Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/duo-auth-default.json
 </code></pre></div>
 <img alt="📝" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f4dd.svg" title=":memo:" /> <strong>NOTE</strong></p>
-<p>To make sure <code>duo</code> has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>. </p>
+<p>To make sure <code>duo</code> has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>.</p>
 <h2 id="test-the-feature">Test the feature<a class="headerlink" href="#test-the-feature" title="Permanent link">#</a></h2>
 <p>To test , enter the complete URL for authorization in a browser or create a simple web page with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
 <p>An example of a complete URL looks like this -
@@ -14624,7 +14624,7 @@ Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 13, 2023 08:34:37 UTC"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 13, 2023 08:34:37 UTC">2023-01-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
   </span>
 
     

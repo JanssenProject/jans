@@ -14598,22 +14598,22 @@
 
 <h1 id="access-evaluation-custom-script">Access Evaluation Custom Script<a class="headerlink" href="#access-evaluation-custom-script" title="Permanent link">#</a></h1>
 <p>The Jans-Auth server implements <a href="https://openid.github.io/authzen/">OpenID AuthZEN Authorization API 1.0 – draft 01</a>.
-The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between 
-Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems. 
-It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests, 
-enhancing interoperability and scalability in authorization processes. 
-The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained, 
+The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
+Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
+It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
+enhancing interoperability and scalability in authorization processes.
+The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
 and dynamic authorization mechanisms.</p>
 <p>This script is used to control Access Evaluation Endpoint described in specification.</p>
 <h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h2>
-<p>The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs) 
-to request access decisions from a Policy Decision Point (PDP) for specific resources and actions. 
-Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine 
-if access should be granted, denied, or if additional information is needed. 
-The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time. 
+<p>The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs)
+to request access decisions from a Policy Decision Point (PDP) for specific resources and actions.
+Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine
+if access should be granted, denied, or if additional information is needed.
+The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.</p>
-<p>During Access Evaluation request processing <code>Access Evaluation</code> custom script is executed. 
-Name of the script must be specified by <code>accessEvaluationScriptName</code> configuration property. 
+<p>During Access Evaluation request processing <code>Access Evaluation</code> custom script is executed.
+Name of the script must be specified by <code>accessEvaluationScriptName</code> configuration property.
 If AS can't find such script or if configuration property is not specified then server executes first script it finds on database.
 AS comes with sample demo script which shows simple example of custom validation and granting access.</p>
 <p><strong>Sample request</strong>
@@ -14802,7 +14802,7 @@ This extends methods from the base script type in addition to adding new methods
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 11, 2025 10:24:05 UTC"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 11, 2025 10:24:05 UTC">2025-06-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
   </span>
 
     
