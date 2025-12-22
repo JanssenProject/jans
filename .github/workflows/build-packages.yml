@@ -370,8 +370,6 @@ jobs:
         toolchain: stable
 
     - name: Build WASM build
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
@@ -408,7 +406,6 @@ jobs:
   
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
-        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
         npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
         cd ..
