@@ -28,7 +28,7 @@ https://sample.as.com/jans-auth/restv1/authorize?
     acr_values=simple_password_auth
     &prompt=create
 ```
- 
+
 Sample redirect to user creation page (line breaks are for display purpose only)
 ```curl
 https://sample.as.com/jans-auth/createUser.htm?
@@ -37,7 +37,7 @@ https://sample.as.com/jans-auth/createUser.htm?
     response_type=code+token&
     redirect_uri=https%3A%2F%2Fcb.example.com&
     state=0ba6bba8-d2a4-44e6-8192-57012e41d506&
-    nonce=963ecc9f-b1d8-4bb0-a0b5-d53be34e7e4e&    
+    nonce=963ecc9f-b1d8-4bb0-a0b5-d53be34e7e4e&
     client_id=9999
 ```
 
@@ -50,7 +50,7 @@ use `getCreateUserPage` method.
     }
 ```
 
-Once user is redirected, it enters all details and hits action button. 
+Once user is redirected, it enters all details and hits action button.
 At this point `prepare` method is called. It can be used to make preparetions needed for business logic.
 `prepare` method must return `true`. If `false` is returned, AS will show error and user registration will be interrupted.
 
@@ -74,7 +74,7 @@ If `prepare` method returned `true`, then `createUser` method is called. It can 
 
 `createUser` method must return `true` to proceed with persistence. If `false` is returned, new user is not created. Process is interrupted.
 
-After successful user creation, user-agent is redirect to Authorization Endpoint which is same url as original request except 
+After successful user creation, user-agent is redirect to Authorization Endpoint which is same url as original request except
 `prompt=create` in it. Redirect url to Authorization Endpoint after user creation can be customized with `buildPostAuthorizeUrl` method.
 
 ```java
@@ -239,7 +239,7 @@ public class CreateUser implements CreateUserType {
     }
 }
 
-``` 
+```
 
 ## Sample Scripts
 - [Sample CreateUser script](../../../script-catalog/create_user/CreateUser.java)
