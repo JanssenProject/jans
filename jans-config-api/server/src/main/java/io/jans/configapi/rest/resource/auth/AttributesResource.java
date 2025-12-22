@@ -137,8 +137,7 @@ public class AttributesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createAttribute(@Valid JansAttribute attribute) {
         log.debug(" JansAttribute details to add - attribute:{}", attribute);
@@ -185,8 +184,7 @@ public class AttributesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAttribute(@Valid JansAttribute attribute) {
         log.debug(" JansAttribute details to update - attribute:{}", attribute);

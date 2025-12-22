@@ -74,8 +74,6 @@ public class Constants {
                     "postBindingAuthnRequest", SINGLE_SIGN_ON_SERVICE_URL, "wantAuthnRequestsSigned",
                     "signingCertificate", "addExtensionsElementWithKeyInfo"));
 
-    //admin
-    public static final String SAML_ADMIN_ACCESS = "https://jans.io/oauth/config/saml.admin";
     
     // Scopes
     public static final String SAML_READ_ACCESS = "https://jans.io/oauth/config/saml.readonly";
@@ -88,4 +86,7 @@ public class Constants {
     public static final String IDP_SAML_READ_ACCESS = "https://jans.io/idp/saml.readonly";
     public static final String IDP_SAML_WRITE_ACCESS = "https://jans.io/idp/saml.write";
     public static final String IDP_SAML_DELETE_ACCESS = "https://jans.io/idp/saml.delete";
+    
+    //admin
+    public static final String SAML_ADMIN_ACCESS = "https://jans.io/oauth/config/saml.admin";
 }
