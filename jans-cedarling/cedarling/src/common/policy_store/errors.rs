@@ -7,7 +7,6 @@
 
 /// Cedar schema-specific errors.
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum CedarSchemaErrorType {
     /// Schema file is empty
     #[error("Schema file is empty")]
@@ -20,31 +19,14 @@ pub enum CedarSchemaErrorType {
     /// Schema validation failed
     #[error("Schema validation failed: {0}")]
     ValidationError(String),
-
-    /// Namespace extraction failed
-    #[error("Namespace extraction failed: {0}")]
-    NamespaceError(String),
 }
 
 /// Cedar entity-specific errors.
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum CedarEntityErrorType {
-    /// Failed to create entity
-    #[error("Failed to create entity: {0}")]
-    EntityCreationError(String),
-
     /// Failed to parse entity from JSON
     #[error("Failed to parse entity from JSON: {0}")]
     JsonParseError(String),
-
-    /// No entity found after parsing
-    #[error("No entity found after parsing")]
-    NoEntityFound,
-
-    /// Invalid entity UID format
-    #[error("Invalid entity UID format: {0}")]
-    InvalidUidFormat(String),
 
     /// Invalid entity type name
     #[error("Invalid entity type name '{0}': {1}")]
@@ -54,18 +36,6 @@ pub enum CedarEntityErrorType {
     #[error("Invalid entity ID: {0}")]
     InvalidEntityId(String),
 
-    /// Duplicate entity UID detected
-    #[error("Duplicate entity UID '{uid}' found in '{file1}' and '{file2}'")]
-    DuplicateUid {
-        uid: String,
-        file1: String,
-        file2: String,
-    },
-
-    /// Parent entity not found in hierarchy
-    #[error("Parent entity '{parent}' not found for entity '{child}'")]
-    MissingParent { parent: String, child: String },
-
     /// Failed to create entity store
     #[error("Failed to create entity store: {0}")]
     EntityStoreCreation(String),
@@ -73,7 +43,6 @@ pub enum CedarEntityErrorType {
 
 /// Trusted issuer-specific errors.
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum TrustedIssuerErrorType {
     /// Trusted issuer file is not a JSON object
     #[error("Trusted issuer file must be a JSON object")]
@@ -105,19 +74,10 @@ pub enum TrustedIssuerErrorType {
         issuer_id: String,
         token_type: String,
     },
-
-    /// Duplicate issuer ID detected
-    #[error("Duplicate issuer ID '{issuer_id}' found in files '{file1}' and '{file2}'")]
-    DuplicateIssuerId {
-        issuer_id: String,
-        file1: String,
-        file2: String,
-    },
 }
 
 /// Manifest validation-specific errors.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
-#[allow(dead_code)]
 pub enum ManifestErrorType {
     /// Manifest file not found
     #[error("Manifest file not found (manifest.json is required for integrity validation)")]
@@ -158,7 +118,6 @@ pub enum ManifestErrorType {
 
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum PolicyStoreError {
     /// IO error during file operations
     #[error("IO error: {0}")]
@@ -180,19 +139,11 @@ pub enum PolicyStoreError {
         source: serde_json::Error,
     },
 
-    /// YAML parsing error
-    #[error("YAML parsing error in '{file}'")]
-    YamlParsing {
-        file: String,
-        #[source]
-        source: Box<dyn std::error::Error + Send + Sync>,
-    },
-
     /// Cedar parsing error
-    #[error("Cedar parsing error in '{file}'")]
+    #[error("Cedar parsing error in '{file}': {detail}")]
     CedarParsing {
         file: String,
-        message: String, // Cedar errors don't implement std::error::Error
+        detail: CedarParseErrorDetail,
     },
 
     /// Cedar schema error
@@ -228,10 +179,6 @@ pub enum PolicyStoreError {
     #[error("Path is not a directory: {path}")]
     NotADirectory { path: String },
 
-    /// Path is not a file
-    #[error("Path is not a file: {path}")]
-    NotAFile { path: String },
-
     /// Directory read error
     #[error("Failed to read directory '{path}'")]
     DirectoryReadError {
@@ -247,66 +194,46 @@ pub enum PolicyStoreError {
         #[source]
         source: std::io::Error,
     },
+}
 
-    /// Empty directory
-    #[error("Directory is empty: {path}")]
-    EmptyDirectory { path: String },
+/// Details about Cedar parsing errors.
+#[derive(Debug, Clone, thiserror::Error)]
+pub enum CedarParseErrorDetail {
+    /// Missing @id() annotation
+    #[error("No @id() annotation found and could not derive ID from filename")]
+    MissingIdAnnotation,
 
-    /// Invalid file name
-    #[error("Invalid file name in '{path}'")]
-    InvalidFileName {
-        path: String,
-        #[source]
-        source: std::io::Error,
-    },
+    /// Failed to parse Cedar policy or template
+    #[error("{0}")]
+    ParseError(String),
+
+    /// Failed to add policy to policy set
+    #[error("Failed to add policy to set: {0}")]
+    AddPolicyFailed(String),
+
+    /// Failed to add template to policy set
+    #[error("Failed to add template to set: {0}")]
+    AddTemplateFailed(String),
 }
 
 /// Validation errors for policy store components.
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
+
 pub enum ValidationError {
-    /// Invalid metadata
-    #[error("Invalid metadata in file {file}: {message}")]
-    InvalidMetadata { file: String, message: String },
-
-    /// Invalid policy
-    #[error("Invalid policy in file {file}{}: {message}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
-    InvalidPolicy {
+    /// Failed to parse metadata JSON
+    #[error("Invalid metadata in file {file}: failed to parse JSON")]
+    MetadataJsonParseFailed {
         file: String,
-        line: Option<u32>,
-        message: String,
+        #[source]
+        source: serde_json::Error,
     },
 
-    /// Invalid template
-    #[error("Invalid template in file {file}{}: {message}", .line.map(|l| format!(" at line {}", l)).unwrap_or_default())]
-    InvalidTemplate {
+    /// Invalid cedar version format in metadata
+    #[error("Invalid metadata in file {file}: invalid cedar_version format")]
+    MetadataInvalidCedarVersion {
         file: String,
-        line: Option<u32>,
-        message: String,
-    },
-
-    /// Invalid entity
-    #[error("Invalid entity in file {file}: {message}")]
-    InvalidEntity { file: String, message: String },
-
-    /// Invalid trusted issuer
-    #[error("Invalid trusted issuer in file {file}: {message}")]
-    InvalidTrustedIssuer { file: String, message: String },
-
-    /// Invalid schema
-    #[error("Invalid schema in file {file}: {message}")]
-    InvalidSchema { file: String, message: String },
-
-    /// Manifest validation failed
-    #[error("Manifest validation failed: {message}")]
-    ManifestValidation { message: String },
-
-    /// File checksum mismatch
-    #[error("Checksum mismatch for file {file}: expected {expected}, got {actual}")]
-    ChecksumMismatch {
-        file: String,
-        expected: String,
-        actual: String,
+        #[source]
+        source: semver::Error,
     },
 
     /// Missing required file
@@ -317,18 +244,6 @@ pub enum ValidationError {
     #[error("Missing required directory: {directory}")]
     MissingRequiredDirectory { directory: String },
 
-    /// Duplicate entity UID
-    #[error("Duplicate entity UID found: {uid} in files {file1} and {file2}")]
-    DuplicateEntityUid {
-        uid: String,
-        file1: String,
-        file2: String,
-    },
-
-    /// Missing @id() annotation
-    #[error("Missing @id() annotation in {file}: {policy_type} must have an @id() annotation")]
-    MissingIdAnnotation { file: String, policy_type: String },
-
     /// Invalid file extension
     #[error("Invalid file extension for {file}: expected {expected}, got {actual}")]
     InvalidFileExtension {
@@ -337,17 +252,15 @@ pub enum ValidationError {
         actual: String,
     },
 
-    /// Duplicate policy ID
-    #[error("Duplicate policy ID '{policy_id}' found in files {file1} and {file2}")]
-    DuplicatePolicyId {
-        policy_id: String,
-        file1: String,
-        file2: String,
-    },
+    /// Policy ID is empty
+    #[error("Invalid policy ID format in {file}: Policy ID cannot be empty")]
+    EmptyPolicyId { file: String },
 
-    /// Invalid policy ID format
-    #[error("Invalid policy ID format in {file}: {message}")]
-    InvalidPolicyId { file: String, message: String },
+    /// Policy ID contains invalid characters
+    #[error(
+        "Invalid policy ID format in {file}: Policy ID '{id}' contains invalid characters. Only alphanumeric, '_', '-', and ':' are allowed"
+    )]
+    InvalidPolicyIdCharacters { file: String, id: String },
 
     // Specific metadata validation errors
     /// Empty Cedar version
@@ -377,8 +290,10 @@ pub enum ValidationError {
     InvalidPolicyStoreVersion { version: String, details: String },
 
     /// Policy store description too long
-    #[error("Policy store description too long in metadata.json: {length} chars (max 1000)")]
-    DescriptionTooLong { length: usize },
+    #[error(
+        "Policy store description too long in metadata.json: {length} chars (max {max_length})"
+    )]
+    DescriptionTooLong { length: usize, max_length: usize },
 
     /// Invalid timestamp ordering
     #[error(
@@ -389,7 +304,6 @@ pub enum ValidationError {
 
 /// Errors related to archive (.cjar) handling.
 #[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
 pub enum ArchiveError {
     /// Invalid file extension (expected .cjar)
     #[error("Invalid file extension: expected '{expected}', found '{found}'")]
@@ -415,124 +329,8 @@ pub enum ArchiveError {
     #[error("Path traversal attempt detected in archive: '{path}'")]
     PathTraversal { path: String },
 
-    /// File path-based archive loading not supported in WASM
-    #[error(
-        "File path-based archive loading is not supported in WASM. Use ArchiveSource::Url for remote archives, or create an ArchiveVfs::from_buffer() directly with bytes you fetch. See module documentation for examples."
-    )]
+    /// Unsupported operation on this platform
+    #[cfg(target_arch = "wasm32")]
+    #[error("Archive operations are not supported on this platform")]
     WasmUnsupported,
-}
-
-/// Errors related to JWT token validation.
-#[derive(Debug, thiserror::Error)]
-#[allow(dead_code)]
-pub enum TokenError {
-    /// Token from untrusted issuer
-    #[error("Token from untrusted issuer: {issuer}")]
-    UntrustedIssuer { issuer: String },
-
-    /// Missing required claim
-    #[error("Missing required claim '{claim}' in token from issuer {issuer}")]
-    MissingRequiredClaim { claim: String, issuer: String },
-
-    /// Token signature validation failed
-    #[error("Token signature validation failed for issuer {issuer}: {message}")]
-    SignatureValidation { issuer: String, message: String },
-
-    /// JWKS fetch failed
-    #[error("Failed to fetch JWKS from endpoint {endpoint}: {message}")]
-    JwksFetchFailed { endpoint: String, message: String },
-
-    /// Invalid token format
-    #[error("Invalid token format: {message}")]
-    InvalidFormat { message: String },
-
-    /// Token expired
-    #[error("Token has expired")]
-    Expired,
-
-    /// Token not yet valid
-    #[error("Token is not yet valid")]
-    NotYetValid,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_validation_error_messages() {
-        let err = ValidationError::InvalidMetadata {
-            file: "metadata.json".to_string(),
-            message: "missing field 'name'".to_string(),
-        };
-        assert_eq!(
-            err.to_string(),
-            "Invalid metadata in file metadata.json: missing field 'name'"
-        );
-
-        let err = ValidationError::InvalidPolicy {
-            file: "policy1.cedar".to_string(),
-            line: Some(42),
-            message: "syntax error".to_string(),
-        };
-        assert!(err.to_string().contains("policy1.cedar"));
-        assert!(err.to_string().contains("at line 42"));
-
-        let err = ValidationError::MissingRequiredFile {
-            file: "schema.cedarschema".to_string(),
-        };
-        assert_eq!(err.to_string(), "Missing required file: schema.cedarschema");
-    }
-
-    #[test]
-    fn test_archive_error_messages() {
-        let err = ArchiveError::InvalidZipFormat {
-            details: "not a zip file".to_string(),
-        };
-        assert_eq!(
-            err.to_string(),
-            "Invalid ZIP archive format: not a zip file"
-        );
-
-        let err = ArchiveError::PathTraversal {
-            path: "../../../etc/passwd".to_string(),
-        };
-        assert!(err.to_string().contains("Path traversal"));
-        assert!(err.to_string().contains("../../../etc/passwd"));
-    }
-
-    #[test]
-    fn test_token_error_messages() {
-        let err = TokenError::UntrustedIssuer {
-            issuer: "https://evil.com".to_string(),
-        };
-        assert_eq!(
-            err.to_string(),
-            "Token from untrusted issuer: https://evil.com"
-        );
-
-        let err = TokenError::MissingRequiredClaim {
-            claim: "sub".to_string(),
-            issuer: "https://issuer.com".to_string(),
-        };
-        assert!(err.to_string().contains("sub"));
-        assert!(err.to_string().contains("https://issuer.com"));
-    }
-
-    #[test]
-    fn test_policy_store_error_from_io() {
-        let io_err = std::io::Error::new(std::io::ErrorKind::NotFound, "file not found");
-        let ps_err: PolicyStoreError = io_err.into();
-        assert!(ps_err.to_string().contains("IO error"));
-    }
-
-    #[test]
-    fn test_policy_store_error_from_validation() {
-        let val_err = ValidationError::InvalidMetadata {
-            file: "test.json".to_string(),
-            message: "invalid".to_string(),
-        };
-        let ps_err: PolicyStoreError = val_err.into();
-        assert!(ps_err.to_string().contains("Validation error"));
-    }
 }

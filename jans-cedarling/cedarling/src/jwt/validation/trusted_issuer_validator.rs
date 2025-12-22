@@ -5,8 +5,16 @@
 
 //! Trusted issuer JWT validation module.
 //!
-//! This module provides functionality to validate JWT tokens against configured trusted issuers,
-//! including issuer matching, required claims validation, JWKS fetching, and signature verification.
+//! This module provides standalone functionality to validate JWT tokens against configured
+//! trusted issuers, including issuer matching, required claims validation, JWKS fetching,
+//! and signature verification.
+//!
+//! ## Features
+//!
+//! - **Issuer matching**: Validates that JWT tokens come from configured trusted issuers
+//! - **Required claims validation**: Ensures tokens contain all claims specified in issuer configuration
+//! - **JWKS management**: Fetches and caches JWKS keys from issuer's OIDC endpoint with configurable TTL
+//! - **Signature verification**: Validates JWT signatures using cached JWKS keys
 
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use crate::jwt::JwtLogEntry;
@@ -14,6 +22,7 @@ use crate::jwt::http_utils::{GetFromUrl, OpenIdConfig};
 use crate::jwt::key_service::{DecodingKeyInfo, KeyService, KeyServiceError};
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
+use chrono::{DateTime, Utc};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
@@ -30,7 +39,12 @@ pub enum TrustedIssuerError {
 
     /// Token is missing a required claim
     #[error("Missing required claim: '{claim}' for token type '{token_type}'")]
-    MissingRequiredClaim { claim: String, token_type: String },
+    MissingRequiredClaim {
+        /// The name of the missing claim
+        claim: String,
+        /// The type of token being validated
+        token_type: String,
+    },
 
     /// Failed to decode JWT header
     #[error("Failed to decode JWT header: {0}")]
@@ -39,7 +53,9 @@ pub enum TrustedIssuerError {
     /// Failed to fetch OpenID configuration
     #[error("Failed to fetch OpenID configuration from '{endpoint}': {source}")]
     OpenIdConfigFetch {
+        /// The OIDC endpoint that failed
         endpoint: String,
+        /// The underlying error
         #[source]
         source: Box<dyn std::error::Error + Send + Sync>,
     },
@@ -50,7 +66,12 @@ pub enum TrustedIssuerError {
 
     /// No matching key found in JWKS
     #[error("No matching key found for kid: {}, algorithm: '{alg:?}'", kid.as_ref().map(|s| s.as_str()).unwrap_or("none"))]
-    NoMatchingKey { kid: Option<String>, alg: Algorithm },
+    NoMatchingKey {
+        /// The key ID from the JWT header
+        kid: Option<String>,
+        /// The algorithm from the JWT header
+        alg: Algorithm,
+    },
 
     /// JWT signature validation failed
     #[error("Invalid JWT signature: {0}")]
@@ -58,11 +79,25 @@ pub enum TrustedIssuerError {
 
     /// Token type not configured for issuer
     #[error("Token type '{token_type}' not configured for issuer '{issuer}'")]
-    TokenTypeNotConfigured { token_type: String, issuer: String },
+    TokenTypeNotConfigured {
+        /// The token type that wasn't configured
+        token_type: String,
+        /// The issuer missing the token type configuration
+        issuer: String,
+    },
 
     /// Missing issuer claim in token
     #[error("Token missing 'iss' claim")]
     MissingIssuerClaim,
+
+    /// Token metadata has empty entity_type_name
+    #[error(
+        "Invalid token metadata configuration: entity_type_name is empty for token type '{token_type}'"
+    )]
+    EmptyEntityTypeName {
+        /// The token type with empty entity_type_name
+        token_type: String,
+    },
 }
 
 /// Result type for trusted issuer validation operations.
@@ -75,7 +110,7 @@ pub type Result<T> = std::result::Result<T, TrustedIssuerError>;
 /// - Required claims validation based on token metadata
 /// - JWKS fetching and caching
 /// - JWT signature verification
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
 
 /// Default JWKS cache duration (1 hour) used when no Cache-Control header is present
 const DEFAULT_JWKS_CACHE_DURATION_SECS: u64 = 3600;
@@ -86,6 +121,13 @@ const MIN_JWKS_CACHE_DURATION_SECS: u64 = 300;
 /// Maximum JWKS cache duration (24 hours) to ensure keys are refreshed regularly
 const MAX_JWKS_CACHE_DURATION_SECS: u64 = 86400;
 
+/// Validator for JWT tokens against trusted issuer configurations.
+///
+/// This validator provides the following functionality:
+/// - Issuer matching against configured trusted issuers
+/// - Required claims validation based on token metadata
+/// - JWKS fetching and caching with configurable TTL
+/// - JWT signature verification
 pub struct TrustedIssuerValidator {
     /// Map of issuer identifiers to their configurations
     trusted_issuers: HashMap<String, Arc<TrustedIssuer>>,
@@ -98,14 +140,20 @@ pub struct TrustedIssuerValidator {
     oidc_configs: HashMap<String, Arc<OpenIdConfig>>,
     /// Timestamp of last JWKS fetch for expiration tracking
     /// Maps issuer OIDC endpoint to (fetch_time, cache_duration)
-    keys_fetch_time: HashMap<String, (SystemTime, Duration)>,
+    keys_fetch_time: HashMap<String, (DateTime<Utc>, Duration)>,
     /// Optional logger for diagnostic messages
     logger: Option<Logger>,
 }
 
 impl TrustedIssuerValidator {
     /// Creates a new trusted issuer validator with the given trusted issuers.
-    pub(crate) fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
+    ///
+    /// This is a convenience constructor equivalent to `with_logger(trusted_issuers, None)`.
+    ///
+    /// # Arguments
+    ///
+    /// * `trusted_issuers` - Map of issuer IDs to their configurations
+    pub fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
         Self::with_logger(trusted_issuers, None)
     }
 
@@ -214,14 +262,13 @@ impl TrustedIssuerValidator {
         // Check if we have keys and if they've expired
         let should_refresh = if self.key_service.has_keys() {
             if let Some((fetch_time, cache_duration)) = self.keys_fetch_time.get(endpoint_str) {
-                // Check if keys have expired
-                if let Ok(elapsed) = fetch_time.elapsed() {
-                    // Refresh if elapsed time exceeds cache duration
-                    elapsed >= *cache_duration
-                } else {
-                    // System time went backwards, refresh to be safe
-                    true
-                }
+                // Calculate elapsed time using chrono
+                let elapsed = Utc::now().signed_duration_since(*fetch_time);
+                // Refresh if elapsed time exceeds cache duration
+                // Note: chrono::Duration can represent negative values if time went backwards
+                elapsed
+                    >= chrono::Duration::from_std(*cache_duration)
+                        .unwrap_or(chrono::Duration::zero())
             } else {
                 // No timestamp recorded, keys are fresh
                 false
@@ -244,10 +291,8 @@ impl TrustedIssuerValidator {
         let cache_duration = self.determine_cache_duration(trusted_issuer);
 
         // Record fetch time for expiration tracking
-        self.keys_fetch_time.insert(
-            endpoint_str.to_string(),
-            (SystemTime::now(), cache_duration),
-        );
+        self.keys_fetch_time
+            .insert(endpoint_str.to_string(), (Utc::now(), cache_duration));
 
         // Log key refresh for monitoring
         self.logger.log_any(JwtLogEntry::new(
@@ -266,72 +311,70 @@ impl TrustedIssuerValidator {
     fn determine_cache_duration(&self, _trusted_issuer: &TrustedIssuer) -> Duration {
         let cache_secs = DEFAULT_JWKS_CACHE_DURATION_SECS;
 
-        let bounded_secs = cache_secs
-            .max(MIN_JWKS_CACHE_DURATION_SECS)
-            .min(MAX_JWKS_CACHE_DURATION_SECS);
+        let bounded_secs =
+            cache_secs.clamp(MIN_JWKS_CACHE_DURATION_SECS, MAX_JWKS_CACHE_DURATION_SECS);
 
         Duration::from_secs(bounded_secs)
     }
 
     /// Validates that a token contains all required claims based on token metadata.
     ///
-    /// The required claims are determined by the token metadata configuration
-    /// for the specific token type (e.g., access_token, id_token).
+    /// This is a convenience method that delegates to the standalone `validate_required_claims` function.
+    /// It validates claims explicitly specified in `required_claims` set from the token metadata.
     pub fn validate_required_claims(
         &self,
         claims: &JsonValue,
         token_type: &str,
         token_metadata: &TokenEntityMetadata,
     ) -> Result<()> {
-        // Check for entity_type_name (always required)
-        if token_metadata.entity_type_name.is_empty() {
-            return Err(TrustedIssuerError::MissingRequiredClaim {
-                claim: "entity_type_name".to_string(),
-                token_type: token_type.to_string(),
-            });
-        }
+        validate_required_claims(claims, token_type, token_metadata)
+    }
+}
 
-        // Validate user_id claim if configured
-        if let Some(user_id_claim) = &token_metadata.user_id {
-            if claims.get(user_id_claim).is_none() {
-                return Err(TrustedIssuerError::MissingRequiredClaim {
-                    claim: user_id_claim.clone(),
-                    token_type: token_type.to_string(),
-                });
-            }
-        }
-
-        // Validate role_mapping claim if configured
-        if let Some(role_claim) = &token_metadata.role_mapping {
-            if claims.get(role_claim).is_none() {
-                return Err(TrustedIssuerError::MissingRequiredClaim {
-                    claim: role_claim.clone(),
-                    token_type: token_type.to_string(),
-                });
-            }
-        }
-
-        // Validate workload_id claim if configured
-        if let Some(workload_claim) = &token_metadata.workload_id {
-            if claims.get(workload_claim).is_none() {
-                return Err(TrustedIssuerError::MissingRequiredClaim {
-                    claim: workload_claim.clone(),
-                    token_type: token_type.to_string(),
-                });
-            }
-        }
-
-        // Validate token_id claim (e.g., "jti")
-        if claims.get(&token_metadata.token_id).is_none() {
-            return Err(TrustedIssuerError::MissingRequiredClaim {
-                claim: token_metadata.token_id.clone(),
-                token_type: token_type.to_string(),
-            });
-        }
-
-        Ok(())
+/// Validates that a token contains all required claims based on token metadata.
+///
+/// This is a standalone function that can be used independently of `TrustedIssuerValidator`.
+/// It validates:
+/// - `entity_type_name` is not empty (configuration validation)
+/// - All claims in `required_claims` set exist
+///
+/// Note: Mapping fields like `user_id`, `role_mapping`, `workload_id`, and `token_id`
+/// are configuration hints for claim extraction, not strictly required claims.
+/// They are validated only if explicitly included in `required_claims`.
+///
+/// # Arguments
+///
+/// * `claims` - The JWT claims as a JSON value
+/// * `token_type` - The type of token (e.g., "access_token", "id_token")
+/// * `token_metadata` - The token metadata configuration from the trusted issuer
+///
+pub fn validate_required_claims(
+    claims: &JsonValue,
+    token_type: &str,
+    token_metadata: &TokenEntityMetadata,
+) -> Result<()> {
+    // Check for entity_type_name (configuration validation, always required)
+    if token_metadata.entity_type_name.is_empty() {
+        return Err(TrustedIssuerError::EmptyEntityTypeName {
+            token_type: token_type.to_string(),
+        });
     }
 
+    // Validate all claims explicitly specified in required_claims set
+    // This is the authoritative list of required claims from the issuer configuration
+    for claim in &token_metadata.required_claims {
+        if claims.get(claim).is_none() {
+            return Err(TrustedIssuerError::MissingRequiredClaim {
+                claim: claim.clone(),
+                token_type: token_type.to_string(),
+            });
+        }
+    }
+
+    Ok(())
+}
+
+impl TrustedIssuerValidator {
     /// Validates a JWT token against a trusted issuer with JWKS preloading.
     ///
     /// This performs comprehensive validation including:
@@ -446,6 +489,7 @@ impl TrustedIssuerValidator {
 mod tests {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use std::collections::HashSet;
 
     fn create_test_issuer(id: &str, endpoint: &str) -> TrustedIssuer {
         let mut token_metadata = HashMap::new();
@@ -549,7 +593,7 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_required_claims_missing_user_id() {
+    fn test_validate_required_claims_missing_sub() {
         let validator = TrustedIssuerValidator::new(HashMap::new());
 
         let claims = serde_json::json!({
@@ -557,11 +601,12 @@ mod tests {
             "role": "admin"
         });
 
+        // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))
-            .role_mapping(Some("role".to_string()))
+            .user_id(Some("sub".to_string())) // This is just a mapping, not validated
             .token_id("jti".to_string())
+            .required_claims(HashSet::from(["sub".to_string()])) // This IS validated
             .build();
 
         let result = validator.validate_required_claims(&claims, "access_token", &metadata);
@@ -581,11 +626,12 @@ mod tests {
             "jti": "token123"
         });
 
+        // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))
-            .role_mapping(Some("role".to_string()))
+            .role_mapping(Some("role".to_string())) // This is just a mapping, not validated
             .token_id("jti".to_string())
+            .required_claims(HashSet::from(["role".to_string()])) // This IS validated
             .build();
 
         let result = validator.validate_required_claims(&claims, "access_token", &metadata);
@@ -597,7 +643,7 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_required_claims_missing_token_id() {
+    fn test_validate_required_claims_missing_jti() {
         let validator = TrustedIssuerValidator::new(HashMap::new());
 
         let claims = serde_json::json!({
@@ -605,11 +651,11 @@ mod tests {
             "role": "admin"
         });
 
+        // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))
-            .role_mapping(Some("role".to_string()))
-            .token_id("jti".to_string())
+            .token_id("jti".to_string()) // This is just a mapping, not validated
+            .required_claims(HashSet::from(["jti".to_string()])) // This IS validated
             .build();
 
         let result = validator.validate_required_claims(&claims, "access_token", &metadata);
@@ -618,6 +664,30 @@ mod tests {
             result.unwrap_err(),
             TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "jti"
         ));
+    }
+
+    #[test]
+    fn test_validate_required_claims_mapping_fields_not_required() {
+        // Test that mapping fields (user_id, role_mapping, token_id) are NOT validated
+        // unless they are explicitly in required_claims
+        let validator = TrustedIssuerValidator::new(HashMap::new());
+
+        let claims = serde_json::json!({
+            "iss": "https://issuer.com"
+            // Note: sub, role, jti are all missing
+        });
+
+        let metadata = TokenEntityMetadata::builder()
+            .entity_type_name("Jans::Access_token".to_string())
+            .user_id(Some("sub".to_string()))     // Mapping only
+            .role_mapping(Some("role".to_string())) // Mapping only
+            .token_id("jti".to_string())          // Mapping only
+            .required_claims(HashSet::new())      // No required claims
+            .build();
+
+        // Should pass because required_claims is empty
+        let result = validator.validate_required_claims(&claims, "access_token", &metadata);
+        assert!(result.is_ok());
     }
 
     /// Helper to create a test JWT token with given claims and key
@@ -855,6 +925,8 @@ mod tests {
                 .user_id(Some("sub".to_string()))
                 .role_mapping(Some("role".to_string()))
                 .token_id("jti".to_string())
+                // Explicitly require "role" claim
+                .required_claims(HashSet::from(["role".to_string()]))
                 .build(),
         );
 
@@ -867,12 +939,12 @@ mod tests {
         let mut validator =
             TrustedIssuerValidator::new(HashMap::from([("test".to_string(), issuer)]));
 
-        // Token missing "role" claim
+        // Token missing "role" claim which is in required_claims
         let claims = serde_json::json!({
             "iss": "test",
             "sub": "user123",
             "jti": "token123",
-            // Missing "role"
+            // Missing "role" - which is required
         });
 
         let token = create_test_jwt(&claims, "test-kid", Algorithm::HS256);

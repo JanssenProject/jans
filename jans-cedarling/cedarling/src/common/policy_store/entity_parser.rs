@@ -304,10 +304,11 @@ mod tests {
         });
 
         let result = EntityParser::parse_entity(&content, "user1.json", None);
-        if let Err(ref e) = result {
-            eprintln!("Error parsing entity: {}", e);
-        }
-        assert!(result.is_ok(), "Should parse simple entity");
+        assert!(
+            result.is_ok(),
+            "Should parse simple entity: {:?}",
+            result.err()
+        );
 
         let parsed = result.unwrap();
         assert_eq!(parsed.filename, "user1.json");
@@ -336,10 +337,8 @@ mod tests {
             ]
         });
 
-        let result = EntityParser::parse_entity(&content, "user2.json", None);
-        assert!(result.is_ok(), "Should parse entity with parents");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entity(&content, "user2.json", None)
+            .expect("Should parse entity with parents");
         // Verify parents using into_inner()
         let parents = &parsed.entity.clone().into_inner().2;
         assert_eq!(parents.len(), 2, "Should have 2 parents");
@@ -358,10 +357,8 @@ mod tests {
             "parents": []
         });
 
-        let result = EntityParser::parse_entity(&content, "jans_user.json", None);
-        assert!(result.is_ok(), "Should parse entity with namespace");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entity(&content, "jans_user.json", None)
+            .expect("Should parse entity with namespace");
         assert_eq!(parsed.uid.to_string(), "Jans::User::\"user123\"");
     }
 
@@ -376,8 +373,8 @@ mod tests {
             "parents": []
         });
 
-        let result = EntityParser::parse_entity(&content, "resource.json", None);
-        assert!(result.is_ok(), "Should parse entity with empty attrs");
+        EntityParser::parse_entity(&content, "resource.json", None)
+            .expect("Should parse entity with empty attrs");
     }
 
     #[test]
@@ -385,13 +382,13 @@ mod tests {
         let content = serde_json::json!("not an object");
 
         let result = EntityParser::parse_entity(&content, "invalid.json", None);
-        assert!(result.is_err(), "Should fail on invalid JSON");
+        let err = result.expect_err("Should fail on invalid JSON");
 
-        if let Err(PolicyStoreError::JsonParsing { file, .. }) = result {
-            assert_eq!(file, "invalid.json");
-        } else {
-            panic!("Expected JsonParsing error");
-        }
+        assert!(
+            matches!(&err, PolicyStoreError::JsonParsing { file, .. } if file == "invalid.json"),
+            "Expected JsonParsing error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -406,7 +403,12 @@ mod tests {
         });
 
         let result = EntityParser::parse_entity(&content, "invalid_type.json", None);
-        assert!(result.is_err(), "Should fail on invalid entity type");
+        let err = result.expect_err("Should fail on invalid entity type");
+        assert!(
+            matches!(&err, PolicyStoreError::CedarEntityError { .. }),
+            "Expected CedarEntityError for invalid entity type, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -424,10 +426,8 @@ mod tests {
             }
         ]"#;
 
-        let result = EntityParser::parse_entities(content, "users.json", None);
-        assert!(result.is_ok(), "Should parse entity array");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entities(content, "users.json", None)
+            .expect("Should parse entity array");
         assert_eq!(parsed.len(), 2, "Should have 2 entities");
     }
 
@@ -446,10 +446,8 @@ mod tests {
             }
         }"#;
 
-        let result = EntityParser::parse_entities(content, "users.json", None);
-        assert!(result.is_ok(), "Should parse entity object");
-
-        let parsed = result.unwrap();
+        let parsed = EntityParser::parse_entities(content, "users.json", None)
+            .expect("Should parse entity object");
         assert_eq!(parsed.len(), 2, "Should have 2 entities");
     }
 
@@ -480,10 +478,7 @@ mod tests {
             },
         ];
 
-        let result = EntityParser::detect_duplicates(entities);
-        assert!(result.is_ok(), "Should have no duplicates");
-
-        let map = result.unwrap();
+        let map = EntityParser::detect_duplicates(entities).expect("Should have no duplicates");
         assert_eq!(map.len(), 2, "Should have 2 unique entities");
     }
 
@@ -515,13 +510,16 @@ mod tests {
         ];
 
         let result = EntityParser::detect_duplicates(entities);
-        assert!(result.is_err(), "Should detect duplicates");
+        let errors = result.expect_err("Should detect duplicates");
 
-        let errors = result.unwrap_err();
         assert_eq!(errors.len(), 1, "Should have 1 duplicate error");
-        assert!(errors[0].contains("User::\"alice\""));
-        assert!(errors[0].contains("user1.json"));
-        assert!(errors[0].contains("user2.json"));
+        assert!(
+            errors[0].contains("User::\"alice\"")
+                && errors[0].contains("user1.json")
+                && errors[0].contains("user2.json"),
+            "Error should reference User::alice, user1.json and user2.json, got: {}",
+            errors[0]
+        );
     }
 
     #[test]
@@ -556,8 +554,7 @@ mod tests {
         };
 
         let entities = vec![parent, child];
-        let result = EntityParser::validate_hierarchy(&entities);
-        assert!(result.is_ok(), "Hierarchy should be valid");
+        EntityParser::validate_hierarchy(&entities).expect("Hierarchy should be valid");
     }
 
     #[test]
@@ -580,11 +577,14 @@ mod tests {
 
         let entities = vec![child];
         let result = EntityParser::validate_hierarchy(&entities);
-        assert!(result.is_err(), "Should detect missing parent");
+        let errors = result.expect_err("Should detect missing parent");
 
-        let errors = result.unwrap_err();
         assert_eq!(errors.len(), 1, "Should have 1 hierarchy error");
-        assert!(errors[0].contains("Role::\"admin\""));
+        assert!(
+            errors[0].contains("Role::\"admin\""),
+            "Error should reference missing parent Role::admin, got: {}",
+            errors[0]
+        );
     }
 
     #[test]
@@ -614,10 +614,8 @@ mod tests {
             },
         ];
 
-        let result = EntityParser::create_entities_store(entities);
-        assert!(result.is_ok(), "Should create entity store");
-
-        let store = result.unwrap();
+        let store =
+            EntityParser::create_entities_store(entities).expect("Should create entity store");
         assert_eq!(store.iter().count(), 2, "Store should have 2 entities");
     }
 

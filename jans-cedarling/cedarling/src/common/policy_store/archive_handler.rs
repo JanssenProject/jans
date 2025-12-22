@@ -20,33 +20,6 @@
 //! - Use `ArchiveVfs::from_buffer()` with bytes you fetch (works now)
 //! - Use `ArchiveSource::Url` with `load_policy_store()` (once URL fetching is implemented)
 //! - Only `from_file()` is native-only (requires file system access)
-//!
-//! # Example: Native
-//!
-//! ```no_run
-//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
-//!
-//! // Load from file path (native only - file I/O not available in WASM)
-//! let archive_vfs = ArchiveVfs::from_file("policy_store.cjar")?;
-//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-//! let loaded = loader.load_directory(".")?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
-//! ```
-//!
-//! # Example: WASM (or Native)
-//!
-//! ```no_run
-//! use cedarling::common::policy_store::{ArchiveVfs, DefaultPolicyStoreLoader};
-//!
-//! // Load from bytes - works in both native and WASM!
-//! let archive_bytes: Vec<u8> = fetch_from_network().await?;
-//! let archive_vfs = ArchiveVfs::from_buffer(archive_bytes)?;
-//! let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-//! let loaded = loader.load_directory(".")?;
-//! # Ok::<(), Box<dyn std::error::Error>>(())
-//! # async fn fetch_from_network() -> Result<Vec<u8>, Box<dyn std::error::Error>> { Ok(vec![]) }
-//! ```
-
 use super::errors::ArchiveError;
 use super::vfs_adapter::{DirEntry, VfsFileSystem};
 use std::io::{Cursor, Read, Seek};
@@ -326,10 +299,7 @@ where
         // First pass: collect all unique entry paths
         for i in 0..archive.len() {
             let file = archive.by_index(i).map_err(|e| {
-                std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    format!("Failed to read archive entry {}: {}", i, e),
-                )
+                std::io::Error::other(format!("Failed to read archive entry {}: {}", i, e))
             })?;
 
             let file_name = file.name();
@@ -387,13 +357,6 @@ where
     }
 }
 
-/// Type alias for ArchiveVfs backed by in-memory buffer (WASM-compatible).
-pub type ArchiveVfsBuffer = ArchiveVfs<Cursor<Vec<u8>>>;
-
-#[cfg(not(target_arch = "wasm32"))]
-/// Type alias for ArchiveVfs backed by file (native only).
-pub type ArchiveVfsFile = ArchiveVfs<std::fs::File>;
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -431,22 +394,24 @@ mod tests {
     fn test_from_buffer_invalid_zip() {
         let bytes = b"This is not a ZIP file".to_vec();
         let result = ArchiveVfs::from_buffer(bytes);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::InvalidZipFormat { .. }
-        ));
+        let err = result.expect_err("Expected InvalidZipFormat error for non-ZIP data");
+        assert!(
+            matches!(err, ArchiveError::InvalidZipFormat { .. }),
+            "Expected InvalidZipFormat error, got: {:?}",
+            err
+        );
     }
 
     #[test]
     fn test_from_buffer_path_traversal() {
         let bytes = create_test_archive(vec![("../../../etc/passwd", "malicious")]);
         let result = ArchiveVfs::from_buffer(bytes);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ArchiveError::PathTraversal { .. }
-        ));
+        let err = result.expect_err("Expected PathTraversal error for malicious path");
+        assert!(
+            matches!(err, ArchiveError::PathTraversal { .. }),
+            "Expected PathTraversal error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -470,7 +435,11 @@ mod tests {
         let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
 
         let result = vfs.read_file("nonexistent.json");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected error for nonexistent file");
+        assert!(
+            matches!(err, std::io::Error { .. }),
+            "Expected IO error for file not found"
+        );
     }
 
     #[test]

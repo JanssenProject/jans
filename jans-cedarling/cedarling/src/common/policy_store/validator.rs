@@ -9,6 +9,9 @@ use super::errors::ValidationError;
 use super::metadata::{PolicyStoreInfo, PolicyStoreMetadata};
 use semver::Version;
 
+/// Maximum allowed length for policy store description.
+pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+
 /// Validator for policy store metadata.
 pub struct MetadataValidator;
 
@@ -73,17 +76,20 @@ impl MetadataValidator {
         }
 
         // Validate description length if provided
-        if let Some(desc) = &info.description {
-            if desc.len() > 1000 {
-                return Err(ValidationError::DescriptionTooLong { length: desc.len() });
-            }
+        if let Some(desc) = &info.description
+            && desc.len() > DESCRIPTION_MAX_LENGTH
+        {
+            return Err(ValidationError::DescriptionTooLong {
+                length: desc.len(),
+                max_length: DESCRIPTION_MAX_LENGTH,
+            });
         }
 
         // Validate timestamps ordering if both are provided
-        if let (Some(created), Some(updated)) = (info.created_date, info.updated_date) {
-            if updated < created {
-                return Err(ValidationError::InvalidTimestampOrdering);
-            }
+        if let (Some(created), Some(updated)) = (info.created_date, info.updated_date)
+            && updated < created
+        {
+            return Err(ValidationError::InvalidTimestampOrdering);
         }
 
         Ok(())
@@ -119,9 +125,9 @@ impl MetadataValidator {
     pub fn parse_and_validate(json: &str) -> Result<PolicyStoreMetadata, ValidationError> {
         // Parse JSON
         let metadata: PolicyStoreMetadata =
-            serde_json::from_str(json).map_err(|e| ValidationError::InvalidMetadata {
+            serde_json::from_str(json).map_err(|e| ValidationError::MetadataJsonParseFailed {
                 file: "metadata.json".to_string(),
-                message: format!("Failed to parse JSON: {}", e),
+                source: e,
             })?;
 
         // Validate
@@ -176,22 +182,21 @@ impl PolicyStoreMetadata {
     /// Check if this policy store is compatible with a given Cedar version.
     pub fn is_compatible_with_cedar(
         &self,
-        required_version: &str,
+        required_version: &Version,
     ) -> Result<bool, ValidationError> {
-        let store_version =
-            Version::parse(&self.cedar_version).map_err(|e| ValidationError::InvalidMetadata {
+        let store_version = Version::parse(&self.cedar_version).map_err(|e| {
+            ValidationError::MetadataInvalidCedarVersion {
                 file: "metadata.json".to_string(),
-                message: format!("Invalid cedar_version: {}", e),
-            })?;
+                source: e,
+            }
+        })?;
 
-        let required =
-            Version::parse(required_version).map_err(|e| ValidationError::InvalidMetadata {
-                file: "compatibility_check".to_string(),
-                message: format!("Invalid required version: {}", e),
-            })?;
+        // Check if the store version is compatible with the required version
+        if store_version.major == required_version.major {
+            return Ok(store_version >= *required_version);
+        }
 
-        // Compatible if major version matches and minor version is >= required
-        Ok(store_version.major == required.major && store_version >= required)
+        Ok(false)
     }
 }
 
@@ -251,11 +256,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::EmptyCedarVersion
-        ));
+        let err = result.expect_err("Expected EmptyCedarVersion error");
+        assert!(
+            matches!(err, ValidationError::EmptyCedarVersion),
+            "Expected EmptyCedarVersion, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -273,11 +279,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidCedarVersion { .. }
-        ));
+        let err = result.expect_err("Expected InvalidCedarVersion error");
+        assert!(
+            matches!(err, ValidationError::InvalidCedarVersion { .. }),
+            "Expected InvalidCedarVersion, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -295,11 +302,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::EmptyPolicyStoreName
-        ));
+        let err = result.expect_err("Expected EmptyPolicyStoreName error");
+        assert!(
+            matches!(err, ValidationError::EmptyPolicyStoreName),
+            "Expected EmptyPolicyStoreName, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -317,11 +325,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::PolicyStoreNameTooLong { length: 256 }
-        ));
+        let err = result.expect_err("Expected PolicyStoreNameTooLong error");
+        assert!(
+            matches!(err, ValidationError::PolicyStoreNameTooLong { length: 256 }),
+            "Expected PolicyStoreNameTooLong with length 256, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -339,11 +348,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidPolicyStoreId { .. }
-        ));
+        let err = result.expect_err("Expected InvalidPolicyStoreId error");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyStoreId { .. }),
+            "Expected InvalidPolicyStoreId, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -361,11 +371,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidPolicyStoreId { .. }
-        ));
+        let err = result.expect_err("Expected InvalidPolicyStoreId error for short ID");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyStoreId { .. }),
+            "Expected InvalidPolicyStoreId, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -401,11 +412,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidPolicyStoreVersion { .. }
-        ));
+        let err = result.expect_err("Expected InvalidPolicyStoreVersion error");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyStoreVersion { .. }),
+            "Expected InvalidPolicyStoreVersion, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -428,12 +440,13 @@ mod tests {
 
     #[test]
     fn test_validate_description_too_long() {
+        let over_limit = DESCRIPTION_MAX_LENGTH + 1;
         let metadata = PolicyStoreMetadata {
             cedar_version: "4.4.0".to_string(),
             policy_store: PolicyStoreInfo {
                 id: String::new(),
                 name: "Test".to_string(),
-                description: Some("a".repeat(1001)),
+                description: Some("a".repeat(over_limit)),
                 version: String::new(),
                 created_date: None,
                 updated_date: None,
@@ -441,11 +454,16 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::DescriptionTooLong { length: 1001 }
-        ));
+        let err = result.expect_err("Expected DescriptionTooLong error");
+        assert!(
+            matches!(
+                err,
+                ValidationError::DescriptionTooLong { length, max_length }
+                if length == over_limit && max_length == DESCRIPTION_MAX_LENGTH
+            ),
+            "Expected DescriptionTooLong with correct limits, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -470,11 +488,12 @@ mod tests {
         };
 
         let result = MetadataValidator::validate(&metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ValidationError::InvalidTimestampOrdering
-        ));
+        let err = result.expect_err("Expected InvalidTimestampOrdering error");
+        assert!(
+            matches!(err, ValidationError::InvalidTimestampOrdering),
+            "Expected InvalidTimestampOrdering, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -501,7 +520,10 @@ mod tests {
 
         let result = MetadataValidator::parse_and_validate(json);
         let err = result.expect_err("Should fail on invalid JSON");
-        assert!(matches!(err, ValidationError::InvalidMetadata { .. }));
+        assert!(matches!(
+            err,
+            ValidationError::MetadataJsonParseFailed { .. }
+        ));
     }
 
     #[test]
@@ -516,7 +538,10 @@ mod tests {
 
         let result = MetadataValidator::parse_and_validate(json);
         let err = result.expect_err("Should fail on missing required field");
-        assert!(matches!(err, ValidationError::InvalidMetadata { .. }));
+        assert!(matches!(
+            err,
+            ValidationError::MetadataJsonParseFailed { .. }
+        ));
     }
 
     #[test]
@@ -579,7 +604,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("4.4.0")
+            .is_compatible_with_cedar(&Version::new(4, 4, 0))
             .expect("Should successfully check compatibility");
         assert!(is_compatible);
     }
@@ -599,7 +624,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("4.4.0")
+            .is_compatible_with_cedar(&Version::new(4, 4, 0))
             .expect("Should successfully check compatibility");
         assert!(is_compatible);
     }
@@ -619,7 +644,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("3.0.0")
+            .is_compatible_with_cedar(&Version::new(3, 0, 0))
             .expect("Should successfully check compatibility");
         assert!(!is_compatible);
     }
@@ -639,7 +664,7 @@ mod tests {
         };
 
         let is_compatible = metadata
-            .is_compatible_with_cedar("4.4.0")
+            .is_compatible_with_cedar(&Version::new(4, 4, 0))
             .expect("Should successfully check compatibility");
         assert!(!is_compatible);
     }

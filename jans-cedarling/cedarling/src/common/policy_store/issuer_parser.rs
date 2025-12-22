@@ -23,8 +23,6 @@ pub struct ParsedIssuer {
     pub issuer: TrustedIssuer,
     /// Source filename
     pub filename: String,
-    /// Raw JSON content
-    pub content: String,
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
@@ -60,13 +58,10 @@ impl IssuerParser {
             let issuer = Self::parse_single_issuer(issuer_json, issuer_id, filename)?;
 
             // Store only this issuer's JSON, not the entire file content
-            let issuer_content = serde_json::to_string(issuer_json).unwrap_or_default();
-
             parsed_issuers.push(ParsedIssuer {
                 id: issuer_id.clone(),
                 issuer,
                 filename: filename.to_string(),
-                content: issuer_content,
             });
         }
 
@@ -356,15 +351,19 @@ mod tests {
         }"#;
 
         let result = IssuerParser::parse_issuer(content, "bad.json");
-        assert!(result.is_err(), "Should fail on missing name");
+        let err = result.expect_err("Should fail on missing name");
 
-        assert!(matches!(
-            result,
-            Err(PolicyStoreError::TrustedIssuerError {
-                file,
-                err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
-            }) if file == "bad.json" && issuer_id == "bad_issuer" && field == "name"
-        ));
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    file,
+                    err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
+                } if file == "bad.json" && issuer_id == "bad_issuer" && field == "name"
+            ),
+            "Expected MissingRequiredField error for name, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -377,15 +376,19 @@ mod tests {
         }"#;
 
         let result = IssuerParser::parse_issuer(content, "bad.json");
-        assert!(result.is_err(), "Should fail on missing endpoint");
+        let err = result.expect_err("Should fail on missing endpoint");
 
-        assert!(matches!(
-            result,
-            Err(PolicyStoreError::TrustedIssuerError {
-                file,
-                err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
-            }) if file == "bad.json" && issuer_id == "bad_issuer" && field == "openid_configuration_endpoint"
-        ));
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    file,
+                    err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
+                } if file == "bad.json" && issuer_id == "bad_issuer" && field == "openid_configuration_endpoint"
+            ),
+            "Expected MissingRequiredField error for endpoint, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -399,15 +402,19 @@ mod tests {
         }"#;
 
         let result = IssuerParser::parse_issuer(content, "bad.json");
-        assert!(result.is_err(), "Should fail on invalid URL");
+        let err = result.expect_err("Should fail on invalid URL");
 
-        assert!(matches!(
-            result,
-            Err(PolicyStoreError::TrustedIssuerError {
-                file,
-                err: TrustedIssuerErrorType::InvalidOidcEndpoint { issuer_id, url, .. }
-            }) if file == "bad.json" && issuer_id == "bad_issuer" && url == "not a valid url"
-        ));
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    file,
+                    err: TrustedIssuerErrorType::InvalidOidcEndpoint { issuer_id, url, .. }
+                } if file == "bad.json" && issuer_id == "bad_issuer" && url == "not a valid url"
+            ),
+            "Expected InvalidOidcEndpoint error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -415,13 +422,13 @@ mod tests {
         let content = "{ invalid json }";
 
         let result = IssuerParser::parse_issuer(content, "invalid.json");
-        assert!(result.is_err(), "Should fail on invalid JSON");
+        let err = result.expect_err("Should fail on invalid JSON");
 
-        if let Err(PolicyStoreError::JsonParsing { file, .. }) = result {
-            assert_eq!(file, "invalid.json");
-        } else {
-            panic!("Expected JsonParsing error");
-        }
+        assert!(
+            matches!(&err, PolicyStoreError::JsonParsing { file, .. } if file == "invalid.json"),
+            "Expected JsonParsing error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -440,9 +447,11 @@ mod tests {
         }"#;
 
         let result = IssuerParser::parse_issuer(content, "bad.json");
+        let err = result.expect_err("Should fail on missing entity_type_name in token metadata");
         assert!(
-            result.is_err(),
-            "Should fail on missing entity_type_name in token metadata"
+            matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
+            "Expected TrustedIssuerError, got: {:?}",
+            err
         );
     }
 
@@ -464,7 +473,6 @@ mod tests {
                     )]),
                 },
                 filename: "file1.json".to_string(),
-                content: String::new(),
             },
             ParsedIssuer {
                 id: "issuer2".to_string(),
@@ -481,7 +489,6 @@ mod tests {
                     )]),
                 },
                 filename: "file2.json".to_string(),
-                content: String::new(),
             },
         ];
 
@@ -507,7 +514,6 @@ mod tests {
                     )]),
                 },
                 filename: "file1.json".to_string(),
-                content: String::new(),
             },
             ParsedIssuer {
                 id: "issuer1".to_string(),
@@ -524,18 +530,20 @@ mod tests {
                     )]),
                 },
                 filename: "file2.json".to_string(),
-                content: String::new(),
             },
         ];
 
         let result = IssuerParser::validate_issuers(&issuers);
-        assert!(result.is_err(), "Should detect duplicate issuer IDs");
+        let errors = result.expect_err("Should detect duplicate issuer IDs");
 
-        let errors = result.unwrap_err();
-        assert_eq!(errors.len(), 1);
-        assert!(errors[0].contains("issuer1"));
-        assert!(errors[0].contains("file1.json"));
-        assert!(errors[0].contains("file2.json"));
+        assert_eq!(errors.len(), 1, "Expected exactly one duplicate error");
+        assert!(
+            errors[0].contains("issuer1")
+                && errors[0].contains("file1.json")
+                && errors[0].contains("file2.json"),
+            "Error should reference issuer1, file1.json and file2.json, got: {}",
+            errors[0]
+        );
     }
 
     #[test]
@@ -550,15 +558,17 @@ mod tests {
                 token_metadata: HashMap::new(),
             },
             filename: "file1.json".to_string(),
-            content: String::new(),
         }];
 
         let result = IssuerParser::validate_issuers(&issuers);
-        assert!(result.is_err(), "Should warn about missing token metadata");
+        let errors = result.expect_err("Should warn about missing token metadata");
 
-        let errors = result.unwrap_err();
-        assert_eq!(errors.len(), 1);
-        assert!(errors[0].contains("no token metadata"));
+        assert_eq!(errors.len(), 1, "Expected exactly one warning");
+        assert!(
+            errors[0].contains("no token metadata"),
+            "Error should mention missing token metadata, got: {}",
+            errors[0]
+        );
     }
 
     #[test]
@@ -579,7 +589,6 @@ mod tests {
                     )]),
                 },
                 filename: "file1.json".to_string(),
-                content: String::new(),
             },
             ParsedIssuer {
                 id: "issuer2".to_string(),
@@ -596,7 +605,6 @@ mod tests {
                     )]),
                 },
                 filename: "file2.json".to_string(),
-                content: String::new(),
             },
         ];
 

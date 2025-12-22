@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::sync::LazyLock;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use super::http_utils::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
@@ -148,13 +147,6 @@ impl MockEndpoints {
             status_list: None,
         }
     }
-
-    #[track_caller]
-    pub fn assert(&self) {
-        if let Some(x) = self.oidc.as_ref() { x.assert() }
-        if let Some(x) = self.jwks.as_ref() { x.assert() }
-        if let Some(x) = self.status_list.as_ref() { x.assert() }
-    }
 }
 
 #[derive(Clone, Copy)]
@@ -265,14 +257,9 @@ impl MockServer {
         };
         let encoding_key = self.keys.encoding_key.clone();
         let build_jwt_claims = move || {
-            let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-            let exp = iat + Duration::from_secs(3600); // defaults to 1 hour
-            let ttl = ttl
-                .map(Duration::from_secs)
-                .unwrap_or_else(|| 
-                    // defaults to 5 mins if the ttl is None
-                    Duration::from_secs(600)
-                );
+            let now = chrono::Utc::now().timestamp();
+            let exp = now + 3600; // defaults to 1 hour
+            let ttl_secs = ttl.unwrap_or(600); // defaults to 5 mins if the ttl is None
             let claims = json!({
                 "sub": sub,
                 "status_list": {
@@ -280,9 +267,9 @@ impl MockServer {
                   "lst": lst,
                 },
                 "iss": iss,
-                "exp": exp.as_secs(),
-                "ttl": ttl.as_secs(),
-                "iat": iat.as_secs(),
+                "exp": exp,
+                "ttl": ttl_secs,
+                "iat": now,
             });
 
             jwt::encode(&header, &claims, &encoding_key)

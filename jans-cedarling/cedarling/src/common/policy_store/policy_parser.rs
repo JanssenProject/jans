@@ -9,14 +9,14 @@
 //! policy IDs from @id() annotations. It provides validation and error
 //! reporting with file names and line numbers.
 
-use super::errors::{PolicyStoreError, ValidationError};
+use super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use cedar_policy::{Policy, PolicyId, PolicySet, Template};
+
+#[cfg(test)]
 use std::collections::HashMap;
-use std::str::FromStr;
 
 /// Represents a parsed Cedar policy with metadata.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct ParsedPolicy {
     /// The policy ID (from Cedar engine or @id annotation)
     pub id: PolicyId,
@@ -28,10 +28,7 @@ pub struct ParsedPolicy {
 
 /// Represents a parsed Cedar template with metadata.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct ParsedTemplate {
-    /// The template ID (from Cedar engine or @id annotation)
-    pub id: PolicyId,
     /// The original filename
     pub filename: String,
     /// The parsed Cedar template
@@ -67,8 +64,7 @@ impl PolicyParser {
             None => {
                 return Err(PolicyStoreError::CedarParsing {
                     file: filename.to_string(),
-                    message: "No @id() annotation found and could not derive ID from filename"
-                        .to_string(),
+                    detail: CedarParseErrorDetail::MissingIdAnnotation,
                 });
             },
         };
@@ -77,7 +73,7 @@ impl PolicyParser {
         let policy = Policy::parse(Some(policy_id.clone()), content).map_err(|e| {
             PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
-                message: format!("{}", e),
+                detail: CedarParseErrorDetail::ParseError(e.to_string()),
             }
         })?;
 
@@ -112,8 +108,7 @@ impl PolicyParser {
             None => {
                 return Err(PolicyStoreError::CedarParsing {
                     file: filename.to_string(),
-                    message: "No @id() annotation found and could not derive ID from filename"
-                        .to_string(),
+                    detail: CedarParseErrorDetail::MissingIdAnnotation,
                 });
             },
         };
@@ -122,18 +117,20 @@ impl PolicyParser {
         let template = Template::parse(Some(template_id.clone()), content).map_err(|e| {
             PolicyStoreError::CedarParsing {
                 file: filename.to_string(),
-                message: format!("{}", e),
+                detail: CedarParseErrorDetail::ParseError(e.to_string()),
             }
         })?;
 
         Ok(ParsedTemplate {
-            id: template_id,
             filename: filename.to_string(),
             template,
         })
     }
 
     /// Parse multiple policies and return a map of policy ID to filename.
+    ///
+    /// Useful for batch processing of policy files in tests and tooling.
+    #[cfg(test)]
     pub fn parse_policies<'a, I>(
         policy_files: I,
     ) -> Result<HashMap<PolicyId, String>, PolicyStoreError>
@@ -149,24 +146,6 @@ impl PolicyParser {
         }
 
         Ok(policy_map)
-    }
-
-    /// Parse multiple templates and return a map of template ID to filename.
-    pub fn parse_templates<'a, I>(
-        template_files: I,
-    ) -> Result<HashMap<PolicyId, String>, PolicyStoreError>
-    where
-        I: IntoIterator<Item = (&'a str, &'a str)>,
-    {
-        let template_files_vec: Vec<_> = template_files.into_iter().collect();
-        let mut template_map = HashMap::with_capacity(template_files_vec.len());
-
-        for (filename, content) in template_files_vec {
-            let parsed = Self::parse_template(content, filename)?;
-            template_map.insert(parsed.id, parsed.filename);
-        }
-
-        Ok(template_map)
     }
 
     /// Create a PolicySet from parsed policies and templates.
@@ -185,7 +164,7 @@ impl PolicyParser {
                 .add(parsed.policy)
                 .map_err(|e| PolicyStoreError::CedarParsing {
                     file: parsed.filename,
-                    message: format!("Failed to add policy to set: {}", e),
+                    detail: CedarParseErrorDetail::AddPolicyFailed(e.to_string()),
                 })?;
         }
 
@@ -194,7 +173,7 @@ impl PolicyParser {
             policy_set.add_template(parsed.template).map_err(|e| {
                 PolicyStoreError::CedarParsing {
                     file: parsed.filename,
-                    message: format!("Failed to add template to set: {}", e),
+                    detail: CedarParseErrorDetail::AddTemplateFailed(e.to_string()),
                 }
             })?;
         }
@@ -258,9 +237,8 @@ impl PolicyParser {
     /// Validate policy ID format (alphanumeric, underscore, hyphen, colon only).
     pub fn validate_policy_id(id: &str, filename: &str) -> Result<(), ValidationError> {
         if id.is_empty() {
-            return Err(ValidationError::InvalidPolicyId {
+            return Err(ValidationError::EmptyPolicyId {
                 file: filename.to_string(),
-                message: "Policy ID cannot be empty".to_string(),
             });
         }
 
@@ -269,12 +247,9 @@ impl PolicyParser {
             .chars()
             .all(|c| c.is_alphanumeric() || c == '_' || c == '-' || c == ':')
         {
-            return Err(ValidationError::InvalidPolicyId {
+            return Err(ValidationError::InvalidPolicyIdCharacters {
                 file: filename.to_string(),
-                message: format!(
-                    "Policy ID '{}' contains invalid characters. Only alphanumeric, '_', '-', and ':' are allowed",
-                    id
-                ),
+                id: id.to_string(),
             });
         }
 
@@ -285,6 +260,7 @@ impl PolicyParser {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::str::FromStr;
 
     #[test]
     fn test_parse_simple_policy() {
@@ -310,14 +286,17 @@ mod tests {
         let policy_text = "this is not valid cedar syntax";
 
         let result = PolicyParser::parse_policy(policy_text, "invalid.cedar");
-        assert!(result.is_err());
+        let err = result.expect_err("Expected CedarParsing error for invalid syntax");
 
-        if let Err(PolicyStoreError::CedarParsing { file, message }) = result {
-            assert_eq!(file, "invalid.cedar");
-            assert!(!message.is_empty());
-        } else {
-            panic!("Expected CedarParsing error");
-        }
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::CedarParsing { file, detail: CedarParseErrorDetail::ParseError(_) }
+                if file == "invalid.cedar"
+            ),
+            "Expected CedarParsing error with ParseError detail, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -335,8 +314,8 @@ mod tests {
 
         let parsed = result.unwrap();
         assert_eq!(parsed.filename, "template.cedar");
-        // ID should be derived from filename
-        assert_eq!(parsed.id.to_string(), "template");
+        // ID should be derived from filename - get from template directly
+        assert_eq!(parsed.template.id().to_string(), "template");
     }
 
     #[test]
@@ -359,7 +338,7 @@ mod tests {
 
         let files = vec![("policy1.cedar", policy1), ("policy2.cedar", policy2)];
 
-        let result = PolicyParser::parse_policies(files.into_iter());
+        let result = PolicyParser::parse_policies(files);
         assert!(result.is_ok());
 
         let policy_map = result.unwrap();
@@ -412,21 +391,23 @@ mod tests {
     #[test]
     fn test_validate_policy_id_empty() {
         let result = PolicyParser::validate_policy_id("", "test.cedar");
-        assert!(result.is_err());
-        assert!(matches!(
-            result,
-            Err(ValidationError::InvalidPolicyId { .. })
-        ));
+        let err = result.expect_err("Expected EmptyPolicyId error for empty policy ID");
+        assert!(
+            matches!(err, ValidationError::EmptyPolicyId { .. }),
+            "Expected EmptyPolicyId error, got: {:?}",
+            err
+        );
     }
 
     #[test]
     fn test_validate_policy_id_invalid_chars() {
         let result = PolicyParser::validate_policy_id("invalid@policy#id", "test.cedar");
-        assert!(result.is_err());
-        assert!(matches!(
-            result,
-            Err(ValidationError::InvalidPolicyId { .. })
-        ));
+        let err = result.expect_err("Expected InvalidPolicyIdCharacters error for invalid chars");
+        assert!(
+            matches!(err, ValidationError::InvalidPolicyIdCharacters { .. }),
+            "Expected InvalidPolicyIdCharacters error, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -466,7 +447,7 @@ mod tests {
 
         // Verify IDs are derived from filenames
         assert_eq!(parsed_policy.id.to_string(), "policy");
-        assert_eq!(parsed_template.id.to_string(), "template");
+        assert_eq!(parsed_template.template.id().to_string(), "template");
 
         let result = PolicyParser::create_policy_set(vec![parsed_policy], vec![parsed_template]);
         assert!(result.is_ok());

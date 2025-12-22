@@ -4,7 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::io::Write;
-use std::sync::{Arc, Mutex};
+#[cfg(test)]
+use std::sync::Arc;
+use std::sync::Mutex;
 
 use crate::log::LogLevel;
 use crate::log::err_log_entry::ErrorLogEntry;
@@ -76,14 +78,14 @@ impl LogWriter for StdOutLogger {
     }
 }
 
-// Test writer created for mocking LogWriter
-#[allow(dead_code)]
+/// Test writer created for mocking LogWriter in tests.
+#[cfg(test)]
 #[derive(Clone)]
 pub(crate) struct TestWriter {
     buf: Arc<Mutex<Vec<u8>>>,
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 impl TestWriter {
     pub(crate) fn new() -> Self {
         Self {
@@ -97,6 +99,7 @@ impl TestWriter {
     }
 }
 
+#[cfg(test)]
 impl Write for TestWriter {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.buf.lock().unwrap().extend_from_slice(buf);
