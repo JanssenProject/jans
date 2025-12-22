@@ -77,7 +77,8 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
             navigator.clipboard.writeText(jsonString);
             setSnackbar({ open: true, message: 'Token JSON copied to clipboard!' });
         } catch (error) {
-            setSnackbar({ open: true, message: 'Copy failed: ' + error.message });
+            const message = error instanceof Error ? error.message : String(error);
+            setSnackbar({ open: true, message: 'Copy failed: ' + message });
         }
     };
 
@@ -92,6 +93,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
         try {
             // Get login details
             const loginDetails = await getStoredLoginDetails();
+
+            if (!loginDetails || !loginDetails.id_token) {
+                console.warn('No login details found, nothing to logout');
+                if (notifyOnComplete) notifyOnDataChange("true");
+                return;
+            }
 
             // Decode ID token to get issuer
             const idToken = loginDetails.id_token;
@@ -124,6 +131,20 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
         } catch (error) {
             console.error("Logout error:", error);
 
+            // Capture login details before cleanup for potential silent logout
+            let savedIdToken: string | null = null;
+            let savedOpenIdConfig: OpenIDConfiguration | null = null;
+            try {
+                const loginDetails = await getStoredLoginDetails();
+                if (loginDetails?.id_token) {
+                    savedIdToken = loginDetails.id_token;
+                    const payload = jwtDecode<{ iss: string }>(loginDetails.id_token);
+                    savedOpenIdConfig = await getOpenIDConfigurationByIssuer(payload.iss);
+                }
+            } catch (captureError) {
+                console.error("Failed to capture logout data:", captureError);
+            }
+
             // Fallback: Always ensure local data is cleaned up
             try {
                 await performLocalLogout();
@@ -131,19 +152,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 console.error("Cleanup error:", cleanupError);
             }
 
-            // Try silent logout if available
-            try {
-                const loginDetails = await getStoredLoginDetails();
-                if (loginDetails?.id_token) {
-                    const payload = jwtDecode<{ iss: string }>(loginDetails.id_token);
-                    const openidConfiguration = await getOpenIDConfigurationByIssuer(payload.iss);
-
-                    if (openidConfiguration?.end_session_endpoint) {
-                        await performSilentLogout(loginDetails.id_token, openidConfiguration);
-                    }
+            if (savedIdToken && savedOpenIdConfig?.end_session_endpoint) {
+                try {
+                    await performSilentLogout(savedIdToken, savedOpenIdConfig);
+                } catch (silentError) {
+                    console.error("Silent logout failed:", silentError);
                 }
-            } catch (silentError) {
-                console.error("Silent logout failed:", silentError);
             }
         } finally {
             setLoading(false);
@@ -182,9 +196,9 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
         )
 
         if (existingIndex >= 0) {
-            // Update existing configuration
+            // Return existing configuration
             return openidConfigurations[existingIndex];
-        } 
+        }
 
         return null;
     }
