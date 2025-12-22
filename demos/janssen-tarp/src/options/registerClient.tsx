@@ -18,6 +18,7 @@ import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import Alert from '@mui/material/Alert';
+import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from './types';
 
 export default function RegisterClient({ isOpen, handleDialog }) {
   const [open, setOpen] = React.useState(isOpen);
@@ -124,92 +125,204 @@ export default function RegisterClient({ isOpen, handleDialog }) {
     }
   };
 
-  const registerClient = async () => {
+  const registerClient = async (): Promise<void> => {
     try {
       setLoading(true);
-      if (issuer === 0) {
+
+      // Validate issuer
+      if (!issuer || issuer === '0') {
         setIssuerError('Issuer cannot be left blank. Either enter correct Issuer or OpenID Configuration URL.');
         return;
       }
-      const opConfigurationEndpoint = issuer;
-      const opConfigurationEndpointURL = new URL(opConfigurationEndpoint);
-      const issuerUrl = opConfigurationEndpointURL.protocol + '//' + opConfigurationEndpointURL.hostname;
+
+      // Normalize issuer URL
+      let issuerUrl: string;
+      let opConfigurationEndpoint: string;
+
+      try {
+        // Check if the issuer is already a configuration endpoint or needs .well-known/openid-configuration
+        if (issuer.includes('.well-known/openid-configuration')) {
+          opConfigurationEndpoint = issuer;
+          const url = new URL(issuer);
+          issuerUrl = `${url.protocol}//${url.hostname}`;
+        } else {
+          issuerUrl = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
+          opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
+        }
+      } catch (error) {
+        setErrorMessage('Invalid URL format. Please enter a valid URL.');
+        return;
+      }
+
+      // Prepare scopes
       const scopes = selectedScopes.map((ele) => ele.name).join(" ");
 
+      // Fetch OpenID configuration
       const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
 
-      if (openidConfig != undefined) {
-        chrome.storage.local.set({ opConfiguration: openidConfig.data }).then(() => {
-          console.log("OP Configuration: " + JSON.stringify(openidConfig));
-        });
+      if (!openidConfig?.data) {
+        setErrorMessage('Error in fetching OpenID configuration!');
+        return;
+      }
 
-        const registrationUrl = openidConfig.data.registration_endpoint;
+      const configData = openidConfig.data;
 
-        var registerObj: ILooseObject = {
-          redirect_uris: [chrome.identity.getRedirectURL()],
-          scope: scopes,
-          post_logout_redirect_uris: [chrome.identity.getRedirectURL('logout')],
-          response_types: ['code'],
-          grant_types: ['authorization_code'],
-          application_type: 'web',
-          client_name: 'janssen-tarp-' + uuidv4(),
-          token_endpoint_auth_method: 'client_secret_basic',
-          access_token_as_jwt: true,
-          userinfo_signed_response_alg: "RS256",
-          jansInclClaimsInIdTkn: "true",
-          access_token_lifetime: 86400 //1 day
-        };
+      // Validate required endpoints
+      if (!configData.registration_endpoint) {
+        setErrorMessage('OpenID configuration does not contain a registration endpoint');
+        return;
+      }
 
-        if (!!expireAt) {
-          registerObj.lifetime = ((expireAt.valueOf() - moment().valueOf()) / 1000);
+      // Store multiple OpenID configurations
+      await storeOpenIDConfiguration(issuerUrl, configData);
+
+      // Register OIDC client
+      const registrationUrl = configData.registration_endpoint;
+      const clientId = `janssen-tarp-${uuidv4()}`;
+
+      const registerObj: RegistrationRequest = {
+        redirect_uris: [chrome.identity.getRedirectURL()],
+        scope: scopes,
+        post_logout_redirect_uris: [chrome.identity.getRedirectURL('logout')],
+        response_types: ['code'],
+        grant_types: ['authorization_code'],
+        application_type: 'web',
+        client_name: clientId,
+        token_endpoint_auth_method: 'client_secret_basic',
+        access_token_as_jwt: true,
+        userinfo_signed_response_alg: "RS256",
+        jansInclClaimsInIdTkn: "true",
+        access_token_lifetime: 86400 // 1 day
+      };
+
+      // Add expiration if specified
+      if (expireAt) {
+        const lifetimeSeconds = Math.floor((expireAt.valueOf() - Date.now()) / 1000);
+        if (lifetimeSeconds > 0) {
+          registerObj.lifetime = lifetimeSeconds;
         }
+      }
 
-        const registrationResp = await registerOIDCClient(registrationUrl, registerObj);
+      const registrationResp = await registerOIDCClient(registrationUrl, registerObj);
 
-        if (registrationResp !== undefined) {
-          chrome.storage.local.get(["oidcClients"], (result) => {
-            let clientArr = []
-            if (!!result.oidcClients) {
-              clientArr = result.oidcClients;
+      if (!registrationResp?.data) {
+        setErrorMessage(REGISTRATION_ERROR);
+        return;
+      }
+
+      // Create client object
+      const newClient: OIDCClient = {
+        id: uuidv4(),
+        opHost: issuerUrl,
+        clientId: registrationResp.data.client_id,
+        clientSecret: registrationResp.data.client_secret,
+        scope: registerObj.scope,
+        redirectUris: registerObj.redirect_uris,
+        authorizationEndpoint: configData.authorization_endpoint,
+        tokenEndpoint: configData.token_endpoint,
+        userinfoEndpoint: configData.userinfo_endpoint,
+        acrValuesSupported: configData.acr_values_supported,
+        endSessionEndpoint: configData.end_session_endpoint,
+        responseType: registerObj.response_types,
+        postLogoutRedirectUris: registerObj.post_logout_redirect_uris,
+        expireAt: expireAt ? expireAt.valueOf() : undefined,
+        showClientExpiry: !!expireAt,
+        registrationDate: Date.now(),
+        openidConfiguration: configData
+      };
+
+      // Store the new client
+      await storeOIDCClient(newClient);
+
+      console.log('OIDC client registered successfully!', {
+        clientId: newClient.clientId,
+        opHost: newClient.opHost
+      });
+
+      setErrorMessage('Registration successful!');
+      handleClose();
+
+    } catch (err) {
+      console.error('Client registration failed:', err);
+      setErrorMessage(err instanceof Error ? err.message : REGISTRATION_ERROR);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to store multiple OpenID configurations
+  const storeOpenIDConfiguration = async (issuerUrl: string, config: OpenIDConfiguration): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(["openidConfigurations"], (result) => {
+        try {
+          const configs:  OpenIDConfiguration[] = result.openidConfigurations || [];
+
+           // Check if configuration already exists (by issuer )
+           const existingIndex = configs.findIndex(c =>
+            c.issuer === issuerUrl
+          );
+
+          if (existingIndex >= 0) {
+            // Update existing configuration
+            configs[existingIndex] = config;
+          } else {
+            // Add new configuration
+            configs.push(config);
+          }
+
+          chrome.storage.local.set({ openidConfigurations: configs }, () => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+            } else {
+              console.log(`OpenID configuration stored for ${issuerUrl}`);
+              resolve();
             }
-
-            clientArr.push({
-              'opHost': issuerUrl,
-              'clientId': registrationResp.data.client_id,
-              'clientSecret': registrationResp.data.client_secret,
-              'scope': registerObj.scope,
-              'redirectUris': registerObj.redirect_uris,
-              'authorizationEndpoint': openidConfig.data.authorization_endpoint,
-              'tokenEndpoint': openidConfig.data.token_endpoint,
-              'userinfoEndpoint': openidConfig.data.userinfo_endpoint,
-              'acrValuesSupported': openidConfig.data.acr_values_supported,
-              'endSessionEndpoint': openidConfig.data.end_session_endpoint,
-              'responseType': registerObj.response_types,
-              'postLogoutRedirectUris': registerObj.post_logout_redirect_uris,
-              'expireAt': !!expireAt ? expireAt.valueOf() : undefined,
-              'showClientExpiry': !!expireAt
-
-            });
-            chrome.storage.local.set({ oidcClients: clientArr });
           });
 
-          console.log('OIDC client registered successfully!')
-          console.log("oidcClient is set for client_id: " + registrationResp.data.client_id);
-          setErrorMessage('Regstration successful!')
-          handleClose();
-
-        } else {
-          setErrorMessage(REGISTRATION_ERROR)
+        } catch (error) {
+          reject(error);
         }
-      } else {
-        setErrorMessage('Error in fetching Openid configuration!')
-      }
-    } catch (err) {
-      console.error(err)
-      setErrorMessage(REGISTRATION_ERROR)
-    }
-    setLoading(false);
-  }
+      });
+    });
+  };
+
+  // Helper function to store OIDC client with support for multiple clients
+  const storeOIDCClient = async (client: OIDCClient): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(["oidcClients"], (result) => {
+        try {
+          const clients: OIDCClient[] = result.oidcClients || [];
+
+          // Check if client already exists (by clientId or opHost + clientId combination)
+          const existingIndex = clients.findIndex(c =>
+            c.clientId === client.clientId && c.opHost === client.opHost
+          );
+
+          if (existingIndex >= 0) {
+            // Update existing client
+            clients[existingIndex] = client;
+          } else {
+            // Add new client
+            clients.push(client);
+          }
+
+          // Sort clients by registration date (newest first)
+          clients.sort((a, b) => b.registrationDate - a.registrationDate);
+
+          chrome.storage.local.set({ oidcClients: clients }, () => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+            } else {
+              console.log(`Client stored: ${client.clientId}`);
+              resolve();
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  };
 
   return (
     <React.Fragment>
@@ -281,7 +394,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
                 if (details.option.create && reason !== 'removeOption') {
                   valueList.push({ id: undefined, name: details.option.name, create: details.option.create });
                   setSelectedScopes(valueList);
-                } else if(reason === 'createOption') {
+                } else if (reason === 'createOption') {
                   valueList.push({ id: undefined, name: details.option, create: true });
                 } else {
                   setSelectedScopes(newValue);
