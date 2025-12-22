@@ -33,14 +33,39 @@ use std::path::Path;
 pub async fn load_policy_store_directory(
     path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    let vfs = super::vfs_adapter::PhysicalVfs::new();
-    let loader = DefaultPolicyStoreLoader::new(vfs);
     let path_str = path
         .to_str()
         .ok_or_else(|| PolicyStoreError::PathNotFound {
             path: path.display().to_string(),
-        })?;
-    loader.load_directory(path_str)
+        })?
+        .to_string();
+
+    // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
+    // `load_directory` is intentionally synchronous because it performs blocking filesystem I/O.
+    // Using `spawn_blocking` ensures these operations don't block the async executor.
+    tokio::task::spawn_blocking(move || {
+        // Use the PhysicalVfs-specific loader for directory-based stores.
+        let loader = DefaultPolicyStoreLoader::new_physical();
+
+        // Load all components from the directory.
+        let loaded = loader.load_directory(&path_str)?;
+
+        // If a manifest is present, validate it against the physical filesystem.
+        if let Some(ref manifest) = loaded.manifest {
+            loader.validate_manifest(&path_str, &loaded.metadata, manifest)?;
+        }
+
+        Ok(loaded)
+    })
+    .await
+    .map_err(|e| {
+        // If the blocking task panicked, convert to an IO error.
+        // This should be rare and typically indicates a bug in the loader code.
+        PolicyStoreError::Io(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Blocking task panicked: {}", e),
+        ))
+    })?
 }
 
 /// Load a policy store from a directory path (WASM stub).
@@ -60,10 +85,27 @@ pub async fn load_policy_store_directory(
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    use super::archive_handler::ArchiveVfs;
-    let archive_vfs = ArchiveVfs::from_file(path)?;
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    loader.load_directory(".")
+    let path = path.to_path_buf();
+    
+    // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
+    // `load_directory` is intentionally synchronous because it performs blocking filesystem I/O
+    // (reading from zip archive). Using `spawn_blocking` ensures these operations don't block
+    // the async executor.
+    tokio::task::spawn_blocking(move || {
+        use super::archive_handler::ArchiveVfs;
+        let archive_vfs = ArchiveVfs::from_file(&path)?;
+        let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+        loader.load_directory(".")
+    })
+    .await
+    .map_err(|e| {
+        // If the blocking task panicked, convert to an IO error.
+        // This should be rare and typically indicates a bug in the loader code.
+        PolicyStoreError::Io(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Blocking task panicked: {}", e),
+        ))
+    })?
 }
 
 /// Load a policy store from a Cedar Archive (.cjar) file (WASM stub).
@@ -551,12 +593,11 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Load a directory-based policy store.
     ///
-    /// Note: Manifest validation is automatically performed ONLY for PhysicalVfs.
-    /// For other VFS types (MemoryVfs, WASM, custom implementations), users should
-    /// call ManifestValidator::validate() directly if validation is needed.
-    ///
-    /// This design follows the Interface Segregation Principle: manifest validation
-    /// is only available where it makes sense (native filesystem).
+    /// This method is generic over the underlying `VfsFileSystem` and **does not**
+    /// perform manifest validation. For backends that need manifest validation
+    /// (e.g., `PhysicalVfs`), callers should use higher-level helpers such as
+    /// `load_policy_store_directory` or call `validate_manifest` explicitly on
+    /// `DefaultPolicyStoreLoader<PhysicalVfs>`.
     pub fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
@@ -564,26 +605,6 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         // Load all components
         let metadata = self.load_metadata(dir)?;
         let manifest = self.load_manifest(dir)?;
-
-        // Validate manifest if present (only for PhysicalVfs)
-        // This uses runtime type checking to avoid leaking PhysicalVfs-specific
-        // behavior into the generic interface
-        #[cfg(not(target_arch = "wasm32"))]
-        if let Some(ref manifest_data) = manifest {
-            use std::any::TypeId;
-
-            // Only validate for PhysicalVfs - this avoids forcing all VFS implementations
-            // to support manifest validation when it may not be meaningful
-            if TypeId::of::<V>() == TypeId::of::<super::vfs_adapter::PhysicalVfs>() {
-                // We need to cast self to the PhysicalVfs-specific type to call validate_manifest
-                // Safety: We've verified V is PhysicalVfs via TypeId check
-                let physical_loader = unsafe {
-                    &*(self as *const Self
-                        as *const DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs>)
-                };
-                physical_loader.validate_manifest(dir, &metadata, manifest_data)?;
-            }
-        }
 
         let schema = self.load_schema(dir)?;
         let policies = self.load_policies(dir)?;
