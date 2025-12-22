@@ -407,7 +407,10 @@ jobs:
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
         npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
-        npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}" || {
+          echo "npm publish failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
         cd ..
   
         # Build for Node.js target with modified version
@@ -416,7 +419,10 @@ jobs:
         echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
-        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
+          echo "npm publish (nodejs) failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
 
     - name: Archive and sign pkg contents
       id: archive_pkg
