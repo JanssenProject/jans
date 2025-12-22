@@ -134,6 +134,11 @@ public class ApiHealthCheck  {
         }
     }
 
+    /**
+     * Retrieve current application server statistics.
+     *
+     * @return a JAX-RS Response whose entity is a StatsData object containing current server statistics (returned with HTTP 200).
+     */
     @Operation(summary = "Returns application server status", description = "Returns application server status", operationId = "get-server-stat", tags = {
     "Health - Check" })
     @ApiResponses(value = {
@@ -149,6 +154,12 @@ public class ApiHealthCheck  {
 
     }
 
+    /**
+     * Retrieve version information for the specified artifact.
+     *
+     * @param artifact the artifact name to query; use "ALL" to request versions for all artifacts
+     * @return a Response whose entity is a JSON object containing version data for the requested artifact
+     */
     @Operation(summary = "Returns application version", description = "Returns application version", operationId = "get-app-version", tags = {
     "Health - Check" }, 
             security = {
@@ -168,6 +179,12 @@ public class ApiHealthCheck  {
         return Response.ok(statusCheckerTimer.getAppVersionData(artifact)).build();
     }
 
+    /**
+     * Retrieves status information for a specified service.
+     *
+     * @param service the service name to check; use ApiConstants.ALL to request status for all services (default)
+     * @return a JsonNode containing the service status payload
+     */
     @Operation(summary = "Fetch service status", description = "Fetch service status", operationId = "get-service-status", tags = {
             "Health - Check" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.APP_DATA_READ_ACCESS }),

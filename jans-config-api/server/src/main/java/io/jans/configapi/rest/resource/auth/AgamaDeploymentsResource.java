@@ -47,6 +47,13 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     
     private ObjectMapper mapper;
 
+    /**
+     * Retrieve a paged list of currently deployed Agama projects.
+     *
+     * @param start the zero-based start index for the returned page
+     * @param count the maximum number of results to return; when less than or equal to zero a server-configured default is used
+     * @return a Response whose entity is a PagedResult<Deployment> containing the requested page of deployments; returned Deployment entries have internal folder details removed
+     */
     @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-prj", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
@@ -73,6 +80,12 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
     
+    /**
+     * Retrieve details of a single Agama deployment by project name.
+     *
+     * @param projectName the Agama project name
+     * @return a Response containing HTTP 200 with the Deployment when found; HTTP 204 when the deployment exists but is not yet finished; HTTP 404 when the project is unknown
+     */
     @Operation(summary = "Retrieve details of a single deployment by name.", description = "Retrieve details of a single deployment by name.", operationId = "get-agama-prj-by-name", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
@@ -105,6 +118,17 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Uploads an Agama project ZIP and queues a deployment task, adding or replacing the project on the server.
+     *
+     * @param projectName   the name of the Agama project
+     * @param autoconfigure a string parsable as boolean; `"true"` enables automatic post-deployment configuration
+     * @param gamaBinary    the raw bytes of the project ZIP (application/zip)
+     * @return a Response with:
+     *         - 202 Accepted when a deployment task was queued,
+     *         - 400 Bad Request when project name or binary data is missing,
+     *         - 409 Conflict when there is an active deployment task for the project
+     */
     @Operation(summary = "Add or replace an Agama project to the server.", description = "Add or replace an Agama project to the server.", operationId = "post-agama-prj", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
@@ -140,6 +164,12 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Undeploys the named Agama project from the server.
+     *
+     * @param projectName the name of the Agama project to undeploy
+     * @return `204 No Content` if undeployment succeeded; `404 Not Found` if the project does not exist; `409 Conflict` if the project is currently being deployed; `500 Internal Server Error` for unexpected server errors
+     */
     @Operation(summary = "Undeploy an Agama project from the server.", description = "Undeploy an Agama project from the server.", operationId = "delete-agama-prj", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }),
@@ -172,6 +202,15 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         
     }
 
+    /**
+     * Retrieve configurations for flows that belong to the specified project.
+     *
+     * The project must be fully processed. The response body is a JSON string that maps each flow's
+     * qualified name to its configuration properties; flows that do not exist or have no properties are omitted.
+     *
+     * @param projectName the Agama project name
+     * @return a JSON string representing a mapping from flow qualified names to their configuration property maps
+     */
     @Operation(summary = "Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully.", description = "Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully.", operationId = "get-agama-prj-configs", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
@@ -224,6 +263,13 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
+    /**
+     * Replace configurations for flows that belong to the specified Agama project.
+     *
+     * @param projectName   the Agama project name
+     * @param flowsConfigs  a mapping from flow qualified name to a map of configuration properties (property name -> value)
+     * @return a map from flow qualified name to `true` if that flow's configuration was successfully updated, `false` otherwise
+     */
     @Operation(summary = "Set or replace the configurations associated to flows that belong to the project. The project must have been already processed fully.", description = "Set or replace the configurations associated to flows that belong to the project. The project must have been already processed fully.", operationId = "put-agama-prj", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),

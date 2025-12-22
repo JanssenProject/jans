@@ -54,6 +54,13 @@ public class AgamaRepoResource extends ConfigBaseResource {
     @Inject
     AgamaRepoService agamaRepoService;
 
+    /**
+     * Retrieve all Agama repositories.
+     *
+     * Returns an HTTP response whose entity is a JSON representation of the available Agama repositories.
+     *
+     * @return HTTP 200 with a JSON body containing the repositories (JsonNode) or HTTP 204 if no repositories are available.
+     */
     @Operation(summary = "Gets all agama repositories.", description = "Gets all agama repositories.", operationId = "get-agama-repositories", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }),
@@ -76,6 +83,13 @@ public class AgamaRepoResource extends ConfigBaseResource {
         return Response.ok(agamaRepoService.getAllAgamaRepositories()).build();
     }
 
+    /**
+     * Downloads an Agama project from the specified download link.
+     *
+     * @param downloadLink the URL or link used to retrieve the Agama project
+     * @return a JAX-RS Response whose entity is the project content as a plain-text/binary payload
+     * @throws IOException if an I/O error occurs while obtaining the project
+     */
     @Operation(summary = "Download agama project.", description = "Download agama project.", operationId = "get-agama-project", tags = {
             "Agama" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_REPO_READ_ACCESS }),

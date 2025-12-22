@@ -76,6 +76,19 @@ public class UserResource extends BaseResource {
     @Inject
     UserMgmtService userMgmtSrv;
 
+    /**
+     * Retrieves a paged list of users matching the provided search, filter, and sort parameters.
+     *
+     * @param limit maximum number of results to return
+     * @param pattern search pattern to match user entries
+     * @param startIndex 1-based index of the first result to return
+     * @param sortBy attribute used to order the returned results
+     * @param sortOrder sort direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value filters (e.g., "mail=abc@mail.com,jansStatus=true")
+     * @return a paged result containing matching CustomUser entries and paging metadata
+     * @throws IllegalAccessException if an error occurs accessing properties during conversion
+     * @throws InvocationTargetException if an invoked method or constructor during conversion throws an exception
+     */
     @Operation(summary = "Gets list of users", description = "Gets list of users", operationId = "get-user", tags = {
             "Configuration – User Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_READ_ACCESS }),
@@ -112,6 +125,14 @@ public class UserResource extends BaseResource {
         return Response.ok(this.doSearch(searchReq, true)).build();
     }
 
+    /**
+     * Retrieve the user identified by its inum and return it as a CustomUser in the response.
+     *
+     * @param inum the user's unique inum identifier
+     * @return a Response whose entity is the matching CustomUser
+     * @throws IllegalAccessException   if a reflection access error occurs while converting the user
+     * @throws InvocationTargetException if a reflection invocation error occurs while converting the user
+     */
     @Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
             "Configuration – User Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_READ_ACCESS }),
@@ -149,6 +170,16 @@ public class UserResource extends BaseResource {
         return Response.ok(customUser).build();
     }
 
+    /**
+     * Create a new user from the provided CustomUser payload.
+     *
+     * @param customUser the CustomUser payload containing user attributes to persist
+     * @param removeNonLDAPAttributes if true, non‑LDAP attributes will be removed from the request before persisting
+     * @return the created CustomUser populated with persisted attributes
+     * @throws NoSuchMethodException if an expected method is not found during attribute mapping
+     * @throws IllegalAccessException if a reflective access error occurs while mapping attributes
+     * @throws InvocationTargetException if an invoked method throws an exception during attribute mapping
+     */
     @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
             "Configuration – User Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
@@ -210,6 +241,18 @@ public class UserResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
+    /**
+     * Update an existing user from the provided CustomUser payload.
+     *
+     * Applies validation, optional removal of non‑LDAP attributes, and persists the changes; the response contains the updated CustomUser.
+     *
+     * @param customUser the CustomUser representation containing updated user fields
+     * @param removeNonLDAPAttributes if true, remove attributes that are not mapped to LDAP before processing
+     * @return a Response with status 200 OK containing the updated CustomUser as JSON
+     * @throws NoSuchMethodException if a required accessor/mutator method is not found while mapping attributes
+     * @throws IllegalAccessException if a reflection access error occurs while mapping attributes
+     * @throws InvocationTargetException if an invoked method throws an exception while mapping attributes
+     */
     @Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
             "Configuration – User Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
@@ -273,6 +316,22 @@ public class UserResource extends BaseResource {
 
     }
 
+    /**
+     * Apply a user patch for the user identified by the given inum and return the patched CustomUser.
+     *
+     * Attempts to load the existing user, optionally removes non-LDAP attributes from the request,
+     * applies the provided patch, excludes configured attributes from the result, and converts the
+     * updated record to a CustomUser for the response.
+     *
+     * @param inum the identifier of the user to patch
+     * @param userPatchRequest the patch operations to apply to the user
+     * @param removeNonLDAPAttributes when true, remove attributes that are not stored in LDAP from the request before patching
+     * @return the patched CustomUser
+     * @throws IllegalAccessException if an access error occurs while reflecting or copying attributes
+     * @throws InvocationTargetException if an invoked method throws an exception during attribute handling
+     * @throws JsonPatchException if the patch payload is invalid or cannot be applied
+     * @throws IOException if an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
             "Configuration – User Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_WRITE_ACCESS }),
@@ -328,6 +387,12 @@ public class UserResource extends BaseResource {
         return Response.ok(customUser).build();
     }
 
+    /**
+     * Delete a user identified by the given inum.
+     *
+     * @param inum the user's unique inum identifier
+     * @return an HTTP 204 No Content response when the user is successfully deleted
+     */
     @Operation(summary = "Delete User", description = "Delete User", operationId = "delete-user", tags = {
             "Configuration – User Management" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.USER_DELETE_ACCESS }),

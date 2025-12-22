@@ -45,6 +45,11 @@ public class ConfigApiResource extends ConfigBaseResource {
     @Inject
     ConfigApiService configApiService;
 
+    /**
+     * Retrieve the current config-api application configuration.
+     *
+     * @return the current ApiAppConfiguration
+     */
     @Operation(summary = "Gets config-api configuration properties.", description = "Gets config-api configuration properties.", operationId = "get-config-api-properties", tags = {
             "Configuration – Config API" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_READ_ACCESS }),
@@ -66,6 +71,17 @@ public class ConfigApiResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Apply a JSON Patch to the config-api dynamic configuration and return the updated application configuration.
+     *
+     * <p>The provided JSON Patch document is applied to the stored dynamic configuration, the change is persisted,
+     * and the latest ApiAppConfiguration is returned.</p>
+     *
+     * @param jsonPatchString a JSON Patch document (RFC 6902) as a string describing the modifications to apply
+     * @return the updated ApiAppConfiguration after the patch has been applied and persisted
+     * @throws JsonPatchException if the JSON Patch cannot be applied to the current configuration
+     * @throws IOException if there is an I/O or JSON processing error while applying the patch
+     */
     @Operation(summary = "Partially modifies config-api configuration properties.", description = "Partially modifies config-api Configuration properties.", operationId = "patch-config-api-properties", tags = {
             "Configuration – Config API" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }),

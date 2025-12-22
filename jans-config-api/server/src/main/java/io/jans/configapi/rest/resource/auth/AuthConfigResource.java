@@ -52,6 +52,11 @@ public class AuthConfigResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
  
+    /**
+     * Retrieves the current Jans authorization server configuration.
+     *
+     * @return the current AppConfiguration representing the server's configuration
+     */
     @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
             "Configuration – Properties" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }),
@@ -76,6 +81,18 @@ public class AuthConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Applies a JSON Patch to the stored AppConfiguration, persists the change, and returns the updated configuration.
+     *
+     * The provided JSON Patch string is applied to the current configuration; if the patch touches the
+     * "agamaConfiguration" field, that sub-configuration is validated before persisting. The persisted and
+     * reloaded AppConfiguration is returned.
+     *
+     * @param jsonPatchString JSON Patch document as a string describing the partial updates
+     * @return the updated AppConfiguration after applying the patch and persisting the change
+     * @throws JsonPatchException if the JSON Patch cannot be applied to the current configuration
+     * @throws IOException if an I/O error occurs while processing the patch or configuration
+     */
     @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.", description = "Partially modifies Jans authorization server AppConfiguration properties.", operationId = "patch-properties", tags = {
             "Configuration – Properties" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
@@ -113,6 +130,11 @@ public class AuthConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Retrieve the configured persistence settings for the Jans authorization server.
+     *
+     * @return the PersistenceConfiguration describing the server's configured persistence
+     */
     @Operation(summary = "Returns persistence type configured for Jans authorization server.", description = "Returns persistence type configured for Jans authorization server.", operationId = "get-properties-persistence", tags = {
             "Configuration – Properties" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }),
@@ -139,6 +161,13 @@ public class AuthConfigResource extends ConfigBaseResource {
     }
     
     
+    /**
+     * List available feature flag types configured for the Jans authorization server.
+     *
+     * The returned set excludes FeatureFlagType.UNKNOWN.
+     *
+     * @return an EnumSet of available FeatureFlagType values; excludes {@code FeatureFlagType.UNKNOWN}.
+     */
     @Operation(summary = "Returns feature flags type configured for Jans authorization server.", description = "Returns feature flags type configured for Jans authorization server.", operationId = "get-feature-flag-type", tags = {
             "Configuration – Properties" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }),

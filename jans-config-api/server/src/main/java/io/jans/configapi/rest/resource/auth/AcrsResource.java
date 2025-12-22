@@ -75,6 +75,11 @@ public class AcrsResource extends ConfigBaseResource {
     @Inject
     LdapConfigurationService ldapConfigurationService;
 
+    /**
+     * Gets the current default authentication method.
+     *
+     * @return a JAX-RS Response containing an AuthenticationMethod whose `defaultAcr` is set to the configured authentication mode
+     */
     @Operation(summary = "Gets default authentication method.", description = "Gets default authentication method.", operationId = "get-acrs", tags = {
             "Default Authentication Method" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ACRS_READ_ACCESS }),
@@ -98,6 +103,13 @@ public class AcrsResource extends ConfigBaseResource {
         return Response.ok(authenticationMethod).build();
     }
 
+    /**
+     * Update the server's default authentication method.
+     *
+     * @param authenticationMethod an AuthenticationMethod whose `defaultAcr` is the new default; must be non-null and `defaultAcr` must not be blank
+     * @return a JAX-RS Response containing the updated AuthenticationMethod
+     * @throws BadRequestException if `authenticationMethod` is null, `defaultAcr` is blank, or the provided ACR is invalid
+     */
     @Operation(summary = "Updates default authentication method.", description = "Updates default authentication method.", operationId = "put-acrs", tags = {
             "Default Authentication Method" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }),

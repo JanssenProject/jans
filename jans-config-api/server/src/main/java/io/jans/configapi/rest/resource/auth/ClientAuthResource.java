@@ -42,6 +42,12 @@ public class ClientAuthResource extends ConfigBaseResource {
     @Inject
     ClientAuthService clientAuthService;
 
+    /**
+     * Retrieves the client authorizations associated with the specified user.
+     *
+     * @param userId the user identifier whose client-to-scope authorizations are retrieved
+     * @return a map from Client to the set of authorized Scope objects for the specified user
+     */
     @Operation(summary = "Gets list of client authorization", description = "Gets list of client authorizations", operationId = "get-client-authorization", tags = {
             "Client Authorization" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {
@@ -75,6 +81,14 @@ public class ClientAuthResource extends ConfigBaseResource {
         return Response.ok(clientAuths).build();
     }
 
+    /**
+     * Revoke all authorizations for the specified user on the specified client.
+     *
+     * @param userId  the identifier of the user whose authorizations will be revoked
+     * @param clientId the identifier of the client from which the user's authorizations will be removed
+     * @param userName the username associated with the authorizations to remove
+     * @return HTTP 204 No Content response when the authorizations are successfully removed
+     */
     @Operation(summary = "Revoke client authorization", description = "Revoke client authorizations", operationId = "delete-client-authorization", tags = {
             "Client Authorization" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = {

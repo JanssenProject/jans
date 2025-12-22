@@ -69,6 +69,17 @@ public class IdpResource extends BaseResource {
     @Inject
     IdpService idpService;
 
+    /**
+     * Retrieves a paged list of SAML Identity Providers matching the provided search parameters.
+     *
+     * @param limit         maximum number of results to return
+     * @param pattern       search pattern to filter identity providers
+     * @param startIndex    1-based index of the first result to return
+     * @param sortBy        attribute used to sort the results
+     * @param sortOrder     sorting direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair additional field=value filters (comma-separated pairs)
+     * @return              a Response containing a paged result of IdentityProvider entries matching the query
+     */
     @Operation(summary = "Retrieves SAML Identity Provider", description = "Retrieves SAML Identity Provider", operationId = "get-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
@@ -104,6 +115,12 @@ public class IdpResource extends BaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
+    /**
+     * Retrieve the SAML Identity Provider identified by the given inum.
+     *
+     * @param inum the unique identifier (inum) of the Identity Provider to fetch
+     * @return an HTTP response whose body is the requested IdentityProvider (200 OK)
+     */
     @Operation(summary = "Get SAML Identity Provider by Inum", description = "Get SAML Identity Provider by Inum", operationId = "get-saml-identity-provider-by-inum", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
@@ -129,6 +146,12 @@ public class IdpResource extends BaseResource {
         return Response.ok(idp).build();
     }
 
+    /**
+     * Retrieve the service provider (SP) metadata for a SAML identity provider as a JSON string.
+     *
+     * @param inum Unique identifier of the identity provider to fetch metadata for.
+     * @return the SP metadata as a JSON-formatted string
+     */
     @Operation(summary = "Get SAML SP Metadata as Json", description = "Get SAML SP Metadata as Json", operationId = "get-saml-sp-metadata-json", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
@@ -162,6 +185,12 @@ public class IdpResource extends BaseResource {
         return Response.ok(json).build();
     }
 
+    /**
+     * Retrieve the Service Provider metadata file URL for the specified SAML identity provider.
+     *
+     * @param inum Unique identifier of the identity provider.
+     * @return the Service Provider (SP) metadata endpoint URL for the given identity provider.
+     */
     @Operation(summary = "Get SAML SP Metadata Endpoint URL", description = "Get SAML SP Metadata Endpoint URL", operationId = "get-saml-sp-metadata-url", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_READ_ACCESS }),
@@ -191,6 +220,15 @@ public class IdpResource extends BaseResource {
         return Response.ok(spMetadataUrl).build();
     }
 
+    /**
+     * Create a SAML identity provider from multipart form data.
+     *
+     * The multipart form must include a BrokerIdentityProviderForm carrying the IdentityProvider model and, optionally, a metadata file.
+     *
+     * @param brokerIdentityProviderForm multipart form containing the IdentityProvider and optional metadata file used to create the SAML IDP
+     * @return a Response whose entity is the created IdentityProvider and which is returned with HTTP 201 Created
+     * @throws IOException if reading the uploaded metadata file fails
+     */
     @Operation(summary = "Create SAML Identity Provider", description = "Create SAML Identity Provider", operationId = "post-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
@@ -250,6 +288,15 @@ public class IdpResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(idp).build();
     }
 
+    /**
+     * Update a SAML Identity Provider using data and optional metadata uploaded via multipart form.
+     *
+     * The request must include an IdentityProvider with name, displayName, and inum; if realm is omitted the existing realm is preserved.
+     *
+     * @param brokerIdentityProviderForm multipart form containing the IdentityProvider and optional metadata file
+     * @return a Response whose entity is the updated IdentityProvider
+     * @throws IOException if reading the uploaded metadata stream fails
+     */
     @Operation(summary = "Update SAML Identity Provider", description = "Update SAML Identity Provider", operationId = "put-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_WRITE_ACCESS }),
@@ -315,6 +362,13 @@ public class IdpResource extends BaseResource {
         return Response.ok(idp).build();
     }
 
+    /**
+     * Delete the SAML identity provider identified by the given inum.
+     *
+     * @param inum unique identifier of the identity provider to delete
+     * @return a Response with HTTP 204 No Content on successful deletion
+     * @throws IOException if an I/O error occurs during deletion
+     */
     @Operation(summary = "Delete SAML Identity Provider", description = "Delete SAML Identity Provider", operationId = "delete-saml-identity-provider", tags = {
             "SAML - Identity Broker" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.IDP_SAML_DELETE_ACCESS }),

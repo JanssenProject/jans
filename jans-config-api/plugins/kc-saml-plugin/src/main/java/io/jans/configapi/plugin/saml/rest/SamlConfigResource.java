@@ -50,6 +50,11 @@ public class SamlConfigResource extends BaseResource {
     @Inject
     SamlConfigService samlConfigService;
 
+    /**
+     * Retrieves the current SAML dynamic configuration.
+     *
+     * @return HTTP 200 Response whose entity is the current SamlAppConfiguration serialized as JSON.
+     */
     @Operation(summary = "Gets SAML configuration properties", description = "Gets SAML configuration properties", operationId = "get-saml-properties", tags = {
             "SAML - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_READ_ACCESS }),
@@ -70,6 +75,14 @@ public class SamlConfigResource extends BaseResource {
         return Response.ok(samlConfiguration).build();
     }
 
+    /**
+     * Apply and persist the provided dynamic SAML configuration.
+     *
+     * Replaces the current dynamic SAML configuration with the supplied values, persists the change, and returns the updated configuration.
+     *
+     * @param samlConfiguration the dynamic SAML configuration to apply
+     * @return an HTTP 200 response containing the updated SamlAppConfiguration as JSON
+     */
     @Operation(summary = "Update SAML configuration properties", description = "Update SAML configuration properties", operationId = "put-saml-properties", tags = {
             "SAML - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }),
@@ -94,6 +107,14 @@ public class SamlConfigResource extends BaseResource {
 
     }
 
+    /**
+     * Applies a JSON Patch to the dynamic SAML configuration and persists the updated configuration.
+     *
+     * @param jsonPatchString JSON Patch document as a string (media type application/json-patch+json) describing the partial updates.
+     * @return the updated SamlAppConfiguration.
+     * @throws JsonPatchException if the patch document is invalid or cannot be applied to the current configuration.
+     * @throws IOException if an I/O error occurs while processing the patch.
+     */
     @Operation(summary = "Partially modifies SAML configuration properties.", description = "Partially modifies SAML Configuration properties.", operationId = "patch-saml-properties", tags = {
             "SAML - Configuration" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }),

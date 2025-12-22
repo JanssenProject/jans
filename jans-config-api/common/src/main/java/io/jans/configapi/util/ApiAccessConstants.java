@@ -3,6 +3,9 @@ package io.jans.configapi.util;
 public class ApiAccessConstants {
 
     
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private ApiAccessConstants() {
     }
 
