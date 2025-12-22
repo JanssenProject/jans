@@ -426,14 +426,22 @@ mod manifest_security {
     }
 
     #[test]
+    #[cfg(not(target_arch = "wasm32"))]
     fn test_handles_invalid_checksum_format() {
+        use super::super::loader::load_policy_store_directory;
+        use std::fs;
+        use std::io::Read;
+        use tempfile::TempDir;
+        use zip::read::ZipArchive;
+
         let mut builder = fixtures::minimal_valid();
 
-        // Add invalid manifest with bad checksum format
+        // Add invalid manifest with bad checksum format.
+        // Use the same policy_store_id as the builder to avoid PolicyStoreIdMismatch error.
         builder.extra_files.insert(
             "manifest.json".to_string(),
             r#"{
-                "policy_store_id": "test123",
+                "policy_store_id": "abc123def456",
                 "generated_date": "2024-01-01T00:00:00Z",
                 "files": {
                     "metadata.json": {
@@ -446,20 +454,46 @@ mod manifest_security {
         );
 
         let archive = builder.build_archive().unwrap();
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
 
-        // For archive-based loading, manifest validation is not enforced automatically.
-        // The loader should still succeed even if the manifest's checksum format is invalid.
-        let loaded = result.expect(
-            "Archive-based loader should succeed even with invalid manifest checksum format",
+        // Extract archive to temp directory to test directory-based loading with manifest validation.
+        // We use `load_policy_store_directory` (not archive-based loading) because manifest validation
+        // is only performed for directory-based stores, not for archive-based loading.
+        let temp_dir = TempDir::new().unwrap();
+        let mut zip_archive = ZipArchive::new(std::io::Cursor::new(&archive)).unwrap();
+
+        for i in 0..zip_archive.len() {
+            let mut file = zip_archive.by_index(i).unwrap();
+            let file_path = temp_dir.path().join(file.name());
+
+            if file.is_dir() {
+                fs::create_dir_all(&file_path).unwrap();
+            } else {
+                if let Some(parent) = file_path.parent() {
+                    fs::create_dir_all(parent).unwrap();
+                }
+                let mut contents = Vec::new();
+                file.read_to_end(&mut contents).unwrap();
+                fs::write(&file_path, contents).unwrap();
+            }
+        }
+
+        // Use load_policy_store_directory which validates manifests
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(load_policy_store_directory(temp_dir.path()));
+
+        // Invalid checksum format should be reported via ManifestError::InvalidChecksumFormat.
+        let err = result.expect_err(
+            "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum format",
         );
-
-        // Verify that the manifest was loaded and attached, even though its checksum format is invalid.
         assert!(
-            loaded.manifest.is_some(),
-            "Expected manifest to be present even when checksum format is invalid"
+            matches!(
+                err,
+                PolicyStoreError::ManifestError {
+                    err: crate::common::policy_store::errors::ManifestErrorType::InvalidChecksumFormat { .. }
+                }
+            ),
+            "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {:?}",
+            err
         );
     }
 }
