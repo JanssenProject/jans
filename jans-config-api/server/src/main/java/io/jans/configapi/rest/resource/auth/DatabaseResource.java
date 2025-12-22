@@ -71,7 +71,7 @@ public class DatabaseResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.DATABASE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response getDefaultAuthenticationMethod() {
+    public Response getDatabaseSchema() {
         Map<String, Map<String, AttributeType>> tableColumnsMap = databaseService.getTableColumnsMap();
 
         return Response.ok(tableColumnsMap).build();

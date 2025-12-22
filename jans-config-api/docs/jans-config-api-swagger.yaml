@@ -15689,21 +15689,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
+        selected:
+          type: boolean
         whitePagesCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
-        selected:
+        userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -17456,10 +17456,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -18303,10 +18303,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
