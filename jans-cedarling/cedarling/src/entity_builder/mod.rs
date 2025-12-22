@@ -19,6 +19,7 @@ mod built_entities;
 mod entity_id_getters;
 mod error;
 mod schema;
+mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
 use crate::authz::AuthorizeEntitiesData;
@@ -28,6 +29,7 @@ use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
+use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
@@ -51,7 +53,7 @@ pub struct EntityBuilder {
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
-    trusted_issuers: HashMap<String, TrustedIssuer>,
+    issuers_index: TrustedIssuerIndex,
 }
 
 impl EntityBuilder {
@@ -79,12 +81,14 @@ impl EntityBuilder {
 
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
+        let issuers_index = TrustedIssuerIndex::new(trusted_issuers);
+
         Ok(Self {
             config,
             iss_entities,
             schema,
             default_entities,
-            trusted_issuers: trusted_issuers.clone(),
+            issuers_index,
         })
     }
 
@@ -225,16 +229,7 @@ impl EntityBuilder {
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
         // First, try to find the issuer in trusted issuer metadata
-        for trusted_issuer in self.trusted_issuers.values() {
-            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
-            // Compare both the full URL and just the origin
-            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
-                // Use the trusted issuer's name field
-                return Some(Arc::new(trusted_issuer.to_owned()));
-            }
-        }
-
-        None
+        self.issuers_index.find_by_url(issuer).cloned()
     }
 }
 

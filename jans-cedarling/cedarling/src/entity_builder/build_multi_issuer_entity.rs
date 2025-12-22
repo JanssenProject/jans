@@ -290,16 +290,9 @@ impl EntityBuilder {
 
     /// Resolve issuer name using trusted issuer metadata or fallback to hostname
     fn resolve_issuer_name(&self, issuer: &str) -> Result<String, MultiIssuerEntityError> {
-        // TODO: utilize HashMap search to avoid iteration over values.
-
         // First, try to find the issuer in trusted issuer metadata
-        for trusted_issuer in self.trusted_issuers.values() {
-            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
-            // Compare both the full URL and just the origin
-            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
-                // Use the trusted issuer's name field
-                return Ok(sanitize_issuer_name(&trusted_issuer.name));
-            }
+        if let Some(trusted_issuer) = self.issuers_index.find_by_url(issuer) {
+            return Ok(sanitize_issuer_name(&trusted_issuer.name));
         }
 
         // Fallback to hostname from JWT iss claim
