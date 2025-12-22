@@ -22,7 +22,7 @@ The Config Api Interception script implements the [ConfigApiType](https://github
 |:-----|:------|
 |`authorize(self, responseAsJsonObject, context)`| responseAsJsonObject - is `org.codehaus.jettison.json.JSONObject`, you can use any method to manipulate `json`. context is reference of `io.jans.as.service.external.context.ExternalIntrospectionContext` (in https://github.com/JanssenFederation/oxauth project,)|
 
-## Sample script which demonstrates basic client authentication 
+## Sample script which demonstrates basic client authentication
 
 ### Script Type: Python
 
