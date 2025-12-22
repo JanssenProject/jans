@@ -6,9 +6,9 @@ public class ApiAccessConstants {
     private ApiAccessConstants() {
     }
 
-    public static final String JANS_AUTH_CONFIG_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
-    public static final String JANS_AUTH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.write";
-    public static final String JANS_AUTH_CONFIG_ADMIN_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.admin";
+    public static final String AUTH_CONFIG_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
+    public static final String AUTH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.write";
+    public static final String AUTH_CONFIG_ADMIN_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.admin";
     
     public static final String ATTRIBUTES_READ_ACCESS = "https://jans.io/oauth/config/attributes.readonly";
     public static final String ATTRIBUTES_WRITE_ACCESS = "https://jans.io/oauth/config/attributes.write";
@@ -92,10 +92,10 @@ public class ApiAccessConstants {
     public static final String AGAMA_REPO_WRITE_ACCESS = "https://jans.io/oauth/config/agama-repo.write";
    
 
-    public static final String JANS_AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
-    public static final String JANS_AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
-    public static final String JANS_AUTH_REVOKE_SESSION  = "revoke_session";
-    public static final String JANS_AUTH_SESSION_ADMIN_ACCESS = "https://jans.io/oauth/jans-auth-server/session.admin";
+    public static final String AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
+    public static final String AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
+    public static final String AUTH_REVOKE_SESSION  = "revoke_session";
+    public static final String AUTH_SESSION_ADMIN_ACCESS = "https://jans.io/oauth/jans-auth-server/session.admin";
     
     // Super Scopes
     public static final String SUPER_ADMIN_READ_ACCESS  = "https://jans.io/oauth/config/read-all";

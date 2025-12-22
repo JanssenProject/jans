@@ -1009,3 +1009,9 @@ components:
             https://jans.io/oauth/config/user.delete: Delete user related information
             https://jans.io/oauth/config/user.admin: Admin to manage user related
               information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

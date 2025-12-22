@@ -881,3 +881,7 @@ components:
               information
             https://jans.io/oauth/config/lock.admin: Admin to manage Lock telemetry
               related information
+            https://jans.io/oauth/config/read-all: Admin read scope
+            https://jans.io/oauth/config/write-all: Admin write scope
+            https://jans.io/oauth/config/delete-all: Admin delete scope
+            jans_stat: Auth Server Stats Authorization Scope

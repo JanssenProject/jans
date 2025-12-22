@@ -12,8 +12,6 @@ import io.jans.configapi.ConfigServerBaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 
 import jakarta.ws.rs.core.MediaType;
