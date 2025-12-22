@@ -49,7 +49,7 @@ Let's see at a glance user attributes.
 |Preferred Username|
 |TransientId|
 |PersistentId|
-|Country|  
+|Country|
 |Secret Answer|
 |OpenID Connect JSON formatted address|
 |User certificate|

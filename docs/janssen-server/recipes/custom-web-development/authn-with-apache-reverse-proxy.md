@@ -21,14 +21,14 @@ tags:
 
 
 
-This guide describes steps to enable authentication for web applications using the Janssen server which is an OpenID Connect Provider (OP). 
+This guide describes steps to enable authentication for web applications using the Janssen server which is an OpenID Connect Provider (OP).
 
 In the process of setting up a working environment, we will see how to use the command-line tool `jans-cli` to manually register an OpenID Connect client with the Janssen server. We will also see how to configure Relying Party to communicate with the Janssen server.
 
 #### Hardware configuration
 
 For development and POC purposes, 4GB RAM and 10 GB HDD should be available for Janssen Server. For PROD deployments, please refer [installation guide](https://github.com/JanssenProject/jans/wiki#janssen-installation).
-  
+
 
 #### Prerequisites
 - Installed Apache reverse proxy that is SSL enabled
@@ -45,7 +45,7 @@ In this setup, we have four important components.
   - _Reverse Proxy_: In our setup protected resources will be accessible through the proxy's FQDN `https://test.apache.rp.io`. For simplicity, we will use a CGI script as a protected resource and host it on the Apache proxy itself. In a typical production setup, protected resources are usually hosted on a separate server. 
   - _Relying Party_: We will use Apache module [mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc) to provide relying party(RP) functionality. RP implements authentication flows from OpenID Connect specification. For each incoming request, RP ensures that the request is authenticated. If the request is not pre-authenticated, then RP will coordinate with Janssen server to integrate authentication.
 - **Janssen server** is our open-id connect provider (OP). We will assume that the Janssen server is accessible at FQDN `https://janssen.op.io/`
- 
+
 
 ## Configure Janssen server
 
@@ -71,7 +71,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
     ![CLI-main-menu](../../../assets/image-howto-mod-auth-cli-main-menu-04292022.png)
     
     To register a new OpenID Connect client, select `OAuth OpenID Connect - Clients` option (`16` in above sample). Selecting an appropriate option will bring up related sub-menu. 
-   
+
   - From sub-menu, select option for `Create new OpenId connect client`. Upon selecting this option, CLI will prompt for inputs required to register a new OpenID connect client.
   - Provide inputs for the following properties:
   
@@ -88,7 +88,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
     responseTypes: code
     grantTypes: authorization_code
     ```
-    
+
    - Once values for all the above properties are provided, input `c` at the prompt to instruct `jans-cli` to create schema using inputs provided till now. At this time, `jans-cli` will show the schema(JSON) that will be used to create a new OpenID Connect client on Janssen server. Verify that schema has captured all the provided inputs correctly.
    - Now next step is for `jans-cli` to post this JSON schema to Janssen server to actually register new client. To do this, input `y` on the prompt.
    - If the client is successfully registered then we will receive JSON data back. This data describes newly registered client. Some of these values from this JSON response, like `inum` and `clientSecret`, will be required when we configure `mod_auth_openidc` as a client. So keep this reponse JSON handy. See a sample of JSON response below:
@@ -216,12 +216,12 @@ As mentioned under [component setup](#component-setup), our protected resource w
     chown www-data:www-data /usr/lib/cgi-bin/printHeaders.py
     chmod ug+x /usr/lib/cgi-bin/printHeaders.py
     ```
-    
+
  At this point, `printHeaders.py` should be accessible at `https://test.apache.rp.io/cgi-bin/printHeaders.py` without requiring any authentication.
- 
+
 ## Configure openidc module
 
-#### Install *mod-auth-openidc* 
+#### Install *mod-auth-openidc*
 
 On Apache reverse proxy host, add _mod-auth-openidc_ using commands below
 ```
@@ -229,7 +229,7 @@ apt-get install libapache2-mod-auth-openidc
 a2enmod auth_openidc
 service apache2 restart
 ```
-#### Configure *mod-auth-openidc* 
+#### Configure *mod-auth-openidc*
 - Open `/etc/apache2/sites-available/default-ssl.conf`
 - Add *mod-auth-openidc* configuration parameters given below for virtual host `_default_:443`. Find more configuration options for _mod-auth-openidc_ [here](https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf). 
 - This configuration will enable authentication for any resource under `/` context root.
