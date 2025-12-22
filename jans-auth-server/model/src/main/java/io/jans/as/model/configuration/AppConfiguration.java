@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
+import io.jans.as.model.configuration.rate.RateLimitConfig;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
@@ -969,6 +970,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR. Only needed if softwareStatementValidationType=builtin")
     private List<SsaValidationConfig> dcrSsaValidationConfigs;
+
+    @DocProperty(description = "Rate Limit Configuration")
+    private RateLimitConfig rateLimitConfiguration;
 
     @DocProperty(description = "SSA Configuration")
     private SsaConfiguration ssaConfiguration;
@@ -3801,6 +3805,14 @@ public class AppConfiguration implements Configuration {
 
     public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
         this.ssaConfiguration = ssaConfiguration;
+    }
+
+    public RateLimitConfig getRateLimitConfiguration() {
+        return rateLimitConfiguration;
+    }
+
+    public void setRateLimitConfiguration(RateLimitConfig rateLimitConfiguration) {
+        this.rateLimitConfiguration = rateLimitConfiguration;
     }
 
     public Boolean getAuthorizationChallengeShouldGenerateSession() {

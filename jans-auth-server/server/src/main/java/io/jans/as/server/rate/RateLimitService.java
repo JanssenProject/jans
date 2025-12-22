@@ -7,6 +7,7 @@ import io.github.bucket4j.Bucket;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.rate.RateLimitConfig;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -53,6 +54,13 @@ public class RateLimitService {
     public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
         // if rate_limit flag is disabled immediately return
         if (!errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.RATE_LIMIT)){
+            return httpRequest;
+        }
+
+        RateLimitConfig rateLimitConfiguration = appConfiguration.getRateLimitConfiguration();
+
+        // no rate limit configuration -> return
+        if (rateLimitConfiguration == null) {
             return httpRequest;
         }
 
