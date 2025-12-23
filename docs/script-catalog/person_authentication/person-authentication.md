@@ -30,9 +30,9 @@ workflow.
 
 Typically, a `PersonAuthenticationType` script can be used to:
 
-- Introduce a new 2FA authentication mechanism  
-- Customize multi-step authentication  
-- Offer Social logins  
+- Introduce a new 2FA authentication mechanism
+- Customize multi-step authentication
+- Offer Social logins
 - Proactively perform fraud detection and block a fraudulent user
 
 Authentication mechanisms offered by Jans can be confirmed by checking the
@@ -82,8 +82,8 @@ Relevant methods:
 
 #### b. Web page in xhtml:
 
-1. The `f:metadata` and `f:viewAction` tags are used to load variables 
-(prepared in the `prepareForStep` method of the custom script). These 
+1. The `f:metadata` and `f:viewAction` tags are used to load variables
+(prepared in the `prepareForStep` method of the custom script). These
 variables are rendered on the UI page.
 ```
 <f:metadata>
@@ -165,9 +165,10 @@ web and mobile clients can request any enabled authentication mechanism**.
 	 - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION`
 	 - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
-2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
+2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
 
 #### Level (rank) of an Authentication mechanism :
+
 Each authentication mechanism (script) has a "Level" assigned to it which
 describes how secure and reliable it is. **The higher the "Level", higher is
 the reliability represented by the script.** Though several mechanisms can be
@@ -200,7 +201,7 @@ compatibility in future.
 ```
 jansExtUid: [otp:xyz1, cert:xyz2, duo:xyz3, ...]
 jansAuthenticator: {
-   "xyz1": {"id": "xyz1", "type": "otp", "custom": {...}}, 
+   "xyz1": {"id": "xyz1", "type": "otp", "custom": {...}},
    "xyz2": {"id": "xyz2", "type": "cert", "custom": {...}},
    "xyz3": {"id": "xyz3", "type": "duo", "custom": {...}},
     ...
@@ -307,15 +308,14 @@ fields too. Hence it's better to persist all changes in one update request to DB
 
 2. [OTP authentication](../../../script-catalog/person_authentication/otp-external-authenticator) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
 
-3. SMS OTP :  
+3. SMS OTP :
 
 4. Email OTP:
 
 
 ### B. Implementing Multistep authentication
 
-1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here is an example of how the 
-number of steps can be varied depending on the context or business requirement.
+1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here is an example of how the number of steps can be varied depending on the context or business requirement.
 
 ### C. Implementing Social logins
 

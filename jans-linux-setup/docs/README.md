@@ -117,7 +117,7 @@ desciribng base installers
    - `install()`: write actual installation codes in this fucntion,
    - `copy_static()`: if you need to copy some static files, write here,
    - `generate_configuration()`: many installers needs configuration generations, such as client_id's, password before rendering templates.
-      So include these code here,
+      So include this code here,
    - `render_import_templates()`: template renderings are done under this function, then imported to database
    - `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script,
       updating jans_auth and/or other service configurations etc.
