@@ -8,9 +8,9 @@
 
 use std::sync::{Arc, Weak};
 
-use uuid7::Uuid;
-use crate::log::log_strategy::LogStrategyLogger;
 use super::{LogLevel, LogStrategy};
+use crate::log::log_strategy::LogStrategyLogger;
+use uuid7::Uuid;
 
 /// Log Writer
 /// interface for logging events
@@ -39,7 +39,6 @@ impl LogWriter for Option<Weak<LogStrategy>> {
         }
 
         // we log the error manually to stdout if the logger is gone
-        
         let log = match serde_json::to_value(&entry) {
             Ok(json) => json.to_string(),
             Err(err) => {
@@ -102,7 +101,7 @@ pub(crate) trait Indexed {
     }
 }
 
-pub(crate) trait Loggable: serde::Serialize + Indexed + Clone {
+pub(crate) trait Loggable: serde::Serialize + Indexed + Clone + Send {
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
