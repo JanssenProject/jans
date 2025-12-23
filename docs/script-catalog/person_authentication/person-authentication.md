@@ -192,7 +192,7 @@ enrollment and authentication flows. And after enrollment it needs to store
 data into user entry for later use in authentication flow.
 To search by enrolled authenticator there is another multi-valued
 attribute `jansExtUid`. This attribute has default DB index to quick search.
-Both attributes is recommended to use In Jans since 1.1.1 version for better
+Both attributes are recommended to use in Jans since 1.1.1 version for better
 compatibility in future.
 
 

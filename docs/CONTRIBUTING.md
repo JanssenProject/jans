@@ -82,7 +82,7 @@ Janssen Project mandates all commits to follow guidelines as below.
 
 - **Add GPG signature to your commit**
 
-  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key    setup already then just use `-S` switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
+  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key setup already then just use `-S` switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
 
 - **Add DCO sign-off**
   
@@ -451,7 +451,7 @@ It is essential for everyone in the community to actively participate in the doc
 Best place to find something to work on is to look at [currently open issues](https://github.com/JanssenProject/jans/issues). If you are a first time contributor then starting with [list of good first issues](https://github.com/JanssenProject/jans/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) is best.
 
 ### Start a discussion
-Start a [GitHub Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your solution or implementation approach. Janssen is a community-driven project and it'll be helpful to get community's view about it.
+Start a [GitHub Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your proposed solution or implementation approach is. Janssen is a community-driven project and it's helpful to get the community's view about it.
 
 ### Create an issue
 Take your time to write a proper issue including a good summary and description. Outcome of GitHub discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate `issue template` and it'll help you create an issue with right content.
