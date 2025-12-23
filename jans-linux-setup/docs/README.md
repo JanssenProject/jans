@@ -85,7 +85,7 @@ Collection of utilities used by SetupApp.
 
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
      (couchbase) and which bucket to import according to `dn`
-   - `set_jans_auth_conf_dynamic(entries)`: takes entries as dctionary and updates `jans_auth_conf_dynamic` in database
+   - `set_jans_auth_conf_dynamic(entries)`: takes entries as dictionary and updates `jans_auth_conf_dynamic` in database
    - `set_jans_auth_conf_dynamic(entries)`: the same for `jans_auth_conf_dynamic`
    - `enable_script(inum)`: enables script
    - `enable_service(service)`: enables jans service in oxtrust ui

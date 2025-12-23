@@ -55,6 +55,7 @@ The following sections explain how authentication
 flow can be built using a custom script.
 
 ### A. Custom script
+
 The **PersonAuthenticationType** script is described by a java interface
 whose methods should be overridden to implement an authentication workflow.
 The [article](person-authentication-interface.md) talks about these
@@ -62,10 +63,12 @@ methods in detail and the psuedo code
 for each method.
 
 ### B. UI pages:
+
 All web pages are **xhtml** files. The Command-Action offering by JSF
 framework is used by the Jans-auth server to implement authentication flows.
 
 #### a. Server-side actions implemented by custom script:
+
 The custom script's `authenticate` and `prepareForStep` implementations are
 called by the following java class - [Authenticator](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/auth/Authenticator.java). These methods are
 mapped as command actions and view actions respectively in the web page.
@@ -78,6 +81,7 @@ Relevant methods:
 | String prepareAuthenticationForStep() | Makes the authentication flow proceed by calling the `prepareForStep` method of the custom script |
 
 #### b. Web page in xhtml:
+
 1. The `f:metadata` and `f:viewAction` tags are used to load variables 
 (prepared in the `prepareForStep` method of the custom script). These 
 variables are rendered on the UI page.
@@ -95,20 +99,23 @@ variables are rendered on the UI page.
 ```
 
 #### c. Page customizations:
+
 The Jans-auth server comes with a default set of pages for login, logout,
 errors, authorizations. You can easily override these pages or write new ones.
-You can easily apply your own stylesheet, images and resouce-bundles to your
+You can easily apply your own stylesheet, images and resource-bundles to your
 pages.
 
 This [article](#c-page-customizations) covers all the details you need to write your own web page.
 
 ### C. Business logic in Custom script:
+
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans.
 The most important aspects of business logic are implemented through a set of
 beans. Details and examples of this can be found in this [article](../../janssen-server/developer/managed-beans.md)
 
-### D. Third party libraries for use in the custom script
-Java or Python libraries to be imported and used very easily. Remember, you
+### D. Third-party libraries for use in the custom script
+
+Java or Python libraries to be imported and used with ease. Remember, you
 can import a python library only if it has been written in "pure python".
 More details of this mentioned [here](../../janssen-server/developer/interception-scripts.md#using-python-libraries-in-a-script)
 
@@ -182,7 +189,7 @@ The `jansAuthenticator` attribute can be used in cases when person authenticator
 need to persist data between person logins. For example script can have
 enrollment and authentication flows. And after enrollment it needs to store
 data into user entry for later use in authentication flow.
-In order to search by enrolled authenticator there is another multi-valued
+To search by enrolled authenticator there is another multi-valued
 attribute `jansExtUid`. This attribute has default DB index to quick search.
 Both attributes is recommended to use In Jans since 1.1.1 version for better
 compatibility in future.
@@ -315,7 +322,7 @@ number of steps can be varied depending on the context or business requirement.
 You can use a `PersonAuthenticationType` script to allow users to sign using
 credentials from popular **Social Identity providers** or
 **Inbound Identity Providers** like Facebook, Google and Apple. After users
-authenticate, thier Social Identity Provider credentials are provisioned into
+authenticate, their Social Identity Provider credentials are provisioned into
 the Jans-auth server. More on this topic in this [article](../../janssen-server/recipes/social-login.md)
 
 
@@ -335,7 +342,7 @@ An example of a complete URL looks like this -
 		&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
 	```
 To test , enter the complete URL for authorization in a browser or create a
-simple webmapage with a link that simulates the user sign-in attempt. If the
+simple webpage with a link that simulates the user sign-in attempt. If the
 server is configured properly, the first page for the selected authentication
 method will be displayed to the user.
 

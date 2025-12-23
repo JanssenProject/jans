@@ -82,7 +82,7 @@ Janssen Project mandates all commits to follow guidelines as below.
 
 - **Add GPG signature to your commit**
 
-  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key    setup already then just use `-S` switch with you commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
+  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key    setup already then just use `-S` switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
 
 - **Add DCO sign-off**
   
