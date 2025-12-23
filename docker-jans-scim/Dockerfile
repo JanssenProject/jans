@@ -62,7 +62,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-scim
 
-ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
+ENV JANS_SOURCE_VERSION=f3c75bc38ff291a2e5d3a638bbff634f0d548a1f
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
