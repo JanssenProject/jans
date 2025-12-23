@@ -83,8 +83,14 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     };
 
     /**
- * Main logout function with improved error handling and structure
- */
+     * Performs a complete logout flow that removes local login state and, when available, invokes the OP's end session endpoint.
+     *
+     * Performs local cleanup of stored login details, attempts an interactive remote logout via the issuer's end_session_endpoint (or a silent logout when forced or when interactive fails), and on error will still ensure local cleanup and try a silent logout if possible. Updates component loading state and optionally notifies the parent via notifyOnDataChange when finished.
+     *
+     * @param options - Logout behavior options.
+     * @param options.forceSilentLogout - If true, skip interactive logout and perform a silent (non-interactive) logout when possible. Defaults to `false`.
+     * @param options.notifyOnComplete - If true, invoke `notifyOnDataChange("true")` after the logout flow completes (successfully or not). Defaults to `true`.
+     */
     async function logout(options: LogoutOptions = {}): Promise<void> {
         const { forceSilentLogout = false, notifyOnComplete = true } = options;
 
@@ -166,7 +172,9 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
-     * Get stored login details
+     * Retrieve saved login details from chrome.storage.local.
+     *
+     * @returns The stored `LoginDetails` object, or `null` if no details are present or an error occurred while reading storage.
      */
     async function getStoredLoginDetails(): Promise<LoginDetails | null> {
         return new Promise((resolve) => {
@@ -182,7 +190,10 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
-     * Get OpenID configuration by issuer URL
+     * Retrieve the stored OpenID Connect configuration that matches the given issuer URL.
+     *
+     * @param issuerUrl - The issuer URL to match against stored OpenID configurations
+     * @returns The matching OpenID configuration if found, `null` otherwise
      */
     async function getOpenIDConfigurationByIssuer(issuerUrl: string): Promise<OpenIDConfiguration | null> {
         const openidConfigurations: OpenIDConfiguration[] = await new Promise((resolve) => {
@@ -209,7 +220,10 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
-     * Remove login details from storage
+     * Removes the stored `loginDetails` entry from chrome.storage.local.
+     *
+     * @returns Resolves when `loginDetails` have been removed.
+     * @throws The `chrome.runtime.lastError` value when the storage removal fails.
      */
     async function removeLoginDetails(): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -224,8 +238,13 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
- * Perform comprehensive local logout
- */
+     * Remove stored login-related data to complete a local logout.
+     *
+     * Performs removal of local storage keys used for login state.
+     *
+     * @returns `void` when local logout completes.
+     * @throws Rejects with `chrome.runtime.lastError` if storage removal fails.
+     */
     async function performLocalLogout(): Promise<void> {
         const itemsToRemove = [
             "loginDetails"
@@ -244,7 +263,11 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
-     * Perform remote logout via end_session_endpoint
+     * Initiates logout against the provider's end_session_endpoint, preferring an interactive web flow and falling back to a silent request.
+     *
+     * @param idToken - The ID token to include as `id_token_hint` when constructing the logout request.
+     * @param openidConfiguration - The OpenID Connect configuration for the issuer; used to build the end_session_endpoint URL and include optional parameters like `client_id`.
+     * @param forceSilent - If `true`, skip the interactive web flow and perform a silent (non-interactive) logout request.
      */
     async function performRemoteLogout(
         idToken: string,
@@ -282,7 +305,12 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
-     * Perform silent logout (no user interaction)
+     * Attempts a non-interactive logout by calling the provider's end_session_endpoint.
+     *
+     * This is a best-effort, silent logout: it sends a request including credentials and does not surface errors to callers.
+     *
+     * @param idToken - The ID token to present as the `id_token_hint` for the logout request.
+     * @param openidConfiguration - The OpenID Connect configuration that contains the `end_session_endpoint` and related logout parameters.
      */
     async function performSilentLogout(
         idToken: string,
@@ -305,7 +333,11 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     }
 
     /**
-     * Build logout URL with parameters
+     * Constructs the provider's end-session URL with required and optional query parameters.
+     *
+     * @param idToken - The ID token to include as the `id_token_hint`.
+     * @param openidConfiguration - OpenID configuration containing `end_session_endpoint` and optional fields (`client_id`, `logout_hint`) used when building the URL.
+     * @returns The full logout URL including `state`, `id_token_hint`, and any available optional parameters (e.g., `post_logout_redirect_uri`, `client_id`, `ui_locales`, `logout_hint`).
      */
     function buildLogoutUrl(
         idToken: string,

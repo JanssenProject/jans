@@ -69,6 +69,13 @@ function createData(
     };
 }
 
+/**
+ * Render a table row representing an OIDC client with controls to delete the client and trigger an authentication flow.
+ *
+ * @param props.row - OIDC client data (as returned by `createData`) used to populate the row's cells.
+ * @param props.notifyOnDataChange - Callback invoked after client data changes (for example, after deletion or when the auth flow is triggered).
+ * @returns A JSX element containing the table row and its action controls.
+ */
 function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) {
     const { row, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
