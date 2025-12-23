@@ -7,6 +7,7 @@
 package io.jans.keycloak.link.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.enterprise.inject.Vetoed;
 
 import java.util.Arrays;
@@ -47,6 +48,7 @@ public class AppConfiguration extends LinkConfiguration {
     private int metricReporterKeepDataDays;
     private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
+    private Boolean disableExternalLoggerConfiguration = true;
 
     // in seconds
     private int cleanServiceInterval;
@@ -115,7 +117,15 @@ public class AppConfiguration extends LinkConfiguration {
         return disableJdkLogger;
     }
 
-    public int getCleanServiceInterval() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public int getCleanServiceInterval() {
         return cleanServiceInterval;
     }
 

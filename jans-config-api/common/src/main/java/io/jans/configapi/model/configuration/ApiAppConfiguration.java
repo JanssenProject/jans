@@ -3,6 +3,7 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.doc.annotation.DocProperty;
 
 import java.util.List;
 
@@ -81,6 +82,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Choose whether to disable JDK loggers.")
     private Boolean disableJdkLogger = true;
+
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
 
     @Schema(description = "Maximum number of results per page in search endpoints.")
     private int maxCount;
@@ -301,7 +305,15 @@ public class ApiAppConfiguration implements Configuration {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-    public int getMaxCount() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public int getMaxCount() {
         return maxCount;
     }
 
