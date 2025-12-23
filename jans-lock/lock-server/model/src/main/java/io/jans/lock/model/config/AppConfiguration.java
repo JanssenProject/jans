@@ -82,6 +82,9 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "Choose whether to disable JDK loggers")
     private Boolean disableJdkLogger = true;
 
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
+
     @DocProperty(description = "Specify the logging level of loggers")
     @Schema(description = "Specify the logging level of loggers")
     private String loggingLevel;
@@ -248,7 +251,15 @@ public class AppConfiguration implements Configuration {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-    public String getLoggingLevel() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public String getLoggingLevel() {
         return loggingLevel;
     }
 
