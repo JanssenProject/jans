@@ -55,6 +55,7 @@ pub mod interface;
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;
+pub(crate) mod loggable_fn;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;

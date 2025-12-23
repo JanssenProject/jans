@@ -15,6 +15,7 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
 use smol_str::{SmolStr, ToSmolStr};
 use uuid7::Uuid;
@@ -437,6 +438,15 @@ impl BaseLogEntry {
             log_kind: log_type,
             level: default_log_level,
         }
+    }
+
+    /// Create LoggableFn from BaseLogEntry
+    pub(crate) fn with_fn<F, R>(self, builder: F) -> LoggableFn<F>
+    where
+        R: Loggable + Indexed,
+        for<'a> F: Fn(BaseLogEntry) -> R,
+    {
+        LoggableFn::new(self, builder)
     }
 }
 

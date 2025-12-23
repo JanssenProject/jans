@@ -110,14 +110,21 @@ pub(crate) trait Loggable: serde::Serialize + Indexed + Clone + Send {
     // default implementation of method
     // is used to avoid boilerplate code
     fn can_log(&self, logger_level: LogLevel) -> bool {
-        if let Some(entry_log_level) = self.get_log_level() {
-            // higher level is more important, ie closer to fatal
-            logger_level <= entry_log_level
-        } else {
-            // if `.get_log_level` return None
-            // it means that `log_kind` != `System` and we should log it
-            true
-        }
+        can_log(self.get_log_level(), logger_level)
+    }
+}
+
+/// check if entry can log to logger
+// default implementation of method
+// is used to avoid boilerplate code
+pub(super) fn can_log(entity_level: Option<LogLevel>, logger_level: LogLevel) -> bool {
+    if let Some(entry_log_level) = entity_level {
+        // higher level is more important, ie closer to fatal
+        logger_level <= entry_log_level
+    } else {
+        // if `.get_log_level` return None
+        // it means that `log_kind` != `System` and we should log it
+        true
     }
 }
 
