@@ -4,15 +4,6 @@ use crate::log::{
 };
 
 /// LoggableFn is a helper struct to create loggable entries using a closure.
-///
-/// Example usage:
-/// ```rust
-/// let loggable_entry = LoggableFn::new(|base| MyLogEntry {
-///     base,
-///     field1: "value1".to_string(),
-///     field2: 42,
-/// });
-/// let log_entry = loggable_entry.build();
 #[derive(Clone)]
 pub(crate) struct LoggableFn<F> {
     base: BaseLogEntry,
@@ -21,8 +12,8 @@ pub(crate) struct LoggableFn<F> {
 
 impl<F, R> LoggableFn<F>
 where
-    R: Loggable + Indexed,
-    for<'a> F: Fn(BaseLogEntry) -> R,
+    R: Loggable,
+    F: Fn(BaseLogEntry) -> R,
 {
     pub(crate) fn new(base: BaseLogEntry, builder: F) -> Self {
         Self { base, builder }
@@ -31,18 +22,12 @@ where
     pub(crate) fn build(self) -> R {
         (self.builder)(self.base)
     }
-}
 
-impl<F, R> LoggableFn<F>
-where
-    R: Loggable + Indexed,
-    for<'a> F: Fn(&'a BaseLogEntry) -> R,
-{
-    fn get_log_level(&self) -> Option<super::LogLevel> {
+    pub(crate) fn get_log_level(&self) -> Option<super::LogLevel> {
         self.base.get_log_level()
     }
 
-    fn can_log(&self, logger_level: super::LogLevel) -> bool {
+    pub(crate) fn can_log(&self, logger_level: super::LogLevel) -> bool {
         can_log(self.get_log_level(), logger_level)
     }
 }

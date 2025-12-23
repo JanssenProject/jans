@@ -38,7 +38,6 @@ impl StdOutLogger {
 
 // Implementation of LogWriter
 impl LogWriter for StdOutLogger {
-    #[cfg(not(target_arch = "wasm32"))]
     fn log_any<T: Loggable>(&self, entry: T) {
         if !entry.can_log(self.log_level) {
             // do nothing
@@ -67,12 +66,17 @@ impl LogWriter for StdOutLogger {
         .unwrap();
     }
 
-    #[cfg(target_arch = "wasm32")]
-    fn log_any<T: Loggable>(&self, entry: T) {
-        if !entry.can_log(self.log_level) {
+    fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(crate::log::BaseLogEntry) -> R,
+    {
+        if !log_fn.can_log(self.log_level) {
             // do nothing
             return;
         }
+
+        self.log_any(log_fn.build());
     }
 }
 

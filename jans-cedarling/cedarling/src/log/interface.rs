@@ -9,7 +9,10 @@
 use std::sync::{Arc, Weak};
 
 use super::{LogLevel, LogStrategy};
-use crate::log::log_strategy::LogStrategyLogger;
+use crate::log::{
+    BaseLogEntry, log_strategy::LogStrategyLogger, loggable_fn::LoggableFn,
+    stdout_logger::StdOutLogger,
+};
 use uuid7::Uuid;
 
 /// Log Writer
@@ -17,6 +20,11 @@ use uuid7::Uuid;
 pub(crate) trait LogWriter {
     /// log any serializable entry that not suitable for [`LogEntry`]
     fn log_any<T: Loggable>(&self, entry: T);
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R;
 }
 
 impl LogWriter for Option<Arc<LogStrategy>> {
@@ -25,29 +33,42 @@ impl LogWriter for Option<Arc<LogStrategy>> {
             logger.log_any(entry);
         }
     }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(logger) = self.as_ref() {
+            logger.log_fn(log_fn);
+        }
+    }
 }
 
 impl LogWriter for Option<Weak<LogStrategy>> {
     fn log_any<T: Loggable>(&self, entry: T) {
         if let Some(log_strategy) = self.as_ref().and_then(|l| l.upgrade()) {
-            match log_strategy.logger() {
-                LogStrategyLogger::Off(log) => log.log_any(entry),
-                LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
-                LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
-            }
+            log_strategy.as_ref().log_any(entry);
             return;
         }
 
         // we log the error manually to stdout if the logger is gone
-        let log = match serde_json::to_value(&entry) {
-            Ok(json) => json.to_string(),
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(entry).expect(&err_msg).to_string()
-            },
-        };
+        StdOutLogger::new(LogLevel::INFO).log_any(entry);
+    }
 
-        println!("{log}");
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(log_strategy) = self.as_ref().and_then(|l| l.upgrade()) {
+            log_strategy.as_ref().log_fn(log_fn);
+            return;
+        }
+
+        let entry = log_fn.build();
+        // we log the error manually to stdout if the logger is gone
+        StdOutLogger::new(LogLevel::INFO).log_any(entry);
     }
 }
 

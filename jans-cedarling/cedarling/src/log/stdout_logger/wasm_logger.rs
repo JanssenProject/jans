@@ -67,4 +67,17 @@ impl LogWriter for StdOutLogger {
             None => console::log(&js_array),
         }
     }
+
+    fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(crate::log::BaseLogEntry) -> R,
+    {
+        if !log_fn.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
+        self.log_any(log_fn.build());
+    }
 }

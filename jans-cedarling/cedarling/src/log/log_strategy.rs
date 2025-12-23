@@ -6,6 +6,7 @@
 use std::sync::RwLock;
 
 use super::InitLockServiceError;
+use super::LogLevel;
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
@@ -13,6 +14,8 @@ use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 use crate::lock::LockService;
+use crate::log::BaseLogEntry;
+use crate::log::loggable_fn::LoggableFn;
 use serde::Serialize;
 
 pub(crate) struct LogStrategy {
@@ -20,6 +23,7 @@ pub(crate) struct LogStrategy {
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
     lock_service: RwLock<Option<LockService>>,
+    log_level: Option<LogLevel>,
 }
 
 /// LogStrategy implements strategy pattern for logging.
@@ -55,10 +59,12 @@ impl LogStrategy {
             pdp_id,
             app_name,
             lock_service: RwLock::new(None),
+            log_level: Some(config.log_level),
         })
     }
 
-    pub fn new_with_logger(
+    // is used as fallback for memory logger if error happens
+    pub(super) fn new_with_logger(
         logger: LogStrategyLogger,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
@@ -69,6 +75,7 @@ impl LogStrategy {
             pdp_id,
             app_name,
             lock_service: RwLock::new(lock_service),
+            log_level: None,
         }
     }
 
@@ -91,6 +98,26 @@ impl LogStrategy {
             LogStrategyLogger::Off(log) => log.log_any(entry),
             LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
             LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+        }
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable + Indexed,
+        for<'a> F: Fn(BaseLogEntry) -> R,
+    {
+        match &self.log_level {
+            Some(logger_level) => {
+                if log_fn.can_log(*logger_level) {
+                    let entry = log_fn.build();
+                    self.log_entry(entry);
+                }
+            },
+            None => {
+                // this case happens only when call `new_with_logger` method
+                let entry = log_fn.build();
+                self.log_entry(entry);
+            },
         }
     }
 
@@ -147,6 +174,14 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
 impl LogWriter for LogStrategy {
     fn log_any<T: Loggable>(&self, entry: T) {
         self.log_entry(entry);
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(super::BaseLogEntry) -> R,
+    {
+        self.log_fn(log_fn);
     }
 }
 

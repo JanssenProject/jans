@@ -14,6 +14,9 @@ use super::err_log_entry::ErrorLogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
+use crate::log::BaseLogEntry;
+use crate::log::interface::Indexed;
+use crate::log::loggable_fn::LoggableFn;
 
 mod memory_calc;
 use memory_calc::calculate_memory_usage;
@@ -57,6 +60,46 @@ impl MemoryLogger {
             pdp_id,
             app_name,
         }
+    }
+
+    fn log_entry<T: Loggable>(&self, entry: T) {
+        let entry_id = entry.get_id().to_string();
+        let index_keys = entry.get_index_keys();
+        let json = to_json_value(&entry);
+        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
+        let err = match set_result {
+            Ok(_) => return,
+            Err(Error::CapacityExceeded) => {
+                // remove oldest key and try again
+
+                let key_to_delete = storage
+                    .get_oldest_key_by_expiration()
+                    .map(|exp_entry| exp_entry.key.clone());
+
+                if let Some(key) = key_to_delete {
+                    storage.pop(&key);
+                }
+
+                // It should be rare case, so instead of cloning the whole entry,
+                // in success case we convert raw value to json (here).
+                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
+                let json = to_json_value(&entry);
+
+                // set_again
+                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
+                    err
+                } else {
+                    return;
+                }
+            },
+            Err(err) => err,
+        };
+        fallback::log(
+            &format!("could not store LogEntry to memory: {err:?}"),
+            &self.pdp_id,
+            &self.app_name,
+        );
     }
 }
 
@@ -104,6 +147,8 @@ mod fallback {
     /// - A runtime to initialize a new LogStrategy could not be built.
     /// - A fallback logger could not be initialized.
     pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
+        use crate::log::stdout_logger::StdOutLogger;
+
         // level is so that all messages passed here are logged.
         let logger = StdOutLogger::new(LogLevel::TRACE);
 
@@ -140,47 +185,18 @@ impl LogWriter for MemoryLogger {
             return;
         }
 
-        let entry_id = entry.get_id().to_string();
-        let index_keys = entry.get_index_keys();
-        let json = to_json_value(&entry);
+        self.log_entry(entry)
+    }
 
-        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
-
-        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
-
-        let err = match set_result {
-            Ok(_) => return,
-            Err(Error::CapacityExceeded) => {
-                // remove oldest key and try again
-
-                let key_to_delete = storage
-                    .get_oldest_key_by_expiration()
-                    .map(|exp_entry| exp_entry.key.clone());
-
-                if let Some(key) = key_to_delete {
-                    storage.pop(&key);
-                }
-
-                // It should be rare case, so instead of cloning the whole entry,
-                // in success case we convert raw value to json (here).
-                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
-                let json = to_json_value(&entry);
-
-                // set_again
-                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
-                    err
-                } else {
-                    return;
-                }
-            },
-            Err(err) => err,
-        };
-
-        fallback::log(
-            &format!("could not store LogEntry to memory: {err:?}"),
-            &self.pdp_id,
-            &self.app_name,
-        );
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if log_fn.can_log(self.log_level) {
+            let entry = log_fn.build();
+            self.log_entry(entry);
+        }
     }
 }
 
