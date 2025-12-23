@@ -34,7 +34,7 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 
 In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
-To exercise a finer grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers.
+To exercise a finer-grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers.
 
 ### Example of usage
 
@@ -52,7 +52,7 @@ Log into your Janssen machine and run the commands provided:
 
 Request a token with the scopes necessary to perform the intended operations. Use a white space to separate scopes. Here is how (line breaks added for readability):
 
-```
+```bash
 curl -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d 
 scope='https://jans.io/scim/users.read https://jans.io/scim/users.write' 
 https://your-jans-server/jans-auth/restv1/token

@@ -78,7 +78,6 @@ File should contain the following properties:
     - **casa_prefix**
     - **casa_contextPath**
     - **casa_extraCss**
-    .    
 
 Generated value **jansData** in JSON format will contain type of event (one of **AUTHENTICATED**, **UNAUTHENTICATED**, **UPDATED**, **GONE**) and all properties/attributes defined by **audit_data** and **audit_cust_data**.
 

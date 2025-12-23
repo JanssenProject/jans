@@ -1,6 +1,6 @@
 # Fortinet - RADIUS server Authentication
 
-This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the user name and password.
+This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the username and password.
 
 ## Prerequisites
 
@@ -16,6 +16,7 @@ This document explains how to configure the Gluu Server so that when a user logs
 In `Authentication` -> `Radius Service` -> `Clients`, create a new client (which is Gluu server). Enter the "secret" which will be used by the interception script to exchange RADIUS packets.
 
 ## Gluu Server Configuration
+
 ### Add JRadius library to oxAuth
 
 - Copy the jradius-client jar file to the following oxAuth folder inside the Gluu Server chroot: `/opt/gluu/jetty/oxauth/custom/libs` 
@@ -59,6 +60,7 @@ Now authenticating a user against Fortinet's RADIUS server is possible from your
     To make sure this method has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"fortinet"`.
 
 ### Make Fortinet's user-password authentication the Default mechanism.
+
 If fortinet should be the default authentication mechanism, follow these instructions:
 
 1. Navigate to `Configuration` > `Manage Authentication`. 
@@ -76,6 +78,7 @@ If fortinet should be the default authentication mechanism, follow these instruc
 If Fortinet should be the default authentication mechanism for all access, change both fields to fortinet.
 
 ## Troubleshooting
+
 If problems are encountered, take a look at the logs, specifically `/opt/gluu/jetty/oxauth/logs/oxauth_script.log`. Inspect all messages related to Fortinet. For instance, the following messages show an example of correct script initialization:
 
 ```

@@ -7,9 +7,9 @@ There are many ways you can contribute. Of course you can contribute code. But w
 
 ## Join the Community
 
-* **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on Github
-* **Discussions**: Join interesting discussions at [Github Discussions](https://github.com/JanssenProject/jans/discussions)
-* **Chat**: We have an active [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). You can register for free their with your Github identity.
+* **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on GitHub
+* **Discussions**: Join interesting discussions at [GitHub Discussions](https://github.com/JanssenProject/jans/discussions)
+* **Chat**: We have an active [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). You can register for free their with your GitHub identity.
 * **Tweet**: Janssen is on [Twitter](https://twitter.com/janssen_project) too. Follow us there to stay up to date on release announcements and news around Janssen.
 
 ## First Time Contributors
@@ -82,7 +82,7 @@ Janssen Project mandates all commits to follow guidelines as below.
 
 - **Add GPG signature to your commit**
 
-  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by Github. If you have GPG key    setup already then just use `-S` switch with you commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
+  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key    setup already then just use `-S` switch with you commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
 
 - **Add DCO sign-off**
   
@@ -221,7 +221,7 @@ Janssen Project documentation uses Markdown. Guidelines below are intended to br
 
 !!! Testing
 
-    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#testing-documentation-changes-locally) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
+    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by GitHub and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#testing-documentation-changes-locally) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
 
 #### Document Title
 
@@ -323,7 +323,7 @@ for previous releases.
     ```
 
  - To include additional lines in a list item, start the sub-line with four spaces. For example:
- 
+
     ```
     1. This is the first item in a list   
        There are four spaces to start this line   
@@ -374,7 +374,7 @@ It will look like this:
 #### Code Formatting
   - To format text as code within a line of normal text, surround the code with a single backtick (\`).
   - If the code is to be on its own line, it should be a fenced code block. To make a fenced code block, make a line before and after the code with three backticks:
-  
+
     ```
         ```
         This is code
@@ -451,15 +451,15 @@ It is essential for everyone in the community to actively participate in the doc
 Best place to find something to work on is to look at [currently open issues](https://github.com/JanssenProject/jans/issues). If you are a first time contributor then starting with [list of good first issues](https://github.com/JanssenProject/jans/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) is best.
 
 ### Start a discussion
-Start a [Github Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your solution or implementation approach. Janssen is a community driven project and it'll be helpful to get community's view about it.
+Start a [GitHub Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your solution or implementation approach. Janssen is a community driven project and it'll be helpful to get community's view about it.
 
 ### Create an issue
-Take your time to write a proper issue including a good summary and description. Outcome of Github discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate `issue template` and it'll help you create an issue with right content.
+Take your time to write a proper issue including a good summary and description. Outcome of GitHub discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate `issue template` and it'll help you create an issue with right content.
 
 Remember that issue may be the first thing a reviewer of your PR will look at to get an idea of what you are proposing. It will also be used by the community in the future to find about what new features and enhancements are included in new releases.
 
 ### Implement the change
-All contributions to Janssen Project should be made via Github pull requests(PR).
+All contributions to Janssen Project should be made via GitHub pull requests(PR).
 
 > New to PR workflow?? Learn and practice it at [first-contributions](https://github.com/firstcontributions/first-contributions)
 
@@ -474,7 +474,7 @@ Start working on changes as required.
 - Use static code analysis and linting tools to make sure the code is high-quality.
 - Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.
 - Create PR early and push often. 
-- Janssen uses Github actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
+- Janssen uses GitHub actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
 - Engage PR reviewers at the start so that they can continue to reivew code as it is developed and in small chunks.
 - For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.
 
@@ -505,9 +505,9 @@ of the following :
 
 ### Raise a PR
 - Make sure that PR title follows these [guidelines](#prs)
-- Janssen uses Github PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. Github will populate new PR's description with these instructions. You can edit PR description as per your requirements.
-- When PR is raised, Github will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
-- Once PR is raised, ensure that PR passes all the mandatory Github actions checks available on Github PR page. Github will not allow PR to be merged if any of the mandatory check is failing.
+- Janssen uses GitHub PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. GitHub will populate new PR's description with these instructions. You can edit PR description as per your requirements.
+- When PR is raised, GitHub will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
+- Once PR is raised, ensure that PR passes all the mandatory GitHub actions checks available on GitHub PR page. GitHub will not allow PR to be merged if any of the mandatory check is failing.
 
 ### Follow Through
 

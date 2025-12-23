@@ -281,7 +281,7 @@ authorization data with access token, action, resource, and context.
 
 Attributes
 ----------
-:param tokens: A class containing the JWTs what will be used for the request.
+:param tokens: A class containing the JWTs that will be used for the request.
 :param action: The action to be authorized.
 :param resource: Resource data (wrapped `EntityData` object).
 :param context: Python dictionary with additional context.

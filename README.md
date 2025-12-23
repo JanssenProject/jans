@@ -9,15 +9,15 @@ Janssen is a self-funded project chartered directly under the Linux Foundation
 to foster the development of enterprise digital identity and access management
 infrastructure. As the lead Contributors, the [Gluu team](https://gluu.org) drives the
 priorities on a day-to-day basis, governed and guided by the Janssen community
-Technical Steering Commitee.
+Technical Steering Committee.
 
 There are several Janssen Components in different stages of development, from demos
 to stable releases. Janssen Project software has batteries included. You
-will find binaries, cloud native deployment assets, documentation and more--
-enabling you to build a product or mission critical cybersecurity service with
+will find binaries, cloud-native deployment assets, documentation and more--
+enabling you to build a product or mission-critical cybersecurity service with
 Janssen software.
 
-If your enteprise needs Janssen for a production deployment, Gluu offers a
+If your enterprise needs Janssen for a production deployment, Gluu offers a
 commercial distribution of Janssen Project Components called
 [Gluu Flex](https://gluu.org/flex) and [Gluu Solo](https://gluu.org/solo).
 

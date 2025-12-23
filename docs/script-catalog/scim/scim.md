@@ -134,7 +134,7 @@ Let's alter `postSearchUsers`'s second parameter (`results`) to ensure addresses
 
 This is very straightforward code except for the usage of `jansAddress`. Shouldn't it be simply `addresses` as the known SCIM attribute?
 
-Scripts work with entities that are about to be persisted or have already been saved so they kind of resemble the database structure (schema in MySQL terms). It turns out that database attribute names rarely match with SCIM names.
+Scripts work with entities that are about to be persisted or have already been saved so they resemble the database structure (schema in MySQL terms) It turns out that database attribute names rarely match with SCIM names.
 
 While it is easy to know the SCIM name of a database attribute, the converse requires checking the code, however since you already have the skill this shouldn't be a problem: in [this](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2/user/UserResource.java) Java class you'll find the representation of a user resource in SCIM spec terms. Pay attention to the `addresses` field and its associated `StoreReference` annotation that contains the attribute where addresses are actually stored.
 
@@ -171,7 +171,7 @@ Returning `None` transfers the control of the operation for normal processing (d
 
 - Possible values for `context.getResourceType()` are: User, Group, FidoDevice, Fido2Device
 - `context.getTokenDetails().getValue()` is a shortcut that will give you the access token the caller employed to issue the service call
-- Both `context.getTokenDetails().getTokenType()` and `context.getTokenDetails().getScope()` return non null values when the protection mechanism of the API is OAuth or test mode
+- Both `context.getTokenDetails().getTokenType()` and `context.getTokenDetails().getScope()` return non-null values when the protection mechanism of the API is OAuth or test mode
 - Note that for resource creation operation, `entity` basically contains the same data supplied in the POST `payload`. In this case, `entity` has not originated from the database and has not been persisted either
 - For the case of modification, retrieval and removal, `entity` contains the data currently stored in the database for the resource in question
 - Since many values come from Java code, you can always do `getClass().getName()` to get an idea of what type of variables you are dealing with
@@ -235,7 +235,7 @@ Here is how `init` would look like:
         print "ScimEventHandler (init): Initialized successfully"
         return True
 
-Note no validations took place here: we assumed the script contains the properties, that they are non empty and have sensible values.
+Note no validations took place here: we assumed the script contains the properties, that they are non-empty and have sensible values.
 
 **Allow/Deny resource operations**
 
