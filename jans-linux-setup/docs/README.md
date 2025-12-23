@@ -51,10 +51,10 @@ All files related to SetupApp are saved under this directory and subdirectories.
   For example if you code `Config.get('install_jans', False)`, this will return value of variable `install_jans` if defined, 
   otherwise  returns `False`. This is the third file you need to import if you are going to write another application and sould
   be constructed by `init()`. You won't need initialize this class.
-  
+
 - `setup_options.py` Command line arguments are kept in this file. It has a single function `get_setup_options()` which returns 
   `argsp` object and `setupOptions` as dictionary.
-  
+
 - `test_data_loader.py` Test data loader class found in this file.
 
 - `messages.py` This file contains message texts used in TUI. The aim was to use same messages in command line and tui
@@ -82,7 +82,7 @@ Collection of utilities used by SetupApp.
    in installers. Functions in `DBUtils` class automatically determines which database to be used for operations by examining
    `mapping_locations` defined in `Config` and populated during install time (or later from `setup.properties`).
    Some most commanly functions are:
-   
+
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
      (couchbase) and which bucket to import according to `dn`
    - `set_jans_auth_conf_dynamic(entries)`: takes entries as dctionary and updates `jans_auth_conf_dynamic` in database
@@ -90,13 +90,13 @@ Collection of utilities used by SetupApp.
    - `enable_script(inum)`: enables script
    - `enable_service(service)`: enables jans service in oxtrust ui
    - `add_client2script(inum)`: adds client to script's allowed client property
-   
+
 - `crypto64.py` Cryptographic and base64 utilities are included in this module. Since this module is inherited by `SetupUtils`
   class, all methods are available in installers.
-  
+
 - `setup_utils.py` Basic SetapApp utilities is in class `SetupUtils`. We need to class `init()` classic method after initializing
   the class. This class in inherited by base installer class, thus all methods are available in installers.
-  
+
 - `tui.py` TUI (Text User Interface) installing utility. It provides ncurses widgets for nice installation screens.
 
 ### `installers/`
@@ -116,14 +116,14 @@ desciribng base installers
    - `create_folders()`: if defined directory creation function is called,
    - `install()`: write actual installation codes in this fucntion,
    - `copy_static()`: if you need to copy some static files, write here,
-   - `generate_configuration()`: many installers needs configuration generations, such as client_id's, password before rendering templates. 
+   - `generate_configuration()`: many installers needs configuration generations, such as client_id's, password before rendering templates.
       So include these code here,
    - `render_import_templates()`: template renderings are done under this function, then imported to database
-   - `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script, 
+   - `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script,
       updating jans_auth and/or other service configurations etc.
    
    This module also contains start/stop/restart/enable linux services.
-   
+
 - `jetty.py` Provides `JettyInstaller`. Janssen Project components either jetty or node services. So `jetty.py` provides installers for jetty services as well as
    installing jetty itself.
 
@@ -136,7 +136,7 @@ Chose either `JettyInstaller` or `NodeInstaller` depending on your application t
 Start with creating class and variables defined in `__init__()`
 
 For this example let say we need to update/add these variables  `ThisApplicationKeystorePath`, `ThisApplicationKeystorePassword`,
-`ThisApplicationApiBase` and `ThisApplicationTestMode` on **oxTrustConfApplication**. Prepare a json file 
+`ThisApplicationApiBase` and `ThisApplicationTestMode` on **oxTrustConfApplication**. Prepare a json file
 `templates/sample-app/oxtrust_config.json` having the follwoing content:
 
 ```

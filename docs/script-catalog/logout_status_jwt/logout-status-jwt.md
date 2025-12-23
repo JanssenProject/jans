@@ -9,7 +9,7 @@ tags:
 By overriding the interface methods in [`LogoutStatusJwtType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/LogoutStatusJwtType.java) inside a custom script you can
 
 1. Enable transformation of claims and values in logout_status_jwt, e.g. add a custom claim to an `logout_status_jwt`, change the `sub` value, or remove the `nonce`.  
-      
+
 2. Set a specific logout_status_jwt lifetime
 
 ## Interface
@@ -36,7 +36,7 @@ The LogoutStatusJwtType interception script also adds the following method(s):
 
 ## Common Use Case
 
-## Script Type: Java 
+## Script Type: Java
 
 ### Add/Modify claims inside logout_status_jwt
 

@@ -1,15 +1,15 @@
 # Fortinet - RADIUS server Authentication
 
-This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the user name and password. 
+This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the user name and password.
 
-## Prerequisites 
+## Prerequisites
 
 - A Gluu Server (installation instructions [here](../../../../janssen-server/install/README.md)) which will play the role of RADIUS client    
 - The [Fortinet script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fortinet/FortinetExternalAuthenticator.py) (included in the default Gluu Server distribution);   
 - A Fortinet server which is the RADIUS server.     
 - The jradius-client [jar library](https://sourceforge.net/projects/jradius-client/files/) added to oxAuth
 
-    
+
 
 ## Fortinet Configuration
 
@@ -25,7 +25,7 @@ In `Authentication` -> `Radius Service` -> `Clients`, create a new client (which
     ```
     <Set name="extraClasspath">/opt/gluu/jetty/oxauth/custom/libs/jradius-client.jar</Set>
     ```
-    
+
 - [Restart](../../../../janssen-server/vm-ops/restarting-services.md#restart) the `oxauth` service
 
 
@@ -53,13 +53,13 @@ Follow the steps below to enable Fortinet's RADIUS authentication:
 
 1. Scroll to the bottom of the page and click `Update`
 
-Now authenticating a user against Fortinet's RADIUS server is possible from your Gluu Server. This means that, using OpenID Connect `acr_values`, applications can now request Fortinet authentication for users. 
+Now authenticating a user against Fortinet's RADIUS server is possible from your Gluu Server. This means that, using OpenID Connect `acr_values`, applications can now request Fortinet authentication for users.
 
-!!! Note 
-    To make sure this method has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"fortinet"`. 
+!!! Note
+    To make sure this method has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"fortinet"`.
 
 ### Make Fortinet's user-password authentication the Default mechanism.
-If fortinet should be the default authentication mechanism, follow these instructions: 
+If fortinet should be the default authentication mechanism, follow these instructions:
 
 1. Navigate to `Configuration` > `Manage Authentication`. 
 
@@ -73,9 +73,9 @@ If fortinet should be the default authentication mechanism, follow these instruc
 
  - `Default acr` sets the default authentication mechanism for accessing all applications that leverage your Gluu Server for authentication (unless otherwise specified).    
 
-If Fortinet should be the default authentication mechanism for all access, change both fields to fortinet.  
- 
-## Troubleshooting    
+If Fortinet should be the default authentication mechanism for all access, change both fields to fortinet.
+
+## Troubleshooting
 If problems are encountered, take a look at the logs, specifically `/opt/gluu/jetty/oxauth/logs/oxauth_script.log`. Inspect all messages related to Fortinet. For instance, the following messages show an example of correct script initialization:
 
 ```

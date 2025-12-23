@@ -10,7 +10,7 @@ This list of steps needed to do to enable Basic Multi person authentication modu
     - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
 
 2. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
---> 
+-->
 1. Prepare authentication configuration file `/etc/certs/multi_auth_conf.json`. There is format description and sample configuration below. Make sure to keep permission "jetty:root" for this file. 
 
   - servers: hostname/IP address with port of LDAP/AD servers.
@@ -18,7 +18,7 @@ This list of steps needed to do to enable Basic Multi person authentication modu
   - bindPassword: password for bindDN
     - 'bindPassword' should be the base64 encoded of password text
     - You can take the advantage of 'encode.py' script to encode/decode your password.
-    - 'encode.py' is available inside Jans ( location: /opt/jans/bin/ )  
+    - 'encode.py' is available inside Jans ( location: /opt/jans/bin/ )
   - useSSL: for 1636/636, it will be "true", otherwise "false"
   - maxConnections: total number of concurrent connection to LDAP/AD servers.
   - baseDN: where users are located.
@@ -56,7 +56,7 @@ This list of steps needed to do to enable Basic Multi person authentication modu
 }
 
 ```
- 
+
 
 2. Enable 'basic_multi_auth' in Admin-UI: 
 
@@ -76,7 +76,7 @@ This list of steps needed to do to enable Basic Multi person authentication modu
       - auth_configuration_file: /etc/certs/multi_auth_conf.json
    - Module Propertiest: db
    - Script: get script and paste it here.
-   - Enable it and wait for 2 mins. 
+   - Enable it and wait for 2 mins.
 
  3. Test
 

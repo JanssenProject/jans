@@ -1,26 +1,26 @@
 # 2FA Resource Owner Password Script Using Twilio
 
 
-This resource owner password script implements two factor 
-authentication using twilio. This could easily be adjusted 
+This resource owner password script implements two factor
+authentication using twilio. This could easily be adjusted
 for other 2FA use cases (e.g. using a Yubikey or a magic link).
 
 ## Requirements
 
-  The script is written for jans , meaning it will only work on a Janssen 
-or a Gluu Flex installation. An additional requirement is a twilio account 
-with twilio API credentials. 
+  The script is written for jans , meaning it will only work on a Janssen
+or a Gluu Flex installation. An additional requirement is a twilio account
+with twilio API credentials.
 
-## Application Flow and Sequence Diagram 
-  The application flow is described below, alongside a 
+## Application Flow and Sequence Diagram
+  The application flow is described below, alongside a
 [sequence diagram](./sequence%20diagram.txt)
-In the first step, the user provides only his username or email (through the RP). 
-The script then checks the username against the backend database. If the user is found, and 
-has a phone number associated with his account, an OTP code is sent to the associated number. 
+In the first step, the user provides only his username or email (through the RP).
+The script then checks the username against the backend database. If the user is found, and
+has a phone number associated with his account, an OTP code is sent to the associated number.
 The user (through the RP) is prompted for the OTP code and the RP sends another authentication
 request to the script to validate the OTP code.
 If the OTP code is valid, the user provides his password which is then validated by the script.
-Only then is the access token issued and authentication succeed. 
+Only then is the access token issued and authentication succeed.
 ![sequence diagram](./sequence%20diagram.png)
 
 ## Flex Server Configuration

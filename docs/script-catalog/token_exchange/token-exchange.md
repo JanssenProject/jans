@@ -7,8 +7,8 @@ tags:
 
 # Token Exchange Custom Script
 
-The Jans-Auth server supports [OAuth 2.0 Token Exchange (RFC 8693)](https://tools.ietf.org/html/rfc8693), 
-which enables clients to exchange one type of token for another. 
+The Jans-Auth server supports [OAuth 2.0 Token Exchange (RFC 8693)](https://tools.ietf.org/html/rfc8693),
+which enables clients to exchange one type of token for another.
 This capability allows scenarios such as delegation, constrained token issuance, and token transformation
 to meet various security and interoperability requirements.
 
@@ -16,15 +16,16 @@ This script is used to control the Token Exchange behavior at Token Endpoint as 
 
 ## Behavior
 
-The Token Exchange Endpoint accepts requests where a client submits an existing token (the _subject token_) and 
-requests a new token (the _requested token_) with potentially different properties, scopes, or lifetimes. 
-Upon receiving a request, the endpoint validates the provided token, applies custom business or security logic, 
-and returns a response indicating whether the token exchange is approved. 
+The Token Exchange Endpoint accepts requests where a client submits an existing token (the _subject token_) and
+requests a new token (the _requested token_) with potentially different properties, scopes, or lifetimes.
+Upon receiving a request, the endpoint validates the provided token, applies custom business or security logic,
+and returns a response indicating whether the token exchange is approved.
 If approved, the Token Endpoint issues a new token based on the rules defined in the custom script.
 
 During token exchange processing, the `TokenExchange` custom script is executed. Jans-Auth includes a sample demo script that illustrates a simple example of custom token exchange logic.
 
 **Sample request**
+
 ```http
 POST /jans-auth/restv1/token HTTP/1.1
 Host: happy-example.gluu.info
@@ -42,10 +43,11 @@ Authorization: Bearer eyJraWQiOiJr...
 
 ## Interface
 
-The Token Exchange script implements the [TokenExchangeType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/TokenExchangeType.java) 
+The Token Exchange script implements the [TokenExchangeType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/TokenExchangeType.java)
 interface. This interface extends the base custom script type with methods specific to token exchange operations:
 
 ### Inherited Methods
+
 | Method header | Method description |
 |:-----|:------|
 | `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
@@ -53,6 +55,7 @@ interface. This interface extends the base custom script type with methods speci
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
 ### New methods
+
 | Method header | Method description |
 |:-----|:------|
 |`def validate(self, context)`| Called before built-in validation, main purpose is to perform all validations in this method. It must return `ScriptTokenExchangeControl`. |
@@ -60,6 +63,7 @@ interface. This interface extends the base custom script type with methods speci
 
 
 ### Objects
+
 | Object name | Object description |
 |:-----|:------|
 |`responseAsJsonObject`| Response represented as json by `org.json.JSONObject` |

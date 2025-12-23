@@ -1,11 +1,11 @@
 ## README Auditing Authentication Attempts
 
-Name of the script in **janssen** (for example, using **/opt/jans/jans-cli/config-cli.py** or **/opt/jans/jans-cli/config-cli-tui.py**): **jans-session-audit**.  
-Script type:  **Application Sessions**.  
+Name of the script in **janssen** (for example, using **/opt/jans/jans-cli/config-cli.py** or **/opt/jans/jans-cli/config-cli-tui.py**): **jans-session-audit**.
+Script type:  **Application Sessions**.
 
-The script generates audit report and creates record in DB. Also **jansData** field (in JSON format), that contains summary info of session audit will be generated.  
+The script generates audit report and creates record in DB. Also **jansData** field (in JSON format), that contains summary info of session audit will be generated.
 
-Following are the configuration properties for the *jans-session-audit.py* script (**jans-session-audit**):  
+Following are the configuration properties for the *jans-session-audit.py* script (**jans-session-audit**):
 
 Parameters of the script:
 
@@ -13,13 +13,13 @@ Parameters of the script:
 
 - **metric_audit_conf_json_file_path**: configuration file. For example: **/etc/jans/conf/jans-session-audit.json**  
 
-File should contain follow properties:  
+File should contain follow properties:
 1. **event_types**.  
     Type of Session event(s), that will be saved in the DB:  
     - **AUTHENTICATED**
     - **UNAUTHENTICATED**
     - **UPDATED**
-    - **GONE**  
+    - **GONE**
     .
 
 1. **audit_data**.  
@@ -34,7 +34,7 @@ File should contain follow properties:
     - **sessionState**
     - **permissionGranted**
     - **permissionGrantedMap**
-    - **deviceSecrets**  
+    - **deviceSecrets**
     .
 
 1. **audit_cust_data**.  
@@ -54,7 +54,7 @@ File should contain follow properties:
     - **state**
     - **casa_prefix**
     - **casa_contextPath**
-    - **casa_extraCss**  
+    - **casa_extraCss**
     .
 
 1. **audit_cust_data** Can contain only one attribute:
@@ -77,12 +77,12 @@ File should contain follow properties:
     - **state**
     - **casa_prefix**
     - **casa_contextPath**
-    - **casa_extraCss**  
+    - **casa_extraCss**
     .    
 
 Generated value **jansData** in JSON format will contain type of event (one of **AUTHENTICATED**, **UNAUTHENTICATED**, **UPDATED**, **GONE**) and all properties/attributes defined by **audit_data** and **audit_cust_data**.
 
-Examples of **/etc/jans/conf/jans-session-audit.json** file: 
+Examples of **/etc/jans/conf/jans-session-audit.json** file:
 
 ##
 
@@ -252,7 +252,7 @@ Examples of generated **jansData** (JSON format):
 
 ##
 
-**/etc/jans/conf/jans-session-audit.json**: 
+**/etc/jans/conf/jans-session-audit.json**:
 
 ```json
 {
@@ -274,7 +274,7 @@ Examples of generated **jansData** (JSON format):
 
 ##
 
-**/etc/jans/conf/jans-session-audit.json**: 
+**/etc/jans/conf/jans-session-audit.json**:
 
 ```json
 {
@@ -308,7 +308,7 @@ Examples of generated **jansData** (JSON format):
 
 ##
 
-**/etc/jans/conf/jans-session-audit.json**: 
+**/etc/jans/conf/jans-session-audit.json**:
 
 ```json
 {
@@ -363,4 +363,3 @@ Examples of generated **jansData** (JSON format):
 }
 ```
 
-##

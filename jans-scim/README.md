@@ -2,15 +2,15 @@
 
 A component of the Janssen Project that implements a standards-compliant SCIM service.
 
-SCIM is a specification designed to reduce the complexity of user management 
-operations by providing a common user schema and the patterns for exchanging such 
-schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving 
+SCIM is a specification designed to reduce the complexity of user management
+operations by providing a common user schema and the patterns for exchanging such
+schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving
 interoperability, security, and scalability in the context of identity management.
 
-For your reference, the current version of the standard is governed by the following 
+For your reference, the current version of the standard is governed by the following
 documents: [RFC 7642](https://tools.ietf.org/html/rfc7642), [RFC 7643](https://tools.ietf.org/html/rfc7643), and [RFC 7644](https://tools.ietf.org/html/rfc7644).
 
-**Jans-SCIM** can be seen merely as a **REST API** with endpoints exposing 
+**Jans-SCIM** can be seen merely as a **REST API** with endpoints exposing
 **CRUD** functionality (create, read, update and delete) for managing identity resources such as users, groups, and fido devices.
 
 ## About endpoints protection
@@ -29,16 +29,16 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 |`https://jans.io/scim/fido.write`|Modify fido resources|
 |`https://jans.io/scim/fido2.read`|Query fido 2 resources|
 |`https://jans.io/scim/fido2.write`|Modify fido 2 resources|
-|`https://jans.io/scim/all-resources.search`|Access the root .search endpoint| 
+|`https://jans.io/scim/all-resources.search`|Access the root .search endpoint|
 |`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
 
 In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
-To exercise a finer grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers. 
+To exercise a finer grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers.
 
 ### Example of usage
 
-In the following example we leverage the OAuth SCIM Client to get a token and issue a call to an endpoint. 
+In the following example we leverage the OAuth SCIM Client to get a token and issue a call to an endpoint.
 
 ### Get client credentials
 
@@ -50,7 +50,7 @@ Log into your Janssen machine and run the commands provided:
 
 ### Get a token
 
-Request a token with the scopes necessary to perform the intended operations. Use a white space to separate scopes. Here is how (line breaks added for readability): 
+Request a token with the scopes necessary to perform the intended operations. Use a white space to separate scopes. Here is how (line breaks added for readability):
 
 ```
 curl -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d 
@@ -58,7 +58,7 @@ scope='https://jans.io/scim/users.read https://jans.io/scim/users.write'
 https://your-jans-server/jans-auth/restv1/token
 ```
 
-Grab the "access_token" from the response. Ideally this and the commands that follow should be issued from a machine other than your Jans server. 
+Grab the "access_token" from the response. Ideally this and the commands that follow should be issued from a machine other than your Jans server.
 
 ### Issue a request to the service
 
@@ -158,7 +158,7 @@ client.close();
 
 This code performs a search using a filter based on username. It is recommended to call `close` once you know there will not be any other request associated to the client object obtained.
 
-#### Where to go next? 
+#### Where to go next?
 
 The `client` instance resembles quite close the SCIM specification, so it is generally easy to map the operations described in the standard versus the Java methods available. It can be useful to have some javadocs at hand though, specifically those from `model` and `client` folders of this repository. You may clone this repo and run `mvn javadoc:javadoc` inside the two directories mentioned.
 
