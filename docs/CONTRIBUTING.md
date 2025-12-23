@@ -459,7 +459,7 @@ Take your time to write a proper issue including a good summary and description.
 Remember that issue may be the first thing a reviewer of your PR will look at to get an idea of what you are proposing. It will also be used by the community in the future to find about what new features and enhancements are included in new releases.
 
 ### Implement the change
-All contributions to Janssen Project should be made via GitHub pull requests(PR).
+All contributions to Janssen Project should be made via GitHub pull requests (PR).
 
 > New to PR workflow?? Learn and practice it at [first-contributions](https://github.com/firstcontributions/first-contributions)
 
@@ -475,7 +475,7 @@ Start working on changes as required.
 - Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.
 - Create PR early and push often. 
 - Janssen uses GitHub actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
-- Engage PR reviewers at the start so that they can continue to reivew code as it is developed and in small chunks.
+- Engage PR reviewers at the start so that they can continue to review code as it is developed and in small chunks.
 - For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.
 
 <!-- TODO: enable this once the workspace guide is ready and developers can test locally from workspace

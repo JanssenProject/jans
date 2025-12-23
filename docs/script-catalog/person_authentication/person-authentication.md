@@ -307,7 +307,7 @@ fields too. Hence it's better to persist all changes in one update request to DB
 
 ### B. Implementing Multistep authentication
 
-1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here an example of how the 
+1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here is an example of how the 
 number of steps can be varied depending on the context or business requirement.
 
 ### C. Implementing Social logins

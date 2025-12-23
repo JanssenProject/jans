@@ -49,7 +49,7 @@ All files related to SetupApp are saved under this directory and subdirectories.
   method with argument installaltion directory. Since we don't create varbiles related to services/applications unless they are
   installed, you can query a variable with static method `get()` by providing variable name and default value if you need. 
   For example if you code `Config.get('install_jans', False)`, this will return value of variable `install_jans` if defined, 
-  otherwise  returns `False`. This is the third file you need to import if you are going to write another application and should
+  otherwise returns `False`. This is the third file you need to import if you are going to write another application and should
   be constructed by `init()`. You won't need initialize this class.
 
 - `setup_options.py` Command line arguments are kept in this file. It has a single function `get_setup_options()` which returns 
@@ -81,7 +81,7 @@ Collection of utilities used by SetupApp.
    class is assigned to `self.dbutils` variable in base class for installers, we generally don't include this module
    in installers. Functions in `DBUtils` class automatically determines which database to be used for operations by examining
    `mapping_locations` defined in `Config` and populated during install time (or later from `setup.properties`).
-   Some most commonly functions are:
+   Some of the most commonly used functions are:
 
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
      (couchbase) and which bucket to import according to `dn`
