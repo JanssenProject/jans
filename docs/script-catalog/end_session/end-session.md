@@ -33,7 +33,7 @@ The end session script implements the [EndSessionType](https://github.com/Jansse
 
 
 ## Use case: Dummy Logout Page
-This script has been adapted from the Gluu Server [sample end session script](https://github.com/GluuFederation/community-edition-setup/blob/version_4.4.0/static/extension/end_session/end_session.py). 
+This script has been adapted from the Gluu Server [sample end session script](https://github.com/GluuFederation/community-edition-setup/blob/version_4.4.0/static/extension/end_session/end_session.py).
 
 !!! Note
 
