@@ -13,7 +13,7 @@ Parameters of the script:
 
 - **metric_audit_conf_json_file_path**: configuration file. For example: **/etc/jans/conf/jans-session-audit.json**  
 
-File should contain follow properties:
+File should contain the following properties:
 1. **event_types**.  
     Type of Session event(s), that will be saved in the DB:  
     - **AUTHENTICATED**

@@ -289,17 +289,12 @@ persist user entry. It's expected behaviour because script might update other
 fields too. Hence it's better to persist all changes in one update request to DB.
 
 
-#### 1. Default authentication method:
 
-`default_acr`: This is the default authentication mechanism exposed to all
-applications that send users to the Janssen Server for sign-in. Unless an app
-specifically requests a different form of authentication using the
-OpenID Connect acr_values parameter (as specified below), users will receive
-the form of authentication specified in this field.
 
 ## Usage scenarios
 
 ### A. Implementing 2FA authentication mechanisms
+
 1. [FIDO2](../../script-catalog/person_authentication/fido2-external-authenticator/README.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
 
 
@@ -311,10 +306,12 @@ the form of authentication specified in this field.
 
 
 ### B. Implementing Multistep authentication
+
 1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here an example of how the 
 number of steps can be varied depending on the context or business requirement.
 
 ### C. Implementing Social logins
+
 You can use a `PersonAuthenticationType` script to allow users to sign using
 credentials from popular **Social Identity providers** or
 **Inbound Identity Providers** like Facebook, Google and Apple. After users
@@ -323,6 +320,7 @@ the Jans-auth server. More on this topic in this [article](../../janssen-server/
 
 
 ### D. Proactively perform fraud detection
+
 1. Impossible travel
 
 ## Testing an authentication flow
@@ -344,6 +342,7 @@ method will be displayed to the user.
 ## FAQs
 
 ### 1. How can error messages be displayed on a web page?
+
 1. FacesMessage bean is used for this purpose.
 	```
 	from org.jans.jsf2.message import FacesMessages

@@ -38,7 +38,7 @@ python3 /opt/jans/jans-setup/setup.py
     The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable `Trust all (SSL)`.
 
 #### E. Push Notification Server **hosted by Gluu**:
-The Notification server should be configured to recieve push notifications on registered mobile devices.
+The Notification server should be configured to receive push notifications on registered mobile devices.
 
 Configure `/etc/certs/super_gluu_creds.json`. For each Mobile app (Android, iOS); place the Access key / Secret key of Push Notification server.
 ```

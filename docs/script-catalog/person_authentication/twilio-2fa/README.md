@@ -65,6 +65,7 @@ Now `twilio_sms` is an available authentication mechanism for your Janssen Serve
     Find `"acr_values_supported":` and you should see `twilio_sms` .
 
 ## Enable `twilio_sms` Script as default authentication script:
+
 Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable `twilio_sms` authentication:
 1. Create a file say `twilio_sms` -auth-default.json` with the following contents
@@ -83,6 +84,7 @@ Follow the steps below to enable `twilio_sms` authentication:
 
 
 ### Test the feature
+
 To test, enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
 
 An example of a complete URL looks like this -
@@ -109,6 +111,7 @@ The designs are being rendered from the [SMS xhtml page](https://github.com/Jans
 The script assumes the user phone number is already stored in his corresponding MySQL entry (attribute `phoneNumberVerified`). You can change the attribute by altering the script directly (see authenticate routine).
 
 ### Subsequent Logins
+
 All <!--subsequent--> authentications will trigger an SMS with an OTP to the registered phone number. Enter the OTP to pass authentication.
 
 ### Credential Management
@@ -116,6 +119,7 @@ All <!--subsequent--> authentications will trigger an SMS with an OTP to the reg
 A user's registered phone number can be removed by a Gluu administrator either via the jans TUI, or in MySQL under the user entry. Once the phone number has been removed from the user's account, the user can re-enroll a new phone number following the [phone number enrollment](#phone-number-enrollment) instructions above.
 
 ## Troubleshooting
+
 If problems are encountered, take a look at the logs, specifically `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`. Inspect all messages related to Twilio. For instance, the following messages show an example of correct script initialization:
 
 ```
