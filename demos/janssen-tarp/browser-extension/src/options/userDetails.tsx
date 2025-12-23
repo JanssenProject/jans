@@ -17,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { pink } from '@mui/material/colors';
 import UseSnackbar from './UseSnackbar';
+import { OpenIDConfiguration, LogoutOptions, LoginDetails } from './types';
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
     const [showPayloadIdToken, setShowPayloadIdToken] = useState(false);
@@ -72,89 +73,279 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
     const copyToClipboard = () => {
         try {
-          const jsonString = JSON.stringify(jwtTokens, null, 2); // pretty print
-          navigator.clipboard.writeText(jsonString);
-          setSnackbar({ open: true, message: 'Token JSON copied to clipboard!' });
+            const jsonString = JSON.stringify(jwtTokens, null, 2); // pretty print
+            navigator.clipboard.writeText(jsonString);
+            setSnackbar({ open: true, message: 'Token JSON copied to clipboard!' });
         } catch (error) {
-          setSnackbar({ open: true, message: 'Copy failed: ' + error.message });
+            const message = error instanceof Error ? error.message : String(error);
+            setSnackbar({ open: true, message: 'Copy failed: ' + message });
         }
-      };
+    };
 
-    async function logout() {
+    /**
+ * Main logout function with improved error handling and structure
+ */
+    async function logout(options: LogoutOptions = {}): Promise<void> {
+        const { forceSilentLogout = false, notifyOnComplete = true } = options;
+
         setLoading(true);
+
         try {
+            // Get login details
+            const loginDetails = await getStoredLoginDetails();
 
-            const loginDetails: string = await new Promise((resolve, reject) => {
-                chrome.storage.local.get(["loginDetails"], (result) => {
-                    resolve(JSON.stringify(result));
-                });
-            });
+            if (!loginDetails || !loginDetails.id_token) {
+                console.warn('No login details found, nothing to logout');
+                if (notifyOnComplete) notifyOnDataChange("true");
+                return;
+            }
 
-            const openidConfiguration: string = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
+            // Decode ID token to get issuer
+            const idToken = loginDetails.id_token;
+            const payload = jwtDecode<{ iss: string;[key: string]: any }>(idToken);
+            const issuerUrl = payload.iss;
 
-            chrome.storage.local.remove(["loginDetails"], function () {
-                var error = chrome.runtime.lastError;
-                if (error) {
-                    console.error(error);
-                } else {
-                    const logoutUrl = `${JSON.parse(openidConfiguration).opConfiguration.end_session_endpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.identity.getRedirectURL('logout')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`
-                    chrome.identity.launchWebAuthFlow(
-                        {
-                            url: logoutUrl,
-                            interactive: true
-                        },
-                        (responseUrl) => {
-                            if (chrome.runtime.lastError) {
-                                console.error("Logout error:", chrome.runtime.lastError);
-                            } else {
-                                console.log("Logged out successfully."); 
-                                chrome.storage.local.remove("tokens");
-                            }
-                        }
-                    );
+            // Get OpenID configuration for this issuer
+            const openidConfiguration = await getOpenIDConfigurationByIssuer(issuerUrl);
 
+            if (!openidConfiguration) {
+                throw new Error(`OpenID Configuration not found for issuer: ${issuerUrl}`);
+            }
+
+            // Check if end_session_endpoint is available
+            if (!openidConfiguration.end_session_endpoint) {
+                console.warn('No end_session_endpoint available, performing local logout only');
+                await performLocalLogout();
+                if (notifyOnComplete) notifyOnDataChange("true");
+                return;
+            }
+
+            // Remove login details first (immediate local logout)
+            await removeLoginDetails();
+
+            // Perform remote logout
+            await performRemoteLogout(idToken, openidConfiguration, forceSilentLogout);
+
+            console.log("Logged out successfully.");
+
+        } catch (error) {
+            console.error("Logout error:", error);
+
+            // Capture login details before cleanup for potential silent logout
+            let savedIdToken: string | null = null;
+            let savedOpenIdConfig: OpenIDConfiguration | null = null;
+            try {
+                const loginDetails = await getStoredLoginDetails();
+                if (loginDetails?.id_token) {
+                    savedIdToken = loginDetails.id_token;
+                    const payload = jwtDecode<{ iss: string }>(loginDetails.id_token);
+                    savedOpenIdConfig = await getOpenIDConfigurationByIssuer(payload.iss);
                 }
-            });
-        } catch (err) {
-            const loginDetails: string = await new Promise((resolve, reject) => {
-                chrome.storage.local.get(["loginDetails"], (result) => {
-                    resolve(JSON.stringify(result));
-                });
-            });
+            } catch (captureError) {
+                console.error("Failed to capture logout data:", captureError);
+            }
 
-            const openidConfiguration: string = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
+            // Fallback: Always ensure local data is cleaned up
+            try {
+                await performLocalLogout();
+            } catch (cleanupError) {
+                console.error("Cleanup error:", cleanupError);
+            }
 
-            chrome.storage.local.remove(["loginDetails"], function () {
-                var error = chrome.runtime.lastError;
-                if (error) {
-                    console.error(error);
-                } else {
-                    fetch(`${JSON.parse(openidConfiguration).opConfiguration.end_session_endpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.runtime.getURL('options.html')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`)
+            if (savedIdToken && savedOpenIdConfig?.end_session_endpoint) {
+                try {
+                    await performSilentLogout(savedIdToken, savedOpenIdConfig);
+                } catch (silentError) {
+                    console.error("Silent logout failed:", silentError);
                 }
-            });
-
+            }
+        } finally {
+            setLoading(false);
+            if (notifyOnComplete) notifyOnDataChange("true");
         }
-        setLoading(false);
-        notifyOnDataChange("true");
     }
+
+    /**
+     * Get stored login details
+     */
+    async function getStoredLoginDetails(): Promise<LoginDetails | null> {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(["loginDetails"], (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error reading login details:", chrome.runtime.lastError);
+                    resolve(null);
+                    return;
+                }
+                resolve(result.loginDetails || null);
+            });
+        });
+    }
+
+    /**
+     * Get OpenID configuration by issuer URL
+     */
+    async function getOpenIDConfigurationByIssuer(issuerUrl: string): Promise<OpenIDConfiguration | null> {
+        const openidConfigurations: OpenIDConfiguration[] = await new Promise((resolve) => {
+            chrome.storage.local.get(["openidConfigurations"], (result) => {
+                resolve(result?.openidConfigurations ? result.openidConfigurations : []);
+            })
+        });
+
+        const existingIndex = openidConfigurations.findIndex(c =>
+            c.issuer === issuerUrl
+        )
+
+        if (existingIndex >= 0) {
+            // Return existing configuration
+            return openidConfigurations[existingIndex];
+        }
+
+        return null;
+    }
+
+    /**
+     * Remove login details from storage
+     */
+    async function removeLoginDetails(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.remove(["loginDetails"], () => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    /**
+ * Perform comprehensive local logout
+ */
+    async function performLocalLogout(): Promise<void> {
+        const itemsToRemove = [
+            "loginDetails"
+        ];
+
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.remove(itemsToRemove, () => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    console.log("Local logout completed");
+                    resolve();
+                }
+            });
+        });
+    }
+
+    /**
+     * Perform remote logout via end_session_endpoint
+     */
+    async function performRemoteLogout(
+        idToken: string,
+        openidConfiguration: OpenIDConfiguration,
+        forceSilent: boolean = false
+    ): Promise<void> {
+        // If forced silent or no interactive logout needed, use silent logout
+        if (forceSilent) {
+            return performSilentLogout(idToken, openidConfiguration);
+        }
+
+        // Interactive logout with web auth flow
+        return new Promise((resolve, reject) => {
+            const logoutUrl = buildLogoutUrl(idToken, openidConfiguration);
+
+            chrome.identity.launchWebAuthFlow(
+                {
+                    url: logoutUrl,
+                    interactive: true
+                },
+                (responseUrl) => {
+                    if (chrome.runtime.lastError) {
+                        console.warn("Interactive logout failed, trying silent:", chrome.runtime.lastError);
+                        // Fallback to silent logout
+                        performSilentLogout(idToken, openidConfiguration)
+                            .then(resolve)
+                            .catch(reject);
+                    } else {
+                        console.log("Interactive logout completed");
+                        resolve();
+                    }
+                }
+            );
+        });
+    }
+
+    /**
+     * Perform silent logout (no user interaction)
+     */
+    async function performSilentLogout(
+        idToken: string,
+        openidConfiguration: OpenIDConfiguration
+    ): Promise<void> {
+        const logoutUrl = buildLogoutUrl(idToken, openidConfiguration);
+
+        try {
+            const response = await fetch(logoutUrl, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'no-cors' // Use no-cors to avoid CORS issues
+            });
+
+            console.log("Silent logout request sent");
+        } catch (error) {
+            console.warn("Silent logout request failed:", error);
+            // Silent logout is best effort, don't throw
+        }
+    }
+
+    /**
+     * Build logout URL with parameters
+     */
+    function buildLogoutUrl(idToken: string, openidConfiguration: OpenIDConfiguration): string {
+        const params = new URLSearchParams({
+            state: uuidv4(),
+            id_token_hint: idToken
+        });
+
+        // Add post_logout_redirect_uri if available
+        const redirectUri = chrome.identity.getRedirectURL('logout');
+        if (redirectUri) {
+            params.append('post_logout_redirect_uri', redirectUri);
+        }
+
+        // Add optional parameters
+        const optionalParams = {
+            client_id: openidConfiguration.client_id,
+            ui_locales: navigator.language,
+            logout_hint: openidConfiguration.logout_hint
+        };
+
+        Object.entries(optionalParams).forEach(([key, value]) => {
+            if (value) params.append(key, value);
+        });
+
+        return `${openidConfiguration.end_session_endpoint}?${params.toString()}`;
+    }
+
 
     return (
         <div className="box">
-            <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message}/>
+            <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message} />
             <div className="w3-panel w3-pale-yellow w3-border">
                 <WindmillSpinner loading={loading} color="#00ced1" />
                 <br />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '90vw' }}>
-            <legend><span className="number">O</span> User Details:</legend>
-            <Tooltip title="Copy tokens JSON">
-                  <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
-                    <ContentCopyIcon sx={{ color: pink[500] }} />
-                  </IconButton>
+                <legend><span className="number">O</span> User Details:</legend>
+                <Tooltip title="Copy tokens JSON">
+                    <IconButton aria-label="Copy" style={{ maxWidth: '5vmax', float: 'right' }} onClick={copyToClipboard}>
+                        <ContentCopyIcon sx={{ color: pink[500] }} />
+                    </IconButton>
                 </Tooltip>
-                </div>
+            </div>
             <hr />
-            
+
             {data?.displayToken &&
                 <>
                     <Accordion>
@@ -220,7 +411,7 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
                 </AccordionDetails>
             </Accordion>
             <hr />
-            <Button variant="contained" id="logoutButton" color="success" onClick={logout}>Logout</Button>
+            <Button variant="contained" id="logoutButton" color="success" onClick={() => logout({ forceSilentLogout: false, notifyOnComplete: true })}>Logout</Button>
         </div>
     )
 };

@@ -8,7 +8,6 @@ import TableRow from '@mui/material/TableRow';
 import OfflineBoltIcon from '@mui/icons-material/OfflineBolt';
 import { pink, green } from '@mui/material/colors';
 import Grid from '@mui/material/Grid';
-import moment from 'moment';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
@@ -73,7 +72,7 @@ function createData(
 function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) {
     const { row, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
-    const lifetime = Math.floor((row.expireAt - moment().toDate().getTime()) / 1000);
+    const lifetime = Math.floor((row.expireAt - Date.now()) / 1000);
 
     const handleDialog = (isOpen) => {
         setOpen(isOpen);
