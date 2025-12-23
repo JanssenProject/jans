@@ -113,6 +113,14 @@ impl PolicyStoreTestBuilder {
         self
     }
 
+    /// Set a custom Cedar schema.
+    ///
+    /// If not called, a default minimal schema is used.
+    pub fn with_schema(mut self, schema: impl Into<String>) -> Self {
+        self.schema = schema.into();
+        self
+    }
+
     /// Add a policy file.
     ///
     /// # Arguments
