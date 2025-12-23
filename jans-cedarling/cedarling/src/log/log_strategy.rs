@@ -73,7 +73,7 @@ impl LogStrategy {
         }
     }
 
-    pub(crate) fn logger(&self) -> &LogStrategyLogger {
+    pub(super) fn logger(&self) -> &LogStrategyLogger {
         &self.logger
     }
 
