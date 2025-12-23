@@ -18,16 +18,6 @@ import axios from 'axios';
 import Alert, { AlertColor } from '@mui/material/Alert';
 import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from './types';
 
-/**
- * Render a dialog that collects issuer, scopes, and optional expiry, then registers and persists an OIDC client.
- *
- * The component manages issuer validation, fetching and storing OpenID configurations, performing dynamic client
- * registration against the provider's registration endpoint, and persisting the resulting client(s) to extension storage.
- *
- * @param isOpen - Initial open state of the dialog; when changed externally the component will open or close accordingly.
- * @param handleDialog - Callback invoked with the new open state (true to open, false to close) to synchronize parent state.
- * @returns The RegisterClient React element (a dialog UI) for creating and registering OIDC clients.
- */
 export default function RegisterClient({ isOpen, handleDialog }) {
   const [open, setOpen] = React.useState(isOpen);
   const [selectedScopes, setSelectedScopes] = React.useState([])
@@ -386,7 +376,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             noValidate
             autoComplete="off"
           >
-            {(!!alert || alert !== '') ?
+            {alert ?
               <Alert severity={alertSeverity}>{alert}</Alert> : ''
             }
             <TextField
