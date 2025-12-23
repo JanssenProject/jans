@@ -12,6 +12,8 @@ import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 /**
  * Logger service
  *
@@ -28,6 +30,11 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
     public boolean isDisableJdkLogger() {
         return appConfiguration.getDisableJdkLogger() != null && appConfiguration.getDisableJdkLogger();
     }
+
+	@Override
+	public boolean isDisableExternalLoggerConfiguration() {
+		return isTrue(appConfiguration.getDisableExternalLoggerConfiguration());
+	}
 
     @Override
     public String getLoggingLevel() {
