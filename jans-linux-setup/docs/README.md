@@ -121,7 +121,7 @@ desciribng base installers
    - `render_import_templates()`: template renderings are done under this function, then imported to database
    - `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script,
       updating jans_auth and/or other service configurations etc.
-   
+
    This module also contains start/stop/restart/enable linux services.
 
 - `jetty.py` Provides `JettyInstaller`. Janssen Project components either jetty or node services. So `jetty.py` provides installers for jetty services as well as

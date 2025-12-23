@@ -143,16 +143,19 @@ authentication method is set.
 Use the jans-cli to [update / look-up the default authentication method](https://github.com/JanssenProject/jans-cli/edit/main/docs/cli/cli-default-authentication-method.md).
 
 #### Authentication method for a client (RP):
+
 A client may also specify `default_acr_values` during registration
 (and omit the parameter `acr_values` while making an authentication request).
 
 #### Multiple Authentication Mechanisms
+
 The Jans Server can concurrently support multiple authentication mechanisms,
 enabling Web and mobile apps (clients) to request a specific type of
 authentication using the standard OpenID Connect request parameter: `acr_values`.
 Learn more about acr_values in the [OpenID Connect core spec](http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics).
 
 #### Enabling an authentication mechanism
+
 An Authentication method is offered by the AS if its ACR value i.e. its
 corresponding custom script is `enabled`.
 

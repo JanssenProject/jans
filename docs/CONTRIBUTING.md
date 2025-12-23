@@ -473,7 +473,7 @@ Start working on changes as required.
 - Make sure the [code conventions](#code-conventions-and-guidelines) are being followed.
 - Use static code analysis and linting tools to make sure the code is high-quality.
 - Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.
-- Create PR early and push often. 
+- Create PR early and push often.
 - Janssen uses GitHub actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
 - Engage PR reviewers at the start so that they can continue to review code as it is developed and in small chunks.
 - For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.
