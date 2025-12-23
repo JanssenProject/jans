@@ -59,7 +59,7 @@ flow can be built using a custom script.
 The **PersonAuthenticationType** script is described by a java interface
 whose methods should be overridden to implement an authentication workflow.
 The [article](person-authentication-interface.md) talks about these
-methods in detail and the psuedo code
+methods in detail and the pseudo code
 for each method.
 
 ### B. UI pages:
