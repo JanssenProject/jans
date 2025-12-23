@@ -57,7 +57,12 @@
 		    <groupId>com.google.cloud.sql</groupId>
 		    <artifactId>postgres-socket-factory</artifactId>
 		</dependency>
-
+		<!-- OpenCensus API - required by google-http-client used by Cloud SQL socket factory -->
+		<dependency>
+			<groupId>io.opencensus</groupId>
+			<artifactId>opencensus-api</artifactId>
+			<version>0.31.1</version>
+		</dependency>
 		<!-- SQL Query -->
 		<dependency>
 		    <groupId>com.querydsl</groupId>
@@ -79,11 +84,11 @@
         </dependency>
 
 
-		<!-- Tests -->
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+                <!-- Tests -->
+                <dependency>
+                        <groupId>org.testng</groupId>
+                        <artifactId>testng</artifactId>
+                        <scope>test</scope>
+                </dependency>
+        </dependencies>
 </project>
