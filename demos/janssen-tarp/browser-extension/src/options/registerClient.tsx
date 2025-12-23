@@ -245,7 +245,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
 
       setAlert('Registration successful!');
       setAlertSeverity('success');
-      
+
       handleClose();
 
     } catch (err) {
@@ -261,14 +261,18 @@ export default function RegisterClient({ isOpen, handleDialog }) {
   const storeOpenIDConfiguration = async (config: OpenIDConfiguration): Promise<void> => {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(["openidConfigurations"], (result) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+          return;
+        }
         try {
-          const configs:  OpenIDConfiguration[] = result.openidConfigurations || [];
+          const configs: OpenIDConfiguration[] = result.openidConfigurations || [];
 
           // Use the authoritative issuer from the config, not the derived URL
           const authoritativeIssuer: string = config.issuer;
 
-           // Check if configuration already exists (by issuer )
-           const existingIndex = configs.findIndex(c =>
+          // Check if configuration already exists (by issuer )
+          const existingIndex = configs.findIndex(c =>
             c.issuer === authoritativeIssuer
           );
 
@@ -300,6 +304,10 @@ export default function RegisterClient({ isOpen, handleDialog }) {
   const storeOIDCClient = async (client: OIDCClient): Promise<void> => {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(["oidcClients"], (result) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+          return;
+        }
         try {
           const clients: OIDCClient[] = result.oidcClients || [];
 

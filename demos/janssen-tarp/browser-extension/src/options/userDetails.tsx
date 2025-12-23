@@ -187,6 +187,11 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     async function getOpenIDConfigurationByIssuer(issuerUrl: string): Promise<OpenIDConfiguration | null> {
         const openidConfigurations: OpenIDConfiguration[] = await new Promise((resolve) => {
             chrome.storage.local.get(["openidConfigurations"], (result) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error reading OpenID configurations:", chrome.runtime.lastError);
+                    resolve([]);
+                    return;
+                }
                 resolve(result?.openidConfigurations ? result.openidConfigurations : []);
             })
         });
@@ -302,7 +307,11 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
     /**
      * Build logout URL with parameters
      */
-    function buildLogoutUrl(idToken: string, openidConfiguration: OpenIDConfiguration): string {
+    function buildLogoutUrl(
+        idToken: string,
+        openidConfiguration: OpenIDConfiguration,
+        clientId?: string
+    ): string {
         const params = new URLSearchParams({
             state: uuidv4(),
             id_token_hint: idToken
@@ -316,9 +325,9 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
 
         // Add optional parameters
         const optionalParams = {
-            client_id: openidConfiguration.client_id,
+            client_id: clientId,
             ui_locales: navigator.language,
-            logout_hint: openidConfiguration.logout_hint
+            logout_hint: idToken
         };
 
         Object.entries(optionalParams).forEach(([key, value]) => {
