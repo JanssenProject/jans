@@ -61,7 +61,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=f3c75bc38ff291a2e5d3a638bbff634f0d548a1f
+ENV JANS_SOURCE_VERSION=8a1d1a70371249bbdf178a3086e052b90b7ea315
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
