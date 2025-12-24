@@ -1033,21 +1033,13 @@ class SqlClient(SqlSchemaMixin):
         return column_mapping
 
 
-def _build_jdbc_connection_uri(
-    db_dialect: str,
-    db_name: str,
-    server_time_zone: str,
-    db_user: str | None = None,
-    db_password: str | None = None,
-) -> str:
+def _build_jdbc_connection_uri(db_dialect: str, db_name: str, server_time_zone: str) -> str:
     """Build the JDBC connection URI based on the database dialect and Cloud SQL connector settings.
 
     Args:
         db_dialect: The database dialect ('mysql' or 'pgsql').
         db_name: The database name.
         server_time_zone: The server timezone.
-        db_user: The database username (required for Cloud SQL Connector).
-        db_password: The database password (required for Cloud SQL Connector).
 
     Returns:
         The JDBC connection URI string.
@@ -1066,27 +1058,18 @@ def _build_jdbc_connection_uri(
                 "Set it to your Cloud SQL instance connection name (project:region:instance)."
             )
 
-        from urllib.parse import quote_plus
-
-        user_encoded = quote_plus(db_user or "")
-        password_encoded = quote_plus(db_password or "")
-
         if db_dialect == "mysql":
             return (
                 f"jdbc:mysql:///{db_name}"
                 f"?cloudSqlInstance={instance_connection_name}"
                 f"&socketFactory=com.google.cloud.sql.mysql.SocketFactory"
                 f"&serverTimezone={server_time_zone}"
-                f"&user={user_encoded}"
-                f"&password={password_encoded}"
             )
         else:  # pgsql
             return (
                 f"jdbc:postgresql:///{db_name}"
                 f"?cloudSqlInstance={instance_connection_name}"
                 f"&socketFactory=com.google.cloud.sql.postgres.SocketFactory"
-                f"&user={user_encoded}"
-                f"&password={password_encoded}"
             )
     else:
         db_host = os.environ.get("CN_SQL_DB_HOST", "localhost")
@@ -1122,21 +1105,16 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
             default_schema = "public"
         db_schema = os.environ.get("CN_SQL_DB_SCHEMA", "") or default_schema
 
-        db_user = os.environ.get("CN_SQL_DB_USER", "jans")
-        db_password = get_sql_password(manager)
-
         rendered_txt = txt % {
             "rdbm_db": db_name,
             "rdbm_schema": db_schema,
             "rdbm_type": "postgresql" if db_dialect == "pgsql" else "mysql",
             "rdbm_host": os.environ.get("CN_SQL_DB_HOST", "localhost"),
             "rdbm_port": os.environ.get("CN_SQL_DB_PORT", 3306),
-            "rdbm_connection_uri": _build_jdbc_connection_uri(
-                db_dialect, db_name, server_time_zone, db_user, db_password
-            ),
-            "rdbm_user": db_user,
+            "rdbm_connection_uri": _build_jdbc_connection_uri(db_dialect, db_name, server_time_zone),
+            "rdbm_user": os.environ.get("CN_SQL_DB_USER", "jans"),
             "rdbm_password_enc": encode_text(
-                db_password,
+                get_sql_password(manager),
                 manager.secret.get("encoded_salt"),
             ).decode(),
             "server_time_zone": server_time_zone,
