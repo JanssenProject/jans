@@ -384,20 +384,25 @@ mod tests {
         let entry_decision = LogEntry::new_with_data(LogType::Decision, None);
         logger.log_any(entry_decision);
 
-        let entry_system_info =
-            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::INFO);
+        let entry_system_info = LogEntry::new(
+            BaseLogEntry::new_opt_request_id(LogType::System, Some(request_id))
+                .set_level(LogLevel::INFO),
+        );
         logger.log_any(entry_system_info);
 
-        let entry_system_debug =
-            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::DEBUG);
+        let entry_system_debug = LogEntry::new(
+            BaseLogEntry::new_opt_request_id(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG),
+        );
         logger.log_any(entry_system_debug);
 
         let entry_metric = LogEntry::new_with_data(LogType::Metric, None);
         logger.log_any(entry_metric);
 
         // without request id
-        let entry_system_warn =
-            LogEntry::new_with_data(LogType::System, None).set_level(LogLevel::WARN);
+        let entry_system_warn = LogEntry::new(
+            BaseLogEntry::new_opt_request_id(LogType::System, None).set_level(LogLevel::WARN),
+        );
         logger.log_any(entry_system_warn);
 
         assert!(

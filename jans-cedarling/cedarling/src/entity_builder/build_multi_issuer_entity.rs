@@ -6,7 +6,7 @@
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::*;
 use crate::log::interface::LogWriter;
-use crate::log::{LogEntry, LogLevel, LogType};
+use crate::log::{BaseLogEntry, LogEntry, LogLevel, LogType};
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -129,26 +129,30 @@ impl EntityBuilder {
                     },
                     Err(e) => {
                         log_service.log_any(
-                            LogEntry::new_with_data(LogType::System, None)
-                                .set_level(LogLevel::ERROR)
-                                .set_message(format!(
-                                    "Failed to generate entity key for token '{}'",
-                                    token_name
-                                ))
-                                .set_error(e.to_string()),
+                            LogEntry::new(
+                                BaseLogEntry::new_opt_request_id(LogType::System, None)
+                                    .set_level(LogLevel::ERROR),
+                            )
+                            .set_message(format!(
+                                "Failed to generate entity key for token '{}'",
+                                token_name
+                            ))
+                            .set_error(e.to_string()),
                         );
                         continue;
                     },
                 },
                 Err(e) => {
                     log_service.log_any(
-                        LogEntry::new_with_data(LogType::System, None)
-                            .set_level(LogLevel::ERROR)
-                            .set_message(format!(
-                                "Failed to build token entity for token '{}'",
-                                token_name
-                            ))
-                            .set_error(e.to_string()),
+                        LogEntry::new(
+                            BaseLogEntry::new_opt_request_id(LogType::System, None)
+                                .set_level(LogLevel::ERROR),
+                        )
+                        .set_message(format!(
+                            "Failed to build token entity for token '{}'",
+                            token_name
+                        ))
+                        .set_error(e.to_string()),
                     );
                     continue;
                 },
@@ -157,10 +161,12 @@ impl EntityBuilder {
 
         if token_entities.is_empty() {
             log_service.log_any(
-                LogEntry::new_with_data(LogType::System, None)
-                    .set_level(LogLevel::ERROR)
-                    .set_message("No valid tokens found for multi-issuer authorization".to_string())
-                    .set_error("All tokens failed validation or entity building".to_string()),
+                LogEntry::new(
+                    BaseLogEntry::new_opt_request_id(LogType::System, None)
+                        .set_level(LogLevel::ERROR),
+                )
+                .set_message("No valid tokens found for multi-issuer authorization".to_string())
+                .set_error("All tokens failed validation or entity building".to_string()),
             );
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
@@ -170,13 +176,15 @@ impl EntityBuilder {
             .build_resource_entity(resource)
             .inspect_err(|e| {
                 log_service.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::ERROR)
-                        .set_message(
-                            "Failed to build resource entity for multi-issuer authorization"
-                                .to_string(),
-                        )
-                        .set_error(e.to_string()),
+                    LogEntry::new(
+                        BaseLogEntry::new_opt_request_id(LogType::System, None)
+                            .set_level(LogLevel::ERROR),
+                    )
+                    .set_message(
+                        "Failed to build resource entity for multi-issuer authorization"
+                            .to_string(),
+                    )
+                    .set_error(e.to_string()),
                 );
             })
             .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;

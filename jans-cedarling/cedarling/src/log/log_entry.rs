@@ -49,6 +49,17 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
+    pub(crate) fn new(base: BaseLogEntry) -> LogEntry {
+        Self {
+            base,
+            auth_info: None,
+            msg: String::new(),
+            error_msg: None,
+            cedar_lang_version: None,
+            cedar_sdk_version: None,
+        }
+    }
+
     pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
         Self {
             base: BaseLogEntry::new_opt_request_id(log_type, request_id),
@@ -78,11 +89,6 @@ impl LogEntry {
     pub(crate) fn set_cedar_version(mut self) -> Self {
         self.cedar_lang_version = Some(cedar_policy::get_lang_version());
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
-        self
-    }
-
-    pub(crate) fn set_level(mut self, level: LogLevel) -> Self {
-        self.base.level = Some(level);
         self
     }
 }
@@ -437,6 +443,14 @@ impl BaseLogEntry {
             timestamp: Some(local_time_string),
             log_kind: log_type,
             level: default_log_level,
+        }
+    }
+
+    /// Set log level
+    pub(crate) fn set_level(self, level: LogLevel) -> Self {
+        Self {
+            level: Some(level),
+            ..self
         }
     }
 

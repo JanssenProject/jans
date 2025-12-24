@@ -63,10 +63,11 @@ impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Result<Self, AuthzServiceInitError> {
         config.log_service.log_any(
-            LogEntry::new_with_data(LogType::System, None)
-                .set_cedar_version()
-                .set_level(LogLevel::INFO)
-                .set_message("Cedarling Authz initialized successfully".to_string()),
+            LogEntry::new(
+                BaseLogEntry::new_opt_request_id(LogType::System, None).set_level(LogLevel::INFO),
+            )
+            .set_cedar_version()
+            .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
         Ok(Self {
@@ -443,17 +444,19 @@ impl Authz {
 
         // DEBUG LOG
         // Log all result information about multi-issuer authorization
-        let debug_log_entry = LogEntry::new_with_data(LogType::System, Some(request_id))
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone().unwrap_or(json!({})),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                authorize_info: vec![authz_info],
-                authorized: result.decision,
-            })
-            .set_message("Result of multi-issuer authorize.".to_string());
+        let debug_log_entry = LogEntry::new(
+            BaseLogEntry::new_opt_request_id(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG),
+        )
+        .set_auth_info(AuthorizationLogInfo {
+            action: request.action.clone(),
+            context: request.context.clone().unwrap_or(json!({})),
+            resource: resource_uid.to_string(),
+            entities: entities_json,
+            authorize_info: vec![authz_info],
+            authorized: result.decision,
+        })
+        .set_message("Result of multi-issuer authorize.".to_string());
         log_async(&self.config.log_service, debug_log_entry);
 
         Ok(result)
@@ -592,17 +595,19 @@ impl Authz {
         // DEBUG LOG
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        let unsigned_debug_log = LogEntry::new_with_data(LogType::System, Some(request_id))
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                authorize_info: debug_authorize_info,
-                authorized: result.decision,
-            })
-            .set_message("Result of authorize.".to_string());
+        let unsigned_debug_log = LogEntry::new(
+            BaseLogEntry::new_opt_request_id(LogType::System, Some(request_id))
+                .set_level(LogLevel::DEBUG),
+        )
+        .set_auth_info(AuthorizationLogInfo {
+            action: request.action.clone(),
+            context: request.context.clone(),
+            resource: resource_uid.to_string(),
+            entities: entities_json,
+            authorize_info: debug_authorize_info,
+            authorized: result.decision,
+        })
+        .set_message("Result of authorize.".to_string());
         log_async(&self.config.log_service, unsigned_debug_log);
 
         if !result.decision {
@@ -659,10 +664,12 @@ impl Authz {
         request_id: Uuid,
     ) {
         if !diagnostics.errors.is_empty() {
-            let log_entry = LogEntry::new_with_data(LogType::Decision, Some(request_id))
-                .set_level(LogLevel::ERROR)
-                .set_message(format!("Policy evaluation errors for {}", principal_name))
-                .set_error(format!("{:?}", diagnostics.errors));
+            let log_entry = LogEntry::new(BaseLogEntry::new_opt_request_id(
+                LogType::Decision,
+                Some(request_id),
+            ))
+            .set_message(format!("Policy evaluation errors for {}", principal_name))
+            .set_error(format!("{:?}", diagnostics.errors));
             log_async(&self.config.log_service, log_entry);
         }
     }
@@ -682,12 +689,12 @@ impl Authz {
         let serialized_errors = serde_json::to_string(&all_errors)
             .unwrap_or_else(|_| "failed to serialize diagnostics errors".to_string());
 
-        let log_entry = LogEntry::new_with_data(LogType::Decision, Some(request_id))
-            .set_level(LogLevel::ERROR)
-            .set_message(
-                "Authorization denied: summary of all policy evaluation errors".to_string(),
-            )
-            .set_error(serialized_errors);
+        let log_entry = LogEntry::new(
+            BaseLogEntry::new_opt_request_id(LogType::Decision, Some(request_id))
+                .set_level(LogLevel::ERROR),
+        )
+        .set_message("Authorization denied: summary of all policy evaluation errors".to_string())
+        .set_error(serialized_errors);
 
         log_async(&self.config.log_service, log_entry);
     }

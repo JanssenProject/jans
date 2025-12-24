@@ -15,7 +15,7 @@ use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuersValidationErr
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
-use crate::log::{self, LogEntry, LogType};
+use crate::log::{self, BaseLogEntry, LogEntry, LogType};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -91,8 +91,8 @@ impl<'a> ServiceFactory<'a> {
         // Log warns that some default entities loaded not correctly
         // it will be logged only once.
         for warn in default_entities_with_warn.warns() {
-            let log_entry = LogEntry::new_with_data(LogType::System, None)
-                .set_level(LogLevel::WARN)
+            let log_entry = LogEntry::new(BaseLogEntry::new_opt_request_id(LogType::System, None)
+                .set_level(LogLevel::WARN))
                 .set_message(warn.to_string());
 
             logger.log_any(log_entry);

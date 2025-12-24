@@ -124,17 +124,21 @@ impl Cedarling {
             .await
             .inspect(|_| {
                 log.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::DEBUG)
-                        .set_message("configuration parsed successfully".to_string()),
+                    LogEntry::new(
+                        crate::log::BaseLogEntry::new_opt_request_id(LogType::System, None)
+                            .set_level(LogLevel::DEBUG),
+                    )
+                    .set_message("configuration parsed successfully".to_string()),
                 )
             })
             .inspect_err(|err| {
                 log.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_error(err.to_string())
-                        .set_level(LogLevel::ERROR)
-                        .set_message("configuration parsed with error".to_string()),
+                    LogEntry::new(
+                        crate::log::BaseLogEntry::new_opt_request_id(LogType::System, None)
+                            .set_level(LogLevel::ERROR),
+                    )
+                    .set_error(err.to_string())
+                    .set_message("configuration parsed with error".to_string()),
                 )
             })?;
 
