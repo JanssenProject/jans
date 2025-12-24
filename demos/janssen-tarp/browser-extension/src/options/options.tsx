@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import '../static/css/options.css'
 import Header from './header'
 import HomePage from './homePage'
-import UserDetails from './userDetails'
-import { ILooseObject } from './ILooseObject'
 import Utils from './Utils';
 const Options = () => {
 

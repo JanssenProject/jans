@@ -38,10 +38,10 @@ Janssen Tarp is a Relying Party tool in form of a Browser Extension
 
 ## Build
 
-1. Change directory to the project directory (`/janssen-tarp`).
+1. Change directory to the project directory (`/janssen-tarp/browser-extension`).
 2. Run `npm install`.
-3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/dist/chrome` and `/janssen-tarp/dist/firefox` directories respectively.
-4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/release`.
+3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/browser-extension/dist/chrome` and `/janssen-tarp/browser-extension/dist/firefox` directories respectively.
+4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/browser-extension/release`.
 
 ## Releases
 
