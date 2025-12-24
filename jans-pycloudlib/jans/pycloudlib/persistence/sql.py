@@ -1241,6 +1241,16 @@ def dump_sql_overrides(data):
 
 
 def override_sql_ssl_property(sql_prop_file):
+    # The connector handles SSL/TLS encryption automatically
+    cloudsql_connector_enabled = as_boolean(os.environ.get("CN_SQL_CLOUDSQL_CONNECTOR_ENABLED", "false"))
+    if cloudsql_connector_enabled:
+        if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+            logger.warning(
+                "Both CN_SQL_CLOUDSQL_CONNECTOR_ENABLED and CN_SQL_SSL_ENABLED are set to true. "
+                "SSL properties will be skipped as Cloud SQL Connector handles encryption automatically."
+            )
+        return
+
     with open(sql_prop_file) as f:
         props = javaproperties.loads(f.read())
 
