@@ -1309,7 +1309,7 @@ def override_sql_ssl_property(sql_prop_file):
         f.write(javaproperties.dumps(props, timestamp=None))
 
 
-def resolve_db_schema_name():
+def resolve_db_schema_name() -> str:
     """Resolve database schema name based on dialect and environment.
 
     For MySQL, schema is synonymous with database name.
@@ -1330,7 +1330,7 @@ def resolve_db_schema_name():
     return os.environ.get("CN_SQL_DB_SCHEMA", "") or default_schema
 
 
-def set_postgres_search_path(dbapi_connection, connection_record):
+def set_postgres_search_path(dbapi_connection: _t.Any, connection_record: _t.Any) -> None:
     """Set PostgreSQL search_path to the resolved schema on new connections.
 
     Args:
