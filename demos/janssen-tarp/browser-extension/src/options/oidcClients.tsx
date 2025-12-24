@@ -8,7 +8,6 @@ import TableRow from '@mui/material/TableRow';
 import OfflineBoltIcon from '@mui/icons-material/OfflineBolt';
 import { pink, green } from '@mui/material/colors';
 import Grid from '@mui/material/Grid';
-import moment from 'moment';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
@@ -70,10 +69,17 @@ function createData(
     };
 }
 
+/**
+ * Render a table row representing an OIDC client with controls to delete the client and trigger an authentication flow.
+ *
+ * @param props.row - OIDC client data (as returned by `createData`) used to populate the row's cells.
+ * @param props.notifyOnDataChange - Callback invoked after client data changes (for example, after deletion or when the auth flow is triggered).
+ * @returns A JSX element containing the table row and its action controls.
+ */
 function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) {
     const { row, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
-    const lifetime = Math.floor((row.expireAt - moment().toDate().getTime()) / 1000);
+    const lifetime = Math.floor((row.expireAt - Date.now()) / 1000);
 
     const handleDialog = (isOpen) => {
         setOpen(isOpen);
