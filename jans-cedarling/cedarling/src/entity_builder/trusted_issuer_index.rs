@@ -5,17 +5,27 @@
 
 use std::{collections::HashMap, sync::Arc};
 
-use crate::common::policy_store::TrustedIssuer;
+use crate::{
+    LogLevel,
+    common::policy_store::TrustedIssuer,
+    log::{LogEntry, LogType, LogWriter, Logger},
+};
 
+/// Fast lookup index for trusted issuers by URL or origin.
+///
+/// Stores issuers once and maintains separate indexes for O(1) lookups.
 #[derive(Debug, Clone)]
 pub struct TrustedIssuerIndex {
+    // Primary storage - each issuer stored exactly once
     issuers: HashMap<String, Arc<TrustedIssuer>>,
+    // Index: full URL -> issuer key
     url_index: HashMap<String, String>,
+    // Index: origin -> issuer key
     origin_index: HashMap<String, String>,
 }
 
 impl TrustedIssuerIndex {
-    pub fn new(issuers: &HashMap<String, TrustedIssuer>) -> Self {
+    pub fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<Logger>) -> Self {
         let mut issuers_arc = HashMap::new();
         let mut origin_index = HashMap::new();
         let mut url_index = HashMap::new();
@@ -25,7 +35,17 @@ impl TrustedIssuerIndex {
             let full_url = issuer.oidc_endpoint.as_str();
 
             issuers_arc.insert(key.clone(), Arc::new(issuer.clone()));
-            origin_index.insert(origin, key.clone());
+            if let Some(existing_key) = origin_index.get(&origin) {
+                logger.log_any(
+                    LogEntry::new_with_data(LogType::System, None)
+                        .set_level(LogLevel::WARN)
+                        .set_message(format!(
+                            "Multiple issuers share the same origin '{origin}'. \
+                             Issuer '{key}' will be shadowed by '{existing_key}' in origin-based lookups.",
+                        )),
+                );
+            }
+            origin_index.entry(origin).or_insert_with(|| key.clone());
             url_index.insert(full_url.to_string(), key.clone());
         }
 
@@ -42,6 +62,11 @@ impl TrustedIssuerIndex {
             .get(url)
             .or_else(|| self.origin_index.get(url))
             .and_then(|key| self.issuers.get(key))
+    }
+
+    /// Returns an iterator over references to all trusted issuers.
+    pub fn values(&self) -> impl Iterator<Item = &TrustedIssuer> + '_ {
+        self.url_index.values().map(AsRef::as_ref)
     }
 }
 
@@ -88,12 +113,12 @@ mod tests {
         };
         trusted_issuers.insert("company".to_string(), company_issuer);
 
-        TrustedIssuerIndex::new(&trusted_issuers)
+        TrustedIssuerIndex::new(&trusted_issuers, None)
     }
 
     #[test]
     fn test_empty_issuer_index() {
-        let issuer_index = TrustedIssuerIndex::new(&HashMap::new());
+        let issuer_index = TrustedIssuerIndex::new(&HashMap::new(), None);
         assert!(
             issuer_index
                 .find_by_url("https://login.microsoftonline.com/tenant")

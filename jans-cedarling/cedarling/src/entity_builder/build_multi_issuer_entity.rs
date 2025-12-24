@@ -373,7 +373,13 @@ mod tests {
         };
         trusted_issuers.insert("company".to_string(), company_issuer);
 
-        EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap()
+        EntityBuilder::new(
+            config,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None,
+            DefaultEntities::default(),
+        )
+        .unwrap()
     }
 
     fn create_test_token(
@@ -640,8 +646,13 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder =
-            EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None,
+            DefaultEntities::default(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -701,8 +712,13 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder =
-            EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None,
+            DefaultEntities::default(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -776,7 +792,7 @@ mod tests {
         )]);
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -920,7 +936,7 @@ mod tests {
         let trusted_issuers = HashMap::new();
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )

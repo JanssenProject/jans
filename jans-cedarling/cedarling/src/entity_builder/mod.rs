@@ -27,9 +27,10 @@ use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::normalize_issuer;
-use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+use crate::common::policy_store::ClaimMappings;
+#[cfg(test)]
+use crate::common::policy_store::TrustedIssuer;
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
-use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
@@ -43,6 +44,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
+pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
 pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
 pub(crate) use built_entities::BuiltEntities;
 
@@ -59,13 +61,13 @@ pub struct EntityBuilder {
 impl EntityBuilder {
     pub fn new(
         config: EntityBuilderConfig,
-        trusted_issuers: &HashMap<String, TrustedIssuer>,
+        issuers_index: TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
-        let (ok, errs) = trusted_issuers
+        let (ok, errs) = issuers_index
             .values()
             .map(|iss| {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
@@ -80,8 +82,6 @@ impl EntityBuilder {
         }
 
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
-
-        let issuers_index = TrustedIssuerIndex::new(trusted_issuers);
 
         Ok(Self {
             config,
@@ -228,7 +228,6 @@ impl EntityBuilder {
     #[cfg(test)]
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
-        // First, try to find the issuer in trusted issuer metadata
         self.issuers_index.find_by_url(issuer).cloned()
     }
 }
@@ -454,10 +453,11 @@ mod test {
                 )),
             ),
         ]);
+        let issuers_index = TrustedIssuerIndex::new(&issuers, None);
 
         let entity_builder = EntityBuilder::new(
             config,
-            &issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -557,6 +557,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create tokens
         let tokens: HashMap<String, Arc<Token>> = HashMap::from([(
@@ -585,7 +586,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
@@ -749,6 +750,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
         let config = EntityBuilderConfig {
@@ -759,7 +761,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
@@ -897,6 +899,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
         let config = EntityBuilderConfig {
@@ -907,7 +910,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
@@ -1089,6 +1092,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
         let config = EntityBuilderConfig {
@@ -1099,7 +1103,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
