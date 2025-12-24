@@ -4,34 +4,142 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::io::Write;
+use std::sync::mpsc;
+#[cfg(test)]
 use std::sync::{Arc, Mutex};
+use std::thread::{self, JoinHandle};
+use std::time::{Duration, Instant};
 
 use crate::log::LogLevel;
 use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
 
+const BUFFER_LIMIT: usize = 1_000_000; // 1 MB limit
+const DEFAULT_FLUSH_TIMEOUT: Duration = Duration::from_millis(100);
+
+enum LogMessage {
+    Log(Box<dyn FnOnce() -> String + Send + 'static>),
+    Shutdown,
+}
+
+fn spawn_writer_thread(
+    receiver: mpsc::Receiver<LogMessage>,
+    writer: Box<dyn Write + Send + Sync>,
+    flush_timeout: Duration,
+) -> JoinHandle<()> {
+    thread::spawn(move || {
+        let mut writer = writer;
+        let mut buffer = String::new();
+        let mut next_flush_deadline = Instant::now() + flush_timeout;
+        loop {
+            // Check if flush deadline has passed
+            let now = Instant::now();
+            if now >= next_flush_deadline && !buffer.is_empty() {
+                writer.write_all(buffer.as_bytes()).unwrap();
+                buffer.clear();
+                next_flush_deadline = now + flush_timeout;
+            }
+
+            // Compute remaining time until next flush deadline
+            let remaining = next_flush_deadline.saturating_duration_since(now);
+            match receiver.recv_timeout(remaining) {
+                Ok(LogMessage::Log(serializer)) => {
+                    let json_string = serializer();
+                    buffer.push_str(&json_string);
+                    buffer.push('\n');
+                    if buffer.len() >= BUFFER_LIMIT {
+                        writer.write_all(buffer.as_bytes()).unwrap();
+                        buffer.clear();
+                        // Reset flush deadline since we just flushed
+                        next_flush_deadline = Instant::now() + flush_timeout;
+                    }
+                },
+                Ok(LogMessage::Shutdown) => {
+                    break;
+                },
+                Err(mpsc::RecvTimeoutError::Timeout) => {
+                    // Timeout, flush buffer if not empty
+                    if !buffer.is_empty() {
+                        writer.write_all(buffer.as_bytes()).unwrap();
+                        buffer.clear();
+                        next_flush_deadline = Instant::now() + flush_timeout;
+                    }
+                },
+                Err(mpsc::RecvTimeoutError::Disconnected) => {
+                    // Sender dropped, flush and exit
+                    if !buffer.is_empty() {
+                        writer.write_all(buffer.as_bytes()).unwrap();
+                        buffer.clear();
+                    }
+                    break;
+                },
+            }
+        }
+        // Final flush
+        if !buffer.is_empty() {
+            writer.write_all(buffer.as_bytes()).unwrap();
+        }
+    })
+}
+
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
-    // we use `dyn Write`` trait to make it testable and mockable.
-    writer: Mutex<Box<dyn Write + Send + Sync>>,
+    sender: mpsc::Sender<LogMessage>,
+    thread_handle: Option<JoinHandle<()>>,
     log_level: LogLevel,
+    #[cfg(test)]
+    flush_timeout: Duration,
 }
 
 impl StdOutLogger {
     pub(crate) fn new(log_level: LogLevel) -> Self {
-        Self {
-            writer: Mutex::new(Box::new(std::io::stdout())),
+        Self::new_inner(
+            Box::new(std::io::stdout()),
             log_level,
-        }
+            DEFAULT_FLUSH_TIMEOUT,
+        )
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[cfg(test)]
     pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
+        Self::new_inner(writer, log_level, DEFAULT_FLUSH_TIMEOUT)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn new_with_timeout(
+        writer: Box<dyn Write + Send + Sync>,
+        log_level: LogLevel,
+        flush_timeout: Duration,
+    ) -> Self {
+        Self::new_inner(writer, log_level, flush_timeout)
+    }
+
+    fn new_inner(
+        writer: Box<dyn Write + Send + Sync>,
+        log_level: LogLevel,
+        flush_timeout: Duration,
+    ) -> Self {
+        let (sender, receiver) = mpsc::channel();
+        let thread_handle = Some(spawn_writer_thread(receiver, writer, flush_timeout));
         Self {
-            writer: Mutex::new(Box::new(writer)),
+            sender,
+            thread_handle,
             log_level,
+            #[cfg(test)]
+            flush_timeout,
+        }
+    }
+}
+
+impl Drop for StdOutLogger {
+    fn drop(&mut self) {
+        // Send shutdown signal
+        let _ = self.sender.send(LogMessage::Shutdown);
+        // Wait for thread to finish
+        if let Some(handle) = self.thread_handle.take() {
+            let _ = handle.join();
         }
     }
 }
@@ -44,7 +152,7 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json = match serde_json::to_value(&entry) {
+        let serializer = move || match serde_json::to_value(&entry) {
             Ok(json) => json.to_string(),
             Err(err) => {
                 let err_msg = format!("failed to serialize log entry to JSON: {err}");
@@ -53,17 +161,7 @@ impl LogWriter for StdOutLogger {
                     .to_string()
             },
         };
-
-        // we can't handle error here or test it so we just panic if it happens.
-        // we should have specific platform to get error
-        writeln!(
-            self.writer
-                .lock()
-                .expect("In StdOutLogger writer mutex should unlock"),
-            "{}",
-            &json.to_string()
-        )
-        .unwrap();
+        let _ = self.sender.send(LogMessage::Log(Box::new(serializer)));
     }
 
     fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)
@@ -81,13 +179,13 @@ impl LogWriter for StdOutLogger {
 }
 
 // Test writer created for mocking LogWriter
-#[allow(dead_code)]
+#[cfg(test)]
 #[derive(Clone)]
 pub(crate) struct TestWriter {
     buf: Arc<Mutex<Vec<u8>>>,
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 impl TestWriter {
     pub(crate) fn new() -> Self {
         Self {
@@ -99,8 +197,14 @@ impl TestWriter {
         let buf = self.buf.lock().unwrap();
         String::from_utf8_lossy(buf.as_slice()).into_owned()
     }
+
+    pub(crate) fn get_buf_contents(&self) -> String {
+        let buf = self.buf.lock().unwrap();
+        String::from_utf8_lossy(buf.as_slice()).into_owned()
+    }
 }
 
+#[cfg(test)]
 impl Write for TestWriter {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.buf.lock().unwrap().extend_from_slice(buf);
@@ -143,7 +247,7 @@ mod tests {
         let json_str = json!(log_entry).to_string();
 
         // Create a test writer
-        let mut test_writer = TestWriter::new();
+        let test_writer = TestWriter::new();
         let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Create logger with test writer
@@ -152,13 +256,116 @@ mod tests {
         // Log the entry
         logger.log_any(log_entry);
 
-        // call flush just to get great coverage
-        _ = test_writer.flush();
+        // Drop logger to ensure writer thread finishes
+        drop(logger);
 
         // Check logged content
         let logged_content = test_writer.into_inner_buf();
 
         // Verify that the log entry was logged correctly
         assert_eq!(logged_content, json_str + "\n");
+    }
+
+    #[test]
+    fn flush_guaranteed_within_timeout_even_with_continuous_messages() {
+        use std::thread;
+
+        let pdp_id = PdpID::new();
+        let app_name = None;
+
+        // Create a test writer
+        let test_writer = TestWriter::new();
+        let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
+
+        // Use a short timeout for testing (10ms)
+        let flush_timeout = Duration::from_millis(10);
+        let logger = StdOutLogger::new_with_timeout(buffer, LogLevel::TRACE, flush_timeout);
+
+        // Create first log entry
+        let log_entry1 = LogEntry {
+            base: BaseLogEntry::new_decision(gen_uuid7()),
+            auth_info: None,
+            msg: "First message".to_string(),
+            error_msg: None,
+            cedar_lang_version: None,
+            cedar_sdk_version: None,
+        };
+
+        // Create second log entry
+        let log_entry2 = LogEntry {
+            base: BaseLogEntry::new_decision(gen_uuid7()),
+            auth_info: None,
+            msg: "Second message".to_string(),
+            error_msg: None,
+            cedar_lang_version: None,
+            cedar_sdk_version: None,
+        };
+
+        // Log first entry
+        logger.log_any(log_entry1.clone());
+
+        // Wait for half the timeout - buffer should still be empty
+        thread::sleep(flush_timeout / 2);
+        assert_eq!(
+            test_writer.get_buf_contents(),
+            "",
+            "Buffer should be empty before flush timeout"
+        );
+
+        logger.log_any(log_entry2);
+
+        // Wait for the full timeout plus small margin
+        thread::sleep(flush_timeout / 2 + Duration::from_millis(1));
+
+        // Buffer should now contain the first message (may also contain second message)
+        let expected_json = json!(log_entry1).to_string() + "\n";
+        let buf_contents = test_writer.get_buf_contents();
+        assert!(
+            buf_contents.starts_with(&expected_json),
+            "First message should appear after flush timeout, got: {}",
+            buf_contents
+        );
+
+        // Now continuously send messages at intervals shorter than timeout
+        for i in 0..5 {
+            let log_entry = LogEntry {
+                base: BaseLogEntry::new_decision(gen_uuid7()),
+                auth_info: None,
+                msg: format!("Continuous message {}", i),
+                error_msg: None,
+                cedar_lang_version: None,
+                cedar_sdk_version: None,
+            };
+            let log_entry =
+                LogEntryWithClientInfo::from_loggable(log_entry.clone(), pdp_id, app_name.clone());
+
+            logger.log_any(log_entry);
+
+            // Wait shorter than timeout
+            thread::sleep(flush_timeout / 4);
+
+            // Verify that previous continuous messages might not be flushed yet,
+            // but they shouldn't block the flush of the first message (already verified)
+        }
+
+        // Wait for final flush
+        thread::sleep(flush_timeout * 2);
+
+        // Clean up logger
+        drop(logger);
+
+        // Verify that all messages eventually arrived
+        let final_content = test_writer.into_inner_buf();
+        assert!(
+            final_content.contains("First message"),
+            "First message should still be in final output"
+        );
+        for i in 0..5 {
+            assert!(
+                final_content.contains(&format!("Continuous message {}", i)),
+                "Continuous message {} should be in final output",
+                i
+            );
+        }
     }
 }

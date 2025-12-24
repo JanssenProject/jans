@@ -189,11 +189,13 @@ fn test_log_stdout_logger() {
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
-    let strategy =
-        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name, None);
 
     // Act
-    strategy.log_any(log_entry);
+    {
+        let strategy =
+            LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name, None);
+        strategy.log_any(log_entry);
+    } // strategy and logger are dropped here, waiting for writer thread
 
     let logged_content = test_writer.into_inner_buf();
 

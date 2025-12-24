@@ -112,9 +112,9 @@ mod fallback {
 
     /// conform to Loggable requirement imposed by LogStrategy
     #[derive(serde::Serialize, Clone)]
-    struct StrWrap<'a>(&'a str);
+    struct StrWrap(String);
 
-    impl crate::log::interface::Indexed for StrWrap<'_> {
+    impl crate::log::interface::Indexed for StrWrap {
         fn get_id(&self) -> uuid7::Uuid {
             crate::log::log_entry::gen_uuid7()
         }
@@ -128,7 +128,7 @@ mod fallback {
         }
     }
 
-    impl crate::log::interface::Loggable for StrWrap<'_> {
+    impl crate::log::interface::Loggable for StrWrap {
         fn get_log_level(&self) -> Option<LogLevel> {
             // These must always be logged.
             Some(LogLevel::TRACE)
@@ -159,7 +159,7 @@ mod fallback {
 
         use crate::log::interface::LogWriter;
         // a string is always serializable
-        log_strategy.log_any(StrWrap(msg))
+        log_strategy.log_any(StrWrap(msg.to_string()))
     }
 }
 
