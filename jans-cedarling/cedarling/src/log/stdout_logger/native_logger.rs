@@ -5,7 +5,6 @@
 
 use std::io::Write;
 use std::sync::mpsc;
-#[cfg(test)]
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
@@ -17,6 +16,24 @@ use crate::log::interface::{LogWriter, Loggable};
 const BUFFER_LIMIT: usize = 1_000_000; // 1 MB limit
 const DEFAULT_FLUSH_TIMEOUT: Duration = Duration::from_millis(100);
 
+#[derive(Clone, Copy)]
+pub(crate) enum StdOutLoggerMode {
+    Immediate,
+    Async {
+        timeout: Duration,
+        buffer_limit: usize,
+    },
+}
+
+impl StdOutLoggerMode {
+    pub(crate) fn async_default() -> Self {
+        Self::Async {
+            timeout: DEFAULT_FLUSH_TIMEOUT,
+            buffer_limit: BUFFER_LIMIT,
+        }
+    }
+}
+
 enum LogMessage {
     Log(Box<dyn FnOnce() -> String + Send + 'static>),
     Shutdown,
@@ -26,6 +43,7 @@ fn spawn_writer_thread(
     receiver: mpsc::Receiver<LogMessage>,
     writer: Box<dyn Write + Send + Sync>,
     flush_timeout: Duration,
+    buffer_limit: usize,
 ) -> JoinHandle<()> {
     thread::spawn(move || {
         let mut writer = writer;
@@ -47,7 +65,7 @@ fn spawn_writer_thread(
                     let json_string = serializer();
                     buffer.push_str(&json_string);
                     buffer.push('\n');
-                    if buffer.len() >= BUFFER_LIMIT {
+                    if buffer.len() >= buffer_limit {
                         writer.write_all(buffer.as_bytes()).unwrap();
                         buffer.clear();
                         // Reset flush deadline since we just flushed
@@ -84,27 +102,40 @@ fn spawn_writer_thread(
 
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
-    sender: mpsc::Sender<LogMessage>,
+    mode: StdOutLoggerMode,
+    sender: Option<mpsc::Sender<LogMessage>>,
     thread_handle: Option<JoinHandle<()>>,
+    writer: Option<Arc<Mutex<Box<dyn Write + Send + Sync>>>>,
     log_level: LogLevel,
-    #[cfg(test)]
-    flush_timeout: Duration,
 }
 
 impl StdOutLogger {
+    // is used as fallback in memory logger, so default is immediate mode
     pub(crate) fn new(log_level: LogLevel) -> Self {
         Self::new_inner(
             Box::new(std::io::stdout()),
             log_level,
-            DEFAULT_FLUSH_TIMEOUT,
+            StdOutLoggerMode::async_default(),
         )
+    }
+
+    pub(crate) fn new_immediate(log_level: LogLevel) -> Self {
+        Self::new_inner(
+            Box::new(std::io::stdout()),
+            log_level,
+            StdOutLoggerMode::Immediate,
+        )
+    }
+
+    pub(crate) fn new_with_mode(log_level: LogLevel, mode: StdOutLoggerMode) -> Self {
+        Self::new_inner(Box::new(std::io::stdout()), log_level, mode)
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[cfg(test)]
     pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
-        Self::new_inner(writer, log_level, DEFAULT_FLUSH_TIMEOUT)
+        Self::new_inner(writer, log_level, StdOutLoggerMode::async_default())
     }
 
     #[cfg(test)]
@@ -113,33 +144,64 @@ impl StdOutLogger {
         log_level: LogLevel,
         flush_timeout: Duration,
     ) -> Self {
-        Self::new_inner(writer, log_level, flush_timeout)
+        Self::new_inner(
+            writer,
+            log_level,
+            StdOutLoggerMode::Async {
+                timeout: flush_timeout,
+                buffer_limit: BUFFER_LIMIT,
+            },
+        )
     }
 
     fn new_inner(
         writer: Box<dyn Write + Send + Sync>,
         log_level: LogLevel,
-        flush_timeout: Duration,
+        mode: StdOutLoggerMode,
     ) -> Self {
-        let (sender, receiver) = mpsc::channel();
-        let thread_handle = Some(spawn_writer_thread(receiver, writer, flush_timeout));
-        Self {
-            sender,
-            thread_handle,
-            log_level,
-            #[cfg(test)]
-            flush_timeout,
+        match mode {
+            StdOutLoggerMode::Immediate => Self {
+                mode,
+                sender: None,
+                thread_handle: None,
+                writer: Some(Arc::new(Mutex::new(writer))),
+                log_level,
+            },
+            StdOutLoggerMode::Async {
+                timeout,
+                buffer_limit,
+            } => {
+                let (sender, receiver) = mpsc::channel();
+                let thread_handle =
+                    Some(spawn_writer_thread(receiver, writer, timeout, buffer_limit));
+                Self {
+                    mode,
+                    sender: Some(sender),
+                    thread_handle,
+                    writer: None,
+                    log_level,
+                }
+            },
         }
     }
 }
 
 impl Drop for StdOutLogger {
     fn drop(&mut self) {
-        // Send shutdown signal
-        let _ = self.sender.send(LogMessage::Shutdown);
-        // Wait for thread to finish
-        if let Some(handle) = self.thread_handle.take() {
-            let _ = handle.join();
+        match self.mode {
+            StdOutLoggerMode::Immediate => {
+                // Nothing to do for immediate mode
+            },
+            StdOutLoggerMode::Async { .. } => {
+                // Send shutdown signal
+                if let Some(sender) = &self.sender {
+                    let _ = sender.send(LogMessage::Shutdown);
+                }
+                // Wait for thread to finish
+                if let Some(handle) = self.thread_handle.take() {
+                    let _ = handle.join();
+                }
+            },
         }
     }
 }
@@ -161,7 +223,22 @@ impl LogWriter for StdOutLogger {
                     .to_string()
             },
         };
-        let _ = self.sender.send(LogMessage::Log(Box::new(serializer)));
+        match self.mode {
+            StdOutLoggerMode::Immediate => {
+                let json_string = serializer();
+                if let Some(writer) = &self.writer {
+                    let mut guard = writer.lock().unwrap();
+                    let _ = guard.write_all(json_string.as_bytes());
+                    let _ = guard.write_all(b"\n");
+                    let _ = guard.flush();
+                }
+            },
+            StdOutLoggerMode::Async { .. } => {
+                if let Some(sender) = &self.sender {
+                    let _ = sender.send(LogMessage::Log(Box::new(serializer)));
+                }
+            },
+        }
     }
 
     fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)

@@ -147,7 +147,7 @@ mod fallback {
     /// - A fallback logger could not be initialized.
     pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
         // level is so that all messages passed here are logged.
-        let logger = StdOutLogger::new(LogLevel::TRACE);
+        let logger = StdOutLogger::new_immediate(LogLevel::TRACE);
 
         // This should always be a LogStrategy::StdOut(StdOutLogger)
         let log_strategy = crate::log::LogStrategy::new_with_logger(
