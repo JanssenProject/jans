@@ -321,8 +321,7 @@ public class AssetResource extends ConfigBaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(ApiConstants.UPLOAD)
-    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response uploadAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
