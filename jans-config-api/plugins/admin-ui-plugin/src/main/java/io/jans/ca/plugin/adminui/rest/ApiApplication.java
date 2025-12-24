@@ -59,9 +59,9 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin", description = "Full administrative access to admin user roles (super-user level)"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin", description = "Full administrative access to admin permissions (super-user level)"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin", description = "Full administrative access to role-permission mappings (super-user level)"),
-@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Admin read scope"),
-@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Admin write scope"),
-@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Admin delete scope"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin read access to all configuration resources"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin write access to all configuration resources"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin delete access to all configuration resources"),
 }
 )))
 public class ApiApplication extends Application {

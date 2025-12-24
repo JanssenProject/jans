@@ -2099,6 +2099,9 @@ components:
               administrative access to admin permissions (super-user level)
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin: Full
               administrative access to role-permission mappings (super-user level)
-            https://jans.io/oauth/config/read-all: Admin read scope
-            https://jans.io/oauth/config/write-all: Admin write scope
-            https://jans.io/oauth/config/delete-all: Admin delete scope
+            https://jans.io/oauth/config/read-all: Super admin read access to all
+              configuration resources
+            https://jans.io/oauth/config/write-all: Super admin write access to all
+              configuration resources
+            https://jans.io/oauth/config/delete-all: Super admin delete access to
+              all configuration resources

@@ -15695,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        userCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16626,8 +16626,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16637,6 +16635,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17579,6 +17579,8 @@ components:
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers.
+        disableExternalLoggerConfiguration:
+          type: boolean
         maxCount:
           type: integer
           description: Maximum number of results per page in search endpoints.
@@ -17852,14 +17854,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -18307,10 +18309,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -18481,6 +18483,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18492,8 +18496,6 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         logoutStatusJwt:
-          type: boolean
-        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
@@ -18616,9 +18618,12 @@ components:
               related information
             https://jans.io/oauth/jans-auth-server/session.delete: Delete Session
               information
-            https://jans.io/oauth/config/read-all: Admin read scope
-            https://jans.io/oauth/config/write-all: Admin write scope
-            https://jans.io/oauth/config/delete-all: Admin delete scope
+            https://jans.io/oauth/config/read-all: Super admin read access to all
+              configuration resources
+            https://jans.io/oauth/config/write-all: Super admin write access to all
+              configuration resources
+            https://jans.io/oauth/config/delete-all: Super admin delete access to
+              all configuration resources
             https://jans.io/oauth/config/openid/openid.readonly: View OpenID functionality
             https://jans.io/oauth/config/openid/openid.write: Manage OpenID functionality
             https://jans.io/oauth/config/openid/openid.delete: Delete OpenID functionality
