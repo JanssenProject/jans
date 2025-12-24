@@ -380,8 +380,7 @@ public class IdpResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { Constants.IDP_SAML_DELETE_ACCESS }, groupScopes = {
-            Constants.SAML_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { Constants.IDP_SAML_DELETE_ACCESS }, groupScopes = {}, superScopes = { Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteIdentityProvider(
             @Parameter(description = "Unique identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) throws IOException {
         if (log.isDebugEnabled()) {

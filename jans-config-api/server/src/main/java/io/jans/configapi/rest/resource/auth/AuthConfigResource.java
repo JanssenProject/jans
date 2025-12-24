@@ -175,7 +175,8 @@ public class AuthConfigResource extends ConfigBaseResource {
                             ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
                             ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -183,7 +184,8 @@ public class AuthConfigResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+                    ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.FEATURE_FLAGS)
     public Response getFeatureFlagType() {
         EnumSet<FeatureFlagType> set = EnumSet.allOf(FeatureFlagType.class);

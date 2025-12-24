@@ -2087,6 +2087,8 @@ components:
               admin-ui license related information
             https://jans.io/oauth/jans-auth-server/config/adminui/license.write: Manage
               admin-ui license related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/license.admin: Full
+              administrative access to license related information (super-user level)
             https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: View
               Admin UI security related information
             https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
@@ -2097,3 +2099,6 @@ components:
               administrative access to admin permissions (super-user level)
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin: Full
               administrative access to role-permission mappings (super-user level)
+            https://jans.io/oauth/config/read-all: Admin read scope
+            https://jans.io/oauth/config/write-all: Admin write scope
+            https://jans.io/oauth/config/delete-all: Admin delete scope

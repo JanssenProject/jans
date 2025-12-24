@@ -78,7 +78,7 @@ public class ClientAuthResource extends ConfigBaseResource {
         ClientAuth clientAuth = new ClientAuth();
         clientAuth.setClientAuths(clientAuths);
         
-        return Response.ok(clientAuths).build();
+        return Response.ok(clientAuth).build();
     }
 
     /**

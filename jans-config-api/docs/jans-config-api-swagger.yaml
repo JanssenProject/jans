@@ -810,6 +810,8 @@ paths:
                 $ref: "#/components/schemas/ApiError"
       security:
       - oauth2:
+        - https://jans.io/oauth/config/asset.delete
+      - oauth2:
         - https://jans.io/oauth/config/asset.admin
       - oauth2:
         - https://jans.io/oauth/config/delete-all
@@ -1989,6 +1991,8 @@ paths:
         - https://jans.io/oauth/jans-auth-server/config/properties.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /api/v1/jans-auth-server/config/persistence:
     get:
       tags:
@@ -15691,15 +15695,15 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        adminCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -16622,6 +16626,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16631,8 +16637,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18303,10 +18307,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -18477,8 +18481,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18489,6 +18491,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
         accessToken:
           type: boolean
     TokenEntityPagedResult:
@@ -18630,7 +18634,7 @@ components:
             https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
             https://jans.io/oauth/config/asset.readonly: View Jans Assets
             https://jans.io/oauth/config/asset.write: Manage Jans Assets
-            https://jans.io/oauth/config/asset.admin: Admin for Jans Assets management
+            https://jans.io/oauth/config/asset.delete: Delete Jans Assets
             https://jans.io/oauth/config/token.readonly: View Token details
             https://jans.io/oauth/config/token.write: Manage Token details
             https://jans.io/oauth/config/token.delete: Delete Token details
@@ -18664,5 +18668,6 @@ components:
             https://jans.io/oauth/config/properties.admin: Admin for Config-API management
             https://jans.io/oauth/client/authorizations.admin: Admin for Client Authorizations
               management
+            https://jans.io/oauth/config/asset.admin: Admin for Jans Assets management
             https://jans.io/auth/ssa.admin: Admin for SSA management
             https://jans.io/oauth/config/health.admin: Admin for Health API management
