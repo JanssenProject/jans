@@ -17,7 +17,7 @@ public class Constants {
     public static final String SERVER_KEY_OF_CONFIGURATION_ENTRY = "jansAuth_ConfigurationEntryDN";
 
     public static final String BASE_PROPERTIES_FILE_NAME = "jans.properties";
-    public static final String LDAP_PROPERTIES_FILE_NAME = "jans-ldap.properties";
+    public static final String LDAP_PROPERTIES_FILE_NAME = "jans-auth.properties";
     public static final String COUCHBASE_PROPERTIES_FILE_NAME = "jans-couchbase.properties";
     public static final String SALT_FILE_NAME = "salt";
     public static final String CERTS_DIR = "certsDir";
