@@ -45,12 +45,15 @@ tags = { @Tag(name = "Admin UI - Role"),
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read", description = "View admin user role related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly", description = "View admin user role related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write", description = "Manage admin user role related information"),
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read", description = "View admin permission related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete", description = "Delete admin user role related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly", description = "View admin permission related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write", description = "Manage admin permission related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete", description = "Delete admin permission related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly", description = "View role-permission mapping related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write", description = "Manage role-permission mapping related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete", description = "Delete role-permission mapping related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly", description = "View admin-ui license related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write", description = "Manage admin-ui license related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin", description = "Full administrative access to license related information (super-user level)"),

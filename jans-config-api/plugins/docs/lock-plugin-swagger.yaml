@@ -879,8 +879,8 @@ components:
               information
             https://jans.io/oauth/lock/telemetry.write: Manage Lock telemetry related
               information
-            https://jans.io/oauth/config/lock.admin: Admin to manage Lock telemetry
-              related information
+            https://jans.io/oauth/config/lock.admin: Lock Admin access to manage all
+              Lock configuration related information
             https://jans.io/oauth/config/read-all: Super admin read access to all
               configuration resources
             https://jans.io/oauth/config/write-all: Super admin write access to all

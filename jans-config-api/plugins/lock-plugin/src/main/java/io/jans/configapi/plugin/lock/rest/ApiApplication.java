@@ -39,7 +39,7 @@ import java.util.Set;
         @OAuthScope(name = Constants.LOCK_LOG_WRITE_ACCESS, description = "Manage Lock log health related information"),
         @OAuthScope(name = Constants.LOCK_TELEMETRY_READ_ACCESS, description = "View Lock telemetry related information"),
         @OAuthScope(name = Constants.LOCK_TELEMETRY_WRITE_ACCESS, description = "Manage Lock telemetry related information"),
-        @OAuthScope(name = Constants.LOCK_ADMIN_ACCESS, description = "Admin to manage Lock telemetry related information"),
+        @OAuthScope(name = Constants.LOCK_ADMIN_ACCESS, description = "Lock Admin access to manage all Lock configuration related information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin read access to all configuration resources"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin write access to all configuration resources"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin delete access to all configuration resources"),

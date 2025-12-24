@@ -386,8 +386,7 @@ public class AssetResource extends ConfigBaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @PUT
     @Path(ApiConstants.UPLOAD)
-    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
@@ -465,8 +464,7 @@ public class AssetResource extends ConfigBaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @POST
     @Path(ApiConstants.SERVICE + ApiConstants.SERVICE_NAME_PARAM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response loadServiceAsset(
             @Parameter(description = "Service Name") @PathParam(ApiConstants.SERVICE_NAME) @NotNull String serviceName)
@@ -509,8 +507,7 @@ public class AssetResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.ASSET_ADMIN_ACCESS }, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
+    @ProtectedApi(scopes = { ApiAccessConstants.ASSET_DELETE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ASSET_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteAsset(
             @Parameter(description = "Asset identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {

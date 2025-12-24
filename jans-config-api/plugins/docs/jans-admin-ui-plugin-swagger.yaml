@@ -2071,17 +2071,23 @@ components:
         clientCredentials:
           tokenUrl: "https://{op-hostname}/.../token"
           scopes:
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read: View
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly: View
               admin user role related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write: Manage
               admin user role related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read: View
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete: Delete
+              admin user role related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly: View
               admin permission related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write: Manage
+              admin permission related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete: Delete
               admin permission related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly: View
               role-permission mapping related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write: Manage
+              role-permission mapping related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete: Delete
               role-permission mapping related information
             https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: View
               admin-ui license related information
