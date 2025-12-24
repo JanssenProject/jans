@@ -149,7 +149,6 @@ async fn get_cedarling_from_directory(path: std::path::PathBuf) -> Cedarling {
 /// Disables default entity building (user, workload, roles) since we're using
 /// a custom schema that doesn't include the Jans namespace types.
 /// Uses a custom principal_bool_operator that checks for TestApp::User principal.
-#[allow(dead_code)]
 async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
     use crate::JsonRule;
 
