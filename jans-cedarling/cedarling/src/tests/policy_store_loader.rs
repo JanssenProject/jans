@@ -347,8 +347,8 @@ async fn test_load_from_cjar_file_and_authorize_success() {
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_manifest_validation_invalid_checksum_format() {
+    use super::utils::cedarling_util::get_config;
     use crate::common::policy_store::test_utils::fixtures;
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, PolicyStoreConfig};
 
     let mut builder = fixtures::minimal_valid();
 
@@ -374,22 +374,7 @@ async fn test_manifest_validation_invalid_checksum_format() {
     let temp_dir = extract_archive_to_temp_dir(&archive);
 
     // Attempt to create Cedarling - should fail due to invalid checksum format
-    let config = BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
-            log_level: crate::LogLevel::DEBUG,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
-        },
-        jwt_config: crate::JwtConfig::new_without_validation(),
-        authorization_config: Default::default(),
-        entity_builder_config: Default::default(),
-        lock_config: None,
-        max_default_entities: None,
-        max_base64_size: None,
-    };
+    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
 
     let err = Cedarling::new(&config)
         .await
@@ -415,8 +400,8 @@ async fn test_manifest_validation_invalid_checksum_format() {
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_manifest_validation_policy_store_id_mismatch() {
+    use super::utils::cedarling_util::get_config;
     use crate::common::policy_store::test_utils::fixtures;
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, PolicyStoreConfig};
 
     let mut builder = fixtures::minimal_valid();
 
@@ -437,22 +422,7 @@ async fn test_manifest_validation_policy_store_id_mismatch() {
     let temp_dir = extract_archive_to_temp_dir(&archive);
 
     // Attempt to create Cedarling - should fail due to ID mismatch
-    let config = BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
-            log_level: crate::LogLevel::DEBUG,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
-        },
-        jwt_config: crate::JwtConfig::new_without_validation(),
-        authorization_config: Default::default(),
-        entity_builder_config: Default::default(),
-        lock_config: None,
-        max_default_entities: None,
-        max_base64_size: None,
-    };
+    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
 
     let err = Cedarling::new(&config)
         .await
@@ -880,7 +850,7 @@ async fn test_load_from_cjar_url_and_authorize_success() {
 /// Test that CjarUrl handles HTTP errors gracefully.
 #[test]
 async fn test_cjar_url_handles_http_error() {
-    use crate::{BootstrapConfig, LogConfig, LogTypeConfig, PolicyStoreConfig};
+    use super::utils::cedarling_util::get_config;
     use mockito::Server;
 
     // Create mock server that returns 404
@@ -895,22 +865,7 @@ async fn test_cjar_url_handles_http_error() {
     let cjar_url = format!("{}/nonexistent.cjar", server.url());
 
     // Attempt to create Cedarling - should fail
-    let config = BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
-            log_level: crate::LogLevel::DEBUG,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::CjarUrl(cjar_url),
-        },
-        jwt_config: crate::JwtConfig::new_without_validation(),
-        authorization_config: Default::default(),
-        entity_builder_config: Default::default(),
-        lock_config: None,
-        max_default_entities: None,
-        max_base64_size: None,
-    };
+    let config = get_config(PolicyStoreSource::CjarUrl(cjar_url));
 
     let err = Cedarling::new(&config)
         .await
