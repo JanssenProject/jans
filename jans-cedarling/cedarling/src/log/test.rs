@@ -112,10 +112,13 @@ async fn test_log_memory_logger() {
 
     // make same test as for the memory logger
     // create log entries
-    let entry1 =
-        LogEntry::new_with_data(LogType::Decision, None).set_message("some message".to_string());
+    let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
+        .set_message("some message".to_string());
 
-    let entry2 = LogEntry::new_with_data(LogType::System, None);
+    let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+        LogLevel::DEBUG,
+        None,
+    ));
 
     // log entries
     strategy.log_any(entry1.clone());
@@ -204,10 +207,13 @@ fn test_log_storage_for_only_writer() {
 
     // make same test as for the memory logger
     // create log entries
-    let entry1 =
-        LogEntry::new_with_data(LogType::Decision, None).set_message("some message".to_string());
+    let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
+        .set_message("some message".to_string());
 
-    let entry2 = LogEntry::new_with_data(LogType::System, None);
+    let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+        LogLevel::ERROR,
+        None,
+    ));
 
     // log entries
     strategy.log_any(entry1.clone());

@@ -9,10 +9,7 @@
 use std::sync::{Arc, Weak};
 
 use super::{LogLevel, LogStrategy};
-use crate::log::{
-    BaseLogEntry, log_strategy::LogStrategyLogger, loggable_fn::LoggableFn,
-    stdout_logger::StdOutLogger,
-};
+use crate::log::{BaseLogEntry, loggable_fn::LoggableFn, stdout_logger::StdOutLogger};
 use uuid7::Uuid;
 
 /// Log Writer

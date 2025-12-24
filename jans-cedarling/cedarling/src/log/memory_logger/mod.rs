@@ -15,7 +15,6 @@ use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 use crate::log::BaseLogEntry;
-use crate::log::interface::Indexed;
 use crate::log::loggable_fn::LoggableFn;
 
 mod memory_calc;
@@ -147,8 +146,6 @@ mod fallback {
     /// - A runtime to initialize a new LogStrategy could not be built.
     /// - A fallback logger could not be initialized.
     pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
-        use crate::log::stdout_logger::StdOutLogger;
-
         // level is so that all messages passed here are logged.
         let logger = StdOutLogger::new(LogLevel::TRACE);
 
@@ -285,7 +282,7 @@ mod tests {
         let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(LogType::Decision, None)
+        let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
             .set_message("some message".to_string())
             .set_auth_info(AuthorizationLogInfo {
                 action: "test_action".to_string(),
@@ -296,7 +293,10 @@ mod tests {
                 entities: serde_json::json!({}),
             });
 
-        let entry2 = LogEntry::new_with_data(LogType::System, None);
+        let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ));
 
         assert!(
             entry1.base.id < entry2.base.id,
@@ -343,8 +343,8 @@ mod tests {
         let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(LogType::Decision, None);
-        let entry2 = LogEntry::new_with_data(LogType::Metric, None);
+        let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
+        let entry2 = LogEntry::new(BaseLogEntry::new_metric_opt_request_id(None));
 
         // log entries
         logger.log_any(entry1.clone());
@@ -381,26 +381,29 @@ mod tests {
             None,
         );
 
-        let entry_decision = LogEntry::new_with_data(LogType::Decision, None);
+        let entry_decision = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
         logger.log_any(entry_decision);
 
-        let entry_system_info = LogEntry::new(
-            BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, Some(request_id)),
-        );
+        let entry_system_info = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            Some(request_id),
+        ));
         logger.log_any(entry_system_info);
 
-        let entry_system_debug = LogEntry::new(
-            BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, Some(request_id)),
-        );
+        let entry_system_debug = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::DEBUG,
+            Some(request_id),
+        ));
         logger.log_any(entry_system_debug);
 
-        let entry_metric = LogEntry::new_with_data(LogType::Metric, None);
+        let entry_metric = LogEntry::new(BaseLogEntry::new_metric_opt_request_id(None));
         logger.log_any(entry_metric);
 
         // without request id
-        let entry_system_warn = LogEntry::new(
-            BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None),
-        );
+        let entry_system_warn = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ));
         logger.log_any(entry_system_warn);
 
         assert!(

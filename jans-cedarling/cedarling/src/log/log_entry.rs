@@ -60,23 +60,6 @@ impl LogEntry {
         }
     }
 
-    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
-        let base = match log_type {
-            LogType::System => BaseLogEntry::new_system_opt_request_id(LogLevel::TRACE, request_id),
-            LogType::Decision => BaseLogEntry::new_decision_opt_request_id(request_id),
-            LogType::Metric => BaseLogEntry::new_metric_opt_request_id(request_id),
-        };
-
-        Self {
-            base,
-            auth_info: None,
-            msg: String::new(),
-            error_msg: None,
-            cedar_lang_version: None,
-            cedar_sdk_version: None,
-        }
-    }
-
     pub(crate) fn set_message(mut self, message: String) -> Self {
         self.msg = message;
         self
