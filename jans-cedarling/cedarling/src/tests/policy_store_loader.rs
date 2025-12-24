@@ -1000,3 +1000,253 @@ async fn test_load_policy_store_archive_bytes_invalid() {
         err
     );
 }
+
+// ============================================================================
+// JWT Authorization Tests (using MockServer)
+// ============================================================================
+
+/// Test the `authorize` method with signed JWTs loaded from a directory-based policy store.
+///
+/// This test verifies the full flow:
+/// 1. Create a policy store with a trusted issuer pointing to MockServer
+/// 2. MockServer provides OIDC config and JWKS endpoints
+/// 3. Generate signed JWTs using MockServer
+/// 4. Call `authorize` with the signed tokens
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_authorize_with_jwt_from_directory() {
+    use crate::authz::request::Request;
+    use crate::jwt::test_utils::MockServer;
+    use crate::{
+        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, JwtConfig, LogConfig,
+        LogTypeConfig, PolicyStoreConfig,
+    };
+
+    // Create mock server for OIDC/JWKS
+    let mut mock_server = MockServer::new_with_defaults()
+        .await
+        .expect("Failed to create mock server");
+
+    let issuer_url = mock_server.issuer();
+    let oidc_endpoint = format!("{}/.well-known/openid-configuration", issuer_url);
+
+    // Create trusted issuer JSON that points to mock server
+    // Uses "Jans" as the issuer name to match the default entity builder namespace
+    let trusted_issuer_json = format!(
+        r#"{{
+    "mock_issuer": {{
+        "name": "Jans",
+        "description": "Test issuer for JWT validation",
+        "openid_configuration_endpoint": "{}",
+        "token_metadata": {{
+            "access_token": {{
+                "entity_type_name": "Jans::Access_token",
+                "workload_id": "client_id",
+                "principal_mapping": ["Jans::Workload"]
+            }},
+            "id_token": {{
+                "entity_type_name": "Jans::Id_token"
+            }},
+            "userinfo_token": {{
+                "entity_type_name": "Jans::Userinfo_token",
+                "user_id": "sub",
+                "role_mapping": "role"
+            }}
+        }}
+    }}
+}}"#,
+        oidc_endpoint
+    );
+
+    // Schema that works with JWT-based authorization
+    // Uses Jans namespace to match the default entity builder
+    let schema = r#"namespace Jans {
+    type Url = {"host": String, "path": String, "protocol": String};
+    entity TrustedIssuer = {"issuer_entity_id": Url};
+    entity Access_token = {
+        aud: String,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        client_id?: String,
+        org_id?: String,
+    };
+    entity Id_token = {
+        aud: Set<String>,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        sub: String,
+    };
+    entity Userinfo_token = {
+        country?: String,
+        exp?: Long,
+        iat?: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        sub: String,
+        role?: Set<String>,
+    };
+    entity Workload {
+        iss: TrustedIssuer,
+        access_token: Access_token,
+        client_id: String,
+        org_id?: String,
+    };
+    entity User {
+        userinfo_token: Userinfo_token,
+        country?: String,
+        role?: Set<String>,
+        sub: String,
+    };
+    entity Role;
+    entity Resource {
+        org_id?: String,
+        country?: String,
+    };
+    action "Read" appliesTo {
+        principal: [Workload, User, Role],
+        resource: [Resource],
+        context: {}
+    };
+}
+"#;
+
+    // Build the policy store
+    let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
+        .with_name("JWT Test Policy Store")
+        .with_schema(schema)
+        .with_policy(
+            "allow-workload-read",
+            r#"@id("allow-workload-read")
+permit(
+    principal is Jans::Workload,
+    action == Jans::Action::"Read",
+    resource is Jans::Resource
+)when{
+    principal.access_token.org_id == resource.org_id
+};"#,
+        )
+        .with_trusted_issuer("mock_issuer", trusted_issuer_json);
+
+    let archive = builder.build_archive().expect("Failed to build archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    // Generate signed tokens using MockServer
+    let access_token = mock_server
+        .generate_token_with_hs256sig(
+            &mut json!({
+                "org_id": "test_org",
+                "jti": "access_jti",
+                "client_id": "test_client",
+                "aud": "test_aud",
+                "exp": chrono::Utc::now().timestamp() + 3600,
+                "iat": chrono::Utc::now().timestamp(),
+            }),
+            None,
+        )
+        .expect("Failed to generate access token");
+
+    let id_token = mock_server
+        .generate_token_with_hs256sig(
+            &mut json!({
+                "jti": "id_jti",
+                "aud": ["test_aud"],
+                "sub": "test_user",
+                "exp": chrono::Utc::now().timestamp() + 3600,
+                "iat": chrono::Utc::now().timestamp(),
+            }),
+            None,
+        )
+        .expect("Failed to generate id token");
+
+    let userinfo_token = mock_server
+        .generate_token_with_hs256sig(
+            &mut json!({
+                "jti": "userinfo_jti",
+                "sub": "test_user",
+                "country": "US",
+                "role": ["Admin"],
+                "exp": chrono::Utc::now().timestamp() + 3600,
+                "iat": chrono::Utc::now().timestamp(),
+            }),
+            None,
+        )
+        .expect("Failed to generate userinfo token");
+
+    // Configure Cedarling with JWT validation enabled
+    let config = BootstrapConfig {
+        application_name: "test_app".to_string(),
+        log_config: LogConfig {
+            log_type: LogTypeConfig::StdOut,
+            log_level: crate::LogLevel::DEBUG,
+        },
+        policy_store_config: PolicyStoreConfig {
+            source: PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        },
+        jwt_config: JwtConfig {
+            jwks: None,
+            jwt_sig_validation: true,
+            jwt_status_validation: false,
+            ..Default::default()
+        }
+        .allow_all_algorithms(),
+        authorization_config: AuthorizationConfig {
+            use_user_principal: false,
+            use_workload_principal: true,
+            decision_log_default_jwt_id: "jti".to_string(),
+            decision_log_user_claims: vec![],
+            decision_log_workload_claims: vec!["client_id".to_string()],
+            id_token_trust_mode: crate::IdTokenTrustMode::Never,
+            principal_bool_operator: JsonRule::new(json!({
+                "===": [{"var": "Jans::Workload"}, "ALLOW"]
+            }))
+            .expect("Failed to create principal bool operator"),
+        },
+        entity_builder_config: EntityBuilderConfig {
+            build_user: false,
+            build_workload: true,
+            ..Default::default()
+        },
+        lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+    };
+
+    let cedarling = crate::Cedarling::new(&config)
+        .await
+        .expect("Cedarling should initialize with JWT-enabled config");
+
+    // Create authorization request with signed JWTs
+    let request = Request::deserialize(json!({
+        "tokens": {
+            "access_token": access_token,
+            "id_token": id_token,
+            "userinfo_token": userinfo_token,
+        },
+        "action": "Jans::Action::\"Read\"",
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Resource",
+                "id": "resource1"
+            },
+            "org_id": "test_org",
+            "country": "US"
+        },
+        "context": {},
+    }))
+    .expect("Request should be deserialized");
+
+    // Execute authorization
+    let result = cedarling
+        .authorize(request)
+        .await
+        .expect("Authorization should succeed with valid JWTs");
+
+    assert!(
+        result.decision,
+        "Read action should be allowed for workload with matching org_id"
+    );
+}
