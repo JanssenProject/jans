@@ -59,6 +59,8 @@ servers = { @Server(url = "https://jans.io/", description = "The Jans server") }
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin", description = "Full administrative access to license related information (super-user level)"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly", description = "View Admin UI security related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write", description = "Manage Admin UI security related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly", description = "View Admin UI configuration properties related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write", description = "Manage Admin UI configuration properties related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin", description = "Full administrative access to admin user roles (super-user level)"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin", description = "Full administrative access to admin permissions (super-user level)"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin", description = "Full administrative access to role-permission mappings (super-user level)"),

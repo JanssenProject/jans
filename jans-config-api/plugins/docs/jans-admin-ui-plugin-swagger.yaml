@@ -2099,6 +2099,10 @@ components:
               Admin UI security related information
             https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
               Admin UI security related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly: View
+              Admin UI configuration properties related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/properties.write: Manage
+              Admin UI configuration properties related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin: Full
               administrative access to admin user roles (super-user level)
             https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin: Full
