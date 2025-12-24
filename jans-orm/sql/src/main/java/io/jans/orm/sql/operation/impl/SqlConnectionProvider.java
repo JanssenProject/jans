@@ -98,8 +98,10 @@ public class SqlConnectionProvider {
 	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
 	
 	private boolean disableTimeZone = false;
-	
+
 	private boolean simpleJson = false;
+
+	private boolean validateAfterUpdate;
 
 	protected SqlConnectionProvider() {
 	}
@@ -193,6 +195,12 @@ public class SqlConnectionProvider {
 		Boolean testOnReturn = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-return"), null);
 		if (testOnReturn != null) {
 			objectPoolConfig.setTestOnReturn(testOnReturn);
+		}
+
+		Boolean validateAfterUpdateProperty = StringHelper.toBoolean(props.getProperty("orm.validate-after-update"), null);
+		if (validateAfterUpdateProperty != null) {
+			this.validateAfterUpdate = validateAfterUpdateProperty.booleanValue();
+	        LOG.debug("ORM validate after update: '{}'", this.validateAfterUpdate);
 		}
 
 		// Read properties which override default hash method parameters
@@ -549,6 +557,10 @@ public class SqlConnectionProvider {
 
 	public boolean isSimpleJson() {
 		return simpleJson;
+	}
+
+	public boolean isValidateAfterUpdate() {
+		return validateAfterUpdate;
 	}
 
 }
