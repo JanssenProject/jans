@@ -11,7 +11,7 @@ use std::sync::{Arc, RwLock};
 use crate::LogLevel;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
-use crate::log::{BaseLogEntry, LogEntry, LogType, LogWriter, Logger};
+use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
@@ -59,8 +59,7 @@ impl TokenCache {
     fn log_warn(&self, msg: String) {
         if let Some(logger) = &self.logger {
             logger.log_any(
-                LogEntry::new(BaseLogEntry::new_opt_request_id(LogType::System, None)
-                    .set_level(LogLevel::WARN))
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
                     .set_message(msg),
             );
         }

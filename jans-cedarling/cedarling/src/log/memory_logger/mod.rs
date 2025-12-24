@@ -385,14 +385,12 @@ mod tests {
         logger.log_any(entry_decision);
 
         let entry_system_info = LogEntry::new(
-            BaseLogEntry::new_opt_request_id(LogType::System, Some(request_id))
-                .set_level(LogLevel::INFO),
+            BaseLogEntry::new_system_opt_request_id(LogLevel::INFO, Some(request_id)),
         );
         logger.log_any(entry_system_info);
 
         let entry_system_debug = LogEntry::new(
-            BaseLogEntry::new_opt_request_id(LogType::System, Some(request_id))
-                .set_level(LogLevel::DEBUG),
+            BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, Some(request_id)),
         );
         logger.log_any(entry_system_debug);
 
@@ -401,7 +399,7 @@ mod tests {
 
         // without request id
         let entry_system_warn = LogEntry::new(
-            BaseLogEntry::new_opt_request_id(LogType::System, None).set_level(LogLevel::WARN),
+            BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None),
         );
         logger.log_any(entry_system_warn);
 

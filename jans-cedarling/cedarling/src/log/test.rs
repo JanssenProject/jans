@@ -87,7 +87,7 @@ async fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config, pdp_id, app_name.clone()).expect("build LogStrategy");
     let entry = LogEntry {
-        base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
+        base: BaseLogEntry::new_decision(gen_uuid7()),
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
@@ -168,7 +168,7 @@ fn test_log_stdout_logger() {
     let app_name = None;
     // Arrange
     let log_entry = LogEntry {
-        base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
+        base: BaseLogEntry::new_decision(gen_uuid7()),
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
