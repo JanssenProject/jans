@@ -94,7 +94,6 @@ mod test {
     use super::super::super::test::*;
     use super::*;
     use crate::CedarEntityMapping;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -114,9 +113,7 @@ mod test {
             EntityBuilderConfig::default().with_workload(),
             &HashMap::new(),
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 

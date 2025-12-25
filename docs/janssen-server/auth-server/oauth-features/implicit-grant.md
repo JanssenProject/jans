@@ -8,7 +8,7 @@ tags:
   - implicit
 ---
 
-# OAuth 2.0 Implicit Grant 
+# OAuth 2.0 Implicit Grant
 
 The [Implicit Grant](https://tools.ietf.org/html/rfc6749#section-1.3.2) :
 

@@ -51,6 +51,7 @@ async fn test_cedarling_with_valid_ssa() {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -69,7 +70,6 @@ async fn test_cedarling_with_valid_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 0,
     })
     .await;
 
@@ -110,6 +110,7 @@ async fn test_cedarling_without_ssa() {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -128,7 +129,6 @@ async fn test_cedarling_without_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await;
 

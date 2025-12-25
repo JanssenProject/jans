@@ -3,6 +3,7 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.doc.annotation.DocProperty;
 
 import java.util.List;
 
@@ -31,7 +32,13 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Flag to enable/disable check if acr customScript is enabled. Default value `true`.")
     private boolean acrValidationEnabled;
-
+    
+    @Schema(description = "Flag to enable/disable sending clientSecret in response. Default value `true`.")
+    private boolean returnClientSecretInResponse;
+    
+    @Schema(description = "Flag to enable/disable sending encrypted clientSecret in response. Default value `true`.")
+    private boolean returnEncryptedClientSecretInResponse;
+    
     @Schema(description = "List of approved external Auth server to validate token.")
     private List<String> apiApprovedIssuer;
 
@@ -78,6 +85,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Choose whether to disable JDK loggers.")
     private Boolean disableJdkLogger = true;
+
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
 
     @Schema(description = "Maximum number of results per page in search endpoints.")
     private int maxCount;
@@ -155,6 +165,22 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setAcrValidationEnabled(boolean acrValidationEnabled) {
         this.acrValidationEnabled = acrValidationEnabled;
+    }
+    
+    public boolean isReturnClientSecretInResponse() {
+        return returnClientSecretInResponse;
+    }
+
+    public void setReturnClientSecretInResponse(boolean returnClientSecretInResponse) {
+        this.returnClientSecretInResponse = returnClientSecretInResponse;
+    }
+
+    public boolean isReturnEncryptedClientSecretInResponse() {
+        return returnEncryptedClientSecretInResponse;
+    }
+
+    public void setReturnEncryptedClientSecretInResponse(boolean returnEncryptedClientSecretInResponse) {
+        this.returnEncryptedClientSecretInResponse = returnEncryptedClientSecretInResponse;
     }
 
     public List<String> getApiApprovedIssuer() {
@@ -285,7 +311,15 @@ public class ApiAppConfiguration implements Configuration {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-    public int getMaxCount() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public int getMaxCount() {
         return maxCount;
     }
 
@@ -379,11 +413,12 @@ public class ApiAppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
-                + ", cedarAuthEnabled=" + cedarAuthEnabled + ", disableLoggerTimer=" + disableLoggerTimer
-                + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
-                + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
-                + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType=" + apiProtectionType
-                + ", apiClientId=" + apiClientId
+                + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
+                + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
+                + acrValidationEnabled  + ", returnClientSecretInResponse="+ returnClientSecretInResponse
+                + ", returnEncryptedClientSecretInResponse=" + returnEncryptedClientSecretInResponse
+                + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
+                + apiProtectionType + ", apiClientId=" + apiClientId 
                 + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
                 + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
                 + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="

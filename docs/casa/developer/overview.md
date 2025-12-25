@@ -49,7 +49,7 @@ Most aspects of Casa that are configurable through the admin console UI can be p
 
 ## Credentials enrollment
 
-Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:   
+Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps or tokens  
@@ -83,7 +83,7 @@ While this may cater most companies requirements, sometimes there is the need to
 
 ### Casa ACR update
 
-Given the warning above, there has to be a way to launch a different Agama flow than the one used by default to log into Casa. This can be achieved by supplying a value for Casa's `acr` startup variable: in VM-based installations, locate the file `/etc/default/casa` in and modify the variable as needed. The format is `agama_<qualified-name-of-your-flow>`. Then restart Casa.  
+Given the warning above, there has to be a way to launch a different Agama flow than the one used by default to log into Casa. This can be achieved by supplying a value for Casa's `acr` startup variable: in VM-based installations, locate the file `/etc/default/casa` in and modify the variable as needed. The format is `agama_<qualified-name-of-your-flow>`. Then restart Casa.
 
 ### Requisites
 

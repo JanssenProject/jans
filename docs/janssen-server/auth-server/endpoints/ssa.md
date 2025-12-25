@@ -84,7 +84,7 @@ To call SSA services, a token of type `client_credentials` must be generated wit
 
 ## Create a new SSA
 
-Create `SSA` for the organization with `expiration` (optional). 
+Create `SSA` for the organization with `expiration` (optional).
 If `expiration` is not set take expiration from `ssaConfiguration.ssaExpirationInDays` AS configuration property.
 
 ### Request body description

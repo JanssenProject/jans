@@ -1,3 +1,6 @@
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -40,8 +43,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.14.0
-ENV CN_BUILD_DATE='2025-11-03 11:54'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-12-18 09:49'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -71,7 +74,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=88d8e89acc598b9ddf68659b0a51c3c9e3b712f0
+ENV JANS_SOURCE_VERSION=2738d91c5d9a439fdbb8b56c2d7eae24946df319
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -228,14 +231,18 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.14.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
+# ===========
+# Custom libs
+# ===========
+
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
+    ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
@@ -273,6 +280,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chmod -R g=u /app/templates/jans-config-api \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \

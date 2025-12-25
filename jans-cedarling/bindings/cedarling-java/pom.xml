@@ -6,7 +6,7 @@
 
     <groupId>io.jans</groupId>
     <artifactId>cedarling-java</artifactId>
-    <version>1.14.0</version>
+    <version>0.0.0-nightly</version>
     <name>Cedarling Java binding</name>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

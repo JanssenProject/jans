@@ -49,7 +49,10 @@ public class AppConfiguration implements Configuration, Serializable {
 	
 	@DocProperty(description = "Boolean value specifying whether to enable JDK Loggers")
     private boolean disableJdkLogger = true;
-	
+
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
+
 	@DocProperty(description = "Logging level for Fido2 logger")
     private String loggingLevel;
 	
@@ -145,6 +148,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setDisableJdkLogger(Boolean disableJdkLogger) {
 		this.disableJdkLogger = disableJdkLogger;
+	}
+
+	public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
 	}
 
 	public String getLoggingLevel() {

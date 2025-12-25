@@ -6,6 +6,8 @@
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
   "acrValidationEnabled": true,
+  "returnClientSecretInResponse": true,
+  "returnEncryptedClientSecretInResponse": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
@@ -65,25 +67,25 @@
   },
   "auditLogConf": {
     "enabled": true,
-	"logData": true,
+    "logData": true,
     "ignoreHttpMethod": [
       "GET"
     ],
-	"ignoreAnnotation": [
+    "ignoreAnnotation": [
       "ignoreAudit"
     ],
     "ignoreObjectMapping": [
-    {
-      "name": "loggingRequest",
-      "text": [
-	  "action=FETCH"
-	  ]
-    },
-    {
-      "name": "ssaRequest",
-      "text": [ ]
-    }
-  ],
+      {
+        "name": "loggingRequest",
+        "text": [
+          "action=FETCH"
+        ]
+      },
+      {
+        "name": "ssaRequest",
+        "text": []
+      }
+    ],
     "headerAttributes": [
       "User-inum",
       "jans-client"

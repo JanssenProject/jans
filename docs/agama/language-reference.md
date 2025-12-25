@@ -19,7 +19,7 @@ There is support for single line comments only (no block comments). Use `//` to 
 In practice, values would fit into any of: _string_, _boolean_, _number_, _list_ or _map_. Since routines implemented in other languages can be invoked (more on this later), returned values might not match up exactly with these categories, however this is not too relevant because there is no strict type enforcement in Agama.
 
 ## Literals
- 
+
 ### Strings
 
 - They are surrounded by double quotes. Examples: `"Agama"`, `"blah"`, `""` (empty string) 
@@ -87,7 +87,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 ## Accessing and mutating data in variables
 
-### Strings  
+### Strings
 
 - Suppose `x` is a string. Individual characters can be accessed by zero-based indexes: `x[0]`, `x[1]`, etc. and they are themselves considered strings of size 1 
 
@@ -95,7 +95,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 - Strings are not modifiable (neither size nor individual characters can be altered) 
 
-### Lists  
+### Lists
 
 - Suppose `x` is a list. Elements can be accessed by zero-based indexes: `x[0]`, `x[1]`, etc. 
 
@@ -109,7 +109,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 - Click [here](#advanced-and-special-cases-in-variable-manipulation) to learn more about access in lists 
 
-### Maps  
+### Maps
 
 - Suppose `x` is map. Values can be accessed by using “dot notation” 
 
@@ -150,7 +150,7 @@ Flow com.acme.FoodSurvey
 
 An unsigned integer literal value must be specified after the `Timeout` keyword, if present.
 
-The `Configs` keyword may be used to designate a variable so the flow's properties can be accessed in the code. These properties are usually provided when the flow is created - normally through an administrative tool. This process varies from engine to engine. 
+The `Configs` keyword may be used to designate a variable so the flow's properties can be accessed in the code. These properties are usually provided when the flow is created - normally through an administrative tool. This process varies from engine to engine.
 
 Often flow properties are used to supply configuration parameters to the flow. As an example, suppose a flow that sends a confirmation e-mail has to be implemented. Properties are a good place to hold the configuration of the outgoing mail server to employ: name, port, authentication credentials, etc. For instance, this is how the configuration properties would be bound to variable `conf`:
 
@@ -180,7 +180,7 @@ Check this [section](#input-parameters) to learn how callers can pass values to 
 
 ### Flow statements
 
-The statements that make up a flow - body - come after the header and start at column 1, ie. aligned with the `Flow` keyword: 
+The statements that make up a flow - body - come after the header and start at column 1, ie. aligned with the `Flow` keyword:
 
 ```
 Flow com.acme.FoodSurvey
@@ -235,7 +235,7 @@ When car.color is "pink"
     When car.brand is "Ford"
         Log "Weird-looking car"
         ...
-``` 
+```
 
 Use of `Otherwise`:
 
@@ -676,8 +676,8 @@ Trigger $flow
 
 </td>
 		<td>Starts a flow whose qualified name is determined at runtime</td>
-	</tr>	
-</table> 
+	</tr>
+</table>
 
 ### Input parameters
 
@@ -711,7 +711,7 @@ outcome = Trigger jo.jo.PersonalInfoGathering
 ```
 
 !!! Note
-    The new (overriding) templates will be injected with the same data original templates would receive. In other words, this directive only "modifies" the first parameter of `RRF` instructions.  
+    The new (overriding) templates will be injected with the same data original templates would receive. In other words, this directive only "modifies" the first parameter of `RRF` instructions.
 
 ## Foreign routines
 

@@ -10,12 +10,12 @@ tags:
 
 # Introspection Endpoint
 
-Introspection endpoint allows a protected resource to determine the active state of an OAuth 2.0 token and to determine 
+Introspection endpoint allows a protected resource to determine the active state of an OAuth 2.0 token and to determine
 meta-information about this token. This endpoint can be used to introspect
 both opaque token (i.e. reference tokens) and structured tokens(i.e. value tokens). This endpoint conforms to [OAuth2 token
 introspection](https://datatracker.ietf.org/doc/html/rfc7662) specifications.
 
-The URI to invoke the introspection endpoint in Janssen Server 
+The URI to invoke the introspection endpoint in Janssen Server
 can be found by checking the `introspection_endpoint` claim of the OpenID Connect configuration response, typically deployed at `https://janssen.server.host/.well-known/openid-configuration`
 
  "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
@@ -100,7 +100,7 @@ Response is returned as JWT if `Accept` header has value `application/token-intr
 POST /introspect HTTP/1.1
 Host: as.example.com
 Accept: application/token-introspection+jwt
-```  
+```
 
 Sample decoded JWT payload
 
@@ -174,7 +174,7 @@ navigate via `Auth Server`->`Properties`.
 - [introspectionAccessTokenMustHaveIntrospectionScope](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveintrospectionscope)
 - [introspectionResponseScopesBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#introspectionresponsescopesbackwardcompatibility)
 
-There difference between `introspectionAccessTokenMustHaveUmaProtectionScope` and `introspectionAccessTokenMustHaveIntrospectionScope` is that `uma_protection` scope is enabled for Dynamic Client Registration while `introspection` scope is not. Thus if set `introspectionAccessTokenMustHaveIntrospectionScope` to `true` value allows disable access to Introspection Endpoint to all clients which does not have explicitly granted `introspection` scope. 
+There difference between `introspectionAccessTokenMustHaveUmaProtectionScope` and `introspectionAccessTokenMustHaveIntrospectionScope` is that `uma_protection` scope is enabled for Dynamic Client Registration while `introspection` scope is not. Thus if set `introspectionAccessTokenMustHaveIntrospectionScope` to `true` value allows disable access to Introspection Endpoint to all clients which does not have explicitly granted `introspection` scope.
 
 ## Customising Introspection Endpoint Behaviour using Custom script:
 

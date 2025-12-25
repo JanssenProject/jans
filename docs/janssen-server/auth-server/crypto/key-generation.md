@@ -6,7 +6,7 @@ tags:
   - key generation
 ---
 
-# Key Generation 
+# Key Generation
 
 ## Generating Cryptographic Keys
 

@@ -1,6 +1,6 @@
 [package]
 name = "test_utils"
-version = "1.14.0"
+version = "0.0.0"
 edition = "2021"
 
 [dependencies]
@@ -9,3 +9,7 @@ serde_json = { workspace = true }
 jsonwebtoken = { workspace = true }
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 serde = { workspace = true }
+
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+mockito = { workspace = true }

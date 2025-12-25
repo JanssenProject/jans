@@ -3,12 +3,17 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer};
+use crate::common::{
+    issuer_utils::normalize_issuer,
+    policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer},
+};
 use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
 
-#[derive(Debug, PartialEq)]
+/// Structure representing a validated JWT token, used to derive a Cedar token entity.
+/// Make sure to provide a `TrustedIssuer`; otherwise, the `iss` field may not be constructed.
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub name: String,
     pub iss: Option<Arc<TrustedIssuer>>,
@@ -40,12 +45,25 @@ impl Token {
         self.claims.claims.get(name)
     }
 
-    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         self.claims.logging_info(claim)
     }
 
     pub fn claims_value(&self) -> &HashMap<String, Value> {
         &self.claims.claims
+    }
+
+    /// Extract normalized issuer URL from a token
+    pub fn extract_normalized_issuer(&self) -> Option<String> {
+        // Method 1: From TrustedIssuer reference (preferred)
+        if let Some(trusted_issuer) = &self.iss {
+            return Some(trusted_issuer.normalized_issuer());
+        }
+
+        // Method 2: From token claims (fallback)
+        self.claims
+            .get_claim("iss")
+            .and_then(|claim| claim.value().as_str().map(normalize_issuer))
     }
 }
 
@@ -76,14 +94,13 @@ impl TokenClaims {
         })
     }
 
-    pub fn logging_info<'a>(&'a self, claim: &'a str) -> HashMap<&'a str, &'a serde_json::Value> {
+    pub fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         let claim = if !claim.is_empty() { claim } else { "jti" };
 
-        let iter = [self.claims.get(claim).map(|value| (claim, value))]
-            .into_iter()
-            .flatten();
-
-        HashMap::from_iter(iter)
+        self.claims
+            .get(claim)
+            .map(|value| HashMap::from([(claim.to_string(), value.clone())]))
+            .unwrap_or_default()
     }
 
     // Update TokenClaims claim value by consuming itself.

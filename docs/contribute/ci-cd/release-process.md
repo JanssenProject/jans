@@ -22,4 +22,4 @@ The release process starts on scheduled times detailed in the [milestones](https
 10. **Next Release Planning**: The release manager starts planning the next release. The process starts again from step 1. A branch `release-<version>` is created for the next dev and snapshot release with a similar process from step 1 and is merged into `main`.
 
 # Future plans
-We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly. In this move, the Google `release-please` GitHub workflow  will be activated to automatically release the projects according to the conventional commits submitted. 
+We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly. In this move, the Google `release-please` GitHub workflow  will be activated to automatically release the projects according to the conventional commits submitted.

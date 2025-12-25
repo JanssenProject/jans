@@ -1,3 +1,6 @@
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # ===============
@@ -40,8 +43,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.14.0
-ENV CN_BUILD_DATE='2025-11-03 10:36'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-12-18 08:30'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
@@ -59,7 +62,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-scim
 
-ENV JANS_SOURCE_VERSION=88d8e89acc598b9ddf68659b0a51c3c9e3b712f0
+ENV JANS_SOURCE_VERSION=0c171a0ec392065f583853b2119e3a4a9012386c
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -199,9 +202,13 @@ EXPOSE $CN_SCIM_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.14.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen SCIM" \
     org.opencontainers.image.description="SCIM server"
+
+# ===========
+# Custom libs
+# ===========
 
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-scim/logs \
@@ -229,6 +236,8 @@ RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-scim/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-scim/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-scim/webapps/jans-scim.xml \

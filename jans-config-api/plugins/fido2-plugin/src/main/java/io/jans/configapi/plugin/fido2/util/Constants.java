@@ -24,4 +24,5 @@ public class Constants {
     public static final String FIDO2_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/fido2.readonly";
     public static final String FIDO2_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/fido2.write";
     public static final String FIDO2_CONFIG_DELETE_ACCESS = "https://jans.io/oauth/config/fido2.delete";
+    public static final String FIDO2_ADMIN_ACCESS = "https://jans.io/oauth/config/fido2.admin";
 }

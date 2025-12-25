@@ -18,14 +18,14 @@ kubectl logs <pod-name> -n <namespace>
 ## Log Levels
 The following log levels can be configured through the configuration CLI:
 
-| Log Level | Messages Logged |  
-|---------- |------------                  |  
-|Trace      | All messages                 |  
-|Debug      | Debug level and above        |  
-|Info       | Informational level and above|  
-|Warn       | Warning level and above      |  
-|Error      | Error level and above        |  
-|Fatal      | Only fatal errors            |  
+| Log Level | Messages Logged |
+|---------- |------------                  |
+|Trace      | All messages                 |
+|Debug      | Debug level and above        |
+|Info       | Informational level and above|
+|Warn       | Warning level and above      |
+|Error      | Error level and above        |
+|Fatal      | Only fatal errors            |
 |Off        | Logging is disabled          |
 
 ## Configuring Log Levels
@@ -85,7 +85,7 @@ global:
 ............      
 ```
 
-Apply the changes: 
+Apply the changes:
 
 ```bash
 helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
@@ -140,7 +140,7 @@ global:
 ............      
 ```
 
-Apply the changes: 
+Apply the changes:
 
 ```bash
 helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
@@ -190,7 +190,7 @@ global:
 ............      
 ```
 
-Apply the changes: 
+Apply the changes:
 
 ```bash
 helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
@@ -245,7 +245,7 @@ global:
 ............      
 ```
 
-Apply the changes: 
+Apply the changes:
 
 ```bash
 helm upgrade <helm-release-name> janssen/janssen -f override.yaml -n <namespace>
@@ -262,7 +262,7 @@ kubectl logs -f deployment/<helm-release-name>-scim -n <namespace>
 > This can cause deployments to break, but if you wish you may edit it directly and restart the wanted deployment
 
 
-Edit using the following command: 
+Edit using the following command:
 ```bash
 kubectl edit configmap <helm-release-name>-config-cm -n <namespace>
 ```
