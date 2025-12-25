@@ -291,7 +291,7 @@ impl EntityBuilder {
     /// Resolve issuer name using trusted issuer metadata or fallback to hostname
     fn resolve_issuer_name(&self, issuer: &str) -> Result<String, MultiIssuerEntityError> {
         // First, try to find the issuer in trusted issuer metadata
-        if let Some(trusted_issuer) = self.issuers_index.find_by_url(issuer) {
+        if let Some(trusted_issuer) = self.issuers_index.find(issuer) {
             return Ok(sanitize_issuer_name(&trusted_issuer.name));
         }
 

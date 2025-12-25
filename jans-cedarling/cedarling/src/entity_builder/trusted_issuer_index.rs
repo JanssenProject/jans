@@ -13,55 +13,60 @@ use crate::{
 
 /// Fast lookup index for trusted issuers by URL or origin.
 ///
-/// Stores issuers once and maintains separate indexes for O(1) lookups.
+/// This structure maintains indexes for O(1) lookups of trusted issuers by either:
+/// - Full OIDC endpoint URL
+/// - Origin only
+///
+/// # Origin Collision Handling
+///
+/// When multiple issuers share the same origin, the last issuer encountered during construction
+/// will be used for origin-based lookups. A warning is logged when this occurs. Full URL lookups
+/// remain unaffected and will correctly resolve to each specific issuer.
 #[derive(Debug, Clone)]
 pub struct TrustedIssuerIndex {
-    // Primary storage - each issuer stored exactly once
-    issuers: HashMap<String, Arc<TrustedIssuer>>,
-    // Index: full URL -> issuer key
-    url_index: HashMap<String, String>,
-    // Index: origin -> issuer key
-    origin_index: HashMap<String, String>,
+    /// Index mapping full URL to trusted issuer
+    url_index: HashMap<String, Arc<TrustedIssuer>>,
+    /// Index mapping origin to trusted issuer
+    origin_index: HashMap<String, Arc<TrustedIssuer>>,
 }
 
 impl TrustedIssuerIndex {
     pub fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<Logger>) -> Self {
-        let mut issuers_arc = HashMap::new();
-        let mut origin_index = HashMap::new();
+        let mut origin_index: HashMap<String, Arc<TrustedIssuer>> = HashMap::new();
         let mut url_index = HashMap::new();
 
-        for (key, issuer) in issuers {
-            let origin = issuer.oidc_endpoint.origin().ascii_serialization();
-            let full_url = issuer.oidc_endpoint.as_str();
+        for iss in issuers.values() {
+            let origin = iss.oidc_endpoint.origin().ascii_serialization();
+            let full_url = iss.oidc_endpoint.as_str();
+            let issuer = Arc::new(iss.clone());
 
-            issuers_arc.insert(key.clone(), Arc::new(issuer.clone()));
-            if let Some(existing_key) = origin_index.get(&origin) {
+            if let Some(existing) = origin_index.get(&origin) {
                 logger.log_any(
                     LogEntry::new_with_data(LogType::System, None)
                         .set_level(LogLevel::WARN)
                         .set_message(format!(
-                            "Multiple issuers share the same origin '{origin}'. \
-                             Issuer '{key}' will be shadowed by '{existing_key}' in origin-based lookups.",
+                            "Duplicate origin '{}': issuer '{}' will override existing issuer '{}' for origin-based lookups",
+                            origin,
+                            iss.name,
+                            existing.name,
                         )),
                 );
             }
-            origin_index.entry(origin).or_insert_with(|| key.clone());
-            url_index.insert(full_url.to_string(), key.clone());
+            origin_index.insert(origin, issuer.clone());
+            url_index.insert(full_url.to_string(), issuer);
         }
 
         Self {
-            issuers: issuers_arc,
             url_index,
             origin_index,
         }
     }
 
     /// Finds a trusted issuer by URL, checking full URL first, then origin.
-    pub fn find_by_url(&self, url: &str) -> Option<&Arc<TrustedIssuer>> {
+    pub fn find(&self, url: &str) -> Option<&Arc<TrustedIssuer>> {
         self.url_index
             .get(url)
             .or_else(|| self.origin_index.get(url))
-            .and_then(|key| self.issuers.get(key))
     }
 
     /// Returns an iterator over references to all trusted issuers.
@@ -121,7 +126,7 @@ mod tests {
         let issuer_index = TrustedIssuerIndex::new(&HashMap::new(), None);
         assert!(
             issuer_index
-                .find_by_url("https://login.microsoftonline.com/tenant")
+                .find("https://login.microsoftonline.com/tenant")
                 .is_none()
         );
     }
@@ -129,18 +134,14 @@ mod tests {
     #[test]
     fn test_find_non_existing_issuer() {
         let issuer_index = create_issuer_index();
-        assert!(
-            issuer_index
-                .find_by_url("https://account.google.com")
-                .is_none()
-        );
+        assert!(issuer_index.find("https://account.google.com").is_none());
     }
 
     #[test]
     fn test_find_by_full_url() {
         let issuer_index = create_issuer_index();
         let issuer = issuer_index
-            .find_by_url("https://login.microsoftonline.com/tenant")
+            .find("https://login.microsoftonline.com/tenant")
             .expect("Should find issuer by full URL");
 
         assert_eq!(issuer.name, "Microsoft");
@@ -154,7 +155,7 @@ mod tests {
     fn test_find_by_origin() {
         let issuer_index = create_issuer_index();
         let issuer = issuer_index
-            .find_by_url("https://account.gluu.org")
+            .find("https://account.gluu.org")
             .expect("Should find issuer by origin");
 
         assert_eq!(issuer.name, "Jans");
@@ -168,7 +169,7 @@ mod tests {
     fn test_find_by_origin_with_port() {
         let issuer_index = create_issuer_index();
         let issuer = issuer_index
-            .find_by_url("https://auth.company.internal:8443")
+            .find("https://auth.company.internal:8443")
             .expect("Should find issuer by origin with port");
 
         assert_eq!(issuer.name, "Company");
