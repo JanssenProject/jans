@@ -13,25 +13,26 @@ use crate::log::LogLevel;
 use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
 
-const BUFFER_LIMIT: usize = 1_000_000; // 1 MB limit
-const DEFAULT_FLUSH_TIMEOUT: Duration = Duration::from_millis(100);
-
-#[derive(Clone, Copy)]
-pub(crate) enum StdOutLoggerMode {
+/// Mode for stdout logger in native builds.
+/// Supports both immediate and asynchronous logging.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum StdOutLoggerMode {
+    /// Immediate synchronous logging (no buffering).
     Immediate,
+    /// Asynchronous logging with configurable timeout and buffer.
     Async {
-        timeout: Duration,
+        /// Timeout in milliseconds to flush the log buffer.
+        timeout_millis: u64,
+        /// Maximum buffer size in bytes before an automatic flush.
         buffer_limit: usize,
     },
 }
 
 impl StdOutLoggerMode {
-    pub(crate) fn async_default() -> Self {
-        Self::Async {
-            timeout: DEFAULT_FLUSH_TIMEOUT,
-            buffer_limit: BUFFER_LIMIT,
-        }
-    }
+    /// 100 ms default timeout
+    pub const DEFAULT_FLUSH_TIMEOUT_MILLIS: u64 = 100;
+    /// 1 MB limit
+    pub const DEFAULT_BUFFER_LIMIT: usize = 1 << 20;
 }
 
 enum LogMessage {
@@ -53,7 +54,9 @@ fn spawn_writer_thread(
             // Check if flush deadline has passed
             let now = Instant::now();
             if now >= next_flush_deadline && !buffer.is_empty() {
-                writer.write_all(buffer.as_bytes()).unwrap();
+                writer
+                    .write_all(buffer.as_bytes())
+                    .expect("failed to write logs to stdout");
                 buffer.clear();
                 next_flush_deadline = now + flush_timeout;
             }
@@ -111,47 +114,19 @@ pub(crate) struct StdOutLogger {
 
 impl StdOutLogger {
     // is used as fallback in memory logger, so default is immediate mode
-    pub(crate) fn new(log_level: LogLevel) -> Self {
-        Self::new_inner(
-            Box::new(std::io::stdout()),
-            log_level,
-            StdOutLoggerMode::async_default(),
-        )
-    }
-
-    pub(crate) fn new_immediate(log_level: LogLevel) -> Self {
-        Self::new_inner(
-            Box::new(std::io::stdout()),
-            log_level,
-            StdOutLoggerMode::Immediate,
-        )
-    }
-
-    pub(crate) fn new_with_mode(log_level: LogLevel, mode: StdOutLoggerMode) -> Self {
+    pub(crate) fn new(log_level: LogLevel, mode: StdOutLoggerMode) -> Self {
         Self::new_inner(Box::new(std::io::stdout()), log_level, mode)
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[cfg(test)]
-    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>, log_level: LogLevel) -> Self {
-        Self::new_inner(writer, log_level, StdOutLoggerMode::async_default())
-    }
-
-    #[cfg(test)]
-    pub(crate) fn new_with_timeout(
+    pub(crate) fn new_with(
         writer: Box<dyn Write + Send + Sync>,
         log_level: LogLevel,
-        flush_timeout: Duration,
+        mode: StdOutLoggerMode,
     ) -> Self {
-        Self::new_inner(
-            writer,
-            log_level,
-            StdOutLoggerMode::Async {
-                timeout: flush_timeout,
-                buffer_limit: BUFFER_LIMIT,
-            },
-        )
+        Self::new_inner(writer, log_level, mode)
     }
 
     fn new_inner(
@@ -168,12 +143,16 @@ impl StdOutLogger {
                 log_level,
             },
             StdOutLoggerMode::Async {
-                timeout,
+                timeout_millis: timeout,
                 buffer_limit,
             } => {
                 let (sender, receiver) = mpsc::channel();
-                let thread_handle =
-                    Some(spawn_writer_thread(receiver, writer, timeout, buffer_limit));
+                let thread_handle = Some(spawn_writer_thread(
+                    receiver,
+                    writer,
+                    Duration::from_millis(timeout),
+                    buffer_limit,
+                ));
                 Self {
                     mode,
                     sender: Some(sender),
@@ -328,7 +307,7 @@ mod tests {
         let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Create logger with test writer
-        let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
+        let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
         // Log the entry
         logger.log_any(log_entry);
@@ -355,8 +334,16 @@ mod tests {
         let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Use a short timeout for testing (10ms)
-        let flush_timeout = Duration::from_millis(10);
-        let logger = StdOutLogger::new_with_timeout(buffer, LogLevel::TRACE, flush_timeout);
+        let flush_timeout_u64 = 10;
+        let flush_timeout = Duration::from_millis(flush_timeout_u64);
+        let logger = StdOutLogger::new_with(
+            buffer,
+            LogLevel::TRACE,
+            StdOutLoggerMode::Async {
+                timeout_millis: flush_timeout_u64,
+                buffer_limit: StdOutLoggerMode::DEFAULT_BUFFER_LIMIT,
+            },
+        );
 
         // Create first log entry
         let log_entry1 = LogEntry {

@@ -107,6 +107,7 @@ impl MemoryLogger {
 mod fallback {
     use crate::LogLevel;
     use crate::app_types::{ApplicationName, PdpID};
+    use crate::log::StdOutLoggerMode;
     use crate::log::log_strategy::LogStrategyLogger;
     use crate::log::stdout_logger::StdOutLogger;
 
@@ -147,7 +148,7 @@ mod fallback {
     /// - A fallback logger could not be initialized.
     pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
         // level is so that all messages passed here are logged.
-        let logger = StdOutLogger::new_immediate(LogLevel::TRACE);
+        let logger = StdOutLogger::new(LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
         // This should always be a LogStrategy::StdOut(StdOutLogger)
         let log_strategy = crate::log::LogStrategy::new_with_logger(

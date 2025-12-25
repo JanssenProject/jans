@@ -52,7 +52,10 @@ impl LogStrategy {
                     app_name.clone(),
                 )))
             },
-            LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
+            LogTypeConfig::StdOut(stdout_config) => {
+                let logger = StdOutLogger::new(config.log_level, stdout_config.clone());
+                LogStrategyLogger::StdOut(logger)
+            },
         };
         Ok(Self {
             logger,

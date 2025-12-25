@@ -9,7 +9,7 @@
 // and `use std::env` prevents that compilation.
 #![cfg(not(target_family = "wasm"))]
 
-use cedarling::*;
+use cedarling::{log_config::StdOutLoggerMode, *};
 use std::env;
 
 // The human-readable policy and schema file is located in next folder:
@@ -32,12 +32,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let log_type_arg = &args[1];
     let log_type = match log_type_arg.as_str() {
         "off" => LogTypeConfig::Off,
-        "stdout" => LogTypeConfig::StdOut,
+        "stdout" => LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
         "lock" => unimplemented!(),
         "memory" => extract_memory_config(args),
         _ => {
             eprintln!("Invalid log type, defaulting to StdOut.");
-            LogTypeConfig::StdOut
+            LogTypeConfig::StdOut(StdOutLoggerMode::Immediate)
         },
     };
 

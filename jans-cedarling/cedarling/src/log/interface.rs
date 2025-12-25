@@ -9,7 +9,11 @@
 use std::sync::{Arc, Weak};
 
 use super::{LogLevel, LogStrategy};
-use crate::log::{BaseLogEntry, loggable_fn::LoggableFn, stdout_logger::StdOutLogger};
+use crate::log::{
+    BaseLogEntry,
+    loggable_fn::LoggableFn,
+    stdout_logger::{StdOutLogger, StdOutLoggerMode},
+};
 use uuid7::Uuid;
 
 /// Log Writer
@@ -50,7 +54,7 @@ impl LogWriter for Option<Weak<LogStrategy>> {
         }
 
         // we log the error manually to stdout if the logger is gone
-        StdOutLogger::new(LogLevel::INFO).log_any(entry);
+        StdOutLogger::new(LogLevel::INFO, StdOutLoggerMode::Immediate).log_any(entry);
     }
 
     fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
@@ -65,7 +69,7 @@ impl LogWriter for Option<Weak<LogStrategy>> {
 
         let entry = log_fn.build();
         // we log the error manually to stdout if the logger is gone
-        StdOutLogger::new(LogLevel::INFO).log_any(entry);
+        StdOutLogger::new(LogLevel::INFO, StdOutLoggerMode::Immediate).log_any(entry);
     }
 }
 

@@ -17,10 +17,10 @@ use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, StdOutConfig,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::log::LogLevel;
+use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -56,7 +56,18 @@ impl BootstrapConfig {
                 max_item_size: raw.log_max_item_size,
                 max_items: raw.log_max_items,
             }),
-            LoggerType::StdOut => LogTypeConfig::StdOut,
+            LoggerType::StdOut => {
+                let std_out_logger_conf = match raw.stdout_mode {
+                    // WASM does not support async
+                    #[cfg(not(target_arch = "wasm32"))]
+                    super::log_config::StdOutMode::Async => StdOutLoggerMode::Async {
+                        timeout_millis: raw.stdout_timeout_millis,
+                        buffer_limit: raw.stdout_buffer_limit,
+                    },
+                    super::log_config::StdOutMode::Immediate => StdOutLoggerMode::Immediate,
+                };
+                LogTypeConfig::StdOut(std_out_logger_conf)
+            },
         };
         let log_config = LogConfig {
             log_type,

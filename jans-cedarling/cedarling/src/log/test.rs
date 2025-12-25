@@ -61,7 +61,7 @@ async fn test_new_log_strategy_memory() {
 async fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogTypeConfig::StdOut,
+        log_type: log_config::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -188,7 +188,7 @@ fn test_log_stdout_logger() {
 
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
-    let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
+    let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
     // Act
     {

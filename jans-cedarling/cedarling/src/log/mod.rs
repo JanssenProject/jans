@@ -62,6 +62,7 @@ mod stdout_logger;
 
 pub use log_entry::*;
 pub use log_level::*;
+pub use stdout_logger::StdOutLoggerMode;
 
 #[cfg(test)]
 pub(crate) use nop_logger::NopLogger;
@@ -116,7 +117,7 @@ pub(crate) fn init_test_logger() -> Logger {
         LogStrategy::new(
             &LogConfig {
                 log_level: LogLevel::DEBUG,
-                log_type: crate::LogTypeConfig::StdOut,
+                log_type: crate::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             },
             PdpID::new(),
             Some("test".to_string().into()),
