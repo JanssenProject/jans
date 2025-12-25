@@ -1194,7 +1194,7 @@ permit(
     }))
     .expect("Request should be deserialized");
 
-    // Execute authorization
+    // Execute authorization with valid signed tokens
     let result = cedarling
         .authorize(request)
         .await
@@ -1203,5 +1203,33 @@ permit(
     assert!(
         result.decision,
         "Read action should be allowed for workload with matching org_id"
+    );
+
+    // Prove JWT validation is enforced: tampered token should fail
+    // Create a request with an invalid/tampered access token
+    let tampered_token = format!("{}.tampered", access_token);
+    let invalid_request = Request::deserialize(json!({
+        "tokens": {
+            "access_token": tampered_token,
+            "id_token": id_token,
+            "userinfo_token": userinfo_token,
+        },
+        "action": "Jans::Action::\"Read\"",
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Resource",
+                "id": "resource1"
+            },
+            "org_id": "test_org",
+            "country": "US"
+        },
+        "context": {},
+    }))
+    .expect("Request should be deserialized");
+
+    let invalid_result = cedarling.authorize(invalid_request).await;
+    assert!(
+        invalid_result.is_err(),
+        "Authorization should fail with tampered JWT when validation is enabled"
     );
 }
