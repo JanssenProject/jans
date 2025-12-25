@@ -68,10 +68,10 @@ go test .
 
 ### Build your Go application with dynamic linking
 
-**1. Download pre-built binaries:**  
+**1. Download pre-built binaries:**
 Download the appropriate pre-built binary for your platform from the [Jans releases page](https://github.com/JanssenProject/jans/releases) or build it from source as described above.
 
-**_2. Add linker flags in your main.go file:_**  
+**_2. Add linker flags in your main.go file:_**
 You need specify linker flags in your `main.go` file to link against the Cedarling library.
 
 ```go
@@ -81,14 +81,14 @@ import "C"
 
 And make sure that the Cedarling library files are located in the same directory as your main package.
 
-**_3. Add the Cedarling Go package to your Go application:_**  
+**_3. Add the Cedarling Go package to your Go application:_**
 Use `go get` to fetch the Cedarling Go package:
 
 ```sh
 go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 ```
 
-**_4. Add the Cedarling Go package to your Go application:_**  
+**_4. Add the Cedarling Go package to your Go application:_**
 Build your Go application:
 
 ```sh

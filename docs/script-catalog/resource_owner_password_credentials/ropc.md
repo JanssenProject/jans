@@ -40,7 +40,7 @@ This script has been adapted from the Gluu Server [sample ROPC script](https://g
 
 Main usage of script is at Token Endpoint.
 
-However sometimes it can be useful to use ROPC custom script at Authorization Endpoint to avoid redirects and pages. 
+However sometimes it can be useful to use ROPC custom script at Authorization Endpoint to avoid redirects and pages.
 By default it is not enabled but it can be enabled if set `forceRopcInAuthorizationEndpoint` AS configuration property to `true`.
 
 Also it is required to set `user` in context in custom script (`context.setUser(<user>)`). Without it authorization will go on in normal way (with pages and redirects).
