@@ -51,18 +51,27 @@ public class DatabaseResource extends ConfigBaseResource {
     @Inject
     DatabaseService databaseService;
 
+    /**
+     * Retrieves the database schema as a mapping from table names to their column attributes.
+     *
+     * @return a DatabaseSchemaMap where each key is a table name and each value is a map from column/attribute name to its {@link AttributeType}
+     */
     @Operation(summary = "Gets schema objects", description = "Gets schema objects.", operationId = "get-schema", tags = {
-            "Database" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.DATABASE_READ_ACCESS, ApiAccessConstants.DATABASE_WRITE_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+            "Database" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DatabaseSchemaMap.class, description = "A map of table_name as key and Map of attributes"), examples = @ExampleObject(name = "Response example", value = "example/database/tableInfo.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.DATABASE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getDefaultAuthenticationMethod() {
+            ApiAccessConstants.DATABASE_WRITE_ACCESS }, superScopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    public Response getDatabaseSchema() {
         Map<String, Map<String, AttributeType>> tableColumnsMap = databaseService.getTableColumnsMap();
 
         return Response.ok(tableColumnsMap).build();
