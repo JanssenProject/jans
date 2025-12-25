@@ -126,6 +126,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+      - oauth2:
+        - https://jans.io/oauth/config/user.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Configuration – User Management
@@ -345,6 +351,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
+      - oauth2:
+        - https://jans.io/oauth/config/user.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     post:
       tags:
       - Configuration – User Management
@@ -561,6 +571,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
+      - oauth2:
+        - https://jans.io/oauth/config/user.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /mgt/configuser/{inum}:
     get:
       tags:
@@ -675,6 +689,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+      - oauth2:
+        - https://jans.io/oauth/config/user.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     delete:
       tags:
       - Configuration – User Management
@@ -700,6 +720,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.delete
+      - oauth2:
+        - https://jans.io/oauth/config/user.admin
+      - oauth2:
+        - https://jans.io/oauth/config/delete-all
     patch:
       tags:
       - Configuration – User Management
@@ -850,6 +874,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
+      - oauth2:
+        - https://jans.io/oauth/config/user.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     CustomObjectAttribute:
@@ -863,10 +891,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     CustomUser:
       type: object
       properties:
@@ -979,3 +1007,11 @@ components:
             https://jans.io/oauth/config/user.readonly: View user related information
             https://jans.io/oauth/config/user.write: Manage user related information
             https://jans.io/oauth/config/user.delete: Delete user related information
+            https://jans.io/oauth/config/user.admin: Admin to manage user related
+              information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

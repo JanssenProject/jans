@@ -53,6 +53,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     put:
       tags:
       - Admin UI - Permission
@@ -91,6 +97,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
     post:
       tags:
       - Admin UI - Permission
@@ -129,6 +139,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
     delete:
       tags:
       - Admin UI - Permission
@@ -167,6 +181,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/delete-all
   /admin-ui/adminUIRolePermissionsMapping:
     get:
       tags:
@@ -200,6 +218,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     put:
       tags:
       - Admin UI - Role-Permissions Mapping
@@ -238,6 +262,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
     post:
       tags:
       - Admin UI - Role-Permissions Mapping
@@ -276,6 +304,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/adminUIRoles:
     get:
       tags:
@@ -309,6 +341,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     put:
       tags:
       - Admin UI - Role
@@ -347,6 +385,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
     post:
       tags:
       - Admin UI - Role
@@ -385,6 +427,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/adminUIRoles/{adminUIRole}:
     get:
       tags:
@@ -425,6 +471,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     delete:
       tags:
       - Admin UI - Role
@@ -464,6 +516,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/delete-all
   /admin-ui/config:
     get:
       tags:
@@ -494,7 +550,9 @@ paths:
                 $ref: "#/components/schemas/GenericResponse"
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+        - https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/properties.write
     put:
       tags:
       - Admin UI - Configuration
@@ -571,6 +629,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     delete:
       tags:
       - Admin UI - Role-Permissions Mapping
@@ -610,6 +674,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/delete-all
   /admin-ui/adminUIPermissions/{adminUIPermission}:
     get:
       tags:
@@ -650,6 +718,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
   /admin-ui/security/policyStore:
     get:
       tags:
@@ -789,6 +863,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/license/deleteConfig:
     delete:
       tags:
@@ -820,6 +898,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/license/details:
     get:
       tags:
@@ -851,6 +933,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
   /admin-ui/license/isActive:
     get:
       tags:
@@ -882,6 +970,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
   /admin-ui/license/isConfigValid:
     get:
       tags:
@@ -913,6 +1007,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
   /admin-ui/license/retrieve:
     get:
       tags:
@@ -944,6 +1044,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
   /admin-ui/license/ssa:
     post:
       tags:
@@ -981,6 +1087,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/license/trial:
     get:
       tags:
@@ -1012,6 +1122,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
   /admin-ui/webhook:
     get:
       tags:
@@ -1955,23 +2071,47 @@ components:
         clientCredentials:
           tokenUrl: "https://{op-hostname}/.../token"
           scopes:
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read: View
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly: View
               admin user role related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write: Manage
               admin user role related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read: View
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete: Delete
+              admin user role related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly: View
               admin permission related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write: Manage
+              admin permission related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete: Delete
               admin permission related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly: View
               role-permission mapping related information
             https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write: Manage
               role-permission mapping related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete: Delete
+              role-permission mapping related information
             https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly: View
               admin-ui license related information
             https://jans.io/oauth/jans-auth-server/config/adminui/license.write: Manage
               admin-ui license related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/license.admin: Full
+              administrative access to license related information (super-user level)
             https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: View
               Admin UI security related information
             https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
               Admin UI security related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly: View
+              Admin UI configuration properties related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/properties.write: Manage
+              Admin UI configuration properties related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin: Full
+              administrative access to admin user roles (super-user level)
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin: Full
+              administrative access to admin permissions (super-user level)
+            https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin: Full
+              administrative access to role-permission mappings (super-user level)
+            https://jans.io/oauth/config/read-all: Super admin read access to all
+              configuration resources
+            https://jans.io/oauth/config/write-all: Super admin write access to all
+              configuration resources
+            https://jans.io/oauth/config/delete-all: Super admin delete access to
+              all configuration resources
