@@ -1,6 +1,7 @@
 package io.jans.as.server.rate;
 
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -31,6 +32,9 @@ public class RateLimitServiceTest {
 
     @Mock
     private RegisterService registerService;
+
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
 
     @Test
     public void validateRateLimitForRegister_forSingleCall_shouldPassSuccessfully() throws RateLimitedException {
