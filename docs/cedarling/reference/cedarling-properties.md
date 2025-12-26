@@ -64,6 +64,9 @@ To load policy store one of the following keys must be provided:
 - **`CEDARLING_LOG_TTL`** : in case of `memory` store, TTL (time to live) of log entities in seconds.
 - **`CEDARLING_LOG_MAX_ITEMS`** : Maximum number of log entities that can be stored using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
 - **`CEDARLING_LOG_MAX_ITEM_SIZE`** : Maximum size of a single log entity in bytes using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
+- **`CEDARLING_STDOUT_MODE`** : Logging mode for stdout logger: `async` or `immediate` (default). Only applicable for native targets (not WASM). Defaults to `immediate`.
+- **`CEDARLING_STDOUT_TIMEOUT_MILLIS`** : Flush timeout in milliseconds for async stdout logging. Only applicable for native targets (not WASM). Defaults to 100 ms.
+- **`CEDARLING_STDOUT_BUFFER_LIMIT`** : Buffer size limit in bytes for async stdout logging. Only applicable for native targets (not WASM). Defaults to 1 MB (2^20 bytes).
 
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
