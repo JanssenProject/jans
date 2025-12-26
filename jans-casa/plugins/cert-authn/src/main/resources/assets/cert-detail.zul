@@ -4,7 +4,7 @@
 
     <h:title self="@define(title)">${zkService.appName} - ${labels.usrcert.cert_title}</h:title>
 
-    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.cert.vm.CertAuthenticationSummaryVM')"
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.certauthn.vm.CertAuthenticationSummaryVM')"
            self="@define(maincontent)">
 
         <z:include src="/back-home.zul" />
@@ -47,7 +47,7 @@
                                     </zk:zk>
                                     <zk:zk unless="${empty each.commonName}">
                                         <label class="w4 ma0 truncate nb1">${labels.usercert.expires}</label>
-                                        <z:label value="@load(each.expirationDate) @converter('org.gluu.casa.ui.CustomDateConverter',
+                                        <z:label value="@load(each.expirationDate) @converter('io.jans.casa.ui.CustomDateConverter',
                                         format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset)"/>
                                     </zk:zk>
 
@@ -73,7 +73,7 @@
                 <div class="${css.panel} bg-near-white">
                     <h2 class="f5 dark-blue2 pt1">${labels.usercert.add_certificate}</h2>
                     <p class="pt2 mb2">${labels.usercert.add_steps}</p>
-                    <a href="index.zul" class="${css.primaryButton}">${labels.general.proceed}</a>
+                    <z:button label="${labels.general.proceed}" sclass="${css.primaryButton}" onClick="@('redirect')" />
                 </div>
 
             </section>

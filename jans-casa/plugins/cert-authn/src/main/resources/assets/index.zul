@@ -1,32 +1,25 @@
 <?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
 <?page language="xhtml"?>
-<?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="cbasic.zul"?>
 <z:div xmlns:z="http://www.zkoss.org/2005/zul" xmlns:zk="zk" self="@define(content)"
        viewModel="@('io.jans.casa.plugins.certauthn.vm.CertAuthnVM')">
 
-    <z:div class="f6 flex justify-center mv4" unless="${empty vm.userId}">
+    <z:div class="f6 flex justify-center mv4">
         <div class="w-90 w-75-ns ba bw1 br2 b--light-gray flex flex-column items-center bg-blank">
 
-            <div class="ph5 pv4 tc">
-                <zk:zk if="${vm.userCertMatch ne null}">
-                    <!-- validation went fine -->
-                    ${c:l(c:cat('usrcert.match_',vm.userCertMatch.toString()))}
-                </zk:zk>
-
-                <zk:zk if="${vm.userCertMatch eq null}">
-
-                    <zk:zk if="${vm.hasConfigErrors}">
-                        ${labels.usrcert.config_problems}
-                    </zk:zk>
-                    <zk:zk if="${not vm.hasConfigErrors}">
-                        ${vm.errorMessage}
-                    </zk:zk>
-
-                </zk:zk>
+            <div class="f5 ph5 pv4 tc">
+                ${c:l(vm.messageKey)}
             </div>
-
             <div class="pa3">
-                <a href="cert-detail.zul" class="${css.primaryButton}">${labels.usrcert.back}</a>
+                <zk:zk if="${vm.enroll}">
+                    <a href="${zkService.contextPath}/pl/cert-authn/cert-detail.zul"
+                            class="link ${css.primaryButton}">${labels.usrcert.back}</a>
+                </zk:zk>
+            
+                <zk:zk if="${not vm.enroll}">
+                    <a href="${vm.flowCallbackUrl}" 
+                            class="link ${css.primaryButton}">${labels.general.continue_}</a>
+                </zk:zk>
             </div>
 
         </div>

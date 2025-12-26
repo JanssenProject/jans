@@ -2,9 +2,6 @@ package io.jans.casa.plugins.certauthn.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.as.common.cert.validation.*;
-import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.common.cert.fingerprint.FingerprintHelper;
 import io.jans.as.model.util.CertUtils;
 import io.jans.casa.core.model.*;
 import io.jans.casa.credential.BasicCredential;
@@ -14,11 +11,16 @@ import io.jans.casa.service.IPersistenceService;
 import io.jans.orm.search.filter.Filter;
 
 import java.io.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONObject;
 import org.slf4j.*;
 
 import static io.jans.casa.plugins.certauthn.service.UserCertificateMatch.*;
@@ -31,6 +33,7 @@ public class CertService {
     
     private Logger logger = LoggerFactory.getLogger(getClass());
 	private IPersistenceService persistenceService;
+	private String certPickupUrl;
     private ObjectMapper mapper;
     private boolean hasValidProperties;
     private List<X509Certificate> certChain;
@@ -59,14 +62,16 @@ public class CertService {
 	public void reloadConfiguration() {
 	    
         hasValidProperties = false;
-	    String prop = "certChainPEM";
-		String chainCerts = Optional.ofNullable(persistenceService.getAgamaFlowConfigProperties(AGAMA_FLOW))
-		        .map(jo -> jo.optString(prop, null)).orElse(null);
+		JSONObject props = Optional.ofNullable(
+		            persistenceService.getAgamaFlowConfigProperties(AGAMA_FLOW)).orElse(new JSONObject());
+			
+		String pemString = props.optString("certChainPEM", null);
+		certPickupUrl = props.optString("certPickupUrl", null);
 		
-		if (chainCerts == null) {
-		    logger.error("Unable to read config property '{}' from flow {}", prop, AGAMA_FLOW);
+		if (pemString == null || certPickupUrl == null ) {
+		    logger.error("Unable to read required config properties from flow {}", AGAMA_FLOW);
 		} else {
-		    try (InputStream is = new ByteArrayInputStream(chainCerts.getBytes(UTF_8))) {
+		    try (InputStream is = new ByteArrayInputStream(pemString.getBytes(UTF_8))) {
 
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 certChain = cf.generateCertificates(is).stream().map(X509Certificate.class::cast)
@@ -79,6 +84,10 @@ public class CertService {
 		    }
 		}
 		
+	}
+	
+	public String getCertPickupUrl() {
+	    return certPickupUrl;
 	}
 
     public List<Certificate> getUserCerts(String userId) {
@@ -122,12 +131,11 @@ public class CertService {
             if (person == null) {
                 status = UNKNOWN_USER;
             } else {
-                logger.debug("Generating certificate fingerprint...");
-                String fingerprint = getFingerPrint(certificate);
-                String externalUid = String.format("%s%s", CERT_PREFIX, fingerprint);
+                String externalUid = String.format("%s%s", CERT_PREFIX, getFingerPrint(certificate));
 
                 Filter filter = Filter.createEqualityFilter("jansExtUid", externalUid).multiValued();
-                List<BasePerson> people = persistenceService.find(BasePerson.class, persistenceService.getPeopleDn(), filter, 0, 1);
+                List<BasePerson> people = persistenceService.find(
+                        BasePerson.class, persistenceService.getPeopleDn(), filter, 0, 1);
 
                 //The list should be singleton at most
                 if (people.size() > 0) {
@@ -136,23 +144,20 @@ public class CertService {
                     } else {
                         status = CERT_ENROLLED_OTHER_USER;
                     }
-                } else {
-                    if (enroll) {
-                        logger.info("Associating presented cert to user");
-                        List<String> oeuid = new ArrayList<>(Optional.ofNullable(person.getJansExtUid()).orElse(Collections.emptyList()));
-                        oeuid.add(externalUid);
-                        person.setJansExtUid(oeuid);
+                } else if (enroll) {
+                    logger.info("Associating presented cert to user");
+                    List<String> oeuid = new ArrayList<>(
+                            Optional.ofNullable(person.getJansExtUid()).orElse(Collections.emptyList()));
 
-                        status = SUCCESS;
-                    } else {
-                        logger.info("Certificate not associated to an existing account yet");
-                        status = CERT_NOT_RECOGNIZED;
-                    }
+                    oeuid.add(externalUid);                    
+                    person.setJansExtUid(oeuid);
+                    updateUserX509Certificates(person, certificate);
+                    
+                    status = persistenceService.modify(person) ? SUCCESS : UNKNOWN_ERROR;
+                } else {
+                    logger.info("Certificate not associated to an existing account yet");
+                    status = CERT_NOT_RECOGNIZED;
                 }
-            }
-            if (status.equals(SUCCESS) || status.equals(CERT_ENROLLED_ALREADY)) {
-                updateUserX509Certificates(person, certificate);
-                status = persistenceService.modify(person) ? status : UNKNOWN_ERROR;
             }
             logger.info("Operation result is {}", status.toString());
         } catch (Exception e) {
@@ -173,62 +178,41 @@ public class CertService {
         boolean found = false;
         int i;
         for (i = 0; i < scimCerts.size() && !found; i++) {
-            found = getFingerPrint(CertUtils.x509CertificateFromPem(scimCerts.get(i).getValue())).equals(fingerPrint);
+            String val = scimCerts.get(i).getValue();
+            found = getFingerPrint(CertUtils.x509CertificateFromPem(val)).equals(fingerPrint);
         }
         if (found) {
+            logger.info("Removing cert from SCIM profile data"); 
             person.getX509Certificates().remove(i - 1);
         }
+        person.getJansExtUid().remove(CERT_PREFIX + fingerPrint);
 
-        Optional<String> externalUid = person.getJansExtUid().stream()
-                .filter(str -> str.equals(CERT_PREFIX + fingerPrint)).findFirst();
-        externalUid.ifPresent(uid ->  person.getJansExtUid().remove(uid));
-
+        logger.info("Removing cert reference from user");
         return persistenceService.modify(person);
 
     }
 
     public boolean validate(X509Certificate cert) {
-        
-        logger.info("Validating certificate");
-        PathCertificateVerifier verifier = new PathCertificateVerifier(true);
 
-        ValidationStatus.CertificateValidity validity = verifier.validate(cert, certChain, new Date()).getValidity();
-        boolean valid = validity.equals(ValidationStatus.CertificateValidity.VALID);
-        logger.warn("Certificate is {}valid", valid ? "": "not ");
-        
-        return valid;
+        logger.info("Validating certificate...");
+        PathCertificateVerifier verifier = new PathCertificateVerifier(true);
+        return verifier.validate(cert, certChain, new Date());
 
     }
 
     private void updateUserX509Certificates(CertPerson person, X509Certificate certificate) {
 
+        List<String> stringCerts = Optional.ofNullable(person.getX509Certificates()).orElse(new ArrayList<>());
+        io.jans.scim.model.scim2.user.X509Certificate scimX509Cert = new io.jans.scim.model.scim2.user.X509Certificate();
         try {
-            boolean match = false;
-            String display = certificate.getSubjectX500Principal().getName();
+            byte DEREncoded[] = certificate.getEncoded();
+            scimX509Cert.setValue(new String(Base64.getEncoder().encode(DEREncoded), UTF_8));
+            scimX509Cert.setDisplay(certificate.getSubjectX500Principal().getName());
 
-            logger.info("Reading user's stored X509 certificates");
-            List<String> stringCerts = Optional.ofNullable(person.getX509Certificates()).orElse(new ArrayList<>());
-            List<io.jans.scim.model.scim2.user.X509Certificate> scimCerts = getScimX509Certificates(stringCerts);
+            logger.debug("Updating user's jans509Certificate attribute");
+            stringCerts.add(mapper.writeValueAsString(scimX509Cert));
+            person.setX509Certificates(stringCerts);
 
-            for (io.jans.scim.model.scim2.user.X509Certificate scimCert : scimCerts) {
-                String scimDisplay = scimCert.getDisplay();
-                if (Utils.isNotEmpty(scimDisplay) && scimDisplay.equals(display)) {
-                    logger.debug("The certificate presented is already in user's profile");
-                    match = true;
-                    break;
-                }
-            }
-
-            if (!match) {
-                io.jans.scim.model.scim2.user.X509Certificate scimX509Cert = new io.jans.scim.model.scim2.user.X509Certificate();
-                byte DEREncoded[] = certificate.getEncoded();
-                scimX509Cert.setValue(new String(Base64.getEncoder().encode(DEREncoded), UTF_8));
-                scimX509Cert.setDisplay(display);
-
-                logger.debug("Updating user's oxTrustx509Certificate attribute");
-                stringCerts.add(mapper.writeValueAsString(scimX509Cert));
-                person.setX509Certificates(stringCerts);
-            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -241,13 +225,17 @@ public class CertService {
         Certificate cert = new Certificate();
         cert.setFingerPrint(fingerPrint);
 
+        Function<String, String> keyFunc = t -> t.substring(0, t.indexOf('=')).toLowerCase();
+        Function<String, String> valFunc = t -> t.substring(t.indexOf('=') + 1);
+        
         for (io.jans.scim.model.scim2.user.X509Certificate sc : scimCerts) {
             try {
                 X509Certificate x509Certificate = CertUtils.x509CertificateFromPem(sc.getValue());
                 if (fingerPrint.equals(getFingerPrint(x509Certificate))) {
 
+                    //Break the subject DN into its several pieces and store them in a map
                     Map<String, String> attributes = Arrays.stream(sc.getDisplay().split(",\\s*"))
-                            .collect(Collectors.toMap(t -> t.substring(0,t.indexOf('=')).toLowerCase(), t -> t.substring(t.indexOf('=') + 1)));
+                            .collect(Collectors.toMap(keyFunc, valFunc));
 
                     String cn = attributes.get("cn");
                     String ou = attributes.getOrDefault("ou", "");
@@ -280,7 +268,6 @@ public class CertService {
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }
-
         }
         return cert;
 
@@ -301,8 +288,8 @@ public class CertService {
 
     }
     
-    private String getFingerPrint(X509Certificate certificate) throws Exception {
-        return FingerprintHelper.getPublicKeySshFingerprint(certificate.getPublicKey());
+    private String getFingerPrint(X509Certificate certificate) throws CertificateEncodingException {
+        return DigestUtils.sha1Hex(certificate.getEncoded());
     }
 
 }

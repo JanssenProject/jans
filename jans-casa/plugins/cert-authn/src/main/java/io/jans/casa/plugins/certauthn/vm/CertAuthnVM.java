@@ -4,144 +4,151 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.as.model.util.CertUtils;
 import io.jans.casa.core.pojo.User;
-import io.jans.casa.misc.Utils;
-import io.jans.casa.misc.WebUtils;
+import io.jans.casa.misc.*;
+import io.jans.casa.plugins.certauthn.model.*;
 import io.jans.casa.plugins.certauthn.service.*;
 import io.jans.casa.service.*;
 import io.jans.casa.service.SndFactorAuthenticationUtils;
 import io.jans.service.cache.CacheProvider;
-import io.jans.util.security.StringEncrypter;
 
 import java.util.*;
+import java.net.URLDecoder;
 import java.security.cert.X509Certificate;
 
 import org.slf4j.*;
 import org.zkoss.bind.annotation.Init;
-import org.zkoss.util.Pair;
 import org.zkoss.util.resource.Labels;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+//This page may be hosted in a domain other than Casa. Typical ZK interactions (Javascript/Ajax) may
+//not work fine due to CORS. It does not pay to get into CORS stuff for this case, so this page should
+//just do the processing in the init method and show a static page
 public class CertAuthnVM {
 
-    private static final String RND_KEY = "ref";
+    public static final String RND_KEY = "ref";
+    
+    //max. number of seconds between display of index.zul and returning to agama flow 
+    private static final int ENTRY_EXP_SECONDS = 20;
     private static final String CERT_HEADER = "X-ClientCert";
-    private static final int STATUS_EXP = 10;    //max. number of seconds to go from index.zul back to agama flow 
-
+    private static final String AGAMA_CB = "/jans-auth/fl/callback";
+    
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private CertService certService;
-    private StringEncrypter stringEncrypter;
-
-    @WireVariable
-    private ISessionContext sessionContext;
-
-    @WireVariable
-    private CacheProvider cacheProvider;
-
-    private User user;
-    private boolean hasConfigErrors;
+    
+    private String key;
+    private String messageKey;
+    private String flowCallbackUrl;
     private boolean present;
     private boolean parsed;
-    private boolean inCasaSession;
     private boolean valid;
-        
-    private String errorMessage;
+    private boolean enroll;
+    
     private UserCertificateMatch userCertMatch;
-    private String userId;    
-
-    public String errorMessage() {
-        return errorMessage;
+    private CertService certService;
+    private CacheProvider cacheProvider;
+    
+    public String getMessageKey() {
+        return messageKey;
     }
-
-    public boolean isHasConfigErrors() {
-        return hasConfigErrors;
+    
+    public boolean isEnroll() {
+        return enroll;
     }
-
-    public String getUserId() {
-        return userId;
+    
+    public String getFlowCallbackUrl() {
+        return flowCallbackUrl;
     }
-
-    public UserCertificateMatch getUserCertMatch() {
-        return userCertMatch;
-    }
-
-    //See LocationMatch directive in Apache's https_gluu.conf
+    
     @Init
-    public void init() throws Exception {
-
-        logger.info("Loading certificate validation page...");
-        user = sessionContext.getLoggedUser();
-
-        //Truthy value means usage of this page is in the context of enrollment only (not authentication)
-        inCasaSession = user != null;
-        logger.info("There is{} user in session", inCasaSession ? "": " no");
-
-        String encKey = WebUtils.getQueryParam(RND_KEY);
-        String key = null;
+    public void init() {
         
-        if (inCasaSession) {
-            userId = user.getId();
-        } else {
-            if (Utils.isEmpty(encKey)) {
-                logger.warn("Expected parameter '{}' not specified in URL.", RND_KEY);
-            } else {
-                key = Utils.stringEncrypter().decrypt(encKey);                
-                userId = Optional.ofNullable(cacheProvider.get(key)).map(Object::toString).orElse(null);                
-            }
-
-            if (userId != null) {
-                logger.debug("User id is {}", userId);
-            } else {
-                logger.error("No user ID could be obtained. Aborting...");
+        try {
+            logger.info("Loading certificate validation page...");
+            messageKey = "general.error.general";
+         
+            cacheProvider = Utils.managedBean(CacheProvider.class);
+            certService = CertService.getInstance();    
+            if (!certService.isHasValidProperties()) {
+                logger.warn("Configuration errors detected. Please check the log file and plugin documentation");
+                messageKey = "usrcert.config_problems";
                 return;
             }
+            
+            String encKey = WebUtils.getQueryParam(RND_KEY);        
+            if (Utils.isEmpty(encKey)) {
+                logger.warn("Expected parameter '{}' not specified in URL.", RND_KEY);
+                return;
+            }
+    
+            key = URLDecoder.decode(Utils.stringEncrypter().decrypt(encKey), UTF_8);            
+            Reference ref = getReference(key);            
+            if (ref == null) {
+                logger.warn("Expired or missing cache entry");
+                return;
+            }
+            
+            String userId = ref.getUserId();
+            enroll = ref.isEnroll();
+            if (userId == null) {
+                logger.warn("UserId missing in cache entry");
+                return;
+            }
+            
+            X509Certificate userCert = processCert(WebUtils.getRequestHeader(CERT_HEADER));
+            //If parsed is true, present is too
+            //If valid is true, parsed is too
+            userCertMatch = valid ? certService.processMatch(userCert, userId, enroll) : null;
+            boolean success = UserCertificateMatch.SUCCESS.equals(userCertMatch);
+            
+            computeMessageKey();
+            String outcome = "";
+            
+            if (!success) {
+                outcome = Labels.getLabel(messageKey);
+                logger.error("Cert processing failure. Reason: {}", outcome);
+            }
+            
+            if (!enroll) {
+                flowCallbackUrl = Utils.managedBean(IPersistenceService.class).getIssuerUrl() + AGAMA_CB;
+                
+                //Rewrite the cache entry with the outcome of the operation
+                cacheProvider.put(ENTRY_EXP_SECONDS, key, outcome);
+                
+                if (success) {      //trigger inmmediate redirect. No need to display a success message
+                    logger.info("Redirecting for completion of authentication flow");
+                    WebUtils.execRedirect(flowCallbackUrl, false);
+                }
+                return;
+            }
+            
+            if (success) {
+                IPersistenceService ps = Utils.managedBean(IPersistenceService.class);
+                Minion p = ps.get(Minion.class, ps.getPersonDn(userId));
+                
+                User user = new User();
+                user.setUserName(p.getUid());
+                user.setId(p.getInum());
+                user.setPreferredMethod(p.getPreferredMethod());
+                
+                Utils.managedBean(SndFactorAuthenticationUtils.class).notifyEnrollment(user, CertService.AGAMA_FLOW);
+            }
+            
+        } catch (Exception e) {
+            messageKey = "general.error.general";
+            logger.error(e.getMessage(), e);
         }
-
-        certService = CertService.getInstance();
-        hasConfigErrors = !certService.isHasValidProperties();
-
-        if (hasConfigErrors) {
-            logger.info("Configuration errors were detected. Please check the log file and plugin documentation");
-            return;
-        }
-
-        X509Certificate userCert = processCert();
-        //If parsed is true, present is too
-        //If valid is true, parsed is too
-        userCertMatch = valid ? certService.processMatch(userCert, userId, inCasaSession) : null;
-        String status = makeOutputStatus();
-
-        if (inCasaSession) {
-        	if (userCertMatch.equals(UserCertificateMatch.SUCCESS)) {
-        		Utils.managedBean(SndFactorAuthenticationUtils.class).notifyEnrollment(user, CertService.AGAMA_FLOW);
-        	}
-        } else {
-            cacheProvider.put(STATUS_EXP, key, status);
-
-            logger.info("Preparing redirect for completion of authentication flow");
-            String url = Utils.managedBean(IPersistenceService.class).getIssuerUrl();
-            WebUtils.execRedirect(url + "/jans-auth/fl/callback", true);
-        }
-
+        
     }
-
-    private X509Certificate processCert() {
+   
+    private X509Certificate processCert(String clientCertString) {
 
         X509Certificate clientCert = null;
-        String clientCertString = WebUtils.getRequestHeader(CERT_HEADER);
-
-        try {
-            if (Utils.isEmpty(clientCertString)) {
-                String attribute = "javax.servlet.request.X509Certificate";
-                Optional<?> optAttr = Optional.ofNullable(WebUtils.getServletRequest().getAttribute(attribute));
-
-                if (optAttr.isPresent()) {
-                    logger.info("Got a certificate in request attribute '{}'", attribute);
-                    present = true;
-                    clientCert = optAttr.map(X509Certificate[].class::cast).map(certs -> certs[0]).orElse(null);
-                }
-
+        try {            
+            if (Utils.isEmpty(clientCertString) || clientCertString.equals("(null)")) {
+                logger.warn("No data in header '{}'", CERT_HEADER); 
             } else {
-                logger.info("Got a certificate in request header '{}'", CERT_HEADER);
                 present = true;
                 clientCert = CertUtils.x509CertificateFromPem(clientCertString);
             }
@@ -157,28 +164,33 @@ public class CertAuthnVM {
             //apply applicable validations
             valid = certService.validate(clientCert);
         }
-
         return clientCert;
-
+        
     }
+    
+    private Reference getReference(String k) throws Exception {
+        
+        ObjectMapper mapper = new ObjectMapper();
+        String str = Optional.ofNullable(cacheProvider.get(key)).map(Object::toString).orElse(null);
+        
+        if (str == null) return null;
+        return mapper.readValue(str, Reference.class);
 
-    private String makeOutputStatus() {
+    }   
+    
+    private void computeMessageKey() {
         
         if (!present) {
-            errorMessage = Labels.getLabel("usrcert.not_selected");
-            return "NOT_SELECTED";
+            messageKey = "usrcert.not_selected";
+        } else if (!parsed) {
+            messageKey = "usrcert.unparsable";
+        } else if (!valid) {
+            messageKey = "usrcert.not_valid";
+        } else {
+            //match is not null here
+            messageKey = "usrcert.match_" + userCertMatch.name();
         }
-        if (!parsed) {
-            errorMessage = Labels.getLabel("usrcert.unparsable");
-            return "UNPARSABLE";
-        }
-        if (!valid) {
-            errorMessage = Labels.getLabel("usrcert.not_valid");
-            return "NOT_VALID";
-        }
-        //match is not null here
-        return userCertMatch.name();
         
     }
-
+    
 }

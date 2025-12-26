@@ -5,6 +5,7 @@ import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.plugins.certauthn.service.CertService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.pf4j.Extension;
 import org.slf4j.*;
@@ -20,23 +21,23 @@ public class CertAuthnMethod implements AuthnMethod {
 	}
 
 	public String getUINameKey() {
-		return "usercert.method_label";
+        return "usrcert.cert_label";
 	}
 
 	public String getPanelTitleKey() {
-		return "usercert.method_title";
+        return "usrcert.cert_title";
 	}
 
 	public String getPanelTextKey() {
-		return "usercert.method_text";
+        return "usrcert.cert_text";
 	}
 
 	public String getPanelButtonKey() {
-		return "usercert.method_button_label";
+        return "usrcert.cert_manage";
 	}
 
 	public String getPageUrl() {
-		return "cert-detail.zul";
+        return "cert-detail.zul";
 	}
 
 	public String getAcr() {
@@ -48,21 +49,18 @@ public class CertAuthnMethod implements AuthnMethod {
 	}
 
 	public List<BasicCredential> getEnrolledCreds(String id) {
-	    //Code the logic required to build a list of the credentials already enrolled
-	    //by the user whose unique identifier is id
 
-	    //if (certService.getUserColor(id) == null) {
-	        return Collections.emptyList();
-	    //}
-        //In practice you should create instances of BasicCredential and fill them with data appropriately 
-	    //return Collections.singletonList(new BasicCredential("My color", 0L));
-
+        try {
+            return certService.getUserCerts(id).stream()
+                    .map(cert -> new BasicCredential(cert.getFormattedName(), -1)).collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+        
 	}
 
 	public int getTotalUserCreds(String id) {
-	    //Code the logic required to compute the number of the credentials already enrolled
-	    //by the user whose unique identifier is id. Calling size over the returned value of
-	    //method getEnrolledCreds is an option
 	    return getEnrolledCreds(id).size();
 	}
 
