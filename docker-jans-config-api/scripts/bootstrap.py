@@ -407,8 +407,11 @@ class PersistenceSetup:
         # create missing scopes, saved as scopes.ldif (if enabled)
         logger.info("Missing scopes creation is enabled!")
         self.generate_scopes_ldif()
+        scope_file = "/app/templates/jans-config-api/scopes.ldif"
+        logger.info(f"Importing {scope_file}")
+        self.client.upsert_from_file(scope_file, self.ctx)
 
-        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
+        files = ["config.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:
