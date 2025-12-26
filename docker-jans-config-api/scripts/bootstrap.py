@@ -407,6 +407,8 @@ class PersistenceSetup:
         # create missing scopes, saved as scopes.ldif (if enabled)
         logger.info("Missing scopes creation is enabled!")
         self.generate_scopes_ldif()
+
+        # Upsert scopes separately to ensure template changes are reflected in existing scopes
         scope_file = "/app/templates/jans-config-api/scopes.ldif"
         logger.info(f"Importing {scope_file}")
         self.client.upsert_from_file(scope_file, self.ctx)
