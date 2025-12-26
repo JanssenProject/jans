@@ -228,7 +228,7 @@ impl LogWriter for StdOutLogger {
             StdOutLoggerMode::Async { .. } => {
                 if let Some(sender) = &self.sender {
                     sender.send(LogMessage::Log(Box::new(serializer))).expect(
-                        "could not send log entry to queue StdOutLogger, reserver was deallocated",
+                        "could not send log entry to queue StdOutLogger, receiver was deallocated",
                     );
                 }
             },
