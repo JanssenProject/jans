@@ -102,6 +102,7 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path).await?,
         PolicyStoreSource::CjarUrl(url) => load_policy_store_from_cjar_url(url).await?,
         PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path).await?,
+        PolicyStoreSource::ArchiveBytes(bytes) => load_policy_store_from_archive_bytes(bytes)?,
     };
 
     Ok(policy_store)
@@ -231,6 +232,38 @@ async fn load_policy_store_from_directory(
     Err(PolicyStoreLoadError::Directory(
         "Loading from directory is not supported in WASM.".to_string(),
     ))
+}
+
+/// Loads the policy store directly from archive bytes.
+///
+/// This is useful for:
+/// - WASM environments with custom fetch logic (e.g., auth headers)
+/// - Embedding archives in applications
+/// - Loading from non-standard sources (databases, S3, etc.)
+///
+/// Works on all platforms including WASM.
+fn load_policy_store_from_archive_bytes(
+    bytes: &[u8],
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    use crate::common::policy_store::loader;
+
+    // Load from bytes (works in both native and WASM)
+    let loaded = loader::load_policy_store_archive_bytes(bytes.to_vec()).map_err(|e| {
+        PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {}", e))
+    })?;
+
+    // Get the policy store ID and metadata
+    let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
+
+    // Convert to legacy format using PolicyStoreManager
+    let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
+
+    Ok(PolicyStoreWithID {
+        id: store_id,
+        store: legacy_store,
+        metadata: Some(store_metadata),
+    })
 }
 
 #[cfg(test)]
