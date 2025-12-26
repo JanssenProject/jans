@@ -100,6 +100,37 @@ cedarling = Cedarling(bootstrap_config)
 
 See the python documentation for `BootstrapConfig` for other config loading options.
 
+### Policy Store Sources
+
+Python bindings support all policy store source types:
+
+| Source Type      | Description            | Configuration                                     |
+| ---------------- | ---------------------- | ------------------------------------------------- |
+| Inline JSON/YAML | Policy store as string | `CEDARLING_POLICY_STORE_LOCAL`                    |
+| File JSON/YAML   | Local file path        | `CEDARLING_POLICY_STORE_LOCAL_FN`                 |
+| Directory        | Local directory path   | `CEDARLING_POLICY_STORE_LOCAL_FN` (to directory)  |
+| .cjar File       | Local Cedar archive    | `CEDARLING_POLICY_STORE_LOCAL_FN` (to .cjar file) |
+| .cjar URL        | Remote Cedar archive   | `CEDARLING_POLICY_STORE_URI`                      |
+| Lock Server      | Remote policy server   | `CEDARLING_POLICY_STORE_URI`                      |
+
+**Example configurations:**
+
+```py
+# Load from a directory
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store/"
+bootstrap_config = BootstrapConfig.from_env()
+
+# Load from a .cjar file
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
+bootstrap_config = BootstrapConfig.from_env()
+
+# Load from a .cjar URL
+os.environ["CEDARLING_POLICY_STORE_URI"] = "https://example.com/policy-store.cjar"
+bootstrap_config = BootstrapConfig.from_env()
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
+
 ### Authorization
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.

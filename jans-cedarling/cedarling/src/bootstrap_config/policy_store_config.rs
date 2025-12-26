@@ -64,6 +64,15 @@ pub enum PolicyStoreSource {
     /// The path points to a directory containing the policy store
     /// in the new directory structure format (with manifest.json, policies/, etc.).
     Directory(PathBuf),
+
+    /// Read policy from Cedar Archive bytes directly.
+    ///
+    /// The bytes contain a `.cjar` archive (ZIP format) with the policy store.
+    /// This is particularly useful for:
+    /// - WASM environments with custom fetch logic
+    /// - Embedding archives in applications
+    /// - Loading from non-standard sources (databases, S3, etc.)
+    ArchiveBytes(Vec<u8>),
 }
 
 /// Raw policy store source

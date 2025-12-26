@@ -26,9 +26,15 @@ To load policy store one of the following keys must be provided:
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
-- **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local.
+- **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON or .cjar archive, used if policy store is not local.
 
-- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
+- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON/YAML object with policy store
+
+**New Directory-Based Format** (Native platforms only):
+
+Cedarling now supports a directory-based policy store format with human-readable Cedar files. See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
+
+**Note:** In WASM environments, only URL-based (`CjarUrl`, `LockServer`) and inline string sources are available. Filesystem access is not available in WASM
 
 !!! NOTE
     All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.

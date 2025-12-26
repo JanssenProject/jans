@@ -116,6 +116,24 @@ CEDARLING_POLICY_STORE_LOCAL_FN=example_files/policy-store.json python example.p
 
 ## Configuration
 
+### Policy Store Sources
+
+```python
+# From a local JSON/YAML file
+config = {"CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json"}
+
+# From a local directory (new format)
+config = {"CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/"}
+
+# From a local .cjar archive
+config = {"CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar"}
+
+# From a URL (.cjar or Lock Server)
+config = {"CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar"}
+```
+
+For details on the directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
+
 ### ID Token Trust Mode
 
 The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:

@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Cedarling Policy Store Schema",
-    "description": "Defines the structure of the policy store used by Cedarling, which contains all data necessary to verify JWT tokens and evaluate Cedar policies.",
+    "description": "Defines the structure of the policy store used by Cedarling. Supports both the legacy single-file JSON/YAML format and the new directory-based format with human-readable Cedar files.",
     "type": "object",
     "properties": {
         "cedar_version": {
@@ -22,6 +22,7 @@
         }
     },
     "additionalProperties": false,
+    "$comment": "NEW DIRECTORY-BASED FORMAT: Cedarling also supports a directory-based policy store format with the following structure: metadata.json (required), manifest.json (optional for integrity validation), schema.cedarschema (required, human-readable Cedar schema), policies/ directory with .cedar files (required), templates/ directory (optional), entities/ directory with .json files (optional), trusted-issuers/ directory with .json files (optional). The directory can be packaged as a .cjar (Cedar Archive) ZIP file for distribution.",
     "$defs": {
         "PolicyStore": {
             "description": "Represents a single policy store, which includes policies, trusted issuers, and the Cedar schema used for evaluation.",
@@ -162,6 +163,94 @@
                 "entity_type_name"
             ],
             "additionalProperties": true
+        },
+        "DirectoryMetadata": {
+            "description": "Metadata for the new directory-based policy store format (metadata.json). Contains identification, versioning, and descriptive information.",
+            "type": "object",
+            "properties": {
+                "cedar_version": {
+                    "description": "The version of the Cedar policy language used in this policy store (e.g., '4.4.0').",
+                    "type": "string"
+                },
+                "policy_store": {
+                    "description": "Policy store identification and versioning information.",
+                    "$ref": "#/$defs/PolicyStoreInfo"
+                }
+            },
+            "required": ["cedar_version", "policy_store"]
+        },
+        "PolicyStoreInfo": {
+            "description": "Core identification information for a policy store.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Unique identifier for the policy store (hex hash).",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Human-readable name for the policy store.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Optional description of the policy store.",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Semantic version of the policy store content.",
+                    "type": "string"
+                },
+                "created_date": {
+                    "description": "ISO 8601 timestamp when the policy store was created.",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updated_date": {
+                    "description": "ISO 8601 timestamp when the policy store was last modified.",
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": ["id", "name"]
+        },
+        "DirectoryManifest": {
+            "description": "Manifest file for policy store integrity validation (manifest.json). Contains checksums and metadata for all files.",
+            "type": "object",
+            "properties": {
+                "policy_store_id": {
+                    "description": "Reference to the policy store ID this manifest belongs to. Must match the id in metadata.json.",
+                    "type": "string"
+                },
+                "generated_date": {
+                    "description": "ISO 8601 timestamp when the manifest was generated.",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "files": {
+                    "description": "Map of file paths to their metadata (size and checksum).",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/$defs/FileInfo"
+                    }
+                }
+            },
+            "required": ["policy_store_id", "generated_date", "files"]
+        },
+        "FileInfo": {
+            "description": "Information about a file in the policy store manifest.",
+            "type": "object",
+            "properties": {
+                "size": {
+                    "description": "File size in bytes.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "checksum": {
+                    "description": "SHA-256 checksum of the file content. Format: 'sha256:<hex>'.",
+                    "type": "string",
+                    "pattern": "^sha256:[a-fA-F0-9]{64}$"
+                }
+            },
+            "required": ["size", "checksum"]
         }
     }
 }

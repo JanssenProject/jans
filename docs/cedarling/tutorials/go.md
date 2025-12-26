@@ -147,6 +147,46 @@ if err != nil {
 }
 ```
 
+### Policy Store Sources
+
+Go bindings support all native policy store source types:
+
+| Source Type    | Description            | Configuration                                     |
+| -------------- | ---------------------- | ------------------------------------------------- |
+| Inline JSON    | Policy store as string | `CEDARLING_POLICY_STORE_LOCAL`                    |
+| File JSON/YAML | Local file path        | `CEDARLING_POLICY_STORE_LOCAL_FN`                 |
+| Directory      | Local directory path   | `CEDARLING_POLICY_STORE_LOCAL_FN` (to directory)  |
+| .cjar File     | Local Cedar archive    | `CEDARLING_POLICY_STORE_LOCAL_FN` (to .cjar file) |
+| .cjar URL      | Remote Cedar archive   | `CEDARLING_POLICY_STORE_URI`                      |
+| Lock Server    | Remote policy server   | `CEDARLING_POLICY_STORE_URI`                      |
+
+**Example configurations:**
+
+```go
+// Load from a directory
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":      "MyApp",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
+    // ... other config
+}
+
+// Load from a .cjar file
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":      "MyApp",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+    // ... other config
+}
+
+// Load from a .cjar URL
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":   "MyApp",
+    "CEDARLING_POLICY_STORE_URI":   "https://example.com/policy-store.cjar",
+    // ... other config
+}
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
+
 ### Authorization
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.

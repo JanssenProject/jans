@@ -71,6 +71,18 @@ Before using any function from library you need initialize WASM runtime by calli
 export function init(config: any): Promise<Cedarling>;
 
 /**
+ * Create a new instance of the Cedarling application from archive bytes.
+ * Use this when you need custom fetch logic (e.g., with auth headers).
+ *
+ * @param config - Bootstrap configuration (policy store config is ignored)
+ * @param archive_bytes - The .cjar archive as Uint8Array
+ */
+export function init_from_archive_bytes(
+  config: any,
+  archive_bytes: Uint8Array
+): Promise<Cedarling>;
+
+/**
  * The instance of the Cedarling application.
  */
 export class Cedarling {
@@ -247,6 +259,47 @@ export class PolicyEvaluationError {
 ```
 
 ## Configuration
+
+### Policy Store Sources
+
+Cedarling supports multiple ways to load policy stores. **In WASM environments, only URL-based loading is available** (no filesystem access).
+
+#### WASM-Supported Options
+
+```javascript
+// Option 1: Fetch policy store from URL (simple)
+const BOOTSTRAP_CONFIG = {
+  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  // ... other config
+};
+const cedarling = await init(BOOTSTRAP_CONFIG);
+
+// Option 2: Inline JSON string (for embedded policy stores)
+const BOOTSTRAP_CONFIG = {
+  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreObject),
+  // ... other config
+};
+const cedarling = await init(BOOTSTRAP_CONFIG);
+
+// Option 3: Custom fetch with auth headers (use init_from_archive_bytes)
+const response = await fetch("https://example.com/policy-store.cjar", {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const bytes = new Uint8Array(await response.arrayBuffer());
+const cedarling = await init_from_archive_bytes(BOOTSTRAP_CONFIG, bytes);
+```
+
+> **Note:** Directory-based loading and file-based loading are **NOT supported in WASM** (no filesystem access). Use URL-based loading or `init_from_archive_bytes` for custom fetch scenarios.
+
+#### Cedar Archive (.cjar) Format
+
+For the new directory-based format in WASM, package the directory structure as a `.cjar` file (ZIP archive):
+
+```bash
+cd policy-store && zip -r ../policy-store.cjar .
+```
+
+See [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats) for details on the directory structure and metadata.json format.
 
 ### ID Token Trust Mode
 
