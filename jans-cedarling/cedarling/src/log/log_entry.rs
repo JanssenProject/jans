@@ -15,6 +15,7 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
 use smol_str::{SmolStr, ToSmolStr};
 use uuid7::Uuid;
@@ -48,9 +49,9 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
+    pub(crate) fn new(base: BaseLogEntry) -> LogEntry {
         Self {
-            base: BaseLogEntry::new_opt_request_id(log_type, request_id),
+            base,
             auth_info: None,
             msg: String::new(),
             error_msg: None,
@@ -77,11 +78,6 @@ impl LogEntry {
     pub(crate) fn set_cedar_version(mut self) -> Self {
         self.cedar_lang_version = Some(cedar_policy::get_lang_version());
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
-        self
-    }
-
-    pub(crate) fn set_level(mut self, level: LogLevel) -> Self {
-        self.base.level = Some(level);
         self
     }
 }
@@ -403,29 +399,51 @@ pub struct BaseLogEntry {
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(log_type: LogType, request_id: Uuid) -> Self {
-        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
-
-        let default_log_level = if log_type == LogType::System {
-            Some(LogLevel::TRACE)
-        } else {
-            None
-        };
-
-        Self {
-            id: gen_uuid7(),
-            request_id: Some(request_id),
-            timestamp: Some(local_time_string),
-            log_kind: log_type,
-            level: default_log_level,
-        }
+    /// Create new BaseLogEntry for System log with required request_id
+    pub(crate) fn new_system(log_level: LogLevel, request_id: Uuid) -> Self {
+        Self::new_system_opt_request_id(log_level, Some(request_id))
     }
 
-    pub(crate) fn new_opt_request_id(log_type: LogType, request_id: Option<Uuid>) -> Self {
+    /// Create new BaseLogEntry for Decision log with required request_id
+    pub(crate) fn new_decision(request_id: Uuid) -> Self {
+        Self::new_decision_opt_request_id(Some(request_id))
+    }
+
+    #[allow(dead_code)]
+    /// Create new BaseLogEntry for Metric log with required request_id
+    pub(crate) fn new_metric(request_id: Uuid) -> Self {
+        Self::new_metric_opt_request_id(Some(request_id))
+    }
+
+    /// Create new BaseLogEntry for System log with optional request_id
+    /// Only System log can have log level
+    pub(crate) fn new_system_opt_request_id(log_level: LogLevel, request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::System, Some(log_level), request_id)
+    }
+
+    /// Create new BaseLogEntry for Decision log with optional request_id
+    pub(crate) fn new_decision_opt_request_id(request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::Decision, None, request_id)
+    }
+
+    /// Create new BaseLogEntry for Metric log with optional request_id
+    pub(crate) fn new_metric_opt_request_id(request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::Metric, None, request_id)
+    }
+
+    fn new_opt_request_id(
+        log_type: LogType,
+        log_level: Option<LogLevel>,
+        request_id: Option<Uuid>,
+    ) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
-            Some(LogLevel::TRACE)
+            Some(if let Some(log_level_val) = log_level {
+                log_level_val
+            } else {
+                LogLevel::TRACE
+            })
         } else {
             None
         };
@@ -437,6 +455,15 @@ impl BaseLogEntry {
             log_kind: log_type,
             level: default_log_level,
         }
+    }
+
+    /// Create LoggableFn from BaseLogEntry
+    pub(crate) fn with_fn<F, R>(self, builder: F) -> LoggableFn<F>
+    where
+        R: Loggable + Indexed,
+        for<'a> F: Fn(BaseLogEntry) -> R,
+    {
+        LoggableFn::new(self, builder)
     }
 }
 

@@ -6,6 +6,7 @@
 //! Integration tests for SSA JWT validation functionality
 
 use crate::common::json_rules::JsonRule;
+use crate::log::StdOutLoggerMode;
 use crate::{
     AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
     JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
@@ -40,7 +41,7 @@ async fn test_cedarling_with_valid_ssa() {
     let result = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -99,7 +100,7 @@ async fn test_cedarling_without_ssa() {
     let result = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {

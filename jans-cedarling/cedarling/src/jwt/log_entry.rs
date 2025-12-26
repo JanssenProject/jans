@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogLevel, LogType};
+use crate::log::{BaseLogEntry, LogLevel};
 use serde::Serialize;
 
 #[derive(Serialize, Clone)]
@@ -17,8 +17,9 @@ pub struct JwtLogEntry {
 impl JwtLogEntry {
     /// Helper function for creating log messages
     pub fn new(msg: String, level: Option<LogLevel>) -> Self {
-        let mut base = BaseLogEntry::new_opt_request_id(LogType::System, None);
+        let mut base = BaseLogEntry::new_system_opt_request_id(LogLevel::TRACE, None);
         base.level = level;
+
         Self {
             base,
             msg,
