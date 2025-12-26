@@ -40,6 +40,8 @@ enum LogMessage {
     Shutdown,
 }
 
+const ERR_TO_WRITE_STD_LOGGER: &str = "failed to write logs to stdout";
+
 fn spawn_writer_thread(
     receiver: mpsc::Receiver<LogMessage>,
     writer: Box<dyn Write + Send + Sync>,
@@ -69,7 +71,9 @@ fn spawn_writer_thread(
                     buffer.push_str(&json_string);
                     buffer.push('\n');
                     if buffer.len() >= buffer_limit {
-                        writer.write_all(buffer.as_bytes()).unwrap();
+                        writer
+                            .write_all(buffer.as_bytes())
+                            .expect(ERR_TO_WRITE_STD_LOGGER);
                         buffer.clear();
                         // Reset flush deadline since we just flushed
                         next_flush_deadline = Instant::now() + flush_timeout;
@@ -81,7 +85,9 @@ fn spawn_writer_thread(
                 Err(mpsc::RecvTimeoutError::Timeout) => {
                     // Timeout, flush buffer if not empty
                     if !buffer.is_empty() {
-                        writer.write_all(buffer.as_bytes()).unwrap();
+                        writer
+                            .write_all(buffer.as_bytes())
+                            .expect(ERR_TO_WRITE_STD_LOGGER);
                         buffer.clear();
                         next_flush_deadline = Instant::now() + flush_timeout;
                     }
@@ -89,7 +95,9 @@ fn spawn_writer_thread(
                 Err(mpsc::RecvTimeoutError::Disconnected) => {
                     // Sender dropped, flush and exit
                     if !buffer.is_empty() {
-                        writer.write_all(buffer.as_bytes()).unwrap();
+                        writer
+                            .write_all(buffer.as_bytes())
+                            .expect(ERR_TO_WRITE_STD_LOGGER);
                         buffer.clear();
                     }
                     break;
@@ -98,7 +106,9 @@ fn spawn_writer_thread(
         }
         // Final flush
         if !buffer.is_empty() {
-            writer.write_all(buffer.as_bytes()).unwrap();
+            writer
+                .write_all(buffer.as_bytes())
+                .expect(ERR_TO_WRITE_STD_LOGGER);
         }
     })
 }
@@ -206,7 +216,7 @@ impl LogWriter for StdOutLogger {
             StdOutLoggerMode::Immediate => {
                 let json_string = serializer();
                 if let Some(writer) = &self.writer {
-                    let mut guard = writer.lock().unwrap();
+                    let mut guard = writer.lock().expect(ERR_TO_WRITE_STD_LOGGER);
                     let _ = guard.write_all(json_string.as_bytes());
                     let _ = guard.write_all(b"\n");
                     let _ = guard.flush();
