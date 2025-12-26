@@ -64,6 +64,12 @@ pub enum StdOutMode {
     Immediate,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+const PARSE_STDOUT_MODE_ERR: &str = "Invalid stdout mode. Must be 'async' or 'immediate'";
+
+#[cfg(target_arch = "wasm32")]
+const PARSE_STDOUT_MODE_ERR: &str = "Invalid stdout mode. Must be 'immediate'";
+
 impl std::str::FromStr for StdOutMode {
     type Err = String;
 
@@ -72,10 +78,7 @@ impl std::str::FromStr for StdOutMode {
             #[cfg(not(target_arch = "wasm32"))]
             "async" => Ok(StdOutMode::Async),
             "immediate" => Ok(StdOutMode::Immediate),
-            _ => Err(format!(
-                "Invalid stdout mode: {}. Must be 'async' or 'immediate'",
-                s
-            )),
+            _ => Err(PARSE_STDOUT_MODE_ERR.to_string()),
         }
     }
 }
