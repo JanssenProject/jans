@@ -21,7 +21,120 @@ For a comprehensive JSON schema defining the structure of the policy store, see:
 
 **Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK`; `CEDARLING_POLICY_STORE_URI`; and `CEDARLING_POLICY_STORE_ID` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
 
-## JSON Schema
+## Policy Store Formats
+
+Cedarling supports two policy store formats:
+
+### 1. Legacy Single-File Format (JSON/YAML)
+
+The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.
+
+### 2. New Directory-Based Format
+
+The new directory-based format uses human-readable Cedar files organized in a structured directory:
+
+```
+policy-store/
+├── metadata.json           # Required: Store identification and versioning
+├── manifest.json           # Optional: File checksums for integrity validation
+├── schema.cedarschema      # Required: Cedar schema in human-readable format
+├── policies/               # Required: Directory containing .cedar policy files
+│   ├── allow-read.cedar
+│   └── deny-guest.cedar
+├── templates/              # Optional: Directory containing .cedar template files
+├── entities/               # Optional: Directory containing .json entity files
+└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+```
+
+#### metadata.json
+
+Contains policy store identification and versioning:
+
+```json
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies",
+    "description": "Optional description",
+    "version": "1.0.0",
+    "created_date": "2024-01-01T00:00:00Z",
+    "updated_date": "2024-01-02T00:00:00Z"
+  }
+}
+```
+
+#### manifest.json (Optional)
+
+Provides integrity validation with file checksums:
+
+```json
+{
+  "policy_store_id": "abc123def456",
+  "generated_date": "2024-01-01T12:00:00Z",
+  "files": {
+    "metadata.json": {
+      "size": 245,
+      "checksum": "sha256:abc123..."
+    },
+    "schema.cedarschema": {
+      "size": 1024,
+      "checksum": "sha256:def456..."
+    }
+  }
+}
+```
+
+When a manifest is present, Cedarling validates:
+
+- File checksums match (SHA-256)
+- File sizes match
+- Policy store ID matches between manifest and metadata
+
+#### Policy Files
+
+Policies are stored as human-readable `.cedar` files in the `policies/` directory:
+
+```cedar
+@id("allow-read")
+permit(
+    principal,
+    action == MyApp::Action::"read",
+    resource
+);
+```
+
+Each policy file must have an `@id` annotation that uniquely identifies the policy.
+
+#### Cedar Archive (.cjar) Format
+
+The directory structure can be packaged as a `.cjar` file (ZIP archive) for distribution:
+
+```bash
+# Create a .cjar archive from a policy store directory
+cd policy-store && zip -r ../policy-store.cjar .
+```
+**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CjarUrl` or `init_from_archive_bytes()` for custom fetch scenarios.
+
+**Advanced: Loading from Bytes**
+
+For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:
+
+- **WASM**: Use `init_from_archive_bytes(config, bytes)` function
+- **Rust**: Use `PolicyStoreSource::ArchiveBytes(Vec<u8>)` or `load_policy_store_archive_bytes()` function
+
+```javascript
+// WASM example with custom fetch
+const response = await fetch(url, { headers: { Authorization: "..." } });
+const bytes = new Uint8Array(await response.arrayBuffer());
+const cedarling = await init_from_archive_bytes(config, bytes);
+```
+
+## Legacy Single-File Format (JSON)
+
+The following sections document the legacy single-file JSON format.
+
+### JSON Schema
 
 The JSON Schema accepted by Cedarling is defined as follows:
 
