@@ -97,7 +97,7 @@ impl std::fmt::Display for StdOutMode {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct StdOutConfig {
     /// `CEDARLING_STDOUT_MODE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    /// The logging mode: "async" (default) or "immediate".
+    /// The logging mode: "async" or "immediate" (default).
     /// Only applicable for native targets (not WASM).
     pub mode: StdOutMode,
 
