@@ -102,15 +102,52 @@ await initWasm();
 let cedarling = init(
   "CEDARLING_APPLICATION_NAME": "My App",
   // make sure to update this with your own policy store
-  "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/...",
-  "CEDARLING_LOG_TYPE": "std_out",
-  "CEDARLING_LOG_LEVEL": "DEBUG",
-  "CEDARLING_USER_AUTHZ": "enabled",
-  "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
-);
+  CEDARLING_POLICY_STORE_URI: "https://raw.githubusercontent.com/...",
+  CEDARLING_LOG_TYPE: "std_out",
+  CEDARLING_LOG_LEVEL: "DEBUG",
+  CEDARLING_USER_AUTHZ: "enabled",
+  CEDARLING_WORKLOAD_AUTHZ: "disabled",
+  CEDARLING_JWT_SIG_VALIDATION: "disabled",
+  CEDARLING_ID_TOKEN_TRUST_MODE: "never",
+});
 ```
+
+### Policy Store Sources (WASM)
+
+In WASM environments, filesystem access is not available. Use one of these options:
+
+```javascript
+// Option 1: URL-based loading (simple)
+let cedarling = await init({
+  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  // ... other config
+});
+
+// Option 2: Inline JSON string
+let cedarling = await init({
+  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreObject),
+  // ... other config
+});
+
+// Option 3: Custom fetch with auth headers
+import initWasm, {
+  init_from_archive_bytes,
+} from "@janssenproject/cedarling_wasm";
+
+const response = await fetch("https://example.com/policy-store.cjar", {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const bytes = new Uint8Array(await response.arrayBuffer());
+let cedarling = await init_from_archive_bytes(config, bytes);
+```
+
+For the directory-based format, package your policy store as a `.cjar` file and host it:
+
+```bash
+cd policy-store && zip -r ../policy-store.cjar .
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for details.
 
 ### Authorization
 
