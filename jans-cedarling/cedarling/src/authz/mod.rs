@@ -18,7 +18,7 @@ use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
-    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, gen_uuid7, log_async,
+    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -695,7 +695,7 @@ impl Authz {
             let log_entry = LogEntry::new(BaseLogEntry::new_decision(request_id))
                 .set_message(format!("Policy evaluation errors for {}", principal_name))
                 .set_error(format!("{:?}", diagnostics.errors));
-            log_async(&self.config.log_service, log_entry);
+            self.config.log_service.log_any(log_entry);
         }
     }
 
@@ -720,7 +720,7 @@ impl Authz {
             )
             .set_error(serialized_errors);
 
-        log_async(&self.config.log_service, log_entry);
+        self.config.log_service.log_any(log_entry);
     }
 }
 

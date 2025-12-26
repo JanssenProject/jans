@@ -82,6 +82,7 @@ impl LogStrategy {
         }
     }
 
+    #[cfg(test)]
     pub(super) fn logger(&self) -> &LogStrategyLogger {
         &self.logger
     }
