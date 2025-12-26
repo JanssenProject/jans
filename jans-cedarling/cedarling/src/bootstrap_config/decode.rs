@@ -17,7 +17,7 @@ use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource, StdOutConfig,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::log::{LogLevel, StdOutLoggerMode};

@@ -93,25 +93,6 @@ impl std::fmt::Display for StdOutMode {
     }
 }
 
-/// Configuration for stdout log.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct StdOutConfig {
-    /// `CEDARLING_STDOUT_MODE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    /// The logging mode: "async" or "immediate" (default).
-    /// Only applicable for native targets (not WASM).
-    pub mode: StdOutMode,
-
-    /// `CEDARLING_STDOUT_TIMEOUT_MS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    /// The flush timeout in milliseconds for async stdout logging.
-    /// Only applicable for native targets (not WASM) and async mode.
-    pub timeout_ms: Option<u64>,
-
-    /// `CEDARLING_STDOUT_BUFFER_LIMIT` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    /// The buffer size limit in bytes for async stdout logging.
-    /// Only applicable for native targets (not WASM) and async mode.
-    pub buffer_limit: Option<usize>,
-}
-
 /// Config for the lock logger that are set using the bootstrap configs.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LockServiceConfig {
