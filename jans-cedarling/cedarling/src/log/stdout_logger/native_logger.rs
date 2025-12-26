@@ -216,10 +216,13 @@ impl LogWriter for StdOutLogger {
             StdOutLoggerMode::Immediate => {
                 let json_string = serializer();
                 if let Some(writer) = &self.writer {
-                    let mut guard = writer.lock().expect(ERR_TO_WRITE_STD_LOGGER);
-                    let _ = guard.write_all(json_string.as_bytes());
-                    let _ = guard.write_all(b"\n");
-                    let _ = guard.flush();
+                    let mut guard = writer
+                        .lock()
+                        .expect("failed to acquire lock on stdout writer");
+                    guard
+                        .write_all(json_string.as_bytes())
+                        .expect(ERR_TO_WRITE_STD_LOGGER);
+                    guard.write_all(b"\n").expect(ERR_TO_WRITE_STD_LOGGER);
                 }
             },
             StdOutLoggerMode::Async { .. } => {
