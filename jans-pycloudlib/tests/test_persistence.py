@@ -281,6 +281,23 @@ def test_sql_opendj_attr_types(monkeypatch):
     assert SqlSchemaMixin().opendj_attr_types == json.loads(types_str)
 
 
+@pytest.mark.parametrize(("db_dialect", "db_name", "db_schema", "actual_db_schema"), [
+    # using default schema names
+    ("mysql", "jans", "", "jans"),
+    ("pgsql", "jans", "", "public"),
+    # using custom schema names
+    ("mysql", "jans", "custom", "custom"),
+    ("pgsql", "jans", "custom", "custom"),
+])
+def test_resolve_db_schema_name(monkeypatch, db_dialect, db_name, db_schema, actual_db_schema):
+    from jans.pycloudlib.persistence.sql import resolve_db_schema_name
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", db_dialect)
+    monkeypatch.setenv("CN_SQL_DB_NAME", db_name)
+    monkeypatch.setenv("CN_SQL_DB_SCHEMA", db_schema)
+    assert resolve_db_schema_name() == actual_db_schema
+
+
 # =====
 # utils
 # =====

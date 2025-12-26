@@ -568,6 +568,8 @@ class SqlClient(SqlSchemaMixin):
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
                 event.listen(self._engine, "first_connect", preconfigure_simple_json)
+            else:
+                event.listen(self._engine, "connect", set_postgres_search_path)
 
         # initialized engine
         return self._engine
@@ -1096,14 +1098,7 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
         server_time_zone = os.environ.get("CN_SQL_DB_TIMEZONE", "UTC")
-
-        # In MySQL, physically, a schema is synonymous with a database
-        if db_dialect == "mysql":
-            default_schema = db_name
-        else:  # likely postgres
-            # by default, PostgreSQL creates schema called `public` upon database creation
-            default_schema = "public"
-        db_schema = os.environ.get("CN_SQL_DB_SCHEMA", "") or default_schema
+        db_schema = resolve_db_schema_name()
 
         rendered_txt = txt % {
             "rdbm_db": db_name,
@@ -1312,3 +1307,49 @@ def override_sql_ssl_property(sql_prop_file):
 
     with open(sql_prop_file, "w") as f:
         f.write(javaproperties.dumps(props, timestamp=None))
+
+
+def resolve_db_schema_name() -> str:
+    """Resolve database schema name based on dialect and environment.
+
+    For MySQL, schema is synonymous with database name.
+    For PostgreSQL, defaults to 'public' unless overridden.
+
+    Returns:
+        Schema name to use.
+    """
+    db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+    db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
+
+    # In MySQL, physically, a schema is synonymous with a database
+    if db_dialect == "mysql":
+        default_schema = db_name
+    else:  # likely postgres
+        # by default, PostgreSQL creates schema called `public` upon database creation
+        default_schema = "public"
+    return os.environ.get("CN_SQL_DB_SCHEMA", "") or default_schema
+
+
+def set_postgres_search_path(dbapi_connection: _t.Any, connection_record: _t.Any) -> None:
+    """Set PostgreSQL search_path to the resolved schema on new connections.
+
+    Args:
+        dbapi_connection: Raw DBAPI connection.
+        connection_record: SQLAlchemy connection record (unused but required by event signature).
+    """
+    db_schema = resolve_db_schema_name()
+
+    # use the .autocommit DBAPI attribute so that when the SET search_path directive is invoked,
+    # it is invoked outside of the scope of any transaction and therefore will not be reverted when
+    # the DBAPI connection has a rollback.
+    existing_autocommit = dbapi_connection.autocommit
+
+    try:
+        dbapi_connection.autocommit = True
+        cursor = dbapi_connection.cursor()
+        try:
+            cursor.execute("SET search_path = %s", [db_schema])
+        finally:
+            cursor.close()
+    finally:
+        dbapi_connection.autocommit = existing_autocommit
