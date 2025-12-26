@@ -69,6 +69,7 @@ impl std::str::FromStr for StdOutMode {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
+            #[cfg(not(target_arch = "wasm32"))]
             "async" => Ok(StdOutMode::Async),
             "immediate" => Ok(StdOutMode::Immediate),
             _ => Err(format!(
@@ -82,6 +83,7 @@ impl std::str::FromStr for StdOutMode {
 impl std::fmt::Display for StdOutMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            #[cfg(not(target_arch = "wasm32"))]
             StdOutMode::Async => write!(f, "async"),
             StdOutMode::Immediate => write!(f, "immediate"),
         }

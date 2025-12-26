@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::bootstrap_config::log_config::StdOutMode;
 use crate::log::LogLevel;
 use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
@@ -16,6 +15,7 @@ use web_sys::wasm_bindgen::JsValue;
 /// In WASM, only immediate logging is supported.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum StdOutLoggerMode {
+    /// Immediate logging to console.
     Immediate,
 }
 
@@ -26,7 +26,7 @@ pub(crate) struct StdOutLogger {
 
 impl StdOutLogger {
     // mode with `_mode` parameter is kept for compatibility with native version
-    pub(crate) fn new(log_level: LogLevel, _mode: StdOutMode) -> Self {
+    pub(crate) fn new(log_level: LogLevel, _mode: StdOutLoggerMode) -> Self {
         Self { log_level }
     }
 }
