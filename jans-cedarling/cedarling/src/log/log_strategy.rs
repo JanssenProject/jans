@@ -53,7 +53,7 @@ impl LogStrategy {
                 )))
             },
             LogTypeConfig::StdOut(stdout_config) => {
-                let logger = StdOutLogger::new(config.log_level, stdout_config.clone());
+                let logger = StdOutLogger::new(config.log_level, *stdout_config);
                 LogStrategyLogger::StdOut(logger)
             },
         };
