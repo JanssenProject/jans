@@ -97,16 +97,34 @@ public class ClientsResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
+    /**
+     * Retrieve a paged list of OpenID Connect clients matching the given search criteria.
+     *
+     * @param limit          maximum number of results to return
+     * @param pattern        search pattern to filter clients
+     * @param startIndex     1-based index of the first result to return
+     * @param sortBy         attribute used to sort results
+     * @param sortOrder      sorting direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. "applicationType=web,persistClientAuthorizations=true")
+     * @return               HTTP 200 response whose entity is a PagedResult<Client> containing the matching clients
+     * @throws EncryptionException if decrypting client secrets for the response fails
+     */
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getOpenIdConnectClients(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -128,16 +146,27 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
+    /**
+     * Retrieve a specific OpenID Connect client by its Inum.
+     *
+     * @param inum the client's Inum (identifier)
+     * @return a Response whose entity is the requested Client and whose status is 200 (OK)
+     */
     @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
@@ -151,9 +180,22 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(applyResponsePolicy(client)).build();
     }
 
+    /**
+     * Create a new OpenID Connect client.
+     *
+     * Validates redirect URIs, scopes, and claims; generates a clientId if missing; ensures a client secret exists
+     * (generating one when omitted) and stores it encrypted; sets the client's DN and deletable flag, and persists the client.
+     *
+     * @param client the Client to create; must include redirect URIs. If clientId is absent, a new inum will be generated and assigned.
+     * @return an HTTP 201 Created response containing the created Client with its clientSecret decrypted and the original claims preserved.
+     * @throws EncryptionException if encryption or decryption of the client secret fails.
+     */
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
@@ -162,7 +204,8 @@ public class ClientsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client to be added - client:{}, client.getAttributes():{}, client.getCustomAttributes():{}",
@@ -209,9 +252,23 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    /**
+     * Update an existing OpenID Connect client.
+     *
+     * <p>Validates scopes and claims, preserves the existing clientId and base DN, encrypts a provided
+     * client secret before persistence, and returns the stored client with the client secret decrypted
+     * and claims restored for the response.</p>
+     *
+     * @param client the Client object containing updated fields; must include the client's `clientId` and `redirectUris`
+     * @return the updated Client with decrypted `clientSecret` and restored `claims`
+     * @throws EncryptionException if encryption or decryption of the client secret fails
+     */
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
@@ -221,7 +278,8 @@ public class ClientsResource extends ConfigBaseResource {
     @PUT
     @Ignore
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be updated - client:{}", escapeLog(client));
@@ -260,9 +318,21 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(result).build();
     }
 
+    /**
+     * Apply a JSON Patch to an existing OpenID Connect client identified by its inum.
+     *
+     * @param inum            the client identifier (inum)
+     * @param jsonPatchString the JSON Patch document as a string
+     * @return a Response containing the patched Client and an HTTP 200 status
+     * @throws JsonPatchException if the patch cannot be applied to the client
+     * @throws IOException        if an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
@@ -272,7 +342,8 @@ public class ClientsResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
@@ -300,9 +371,20 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(existingClient).build();
     }
 
+    /**
+     * Delete the OpenID Connect client identified by the given inum.
+     *
+     * Validates that the client exists and removes it from storage.
+     *
+     * @param inum the client identifier (inum) of the client to delete
+     * @return a 204 No Content response on successful deletion
+     */
     @Operation(summary = "Delete OpenId Connect client", description = "Delete OpenId Connect client", operationId = "delete-oauth-openid-client-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -310,7 +392,8 @@ public class ClientsResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteClient(
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {

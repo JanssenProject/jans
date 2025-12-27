@@ -42,9 +42,9 @@ In request to Authorization Endpoint and to Token Endpoint RP can specify `autho
 ```
 
 `type` defines type of authorization detail. Each such type is represented by AS `AuthzDetailType` custom scripts.
-It means that for example above administrator must define two `AuthzDetailType` custom scripts with names: `demo_authz_detail` and `financial-transaction`. 
+It means that for example above administrator must define two `AuthzDetailType` custom scripts with names: `demo_authz_detail` and `financial-transaction`.
 
-If `authorization_details` parameter is absent in request then `AuthzDetailType` custom scripts are not invoked. 
+If `authorization_details` parameter is absent in request then `AuthzDetailType` custom scripts are not invoked.
 
 `demo_authz_detail` and `financial-transaction` `AuthzDetailType` custom scripts must be provided by administrator.
 
@@ -101,7 +101,7 @@ If at least one element from `authorization_details` array fails validation erro
 - Get full HTTP Request - `context.getHttpRequest()`
 
 
-## Simple Use Case: validate authz details is present and return string representation 
+## Simple Use Case: validate that authz details are present and return string representation
 
 ### Script Type: Java
 

@@ -16,9 +16,9 @@ AS support different types of client authentications such as :
 - client_secret_jwt
 - private_key_jwt
 
-Sometimes it's convenient to customize default AS client authentication process. For this reason Client Authentication custom script was introduced. 
+Sometimes it's convenient to customize default AS client authentication process. For this reason Client Authentication custom script was introduced.
 
-If script successfully authenticated client, it should return it in `authenticateClient`. 
+If script successfully authenticated client, it should return it in `authenticateClient`.
 If client is not returned then AS performs built-in authentication.
 
 ## Interface
@@ -46,7 +46,7 @@ The Client Authentication script implements the [ClientAuthnType](https://github
 |`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalClientAuthnContext.java) |
 
 
-## Sample script which demonstrates basic client authentication 
+## Sample script which demonstrates basic client authentication
 
 ### Script Type: Java
 
