@@ -290,16 +290,9 @@ impl EntityBuilder {
 
     /// Resolve issuer name using trusted issuer metadata or fallback to hostname
     fn resolve_issuer_name(&self, issuer: &str) -> Result<String, MultiIssuerEntityError> {
-        // TODO: utilize HashMap search to avoid iteration over values.
-
         // First, try to find the issuer in trusted issuer metadata
-        for trusted_issuer in self.trusted_issuers.values() {
-            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
-            // Compare both the full URL and just the origin
-            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
-                // Use the trusted issuer's name field
-                return Ok(sanitize_issuer_name(&trusted_issuer.name));
-            }
+        if let Some(trusted_issuer) = self.issuers_index.find(issuer) {
+            return Ok(sanitize_issuer_name(&trusted_issuer.name));
         }
 
         // Fallback to hostname from JWT iss claim
@@ -380,7 +373,13 @@ mod tests {
         };
         trusted_issuers.insert("company".to_string(), company_issuer);
 
-        EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap()
+        EntityBuilder::new(
+            config,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None,
+            DefaultEntities::default(),
+        )
+        .unwrap()
     }
 
     fn create_test_token(
@@ -647,8 +646,13 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder =
-            EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None,
+            DefaultEntities::default(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -708,8 +712,13 @@ mod tests {
         };
 
         let trusted_issuers = HashMap::new();
-        let builder =
-            EntityBuilder::new(config, &trusted_issuers, None, DefaultEntities::default()).unwrap();
+        let builder = EntityBuilder::new(
+            config,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
+            None,
+            DefaultEntities::default(),
+        )
+        .unwrap();
 
         let mut claims = HashMap::new();
         claims.insert("iss".to_string(), json!("https://test.issuer.com"));
@@ -783,7 +792,7 @@ mod tests {
         )]);
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -927,7 +936,7 @@ mod tests {
         let trusted_issuers = HashMap::new();
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )

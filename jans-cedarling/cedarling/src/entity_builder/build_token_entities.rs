@@ -111,7 +111,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -163,7 +163,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             None,
             DefaultEntities::default(),
         )
