@@ -25,8 +25,7 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
         .block_on(prepare_cedarling_without_jwt_validation())
         .expect("should initialize Cedarling");
 
-    let request =
-        prepare_cedarling_request_for_without_jwt_validation().expect("should prepare r:equest");
+    let request = prepare_cedarling_request_for_without_jwt_validation();
 
     c.bench_with_input(
         BenchmarkId::new("authz_authorize_without_jwt_validation", "tokio runtime"),
@@ -53,8 +52,8 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
         ))
         .expect("should initialize Cedarling");
 
-    let request = prepare_cedarling_request_for_with_jwt_validation(mock1.keys)
-        .expect("should prepare request");
+    let request =
+        prepare_cedarling_request_for_with_jwt_validation(&mock1.keys, &mock1.base_idp_url);
 
     c.bench_with_input(
         BenchmarkId::new("authz_authorize_with_jwt_validation_hs256", "tokio runtime"),
@@ -163,15 +162,14 @@ async fn prepare_cedarling_with_jwt_validation(
     Cedarling::new(&bootstrap_config).await
 }
 
-pub fn prepare_cedarling_request_for_without_jwt_validation() -> Result<Request, serde_json::Error>
-{
+pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
     Request::deserialize(serde_json::json!(
         {
             "tokens": {
                 "access_token": generate_token_using_claims(json!({
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": "https://test.jans.org",
                     "token_type": "Bearer",
                     "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
@@ -201,7 +199,7 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Result<Request,
                     "exp": 1724835859,
                     "iat": 1724832259,
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": "https://test.jans.org",
                     "jti": "sk3T40NYSYuk5saHZNpkZw",
                     "nonce": "c3872af9-a0f5-4c3f-a1af-f9d0e8846e81",
                     "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
@@ -222,7 +220,7 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Result<Request,
                     "email": "user@example.com",
                     "username": "UserNameExample",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": "https://test.jans.org",
                     "given_name": "Admin",
                     "middle_name": "Admin",
                     "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
@@ -251,18 +249,20 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Result<Request,
             "context": {},
         }
     ))
+    .expect("should build request")
 }
 
 pub fn prepare_cedarling_request_for_with_jwt_validation(
-    keys1: KeyPair,
-) -> Result<Request, serde_json::Error> {
+    keys1: &KeyPair,
+    issuer_url: &str,
+) -> Request {
     Request::deserialize(serde_json::json!(
         {
             "tokens": {
                 "access_token": generate_token_using_claims_and_keypair(&json!({
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": issuer_url,
                     "token_type": "Bearer",
                     "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
@@ -284,7 +284,7 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                         "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
                       }
                     }
-                }), &keys1),
+                }), keys1),
                 "id_token": generate_token_using_claims_and_keypair(&json!({
                     "acr": "basic",
                     "amr": "10",
@@ -292,7 +292,7 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                     "exp": 1724835859,
                     "iat": 1724832259,
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": issuer_url,
                     "jti": "sk3T40NYSYuk5saHZNpkZw",
                     "nonce": "c3872af9-a0f5-4c3f-a1af-f9d0e8846e81",
                     "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
@@ -307,13 +307,13 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                       }
                     },
                     "role":"Admin"
-                }),&keys1),
+                }), keys1),
                 "userinfo_token":  generate_token_using_claims_and_keypair(&json!({
                     "country": "US",
                     "email": "user@example.com",
                     "username": "UserNameExample",
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
-                    "iss": "https://admin-ui-test.gluu.org",
+                    "iss": issuer_url,
                     "given_name": "Admin",
                     "middle_name": "Admin",
                     "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
@@ -328,7 +328,7 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                         "api-admin"
                     ],
                     "exp": 1724945978
-                }), &keys1),
+                }), keys1),
             },
             "action": "Jans::Action::\"Update\"",
             "resource": {
@@ -342,4 +342,5 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
             "context": {},
         }
     ))
+    .expect("should build request")
 }
