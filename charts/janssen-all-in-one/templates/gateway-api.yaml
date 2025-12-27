@@ -31,10 +31,14 @@ spec:
       - name: {{ .Values.gatewayApi.tlsSecretName }}
 
 ---
+{{- /* ======================================================== */}}
+{{- /* ROUTE 1: PUBLIC CONFIGURATION (HTTP & HTTPS)             */}}
+{{- /* These endpoints can be accessible via HTTP (No Redirect) */}}
+{{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-routes
+  name: {{ $fullName }}-routes-public
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ $fullName }}-routes
@@ -48,14 +52,11 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gatewayApi.name }}
+    # No sectionName: Attaches to ALL listeners (HTTP and HTTPS)
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-
-  {{- /* ======================================================== */}}
-  {{- /* SECTION 1: URL REWRITES                                  */}}
-  {{- /* ======================================================== */}}
-
+  
   {{- /* 1. OpenID Configuration */}}
   {{- if index .Values "auth-server" "ingress" "openidConfigEnabled" }}
   - matches:
@@ -259,7 +260,7 @@ spec:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
   {{- end }}
-
+  
   {{- /* 13. Jans Lock */}}
   {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockEnabled") }}
   - matches:
@@ -277,12 +278,34 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
+---
+{{- /* ======================================================== */}}
+{{- /* ROUTE 2: SECURE APPS (HTTPS TRAFFIC)                     */}}
+{{- /* These endpoints serve the app when reached on HTTPS      */}}
+{{- /* ======================================================== */}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-routes-secure
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if .Values.gatewayApi.routeLabels }}
+{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- end }}
+{{- if .Values.gatewayApi.routeAnnotations }}
+  annotations:
+{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayApi.name }}
+    sectionName: https  # ONLY LISTEN ON HTTPS
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
 
-  {{- /* ======================================================== */}}
-  {{- /* SECTION 2: STANDARD PREFIXES (No Rewrites)               */}}
-  {{- /* ======================================================== */}}
-
-  {{- /* 14. Auth Server (/jans-auth) */}}
+  {{- /* 1. Auth Server (/jans-auth) */}}
   {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
   - matches:
     - path:
@@ -293,7 +316,7 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 15. Casa (/jans-casa) */}}
+  {{- /* 2. Casa (/jans-casa) */}}
   {{- if .Values.casa.ingress.casaEnabled }}
   - matches:
     - path:
@@ -304,7 +327,7 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 16. Config API (/jans-config-api) */}}
+  {{- /* 3. Config API (/jans-config-api) */}}
   {{- if index .Values "config-api" "ingress" "configApiEnabled" }}
   - matches:
     - path:
@@ -315,7 +338,7 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 17. FIDO2 (/jans-fido2) */}}
+  {{- /* 4. FIDO2 (/jans-fido2) */}}
   {{- if .Values.fido2.ingress.fido2Enabled }}
   - matches:
     - path:
@@ -326,7 +349,7 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 18. SCIM (/jans-scim) */}}
+  {{- /* 5. SCIM (/jans-scim) */}}
   {{- if .Values.scim.ingress.scimEnabled }}
   - matches:
     - path:
@@ -337,7 +360,7 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 19. SAML (/kc) */}}
+  {{- /* 6. SAML (/kc) */}}
   {{- if .Values.saml.ingress.samlEnabled }}
   - matches:
     - path:
@@ -346,6 +369,119 @@ spec:
     backendRefs:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
+  {{- end }}
+
+---
+{{- /* ======================================================== */}}
+{{- /* ROUTE 3: SECURE APPS (HTTP REDIRECT)                     */}}
+{{- /* These endpoints REDIRECT to HTTPS when reached on HTTP   */}}
+{{- /* ======================================================== */}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-routes-redirect
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if .Values.gatewayApi.routeLabels }}
+{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- end }}
+{{- if .Values.gatewayApi.routeAnnotations }}
+  annotations:
+{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayApi.name }}
+    sectionName: http  # ONLY LISTEN ON HTTP
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  
+  {{- /* Same 6 Rules, but with Redirect Filter instead of BackendRef */}}
+  
+  {{- /* 1. Auth Server Redirect */}}
+  {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-auth
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        port: 443
+        statusCode: 301
+  {{- end }}
+
+  {{- /* 2. Casa Redirect */}}
+  {{- if .Values.casa.ingress.casaEnabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-casa
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        port: 443
+        statusCode: 301
+  {{- end }}
+
+  {{- /* 3. Config API Redirect */}}
+  {{- if index .Values "config-api" "ingress" "configApiEnabled" }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-config-api
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        port: 443
+        statusCode: 301
+  {{- end }}
+
+  {{- /* 4. FIDO2 Redirect */}}
+  {{- if .Values.fido2.ingress.fido2Enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-fido2
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        port: 443
+        statusCode: 301
+  {{- end }}
+
+  {{- /* 5. SCIM Redirect */}}
+  {{- if .Values.scim.ingress.scimEnabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-scim
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        port: 443
+        statusCode: 301
+  {{- end }}
+
+  {{- /* 6. SAML Redirect */}}
+  {{- if .Values.saml.ingress.samlEnabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /kc
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        port: 443
+        statusCode: 301
   {{- end }}
 
 {{- end }}
