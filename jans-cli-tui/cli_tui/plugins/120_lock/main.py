@@ -227,6 +227,11 @@ class Plugin(DialogUtils):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.main_container)
             else:
                 self.data = response.json()
+                self.app.show_message(
+                    title=_(common_strings.success),
+                    message=_("Jans Lock Server configuration was saved."),
+                    tobefocused=self.main_container
+                    )
 
         asyncio.ensure_future(lock_config_coroutine())
 
