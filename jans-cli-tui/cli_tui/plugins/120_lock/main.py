@@ -224,7 +224,7 @@ class Plugin(DialogUtils):
             response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
             if response.status_code not in (200, 201):
-                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.main_container)
+                common_data.app.show_message(_(common_strings.error), str(response.text), tobefocused=self.main_container)
             else:
                 self.data = response.json()
                 self.app.show_message(
