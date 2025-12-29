@@ -22,7 +22,6 @@
         }
     },
     "additionalProperties": false,
-    "$comment": "NEW DIRECTORY-BASED FORMAT: Cedarling also supports a directory-based policy store format with the following structure: metadata.json (required), manifest.json (optional for integrity validation), schema.cedarschema (required, human-readable Cedar schema), policies/ directory with .cedar files (required), templates/ directory (optional), entities/ directory with .json files (optional), trusted-issuers/ directory with .json files (optional). The directory can be packaged as a .cjar (Cedar Archive) ZIP file for distribution.",
     "$defs": {
         "PolicyStore": {
             "description": "Represents a single policy store, which includes policies, trusted issuers, and the Cedar schema used for evaluation.",
