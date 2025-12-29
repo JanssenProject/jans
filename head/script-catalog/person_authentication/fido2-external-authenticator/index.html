@@ -14478,7 +14478,7 @@
 <h1 id="fido2">FIDO2<a class="headerlink" href="#fido2" title="Permanent link">#</a></h1>
 <p><a href="https://fidoalliance.org/fido2/">FIDO 2.0 (FIDO2)</a> , an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments. The Janssen server includes a FIDO2 server implementation. This enables authentications by using  platform authenticators embedded into a person's device or  physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer.</p>
 <p>FIDO2 is comprised of the <a href="https://www.w3.org/TR/webauthn/">W3C’s Web Authentication specification (WebAuthn)</a> and FIDO’s corresponding <a href="https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html">Client-to-Authenticator Protocol (CTAP)</a>. WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.</p>
-<p>This document explains how to use the Janssen Auth Server's built-in 
+<p>This document explains how to use the Janssen Auth Server's built-in
 <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">FIDO2 interception script</a>
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
@@ -14488,7 +14488,7 @@ to implement a two-step, two-factor authentication (2FA) with username / passwor
 <li>At least one FIDO2 device for testing, like one of the devices <a href="#fido2-devices">listed below</a>.</li>
 </ul>
 <h3 id="fido2-devices">FIDO2 devices<a class="headerlink" href="#fido2-devices" title="Permanent link">#</a></h3>
-<p>Some well known FIDO2 devices and manufacturers include:           </p>
+<p>Some well-known FIDO2 devices and manufacturers include:</p>
 <ul>
 <li><a href="https://www.yubico.com/">Yubico</a>      </li>
 <li><a href="https://www.vasco.com/products/two-factor-authenticators/hardware/one-button/digipass-secureclick.html">Vasco DIGIPASS SecureClick</a>   </li>
@@ -14545,7 +14545,7 @@ Follow the steps below to enable FIDO2 authentication:
 </code></pre></div></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If FIDO2 is set as a default authentication mechanism users will <strong>not</strong> be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).  </p>
+<p>If FIDO2 is set as a default authentication mechanism users will <strong>not</strong> be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).</p>
 </div>
 <h3 id="test-the-feature">Test the feature<a class="headerlink" href="#test-the-feature" title="Permanent link">#</a></h3>
 <p>To test, enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
@@ -14625,7 +14625,7 @@ Diagram source in mermaid.live
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 11, 2025 10:24:05 UTC"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 11, 2025 10:24:05 UTC">2025-06-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
   </span>
 
     

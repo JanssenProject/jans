@@ -14399,15 +14399,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -14431,10 +14422,10 @@
   <h1>Index</h1>
 
 <h2 id="readme-auditing-authentication-attempts">README Auditing Authentication Attempts<a class="headerlink" href="#readme-auditing-authentication-attempts" title="Permanent link">#</a></h2>
-<p>Name of the script in <strong>janssen</strong> (for example, using <strong>/opt/jans/jans-cli/config-cli.py</strong> or <strong>/opt/jans/jans-cli/config-cli-tui.py</strong>): <strong>jans-session-audit</strong>.<br />
-Script type:  <strong>Application Sessions</strong>.  </p>
-<p>The script generates audit report and creates record in DB. Also <strong>jansData</strong> field (in JSON format), that contains summary info of session audit will be generated.  </p>
-<p>Following are the configuration properties for the <em>jans-session-audit.py</em> script (<strong>jans-session-audit</strong>):  </p>
+<p>Name of the script in <strong>janssen</strong> (for example, using <strong>/opt/jans/jans-cli/config-cli.py</strong> or <strong>/opt/jans/jans-cli/config-cli-tui.py</strong>): <strong>jans-session-audit</strong>.
+Script type:  <strong>Application Sessions</strong>.</p>
+<p>The script generates audit report and creates record in DB. Also <strong>jansData</strong> field (in JSON format), that contains summary info of session audit will be generated.</p>
+<p>Following are the configuration properties for the <em>jans-session-audit.py</em> script (<strong>jans-session-audit</strong>):</p>
 <p>Parameters of the script:</p>
 <ul>
 <li>
@@ -14444,13 +14435,13 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <p><strong>metric_audit_conf_json_file_path</strong>: configuration file. For example: <strong>/etc/jans/conf/jans-session-audit.json</strong>  </p>
 </li>
 </ul>
-<p>File should contain follow properties:<br />
+<p>File should contain the following properties:
 1. <strong>event_types</strong>.<br />
     Type of Session event(s), that will be saved in the DB:<br />
     - <strong>AUTHENTICATED</strong>
     - <strong>UNAUTHENTICATED</strong>
     - <strong>UPDATED</strong>
-    - <strong>GONE</strong><br />
+    - <strong>GONE</strong>
     .</p>
 <ol>
 <li>
@@ -14467,7 +14458,7 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <li><strong>sessionState</strong></li>
 <li><strong>permissionGranted</strong></li>
 <li><strong>permissionGrantedMap</strong></li>
-<li><strong>deviceSecrets</strong><br />
+<li><strong>deviceSecrets</strong>
 .</li>
 </ul>
 </li>
@@ -14490,7 +14481,7 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <li><strong>state</strong></li>
 <li><strong>casa_prefix</strong></li>
 <li><strong>casa_contextPath</strong></li>
-<li><strong>casa_extraCss</strong><br />
+<li><strong>casa_extraCss</strong>
 .</li>
 </ul>
 </li>
@@ -14516,12 +14507,11 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 - <strong>state</strong>
 - <strong>casa_prefix</strong>
 - <strong>casa_contextPath</strong>
-- <strong>casa_extraCss</strong><br />
-.    </p>
+- <strong>casa_extraCss</strong></p>
 </li>
 </ol>
 <p>Generated value <strong>jansData</strong> in JSON format will contain type of event (one of <strong>AUTHENTICATED</strong>, <strong>UNAUTHENTICATED</strong>, <strong>UPDATED</strong>, <strong>GONE</strong>) and all properties/attributes defined by <strong>audit_data</strong> and <strong>audit_cust_data</strong>.</p>
-<p>Examples of <strong>/etc/jans/conf/jans-session-audit.json</strong> file: </p>
+<p>Examples of <strong>/etc/jans/conf/jans-session-audit.json</strong> file:</p>
 <h2 id="_1"><a class="headerlink" href="#_1" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UNAUTHENTICATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UPDATED&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
@@ -14676,7 +14666,7 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="_5"><a class="headerlink" href="#_5" title="Permanent link">#</a></h2>
-<p><strong>/etc/jans/conf/jans-session-audit.json</strong>: </p>
+<p><strong>/etc/jans/conf/jans-session-audit.json</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -14691,7 +14681,7 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="_6"><a class="headerlink" href="#_6" title="Permanent link">#</a></h2>
-<p><strong>/etc/jans/conf/jans-session-audit.json</strong>: </p>
+<p><strong>/etc/jans/conf/jans-session-audit.json</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -14718,7 +14708,7 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="_7"><a class="headerlink" href="#_7" title="Permanent link">#</a></h2>
-<p><strong>/etc/jans/conf/jans-session-audit.json</strong>: </p>
+<p><strong>/etc/jans/conf/jans-session-audit.json</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;event_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;AUTHENTICATED&quot;</span><span class="p">,</span><span class="s2">&quot;GONE&quot;</span><span class="w"> </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;audit_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -14766,7 +14756,6 @@ Script type:  <strong>Application Sessions</strong>.  </p>
 <span class="w">    </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="_8"><a class="headerlink" href="#_8" title="Permanent link">#</a></h2>
 
 
 
@@ -14789,7 +14778,7 @@ Script type:  <strong>Application Sessions</strong>.  </p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 17, 2023 05:17:28 UTC"><span class="timeago" datetime="2023-07-17T05:17:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 17, 2023 05:17:28 UTC">2023-07-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 29, 2025 05:45:24 UTC"><span class="timeago" datetime="2025-12-29T05:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 29, 2025 05:45:24 UTC">2025-12-29</span>
   </span>
 
     

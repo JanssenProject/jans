@@ -14815,13 +14815,13 @@ Basic development skills are assumed. Some grasp of Java and Python are required
 <h3 id="example-modifying-search-results">Example: Modifying Search Results<a class="headerlink" href="#example-modifying-search-results" title="Permanent link">#</a></h3>
 <p>SCIM spec defines the concept of attribute returnability where some attributes should never be part of a response (like passwords), always be returned (like resource identifiers), or be returned by default unless otherwise stated by the <code>excludedAttributes</code> parameter.</p>
 <p>Assume you are maintaining a user base of secret agents that work for your company and need to avoid exposing information such as their physical addresses for safety reasons. To keep it simple let's restrict the scope to user searches only. In practice you should take steps to hide this data on user retrieval and update.</p>
-<p>Let's alter <code>postSearchUsers</code>'s second parameter (<code>results</code>) to ensure addresses are not leaked:  </p>
+<p>Let's alter <code>postSearchUsers</code>'s second parameter (<code>results</code>) to ensure addresses are not leaked:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nv">user</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">results</span>.<span class="nv">getEntries</span><span class="ss">()</span>:
 <span class="w">    </span><span class="nv">user</span>.<span class="nv">setAttribute</span><span class="ss">(</span><span class="s2">&quot;jansAddress&quot;</span>,<span class="w"> </span><span class="nv">None</span><span class="ss">)</span>
 </code></pre></div>
 
 <p>This is very straightforward code except for the usage of <code>jansAddress</code>. Shouldn't it be simply <code>addresses</code> as the known SCIM attribute?</p>
-<p>Scripts work with entities that are about to be persisted or have already been saved so they kind of resemble the database structure (schema in MySQL terms). It turns out that database attribute names rarely match with SCIM names.</p>
+<p>Scripts work with entities that are about to be persisted or have already been saved so they resemble the database structure (schema in MySQL terms). It turns out that database attribute names rarely match with SCIM names.</p>
 <p>While it is easy to know the SCIM name of a database attribute, the converse requires checking the code, however since you already have the skill this shouldn't be a problem: in <a href="https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2/user/UserResource.java">this</a> Java class you'll find the representation of a user resource in SCIM spec terms. Pay attention to the <code>addresses</code> field and its associated <code>StoreReference</code> annotation that contains the attribute where addresses are actually stored.</p>
 <p>With that said, save your modifications. You may like the idea of adding some prints for enlightment like:</p>
 <div class="codehilite"><pre><span></span><code><span class="nx">print</span><span class="w"> </span><span class="s">&quot;%d entries returned of %d&quot;</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">(</span><span class="nx">results</span><span class="p">.</span><span class="nx">getEntriesCount</span><span class="p">(),</span><span class="w"> </span><span class="nx">results</span><span class="p">.</span><span class="nx">getTotalEntriesCount</span><span class="p">())</span>
@@ -14863,12 +14863,12 @@ Basic development skills are assumed. Some grasp of Java and Python are required
 </tbody>
 </table>
 <p>This method is expected to return an instance of <code>javax.ws.rs.core.Response</code> that supersedes the output of the operation itself. In other words, the actual processing of the operation is skipped in favor of the code supplied here. However note that minor validations may take place in the payload before your code is actually called.</p>
-<p>Returning <code>None</code> transfers the control of the operation for normal processing (default Jans implementation). If the method execution crashes at runtime, a 500 HTTP error is sent. </p>
+<p>Returning <code>None</code> transfers the control of the operation for normal processing (default Jans implementation). If the method execution crashes at runtime, a 500 HTTP error is sent.</p>
 <p><strong>Notes:</strong></p>
 <ul>
 <li>Possible values for <code>context.getResourceType()</code> are: User, Group, FidoDevice, Fido2Device</li>
 <li><code>context.getTokenDetails().getValue()</code> is a shortcut that will give you the access token the caller employed to issue the service call</li>
-<li>Both <code>context.getTokenDetails().getTokenType()</code> and <code>context.getTokenDetails().getScope()</code> return non null values when the protection mechanism of the API is OAuth or test mode</li>
+<li>Both <code>context.getTokenDetails().getTokenType()</code> and <code>context.getTokenDetails().getScope()</code> return non-null values when the protection mechanism of the API is OAuth or test mode</li>
 <li>Note that for resource creation operation, <code>entity</code> basically contains the same data supplied in the POST <code>payload</code>. In this case, <code>entity</code> has not originated from the database and has not been persisted either</li>
 <li>For the case of modification, retrieval and removal, <code>entity</code> contains the data currently stored in the database for the resource in question</li>
 <li>Since many values come from Java code, you can always do <code>getClass().getName()</code> to get an idea of what type of variables you are dealing with</li>
@@ -14939,7 +14939,7 @@ Basic development skills are assumed. Some grasp of Java and Python are required
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">True</span>
 </code></pre></div>
 
-<p>Note no validations took place here: we assumed the script contains the properties, that they are non empty and have sensible values.</p>
+<p>Note no validations took place here: we assumed the script contains the properties, that they are non-empty and have sensible values.</p>
 <p><strong>Allow/Deny resource operations</strong></p>
 <p>The first step is to know the kind of application that is calling our service. For this purpose let's create a method that given incoming request headers returns the matching <code>userType</code></p>
 <div class="codehilite"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="n">headers</span><span class="w"> </span><span class="n">params</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">instance</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">javax</span><span class="p">.</span><span class="n">ws</span><span class="p">.</span><span class="n">rs</span><span class="p">.</span><span class="n">core</span><span class="p">.</span><span class="n">MultivaluedMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span>
@@ -14997,7 +14997,7 @@ Basic development skills are assumed. Some grasp of Java and Python are required
 <h2 id="working-with-more-than-one-script">Working with more than one script<a class="headerlink" href="#working-with-more-than-one-script" title="Permanent link">#</a></h2>
 <p>You may have already noticed that it is possible to have several scripts under the SCIM type. This is how execution takes place when there are several scripts enabled:</p>
 <p>The applicable method is called in the first script. If the return value was <code>True</code>, the method is called again but this time in the subsequent script. If at any point a <code>False</code> return value is encountered, the SCIM operation is aborted with error 500. This means that a normal operation execution requires all involved methods across different scripts to be successful.</p>
-<p>There is an important exception to the above and is related to the <code>manage*</code> methods. In this case, only one script takes effect (the first script found). Note that in most cases having a single SCIM script suffices for all needs. </p>
+<p>There is an important exception to the above and is related to the <code>manage*</code> methods. In this case, only one script takes effect (the first script found). Note that in most cases having a single SCIM script suffices for all needs.</p>
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">#</a></h2>
 <h2 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h2>
 <h3 id="custom-scim-event-handler">Custom SCIM Event Handler<a class="headerlink" href="#custom-scim-event-handler" title="Permanent link">#</a></h3>
@@ -15037,7 +15037,7 @@ Basic development skills are assumed. Some grasp of Java and Python are required
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 11, 2025 10:24:05 UTC"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 11, 2025 10:24:05 UTC">2025-06-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 29, 2025 05:45:24 UTC"><span class="timeago" datetime="2025-12-29T05:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 29, 2025 05:45:24 UTC">2025-12-29</span>
   </span>
 
     

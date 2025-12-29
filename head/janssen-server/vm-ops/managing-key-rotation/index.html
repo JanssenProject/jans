@@ -14481,7 +14481,7 @@
 
 
 <h1 id="managing-key-rotation">Managing Key Rotation<a class="headerlink" href="#managing-key-rotation" title="Permanent link">#</a></h1>
-<p>"Key-rotation" is a standard procedure for all OpenID Connect deployment. "Key-rotation" means replacing existing signing key with newer cryptographic key. For Janssen server, that specific cryptographic key is <code>jans-auth-keys.pkcs12</code>. </p>
+<p>"Key-rotation" is a standard procedure for all OpenID Connect deployment. "Key-rotation" means replacing existing signing key with newer cryptographic key. For Janssen server, that specific cryptographic key is <code>jans-auth-keys.pkcs12</code>.</p>
 <p>There are two possible ways to manage key rotation:
 - built-in key rotation
 - external key rotation</p>
@@ -14498,10 +14498,10 @@
 <li>use - use purpose, possible values are <code>sig</code> for signature and <code>enc</code> for encryption  </li>
 <li>algorithm - algorithm use with given key</li>
 <li>in signature case it can be <code>RS256</code>, <code>RS384</code>, <code>RS512</code>, <code>ES256</code>, <code>ES384</code>, <code>ES512</code>, <code>PS256</code>, <code>PS384</code>, <code>PS512</code></li>
-<li>in encryption case case it can be <code>RSA1_5</code>, <code>RSA-OAEP</code></li>
+<li>in encryption case it can be <code>RSA1_5</code>, <code>RSA-OAEP</code></li>
 </ul>
-<p>Key rotation means that new keys are generated and old one are removed for given algorithm (full replacement).  </p>
-<p>Keys are stored in:<br />
+<p>Key rotation means that new keys are generated and old ones are removed for given algorithm (full replacement).</p>
+<p>Keys are stored in:
 - key store file (specified by <code>keyStoreFile</code>)
 - on persistence level jwks representation of the key are stored in <code>jansConfWebKeys</code> attribute of <code>jansAppConf</code> entity</p>
 <p>It's important to note that key inside key store file must have representation in jwks and vice versa. It must be always in sync otherwise AS will throw error.</p>
@@ -14509,7 +14509,7 @@
 - <code>keyStoreFile</code> - The Key Store File (JKS or PKCS12)
 - <code>keyStoreSecret</code> - The Key Store password</p>
 <h2 id="built-in-key-rotation">Built-in key rotation<a class="headerlink" href="#built-in-key-rotation" title="Permanent link">#</a></h2>
-<p><code>jans-auth-server</code> has <a href="https://github.com/JanssenProject/jans/blob/70a566b67f660750bf742f19ee127f79b2db8930/jans-auth-server/client/src/main/java/io/jans/as/client/util/KeyGenerator.java">KeyGeneratorTimer</a> 
+<p><code>jans-auth-server</code> has <a href="https://github.com/JanssenProject/jans/blob/70a566b67f660750bf742f19ee127f79b2db8930/jans-auth-server/client/src/main/java/io/jans/as/client/util/KeyGenerator.java">KeyGeneratorTimer</a>
 which is responsible for key rotation. Built-in rotation can be switch on/off via <code>keyRegenerationEnabled</code> AS configuration property (by setting <code>true</code> or <code>false</code> value).</p>
 <pre class="mermaid"><code>graph LR
 A[Auth Server] --&gt; V(Properties)
@@ -14529,7 +14529,7 @@ A[Auth Server] --&gt; V(Properties)
 <p>Expiration date during built-in rotation is set as <code>now</code> + <code>keyRegenerationInterval</code>.</p>
 <h2 id="external-key-rotation">External key rotation<a class="headerlink" href="#external-key-rotation" title="Permanent link">#</a></h2>
 <p>External rotation means that keys are rotated by script. In this case <code>keyRegenerationEnabled</code> must be set to <code>false</code> value.
-Script can be scheduled to run periodically. Such script must invoke <code>KeyGenerator</code> class from <code>jans-auth-client-jar-with-dependencies.jar</code> which will keep keys in key store and in AS persistence consistent. 
+Script can be scheduled to run periodically. Such script must invoke <code>KeyGenerator</code> class from <code>jans-auth-client-jar-with-dependencies.jar</code> which will keep keys in key store and in AS persistence consistent.
 See <a href="../../auth-server/crypto/key-generation/">Key Generation</a> page for more details how to generate keys externally.</p>
 <div class="highlight"><pre><span></span><code>/opt/jre/bin/java -Dlog4j.defaultInitOverride=true -cp /opt/dist/jans/jans-auth-client-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore /etc/certs/jans-auth-keys.p12 -keypasswd &lt;Password&gt; -sig_keys RS256 RS384 -enc_keys RSA1_5 RSA-OAEP -key_ops_type ALL -dnname &quot;CN=jansAuth CA Certificates&quot; -expiration 2 &gt; /etc/certs/jans-auth-keys.json
 </code></pre></div>
@@ -14559,7 +14559,7 @@ See <a href="../../auth-server/crypto/key-generation/">Key Generation</a> page f
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 27, 2024 12:12:23 UTC"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 27, 2024 12:12:23 UTC">2024-09-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
   </span>
 
     
