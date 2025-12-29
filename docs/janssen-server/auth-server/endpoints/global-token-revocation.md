@@ -76,7 +76,7 @@ disable `GLOBAL_TOKEN_REVOCATION` flag as required.
 
 ## Required Scope
 
-A client must have the following scope in order to use this endpoint:
+A client must have the following scope to use this endpoint:
 
 - `global_token_revocation`
 
