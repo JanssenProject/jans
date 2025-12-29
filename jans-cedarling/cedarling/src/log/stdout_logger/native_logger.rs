@@ -3,6 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+//! In this module we implement a logger that writes to standard output (stdout).
+//! And ignore error on write failures to stdout. To avoid panics in logging code paths.
+
 use std::io::Write;
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
@@ -40,8 +43,6 @@ enum LogMessage {
     Shutdown,
 }
 
-const ERR_TO_WRITE_STD_LOGGER: &str = "failed to write logs to stdout";
-
 fn spawn_writer_thread(
     receiver: mpsc::Receiver<LogMessage>,
     writer: Box<dyn Write + Send + Sync>,
@@ -56,9 +57,7 @@ fn spawn_writer_thread(
             // Check if flush deadline has passed
             let now = Instant::now();
             if now >= next_flush_deadline && !buffer.is_empty() {
-                writer
-                    .write_all(buffer.as_bytes())
-                    .expect(ERR_TO_WRITE_STD_LOGGER);
+                let _ = writer.write_all(buffer.as_bytes());
                 buffer.clear();
                 next_flush_deadline = now + flush_timeout;
             }
@@ -71,9 +70,7 @@ fn spawn_writer_thread(
                     buffer.push_str(&json_string);
                     buffer.push('\n');
                     if buffer.len() >= buffer_limit {
-                        writer
-                            .write_all(buffer.as_bytes())
-                            .expect(ERR_TO_WRITE_STD_LOGGER);
+                        let _ = writer.write_all(buffer.as_bytes());
                         buffer.clear();
                         // Reset flush deadline since we just flushed
                         next_flush_deadline = Instant::now() + flush_timeout;
@@ -85,9 +82,7 @@ fn spawn_writer_thread(
                 Err(mpsc::RecvTimeoutError::Timeout) => {
                     // Timeout, flush buffer if not empty
                     if !buffer.is_empty() {
-                        writer
-                            .write_all(buffer.as_bytes())
-                            .expect(ERR_TO_WRITE_STD_LOGGER);
+                        let _ = writer.write_all(buffer.as_bytes());
                         buffer.clear();
                         next_flush_deadline = Instant::now() + flush_timeout;
                     }
@@ -95,9 +90,7 @@ fn spawn_writer_thread(
                 Err(mpsc::RecvTimeoutError::Disconnected) => {
                     // Sender dropped, flush and exit
                     if !buffer.is_empty() {
-                        writer
-                            .write_all(buffer.as_bytes())
-                            .expect(ERR_TO_WRITE_STD_LOGGER);
+                        let _ = writer.write_all(buffer.as_bytes());
                         buffer.clear();
                     }
                     break;
@@ -106,9 +99,7 @@ fn spawn_writer_thread(
         }
         // Final flush
         if !buffer.is_empty() {
-            writer
-                .write_all(buffer.as_bytes())
-                .expect(ERR_TO_WRITE_STD_LOGGER);
+            let _ = writer.write_all(buffer.as_bytes());
         }
     })
 }
@@ -219,10 +210,8 @@ impl LogWriter for StdOutLogger {
                     let mut guard = writer
                         .lock()
                         .expect("failed to acquire lock on stdout writer");
-                    guard
-                        .write_all(json_string.as_bytes())
-                        .expect(ERR_TO_WRITE_STD_LOGGER);
-                    guard.write_all(b"\n").expect(ERR_TO_WRITE_STD_LOGGER);
+                    let _ = guard.write_all(json_string.as_bytes());
+                    let _ = guard.write_all(b"\n");
                 }
             },
             StdOutLoggerMode::Async { .. } => {
