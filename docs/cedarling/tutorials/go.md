@@ -13,58 +13,56 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 ### Build with dynamic linking
 
-1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as 
-described above.
+1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as
+   described above.
 
 2. Specify linker flags in your main.go file to link against the Cedarling library.
 
-    ```go
-    // #cgo LDFLAGS: -L. -lcedarling_go
-    import "C"
-    ```
+   ```go
+   // #cgo LDFLAGS: -L. -lcedarling_go
+   import "C"
+   ```
 
-    And make sure that the Cedarling library files are located in the same directory as your main package.
+   And make sure that the Cedarling library files are located in the same directory as your main package.
 
 3. Use `go get` to fetch the Cedarling Go package
 
-    ```sh
-    go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
-    ```
+   ```sh
+   go get github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
+   ```
 
 4. Build your Go application
 
-    ```sh
-    go build .
-    ```
+   ```sh
+   go build .
+   ```
 
 5. Run the application
 
-    - **Windows**
+   - **Windows**
 
-        - Place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
-        - Windows searches libraries in directories below in the 
-          following order
-            1. The directory containing your Go executable (recommended location)
-            2. Windows system directories (e.g., `C:\Windows\System32`)
-            3. The `PATH` environment variable directories
+     - Place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
+     - Windows searches libraries in directories below in the
+       following order
+       1. The directory containing your Go executable (recommended location)
+       2. Windows system directories (e.g., `C:\Windows\System32`)
+       3. The `PATH` environment variable directories
 
-    - **Linux**
-    
-        Add the library directory that contains `libcedarling_go.so` to the
-        `LD_LIBRARY_PATH` environment variable
+   - **Linux**
 
-        ```sh
-        export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
-        ```
+     Add the library directory that contains `libcedarling_go.so` to the
+     `LD_LIBRARY_PATH` environment variable
 
-    - **MacOS**
-        
-        Add the library directory that contains `libcedarling_go.dylib` to the
-        `LD_LIBRARY_PATH` environment variable
-        
-        ```sh
-        export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
-        ```
+     ```sh
+     export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
+     ```
+
+   - **MacOS**
+     Add the library directory that contains `libcedarling_go.dylib` to the
+     `LD_LIBRARY_PATH` environment variable
+     ```sh
+     export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
+     ```
 
 ### Build from Source
 
@@ -79,49 +77,49 @@ Follow these instructions to build from source.
 
 1. Build the Rust library
 
-    Clone the Janssen repository:
+   Clone the Janssen repository:
 
-    ```sh
-    git clone --depth 1 https://github.com/JanssenProject/jans.git
-    ```
+   ```sh
+   git clone --depth 1 https://github.com/JanssenProject/jans.git
+   ```
 
-    We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
+   We use `--depth 1` to avoid cloning unnecessary history and minimalize the download size.
 
-    Navigate to the Cedarling Go bindings directory:
+   Navigate to the Cedarling Go bindings directory:
 
-    ```sh
-    cd jans/jans-cedarling/bindings/cedarling_go
-    ```
+   ```sh
+   cd jans/jans-cedarling/bindings/cedarling_go
+   ```
 
-    ```sh
-    cargo build --release -p cedarling_go
-    ```
+   ```sh
+   cargo build --release -p cedarling_go
+   ```
 
 2. Copy the built artifacts to your application directory
 
-    ```sh
-    # Windows
-    cp target/release/cedarling_go.dll .
-    cp target/release/cedarling_go.dll.lib cedarling_go.lib
+   ```sh
+   # Windows
+   cp target/release/cedarling_go.dll .
+   cp target/release/cedarling_go.dll.lib cedarling_go.lib
 
-    # Linux
-    cp target/release/libcedarling_go.so .
+   # Linux
+   cp target/release/libcedarling_go.so .
 
-    # macOS
-    cp target/release/libcedarling_go.dylib .
-    ```
+   # macOS
+   cp target/release/libcedarling_go.dylib .
+   ```
 
-    or use scripts provided in the repository to automate this process:
+   or use scripts provided in the repository to automate this process:
 
-    ```sh
-    sh build_and_copy_artifacts.sh
-    ```
+   ```sh
+   sh build_and_copy_artifacts.sh
+   ```
 
-    Run go test to ensure everything is working correctly:
+   Run go test to ensure everything is working correctly:
 
-    ```sh
-    go test .
-    ```
+   ```sh
+   go test .
+   ```
 
 ## Usage
 
@@ -149,16 +147,7 @@ if err != nil {
 
 ### Policy Store Sources
 
-Go bindings support all native policy store source types:
-
-| Source Type    | Description            | Configuration                                     |
-| -------------- | ---------------------- | ------------------------------------------------- |
-| Inline JSON    | Policy store as string | `CEDARLING_POLICY_STORE_LOCAL`                    |
-| File JSON/YAML | Local file path        | `CEDARLING_POLICY_STORE_LOCAL_FN`                 |
-| Directory      | Local directory path   | `CEDARLING_POLICY_STORE_LOCAL_FN` (to directory)  |
-| .cjar File     | Local Cedar archive    | `CEDARLING_POLICY_STORE_LOCAL_FN` (to .cjar file) |
-| .cjar URL      | Remote Cedar archive   | `CEDARLING_POLICY_STORE_URI`                      |
-| Lock Server    | Remote policy server   | `CEDARLING_POLICY_STORE_URI`                      |
+Go bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options.
 
 **Example configurations:**
 
@@ -193,7 +182,6 @@ Cedarling provides two main interfaces for performing authorization checks: **To
 
 - [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
-
 
 #### Token-Based Authorization
 
@@ -358,10 +346,10 @@ if err != nil {
 if result.Decision {
     fmt.Println("Access granted")
     fmt.Printf("Request ID: %s\n", result.RequestID)
-    
+
     // Access detailed Cedar response
     fmt.Printf("Cedar decision: %s\n", result.Response.Decision().ToString())
-    
+
     // Get diagnostic information
     diagnostics := result.Response.Diagnostics()
     if len(diagnostics.Reason()) > 0 {

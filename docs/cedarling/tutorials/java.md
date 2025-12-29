@@ -40,7 +40,6 @@ To use Cedarling Java bindings in Java Maven Project add following
 
 Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
 
-
 ## Usage
 
 ### Initialization
@@ -83,16 +82,7 @@ We need to initialize Cedarling first.
 
 ### Policy Store Sources
 
-Java bindings support all native policy store source types:
-
-| Source Type    | Description            | Configuration                                     |
-| -------------- | ---------------------- | ------------------------------------------------- |
-| Inline JSON    | Policy store as string | `CEDARLING_POLICY_STORE_LOCAL`                    |
-| File JSON/YAML | Local file path        | `CEDARLING_POLICY_STORE_LOCAL_FN`                 |
-| Directory      | Local directory path   | `CEDARLING_POLICY_STORE_LOCAL_FN` (to directory)  |
-| .cjar File     | Local Cedar archive    | `CEDARLING_POLICY_STORE_LOCAL_FN` (to .cjar file) |
-| .cjar URL      | Remote Cedar archive   | `CEDARLING_POLICY_STORE_URI`                      |
-| Lock Server    | Remote policy server   | `CEDARLING_POLICY_STORE_URI`                      |
+Java bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options and [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for format details.
 
 **Example configurations:**
 
@@ -130,7 +120,6 @@ Cedarling provides two main interfaces for performing authorization checks: **To
 
 - [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
-
 
 #### Token-Based Authorization
 
@@ -271,4 +260,3 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
-

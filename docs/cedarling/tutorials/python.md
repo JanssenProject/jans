@@ -102,16 +102,7 @@ See the python documentation for `BootstrapConfig` for other config loading opti
 
 ### Policy Store Sources
 
-Python bindings support all policy store source types:
-
-| Source Type      | Description            | Configuration                                     |
-| ---------------- | ---------------------- | ------------------------------------------------- |
-| Inline JSON/YAML | Policy store as string | `CEDARLING_POLICY_STORE_LOCAL`                    |
-| File JSON/YAML   | Local file path        | `CEDARLING_POLICY_STORE_LOCAL_FN`                 |
-| Directory        | Local directory path   | `CEDARLING_POLICY_STORE_LOCAL_FN` (to directory)  |
-| .cjar File       | Local Cedar archive    | `CEDARLING_POLICY_STORE_LOCAL_FN` (to .cjar file) |
-| .cjar URL        | Remote Cedar archive   | `CEDARLING_POLICY_STORE_URI`                      |
-| Lock Server      | Remote policy server   | `CEDARLING_POLICY_STORE_URI`                      |
+Python bindings support all policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options.
 
 **Example configurations:**
 
@@ -379,13 +370,13 @@ else:
 
 **Key Differences from standard authentication**:
 
-| Feature | authorize | authorize_multi_issuer |
-|---------|-----------|------------------------|
-| Principal Model | User/Workload entities | No principals - token-based |
-| Token Sources | Single issuer expected | Multiple issuers supported |
-| Result Type | `AuthorizeResult` | `MultiIssuerAuthorizeResult` |
-| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean) |
-| Use Case | Standard RBAC/ABAC | Federation, multi-org access |
+| Feature         | authorize                                                     | authorize_multi_issuer       |
+| --------------- | ------------------------------------------------------------- | ---------------------------- |
+| Principal Model | User/Workload entities                                        | No principals - token-based  |
+| Token Sources   | Single issuer expected                                        | Multiple issuers supported   |
+| Result Type     | `AuthorizeResult`                                             | `MultiIssuerAuthorizeResult` |
+| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean)  |
+| Use Case        | Standard RBAC/ABAC                                            | Federation, multi-org access |
 
 ### Logging
 
