@@ -181,7 +181,7 @@ Cedarling supports multiple ways to load policy stores:
 
 Policy stores can be structured as directories with human-readable Cedar files:
 
-```
+```text
 policy-store/
 ├── metadata.json           # Required: Store metadata (id, name, version)
 ├── manifest.json           # Optional: File checksums for integrity validation

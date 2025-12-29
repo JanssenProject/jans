@@ -33,7 +33,7 @@ The original format stores all policies and schema in a single JSON or YAML file
 
 The new directory-based format uses human-readable Cedar files organized in a structured directory:
 
-```
+```text
 policy-store/
 ├── metadata.json           # Required: Store identification and versioning
 ├── manifest.json           # Optional: File checksums for integrity validation
