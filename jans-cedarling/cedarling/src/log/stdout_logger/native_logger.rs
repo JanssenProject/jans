@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! In this module we implement a logger that writes to standard output (stdout).
-//! And ignore error on write failures to stdout. To avoid panics in logging code paths.
+//! Implements a logger that writes to standard output (stdout).
+//! Write failures are silently ignored to prevent panics in logging code paths.
 
 use std::io::Write;
 use std::sync::mpsc;
