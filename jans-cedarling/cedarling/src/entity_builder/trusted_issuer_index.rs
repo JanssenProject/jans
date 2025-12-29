@@ -8,7 +8,7 @@ use std::{collections::HashMap, sync::Arc};
 use crate::{
     LogLevel,
     common::policy_store::TrustedIssuer,
-    log::{LogEntry, LogType, LogWriter, Logger},
+    log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
 
 /// Fast lookup index for trusted issuers by URL or origin.
@@ -42,8 +42,7 @@ impl TrustedIssuerIndex {
 
             if let Some(existing) = origin_index.get(&origin) {
                 logger.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::WARN)
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
                         .set_message(format!(
                             "Duplicate origin '{}': issuer '{}' will override existing issuer '{}' for origin-based lookups",
                             origin,
