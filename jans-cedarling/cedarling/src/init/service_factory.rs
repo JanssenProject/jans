@@ -101,10 +101,11 @@ impl<'a> ServiceFactory<'a> {
         let policy_store = self.policy_store()?;
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(logger));
         let schema = &policy_store.schema.validator_schema;
         let entity_builder = EntityBuilder::new(
             config.clone(),
-            &trusted_issuers,
+            issuers_index,
             Some(schema),
             default_entities_with_warn.entities().to_owned(),
         )?;
