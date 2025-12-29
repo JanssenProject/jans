@@ -747,12 +747,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Authorization challenge session lifetime in seconds")
     private Integer authorizationChallengeSessionLifetimeInSeconds;
 
-    @DocProperty(description = "Request count limit - for /register endpoint (Rate Limit)")
-    private Integer rateLimitRegistrationRequestCount;
-
-    @DocProperty(description = "Period in seconds limit - for /register endpoint (Rate Limit)")
-    private Integer rateLimitRegistrationPeriodInSeconds;
-
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
     private Boolean rotateDeviceSecret = false;
@@ -1117,24 +1111,6 @@ public class AppConfiguration implements Configuration {
 
     public void setReturnDeviceSecretFromAuthzEndpoint(Boolean returnDeviceSecretFromAuthzEndpoint) {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
-    }
-
-    public Integer getRateLimitRegistrationRequestCount() {
-        return rateLimitRegistrationRequestCount;
-    }
-
-    public AppConfiguration setRateLimitRegistrationRequestCount(Integer rateLimitRegistrationRequestCount) {
-        this.rateLimitRegistrationRequestCount = rateLimitRegistrationRequestCount;
-        return this;
-    }
-
-    public Integer getRateLimitRegistrationPeriodInSeconds() {
-        return rateLimitRegistrationPeriodInSeconds;
-    }
-
-    public AppConfiguration setRateLimitRegistrationPeriodInSeconds(Integer rateLimitRegistrationPeriodInSeconds) {
-        this.rateLimitRegistrationPeriodInSeconds = rateLimitRegistrationPeriodInSeconds;
-        return this;
     }
 
     public Integer getAuthorizationChallengeSessionLifetimeInSeconds() {
