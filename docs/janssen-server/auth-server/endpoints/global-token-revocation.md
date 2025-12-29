@@ -10,7 +10,7 @@ tags:
 
 The Global Token Revocation endpoint is a critical security feature that allows for the immediate invalidation of
 all tokens and sessions associated with a user. This is particularly useful in scenarios where a user's account may have been compromised,
-as it ensures that all active sessions are terminated and all tokens are revoked, preventing any further unauthorized accessю
+as it ensures that all active sessions are terminated and all tokens are revoked, preventing any further unauthorized access.
 
 Janssen Server provides this endpoint implementation to allow greater
 control and better management of sessions on OP.
