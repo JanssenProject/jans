@@ -275,8 +275,11 @@ const BOOTSTRAP_CONFIG = {
 const cedarling = await init(BOOTSTRAP_CONFIG);
 
 // Option 2: Inline JSON string (for embedded policy stores)
+// policyStoreJson is the policy store JSON as a string
+// See: https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/
+const policyStoreJson = '{"cedar_version":"4.0","policy_stores":{...}}';
 const BOOTSTRAP_CONFIG = {
-  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreObject),
+  CEDARLING_POLICY_STORE_LOCAL: policyStoreJson,
   // ... other config
 };
 const cedarling = await init(BOOTSTRAP_CONFIG);
