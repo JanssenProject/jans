@@ -6,6 +6,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
+use super::super::log_config::StdOutMode;
 use super::default_values::*;
 use super::feature_types::*;
 use super::json_util::*;
@@ -69,6 +70,32 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_max_item_size: Option<usize>,
+
+    /// Logging mode for stdout logger: "async" or "immediate (default)".
+    /// Only applicable for native targets (not WASM).
+    #[serde(rename = "CEDARLING_STDOUT_MODE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_mode: StdOutMode,
+
+    /// Flush timeout in milliseconds for async stdout logging.
+    /// Only applicable for native targets (not WASM).
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_STDOUT_TIMEOUT_MILLIS",
+        default = "default_stdout_timeout_millis"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_timeout_millis: u64,
+
+    /// Buffer size limit in bytes for async stdout logging.
+    /// Only applicable for native targets (not WASM).
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_STDOUT_BUFFER_LIMIT",
+        default = "default_stdout_buffer_limit"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_buffer_limit: usize,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]

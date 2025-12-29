@@ -9,7 +9,7 @@ tags:
 By overriding the interface methods in [`ParType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/par/ParType.java) inside a custom script you can
 
 1. Modify all 'Par' object values before it is persisted.  e.g. modify scopes.  
-      
+
 2. Modify response from `/par` endpoint
 
 ## Interface
@@ -31,13 +31,12 @@ The ParType interception script also adds the following method(s):
 |Method |Method description|
 |:-----|:------|
 | `def createPar(self, par, context)`| Used to modify PAR object before it is persisted. `par` is `io.jans.as.persistence.model.Par`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
-| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint. 
-`response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
+| `def modifyParResponse(self, response, context)`| Used to modify response from `/par` endpoint. `response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`|
 
 
 ## Common Use Case
 
-## Script Type: Java 
+## Script Type: Java
 
 
 ```java
