@@ -34,7 +34,7 @@ To load policy store one of the following keys must be provided:
 
 Cedarling now supports a directory-based policy store format with human-readable Cedar files. See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
 
-**Note:** In WASM environments, only URL-based (`CjarUrl`, `LockServer`) and inline string sources are available. Filesystem access is not available in WASM
+**Note:** In WASM environments, only `CEDARLING_POLICY_STORE_URI` and `CEDARLING_POLICY_STORE_LOCAL` are available. File and directory sources (`CEDARLING_POLICY_STORE_LOCAL_FN`) are not supported in WASM due to lack of filesystem access.
 
 !!! NOTE
 All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
