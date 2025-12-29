@@ -58,7 +58,7 @@ fn spawn_writer_thread(
             if now >= next_flush_deadline && !buffer.is_empty() {
                 writer
                     .write_all(buffer.as_bytes())
-                    .expect("failed to write logs to stdout");
+                    .expect(ERR_TO_WRITE_STD_LOGGER);
                 buffer.clear();
                 next_flush_deadline = now + flush_timeout;
             }
