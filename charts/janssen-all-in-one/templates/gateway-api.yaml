@@ -18,6 +18,11 @@ metadata:
 {{- end }}
 spec:
   gatewayClassName: {{ .Values.gatewayApi.gatewayClassName }}
+  {{- if .Values.lbIp }}
+  addresses:
+  - type: IPAddress
+    value: {{ .Values.lbIp }}
+  {{- end }}
   listeners:
   - name: http
     port: 80
