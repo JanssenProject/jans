@@ -14419,7 +14419,7 @@
 
 
 <h1 id="fortinet-radius-server-authentication">Fortinet - RADIUS server Authentication<a class="headerlink" href="#fortinet-radius-server-authentication" title="Permanent link">#</a></h1>
-<p>This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the user name and password. </p>
+<p>This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the username and password.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Gluu Server (installation instructions <a href="../../../../janssen-server/install/">here</a>) which will play the role of RADIUS client    </li>
@@ -14497,13 +14497,13 @@
 <p>Scroll to the bottom of the page and click <code>Update</code></p>
 </li>
 </ol>
-<p>Now authenticating a user against Fortinet's RADIUS server is possible from your Gluu Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request Fortinet authentication for users. </p>
+<p>Now authenticating a user against Fortinet's RADIUS server is possible from your Gluu Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request Fortinet authentication for users.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>To make sure this method has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"fortinet"</code>. </p>
+<p>To make sure this method has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"fortinet"</code>.</p>
 </div>
 <h3 id="make-fortinets-user-password-authentication-the-default-mechanism">Make Fortinet's user-password authentication the Default mechanism.<a class="headerlink" href="#make-fortinets-user-password-authentication-the-default-mechanism" title="Permanent link">#</a></h3>
-<p>If fortinet should be the default authentication mechanism, follow these instructions: </p>
+<p>If fortinet should be the default authentication mechanism, follow these instructions:</p>
 <ol>
 <li>
 <p>Navigate to <code>Configuration</code> &gt; <code>Manage Authentication</code>. </p>
@@ -14524,7 +14524,7 @@
 <p><code>Default acr</code> sets the default authentication mechanism for accessing all applications that leverage your Gluu Server for authentication (unless otherwise specified).    </p>
 </li>
 </ul>
-<p>If Fortinet should be the default authentication mechanism for all access, change both fields to fortinet.  </p>
+<p>If Fortinet should be the default authentication mechanism for all access, change both fields to fortinet.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
 <p>If problems are encountered, take a look at the logs, specifically <code>/opt/gluu/jetty/oxauth/logs/oxauth_script.log</code>. Inspect all messages related to Fortinet. For instance, the following messages show an example of correct script initialization:</p>
 <div class="highlight"><pre><span></span><code>Fortinet. Initialization
@@ -14553,7 +14553,7 @@ Fortinet. Initialized successfully
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 11, 2025 10:24:05 UTC"><span class="timeago" datetime="2025-06-11T10:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 11, 2025 10:24:05 UTC">2025-06-11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 29, 2025 05:45:24 UTC"><span class="timeago" datetime="2025-12-29T05:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 29, 2025 05:45:24 UTC">2025-12-29</span>
   </span>
 
     

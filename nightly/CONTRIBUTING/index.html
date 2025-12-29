@@ -15178,12 +15178,12 @@
 
 <h1 id="contributing-to-janssen-project">Contributing to Janssen Project<a class="headerlink" href="#contributing-to-janssen-project" title="Permanent link">#</a></h1>
 <p>Purpose of this guide is to provide necessary information and resources to community in order to make successful contribution to the Janssen Project.</p>
-<p>There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. </p>
+<p>There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.</p>
 <h2 id="join-the-community">Join the Community<a class="headerlink" href="#join-the-community" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>Repo</strong>: Watch and Star <a href="https://github.com/JanssenProject/jans">Janssen repository</a> on Github</li>
-<li><strong>Discussions</strong>: Join interesting discussions at <a href="https://github.com/JanssenProject/jans/discussions">Github Discussions</a></li>
-<li><strong>Chat</strong>: We have an active <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. You can register for free their with your Github identity.</li>
+<li><strong>Repo</strong>: Watch and Star <a href="https://github.com/JanssenProject/jans">Janssen repository</a> on GitHub</li>
+<li><strong>Discussions</strong>: Join interesting discussions at <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a></li>
+<li><strong>Chat</strong>: We have an active <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. You can register for free their with your GitHub identity.</li>
 <li><strong>Tweet</strong>: Janssen is on <a href="https://twitter.com/janssen_project">Twitter</a> too. Follow us there to stay up to date on release announcements and news around Janssen.</li>
 </ul>
 <h2 id="first-time-contributors">First Time Contributors<a class="headerlink" href="#first-time-contributors" title="Permanent link">#</a></h2>
@@ -15248,7 +15248,7 @@ to which all contributors must adhere, please read it before interacting with th
 <ul>
 <li><strong>Add GPG signature to your commit</strong></li>
 </ul>
-<p>To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by Github. If you have GPG key    setup already then just use <code>-S</code> switch with you commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification">here</a></p>
+<p>To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key setup already then just use <code>-S</code> switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification">here</a></p>
 <ul>
 <li><strong>Add DCO sign-off</strong></li>
 </ul>
@@ -15261,7 +15261,7 @@ Signed-off-by: Foo Bar &lt;foobar@spam.org&gt;
 <p>Git even has a <code>-s</code> command line option to append this automatically to your commit message:</p>
 <div class="highlight"><pre><span></span><code>$ git commit -s -m &#39;This is my commit message&#39;
 </code></pre></div>
-<p>In all, if you have your GPG verification setup, your commit command should look like </p>
+<p>In all, if you have your GPG verification setup, your commit command should look like</p>
 <div class="highlight"><pre><span></span><code>git commit -S -s -m &#39;message that follows conventional commit style&#39;
 </code></pre></div>
 <h4 id="branches">Branches<a class="headerlink" href="#branches" title="Permanent link">#</a></h4>
@@ -15284,7 +15284,7 @@ Signed-off-by: Foo Bar &lt;foobar@spam.org&gt;
 For-example to backport changes in a certain PR to version <code>v1.0.0</code> a label to that PR matching the version must be added i.e <code>backport/v1.0.0</code>.
 The flow consists of creating a new branch, cherry-picking the changes of the original PR and creating a new PR to merge them.</p>
 <h4 id="license-header">License Header<a class="headerlink" href="#license-header" title="Permanent link">#</a></h4>
-<p>The Janssen Project uses Apache-2.0 license. Any existing or new code file 
+<p>The Janssen Project uses Apache-2.0 license. Any existing or new code file
 has to start with the license header as shown below:</p>
 <div class="highlight"><pre><span></span><code>/*
  * This software is available under the Apache-2.0 license. 
@@ -15293,10 +15293,10 @@ has to start with the license header as shown below:</p>
  * Copyright (c) 2025, Gluu, Inc. 
  */
 </code></pre></div>
-<p>If the developers <a href="">sign a CLA(Contributor License Agreement)</a> they can retain 
+<p>If the developers <a href="">sign a CLA(Contributor License Agreement)</a> they can retain
 the copyright. Once the CLA has been signed, contributions can be accepted
 from the contributor
-with the License header as below. Make sure to replace <code>[github-username]</code> with 
+with the License header as below. Make sure to replace <code>[github-username]</code> with
 contributor's GitHub username:</p>
 <div class="highlight"><pre><span></span><code>/*
  * This software is available under the Apache-2.0 license. 
@@ -15306,7 +15306,7 @@ contributor's GitHub username:</p>
  */
 </code></pre></div>
 <p><strong>Signing the CLA</strong></p>
-<p>The current version of CLA can be found 
+<p>The current version of CLA can be found
 <a href="../governance/cla/">here</a>. This is just for your reference.
 This same CLA will be signed digitally by following the steps below:</p>
 <ol>
@@ -15336,7 +15336,7 @@ Follow the instructions and complete the signing process. </li>
 <li>Projects focused on tooling. These projects might be of a transient nature, not committed by Janssen Project roadmap.</li>
 </ul>
 <h2 id="contributing-to-the-documentation">Contributing to the documentation<a class="headerlink" href="#contributing-to-the-documentation" title="Permanent link">#</a></h2>
-<p>Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. </p>
+<p>Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process.</p>
 <p>In order to ensure consistency of style, language, format, and terminology across all documents, please follow the guidelines below:</p>
 <h3 id="glossary-of-terms">Glossary of terms<a class="headerlink" href="#glossary-of-terms" title="Permanent link">#</a></h3>
 <p>This glossary helps to keep terms and their meanings consistent across documentation.</p>
@@ -15357,10 +15357,10 @@ Follow the instructions and complete the signing process. </li>
 </ul>
 <p>For correct naming of other modules of the Janssen Server, please refer to <a href="https://github.com/JanssenProject/jans#janssen-modules">README</a></p>
 <h3 id="documentation-style-guide">Documentation Style Guide<a class="headerlink" href="#documentation-style-guide" title="Permanent link">#</a></h3>
-<p>Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents. </p>
+<p>Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents.</p>
 <div class="admonition testing">
 <p class="admonition-title">Testing</p>
-<p><a href="https://docs.jans.io">Janssen Project documentation site</a> is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and <a href="https://docs.jans.io">Janssen Project documentation site</a>. Hence it is critical to <a href="../contribute/testing/#testing-documentation-changes-locally">test documentation</a> changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.</p>
+<p><a href="https://docs.jans.io">Janssen Project documentation site</a> is published using MkDocs. Markdown parsers used by GitHub and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and <a href="https://docs.jans.io">Janssen Project documentation site</a>. Hence it is critical to <a href="../contribute/testing/#testing-documentation-changes-locally">test documentation</a> changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.</p>
 </div>
 <h4 id="document-title">Document Title<a class="headerlink" href="#document-title" title="Permanent link">#</a></h4>
 <p>The document title summarises what the document aims to achieve and at the same time, it plays a critical role in making the document easy to find via search. Below are a few guidelines to write good titles for documents.</p>
@@ -15397,11 +15397,11 @@ In this guide, the following command is documented:</p>
 <p>Above command contains references to the release number at two places. <code>v1.1.4</code> in the URL and <code>1.1.4</code> as part of the file
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.</p>
-<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>0.0.0-nightly</code> instead
+<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>replace-janssen-version</code> instead
 of writing actual release numbers in the <code>head</code>(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the <code>head</code> version)
 so that it stays up-to-date release after release.</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -15524,21 +15524,21 @@ This is also code.
 </code></pre></div>
 </li>
 </ul>
-<p>It will look like this:  </p>
+<p>It will look like this:</p>
 <p>Navigate to <code>Configuration</code> &gt; <code>Authentication</code> and click the <code>Passport</code> tab</p>
 <h4 id="linking">Linking<a class="headerlink" href="#linking" title="Permanent link">#</a></h4>
 <p>We recommend using relative linking syntax when linking to other artifacts in repository. Linking to a page within the same repo use this format: <code>[text for the link](../where/the/link/goes.md)</code>
  - You must link to the <code>.md</code> file on GitHub for it to work properly
  - As an example, to make text <code>this link</code> link to a Markdown document named <code>example.md</code> in the same directory, you'd type it as <code>[this link](./example.md)</code></p>
 <p><strong>Service Commands</strong></p>
-<p>The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for <a href="https://jans.io/docs/vm-ops/checking-service-status/">Service Commands</a>. </p>
-<p>In documenting a process that involves a service restart, the Service Command documentation is linked:  </p>
+<p>The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for <a href="https://jans.io/docs/vm-ops/checking-service-status/">Service Commands</a>.</p>
+<p>In documenting a process that involves a service restart, the Service Command documentation is linked:</p>
 <div class="highlight"><pre><span></span><code>## Add the attribute to MySQL
 
  - Add custom attribute 
  - [Restart](https://jans.io/docs/vm-ops/restarting-services/) the `jans-auth.service` service.
 </code></pre></div>
-<p>The word <code>Restart</code> is simply linked to the dedicated doc for Service Commands. </p>
+<p>The word <code>Restart</code> is simply linked to the dedicated doc for Service Commands.</p>
 <h4 id="tables">Tables<a class="headerlink" href="#tables" title="Permanent link">#</a></h4>
 <ul>
 <li>Try to make tables visually readable by spacing to make distinct columns</li>
@@ -15586,26 +15586,26 @@ This is also code.
 <h3 id="find-something-to-work-on">Find something to work on<a class="headerlink" href="#find-something-to-work-on" title="Permanent link">#</a></h3>
 <p>Best place to find something to work on is to look at <a href="https://github.com/JanssenProject/jans/issues">currently open issues</a>. If you are a first time contributor then starting with <a href="https://github.com/JanssenProject/jans/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22">list of good first issues</a> is best.</p>
 <h3 id="start-a-discussion">Start a discussion<a class="headerlink" href="#start-a-discussion" title="Permanent link">#</a></h3>
-<p>Start a <a href="https://github.com/JanssenProject/jans/discussions">Github Discussion</a> about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your solution or implementation approach. Janssen is a community driven project and it'll be helpful to get community's view about it.</p>
+<p>Start a <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussion</a> about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your proposed solution or implementation approach is. Janssen is a community-driven project and it's helpful to get the community's view about it.</p>
 <h3 id="create-an-issue">Create an issue<a class="headerlink" href="#create-an-issue" title="Permanent link">#</a></h3>
-<p>Take your time to write a proper issue including a good summary and description. Outcome of Github discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate <code>issue template</code> and it'll help you create an issue with right content.</p>
+<p>Take your time to write a proper issue including a good summary and description. Outcome of GitHub discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate <code>issue template</code> and it'll help you create an issue with right content.</p>
 <p>Remember that issue may be the first thing a reviewer of your PR will look at to get an idea of what you are proposing. It will also be used by the community in the future to find about what new features and enhancements are included in new releases.</p>
 <h3 id="implement-the-change">Implement the change<a class="headerlink" href="#implement-the-change" title="Permanent link">#</a></h3>
-<p>All contributions to Janssen Project should be made via Github pull requests(PR). </p>
+<p>All contributions to Janssen Project should be made via GitHub pull requests (PR).</p>
 <blockquote>
 <p>New to PR workflow?? Learn and practice it at <a href="https://github.com/firstcontributions/first-contributions">first-contributions</a></p>
 </blockquote>
 <h4 id="create-a-fork">Create a Fork<a class="headerlink" href="#create-a-fork" title="Permanent link">#</a></h4>
 <p>Fork <a href="https://github.com/JanssenProject/jans">Janssen repository</a>. And create a clone.</p>
 <h4 id="implement-the-change_1">Implement the Change<a class="headerlink" href="#implement-the-change_1" title="Permanent link">#</a></h4>
-<p>Start working on changes as required. </p>
+<p>Start working on changes as required.</p>
 <ul>
 <li>Make sure the <a href="#code-conventions-and-guidelines">code conventions</a> are being followed.</li>
 <li>Use static code analysis and linting tools to make sure the code is high-quality.</li>
 <li>Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.</li>
-<li>Create PR early and push often. </li>
-<li>Janssen uses Github actions to run automated checks on PR changes. Ensure that these checks are passing with every push.</li>
-<li>Engage PR reviewers at the start so that they can continue to reivew code as it is developed and in small chunks.</li>
+<li>Create PR early and push often.</li>
+<li>Janssen uses GitHub actions to run automated checks on PR changes. Ensure that these checks are passing with every push.</li>
+<li>Engage PR reviewers at the start so that they can continue to review code as it is developed and in small chunks.</li>
 <li>For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.</li>
 </ul>
 <!-- TODO: enable this once the workspace guide is ready and developers can test locally from workspace
@@ -15637,12 +15637,12 @@ docs: no docs modification
 <h3 id="raise-a-pr">Raise a PR<a class="headerlink" href="#raise-a-pr" title="Permanent link">#</a></h3>
 <ul>
 <li>Make sure that PR title follows these <a href="#prs">guidelines</a></li>
-<li>Janssen uses Github PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. Github will populate new PR's description with these instructions. You can edit PR description as per your requirements.</li>
-<li>When PR is raised, Github will automatically assign reviewer to the PR based changed files and <a href="https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS">CODEOWNERS</a> list.</li>
-<li>Once PR is raised, ensure that PR passes all the mandatory Github actions checks available on Github PR page. Github will not allow PR to be merged if any of the mandatory check is failing.</li>
+<li>Janssen uses GitHub PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. GitHub will populate new PR's description with these instructions. You can edit PR description as per your requirements.</li>
+<li>When PR is raised, GitHub will automatically assign reviewer to the PR based changed files and <a href="https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS">CODEOWNERS</a> list.</li>
+<li>Once PR is raised, ensure that PR passes all the mandatory GitHub actions checks available on GitHub PR page. GitHub will not allow PR to be merged if any of the mandatory check is failing.</li>
 </ul>
 <h3 id="follow-through">Follow Through<a class="headerlink" href="#follow-through" title="Permanent link">#</a></h3>
-<p>Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient. </p>
+<p>Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient.</p>
 <p>Follow activities on your PR closely till the time PR is merged. PR reviewer may want to suggest a change or may need to ask a question to get more clarity. Make sure you are actively collaborating. Once Reviewer has completed the review and approved the changes, the PR will be merged.</p>
 <p>Thats it!! Congratulations on successful contribution. 🥳 🤟</p>
 
@@ -15667,7 +15667,7 @@ docs: no docs modification
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 1, 2025 09:54:31 UTC"><span class="timeago" datetime="2025-12-01T09:54:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 1, 2025 09:54:31 UTC">2025-12-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 29, 2025 05:45:24 UTC"><span class="timeago" datetime="2025-12-29T05:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 29, 2025 05:45:24 UTC">2025-12-29</span>
   </span>
 
     
