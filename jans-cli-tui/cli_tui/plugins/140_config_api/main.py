@@ -781,7 +781,7 @@ class Plugin(DialogUtils):
                 changes.append(('replace', path_, attributes))
 
 
-        def check_mapping_object(obj):
+        def check_mapping_object(obj: Any) -> bool:
 
             if not isinstance(obj, dict):
                 return False
@@ -793,7 +793,7 @@ class Plugin(DialogUtils):
                 return False
 
             for key_ in obj:
-                if not key_ in ('name', 'text'):
+                if key_ not in ('name', 'text'):
                     return False
 
             if 'text' in obj:
@@ -822,13 +822,13 @@ class Plugin(DialogUtils):
                         try:
                             data_['ignoreObjectMapping'][item_number] = json.loads(item_data)
                         except json.decoder.JSONDecodeError:
-                            json_decode_errors.append(f' • {item_data}')
+                            json_decode_errors.append(f' {item_number+1}. {item_data}')
                         else:
                             if not check_mapping_object(data_['ignoreObjectMapping'][item_number]):
-                                json_decode_errors.append(f' • {item_data}')
+                                json_decode_errors.append(f' {item_number+1}. {item_data}')
 
                 if json_decode_errors:
-                    json_decode_errors_message = _("Either the following Object Mapping items could not be converted to JSON or not a valid dictionary for Audit Log Conf:\n")
+                    json_decode_errors_message = _("Either the following line of Object Mapping items could not be converted to JSON or not a valid dictionary for Audit Log Conf:\n")
                     json_decode_errors_message += '\n'.join(json_decode_errors)
                     self.app.show_message(_(common_strings.error), json_decode_errors_message, tobefocused=self.main_container)
                     return
