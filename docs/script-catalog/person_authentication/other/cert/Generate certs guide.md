@@ -404,4 +404,4 @@ Convert a PEM certificate file and a private key to PKCS#12 (.pfx .p12)
 ```
 openssl pkcs12 -export -out enduser-certs/user-gluu.org.pfx -inkey enduser-certs/user-gluu.org.key -in enduser-certs/user-gluu.org.crt -certfile enduser-certs/user-gluu.org.chain
 ```
-                                                                                           
+

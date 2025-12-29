@@ -113,6 +113,8 @@ def test_get_sql_password_from_file(monkeypatch, tmpdir, gmanager):
     ("pgsql", 5432, "public", "postgresql"),
 ])
 def test_render_sql_properties(monkeypatch, tmpdir, gmanager, dialect, port, schema, jdbc_driver):
+    import os
+    import stat
     from jans.pycloudlib.persistence.sql import render_sql_properties
 
     passwd = tmpdir.join("sql_password")
@@ -144,6 +146,10 @@ auth.userPassword=fHL54sT5qHk=
 
     render_sql_properties(gmanager, str(src), str(dest))
     assert dest.read() == expected
+
+    # check file permission (should writable only by owner)
+    perms = stat.S_IMODE(os.stat(dest).st_mode)
+    assert oct(perms) == '0o600'
 
 
 class PGException(Exception):

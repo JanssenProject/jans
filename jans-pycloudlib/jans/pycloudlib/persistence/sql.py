@@ -1116,6 +1116,9 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         }
         f.write(rendered_txt)
 
+    # Set restrictive permissions to protect embedded credentials (if any)
+    os.chmod(dest, 0o600)
+
 
 def set_mysql_strict_mode(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
