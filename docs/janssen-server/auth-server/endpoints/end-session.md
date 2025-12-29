@@ -76,10 +76,10 @@ This script can be used to customize the HTML response generated from end sessio
 
 ## Difference with Global Token Revocation
 
-The End Session endpoint is used to terminate a user's session from a single application (log out), 
-while the Global Token Revocation endpoint (`/global-token-revocation`) is used 
-to invalidate all of a user's sessions and tokens across all applications. 
-This is a more forceful measure that ensures all access is revoked, 
+The End Session endpoint is used to terminate a user's session from a single application (log out),
+while the Global Token Revocation endpoint (`/global-token-revocation`) is used
+to invalidate all of a user's sessions and tokens across all applications.
+This is a more forceful measure that ensures all access is revoked,
 which is useful in situations where a user's account may have been compromised.
 
 For more details, see [Global Token Revocation](global-token-revocation.md).

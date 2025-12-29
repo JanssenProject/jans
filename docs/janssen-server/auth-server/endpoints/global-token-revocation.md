@@ -8,14 +8,14 @@ tags:
 
 # Global Token Revocation Endpoint
 
-The Global Token Revocation endpoint is a critical security feature that allows for the immediate invalidation of 
-all tokens and sessions associated with a user. This is particularly useful in scenarios where a user's account may have been compromised, 
-as it ensures that all active sessions are terminated and all tokens are revoked, preventing any further unauthorized access.
+The Global Token Revocation endpoint is a critical security feature that allows for the immediate invalidation of
+all tokens and sessions associated with a user. This is particularly useful in scenarios where a user's account may have been compromised,
+as it ensures that all active sessions are terminated and all tokens are revoked, preventing any further unauthorized accessю
 
 Janssen Server provides this endpoint implementation to allow greater
 control and better management of sessions on OP.
 
-The URL for the Global Token Revocation endpoint is specified in the Janssen Server's well-known [configuration endpoint](./configuration.md) 
+The URL for the Global Token Revocation endpoint is specified in the Janssen Server's well-known [configuration endpoint](./configuration.md)
 response:
 
 ```text
@@ -82,13 +82,13 @@ A client must have the following scope in order to use this endpoint:
 
 ## Difference with Front-Channel End Session
 
-The Global Token Revocation endpoint provides a comprehensive approach to session termination by 
-revoking all tokens and sessions associated with a user across all applications. 
+The Global Token Revocation endpoint provides a comprehensive approach to session termination by
+revoking all tokens and sessions associated with a user across all applications.
 This is a "back-end" operation that ensures all access is immediately cut off.
 
-In contrast, the Front-Channel End Session (`/end_session`) is a "front-end" mechanism 
-that logs a user out of a single application. 
-It relies on the user's browser to clear the session cookie and does not guarantee that 
+In contrast, the Front-Channel End Session (`/end_session`) is a "front-end" mechanism
+that logs a user out of a single application.
+It relies on the user's browser to clear the session cookie and does not guarantee that
 all tokens and sessions are invalidated across all applications.
 
 For more details, see [End Session](end-session.md).
