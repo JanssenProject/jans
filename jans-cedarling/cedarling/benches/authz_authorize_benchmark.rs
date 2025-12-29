@@ -18,6 +18,21 @@ use tokio::runtime::Runtime;
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
+// Validates that the cedarling instance actually works before benchmarking.
+async fn validate_cedarling_works(cedarling: &Cedarling, request: &Request) {
+    let result = cedarling
+        .authorize(request.clone())
+        .await
+        .expect("authorization call failed");
+
+    let is_allowed = match result.cedar_decision() {
+        cedar_policy::Decision::Allow => true,
+        cedar_policy::Decision::Deny => false,
+    };
+
+    assert!(is_allowed, "got invalid authorization result");
+}
+
 fn without_jwt_validation_benchmark(c: &mut Criterion) {
     let runtime = Runtime::new().expect("init tokio runtime");
 
@@ -26,6 +41,8 @@ fn without_jwt_validation_benchmark(c: &mut Criterion) {
         .expect("should initialize Cedarling");
 
     let request = prepare_cedarling_request_for_without_jwt_validation();
+
+    runtime.block_on(validate_cedarling_works(&cedarling, &request));
 
     c.bench_with_input(
         BenchmarkId::new("authz_authorize_without_jwt_validation", "tokio runtime"),
@@ -54,6 +71,8 @@ fn with_jwt_validation_hs256_benchmark(c: &mut Criterion) {
 
     let request =
         prepare_cedarling_request_for_with_jwt_validation(&mock1.keys, &mock1.base_idp_url);
+
+    runtime.block_on(validate_cedarling_works(&cedarling, &request));
 
     c.bench_with_input(
         BenchmarkId::new("authz_authorize_with_jwt_validation_hs256", "tokio runtime"),
