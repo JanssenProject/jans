@@ -7,11 +7,9 @@ tags:
   - getting-started
 ---
 
-
 # Getting Started with Cedarling in a JavaScript app
 
 This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.
-
 
 ## Installation
 
@@ -25,9 +23,7 @@ npm i @janssenproject/cedarling_wasm
 
 Alternatively, see [here](#build-from-source), if you want to build Cedarling from the source.
 
-
 ### Build from Source
-
 
 #### Requirements
 
@@ -76,8 +72,6 @@ To view the WebAssembly project in action, you can run a local server. One way t
 python3 -m http.server
 ```
 
-
-
 ## Usage
 
 !!! info "Sample Apps"
@@ -95,20 +89,19 @@ Since Cedarling is a WASM module, you need to initialize it first.
 ```js
 import initWasm, { init } from "@janssenproject/cedarling_wasm";
 
-
 // initialize the WASM binary
 await initWasm();
 
 let cedarling = init(
   "CEDARLING_APPLICATION_NAME": "My App",
   // make sure to update this with your own policy store
-  CEDARLING_POLICY_STORE_URI: "https://raw.githubusercontent.com/...",
-  CEDARLING_LOG_TYPE: "std_out",
-  CEDARLING_LOG_LEVEL: "DEBUG",
-  CEDARLING_USER_AUTHZ: "enabled",
-  CEDARLING_WORKLOAD_AUTHZ: "disabled",
-  CEDARLING_JWT_SIG_VALIDATION: "disabled",
-  CEDARLING_ID_TOKEN_TRUST_MODE: "never",
+  "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/...",
+  "CEDARLING_LOG_TYPE": "std_out",
+  "CEDARLING_LOG_LEVEL": "DEBUG",
+  "CEDARLING_USER_AUTHZ": "enabled",
+  "CEDARLING_WORKLOAD_AUTHZ": "disabled",
+  "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+  "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
 });
 ```
 
