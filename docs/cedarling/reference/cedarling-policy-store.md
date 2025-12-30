@@ -117,7 +117,7 @@ cd policy-store && zip -r ../policy-store.cjar .
 
 **Note:** In WASM environments, only URL-based and inline string sources are available. Use `CjarUrl` or `init_from_archive_bytes()` for custom fetch scenarios.
 
-## Advanced: Loading from Bytes**
+## Advanced: Loading from Bytes
 
 For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:
 
