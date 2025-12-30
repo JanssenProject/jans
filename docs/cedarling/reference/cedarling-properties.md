@@ -26,9 +26,15 @@ To load policy store one of the following keys must be provided:
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
-- **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON or .cjar archive, used if policy store is not local.
+- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format:
+  - URLs ending in `.cjar` → loads as Cedar Archive
+  - Other URLs → loads as legacy JSON from Lock Server
 
-- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store file (JSON or YAML) or directory
+- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format:
+  - Directories → loads as directory-based policy store
+  - `.cjar` files → loads as Cedar Archive
+  - `.json` files → loads as JSON
+  - `.yaml`/`.yml` files → loads as YAML
 
 **New Directory-Based Format** (Native platforms only):
 

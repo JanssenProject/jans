@@ -23,7 +23,16 @@ For a comprehensive JSON schema defining the structure of the policy store, see:
 
 ## Policy Store Formats
 
-Cedarling supports two policy store formats:
+Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:
+
+| Configuration | Detection |
+|---------------|-----------|
+| `CEDARLING_POLICY_STORE_URI` ending in `.cjar` | Cedar Archive from URL |
+| `CEDARLING_POLICY_STORE_URI` (other) | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory | Directory-based format |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension | Cedar Archive file |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension | JSON file |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.yaml`/`.yml` extension | YAML file |
 
 ### 1. Legacy Single-File Format (JSON/YAML)
 
