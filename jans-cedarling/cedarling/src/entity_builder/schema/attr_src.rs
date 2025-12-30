@@ -49,7 +49,7 @@ pub enum ExpectedClaimType {
 }
 
 impl AttrSrc {
-    /// Resolves [`AttrSrc`] from [`cedar_policy_validator::types::Type`]
+    /// Resolves [`AttrSrc`] from [`cedar_policy_core::validator::types::Type`]
     pub fn from_type(attr_name: &str, value: &Type) -> Result<Self, BuildAttrSrcError> {
         let attr_src: Self = match value {
             Type::Never => {
