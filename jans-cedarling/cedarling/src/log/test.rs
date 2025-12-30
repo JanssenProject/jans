@@ -61,7 +61,7 @@ async fn test_new_log_strategy_memory() {
 async fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogTypeConfig::StdOut,
+        log_type: log_config::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
         log_level: crate::LogLevel::DEBUG,
     };
 
@@ -87,7 +87,7 @@ async fn test_log_memory_logger() {
     };
     let strategy = LogStrategy::new(&config, pdp_id, app_name.clone()).expect("build LogStrategy");
     let entry = LogEntry {
-        base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
+        base: BaseLogEntry::new_decision(gen_uuid7()),
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
@@ -112,10 +112,13 @@ async fn test_log_memory_logger() {
 
     // make same test as for the memory logger
     // create log entries
-    let entry1 =
-        LogEntry::new_with_data(LogType::Decision, None).set_message("some message".to_string());
+    let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
+        .set_message("some message".to_string());
 
-    let entry2 = LogEntry::new_with_data(LogType::System, None);
+    let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+        LogLevel::DEBUG,
+        None,
+    ));
 
     // log entries
     strategy.log_any(entry1.clone());
@@ -168,7 +171,7 @@ fn test_log_stdout_logger() {
     let app_name = None;
     // Arrange
     let log_entry = LogEntry {
-        base: BaseLogEntry::new(LogType::Decision, gen_uuid7()),
+        base: BaseLogEntry::new_decision(gen_uuid7()),
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
@@ -185,12 +188,14 @@ fn test_log_stdout_logger() {
 
     let test_writer = TestWriter::new();
     let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
-    let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE);
-    let strategy =
-        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name, None);
+    let logger = StdOutLogger::new_with(buffer, LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
     // Act
-    strategy.log_any(log_entry);
+    {
+        let strategy =
+            LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), pdp_id, app_name, None);
+        strategy.log_any(log_entry);
+    } // strategy and logger are dropped here, waiting for writer thread
 
     let logged_content = test_writer.into_inner_buf();
 
@@ -204,10 +209,13 @@ fn test_log_storage_for_only_writer() {
 
     // make same test as for the memory logger
     // create log entries
-    let entry1 =
-        LogEntry::new_with_data(LogType::Decision, None).set_message("some message".to_string());
+    let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
+        .set_message("some message".to_string());
 
-    let entry2 = LogEntry::new_with_data(LogType::System, None);
+    let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+        LogLevel::ERROR,
+        None,
+    ));
 
     // log entries
     strategy.log_any(entry1.clone());
