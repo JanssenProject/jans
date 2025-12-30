@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy_validator::types::{EntityRecordKind, Primitive, Type};
+use cedar_policy_core::validator::types::{EntityRecordKind, Primitive, Type};
 use derive_more::derive::Deref;
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
@@ -122,7 +122,10 @@ impl AttrSrc {
                 let attrs = attrs
                     .iter()
                     .map(|(name, attr_kind)| {
-                        (name.clone(), ExpectedClaimType::from(&attr_kind.attr_type))
+                        (
+                            name.clone(),
+                            ExpectedClaimType::from(attr_kind.attr_type.as_ref()),
+                        )
                     })
                     .collect::<HashMap<SmolStr, ExpectedClaimType>>();
                 Self::JwtClaim(TknClaimAttrSrc {
@@ -141,9 +144,6 @@ impl AttrSrc {
                     BuildAttrSrcErrorKind::MissingEntityTypeName.while_building(attr_name),
                 )?;
                 Self::EntityRef(EntityRefAttrSrc(entity.name().to_smolstr()))
-            },
-            EntityRecordKind::ActionEntity { .. } => {
-                return Err(BuildAttrSrcErrorKind::ActionAttrNotAllowed.while_building(attr_name));
             },
         };
 
@@ -168,8 +168,6 @@ pub enum BuildAttrSrcErrorKind {
     InvalidEntityRecordKind(EntityRecordKind),
     #[error("the entity type name was not defined")]
     MissingEntityTypeName,
-    #[error("action entities cannot become attributes to other entities")]
-    ActionAttrNotAllowed,
 }
 
 impl BuildAttrSrcErrorKind {
@@ -215,7 +213,9 @@ impl From<&EntityRecordKind> for ExpectedClaimType {
             EntityRecordKind::Record { attrs, .. } => {
                 let attrs = attrs
                     .iter()
-                    .map(|(name, attr_kind)| (name.clone(), Self::from(&attr_kind.attr_type)))
+                    .map(|(name, attr_kind)| {
+                        (name.clone(), Self::from(attr_kind.attr_type.as_ref()))
+                    })
                     .collect::<HashMap<SmolStr, Self>>();
                 Self::Object(attrs)
             },
@@ -223,7 +223,6 @@ impl From<&EntityRecordKind> for ExpectedClaimType {
             // ... should we use TryFrom instead of returning null?
             EntityRecordKind::AnyEntity => Self::Null,
             EntityRecordKind::Entity(_entity_lub) => Self::Null,
-            EntityRecordKind::ActionEntity { .. } => Self::Null,
         }
     }
 }

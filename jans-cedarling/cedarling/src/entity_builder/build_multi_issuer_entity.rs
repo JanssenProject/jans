@@ -767,7 +767,7 @@ mod tests {
             }
         "#;
 
-        let validator_schema = cedar_policy_validator::ValidatorSchema::from_str(schema_src)
+        let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
         let config = EntityBuilderConfig {
@@ -919,7 +919,7 @@ mod tests {
             }
         "#;
 
-        let validator_schema = cedar_policy_validator::ValidatorSchema::from_str(schema_src)
+        let validator_schema = cedar_policy_core::validator::ValidatorSchema::from_str(schema_src)
             .expect("should parse schema");
 
         let config = EntityBuilderConfig {

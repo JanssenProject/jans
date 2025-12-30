@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedar_policy_core::extensions::Extensions;
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy_core::validator::ValidatorSchema;
 
 pub(crate) mod cedar_json;
 pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
