@@ -9,7 +9,7 @@ use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub enum Attribute {
     String {
         required: bool,
@@ -40,6 +40,44 @@ pub enum Attribute {
         required: bool,
         name: EntityOrCommonName,
     },
+}
+
+impl PartialEq for Attribute {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Attribute::String { required: r1 }, Attribute::String { required: r2 }) => r1 == r2,
+            (Attribute::Long { required: r1 }, Attribute::Long { required: r2 }) => r1 == r2,
+            (Attribute::Boolean { required: r1 }, Attribute::Boolean { required: r2 }) => r1 == r2,
+            (Attribute::Record { required: r1, attrs: a1 }, Attribute::Record { required: r2, attrs: a2 }) => {
+                if r1 != r2 {
+                    return false;
+                }
+                if a1.len() != a2.len() {
+                    return false;
+                }
+                for (key, value) in a1 {
+                    match a2.get(key) {
+                        Some(other_value) if value == other_value => continue,
+                        _ => return false,
+                    }
+                }
+                true
+            }
+            (Attribute::Set { required: r1, element: e1 }, Attribute::Set { required: r2, element: e2 }) => {
+                r1 == r2 && e1 == e2
+            }
+            (Attribute::Entity { required: r1, name: n1 }, Attribute::Entity { required: r2, name: n2 }) => {
+                r1 == r2 && n1 == n2
+            }
+            (Attribute::Extension { required: r1, name: n1 }, Attribute::Extension { required: r2, name: n2 }) => {
+                r1 == r2 && n1 == n2
+            }
+            (Attribute::EntityOrCommon { required: r1, name: n1 }, Attribute::EntityOrCommon { required: r2, name: n2 }) => {
+                r1 == r2 && n1 == n2
+            }
+            _ => false,
+        }
+    }
 }
 
 impl<'de> Deserialize<'de> for Attribute {

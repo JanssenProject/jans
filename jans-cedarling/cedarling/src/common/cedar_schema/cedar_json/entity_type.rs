@@ -10,10 +10,28 @@ use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashSet;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct EntityShape {
     pub required: bool,
     pub attrs: HashMap<AttributeName, Attribute>,
+}
+
+impl PartialEq for EntityShape {
+    fn eq(&self, other: &Self) -> bool {
+        if self.required != other.required {
+            return false;
+        }
+        if self.attrs.len() != other.attrs.len() {
+            return false;
+        }
+        for (key, value) in &self.attrs {
+            match other.attrs.get(key) {
+                Some(other_value) if value == other_value => continue,
+                _ => return false,
+            }
+        }
+        true
+    }
 }
 
 #[cfg(test)]

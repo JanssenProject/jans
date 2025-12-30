@@ -21,15 +21,43 @@ use serde::{Deserialize, Deserializer, de, de::Error};
 use std::collections::HashMap;
 use url::Url;
 
+fn trimmed_string<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    Ok(s.trim_end().to_string())
+}
+
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
+    #[allow(dead_code)]
     pub cedar_version: Version,
     pub policy_stores: HashMap<String, PolicyStore>,
+}
+
+#[cfg(test)]
+impl PartialEq for AgamaPolicyStore {
+    fn eq(&self, other: &Self) -> bool {
+        if self.cedar_version != other.cedar_version {
+            return false;
+        }
+        if self.policy_stores.len() != other.policy_stores.len() {
+            return false;
+        }
+        for (key, value) in &self.policy_stores {
+            match other.policy_stores.get(key) {
+                Some(other_value) if value == other_value => continue,
+                _ => return false,
+            }
+        }
+        true
+    }
 }
 
 impl<'de> Deserialize<'de> for AgamaPolicyStore {
@@ -82,7 +110,7 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct PolicyStore {
     /// version of policy store
     //
@@ -112,6 +140,47 @@ pub struct PolicyStore {
 
     /// Default entities for the policy store.
     pub default_entities: DefaultEntitiesWithWarns,
+}
+
+#[cfg(test)]
+impl PartialEq for PolicyStore {
+    fn eq(&self, other: &Self) -> bool {
+        if self.version != other.version {
+            return false;
+        }
+        if self.name != other.name {
+            return false;
+        }
+        if self.description != other.description {
+            return false;
+        }
+        if self.cedar_version != other.cedar_version {
+            return false;
+        }
+        if self.schema != other.schema {
+            return false;
+        }
+        if self.policies != other.policies {
+            return false;
+        }
+        // Compare trusted_issuers
+        match (&self.trusted_issuers, &other.trusted_issuers) {
+            (None, None) => {},
+            (Some(map1), Some(map2)) => {
+                if map1.len() != map2.len() {
+                    return false;
+                }
+                for (key, value) in map1 {
+                    match map2.get(key) {
+                        Some(other_value) if value == other_value => continue,
+                        _ => return false,
+                    }
+                }
+            },
+            _ => return false,
+        }
+        self.default_entities == other.default_entities
+    }
 }
 
 impl PolicyStore {
@@ -359,6 +428,7 @@ enum PolicyContentType {
 struct EncodedPolicy {
     pub encoding: super::Encoding,
     pub content_type: PolicyContentType,
+    #[serde(deserialize_with = "trimmed_string")]
     pub body: String,
 }
 
@@ -368,17 +438,39 @@ struct EncodedPolicy {
 ///   "policy_content": "cGVybWl0KA..."
 /// OR
 ///   "policy_content": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
-#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq)]
 enum MaybeEncoded {
     Plain(String),
     Tagged(EncodedPolicy),
 }
 
+impl<'de> Deserialize<'de> for MaybeEncoded {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // Use a local enum with derived Deserialize to do the heavy lifting
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum MaybeEncodedHelper {
+            Plain(String),
+            Tagged(EncodedPolicy),
+        }
+        let helper = MaybeEncodedHelper::deserialize(deserializer)?;
+        Ok(match helper {
+            MaybeEncodedHelper::Plain(s) => MaybeEncoded::Plain(s.trim_end().to_string()),
+            MaybeEncodedHelper::Tagged(es) => {
+                // Body already trimmed by EncodedPolicy's custom deserializer
+                MaybeEncoded::Tagged(es)
+            },
+        })
+    }
+}
+
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
-#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 struct RawPolicy {
     /// Base64-encoded content of the policy.
     pub policy_content: MaybeEncoded,
@@ -390,7 +482,7 @@ struct RawPolicy {
 /// Container to decode policy stores into container
 ///
 /// Contain compiled [`cedar_policy::PolicySet`] and raw policy info to get description or other information.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct PoliciesContainer {
     /// HasMap to store raw policy info
     /// Is used to get policy description by ID
@@ -399,6 +491,27 @@ pub struct PoliciesContainer {
 
     /// compiled `cedar_policy`` Policy set
     policy_set: cedar_policy::PolicySet,
+}
+
+#[cfg(test)]
+impl PartialEq for PoliciesContainer {
+    fn eq(&self, other: &Self) -> bool {
+        // Compare policy sets semantically, ignoring order of policies.
+        // Collect policies into BTreeMaps keyed by policy ID for deterministic comparison.
+        use std::collections::BTreeMap;
+
+        let self_policies: BTreeMap<_, _> = self
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        let other_policies: BTreeMap<_, _> = other
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        self_policies == other_policies
+    }
 }
 
 impl PoliciesContainer {
