@@ -159,14 +159,14 @@ config := map[string]any{
     // ... other config
 }
 
-// Load from a .cjar file
+// Load from a local .cjar archive (Cedar Archive)
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":      "MyApp",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
     // ... other config
 }
 
-// Load from a .cjar URL
+// Load from a remote .cjar archive (Cedar Archive)
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":   "MyApp",
     "CEDARLING_POLICY_STORE_URI":   "https://example.com/policy-store.cjar",

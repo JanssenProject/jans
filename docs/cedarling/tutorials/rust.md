@@ -92,7 +92,7 @@ Rust bindings support all policy store source types:
 | `PolicyStoreSource::FileYaml(PathBuf)`     | Local YAML file                  |
 | `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files |
 | `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file         |
-| `PolicyStoreSource::CjarUrl(String)`       | Remote Cedar archive URL         |
+| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL  |
 | `PolicyStoreSource::LockServer(String)`    | Remote Lock Server               |
 | `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch) |
 
@@ -125,13 +125,13 @@ let config = BootstrapConfig::default()
         PathBuf::from("/path/to/policy-store/")
     ));
 
-// Load from a .cjar file
+// Load from a local .cjar archive (Cedar Archive)
 let config = BootstrapConfig::default()
     .with_policy_store_source(PolicyStoreSource::CjarFile(
         PathBuf::from("/path/to/policy-store.cjar")
     ));
 
-// Load from a .cjar URL
+// Load from a remote .cjar archive (Cedar Archive)
 let config = BootstrapConfig::default()
     .with_policy_store_source(PolicyStoreSource::CjarUrl(
         "https://example.com/policy-store.cjar".to_string()

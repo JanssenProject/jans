@@ -115,7 +115,7 @@ The directory structure can be packaged as a `.cjar` file (ZIP archive) for dist
 cd policy-store && zip -r ../policy-store.cjar .
 ```
 
-**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CjarUrl` or `init_from_archive_bytes()` for custom fetch scenarios.
+**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `init_from_archive_bytes()` for custom fetch scenarios.
 
 ## Advanced: Loading from Bytes
 
@@ -624,9 +624,9 @@ entity Tokens = {
 
 The naming follows this pattern:
 
-- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim  
-- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")  
-- Both converted to lowercase with underscores replacing special characters  
+- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim
+- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
+- Both converted to lowercase with underscores replacing special characters
 
 ### Schema Requirements for Multi-Issuer
 

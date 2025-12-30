@@ -111,11 +111,11 @@ Python bindings support all policy store source types. See [Cedarling Properties
 os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store/"
 bootstrap_config = BootstrapConfig.from_env()
 
-# Load from a .cjar file
+# Load from a local .cjar archive (Cedar Archive)
 os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
 bootstrap_config = BootstrapConfig.from_env()
 
-# Load from a .cjar URL
+# Load from a remote .cjar archive (Cedar Archive)
 os.environ["CEDARLING_POLICY_STORE_URI"] = "https://example.com/policy-store.cjar"
 bootstrap_config = BootstrapConfig.from_env()
 ```

@@ -95,7 +95,7 @@ String bootstrapJsonStr = """
     }
     """;
 
-// Load from a .cjar file
+// Load from a local .cjar archive (Cedar Archive)
 String bootstrapJsonStr = """
     {
         "CEDARLING_APPLICATION_NAME": "MyApp",
@@ -103,7 +103,7 @@ String bootstrapJsonStr = """
     }
     """;
 
-// Load from a .cjar URL
+// Load from a remote .cjar archive (Cedar Archive)
 String bootstrapJsonStr = """
     {
         "CEDARLING_APPLICATION_NAME": "MyApp",
