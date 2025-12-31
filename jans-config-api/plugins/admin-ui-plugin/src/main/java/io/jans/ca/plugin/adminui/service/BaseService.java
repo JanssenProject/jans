@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class BaseService {
@@ -30,7 +31,7 @@ public class BaseService {
     @Inject
     Logger log;
 
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) throws NoSuchAlgorithmException {
         return getToken(tokenRequest, tokenEndpoint, null, null);
     }
 
@@ -53,7 +54,7 @@ public class BaseService {
      * the token endpoint.
      * @return The method is returning a `io.jans.as.client.TokenResponse` object.
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) throws NoSuchAlgorithmException {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -198,7 +199,7 @@ public class BaseService {
         return claims;
     }
 
-    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) {
+    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) throws NoSuchAlgorithmException {
         log.info("Token introspection from auth-server.");
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);
         request.header("Authorization", "Bearer " + accessToken);
