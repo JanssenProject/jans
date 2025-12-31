@@ -14929,7 +14929,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. <code>https://acme.co:444/</code>; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  </p>
-<p>The easiest way to set this up is adding a <code>VirtualHost</code> directive associated to a new port, for instance 444. This <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf">snippet</a> exemplifies a safe way to do so. Note you have to edit accordingly:</p>
+<p>The easiest way to set this up is adding a <code>VirtualHost</code> directive associated to a new port, for instance 444. This <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf">snippet</a> exemplifies a safe way to do so. Note you have to edit accordingly:</p>
 <ul>
 <li>The server name/alias</li>
 <li>The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication</li>
@@ -14937,7 +14937,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Transfer the edited file to <code>/etc/apache2/sites-enabled</code>. Note there is already a file named <code>https_jans.conf</code> with a <code>VirtualHost</code> for port 443 that you can use as a guide. Finally, add a <code>Listen 444</code> directive to file <code>/etc/apache2/ports.conf</code>.</p>
 </div>
 <div class="tabbed-block">
-<p>This is the fastest approach and involves adding a directive inside the existing <code>VirtualHost</code> for port 443 in file <code>/etc/apache2/sites-enabled/https_jans.conf</code>. Copy this <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf">snippet</a> and paste it just after the closing of the <code>Location</code> directive associated to <code>/jans-casa</code>.</p>
+<p>This is the fastest approach and involves adding a directive inside the existing <code>VirtualHost</code> for port 443 in file <code>/etc/apache2/sites-enabled/https_jans.conf</code>. Copy this <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf">snippet</a> and paste it just after the closing of the <code>Location</code> directive associated to <code>/jans-casa</code>.</p>
 </div>
 </div>
 </div>
@@ -14950,7 +14950,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 </div>
 <ol>
 <li>
-<p>Download the certificate authentication Agama project archive: <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/replace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip</code></p>
+<p>Download the certificate authentication Agama project archive: <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/0.0.0-nightly/cert-authn-agama-0.0.0-nightly-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -&gt; "Upload project". Wait one minute</p>
@@ -14997,7 +14997,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <h2 id="install-the-cert-authn-plugin">Install the cert-authn plugin<a class="headerlink" href="#install-the-cert-authn-plugin" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/replace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code>. Alternatively upload the file using Casa itself: go to <code>Administration console</code> &gt; <code>Casa plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/0.0.0-nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code>. Alternatively upload the file using Casa itself: go to <code>Administration console</code> &gt; <code>Casa plugins</code></p>
 </li>
 <li>
 <p>Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"</p>
