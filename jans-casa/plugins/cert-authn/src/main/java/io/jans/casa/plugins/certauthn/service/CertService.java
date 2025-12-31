@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class CertService {
     
     private static final String CERT_PREFIX = "cert:";
-    public static String AGAMA_FLOW = "io.jans.casa.authn.cert";
+    public static final String AGAMA_FLOW = "io.jans.casa.authn.cert";
     
     private Logger logger = LoggerFactory.getLogger(getClass());
 	private IPersistenceService persistenceService;
