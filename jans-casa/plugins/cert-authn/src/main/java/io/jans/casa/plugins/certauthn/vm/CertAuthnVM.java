@@ -170,7 +170,7 @@ public class CertAuthnVM {
     private Reference getReference(String k) throws Exception {
         
         ObjectMapper mapper = new ObjectMapper();
-        String str = Optional.ofNullable(cacheProvider.get(key)).map(Object::toString).orElse(null);
+        String str = Optional.ofNullable(cacheProvider.get(k)).map(Object::toString).orElse(null);
         
         if (str == null) return null;
         return mapper.readValue(str, Reference.class);

@@ -205,7 +205,7 @@ public class CertService {
         List<String> stringCerts = Optional.ofNullable(person.getX509Certificates()).orElse(new ArrayList<>());
         io.jans.scim.model.scim2.user.X509Certificate scimX509Cert = new io.jans.scim.model.scim2.user.X509Certificate();
         try {
-            byte DEREncoded[] = certificate.getEncoded();
+            byte[] DEREncoded = certificate.getEncoded();
             scimX509Cert.setValue(new String(Base64.getEncoder().encode(DEREncoded), UTF_8));
             scimX509Cert.setDisplay(certificate.getSubjectX500Principal().getName());
 

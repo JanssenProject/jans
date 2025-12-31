@@ -12,6 +12,7 @@ import io.jans.util.security.StringEncrypter;
 
 import java.util.List;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 
 import org.json.JSONObject;
 import org.slf4j.*;
@@ -47,6 +48,7 @@ public class CertAuthenticationSummaryVM {
     private CertService certService;
     private SndFactorAuthenticationUtils sndFactorUtils;
     private StringEncrypter stringEncrypter;
+    private SecureRandom random;
 
     public List<Certificate> getCertificates() {
         return certificates;
@@ -58,6 +60,7 @@ public class CertAuthenticationSummaryVM {
         user = sessionContext.getLoggedUser();
         userId = user.getId();
         
+        random = new SecureRandom();
         certService = CertService.getInstance();
         certificates = certService.getUserCerts(userId);
         
@@ -69,8 +72,8 @@ public class CertAuthenticationSummaryVM {
     }
     
     public void redirect() throws StringEncrypter.EncryptionException {
-        
-        String key = ("" + Math.random()).substring(2);
+
+        String key = ("" + random.nextDouble()).substring(2);
         String encKey = URLEncoder.encode(stringEncrypter.encrypt(key), UTF_8);
         
         //We cannot store a Reference object straight in the cache because the 
