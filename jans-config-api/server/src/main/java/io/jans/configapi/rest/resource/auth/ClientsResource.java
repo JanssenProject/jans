@@ -317,9 +317,12 @@ public class ClientsResource extends ConfigBaseResource {
         client.setClientId(existingClient.getClientId());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
-        if (client.getClientSecret() != null) {
+        if (StringUtils.isNotBlank(client.getClientSecret())) {
             client.setClientSecret(this.encryptPassword(client.getClientName(), client.getClientSecret()));
+        } else {
+            client.setClientSecret(existingClient.getClientSecret());
         }
+
         ignoreCustomObjectClassesForNonLDAP(client);
 
         logger.debug("Final Client details to be updated - client:{}", client);
@@ -622,7 +625,7 @@ public class ClientsResource extends ConfigBaseResource {
         if (StringUtils.isBlank(clientPassword)) {
             return encryptedPassword;
         }
-        logger.error("Check for clientName:{}, isPasswordEncrypted(clientPassword):{}", clientName,
+        logger.debug("Check for clientName:{}, isPasswordEncrypted(clientPassword):{}", clientName,
                 isPasswordEncrypted(clientName, clientPassword));
 
         if (!isPasswordEncrypted(clientName, clientPassword)) {
@@ -636,7 +639,7 @@ public class ClientsResource extends ConfigBaseResource {
         if (StringUtils.isBlank(clientPassword)) {
             return isPasswordEncrypted;
         }
-        logger.error("Check for clientName:{}, clientPassword:{}", clientName, clientPassword);
+        logger.debug("Check for clientName:{}, clientPassword:{}", clientName, clientPassword);
         try {
             encryptionService.decrypt(clientPassword);
         } catch (EncryptionException ex) {
