@@ -159,7 +159,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 1. Edit the file: in the `selector` section under `io.jans.casa.authn.main`, add:
 
-    ```
+    ```json
     "io.jans.casa.authn.cert": {
        "icon": "<span class='fa-layers fa-fw f2 mr1 nl2'><i class='far fa-circle' data-fa-transform='shrink-4 up-3 right-4'></i><i class='far fa-circle' data-fa-transform='shrink-5 up-3 right-4'></i><i class='far fa-circle' data-fa-transform='shrink-6 up-3 right-4'></i><i class='fas fa-bookmark' data-fa-transform='rotate-30 shrink-9 down-4'></i><i class='fas fa-bookmark' data-fa-transform='rotate--30 shrink-9 down-4 right-8'></i></span>",
        "textKey": "casa.selector.certauthn"
