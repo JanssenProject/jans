@@ -61,26 +61,26 @@ public class ClientFactory {
         /*
          * Named groups (curves + strong FFDHE only)
          */
-        sslParameters.setNamedGroups(new String[] {
+        /*sslParameters.setNamedGroups(new String[] {
                 "x25519",
                 "secp256r1",
                 "secp384r1",
                 "secp521r1",
                 "ffdhe3072",
                 "ffdhe4096"
-        });
+        });*/
 
         /*
          * Signature algorithms allow-list (no SHA-1)
          */
-        sslParameters.setSignatureSchemes(new String[] {
+        /*sslParameters.setSignatureSchemes(new String[] {
                 "rsa_pss_rsae_sha256",
                 "rsa_pss_rsae_sha384",
                 "ecdsa_secp256r1_sha256",
                 "ecdsa_secp384r1_sha384",
                 "rsa_pkcs1_sha256",
                 "rsa_pkcs1_sha384"
-        });
+        });*/
 
         /*
          * Apply SSLParameters globally to this client
