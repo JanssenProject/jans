@@ -21,14 +21,6 @@ use serde::{Deserialize, Deserializer, de, de::Error};
 use std::collections::HashMap;
 use url::Url;
 
-fn trimmed_string<'de, D>(deserializer: D) -> Result<String, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    Ok(s.trim_end().to_string())
-}
-
 pub(crate) use claim_mapping::ClaimMappings;
 pub use token_entity_metadata::TokenEntityMetadata;
 
@@ -370,7 +362,6 @@ enum PolicyContentType {
 struct EncodedPolicy {
     pub encoding: super::Encoding,
     pub content_type: PolicyContentType,
-    #[serde(deserialize_with = "trimmed_string")]
     pub body: String,
 }
 
