@@ -41,7 +41,7 @@ For this task, two approaches are covered here. You can choose any or even both 
 
 - Reusing already made testing certificates. These are PKI testing certificates published by the Computer Research Security Center of [NIST ITL](https://www.nist.gov/itl)
 
-- Creating a tiny CA through free, open source tools provided by [Smallstep Labs](https://smallstep.com/). This approach is easy too - just need to run a few commands
+- Creating a tiny CA through free, open-source tools provided by [Smallstep Labs](https://smallstep.com/). This approach is easy too - just need to run a few commands
 
 The steps given are supposed to be executed in a developer or administrative machine, not your Janssen server.
 
@@ -96,7 +96,7 @@ The steps given are supposed to be executed in a developer or administrative mac
 
 ### Import client certificates
 
-Instructions for this vary amongst browsers. Often, it boils down to locating a "certificates" section in the settings menu and import the `p12` file under "Your certificates". A prompt will appear: enter the password used when the `p12` file was generated.
+Instructions for this vary among browsers. Often, it boils down to locating a "certificates" section in the settings menu and import the `p12` file under "Your certificates". A prompt will appear: enter the password used when the `p12` file was generated.
 
 If using the NIST PKI test certs, type **password**. Import all the `p12` files copied.
 
@@ -143,7 +143,7 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 
 1. Open the configuration management dialog (press `c`) and choose to export the sample configuration to a file on disk
 
-1. Edit property `certPickupUrl` accordingly. This is the URL that displays the browser dialog in order to choose a certificate
+1. Edit property `certPickupUrl` accordingly. This is the URL that displays the browser dialog for choosing a certificate
 
 1. If you did not [Generate testing certificates](#generate-testing-certificates), i.e. already owned some certs, create a file named `chain.pem` by concatenating the contents (in PEM format) of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
 
@@ -180,7 +180,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 ## Testing
 
 !!! Warning
-    The dialog for users to pick a certificate from the already imported certificates do not behave the same for all browsers. In some cases, a browser will "cache" the selection and remember the choice for the whole browsing session or even for several days. Sometimes, the user is able to choose for how long the selection is remembered. You can always clear the SSL cache to make the prompt appear again. Instructions to do so vary.
+    The dialog for users to pick a certificate from the already imported certificates do not behave the same for all browsers. In some cases, a browser will "cache" the selection and remember the choice for the whole browsing session or even for several days. Sometimes, the user can choose for how long the selection is remembered. You can always clear the SSL cache to make the prompt appear again. Instructions to do so vary.
 
 ### Enrollment
 
@@ -207,7 +207,7 @@ Testing can be extended to the following scenarios:
 
 ## Authentication
 
-Once testing users have certificates enrolled, add other credentials like OTP so second factor authentication can be turned on for them.
+Once testing users have certificates enrolled, add other credentials like OTP so second-factor authentication can be turned on for them.
 
 Here are steps for testing authentication for a given user (happy path):
 
