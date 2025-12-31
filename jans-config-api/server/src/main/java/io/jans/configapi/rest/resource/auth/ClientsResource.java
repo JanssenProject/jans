@@ -240,7 +240,7 @@ public class ClientsResource extends ConfigBaseResource {
 
         String clientSecret = client.getClientSecret();
 
-        if (StringUtils.isNotBlank(clientSecret)) {
+        if (StringUtils.isBlank(clientSecret)) {
             clientSecret = generatePassword();
         }
 
@@ -643,7 +643,7 @@ public class ClientsResource extends ConfigBaseResource {
         try {
             encryptionService.decrypt(clientPassword);
         } catch (EncryptionException ex) {
-            logger.error("Password of {} is not encrypted !!!", clientName);
+            logger.info("Password of {} is not encrypted, will encrypt before storage", clientName);
             isPasswordEncrypted = false;
         }
 
