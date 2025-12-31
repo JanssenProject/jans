@@ -29,6 +29,11 @@ pub use token_entity_metadata::TokenEntityMetadata;
 #[cfg_attr(test, derive(PartialEq))]
 pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
+    ///
+    /// **Note**: This field is currently unused after deserialization but is kept for:
+    /// 1. Input validation - ensures policy store files specify a valid version format
+    /// 2. Format compatibility - maintains the Agama Lab Policy Designer format specification
+    /// 3. Future use - may be needed for version-specific parsing logic as Cedar evolves
     #[allow(dead_code)]
     pub cedar_version: Version,
     pub policy_stores: HashMap<String, PolicyStore>,
