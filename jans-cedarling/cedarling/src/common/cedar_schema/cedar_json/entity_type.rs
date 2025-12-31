@@ -11,27 +11,10 @@ use serde_json::Value;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct EntityShape {
     pub required: bool,
     pub attrs: HashMap<AttributeName, Attribute>,
-}
-
-impl PartialEq for EntityShape {
-    fn eq(&self, other: &Self) -> bool {
-        if self.required != other.required {
-            return false;
-        }
-        if self.attrs.len() != other.attrs.len() {
-            return false;
-        }
-        for (key, value) in &self.attrs {
-            match other.attrs.get(key) {
-                Some(other_value) if value == other_value => continue,
-                _ => return false,
-            }
-        }
-        true
-    }
 }
 
 #[cfg(test)]
@@ -44,7 +27,8 @@ impl EntityShape {
     }
 }
 
-#[derive(Debug, PartialEq, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct EntityType {
     #[serde(rename = "memberOfTypes")]
     pub member_of: Option<HashSet<EntityTypeName>>,
@@ -111,14 +95,17 @@ mod test_deserialize_entity_type {
             },
         });
         let entity_type = serde_json::from_value::<EntityType>(entity_type).unwrap();
-        assert_eq!(entity_type, EntityType {
-            member_of: None,
-            shape: Some(EntityShape::required(HashMap::from([
-                ("name".into(), Attribute::string()),
-                ("age".into(), Attribute::long())
-            ]))),
-            tags: None,
-        });
+        assert_eq!(
+            entity_type,
+            EntityType {
+                member_of: None,
+                shape: Some(EntityShape::required(HashMap::from([
+                    ("name".into(), Attribute::string()),
+                    ("age".into(), Attribute::long())
+                ]))),
+                tags: None,
+            }
+        );
     }
 
     #[test]
@@ -134,14 +121,17 @@ mod test_deserialize_entity_type {
             },
         });
         let with_member_of = serde_json::from_value::<EntityType>(with_member_of).unwrap();
-        assert_eq!(with_member_of, EntityType {
-            member_of: Some(HashSet::from(["UserGroup".into()])),
-            shape: Some(EntityShape::required(HashMap::from([
-                ("name".into(), Attribute::string()),
-                ("age".into(), Attribute::long())
-            ]))),
-            tags: None,
-        });
+        assert_eq!(
+            with_member_of,
+            EntityType {
+                member_of: Some(HashSet::from(["UserGroup".into()])),
+                shape: Some(EntityShape::required(HashMap::from([
+                    ("name".into(), Attribute::string()),
+                    ("age".into(), Attribute::long())
+                ]))),
+                tags: None,
+            }
+        );
     }
 
     #[test]
@@ -163,14 +153,17 @@ mod test_deserialize_entity_type {
             }
         });
         let with_tags = serde_json::from_value::<EntityType>(with_tags).unwrap();
-        assert_eq!(with_tags, EntityType {
-            member_of: None,
-            shape: Some(EntityShape::required(HashMap::from([
-                ("name".into(), Attribute::string()),
-                ("age".into(), Attribute::long())
-            ]))),
-            tags: Some(Attribute::set(Attribute::entity_or_common("String",)))
-        });
+        assert_eq!(
+            with_tags,
+            EntityType {
+                member_of: None,
+                shape: Some(EntityShape::required(HashMap::from([
+                    ("name".into(), Attribute::string()),
+                    ("age".into(), Attribute::long())
+                ]))),
+                tags: Some(Attribute::set(Attribute::entity_or_common("String",)))
+            }
+        );
     }
 
     #[test]

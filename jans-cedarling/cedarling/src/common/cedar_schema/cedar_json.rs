@@ -40,25 +40,10 @@ fn join_namespace(namespace: &str, type_name: &str) -> String {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct CedarSchemaJson {
     #[serde(flatten)]
     namespaces: HashMap<NamespaceName, Namespace>,
-}
-
-#[cfg(test)]
-impl PartialEq for CedarSchemaJson {
-    fn eq(&self, other: &Self) -> bool {
-        if self.namespaces.len() != other.namespaces.len() {
-            return false;
-        }
-        for (key, value) in &self.namespaces {
-            match other.namespaces.get(key) {
-                Some(other_value) if value == other_value => continue,
-                _ => return false,
-            }
-        }
-        true
-    }
 }
 
 impl CedarSchemaJson {
@@ -79,9 +64,10 @@ impl CedarSchemaJson {
         let basename = entity_type_name.basename();
 
         if !namespace.is_empty()
-            && let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
-                return Ok(Some((entity_type_name, entity_schema)));
-            }
+            && let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename)
+        {
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace {
@@ -107,9 +93,10 @@ impl CedarSchemaJson {
 
     fn get_comon_type_from_namespace(&self, namespace: &str, basename: &str) -> Option<&Attribute> {
         if let Some(namespace) = self.namespaces.get(namespace)
-            && let Some(entity_type) = namespace.common_types.get(basename) {
-                return Some(entity_type);
-            }
+            && let Some(entity_type) = namespace.common_types.get(basename)
+        {
+            return Some(entity_type);
+        }
         None
     }
 
@@ -130,19 +117,19 @@ impl CedarSchemaJson {
 
         if !namespace.is_empty()
             && let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
-            {
-                return Ok(Some((entity_type_name, entity_schema)));
-            }
+        {
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace
             && let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
-            {
-                let entity_type_name =
-                    cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
+        {
+            let entity_type_name =
+                cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
 
-                return Ok(Some((entity_type_name, entity_schema)));
-            }
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
 
         // If the type is not found in the default namespace, look for it in the empty namespace.
         if let Some(entity_schema) =
@@ -162,14 +149,16 @@ impl CedarSchemaJson {
         basename: &str,
     ) -> Option<&EntityType> {
         if let Some(namespace) = self.namespaces.get(namespace)
-            && let Some(entity_type) = namespace.entity_types.get(basename) {
-                return Some(entity_type);
-            }
+            && let Some(entity_type) = namespace.entity_types.get(basename)
+        {
+            return Some(entity_type);
+        }
         None
     }
 }
 
 #[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Namespace {
     #[serde(rename = "entityTypes", default)]
     entity_types: HashMap<EntityTypeName, EntityType>,
@@ -177,43 +166,6 @@ pub struct Namespace {
     common_types: HashMap<CommonTypeName, Attribute>,
     #[serde(default)]
     actions: HashMap<ActionName, Action>,
-}
-
-#[cfg(test)]
-impl PartialEq for Namespace {
-    fn eq(&self, other: &Self) -> bool {
-        // Compare entity_types
-        if self.entity_types.len() != other.entity_types.len() {
-            return false;
-        }
-        for (key, value) in &self.entity_types {
-            match other.entity_types.get(key) {
-                Some(other_value) if value == other_value => continue,
-                _ => return false,
-            }
-        }
-        // Compare common_types
-        if self.common_types.len() != other.common_types.len() {
-            return false;
-        }
-        for (key, value) in &self.common_types {
-            match other.common_types.get(key) {
-                Some(other_value) if value == other_value => continue,
-                _ => return false,
-            }
-        }
-        // Compare actions
-        if self.actions.len() != other.actions.len() {
-            return false;
-        }
-        for (key, value) in &self.actions {
-            match other.actions.get(key) {
-                Some(other_value) if value == other_value => continue,
-                _ => return false,
-            }
-        }
-        true
-    }
 }
 
 #[cfg(test)]

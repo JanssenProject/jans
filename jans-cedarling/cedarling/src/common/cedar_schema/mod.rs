@@ -60,7 +60,7 @@ impl<'de> serde::Deserialize<'de> for MaybeEncoded {
             MaybeEncodedHelper::Tagged(es) => {
                 // Body already trimmed by EncodedSchema's custom deserializer
                 MaybeEncoded::Tagged(es)
-            }
+            },
         })
     }
 }

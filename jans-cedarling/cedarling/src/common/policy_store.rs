@@ -34,30 +34,12 @@ pub use token_entity_metadata::TokenEntityMetadata;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     #[allow(dead_code)]
     pub cedar_version: Version,
     pub policy_stores: HashMap<String, PolicyStore>,
-}
-
-#[cfg(test)]
-impl PartialEq for AgamaPolicyStore {
-    fn eq(&self, other: &Self) -> bool {
-        if self.cedar_version != other.cedar_version {
-            return false;
-        }
-        if self.policy_stores.len() != other.policy_stores.len() {
-            return false;
-        }
-        for (key, value) in &self.policy_stores {
-            match other.policy_stores.get(key) {
-                Some(other_value) if value == other_value => continue,
-                _ => return false,
-            }
-        }
-        true
-    }
 }
 
 impl<'de> Deserialize<'de> for AgamaPolicyStore {
@@ -111,6 +93,7 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
 #[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct PolicyStore {
     /// version of policy store
     //
@@ -140,47 +123,6 @@ pub struct PolicyStore {
 
     /// Default entities for the policy store.
     pub default_entities: DefaultEntitiesWithWarns,
-}
-
-#[cfg(test)]
-impl PartialEq for PolicyStore {
-    fn eq(&self, other: &Self) -> bool {
-        if self.version != other.version {
-            return false;
-        }
-        if self.name != other.name {
-            return false;
-        }
-        if self.description != other.description {
-            return false;
-        }
-        if self.cedar_version != other.cedar_version {
-            return false;
-        }
-        if self.schema != other.schema {
-            return false;
-        }
-        if self.policies != other.policies {
-            return false;
-        }
-        // Compare trusted_issuers
-        match (&self.trusted_issuers, &other.trusted_issuers) {
-            (None, None) => {},
-            (Some(map1), Some(map2)) => {
-                if map1.len() != map2.len() {
-                    return false;
-                }
-                for (key, value) in map1 {
-                    match map2.get(key) {
-                        Some(other_value) if value == other_value => continue,
-                        _ => return false,
-                    }
-                }
-            },
-            _ => return false,
-        }
-        self.default_entities == other.default_entities
-    }
 }
 
 impl PolicyStore {
