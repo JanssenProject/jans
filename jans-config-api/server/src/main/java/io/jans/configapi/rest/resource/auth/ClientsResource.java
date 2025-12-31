@@ -189,16 +189,16 @@ public class ClientsResource extends ConfigBaseResource {
     /**
      * Create a new OpenID Connect client.
      *
-     * Validates redirect URIs, scopes, and claims; generates a clientId if missing;
-     * ensures a client secret exists (generating one when omitted) and stores it
-     * encrypted; sets the client's DN and deletable flag, and persists the client.
+     * Validates the provided client, ensures a clientId and client secret exist
+     * (encrypting the secret as needed), persists the client, and returns the
+     * persisted representation.
      *
-     * @param client the Client to create; must include redirect URIs. If clientId
-     *               is absent, a new inum will be generated and assigned.
-     * @return an HTTP 201 Created response containing the created Client with its
-     *         clientSecret decrypted and the original claims preserved.
-     * @throws EncryptionException if encryption or decryption of the client secret
-     *                             fails.
+     * @param client the Client to create; must include redirect URIs. If the client's
+     *               clientId is absent, a new one will be generated and assigned.
+     * @return an HTTP 201 Created response containing the persisted Client. The
+     *         presence and form of the `clientSecret` in the response are governed
+     *         by the server's response policy/configuration.
+     * @throws EncryptionException if encryption or decryption of the client secret fails.
      */
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -266,17 +266,14 @@ public class ClientsResource extends ConfigBaseResource {
      * Update an existing OpenID Connect client.
      *
      * <p>
-     * Validates scopes and claims, preserves the existing clientId and base DN,
-     * encrypts a provided client secret before persistence, and returns the stored
-     * client with the client secret decrypted and claims restored for the response.
+     * Validates scopes and claims, preserves the existing client identifier and base DN,
+     * encrypts a provided client secret before saving, and returns the stored client with
+     * claims restored and the client secret adjusted according to the configured response policy.
      * </p>
      *
-     * @param client the Client object containing updated fields; must include the
-     *               client's `clientId` and `redirectUris`
-     * @return the updated Client with decrypted `clientSecret` and restored
-     *         `claims`
-     * @throws EncryptionException if encryption or decryption of the client secret
-     *                             fails
+     * @param client the Client object containing updated fields; must include the client's `clientId` and `redirectUris`
+     * @return the updated Client with claims restored and `clientSecret` adjusted according to response policy
+     * @throws EncryptionException if encryption or decryption of the client secret fails
      */
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -337,14 +334,14 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     /**
-     * Apply a JSON Patch to an existing OpenID Connect client identified by its
-     * inum.
+     * Apply a JSON Patch to the OpenID Connect client with the given inum.
      *
-     * @param inum            the client identifier (inum)
+     * @param inum            the client identifier (inum) to patch
      * @param jsonPatchString the JSON Patch document as a string
-     * @return a Response containing the patched Client and an HTTP 200 status
-     * @throws JsonPatchException if the patch cannot be applied to the client
-     * @throws IOException        if an I/O error occurs while processing the patch
+     * @return                a Response containing the patched Client entity
+     * @throws EncryptionException if encrypting a provided client secret fails
+     * @throws JsonPatchException  if the patch cannot be applied to the client
+     * @throws IOException         if an I/O error occurs while processing the patch
      */
     @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -614,12 +611,25 @@ public class ClientsResource extends ConfigBaseResource {
         return this.appConfiguration.isReturnEncryptedClientSecretInResponse();
     }
 
+    /**
+     * Determine whether API responses should include client secrets.
+     *
+     * @return `true` if responses should include client secrets, `false` otherwise.
+     */
     private boolean isReturnClientSecretInResponse() {
         logger.debug("appConfiguration.isReturnClientSecretInResponse():{} ",
                 appConfiguration.isReturnClientSecretInResponse());
         return this.appConfiguration.isReturnClientSecretInResponse();
     }
 
+    /**
+     * Encrypts the provided client password if it is not blank and not already encrypted.
+     *
+     * @param clientName     the client identifier used for encryption-check context
+     * @param clientPassword the plaintext or already-encrypted password to evaluate
+     * @return               the encrypted password if encryption was performed; the original password unchanged if it was blank or already encrypted
+     * @throws EncryptionException if encryption fails
+     */
     private String encryptPassword(String clientName, String clientPassword) throws EncryptionException {
         String encryptedPassword = clientPassword;
         if (StringUtils.isBlank(clientPassword)) {
@@ -634,6 +644,15 @@ public class ClientsResource extends ConfigBaseResource {
         return encryptedPassword;
     }
 
+    /**
+     * Checks whether the provided client password appears to be already encrypted.
+     *
+     * If the password is blank, it is treated as encrypted.
+     *
+     * @param clientName     the client identifier (used for logging)
+     * @param clientPassword the password to inspect
+     * @return `true` if the password appears encrypted, `false` otherwise
+     */
     private boolean isPasswordEncrypted(String clientName, String clientPassword) {
         boolean isPasswordEncrypted = true;
         if (StringUtils.isBlank(clientPassword)) {
