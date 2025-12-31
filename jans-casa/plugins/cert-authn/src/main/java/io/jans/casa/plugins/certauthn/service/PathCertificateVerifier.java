@@ -55,9 +55,8 @@ public class PathCertificateVerifier {
         }
     }
 
-    public boolean validate(X509Certificate certificate, List<X509Certificate> issuers, Date validationDate) {
-        
-        X509Certificate issuer = issuers.get(0);
+    public boolean validate(X509Certificate certificate, List<X509Certificate> issuers) {
+
         boolean valid = false; 
         try {
             
@@ -70,7 +69,7 @@ public class PathCertificateVerifier {
             PKIXCertPathBuilderResult certPathResult = verifyCertificate(certificate, chains);
             valid = certPathResult != null;
             
-            log.warn("Chain status is {}valid for '{}'", valid ? "" : "not ", subjectX500Principal);
+            log.info("Chain status is {}valid for '{}'", valid ? "" : "not ", subjectX500Principal);
             
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -107,10 +106,15 @@ public class PathCertificateVerifier {
             // Check that first certificate is an EE certificate
             CertPath certPath = certPathBuilderResult.getCertPath();
             List<? extends Certificate> certList = certPath.getCertificates();
+            
+            if (certList.isEmpty()) {
+                log.error("Certificate path is empty!");
+                return null;
+            }
+
             X509Certificate cert = (X509Certificate) certList.get(0);
             if (cert.getBasicConstraints() != -1) {
                 log.error("Target certificate is not an EE certificate!");
-
                 return null;
             }
 

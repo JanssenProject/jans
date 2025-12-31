@@ -1,7 +1,5 @@
 package io.jans.casa.plugins.certauthn.model;
 
-import java.util.*;
-
 public class Reference {
 
     private String userId;

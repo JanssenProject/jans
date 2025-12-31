@@ -7,6 +7,7 @@ import io.jans.util.security.StringEncrypter;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -16,6 +17,7 @@ public class CertAuthnHelper {
     private static final String RND_KEY = "ref";
     //Max. time allowed to go from authn flow to cert pickup url and back again
     private static final int ENTRY_EXP_SECONDS = 25;
+    private static final SecureRandom RND = new SecureRandom();
     
     private static CacheService cs = CdiUtil.bean(CacheService.class);
     private String userId;
@@ -25,9 +27,11 @@ public class CertAuthnHelper {
     public CertAuthnHelper() {}
 
     public CertAuthnHelper(String inum, String certPickupUrl) {
+        
         this.userId = inum;
-        this.certPickupUrl = certPickupUrl;
-        this.key = ("" + Math.random()).substring(2);
+        this.certPickupUrl = certPickupUrl;        
+        this.key = ("" + RND.nextDouble()).substring(2);
+
     }
     
     public String buildRedirectUrl() throws StringEncrypter.EncryptionException {

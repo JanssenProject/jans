@@ -41,7 +41,7 @@ public class CertAuthnMethod implements AuthnMethod {
 	}
 
 	public String getAcr() {
-	    return certService.AGAMA_FLOW;
+	    return CertService.AGAMA_FLOW;
 	}
 
 	public void reloadConfiguration() {		

@@ -196,7 +196,7 @@ public class CertService {
 
         logger.info("Validating certificate...");
         PathCertificateVerifier verifier = new PathCertificateVerifier(true);
-        return verifier.validate(cert, certChain, new Date());
+        return verifier.validate(cert, certChain);
 
     }
 

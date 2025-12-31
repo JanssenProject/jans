@@ -1,6 +1,6 @@
 package io.jans.casa.plugins.certauthn.model;
 
-public class Certificate implements Comparable<Certificate> {
+public class Certificate {
 
     private String formattedName;
     private String commonName;
@@ -9,10 +9,6 @@ public class Certificate implements Comparable<Certificate> {
     private long expirationDate;
     private boolean expired;
     private String fingerPrint;
-
-    public int compareTo(Certificate cert) {
-        return getFingerPrint().compareTo(cert.getFingerPrint());
-    }
 
     public String getCommonName() {
         return commonName;
@@ -69,4 +65,5 @@ public class Certificate implements Comparable<Certificate> {
     public void setFormattedName(String formattedName) {
         this.formattedName = formattedName;
     }
+
 }
