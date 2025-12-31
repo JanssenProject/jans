@@ -371,35 +371,12 @@ struct EncodedPolicy {
 ///   "policy_content": "cGVybWl0KA..."
 /// OR
 ///   "policy_content": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[serde(untagged)]
 enum MaybeEncoded {
     Plain(String),
     Tagged(EncodedPolicy),
 }
-
-impl<'de> Deserialize<'de> for MaybeEncoded {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        // Use a local enum with derived Deserialize to do the heavy lifting
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        enum MaybeEncodedHelper {
-            Plain(String),
-            Tagged(EncodedPolicy),
-        }
-        let helper = MaybeEncodedHelper::deserialize(deserializer)?;
-        Ok(match helper {
-            MaybeEncodedHelper::Plain(s) => MaybeEncoded::Plain(s.trim_end().to_string()),
-            MaybeEncodedHelper::Tagged(es) => {
-                // Body already trimmed by EncodedPolicy's custom deserializer
-                MaybeEncoded::Tagged(es)
-            },
-        })
-    }
-}
-
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
