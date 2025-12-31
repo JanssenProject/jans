@@ -639,7 +639,7 @@ public class ClientsResource extends ConfigBaseResource {
         if (StringUtils.isBlank(clientPassword)) {
             return isPasswordEncrypted;
         }
-        logger.debug("Check for clientName:{}, clientPassword:{}", clientName, clientPassword);
+        logger.debug("Check for clientName:{}", clientName);
         try {
             encryptionService.decrypt(clientPassword);
         } catch (EncryptionException ex) {
