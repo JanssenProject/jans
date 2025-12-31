@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jans.casa.plugins</groupId>
-    <artifactId>acct-linking-agama</artifactId>
+    <artifactId>cert-authn-agama</artifactId>
     <version>0.0.0-nightly</version>
     <distributionManagement>
 	  <repository>
