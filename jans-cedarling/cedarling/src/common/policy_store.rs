@@ -411,8 +411,11 @@ pub struct PoliciesContainer {
 #[cfg(test)]
 impl PartialEq for PoliciesContainer {
     fn eq(&self, other: &Self) -> bool {
-        // Compare policy sets semantically, ignoring order of policies.
-        // Collect policies into BTreeMaps keyed by policy ID for deterministic comparison.
+        // Compare only the compiled policy_set, ignoring:
+        // 1. Order of policies (using BTreeMap for deterministic comparison)
+        // 2. raw_policy_info (auxiliary data like descriptions)
+        // The policy_set is the canonical representation; if policies are equal,
+        // the containers are semantically equal for testing purposes.
         use std::collections::BTreeMap;
 
         let self_policies: BTreeMap<_, _> = self
