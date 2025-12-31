@@ -36,33 +36,11 @@ struct EncodedSchema {
 ///   "cedar_schema": "cGVybWl0KA..."
 /// OR
 ///   "cedar_schema": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(untagged)]
 enum MaybeEncoded {
     Plain(String),
     Tagged(EncodedSchema),
-}
-
-impl<'de> serde::Deserialize<'de> for MaybeEncoded {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        // Use a local enum with derived Deserialize to do the heavy lifting
-        #[derive(serde::Deserialize)]
-        #[serde(untagged)]
-        enum MaybeEncodedHelper {
-            Plain(String),
-            Tagged(EncodedSchema),
-        }
-        let helper = MaybeEncodedHelper::deserialize(deserializer)?;
-        Ok(match helper {
-            MaybeEncodedHelper::Plain(s) => MaybeEncoded::Plain(s.trim_end().to_string()),
-            MaybeEncodedHelper::Tagged(es) => {
-                // Body already trimmed by EncodedSchema's custom deserializer
-                MaybeEncoded::Tagged(es)
-            },
-        })
-    }
 }
 
 /// Box that holds the [`cedar_policy::Schema`] and
