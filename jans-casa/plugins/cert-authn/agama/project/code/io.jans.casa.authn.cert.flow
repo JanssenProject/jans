@@ -1,0 +1,20 @@
+Flow io.jans.casa.authn.cert
+    Basepath ""
+    Configs conf 
+    Inputs userData
+    
+cah = Call io.jans.casa.certauthn.CertAuthnHelper#new userData.inum conf.certPickupUrl
+url = Call cah buildRedirectUrl
+//See template index.zul and class io.jans.casa.plugins.certauthn.vm.CertAuthnVM in casa plugin
+RFAC url
+
+outcome = Call cah retrieveOutcome
+When outcome is ""
+    Finish true
+
+When outcome is null        //the cache entry expired
+    Log "Cert Authentication failed."
+Otherwise
+    Log "Cert Authentication failed. Reason:" outcome
+
+Finish false
