@@ -30,7 +30,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.service.EncryptionService;
-import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -98,16 +97,22 @@ public class ClientsResource extends ConfigBaseResource {
     AttributeService attributeService;
 
     /**
-     * Retrieve a paged list of OpenID Connect clients matching the given search criteria.
+     * Retrieve a paged list of OpenID Connect clients matching the given search
+     * criteria.
      *
      * @param limit          maximum number of results to return
      * @param pattern        search pattern to filter clients
      * @param startIndex     1-based index of the first result to return
      * @param sortBy         attribute used to sort results
-     * @param sortOrder      sorting direction; allowed values are "ascending" and "descending"
-     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. "applicationType=web,persistClientAuthorizations=true")
-     * @return               HTTP 200 response whose entity is a PagedResult<Client> containing the matching clients
-     * @throws EncryptionException if decrypting client secrets for the response fails
+     * @param sortOrder      sorting direction; allowed values are "ascending" and
+     *                       "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter
+     *                       results (e.g.
+     *                       "applicationType=web,persistClientAuthorizations=true")
+     * @return HTTP 200 response whose entity is a PagedResult<Client> containing
+     *         the matching clients
+     * @throws EncryptionException if decrypting client secrets for the response
+     *                             fails
      */
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -150,7 +155,8 @@ public class ClientsResource extends ConfigBaseResource {
      * Retrieve a specific OpenID Connect client by its Inum.
      *
      * @param inum the client's Inum (identifier)
-     * @return a Response whose entity is the requested Client and whose status is 200 (OK)
+     * @return a Response whose entity is the requested Client and whose status is
+     *         200 (OK)
      */
     @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -183,12 +189,16 @@ public class ClientsResource extends ConfigBaseResource {
     /**
      * Create a new OpenID Connect client.
      *
-     * Validates redirect URIs, scopes, and claims; generates a clientId if missing; ensures a client secret exists
-     * (generating one when omitted) and stores it encrypted; sets the client's DN and deletable flag, and persists the client.
+     * Validates redirect URIs, scopes, and claims; generates a clientId if missing;
+     * ensures a client secret exists (generating one when omitted) and stores it
+     * encrypted; sets the client's DN and deletable flag, and persists the client.
      *
-     * @param client the Client to create; must include redirect URIs. If clientId is absent, a new inum will be generated and assigned.
-     * @return an HTTP 201 Created response containing the created Client with its clientSecret decrypted and the original claims preserved.
-     * @throws EncryptionException if encryption or decryption of the client secret fails.
+     * @param client the Client to create; must include redirect URIs. If clientId
+     *               is absent, a new inum will be generated and assigned.
+     * @return an HTTP 201 Created response containing the created Client with its
+     *         clientSecret decrypted and the original claims preserved.
+     * @throws EncryptionException if encryption or decryption of the client secret
+     *                             fails.
      */
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -230,11 +240,11 @@ public class ClientsResource extends ConfigBaseResource {
 
         String clientSecret = client.getClientSecret();
 
-        if (StringHelper.isEmpty(clientSecret)) {
+        if (StringUtils.isNotBlank(clientSecret)) {
             clientSecret = generatePassword();
         }
 
-        client.setClientSecret(encryptionService.encrypt(clientSecret));
+        client.setClientSecret(this.encryptPassword(client.getClientName(), clientSecret));
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         ignoreCustomObjectClassesForNonLDAP(client);
@@ -255,13 +265,18 @@ public class ClientsResource extends ConfigBaseResource {
     /**
      * Update an existing OpenID Connect client.
      *
-     * <p>Validates scopes and claims, preserves the existing clientId and base DN, encrypts a provided
-     * client secret before persistence, and returns the stored client with the client secret decrypted
-     * and claims restored for the response.</p>
+     * <p>
+     * Validates scopes and claims, preserves the existing clientId and base DN,
+     * encrypts a provided client secret before persistence, and returns the stored
+     * client with the client secret decrypted and claims restored for the response.
+     * </p>
      *
-     * @param client the Client object containing updated fields; must include the client's `clientId` and `redirectUris`
-     * @return the updated Client with decrypted `clientSecret` and restored `claims`
-     * @throws EncryptionException if encryption or decryption of the client secret fails
+     * @param client the Client object containing updated fields; must include the
+     *               client's `clientId` and `redirectUris`
+     * @return the updated Client with decrypted `clientSecret` and restored
+     *         `claims`
+     * @throws EncryptionException if encryption or decryption of the client secret
+     *                             fails
      */
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = {
@@ -303,7 +318,7 @@ public class ClientsResource extends ConfigBaseResource {
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
         if (client.getClientSecret() != null) {
-            client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
+            client.setClientSecret(this.encryptPassword(client.getClientName(), client.getClientSecret()));
         }
         ignoreCustomObjectClassesForNonLDAP(client);
 
@@ -319,7 +334,8 @@ public class ClientsResource extends ConfigBaseResource {
     }
 
     /**
-     * Apply a JSON Patch to an existing OpenID Connect client identified by its inum.
+     * Apply a JSON Patch to an existing OpenID Connect client identified by its
+     * inum.
      *
      * @param inum            the client identifier (inum)
      * @param jsonPatchString the JSON Patch document as a string
@@ -362,7 +378,8 @@ public class ClientsResource extends ConfigBaseResource {
         logger.debug(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
 
         if (isClientSecretPresent && StringUtils.isNotBlank(existingClient.getClientSecret())) {
-            existingClient.setClientSecret(encryptionService.encrypt(existingClient.getClientSecret()));
+            existingClient.setClientSecret(
+                    this.encryptPassword(existingClient.getClientName(), existingClient.getClientSecret()));
         }
 
         clientService.updateClient(existingClient);
@@ -600,4 +617,33 @@ public class ClientsResource extends ConfigBaseResource {
         return this.appConfiguration.isReturnClientSecretInResponse();
     }
 
+    private String encryptPassword(String clientName, String clientPassword) throws EncryptionException {
+        String encryptedPassword = clientPassword;
+        if (StringUtils.isBlank(clientPassword)) {
+            return encryptedPassword;
+        }
+        logger.error("Check for clientName:{}, isPasswordEncrypted(clientPassword):{}", clientName,
+                isPasswordEncrypted(clientName, clientPassword));
+
+        if (!isPasswordEncrypted(clientName, clientPassword)) {
+            encryptedPassword = encryptionService.encrypt(clientPassword);
+        }
+        return encryptedPassword;
+    }
+
+    private boolean isPasswordEncrypted(String clientName, String clientPassword) {
+        boolean isPasswordEncrypted = true;
+        if (StringUtils.isBlank(clientPassword)) {
+            return isPasswordEncrypted;
+        }
+        logger.error("Check for clientName:{}, clientPassword:{}", clientName, clientPassword);
+        try {
+            encryptionService.decrypt(clientPassword);
+        } catch (EncryptionException ex) {
+            logger.error("Password of {} is not encrypted !!!", clientName);
+            isPasswordEncrypted = false;
+        }
+
+        return isPasswordEncrypted;
+    }
 }
