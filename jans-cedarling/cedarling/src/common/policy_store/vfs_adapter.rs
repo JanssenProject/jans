@@ -63,10 +63,8 @@ pub trait VfsFileSystem: Send + Sync + 'static {
 
     /// Check if a path is a file.
     /// This method is only used in non-WASM builds for manifest validation.
-    /// Default implementation returns false for WASM compatibility.
-    fn is_file(&self, _path: &str) -> bool {
-        false
-    }
+    /// Implementations should provide this method even if not used in WASM builds.
+    fn is_file(&self, path: &str) -> bool;
 }
 
 /// Physical filesystem implementation for native platforms.
