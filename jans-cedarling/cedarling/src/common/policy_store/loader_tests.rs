@@ -336,9 +336,7 @@ fn test_parse_policies_success() {
     ];
     let result = PhysicalLoader::parse_policies(&policy_files);
 
-    assert!(result.is_ok());
-
-    let parsed = result.unwrap();
+    let parsed = result.expect("failed to parse policies");
     assert_eq!(parsed.len(), 2);
     assert_eq!(parsed[0].filename, "policy1.cedar");
     assert_eq!(parsed[0].id.to_string(), "policy1");

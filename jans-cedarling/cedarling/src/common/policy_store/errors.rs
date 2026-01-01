@@ -220,7 +220,6 @@ pub enum CedarParseErrorDetail {
 
 /// Validation errors for policy store components.
 #[derive(Debug, thiserror::Error)]
-
 pub enum ValidationError {
     /// Failed to parse metadata JSON
     #[error("Invalid metadata in file {file}: failed to parse JSON")]

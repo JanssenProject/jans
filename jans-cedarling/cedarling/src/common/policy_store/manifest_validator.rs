@@ -8,13 +8,15 @@
 //! This module provides functionality to validate the integrity of a policy store
 //! using a manifest file that contains SHA-256 checksums for all files.
 
+use std::collections::HashSet;
+use std::path::PathBuf;
+
+use hex;
+use sha2::{Digest, Sha256};
+
 use super::errors::{ManifestErrorType, PolicyStoreError};
 use super::metadata::PolicyStoreManifest;
 use super::vfs_adapter::VfsFileSystem;
-use hex;
-use sha2::{Digest, Sha256};
-use std::collections::HashSet;
-use std::path::PathBuf;
 
 /// Result of manifest validation with detailed information.
 #[derive(Debug, Clone, PartialEq)]
@@ -228,6 +230,12 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
         let metadata_path = format!("{}/metadata.json", self.base_path.display());
         if self.vfs.exists(&metadata_path) {
             files.insert("metadata.json".to_string());
+        }
+
+        // Add schema.cedarschema if it exists
+        let schema_path = format!("{}/schema.cedarschema", self.base_path.display());
+        if self.vfs.exists(&schema_path) {
+            files.insert("schema.cedarschema".to_string());
         }
 
         Ok(files)

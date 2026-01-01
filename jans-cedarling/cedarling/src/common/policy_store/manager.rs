@@ -186,6 +186,10 @@ impl PolicyStoreManager {
         let schema = parsed_schema.get_schema().clone();
 
         // Convert to JSON for CedarSchemaJson and ValidatorSchema
+        // NOTE: This parses the schema content again (SchemaFragment::from_str).
+        // For large schemas, this double-parsing could be optimized by having
+        // SchemaParser return both the validated schema and the fragment, but
+        // this is a performance consideration rather than a correctness issue.
         let fragment = SchemaFragment::from_str(schema_content).map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to parse schema fragment: {}", e))
         })?;
