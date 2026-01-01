@@ -8,9 +8,11 @@ use super::*;
 use serde::Deserialize;
 use std::collections::HashSet;
 
-#[derive(Debug, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Action {
     #[serde(rename = "memberOf", default)]
+    #[allow(dead_code)]
     member_of: Option<HashSet<ActionGroup>>,
     #[serde(rename = "appliesTo")]
     pub applies_to: AppliesTo,
@@ -26,7 +28,8 @@ pub struct ActionGroup {
     kind: Option<ActionGroupName>,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct AppliesTo {
     #[serde(rename = "principalTypes", default)]
     pub principal_types: HashSet<EntityName>,

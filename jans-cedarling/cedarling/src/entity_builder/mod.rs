@@ -36,7 +36,7 @@ use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy_core::validator::ValidatorSchema;
 use schema::MappingSchema;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
