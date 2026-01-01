@@ -360,9 +360,7 @@ fn test_parse_policies_with_id_annotation() {
     }];
 
     let result = PhysicalLoader::parse_policies(&policy_files);
-    assert!(result.is_ok());
-
-    let parsed = result.unwrap();
+    let parsed = result.expect("failed to parse policies with id annotation");
     assert_eq!(parsed.len(), 1);
     assert_eq!(parsed[0].id.to_string(), "custom-id-123");
 }
@@ -396,9 +394,7 @@ fn test_parse_templates_success() {
     }];
 
     let result = PhysicalLoader::parse_templates(&template_files);
-    assert!(result.is_ok());
-
-    let parsed = result.unwrap();
+    let parsed = result.expect("failed to parse templates");
     assert_eq!(parsed.len(), 1);
     assert_eq!(parsed[0].filename, "template1.cedar");
     assert_eq!(parsed[0].template.id().to_string(), "template1");
@@ -438,7 +434,7 @@ fn test_load_and_parse_policies_end_to_end() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Add some Cedar policies
     let policies_dir = dir.join("policies");
@@ -496,7 +492,7 @@ fn test_load_and_parse_schema_end_to_end() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Update schema with more complex content
     let schema_content = r#"
@@ -569,7 +565,7 @@ fn test_load_and_parse_entities_end_to_end() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Create entities directory with entity files
     let entities_dir = dir.join("entities");
@@ -657,7 +653,7 @@ fn test_entity_with_complex_attributes() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Create entities directory with complex attributes
     let entities_dir = dir.join("entities");
@@ -717,7 +713,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Create trusted-issuers directory with issuer files
     let issuers_dir = dir.join("trusted-issuers");
@@ -814,7 +810,7 @@ fn test_parse_issuer_with_token_metadata() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Create trusted-issuers directory
     let issuers_dir = dir.join("trusted-issuers");
@@ -1060,7 +1056,7 @@ fn test_complete_policy_store_with_issuers() {
     let dir = temp_dir.path();
 
     // Create a complete policy store structure
-    let _ = create_test_policy_store(dir);
+    create_test_policy_store(dir).expect("Failed to create test policy store");
 
     // Add entities
     let entities_dir = dir.join("entities");
@@ -1346,7 +1342,11 @@ fn test_archive_vfs_with_manifest_validation() {
     // including ArchiveVfs (not just PhysicalVfs)
     let validation_result = validator.validate(Some("abc123def456"));
 
-    assert!(!validation_result.errors.is_empty() || !validation_result.is_valid);
+    // Expected validation to fail for input "abc123def456" due to policy store ID mismatch
+    assert!(
+        !validation_result.is_valid,
+        "expected validation to fail for input 'abc123def456'"
+    );
 }
 
 #[test]

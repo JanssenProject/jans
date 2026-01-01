@@ -92,6 +92,10 @@ pub enum ManifestErrorType {
     #[error("File '{file}' is listed in manifest but not found in policy store")]
     FileMissing { file: String },
 
+    /// Error reading file from policy store
+    #[error("Failed to read file '{file}': {error_message}")]
+    FileReadError { file: String, error_message: String },
+
     /// File checksum mismatch
     #[error("Checksum mismatch for '{file}': expected '{expected}', computed '{actual}'")]
     ChecksumMismatch {

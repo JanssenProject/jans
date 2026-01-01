@@ -175,8 +175,9 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
         let content_bytes =
             self.vfs
                 .read_file(&file_path)
-                .map_err(|_| ManifestErrorType::FileMissing {
+                .map_err(|e| ManifestErrorType::FileReadError {
                     file: relative_path.to_string(),
+                    error_message: format!("{}", e),
                 })?;
 
         // Validate file size

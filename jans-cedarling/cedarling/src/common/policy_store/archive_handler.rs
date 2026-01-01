@@ -180,14 +180,19 @@ where
     }
 
     /// Check if a path exists in the archive (file or directory).
-    fn path_exists(&self, path: &str) -> bool {
+    fn path_exists(&self, path: &str) -> Result<bool, std::io::Error> {
         let normalized = self.normalize_path(path);
 
-        let mut archive = self.archive.lock().expect("mutex poisoned");
+        let mut archive = self.archive.lock().map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("archive mutex poisoned: {}", e),
+            )
+        })?;
 
         // Check if it's a file
         if archive.by_name(&normalized).is_ok() {
-            return true;
+            return Ok(true);
         }
 
         // Check if it's a directory by looking for entries that start with this prefix
@@ -201,19 +206,24 @@ where
             if let Ok(file) = archive.by_index(i) {
                 let file_name = file.name();
                 if file_name == normalized || file_name.starts_with(&dir_prefix) {
-                    return true;
+                    return Ok(true);
                 }
             }
         }
 
-        false
+        Ok(false)
     }
 
     /// Check if a path is a directory in the archive.
-    fn is_directory(&self, path: &str) -> bool {
+    fn is_directory(&self, path: &str) -> Result<bool, std::io::Error> {
         let normalized = self.normalize_path(path);
-        let mut archive = self.archive.lock().expect("mutex poisoned");
-        Self::is_directory_locked(&mut archive, &normalized)
+        let mut archive = self.archive.lock().map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("archive mutex poisoned: {}", e),
+            )
+        })?;
+        Ok(Self::is_directory_locked(&mut archive, &normalized))
     }
 
     /// Check if a path is a directory (with already-locked archive).
@@ -251,7 +261,12 @@ where
     fn read_file(&self, path: &str) -> Result<Vec<u8>, std::io::Error> {
         let normalized = self.normalize_path(path);
 
-        let mut archive = self.archive.lock().expect("mutex poisoned");
+        let mut archive = self.archive.lock().map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("archive mutex poisoned: {}", e),
+            )
+        })?;
 
         let mut file = archive.by_name(&normalized).map_err(|e| {
             std::io::Error::new(
@@ -267,16 +282,19 @@ where
     }
 
     fn exists(&self, path: &str) -> bool {
-        self.path_exists(path)
+        self.path_exists(path).unwrap_or(false)
     }
 
     fn is_dir(&self, path: &str) -> bool {
-        self.is_directory(path)
+        self.is_directory(path).unwrap_or(false)
     }
 
     fn is_file(&self, path: &str) -> bool {
         let normalized = self.normalize_path(path);
-        let mut archive = self.archive.lock().expect("mutex poisoned");
+        let mut archive = match self.archive.lock() {
+            Ok(archive) => archive,
+            Err(_) => return false, // Return false if mutex is poisoned
+        };
 
         if let Ok(file) = archive.by_name(&normalized) {
             return file.is_file();
@@ -293,7 +311,12 @@ where
             format!("{}/", normalized)
         };
 
-        let mut archive = self.archive.lock().expect("mutex poisoned");
+        let mut archive = self.archive.lock().map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("archive mutex poisoned: {}", e),
+            )
+        })?;
         let mut seen = std::collections::HashSet::new();
         let mut entry_paths = Vec::new();
 

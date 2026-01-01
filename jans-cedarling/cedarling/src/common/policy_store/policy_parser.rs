@@ -48,7 +48,8 @@ impl PolicyParser {
     /// 1. Extracting from @id() annotation in the policy text, OR
     /// 2. Deriving from the filename (without .cedar extension)
     ///
-    /// the ID to `Policy::parse()` based on annotation or filename.
+    /// Pass the ID to `Policy::parse()` using the annotation or the filename (without
+    /// the .cedar extension).
     pub fn parse_policy(content: &str, filename: &str) -> Result<ParsedPolicy, PolicyStoreError> {
         // Extract policy ID from @id() annotation or derive from filename
         let policy_id_str = Self::extract_id_annotation(content)

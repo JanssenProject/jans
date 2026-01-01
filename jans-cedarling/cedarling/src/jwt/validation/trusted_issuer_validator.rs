@@ -252,22 +252,19 @@ impl TrustedIssuerValidator {
         let oidc_config = self.get_or_fetch_oidc_config(trusted_issuer).await?;
         let endpoint_str = trusted_issuer.oidc_endpoint.as_str();
 
-        // Check if we have keys and if they've expired
-        let should_refresh = if self.key_service.has_keys() {
-            if let Some((fetch_time, cache_duration)) = self.keys_fetch_time.get(endpoint_str) {
-                // Calculate elapsed time using chrono
-                let elapsed = Utc::now().signed_duration_since(*fetch_time);
-                // Refresh if elapsed time exceeds cache duration
-                // Note: chrono::Duration can represent negative values if time went backwards
-                elapsed
-                    >= chrono::Duration::from_std(*cache_duration)
-                        .unwrap_or(chrono::Duration::zero())
-            } else {
-                // No timestamp recorded, keys are fresh
-                false
-            }
+        // Check if keys for this endpoint have been loaded and if they've expired
+        // Use endpoint-specific check instead of global has_keys() to avoid skipping issuers
+        let should_refresh = if let Some((fetch_time, cache_duration)) =
+            self.keys_fetch_time.get(endpoint_str)
+        {
+            // Keys have been loaded for this endpoint - check if they've expired
+            let elapsed = Utc::now().signed_duration_since(*fetch_time);
+            // Refresh if elapsed time exceeds cache duration
+            // Note: chrono::Duration can represent negative values if time went backwards
+            elapsed
+                >= chrono::Duration::from_std(*cache_duration).unwrap_or(chrono::Duration::zero())
         } else {
-            // No keys loaded yet
+            // No timestamp recorded for this endpoint - keys haven't been loaded yet
             true
         };
 
@@ -557,11 +554,10 @@ mod tests {
         let validator = TrustedIssuerValidator::new(issuers);
 
         let result = validator.find_trusted_issuer("https://evil.com");
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::UntrustedIssuer(_)
-        ));
+        assert!(
+            matches!(result.unwrap_err(), TrustedIssuerError::UntrustedIssuer(_)),
+            "expected UntrustedIssuer error"
+        );
     }
 
     #[test]
@@ -603,11 +599,13 @@ mod tests {
             .build();
 
         let result = validator.validate_required_claims(&claims, "access_token", &metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "sub"
-        ));
+        assert!(
+            matches!(
+                result.unwrap_err(),
+                TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "sub"
+            ),
+            "expected MissingRequiredClaim error for 'sub'"
+        );
     }
 
     #[test]
@@ -628,11 +626,13 @@ mod tests {
             .build();
 
         let result = validator.validate_required_claims(&claims, "access_token", &metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "role"
-        ));
+        assert!(
+            matches!(
+                result.unwrap_err(),
+                TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "role"
+            ),
+            "expected MissingRequiredClaim error for 'role'"
+        );
     }
 
     #[test]
@@ -652,11 +652,13 @@ mod tests {
             .build();
 
         let result = validator.validate_required_claims(&claims, "access_token", &metadata);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "jti"
-        ));
+        assert!(
+            matches!(
+                result.unwrap_err(),
+                TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "jti"
+            ),
+            "expected MissingRequiredClaim error for 'jti'"
+        );
     }
 
     #[test]
@@ -813,11 +815,10 @@ mod tests {
         let result = validator
             .preload_and_validate_token(&token, "access_token")
             .await;
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::UntrustedIssuer(_)
-        ));
+        assert!(
+            matches!(result.unwrap_err(), TrustedIssuerError::UntrustedIssuer(_)),
+            "expected UntrustedIssuer error"
+        );
     }
 
     #[tokio::test]
@@ -835,11 +836,10 @@ mod tests {
         let result = validator
             .preload_and_validate_token(&token, "access_token")
             .await;
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::MissingIssuerClaim
-        ));
+        assert!(
+            matches!(result.unwrap_err(), TrustedIssuerError::MissingIssuerClaim),
+            "expected MissingIssuerClaim error"
+        );
     }
 
     #[tokio::test]
@@ -874,11 +874,10 @@ mod tests {
         let result = validator
             .preload_and_validate_token(&token, "access_token")
             .await;
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::UntrustedIssuer(_)
-        ));
+        assert!(
+            matches!(result.unwrap_err(), TrustedIssuerError::UntrustedIssuer(_)),
+            "expected UntrustedIssuer error"
+        );
     }
 
     #[tokio::test]
@@ -901,11 +900,13 @@ mod tests {
         let result = validator
             .preload_and_validate_token(&token, "userinfo_token")
             .await;
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::TokenTypeNotConfigured { .. }
-        ));
+        assert!(
+            matches!(
+                result.unwrap_err(),
+                TrustedIssuerError::TokenTypeNotConfigured { .. }
+            ),
+            "expected TokenTypeNotConfigured error"
+        );
     }
 
     #[tokio::test]
@@ -945,11 +946,13 @@ mod tests {
         let result = validator
             .preload_and_validate_token(&token, "access_token")
             .await;
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "role"
-        ));
+        assert!(
+            matches!(
+                result.unwrap_err(),
+                TrustedIssuerError::MissingRequiredClaim { claim, .. } if claim == "role"
+            ),
+            "expected MissingRequiredClaim error for 'role'"
+        );
     }
 
     #[tokio::test]

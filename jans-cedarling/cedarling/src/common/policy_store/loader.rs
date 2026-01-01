@@ -129,9 +129,32 @@ pub fn load_policy_store_archive_bytes(
     bytes: Vec<u8>,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     use super::archive_handler::ArchiveVfs;
-    let archive_vfs = ArchiveVfs::from_buffer(bytes)?;
+    use super::manifest_validator::ManifestValidator;
+    use std::path::PathBuf;
+
+    let archive_vfs = ArchiveVfs::from_buffer(bytes.clone())?;
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    loader.load_directory(".")
+    let loaded = loader.load_directory(".")?;
+
+    // Validate manifest if present (same validation used for archive-backed loading)
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(ref _manifest) = loaded.manifest {
+        // Create a new ArchiveVfs instance for validation (ManifestValidator needs its own VFS)
+        let validator_vfs = ArchiveVfs::from_buffer(bytes)?;
+        let validator = ManifestValidator::new(validator_vfs, PathBuf::from("."));
+        let result = validator.validate(Some(&loaded.metadata.policy_store.id));
+
+        // If validation fails, return the first error
+        if !result.is_valid {
+            if let Some(error) = result.errors.first() {
+                return Err(PolicyStoreError::ManifestError {
+                    err: error.error_type.clone(),
+                });
+            }
+        }
+    }
+
+    Ok(loaded)
 }
 
 /// A loaded policy store with all its components.
