@@ -299,9 +299,6 @@ this.
     - Now you can update the policy and schema using the 
       [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)        
 
-
-
-
 ### Step-3: Configure Tarp with the policy store
 
 We will now add the policy store details in the Janssen Tarp that is

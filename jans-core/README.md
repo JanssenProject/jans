@@ -1,5 +1,5 @@
 jans-Core
 =========
 
-This project contains shared code across several Janssen projects. 
+This project contains shared code across several Janssen projects.
 

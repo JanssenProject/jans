@@ -8,7 +8,7 @@ tags:
 
 # Janssen Auth Server Feature Flags
 
-| Feature Flag Name | Description |  | 
+| Feature Flag Name | Description |  |
 |-----|-----|-----|
 | ACTIVE_SESSION | Enable/Disable active session endpoint | [Details](#active_session) |
 | CIBA | Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support | [Details](#ciba) |

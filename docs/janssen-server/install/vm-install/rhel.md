@@ -55,7 +55,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
       ```text
       jans-replace-janssen-version-stable.el8.x86_64.rpm: OK
       ```
-  
+
 - Install the package
 
 ```
@@ -123,7 +123,7 @@ HTTPS cofiguration file `https_jans.conf` as shown below:
   ```bash
   sudo service httpd restart
   ```
-  
+
 ## Uninstall
 
 Uninstall process involves two steps and removes all the Janssen Server components.

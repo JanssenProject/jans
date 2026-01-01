@@ -37,7 +37,7 @@ namespace Jans {
     };
     entity Workload = {
         client_id: String,
-        iss: TrustedIssuer,
+        iss?: TrustedIssuer,
         name?: String,
         rp_id?: String,
         spiffe_id?: String,
@@ -45,7 +45,6 @@ namespace Jans {
     };
     entity Access_token = {
         token_type?: String,
-        issuer?: String,
         validated_at?: Long,
         aud?: String,
         exp?: Long,
@@ -57,7 +56,6 @@ namespace Jans {
     } tags Set<String>;
     entity id_token = {
         token_type?: String,
-        issuer?: String,
         validated_at?: Long,
         acr?: String,
         amr?: Set<String>,
@@ -76,7 +74,6 @@ namespace Jans {
     } tags Set<String>;
     entity Userinfo_token = {
         token_type?: String,
-        issuer?: String,
         validated_at?: Long,
         aud?: String,
         birthdate?: String,

@@ -5,9 +5,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  actions: write
 jobs:
   del_runs:
+    permissions:
+      actions: write
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
