@@ -1,10 +1,4 @@
 # =================================
-# Cloud SQL JDBC Socket Factory
-# =================================
-# Pre-built fat JARs from GHCR for Cloud SQL connectivity
-FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
-
-# =================================
 # Main Image
 # =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
@@ -39,7 +33,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-11-03 10:48'
+ENV CN_BUILD_DATE='2025-12-19 08:52'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
@@ -67,7 +61,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
+ENV JANS_SOURCE_VERSION=6bcc41a0e7f2708e52fe2c950d357dc872b87498
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -219,14 +213,11 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
 # Custom libs
 # ===========
 
-# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
-RUN mkdir -p ${JETTY_BASE}/jans-casa/custom/libs
-COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-casa/custom/libs/
-
 RUN mkdir -p /opt/jans/python/libs \
     ${JETTY_BASE}/jans-casa/static \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/logs \
+    ${JETTY_BASE}/jans-casa/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /etc/jans/conf/casa \

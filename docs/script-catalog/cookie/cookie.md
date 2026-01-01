@@ -5,7 +5,7 @@ tags:
   - script-catalog
 ---
 
-# Cookie Script 
+# Cookie Script
 
 This script is used to modify the "Set-Cookie" cookie header value. Any cookie created by AS can be modified by using this custom script.
 
@@ -32,7 +32,7 @@ The cookie interception script also adds the following method(s):
 
 ## Common Use Case
 
-## Script Type: Java 
+## Script Type: Java
 
 ### Add/Modify cookie value attribute
 

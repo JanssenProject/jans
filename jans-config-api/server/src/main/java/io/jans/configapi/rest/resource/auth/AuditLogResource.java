@@ -58,16 +58,31 @@ public class AuditLogResource extends ConfigBaseResource {
     @Inject
     AuthUtil authUtil;
 
+    /**
+     * Searches and returns paginated audit log entries filtered by an optional pattern and date range.
+     *
+     * @param pattern   a substring or regex to filter log lines; blank returns all entries
+     * @param startIndex the 1-based index of the first result to return
+     * @param limit     maximum number of results to return
+     * @param startDate optional start date (dd-MM-yyyy) to include entries on or after this date
+     * @param endDate   optional end date (dd-MM-yyyy) to include entries on or before this date
+     * @return          a HTTP 200 Response containing a LogPagedResult with the matching log lines and pagination metadata
+     */
     @Operation(summary = "Get audit details.", description = "Get audit details.", operationId = "get-audit-data", tags = {
-            "Logs" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.LOGGING_READ_ACCESS }))
+            "Logs" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogPagedResult.class), examples = @ExampleObject(name = "Response example"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getLogsEnteries(
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,

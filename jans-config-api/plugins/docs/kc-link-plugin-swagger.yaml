@@ -36,6 +36,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/kc-link-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/kc-link-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/kc-link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     put:
       tags:
       - KC Link - Configuration
@@ -66,6 +74,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/kc-link-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/kc-link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     patch:
       tags:
       - KC Link - Configuration
@@ -98,6 +110,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/kc-link-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/kc-link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     AppConfiguration:
@@ -272,3 +288,11 @@ components:
               related information
             https://jans.io/oauth/kc-link-config.write: Manage Keycloak Link configuration
               related information
+            https://jans.io/oauth/config/kc-link.admin: Admin for Keycloak Link configuration
+              related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

@@ -57,11 +57,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
     @ReportMetric
     private PersistenceEntryManager persistenceEntryManager;
 
-    @Inject
+	@Inject
     private DeviceInfoExtractor deviceInfoExtractor;
 
     @Inject
     private Logger log;
+
+    @Inject
+    @Named("fido2MetricsService")
+    private io.jans.fido2.service.metric.Fido2MetricsService fido2MetricsService;
 
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
@@ -376,13 +380,17 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Store FIDO2 metrics data (placeholder for future persistence implementation)
+     * Store FIDO2 metrics data to persistence layer
      */
     private void storeFido2MetricsData(Fido2MetricsData metricsData) {
-        // Placeholder for future persistence implementation
-        // For now, just log the metrics data for debugging
-        if (log.isDebugEnabled()) {
-            log.debug("FIDO2 Metrics Data: {}", metricsData);
+        try {
+            if (fido2MetricsService != null) {
+                fido2MetricsService.storeMetricsData(metricsData);
+            } else {
+                log.warn("Fido2MetricsService not available, cannot store metrics data");
+            }
+        } catch (Exception e) {
+            log.error("Failed to store FIDO2 metrics data: {}", e.getMessage(), e);
         }
     }
 

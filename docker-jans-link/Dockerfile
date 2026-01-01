@@ -1,10 +1,4 @@
 # =================================
-# Cloud SQL JDBC Socket Factory
-# =================================
-# Pre-built fat JARs from GHCR for Cloud SQL connectivity
-FROM ghcr.io/janssenproject/jans/cloudsql-socket-factory:1.27.0 AS cloudsql-libs
-
-# =================================
 # Main Image
 # =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
@@ -39,7 +33,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ======
 
 ARG JYTHON_VERSION=2.7.4
-ARG JYTHON_BUILD_DATE='2025-11-03 10:48'
+ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
@@ -50,8 +44,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 
-ENV CN_VERSION=1.7.0
-ENV CN_BUILD_DATE='2025-07-23 13:16'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-12-18 08:31'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
@@ -69,7 +63,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-link
 
-ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
+ENV JANS_SOURCE_VERSION=6bcc41a0e7f2708e52fe2c950d357dc872b87498
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -213,12 +207,9 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
 # Custom libs
 # ===========
 
-# Copy Cloud SQL Socket Factory fat JARs from builder (includes all dependencies)
-RUN mkdir -p ${JETTY_BASE}/jans-link/custom/libs
-COPY --from=cloudsql-libs /cloudsql/*.jar ${JETTY_BASE}/jans-link/custom/libs/
-
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-link/logs \
+    ${JETTY_BASE}/jans-link/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \

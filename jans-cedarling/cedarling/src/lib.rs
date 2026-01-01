@@ -33,6 +33,7 @@ mod tests;
 use std::sync::Arc;
 
 pub use crate::common::json_rules::JsonRule;
+use crate::log::BaseLogEntry;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
@@ -47,8 +48,8 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
+use log::LogEntry;
 use log::interface::LogWriter;
-use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
 
 // JWT validation exports
@@ -128,17 +129,21 @@ impl Cedarling {
             .await
             .inspect(|_| {
                 log.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::DEBUG)
-                        .set_message("configuration parsed successfully".to_string()),
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::DEBUG,
+                        None,
+                    ))
+                    .set_message("configuration parsed successfully".to_string()),
                 )
             })
             .inspect_err(|err| {
                 log.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_error(err.to_string())
-                        .set_level(LogLevel::ERROR)
-                        .set_message("configuration parsed with error".to_string()),
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::ERROR,
+                        None,
+                    ))
+                    .set_error(err.to_string())
+                    .set_message("configuration parsed with error".to_string()),
                 )
             })?;
 

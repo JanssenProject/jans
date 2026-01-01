@@ -1,0 +1,83 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.usrcert.cert_title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.certauthn.vm.CertAuthenticationSummaryVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="ph4 mb2">
+            <div class="alert alert-success dn" id="feedback-cert-edit" role="alert" />
+        </div>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.usrcert.cert_title}</h2>
+                    <p>${labels.usrcert.cert_text}</p>
+                </div>
+                <!-- Certs list -->
+                <z:div children="@load(vm.certificates)">
+                    <zk:template name="children">
+                        <div class="${css.panel} flex justify-between">
+                            <div class="flex items-start">
+                                <span class="fa-layers fa-fw f2 mr1 nl3">
+                                    <i class="far fa-circle" data-fa-transform="shrink-4 up-3 right-4"></i>
+                                    <i class="far fa-circle" data-fa-transform="shrink-5 up-3 right-4"></i>
+                                    <i class="far fa-circle" data-fa-transform="shrink-6 up-3 right-4"></i>
+                                    <i class="fas fa-bookmark" data-fa-transform="rotate-30 shrink-9 down-4"></i>
+                                    <i class="fas fa-bookmark" data-fa-transform="rotate--30 shrink-9 down-4 right-8"></i>
+                                </span>
+
+                                <p class="ml3 mb0">
+                                    <z:label sclass="f5 dark-blue2" value="@load(empty each.commonName ? c:l('general.no_named') : each.commonName)" />
+                                    <br />
+                                    <zk:zk unless="${empty each.organization}">
+                                        <label class="w4 ma0 truncate nb1">${labels.usercert.organization}</label>
+                                        ${each.organization}
+                                        <br />
+                                    </zk:zk>
+                                    <zk:zk unless="${empty each.location}">
+                                        <label class="w4 ma0 truncate nb1">${labels.usercert.location}</label>
+                                        ${each.location}
+                                        <br />
+                                    </zk:zk>
+                                    <zk:zk unless="${empty each.commonName}">
+                                        <label class="w4 ma0 truncate nb1">${labels.usercert.expires}</label>
+                                        <z:label value="@load(each.expirationDate) @converter('io.jans.casa.ui.CustomDateConverter',
+                                        format='MMM d, yyyy - hh:mm a', offset = sessionContext.zoneOffset)"/>
+                                    </zk:zk>
+
+                                    <zk:zk if="${each.expired}">
+                                        <!-- using div here breaks the layout -->
+                                        <span class="alert alert-danger db mt2" role="alert">
+                                            <i class="fas fa-exclamation-triangle" />
+                                            ${labels.usercert.expired}
+                                        </span>
+                                    </zk:zk>
+                                </p>
+                            </div>
+                            <div class="pl2 pt2">
+                                <h:button class="${css.deleteButton} mb2" w:onClick="alertRef = $('#feedback-cert-edit')"
+                                          onClick="@('delete', each)"
+                                          data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-trash-alt" />
+                                </h:button>
+                            </div>
+                        </div>
+                    </zk:template>
+                </z:div>
+                <div class="${css.panel} bg-near-white">
+                    <h2 class="f5 dark-blue2 pt1">${labels.usercert.add_certificate}</h2>
+                    <p class="pt2 mb2">${labels.usercert.add_steps}</p>
+                    <z:button label="${labels.general.proceed}" sclass="${css.primaryButton}" onClick="@('redirect')" />
+                </div>
+
+            </section>
+        </div>
+    </z:div>
+
+</zk:zk>

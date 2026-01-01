@@ -104,6 +104,9 @@ public class AppInitializer {
 	@Inject
 	private MDS3UpdateTimer mds3UpdateTimer;
 
+	@Inject
+	private io.jans.fido2.service.metric.Fido2MetricsAggregationScheduler fido2MetricsAggregationScheduler;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -139,6 +142,7 @@ public class AppInitializer {
 		cleanerTimer.initTimer();
 		mds3UpdateTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
+		fido2MetricsAggregationScheduler.initTimer();
 
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
