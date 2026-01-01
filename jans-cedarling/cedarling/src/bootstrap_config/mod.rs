@@ -227,6 +227,12 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when the lock server configuration URI is invalid.
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
+
+    /// Error returned when cjar_url is missing or empty.
+    #[error(
+        "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
+    )]
+    MissingCjarUrl,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {

@@ -118,12 +118,12 @@ mod path_traversal {
         let archive = zip.finish().unwrap().into_inner();
         let result = ArchiveVfs::from_buffer(archive);
 
-        // Should reject or sanitize
+        // Should reject archives containing Windows-style path traversal
+        let err = result.expect_err("expected PathTraversal error for Windows path separators");
         assert!(
-            result.is_err() || {
-                let vfs = result.unwrap();
-                !vfs.exists("etc/passwd")
-            }
+            matches!(err, ArchiveError::PathTraversal { .. }),
+            "Expected PathTraversal error for Windows path separators, got: {:?}",
+            err
         );
     }
 }
@@ -165,7 +165,12 @@ mod malicious_archives {
     fn test_rejects_empty_file() {
         let empty: Vec<u8> = Vec::new();
         let result = ArchiveVfs::from_buffer(empty);
-        result.expect_err("empty buffer should not be a valid archive");
+        let err = result.expect_err("empty buffer should not be a valid archive");
+        assert!(
+            matches!(err, ArchiveError::InvalidZipFormat { .. }),
+            "Expected InvalidZipFormat error for empty buffer, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -284,13 +289,12 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         // Should error during entity parsing
-        if let Err(err) = result {
-            assert!(
-                matches!(&err, PolicyStoreError::JsonParsing { .. }),
-                "Expected JSON parsing error for invalid entity JSON, got: {:?}",
-                err
-            );
-        }
+        let err = result.expect_err("expected JSON parsing error for invalid entity JSON");
+        assert!(
+            matches!(&err, PolicyStoreError::JsonParsing { .. }),
+            "Expected JSON parsing error for invalid entity JSON, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -303,13 +307,12 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         // Should error during trusted issuer validation
-        if let Err(err) = result {
-            assert!(
-                matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
-                "Expected TrustedIssuerError for invalid trusted issuer, got: {:?}",
-                err
-            );
-        }
+        let err = result.expect_err("expected TrustedIssuerError for invalid trusted issuer");
+        assert!(
+            matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
+            "Expected TrustedIssuerError for invalid trusted issuer, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -322,13 +325,12 @@ mod input_validation {
         let result = loader.load_directory(".");
 
         // Should detect duplicate entity UIDs
-        if let Err(err) = result {
-            assert!(
-                matches!(&err, PolicyStoreError::CedarEntityError { .. }),
-                "Expected CedarEntityError for duplicate UIDs, got: {:?}",
-                err
-            );
-        }
+        let err = result.expect_err("expected CedarEntityError for duplicate entity UIDs");
+        assert!(
+            matches!(&err, PolicyStoreError::CedarEntityError { .. }),
+            "Expected CedarEntityError for duplicate UIDs, got: {:?}",
+            err
+        );
     }
 
     #[test]
@@ -394,21 +396,75 @@ mod manifest_security {
     use super::*;
 
     #[test]
+    #[cfg(not(target_arch = "wasm32"))]
     fn test_detects_checksum_mismatch() {
+        use std::fs;
+        use std::io::Read;
+        use tempfile::TempDir;
+        use zip::read::ZipArchive;
+
         // Create a store with manifest
         let builder = fixtures::minimal_valid().with_manifest();
 
         // Build the archive
         let archive = builder.build_archive().unwrap();
 
-        // TODO: Modify a file after manifest is generated
-        // This would require manual archive manipulation
-        // For now, just verify manifest is created correctly
-        let vfs = ArchiveVfs::from_buffer(archive).unwrap();
-        let loader = DefaultPolicyStoreLoader::new(vfs);
-        loader
-            .load_directory(".")
-            .expect("Manifest-backed minimal_valid store should load successfully");
+        // Extract archive to temp directory first
+        let temp_dir = TempDir::new().unwrap();
+        let mut zip_archive = ZipArchive::new(std::io::Cursor::new(&archive)).unwrap();
+
+        for i in 0..zip_archive.len() {
+            let mut file = zip_archive.by_index(i).unwrap();
+            let file_path = temp_dir.path().join(file.name());
+
+            if file.is_dir() {
+                fs::create_dir_all(&file_path).unwrap();
+            } else {
+                if let Some(parent) = file_path.parent() {
+                    fs::create_dir_all(parent).unwrap();
+                }
+                let mut contents = Vec::new();
+                file.read_to_end(&mut contents).unwrap();
+                fs::write(&file_path, contents).unwrap();
+            }
+        }
+
+        // Modify schema.cedarschema to trigger checksum mismatch
+        // We modify a byte in the middle to avoid breaking the file structure
+        let schema_path = temp_dir.path().join("schema.cedarschema");
+        if schema_path.exists() {
+            let mut schema_content = fs::read(&schema_path).unwrap();
+            if schema_content.len() > 10 {
+                // Modify a byte in the middle to change checksum without breaking structure
+                let mid_index = schema_content.len() / 2;
+                schema_content[mid_index] = schema_content[mid_index].wrapping_add(1);
+                fs::write(&schema_path, schema_content).unwrap();
+            }
+        }
+
+
+        // Attempt to load - should fail with checksum mismatch
+        // Use the synchronous load_directory method directly for testing
+        use super::super::loader::DefaultPolicyStoreLoader;
+        use super::super::vfs_adapter::PhysicalVfs;
+        let loader = DefaultPolicyStoreLoader::new(PhysicalVfs::new());
+        let dir_str = temp_dir.path().to_str().unwrap();
+        let loaded = loader.load_directory(dir_str).unwrap();
+        
+        // Validate manifest - this should detect the checksum mismatch
+        let result = loader.validate_manifest(dir_str, &loaded.metadata, &loaded.manifest.unwrap());
+
+        let err = result.expect_err("expected checksum mismatch error");
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::ManifestError {
+                    err: crate::common::policy_store::errors::ManifestErrorType::ChecksumMismatch { .. }
+                }
+            ),
+            "Expected ChecksumMismatch error, got: {:?}",
+            err
+        );
     }
 
     #[test]

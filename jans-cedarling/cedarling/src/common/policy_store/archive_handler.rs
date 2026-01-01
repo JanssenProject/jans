@@ -72,7 +72,8 @@ where
             details: e.to_string(),
         })?;
 
-        // Validate all file names for security
+        // Validate all file names for security using zip crate's enclosed_name()
+        // which properly validates and normalizes paths, preventing path traversal
         for i in 0..archive.len() {
             let file = archive
                 .by_index(i)
@@ -81,12 +82,11 @@ where
                     details: e.to_string(),
                 })?;
 
-            let file_path = file.name();
-
-            // Check for path traversal attempts
-            if file_path.contains("..") || Path::new(file_path).is_absolute() {
+            // Use enclosed_name() to validate and normalize the path
+            // This properly handles path traversal, backslashes, and absolute paths
+            if file.enclosed_name().is_none() {
                 return Err(ArchiveError::PathTraversal {
-                    path: file_path.to_string(),
+                    path: file.name().to_string(),
                 });
             }
         }

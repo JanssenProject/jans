@@ -6,6 +6,8 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use crate::bootstrap_config::BootstrapConfigLoadingError;
+
 /// `PolicyStoreConfig` - Configuration for the policy store.
 ///
 /// Defines where the policy will be retrieved from.
@@ -95,33 +97,38 @@ pub enum PolicyStoreSourceRaw {
     Directory(String),
 }
 
-impl From<PolicyStoreConfigRaw> for PolicyStoreConfig {
-    fn from(raw: PolicyStoreConfigRaw) -> Self {
-        Self {
-            source: match raw.source.as_str() {
-                "json" => PolicyStoreSource::Json(raw.path.unwrap_or_default()),
-                "yaml" => PolicyStoreSource::Yaml(raw.path.unwrap_or_default()),
+impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
+    type Error = BootstrapConfigLoadingError;
 
-                "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
-                "file_json" => PolicyStoreSource::FileJson(raw.path.unwrap_or_default().into()),
-                "file_yaml" => PolicyStoreSource::FileYaml(raw.path.unwrap_or_default().into()),
-                "cjar_file" => PolicyStoreSource::CjarFile(
-                    raw.path
-                        .filter(|p| !p.is_empty())
-                        .unwrap_or_else(|| "policy-store.cjar".to_string())
-                        .into(),
-                ),
-                "cjar_url" => PolicyStoreSource::CjarUrl(
-                    raw.path.filter(|p| !p.is_empty()).unwrap_or_default(),
-                ),
-                "directory" => PolicyStoreSource::Directory(
-                    raw.path
-                        .filter(|p| !p.is_empty())
-                        .unwrap_or_else(|| "policy-store".to_string())
-                        .into(),
-                ),
-                _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
+    fn try_from(raw: PolicyStoreConfigRaw) -> Result<Self, Self::Error> {
+        let source = match raw.source.as_str() {
+            "json" => PolicyStoreSource::Json(raw.path.unwrap_or_default()),
+            "yaml" => PolicyStoreSource::Yaml(raw.path.unwrap_or_default()),
+
+            "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
+            "file_json" => PolicyStoreSource::FileJson(raw.path.unwrap_or_default().into()),
+            "file_yaml" => PolicyStoreSource::FileYaml(raw.path.unwrap_or_default().into()),
+            "cjar_file" => PolicyStoreSource::CjarFile(
+                raw.path
+                    .filter(|p| !p.is_empty())
+                    .unwrap_or_else(|| "policy-store.cjar".to_string())
+                    .into(),
+            ),
+            "cjar_url" => {
+                let url = raw.path.filter(|p| !p.is_empty()).unwrap_or_default();
+                if url.is_empty() {
+                    return Err(BootstrapConfigLoadingError::MissingCjarUrl);
+                }
+                PolicyStoreSource::CjarUrl(url)
             },
-        }
+            "directory" => PolicyStoreSource::Directory(
+                raw.path
+                    .filter(|p| !p.is_empty())
+                    .unwrap_or_else(|| "policy-store".to_string())
+                    .into(),
+            ),
+            _ => PolicyStoreSource::FileYaml("policy-store.yaml".into()),
+        };
+        Ok(Self { source })
     }
 }

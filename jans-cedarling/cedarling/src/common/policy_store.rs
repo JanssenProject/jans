@@ -19,19 +19,19 @@ use crate::common::{
     issuer_utils::normalize_issuer,
 };
 
-pub mod archive_handler;
-pub mod entity_parser;
+pub(crate) mod archive_handler;
+pub(crate) mod entity_parser;
 pub mod errors;
-pub mod issuer_parser;
-pub mod loader;
+pub(crate) mod issuer_parser;
+pub(crate) mod loader;
 pub mod manager;
 #[cfg(not(target_arch = "wasm32"))]
-pub mod manifest_validator;
+pub(crate) mod manifest_validator;
 pub mod metadata;
-pub mod policy_parser;
-pub mod schema_parser;
-pub mod validator;
-pub mod vfs_adapter;
+pub(crate) mod policy_parser;
+pub(crate) mod schema_parser;
+pub(crate) mod validator;
+pub(crate) mod vfs_adapter;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
 use cedar_policy::{Policy, PolicyId};
