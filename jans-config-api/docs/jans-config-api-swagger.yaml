@@ -15695,17 +15695,17 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16383,6 +16383,8 @@ components:
           type: boolean
         disableJdkLogger:
           type: boolean
+        disableExternalLoggerConfiguration:
+          type: boolean
         authorizationRequestCustomAllowedParameters:
           uniqueItems: true
           type: array
@@ -16626,6 +16628,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16635,8 +16639,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17496,6 +17498,10 @@ components:
         configOauthEnabled:
           type: boolean
           description: OAuth authentication enable/disable flag. Default value `true`.
+        cedarAuthEnabled:
+          type: boolean
+          description: Cedar OAuth authentication enable/disable flag. Default value
+            `true`.
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -17611,6 +17617,8 @@ components:
           $ref: "#/components/schemas/AuditLogConf"
         dataFormatConversionConf:
           $ref: "#/components/schemas/DataFormatConversionConf"
+        cedarConfig:
+          $ref: "#/components/schemas/CedarConfig"
         plugins:
           type: array
           description: Details of enabled plugins.
@@ -17682,6 +17690,16 @@ components:
           type: string
           description: Date format in audit log file.
       description: Audit Log configuration details.
+    CedarConfig:
+      type: object
+      properties:
+        applicationName:
+          type: string
+          description: Application Name.
+        policyStoreFilename:
+          type: string
+          description: List of attributes that are optional.
+      description: Cedar Configuration for authorization.
     DataFormatConversionConf:
       type: object
       properties:
@@ -18309,10 +18327,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -18483,6 +18501,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        logoutStatusJwt:
+          type: boolean
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18493,10 +18515,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
