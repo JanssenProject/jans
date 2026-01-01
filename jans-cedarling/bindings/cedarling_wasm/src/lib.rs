@@ -117,14 +117,16 @@ pub async fn init_from_archive_bytes(
 
     let mut raw_config: BootstrapConfigRaw = serde_wasm_bindgen::from_value(config_object.into())?;
 
-    // Override the policy store source with the archive bytes
+    // Clear any existing policy store sources to avoid conflicts
+    // We'll set a dummy source temporarily to satisfy validation, then override with ArchiveBytes
     raw_config.local_policy_store = None;
     raw_config.policy_store_uri = None;
-    raw_config.policy_store_local_fn = None;
+    // Set a dummy .cjar file path to satisfy validation (will be overridden below)
+    raw_config.policy_store_local_fn = Some("dummy.cjar".to_string());
 
     let mut bootstrap_config = BootstrapConfig::from_raw_config(&raw_config).map_err(Error::new)?;
 
-    // Set the policy store source to ArchiveBytes
+    // Override the policy store source with the archive bytes
     bootstrap_config.policy_store_config.source = PolicyStoreSource::ArchiveBytes(bytes);
 
     cedarling::Cedarling::new(&bootstrap_config)

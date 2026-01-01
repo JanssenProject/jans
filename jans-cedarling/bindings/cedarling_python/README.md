@@ -118,19 +118,41 @@ CEDARLING_POLICY_STORE_LOCAL_FN=example_files/policy-store.json python example.p
 
 ### Policy Store Sources
 
+Policy store sources can be configured via a YAML/JSON file or environment variables. Here are examples for each source type:
+
 ```python
+from cedarling_python import BootstrapConfig, Cedarling
+
 # From a local JSON/YAML file
-config = {"CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json"}
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
 
 # From a local directory (new format)
-config = {"CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/"}
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_LOCAL_FN: "/path/to/policy-store/"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
 
 # From a local .cjar archive
-config = {"CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar"}
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_LOCAL_FN: "/path/to/policy-store.cjar"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
 
 # From a URL (.cjar or Lock Server)
-config = {"CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar"}
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
+# Using environment variables instead of a file
+import os
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.json"
+bootstrap_config = BootstrapConfig.from_env()
+instance = Cedarling(bootstrap_config)
 ```
+
+For a complete working example showing the full instantiation flow, see [`example.py`](example.py).
 
 For details on the directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
 

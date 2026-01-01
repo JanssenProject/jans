@@ -15,13 +15,45 @@ use tempfile::TempDir;
 use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
 
-/// Create a minimal valid policy store archive for benchmarking.
-fn create_minimal_archive() -> Vec<u8> {
-    create_archive_with_policies(1)
-}
+// Constants for archive content
+const METADATA_JSON: &[u8] = br#"{
+        "cedar_version": "4.4.0",
+        "policy_store": {
+            "id": "bench123456789",
+            "name": "Benchmark Policy Store",
+            "version": "1.0.0"
+        }
+    }"#;
 
-/// Create a policy store archive with the specified number of policies.
-fn create_archive_with_policies(policy_count: usize) -> Vec<u8> {
+const SCHEMA_CEDARSCHEMA_BASIC: &[u8] = br#"namespace TestApp {
+    entity User;
+    entity Resource;
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}"#;
+
+const SCHEMA_CEDARSCHEMA_WITH_ATTRS: &[u8] = br#"namespace TestApp {
+    entity User {
+        name: String,
+        email: String,
+    };
+    entity Resource;
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}"#;
+
+const POLICY_STORE_JSON: &str =
+    r#"{"cedar_version":"4.4.0","policy_store":{"id":"bench","name":"Bench","version":"1.0.0"}}"#;
+
+/// Helper function to start a policy store archive with common bootstrap setup.
+/// Creates the buffer, cursor, ZipWriter, sets up FileOptions, and writes
+/// metadata.json and schema.cedarschema. Returns the ZipWriter and FileOptions
+/// for the caller to append additional content.
+fn start_policy_store_archive(metadata: &[u8], schema: &[u8]) -> ZipWriter<Cursor<Vec<u8>>> {
     let buffer = Vec::new();
     let cursor = Cursor::new(buffer);
     let mut zip = ZipWriter::new(cursor);
@@ -30,32 +62,42 @@ fn create_archive_with_policies(policy_count: usize) -> Vec<u8> {
 
     // metadata.json
     zip.start_file("metadata.json", options.clone()).unwrap();
-    zip.write_all(
-        br#"{
-        "cedar_version": "4.4.0",
-        "policy_store": {
-            "id": "bench123456789",
-            "name": "Benchmark Policy Store",
-            "version": "1.0.0"
-        }
-    }"#,
-    )
-    .unwrap();
+    zip.write_all(metadata).unwrap();
 
     // schema.cedarschema
     zip.start_file("schema.cedarschema", options.clone())
         .unwrap();
-    zip.write_all(
-        br#"namespace TestApp {
-    entity User;
-    entity Resource;
-    action "read" appliesTo {
-        principal: [User],
-        resource: [Resource]
-    };
-}"#,
-    )
-    .unwrap();
+    zip.write_all(schema).unwrap();
+
+    zip
+}
+
+/// Helper function to parse an archive and read all files.
+/// This simulates the loading process for benchmarking.
+fn parse_archive(archive: &[u8]) -> u64 {
+    let cursor = Cursor::new(bb(archive));
+    let mut zip = zip::ZipArchive::new(cursor).unwrap();
+
+    // Read all files to simulate loading
+    let mut total_size = 0;
+    for i in 0..zip.len() {
+        let mut file = zip.by_index(i).unwrap();
+        let bytes_read = std::io::copy(&mut file, &mut std::io::sink()).unwrap();
+        total_size += bytes_read;
+    }
+    total_size
+}
+
+/// Create a minimal valid policy store archive for benchmarking.
+fn create_minimal_archive() -> Vec<u8> {
+    create_archive_with_policies(1)
+}
+
+/// Create a policy store archive with the specified number of policies.
+fn create_archive_with_policies(policy_count: usize) -> Vec<u8> {
+    let mut zip = start_policy_store_archive(METADATA_JSON, SCHEMA_CEDARSCHEMA_BASIC);
+    let options = FileOptions::<ExtendedFileOptions>::default()
+        .compression_method(CompressionMethod::Deflated);
 
     // policies
     for i in 0..policy_count {
@@ -78,43 +120,9 @@ permit(
 
 /// Create a policy store archive with the specified number of entities.
 fn create_archive_with_entities(entity_count: usize) -> Vec<u8> {
-    let buffer = Vec::new();
-    let cursor = Cursor::new(buffer);
-    let mut zip = ZipWriter::new(cursor);
+    let mut zip = start_policy_store_archive(METADATA_JSON, SCHEMA_CEDARSCHEMA_WITH_ATTRS);
     let options = FileOptions::<ExtendedFileOptions>::default()
         .compression_method(CompressionMethod::Deflated);
-
-    // metadata.json
-    zip.start_file("metadata.json", options.clone()).unwrap();
-    zip.write_all(
-        br#"{
-        "cedar_version": "4.4.0",
-        "policy_store": {
-            "id": "bench123456789",
-            "name": "Benchmark Policy Store",
-            "version": "1.0.0"
-        }
-    }"#,
-    )
-    .unwrap();
-
-    // schema.cedarschema
-    zip.start_file("schema.cedarschema", options.clone())
-        .unwrap();
-    zip.write_all(
-        br#"namespace TestApp {
-    entity User {
-        name: String,
-        email: String,
-    };
-    entity Resource;
-    action "read" appliesTo {
-        principal: [User],
-        resource: [Resource]
-    };
-}"#,
-    )
-    .unwrap();
 
     // One policy
     zip.start_file("policies/allow.cedar", options.clone())
@@ -132,8 +140,13 @@ fn create_archive_with_entities(entity_count: usize) -> Vec<u8> {
 
         let mut entities = Vec::new();
         for i in start..end {
+            // Format string split across lines for readability (under 100 chars per line)
             entities.push(format!(
-                r#"{{"uid":{{"type":"TestApp::User","id":"user{}"}},"attrs":{{"name":"User {}","email":"user{}@example.com"}},"parents":[]}}"#,
+                concat!(
+                    r#"{{"uid":{{"type":"TestApp::User","id":"user{}"}},"#,
+                    r#""attrs":{{"name":"User {}","email":"user{}@example.com"}},"#,
+                    r#""parents":[]}}"#
+                ),
                 i, i, i
             ));
         }
@@ -191,16 +204,7 @@ fn bench_archive_parsing_policies(c: &mut Criterion) {
             &archive,
             |b, archive| {
                 b.iter(|| {
-                    let cursor = Cursor::new(bb(archive.clone()));
-                    let mut zip = zip::ZipArchive::new(cursor).unwrap();
-
-                    // Read all files to simulate loading
-                    let mut total_size = 0;
-                    for i in 0..zip.len() {
-                        let mut file = zip.by_index(i).unwrap();
-                        let bytes_read = std::io::copy(&mut file, &mut std::io::sink()).unwrap();
-                        total_size += bytes_read;
-                    }
+                    let total_size = parse_archive(archive);
                     bb(total_size)
                 })
             },
@@ -222,16 +226,7 @@ fn bench_archive_parsing_entities(c: &mut Criterion) {
             &archive,
             |b, archive| {
                 b.iter(|| {
-                    let cursor = Cursor::new(bb(archive.clone()));
-                    let mut zip = zip::ZipArchive::new(cursor).unwrap();
-
-                    // Read all files to simulate loading
-                    let mut total_size = 0;
-                    for i in 0..zip.len() {
-                        let mut file = zip.by_index(i).unwrap();
-                        let bytes_read = std::io::copy(&mut file, &mut std::io::sink()).unwrap();
-                        total_size += bytes_read;
-                    }
+                    let total_size = parse_archive(archive);
                     bb(total_size)
                 })
             },
@@ -258,11 +253,7 @@ fn bench_directory_creation(c: &mut Criterion) {
                     let dir = temp_dir.path();
 
                     // Create metadata.json
-                    fs::write(
-                        dir.join("metadata.json"),
-                        r#"{"cedar_version":"4.4.0","policy_store":{"id":"bench","name":"Bench","version":"1.0.0"}}"#,
-                    )
-                    .unwrap();
+                    fs::write(dir.join("metadata.json"), POLICY_STORE_JSON).unwrap();
 
                     // Create schema
                     fs::write(
@@ -275,10 +266,8 @@ fn bench_directory_creation(c: &mut Criterion) {
                     fs::create_dir(dir.join("policies")).unwrap();
 
                     for i in 0..count {
-                        let policy = format!(
-                            r#"@id("policy{}") permit(principal, action, resource);"#,
-                            i
-                        );
+                        let policy =
+                            format!(r#"@id("policy{}") permit(principal, action, resource);"#, i);
                         fs::write(dir.join(format!("policies/policy{}.cedar", i)), policy).unwrap();
                     }
 
