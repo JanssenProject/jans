@@ -61,10 +61,10 @@ pub async fn load_policy_store_directory(
     .map_err(|e| {
         // If the blocking task panicked, convert to an IO error.
         // This should be rare and typically indicates a bug in the loader code.
-        PolicyStoreError::Io(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Blocking task panicked: {}", e),
-        ))
+        PolicyStoreError::Io(std::io::Error::other(format!(
+            "Blocking task panicked: {}",
+            e
+        )))
     })?
 }
 
@@ -86,7 +86,7 @@ pub async fn load_policy_store_directory(
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
     let path = path.to_path_buf();
-    
+
     // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
     // `load_directory` is intentionally synchronous because it performs blocking filesystem I/O
     // (reading from zip archive). Using `spawn_blocking` ensures these operations don't block
@@ -101,10 +101,10 @@ pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore,
     .map_err(|e| {
         // If the blocking task panicked, convert to an IO error.
         // This should be rare and typically indicates a bug in the loader code.
-        PolicyStoreError::Io(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Blocking task panicked: {}", e),
-        ))
+        PolicyStoreError::Io(std::io::Error::other(format!(
+            "Blocking task panicked: {}",
+            e
+        )))
     })?
 }
 

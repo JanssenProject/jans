@@ -14,7 +14,6 @@
 //! different storage backends without changing the loading logic.
 
 use std::io::{self, Read};
-use vfs::{PhysicalFS, VfsPath};
 
 #[cfg(test)]
 use std::path::Path;
@@ -63,7 +62,11 @@ pub trait VfsFileSystem: Send + Sync + 'static {
     fn is_dir(&self, path: &str) -> bool;
 
     /// Check if a path is a file.
-    fn is_file(&self, path: &str) -> bool;
+    /// This method is only used in non-WASM builds for manifest validation.
+    /// Default implementation returns false for WASM compatibility.
+    fn is_file(&self, _path: &str) -> bool {
+        false
+    }
 }
 
 /// Physical filesystem implementation for native platforms.
@@ -72,19 +75,19 @@ pub trait VfsFileSystem: Send + Sync + 'static {
 #[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug)]
 pub struct PhysicalVfs {
-    root: VfsPath,
+    root: vfs::VfsPath,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 impl PhysicalVfs {
     /// Create a new physical VFS rooted at the system root.
     pub fn new() -> Self {
-        let root = PhysicalFS::new("/").into();
+        let root = vfs::PhysicalFS::new("/").into();
         Self { root }
     }
 
     /// Helper to get a VfsPath from a string path.
-    fn get_path(&self, path: &str) -> VfsPath {
+    fn get_path(&self, path: &str) -> vfs::VfsPath {
         self.root.join(path).unwrap()
     }
 }
@@ -155,7 +158,7 @@ impl VfsFileSystem for PhysicalVfs {
 #[cfg(test)]
 #[derive(Debug)]
 pub struct MemoryVfs {
-    root: VfsPath,
+    root: vfs::VfsPath,
 }
 
 #[cfg(test)]
@@ -167,7 +170,7 @@ impl MemoryVfs {
     }
 
     /// Helper to get a VfsPath from a string path.
-    fn get_path(&self, path: &str) -> VfsPath {
+    fn get_path(&self, path: &str) -> vfs::VfsPath {
         self.root.join(path).unwrap()
     }
 

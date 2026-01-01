@@ -78,6 +78,7 @@ pub enum TrustedIssuerErrorType {
 
 /// Manifest validation-specific errors.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[cfg(not(target_arch = "wasm32"))]
 pub enum ManifestErrorType {
     /// Manifest file not found
     #[error("Manifest file not found (manifest.json is required for integrity validation)")]
@@ -169,6 +170,7 @@ pub enum PolicyStoreError {
 
     /// Manifest validation error
     #[error("Manifest validation error: {err}")]
+    #[cfg(not(target_arch = "wasm32"))]
     ManifestError { err: ManifestErrorType },
 
     /// Path not found
@@ -307,10 +309,12 @@ pub enum ValidationError {
 pub enum ArchiveError {
     /// Invalid file extension (expected .cjar)
     #[error("Invalid file extension: expected '{expected}', found '{found}'")]
+    #[cfg(not(target_arch = "wasm32"))]
     InvalidExtension { expected: String, found: String },
 
     /// Cannot read archive file
     #[error("Cannot read archive file '{path}': {source}")]
+    #[cfg(not(target_arch = "wasm32"))]
     CannotReadFile {
         path: String,
         #[source]

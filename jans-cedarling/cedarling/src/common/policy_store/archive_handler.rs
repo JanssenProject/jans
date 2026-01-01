@@ -114,6 +114,7 @@ impl ArchiveVfs<std::fs::File> {
     /// - Archive is not a valid ZIP
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
         let path = path.as_ref();
 

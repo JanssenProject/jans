@@ -18,6 +18,7 @@ use std::path::PathBuf;
 
 /// Result of manifest validation with detailed information.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg(not(target_arch = "wasm32"))]
 pub struct ManifestValidationResult {
     /// Whether validation passed (all required checks passed)
     pub is_valid: bool,
@@ -31,6 +32,7 @@ pub struct ManifestValidationResult {
 
 /// Detailed error information for manifest validation failures.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg(not(target_arch = "wasm32"))]
 pub struct ManifestValidationError {
     /// Type of error
     pub error_type: ManifestErrorType,
@@ -38,6 +40,7 @@ pub struct ManifestValidationError {
     pub file: Option<String>,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl ManifestValidationResult {
     /// Create a new validation result.
     pub fn new() -> Self {
@@ -67,6 +70,7 @@ impl ManifestValidationResult {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl Default for ManifestValidationResult {
     fn default() -> Self {
         Self::new()
@@ -74,11 +78,13 @@ impl Default for ManifestValidationResult {
 }
 
 /// Manifest validator for policy store integrity validation.
+#[cfg(not(target_arch = "wasm32"))]
 pub struct ManifestValidator<V: VfsFileSystem> {
     vfs: V,
     base_path: PathBuf,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl<V: VfsFileSystem> ManifestValidator<V> {
     /// Create a new manifest validator.
     pub fn new(vfs: V, base_path: PathBuf) -> Self {
