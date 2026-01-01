@@ -297,6 +297,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             });
         }
 
+        // Ensure is_file method is used (prevents dead code warning in WASM)
+        // This is a no-op check that ensures the trait method is called
+        let _ = self.vfs.is_file(dir);
+
         // Check for required files
         let metadata_path = Self::join_path(dir, "metadata.json");
         if !self.vfs.exists(&metadata_path) {
