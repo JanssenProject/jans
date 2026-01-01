@@ -5,9 +5,10 @@
 
 //! Log entries for policy store operations.
 
+use serde::Serialize;
+
 use crate::log::interface::{Indexed, Loggable};
 use crate::log::{BaseLogEntry, LogLevel};
-use serde::Serialize;
 
 /// Log entry for policy store operations.
 #[derive(Serialize, Clone)]
@@ -26,9 +27,7 @@ impl PolicyStoreLogEntry {
     /// for system-level policy store logs where the severity needs to be explicitly
     /// controlled based on the operation context.
     pub fn new(msg: impl Into<String>, level: Option<LogLevel>) -> Self {
-        let mut base =
-            BaseLogEntry::new_system_opt_request_id(level.unwrap_or(LogLevel::TRACE), None);
-        base.level = level;
+        let base = BaseLogEntry::new_system_opt_request_id(level.unwrap_or(LogLevel::TRACE), None);
         Self {
             base,
             msg: msg.into(),

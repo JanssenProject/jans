@@ -18,12 +18,12 @@
 //! - Is efficient (reads files on-demand from archive)
 //! - Is secure (no temp file cleanup concerns)
 
+use std::path::Path;
+
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
-
 use super::validator::MetadataValidator;
 use super::vfs_adapter::VfsFileSystem;
-use std::path::Path;
 
 /// Load a policy store from a directory path.
 ///
@@ -261,11 +261,13 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
 
         // Log unlisted files if any (informational - these files are allowed but not checksummed)
         if !result.unlisted_files.is_empty() {
-            logger.log_any(PolicyStoreLogEntry::info(format!(
-                "Policy store contains {} unlisted file(s) not in manifest: {:?}",
-                result.unlisted_files.len(),
-                result.unlisted_files
-            )));
+            if let Some(logger) = logger {
+                logger.log_any(PolicyStoreLogEntry::info(format!(
+                    "Policy store contains {} unlisted file(s) not in manifest: {:?}",
+                    result.unlisted_files.len(),
+                    result.unlisted_files
+                )));
+            }
         }
 
         Ok(())

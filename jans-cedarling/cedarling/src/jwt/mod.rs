@@ -364,7 +364,10 @@ impl JwtService {
                 },
                 Err(e) => {
                     self.logger.log_any(JwtLogEntry::new(
-                        format!("Error finding trusted issuer '{}': {}, falling back to issuer_configs", iss, e),
+                        format!(
+                            "Error finding trusted issuer '{}': {}, falling back to issuer_configs",
+                            iss, e
+                        ),
                         Some(LogLevel::DEBUG),
                     ));
                     self.get_issuer_ref(iss)

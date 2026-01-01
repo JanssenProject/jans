@@ -509,9 +509,10 @@ permit(
         let issuer = serde_json::json!({
             format!("issuer{}", i): {
                 "name": format!("Issuer {}", i),
-                "oidc_endpoint": format!("https://issuer{}.example.com/.well-known/openid-configuration", i),
+                "openid_configuration_endpoint": format!("https://issuer{}.example.com/.well-known/openid-configuration", i),
                 "token_metadata": {
                     "access_token": {
+                        "entity_type_name": "issuer",
                         "user_id": "sub",
                         "required_claims": ["sub"]
                     }

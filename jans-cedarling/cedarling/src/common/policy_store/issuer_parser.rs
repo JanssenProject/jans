@@ -214,13 +214,11 @@ impl IssuerParser {
                 seen_ids.insert(parsed.id.clone(), parsed.filename.clone());
             }
 
-            // Validate token metadata completeness
-            if parsed.issuer.token_metadata.is_empty() {
-                errors.push(format!(
-                    "Issuer '{}' in file '{}' has no token metadata configured",
-                    parsed.id, parsed.filename
-                ));
-            }
+            // Token metadata is optional for JWKS-only configurations
+            // It's only required when token_metadata entries specify entity_type_name or required_claims
+            // for signed-token/trusted-issuer validation. Since we can't determine this requirement
+            // when token_metadata is empty, we allow empty token_metadata to support JWKS-only use cases.
+            // Validation of required fields within token_metadata entries is handled in parse_token_metadata.
         }
 
         if errors.is_empty() {
