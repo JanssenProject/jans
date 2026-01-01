@@ -218,6 +218,7 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     ///
     /// This method is public so it can be called explicitly when needed, following
     /// the Interface Segregation Principle.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn validate_manifest(
         &self,
         dir: &str,
@@ -230,6 +231,7 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     /// Validate the manifest file with optional logging for unlisted files.
     ///
     /// Same as `validate_manifest` but accepts an optional logger for structured logging.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn validate_manifest_with_logger(
         &self,
         dir: &str,

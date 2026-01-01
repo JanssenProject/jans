@@ -11,6 +11,7 @@ use super::super::archive_handler::ArchiveVfs;
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
+#[cfg(not(target_arch = "wasm32"))]
 use super::super::manifest_validator::ManifestValidator;
 use super::super::schema_parser::SchemaParser;
 use super::super::vfs_adapter::{MemoryVfs, PhysicalVfs};

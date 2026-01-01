@@ -25,6 +25,7 @@ pub mod errors;
 pub mod issuer_parser;
 pub mod loader;
 pub mod manager;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod manifest_validator;
 pub mod metadata;
 pub mod policy_parser;
