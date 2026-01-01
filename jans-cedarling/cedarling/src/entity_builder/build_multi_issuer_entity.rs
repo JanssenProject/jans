@@ -6,7 +6,7 @@
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::*;
 use crate::log::interface::LogWriter;
-use crate::log::{LogEntry, LogLevel, LogType};
+use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -129,26 +129,30 @@ impl EntityBuilder {
                     },
                     Err(e) => {
                         log_service.log_any(
-                            LogEntry::new_with_data(LogType::System, None)
-                                .set_level(LogLevel::ERROR)
-                                .set_message(format!(
-                                    "Failed to generate entity key for token '{}'",
-                                    token_name
-                                ))
-                                .set_error(e.to_string()),
+                            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                                LogLevel::ERROR,
+                                None,
+                            ))
+                            .set_message(format!(
+                                "Failed to generate entity key for token '{}'",
+                                token_name
+                            ))
+                            .set_error(e.to_string()),
                         );
                         continue;
                     },
                 },
                 Err(e) => {
                     log_service.log_any(
-                        LogEntry::new_with_data(LogType::System, None)
-                            .set_level(LogLevel::ERROR)
-                            .set_message(format!(
-                                "Failed to build token entity for token '{}'",
-                                token_name
-                            ))
-                            .set_error(e.to_string()),
+                        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                            LogLevel::ERROR,
+                            None,
+                        ))
+                        .set_message(format!(
+                            "Failed to build token entity for token '{}'",
+                            token_name
+                        ))
+                        .set_error(e.to_string()),
                     );
                     continue;
                 },
@@ -157,10 +161,12 @@ impl EntityBuilder {
 
         if token_entities.is_empty() {
             log_service.log_any(
-                LogEntry::new_with_data(LogType::System, None)
-                    .set_level(LogLevel::ERROR)
-                    .set_message("No valid tokens found for multi-issuer authorization".to_string())
-                    .set_error("All tokens failed validation or entity building".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message("No valid tokens found for multi-issuer authorization".to_string())
+                .set_error("All tokens failed validation or entity building".to_string()),
             );
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
@@ -170,13 +176,15 @@ impl EntityBuilder {
             .build_resource_entity(resource)
             .inspect_err(|e| {
                 log_service.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::ERROR)
-                        .set_message(
-                            "Failed to build resource entity for multi-issuer authorization"
-                                .to_string(),
-                        )
-                        .set_error(e.to_string()),
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::ERROR,
+                        None,
+                    ))
+                    .set_message(
+                        "Failed to build resource entity for multi-issuer authorization"
+                            .to_string(),
+                    )
+                    .set_error(e.to_string()),
                 );
             })
             .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;
@@ -290,16 +298,9 @@ impl EntityBuilder {
 
     /// Resolve issuer name using trusted issuer metadata or fallback to hostname
     fn resolve_issuer_name(&self, issuer: &str) -> Result<String, MultiIssuerEntityError> {
-        // TODO: utilize HashMap search to avoid iteration over values.
-
         // First, try to find the issuer in trusted issuer metadata
-        for trusted_issuer in self.trusted_issuers.values() {
-            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
-            // Compare both the full URL and just the origin
-            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
-                // Use the trusted issuer's name field
-                return Ok(sanitize_issuer_name(&trusted_issuer.name));
-            }
+        if let Some(trusted_issuer) = self.issuers_index.find(issuer) {
+            return Ok(sanitize_issuer_name(&trusted_issuer.name));
         }
 
         // Fallback to hostname from JWT iss claim
@@ -382,11 +383,9 @@ mod tests {
 
         EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             None,
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .unwrap()
     }
@@ -657,11 +656,9 @@ mod tests {
         let trusted_issuers = HashMap::new();
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             None,
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .unwrap();
 
@@ -725,11 +722,9 @@ mod tests {
         let trusted_issuers = HashMap::new();
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             None,
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .unwrap();
 
@@ -805,11 +800,9 @@ mod tests {
         )]);
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("could not build EntityBuilder");
 
@@ -951,11 +944,9 @@ mod tests {
         let trusted_issuers = HashMap::new();
         let builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            TrustedIssuerIndex::new(&trusted_issuers, None),
             Some(&validator_schema),
-            None,
-            None,
-            crate::log::TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .unwrap();
 

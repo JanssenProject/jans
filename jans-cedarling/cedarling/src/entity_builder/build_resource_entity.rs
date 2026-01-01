@@ -48,18 +48,15 @@ mod test {
     use super::super::*;
     use super::*;
     use crate::CedarEntityMapping;
-    use crate::log::TEST_LOGGER;
     use serde_json::json;
 
     #[test]
     fn can_build_entity() {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
@@ -103,11 +100,9 @@ mod test {
     fn can_build_entity_with_optional_attr() {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {

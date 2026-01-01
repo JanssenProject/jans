@@ -1,0 +1,13 @@
+{
+    "projectName": "cert-authn",
+    "version": "0.0.0-nightly",
+    "author": "jgomer2001",
+    "description": "A project implementing certificate authentication as second factor for authentication",
+    "noDirectLaunch": [ "io.jans.casa.authn.cert" ],
+    "configs": {
+        "io.jans.casa.authn.cert": {
+            "certPickupUrl": "https://...",
+            "certChainPEM": "-----BEGIN CERTIFICATE-----\n your certificate chain, see the docs. \n-----END CERTIFICATE-----\n"
+        }
+    }
+}

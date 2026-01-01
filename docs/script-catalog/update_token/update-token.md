@@ -104,7 +104,7 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
 
 ## Associate an Update Token script to a client (RP) [optional step]
 
-📝 Note: If the Update token script is not associated with a client, then it will be applicable to all clients registered in the Jans Server. Which implies that all tokens obtained using the Jans server will reflect modifications as per the script.
+📝 Note: If the Update token script is not associated with a client, then it will not be executed. To run all scripts globally (independent from what is assigned to client) please set global AS configuration property `runAllUpdateTokenScripts` is set to `true`. Which implies that all tokens obtained using the Jans server will reflect modifications as per the script.
 <br/>
 To Associate an Update Token script to a client (RP), execute the command below with appropriate values for:
  - inum of the client

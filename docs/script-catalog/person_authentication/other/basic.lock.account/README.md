@@ -1,4 +1,6 @@
-Script contents [here](https://github.com/JanssenProject/jans/jans-linux-setup/static/extension/person_authentication/BasicLockAccountExternalAuthenticator.py) 
+## Basic Lock Account
+
+Script contents [here](https://github.com/JanssenProject/jans/jans-linux-setup/static/extension/person_authentication/BasicLockAccountExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server which does basic authentication.
 It looks user account after specified number of unsuccessful login attempts.

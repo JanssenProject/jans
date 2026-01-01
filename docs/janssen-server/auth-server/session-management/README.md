@@ -74,8 +74,8 @@ session events, see:
 
 ## Session data structure in Persistence
 
-### MySQL 
-All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid 
+### MySQL
+All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid
 
 Follow [this link](../../config-guide/auth-server-config/session-management.md) for session management with configuration tools.
 

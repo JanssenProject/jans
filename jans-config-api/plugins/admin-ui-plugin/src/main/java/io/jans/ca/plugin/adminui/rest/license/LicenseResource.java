@@ -38,6 +38,7 @@ public class LicenseResource {
 
     public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
     public static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
+    public static final String SCOPE_LICENSE_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin";
 
     @Inject
     Logger log;
@@ -45,9 +46,22 @@ public class LicenseResource {
     @Inject
     LicenseDetailsService licenseDetailsService;
 
+    /**
+     * Check whether an active admin‑ui license exists.
+     *
+     * <p>Responds with a JSON payload describing the license check result.</p>
+     *
+     * @return HTTP Response whose entity is a GenericResponse. The GenericResponse's `success` is
+     *         `true` if an active license exists, `false` otherwise; the Response's HTTP status code
+     *         reflects the result. On unexpected error the method returns a 500 server error and the
+     *         entity may be null.
+     */
     @Operation(summary = "Check if admin-ui license is active", description = "Check if admin-ui license is active", operationId = "is-license-active", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_READ}))
+            "Admin UI - License"}, security ={
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -55,7 +69,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(IS_ACTIVE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response isActive() {
         GenericResponse licenseResponse = null;
@@ -70,9 +84,16 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Delete license details from the admin UI configuration.
+     *
+     * @return a {@code GenericResponse} describing the operation result; its {@code success} flag indicates whether deletion succeeded and its {@code responseCode} contains the HTTP status to return
+     */
     @Operation(summary = "Delete license details in admin-ui configuration", description = "Delete license details in admin-ui configuration", operationId = "license-config-delete", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_WRITE}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -80,7 +101,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @DELETE
     @Path(CONFIG_DELETE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteLicenseConfiguration() {
         GenericResponse licenseResponse = null;
@@ -95,9 +116,17 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Retrieve the current license from SCAN.
+     *
+     * @return HTTP Response whose entity is a GenericResponse containing license details and an operation status; the HTTP status code reflects the operation result.
+     */
     @Operation(summary = "Retrieve license from SCAN", description = "Retrieve license from SCAN", operationId = "retrieve-license", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_READ}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -105,7 +134,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(RETRIEVE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveLicense() {
         GenericResponse licenseResponse = null;
@@ -120,9 +149,19 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Generate a trial license for the admin UI.
+     *
+     * @return Response containing a GenericResponse describing the result of the trial license generation.
+     *         On success the HTTP status equals the GenericResponse's responseCode and the entity contains details;
+     *         on internal error the endpoint returns HTTP 500 with the GenericResponse entity (which may be null).
+     */
     @Operation(summary = "Generate trial license", description = "Generate trial license", operationId = "get-trial-license", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_READ}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -130,7 +169,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(TRIAL)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response trial() {
         GenericResponse licenseResponse = null;
@@ -145,9 +184,17 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Activate the admin UI license using the provided license key.
+     *
+     * @param licenseRequest request containing the license key and any related metadata
+     * @return a JAX-RS Response whose entity is a GenericResponse describing whether activation succeeded and carrying the appropriate response code
+     */
     @Operation(summary = "Activate license using license-key", description = "Activate license using license-key", operationId = "activate-adminui-license", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_WRITE}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "LicenseRequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseRequest.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -156,7 +203,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @POST
     @Path(ACTIVATE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response activate(@Valid @NotNull LicenseRequest licenseRequest) {
         GenericResponse licenseResponse = null;
@@ -171,9 +218,19 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Save Single Sign-On (SSA) configuration.
+     *
+     * Persists the provided SSA configuration and returns the operation result.
+     *
+     * @param ssaRequest SSARequest payload containing SSA configuration; must be non-null and valid.
+     * @return a Response whose entity is a GenericResponse describing success and containing the HTTP response code.
+     */
     @Operation(summary = "Save SSA in configuration", description = "Save SSA in configuration", operationId = "adminui-post-ssa", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_WRITE}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "SSARequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SSARequest.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -182,7 +239,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @POST
     @Path(SSA)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response ssa(@Valid @NotNull SSARequest ssaRequest) {
         GenericResponse licenseResponse = null;
@@ -197,9 +254,17 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Checks whether the stored Admin UI license configuration is valid.
+     *
+     * @return an HTTP Response containing a GenericResponse whose `success` is `true` if the configuration is valid and `false` otherwise; the response status code reflects the operation result
+     */
     @Operation(summary = "Is license configuration valid", description = "Is license configuration valid", operationId = "check-adminui-license-config", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_READ}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -207,7 +272,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(IS_LICENSE_CONFIG_VALID)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response isConfigValid() {
         GenericResponse licenseResponse = null;
@@ -222,9 +287,17 @@ public class LicenseResource {
         }
     }
 
+    /**
+     * Retrieves admin UI license details.
+     *
+     * @return LicenseResponse containing the current admin UI license details on success; a GenericResponse containing error information on failure.
+     */
     @Operation(summary = "Get admin ui license details", description = "Get admin ui license details", operationId = "get-adminui-license", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_READ}))
+            "Admin UI - License"}, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_READ }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_WRITE}),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_LICENSE_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseResponse.class, description = "License Response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
@@ -232,7 +305,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
     @Path(DETAILS)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response details() {
         try {

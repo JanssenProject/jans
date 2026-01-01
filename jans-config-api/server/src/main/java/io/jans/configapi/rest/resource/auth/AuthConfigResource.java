@@ -52,26 +52,54 @@ public class AuthConfigResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
  
+    /**
+     * Retrieves the current Jans authorization server configuration.
+     *
+     * @return the current AppConfiguration representing the server's configuration
+     */
     @Operation(summary = "Gets all Jans authorization server configuration properties.", description = "Gets all Jans authorization server configuration properties.", operationId = "get-properties", tags = {
-            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
+            "Configuration – Properties" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
         log.debug("AuthConfigResource::getAppConfiguration() appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Applies a JSON Patch to the stored AppConfiguration, persists the change, and returns the updated configuration.
+     *
+     * The provided JSON Patch string is applied to the current configuration; if the patch touches the
+     * "agamaConfiguration" field, that sub-configuration is validated before persisting. The persisted and
+     * reloaded AppConfiguration is returned.
+     *
+     * @param jsonPatchString JSON Patch document as a string describing the partial updates
+     * @return the updated AppConfiguration after applying the patch and persisting the change
+     * @throws JsonPatchException if the JSON Patch cannot be applied to the current configuration
+     * @throws IOException if an I/O error occurs while processing the patch or configuration
+     */
     @Operation(summary = "Partially modifies Jans authorization server Application configuration properties.", description = "Partially modifies Jans authorization server AppConfiguration properties.", operationId = "patch-properties", tags = {
-            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }))
+            "Configuration – Properties" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/auth/config/auth-config-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
@@ -79,8 +107,8 @@ public class AuthConfigResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String jsonPatchString)
             throws JsonPatchException, IOException {
         log.debug("AUTH CONF details to patch - jsonPatchString:{} ", jsonPatchString);
@@ -102,17 +130,29 @@ public class AuthConfigResource extends ConfigBaseResource {
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Retrieve the configured persistence settings for the Jans authorization server.
+     *
+     * @return the PersistenceConfiguration describing the server's configured persistence
+     */
     @Operation(summary = "Returns persistence type configured for Jans authorization server.", description = "Returns persistence type configured for Jans authorization server.", operationId = "get-properties-persistence", tags = {
-            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
+            "Configuration – Properties" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Jans Authorization Server persistence type", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersistenceConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/config/auth-config-persistence.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
         PersistenceConfiguration persistenceConfiguration = configurationService.getPersistenceMetadata();
@@ -121,17 +161,31 @@ public class AuthConfigResource extends ConfigBaseResource {
     }
     
     
+    /**
+     * List available feature flag types configured for the Jans authorization server.
+     *
+     * The returned set excludes FeatureFlagType.UNKNOWN.
+     *
+     * @return an EnumSet of available FeatureFlagType values; excludes {@code FeatureFlagType.UNKNOWN}.
+     */
     @Operation(summary = "Returns feature flags type configured for Jans authorization server.", description = "Returns feature flags type configured for Jans authorization server.", operationId = "get-feature-flag-type", tags = {
-            "Configuration – Properties" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }))
+            "Configuration – Properties" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type="enum")))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_CONFIG_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AUTH_CONFIG_WRITE_ACCESS }, superScopes = {
+                    ApiAccessConstants.AUTH_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.FEATURE_FLAGS)
     public Response getFeatureFlagType() {
         EnumSet<FeatureFlagType> set = EnumSet.allOf(FeatureFlagType.class);

@@ -106,8 +106,8 @@ There is `acrMappings` AS configuration property which allows to specify aliases
 `acrMappings` contains simple map in key-value form.
 
 Lets say RP sends request with `acr_values=loginWithOtpCheck`. If `acrMappings` contains mapping "loginWithOtpCheck":"otp" then
-AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp` for actual processing on server side. 
-It means that custom script must be called `otp` in this case on AS side and not `loginWithOtpCheck` (because `loginWithOtpCheck` is alias to `otp`). 
+AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp` for actual processing on server side.
+It means that custom script must be called `otp` in this case on AS side and not `loginWithOtpCheck` (because `loginWithOtpCheck` is alias to `otp`).
 
 ACR mappings are published on discovery page `GET /.well-known/openid-configuration HTTP/1.1`
 
@@ -149,11 +149,11 @@ flowchart TD
   to any reason, then the Janssen Server uses the [internal server ACR](#1-internal-janssen-server-acr) to authenticate
   the end-user.
 
-## Errors 
+## Errors
 
 ### unmet_authentication_requirements
 
-If authorization request is sent to Authorization Endpoint with `acr_values` for which 
+If authorization request is sent to Authorization Endpoint with `acr_values` for which
 AS it not able to find "Person Authentication" custom script, it returns "unmet_authentication_requirements"
 with detail log in `jans-auth.log`.
 

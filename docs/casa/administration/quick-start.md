@@ -26,7 +26,7 @@ The "out-of-the-box" login experience in Casa consists of the usual username and
 ### Add the strong authentication settings plugin
 
 This step is optional. Check [this](../plugins/2fa-settings.md) page for more information. Use this plugin if you need to exercise an advanced control on how 2FA behaves in your Casa deployment.
- 
+
 ### Test enrollment and 2FA
 
 Do the following steps using a testing account with no administrative privileges:
@@ -40,10 +40,10 @@ Click [here](./2fa-basics.md) to learn more about 2FA in Casa.
 
 ## Finish configuration
 
-Once you are done with testing, you may use casa as the default authentication method of 
-Janssen Server using [TUI](../../janssen-server/config-guide/config-tools/jans-tui/README.md) 
+Once you are done with testing, you may use casa as the default authentication method of
+Janssen Server using [TUI](../../janssen-server/config-guide/config-tools/jans-tui/README.md)
  to log in users via Casa for all applications the server protects.
- 
+
 Finally, as a security measure you can thoroughly disable access to the administrative console of Casa by following the steps below:
 
 1. Connect to your server
@@ -55,6 +55,27 @@ If you want to make the admin console available again you need to recreate the m
 1. Create an empty file (eg. `touch .administrable`)
 1. Run `chown casa:casa .administrable` (do this only if you are on FIPS environment)
 1. Logout in case you have an open browser session, and login again
+
+!!! Note
+    In cloud-native setup, the admin console can be enabled/disabled by changing the value of `casa.adminEnabled` attribute in `values.yaml` file (and run `helm install` or `helm upgrade`).
+    See examples below:
+
+    1. For the vanilla Janssen chart:
+
+        ```yaml
+        global:
+          casa:
+            # admin console is enabled by default; set the value to false to disable the console
+            adminEnabled: true
+        ```
+
+    1. For the all-in-one Janssen chart:
+
+        ```yaml
+        casa:
+          # admin console is enabled by default; set the value to false to disable the console
+          adminEnabled: true
+        ```
 
 ## Check out available plugins
 

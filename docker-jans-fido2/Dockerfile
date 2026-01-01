@@ -1,3 +1,6 @@
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -42,7 +45,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-11-03 12:03'
+ENV CN_BUILD_DATE='2025-12-19 08:53'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -64,7 +67,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
+ENV JANS_SOURCE_VERSION=6bcc41a0e7f2708e52fe2c950d357dc872b87498
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -209,6 +212,10 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
+# ===========
+# Custom libs
+# ===========
+
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/logs \
     ${JETTY_BASE}/jans-fido2/custom/libs \
@@ -236,6 +243,8 @@ RUN chmod 664 ${JETTY_BASE}/jans-fido2/resources/log4j2.xml \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 /etc/jans/conf/fido2/mds/toc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-fido2/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-fido2/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.xml \

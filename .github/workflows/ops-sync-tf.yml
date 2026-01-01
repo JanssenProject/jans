@@ -14,8 +14,6 @@ permissions:
 
 jobs:
   publish:
-    permissions:
-      contents: write  # for Git to git push
     name: Push to terraform-provider-jans repo
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest

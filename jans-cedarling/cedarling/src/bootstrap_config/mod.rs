@@ -33,9 +33,9 @@ pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTo
 pub use entity_builder_config::{
     EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc,
 };
-pub use jwt_config::{JwtConfig, JwtConfigRaw};
+pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
-pub use log_config::{LogConfig, LogConfigRaw, LogTypeConfig, MemoryLogConfig};
+pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
 
@@ -65,9 +65,6 @@ pub struct BootstrapConfig {
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
     pub max_base64_size: Option<usize>,
-    /// Allows to limit maximum token cache TTL in seconds.
-    /// Zero means no token cache TTL limit.
-    pub token_cache_max_ttl_secs: usize,
 }
 
 impl BootstrapConfig {

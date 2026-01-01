@@ -88,7 +88,7 @@ Accept: application/statuslist+json
 
 **Important**
 Logout Status JWT specifies `exp` which means that token must be considered expired when this time is reached independently from Token Status List response.
-If Token Status List has `INVALID` (`1` - at `idx` index for 2 bits) then RP must consider Logout Status JWT as invalid. 
+If Token Status List has `INVALID` (`1` - at `idx` index for 2 bits) then RP must consider Logout Status JWT as invalid.
 
 
 ## Disabling Logout Status JWT Using Feature Flag

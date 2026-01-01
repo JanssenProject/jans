@@ -1,3 +1,6 @@
+# =================================
+# Main Image
+# =================================
 FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
@@ -30,7 +33,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-11-03 10:48'
+ENV CN_BUILD_DATE='2025-12-19 08:52'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
@@ -58,7 +61,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ENV JANS_SOURCE_VERSION=04d297c046dd9d8ef54c0544e6187153b7ed87cf
+ENV JANS_SOURCE_VERSION=6bcc41a0e7f2708e52fe2c950d357dc872b87498
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -181,6 +184,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \
+    CN_CASA_ADMIN_ENABLED="true" \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
@@ -205,10 +209,15 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/casa" \
     org.opencontainers.image.title="Janssen Casa" \
     org.opencontainers.image.description="Self-service portal for people to manage their account security preferences in the Janssen, like 2FA"
 
+# ===========
+# Custom libs
+# ===========
+
 RUN mkdir -p /opt/jans/python/libs \
     ${JETTY_BASE}/jans-casa/static \
     ${JETTY_BASE}/jans-casa/plugins \
     ${JETTY_BASE}/jans-casa/logs \
+    ${JETTY_BASE}/jans-casa/custom/libs \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /etc/jans/conf/casa \
@@ -237,6 +246,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-casa/static \
     && chmod -R g=u /etc/jans \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-casa/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-casa/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown 1000:0 ${JETTY_BASE}/jans-casa/webapps/jans-casa.xml \

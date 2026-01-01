@@ -11,15 +11,14 @@ A Python wrapper for the Rust `cedarling::AuthorizeMultiIssuerRequest` struct.
 Represents a multi-issuer authorization request with multiple JWT tokens from different issuers.
 
 Attributes
-----------  
-:param tokens: List of TokenInput objects containing JWT tokens with explicit type mappings  
-:param resource: Resource data (wrapped `EntityData` object)  
-:param action: The action to be authorized  
+----------
+:param tokens: List of TokenInput objects containing JWT tokens with explicit type mappings
+:param resource: Resource data (wrapped `EntityData` object)
+:param action: The action to be authorized
 :param context: Optional Python dictionary with additional context
 
 Example
 -------
-
 ```python
 # Create a multi-issuer authorization request
 tokens = [
@@ -33,7 +32,6 @@ request = AuthorizeMultiIssuerRequest(
     context={"location": "miami"}
 )
 ```
-
 ___
 
 AuthorizeResult
@@ -59,8 +57,8 @@ A Python wrapper for the Rust `cedar_policy::Response` struct.
 Represents the result of an authorization request.
 
 Attributes
-----------  
-:param decision: The authorization decision (wrapped `Decision` object).  
+----------
+:param decision: The authorization decision (wrapped `Decision` object).
 :param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
 ___
 
@@ -105,6 +103,7 @@ Methods
 ___
 
 # CedarEntityMapping
+
 Cedar entity mapping information
 ___
 
@@ -116,7 +115,7 @@ Represents an instance of the Cedarling application, a local authorization servi
 that answers authorization questions based on JWT tokens.
 
 Attributes
-----------  
+----------
 :param config: A `BootstrapConfig` object for initializing the Cedarling instance.
 
 Methods
@@ -228,8 +227,8 @@ a resource entity with Cedar mapping information and attributes. Attributes are 
 in a dictionary format.
 
 Attributes
-----------  
-:param cedar_entity_mapping: Cedar entity mapping information containing entity_type and id.  
+----------
+:param cedar_entity_mapping: Cedar entity mapping information containing entity_type and id.
 :param payload: Optional dictionary of attributes.
 
 Methods
@@ -281,10 +280,10 @@ A Python wrapper for the Rust `cedarling::Request` struct. Represents
 authorization data with access token, action, resource, and context.
 
 Attributes
-----------  
-:param tokens: A class containing the JWTs what will be used for the request.  
-:param action: The action to be authorized.  
-:param resource: Resource data (wrapped `EntityData` object).  
+----------
+:param tokens: A class containing the JWTs that will be used for the request.
+:param action: The action to be authorized.
+:param resource: Resource data (wrapped `EntityData` object).
 :param context: Python dictionary with additional context.
 
 Example
@@ -296,16 +295,16 @@ request = Request(access_token="token123", action="read", resource=resource, con
 ___
 
 RequestUnsigned
-===============
+=======
 
 A Python wrapper for the Rust `cedarling::RequestUnsigned` struct. Represents
 authorization data for unsigned authorization requests for many principals.
 
 Attributes
-----------  
-:param principals: A list of `EntityData` objects representing the principals.  
-:param action: The action to be authorized.  
-:param resource: Resource data (wrapped `ResourceData` object).  
+----------
+:param principals: A list of `EntityData` objects representing the principals.
+:param action: The action to be authorized.
+:param resource: Resource data (wrapped `ResourceData` object).
 :param context: Python dictionary with additional context.
 
 Example
@@ -323,8 +322,8 @@ A Python wrapper for the Rust `cedarling::TokenInput` struct.
 Represents a JWT token with explicit type mapping for multi-issuer authorization.
 
 Attributes
-----------  
-:param mapping: Token mapping type (e.g., "Jans::Access_Token", "Acme::DolphinToken")  
+----------
+:param mapping: Token mapping type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
 :param payload: JWT token string
 
 Example
@@ -336,62 +335,77 @@ token = TokenInput(mapping="Jans::Access_Token", payload="eyJhbGciOiJIUzI1NiIsIn
 ___
 
 # authorize_errors.ActionError
+
 Error encountered while parsing Action to EntityUid
 ___
 
 # authorize_errors.AuthorizeError
+
 Exception raised by authorize_errors
 ___
 
 # authorize_errors.BuildContextError
+
 Error encountered while building the request context
 ___
 
 # authorize_errors.BuildEntityError
-Error encountered while running on strict id token trust mode
+
+Error encountered while building Cedar entities
 ___
 
 # authorize_errors.BuildUnsignedRoleEntityError
+
 Error building Role entity for unsigned request
 ___
 
 # authorize_errors.CreateContextError
+
 Error encountered while validating context according to the schema
 ___
 
 # authorize_errors.EntitiesToJsonError
+
 Error encountered while parsing all entities to json for logging
 ___
 
 # authorize_errors.ExecuteRuleError
+
 Error encountered while executing the rule for principals
 ___
 
 # authorize_errors.IdTokenTrustModeError
+
 Error encountered while running on strict id token trust mode
 ___
 
 # authorize_errors.InvalidPrincipalError
+
 Error encountered while creating cedar_policy::Request for principal
 ___
 
 # authorize_errors.MultiIssuerEntityError
+
 Error encountered while building multi-issuer entities
 ___
 
 # authorize_errors.MultiIssuerValidationError
+
 Error encountered during multi-issuer token validation
 ___
 
 # authorize_errors.ProcessTokens
+
 Error encountered while processing JWT token data
 ___
 
 # authorize_errors.RequestValidationError
+
 Error encountered while validating the request
 ___
 
 # authorize_errors.ValidateEntitiesError
+
 Error encountered while validating the entities to the schema
 ___
 

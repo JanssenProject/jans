@@ -55,12 +55,14 @@ pub mod interface;
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;
+pub(crate) mod loggable_fn;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
 pub use log_entry::*;
 pub use log_level::*;
+pub use stdout_logger::StdOutLoggerMode;
 
 #[cfg(test)]
 pub(crate) use nop_logger::NopLogger;
@@ -73,6 +75,7 @@ use std::sync::LazyLock;
 use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
+pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
 
 use crate::LockServiceConfig;
@@ -84,6 +87,7 @@ use crate::lock::{InitLockServiceError, LockService};
 pub(crate) type Logger = Arc<LogStrategy>;
 pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
 
@@ -104,13 +108,14 @@ pub(crate) async fn init_logger(
     Ok(logger)
 }
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) fn init_test_logger() -> Logger {
     Arc::new(
         LogStrategy::new(
             &LogConfig {
                 log_level: LogLevel::DEBUG,
-                log_type: crate::LogTypeConfig::StdOut,
+                log_type: crate::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             },
             PdpID::new(),
             Some("test".to_string().into()),

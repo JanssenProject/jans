@@ -2,14 +2,14 @@
 
 Purpose of this guide is to provide necessary information and resources to community in order to make successful contribution to the Janssen Project.
 
-There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
+There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.
 
 
 ## Join the Community
 
-* **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on Github
-* **Discussions**: Join interesting discussions at [Github Discussions](https://github.com/JanssenProject/jans/discussions)
-* **Chat**: We have an active [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free their with your Github identity.
+* **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on GitHub
+* **Discussions**: Join interesting discussions at [GitHub Discussions](https://github.com/JanssenProject/jans/discussions)
+* **Chat**: We have an active [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). You can register for free their with your GitHub identity.
 * **Tweet**: Janssen is on [Twitter](https://twitter.com/janssen_project) too. Follow us there to stay up to date on release announcements and news around Janssen.
 
 ## First Time Contributors
@@ -82,7 +82,7 @@ Janssen Project mandates all commits to follow guidelines as below.
 
 - **Add GPG signature to your commit**
 
-  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by Github. If you have GPG key    setup already then just use `-S` switch with you commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
+  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key setup already then just use `-S` switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
 
 - **Add DCO sign-off**
   
@@ -102,7 +102,7 @@ Janssen Project mandates all commits to follow guidelines as below.
   $ git commit -s -m 'This is my commit message'
   ```
 
-In all, if you have your GPG verification setup, your commit command should look like 
+In all, if you have your GPG verification setup, your commit command should look like
 
 ```
 git commit -S -s -m 'message that follows conventional commit style'
@@ -130,7 +130,7 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 
 #### License Header
 
-The Janssen Project uses Apache-2.0 license. Any existing or new code file 
+The Janssen Project uses Apache-2.0 license. Any existing or new code file
 has to start with the license header as shown below:
 
 ```Text
@@ -142,10 +142,10 @@ has to start with the license header as shown below:
  */
 ```
 
-If the developers [sign a CLA(Contributor License Agreement)]() they can retain 
+If the developers [sign a CLA(Contributor License Agreement)]() they can retain
 the copyright. Once the CLA has been signed, contributions can be accepted
 from the contributor
-with the License header as below. Make sure to replace `[github-username]` with 
+with the License header as below. Make sure to replace `[github-username]` with
 contributor's GitHub username:
 
 ```Text
@@ -159,7 +159,7 @@ contributor's GitHub username:
 
  **Signing the CLA**
 
-The current version of CLA can be found 
+The current version of CLA can be found
 [here](governance/cla.md). This is just for your reference.
 This same CLA will be signed digitally by following the steps below:
 
@@ -191,7 +191,7 @@ Follow the instructions and complete the signing process.
 
 ## Contributing to the documentation
 
-Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
+Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process.
 
 In order to ensure consistency of style, language, format, and terminology across all documents, please follow the guidelines below:
 
@@ -217,11 +217,11 @@ This glossary helps to keep terms and their meanings consistent across documenta
 
 ### Documentation Style Guide
 
-Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents. 
+Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents.
 
 !!! Testing
 
-    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#testing-documentation-changes-locally) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
+    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by GitHub and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#testing-documentation-changes-locally) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
 
 #### Document Title
 
@@ -293,12 +293,12 @@ for previous releases.
  - Leave a blank line between paragraphs. Count a header as a paragraph for this purpose
  - Avoid passive voice as much as possible. It's clearer to say that a subject does something than to say a result was done
  - Avoid using `you` in statements as much as possible. For example, instead of saying `You can navigate to...` simply say `Navigate to...` 
- 
+
 #### Page Setup
  - Start your page with a title on the first line
  - Follow with a concise overview of the document / product's purpose
  - Organize the information in the document from least technical to most technical if possible. Start conceptual, then get detailed
- 
+
 #### Lists
  - Leave a blank line between text and first item in the list
  - Only use a numbered list if the order of the list matters
@@ -321,9 +321,9 @@ for previous releases.
     2. This is the second item
     3. This is the third item
     ```
- 
+
  - To include additional lines in a list item, start the sub-line with four spaces. For example:
- 
+
     ```
     1. This is the first item in a list   
        There are four spaces to start this line   
@@ -345,7 +345,7 @@ It will look like this:
  **Other formatting considerations**
 
  - Admonitions cannot be nested inside a list. They must be aligned all the way left. Inserting them within a list will break the list sequence (starting back over from 1).
-    
+
  - Nesting a [fenced block of code](#code-formatting) in a numbered list is more challenging, as the list and code block syntaxes clash. To nest a code block into a list, insert four spaces to the left of all lines of the formatting. For example:
 
 ```
@@ -374,16 +374,16 @@ It will look like this:
 #### Code Formatting
   - To format text as code within a line of normal text, surround the code with a single backtick (\`).
   - If the code is to be on its own line, it should be a fenced code block. To make a fenced code block, make a line before and after the code with three backticks:
-  
+
     ```
         ```
         This is code
         ```
     ```
-    
+
   - We use the [SuperFences](https://facelessuser.github.io/pymdown-extensions/extensions/superfences/) plugin to enhance this functionality.
-  
-  
+
+
 #### Examples & Navigation
  - When possible, provide an example in the form of code output or a screenshot
  - To instruct a user to click a button, or navigate to a certain page or through a menu, use the following style:
@@ -391,32 +391,32 @@ It will look like this:
      ```
      Navigate to `Configuration` > `Authentication` and click the `Passport` tab
      ```  
- 
-It will look like this:  
- 
+
+It will look like this:
+
 Navigate to `Configuration` > `Authentication` and click the `Passport` tab
- 
+
 #### Linking
 
 We recommend using relative linking syntax when linking to other artifacts in repository. Linking to a page within the same repo use this format: `[text for the link](../where/the/link/goes.md)`
  - You must link to the `.md` file on GitHub for it to work properly
  - As an example, to make text `this link` link to a Markdown document named `example.md` in the same directory, you'd type it as `[this link](./example.md)`
- 
+
 **Service Commands**
 
-The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://jans.io/docs/vm-ops/checking-service-status/). 
+The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE etc.). Service commands can vary. Rather than "hard coding" service commands into documentation, please instead reference the dedicated documentation page for [Service Commands](https://jans.io/docs/vm-ops/checking-service-status/).
 
-In documenting a process that involves a service restart, the Service Command documentation is linked:  
+In documenting a process that involves a service restart, the Service Command documentation is linked:
 
-```  
+```
 ## Add the attribute to MySQL
 
  - Add custom attribute 
  - [Restart](https://jans.io/docs/vm-ops/restarting-services/) the `jans-auth.service` service.
 ```
 
-The word `Restart` is simply linked to the dedicated doc for Service Commands. 
- 
+The word `Restart` is simply linked to the dedicated doc for Service Commands.
+
 #### Tables
  - Try to make tables visually readable by spacing to make distinct columns
  - The header for each column must be separated by at least three dashes
@@ -451,15 +451,15 @@ It is essential for everyone in the community to actively participate in the doc
 Best place to find something to work on is to look at [currently open issues](https://github.com/JanssenProject/jans/issues). If you are a first time contributor then starting with [list of good first issues](https://github.com/JanssenProject/jans/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) is best.
 
 ### Start a discussion
-Start a [Github Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your solution or implementation approach. Janssen is a community driven project and it'll be helpful to get community's view about it.
+Start a [GitHub Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your proposed solution or implementation approach is. Janssen is a community-driven project and it's helpful to get the community's view about it.
 
 ### Create an issue
-Take your time to write a proper issue including a good summary and description. Outcome of Github discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate `issue template` and it'll help you create an issue with right content.
+Take your time to write a proper issue including a good summary and description. Outcome of GitHub discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate `issue template` and it'll help you create an issue with right content.
 
 Remember that issue may be the first thing a reviewer of your PR will look at to get an idea of what you are proposing. It will also be used by the community in the future to find about what new features and enhancements are included in new releases.
 
 ### Implement the change
-All contributions to Janssen Project should be made via Github pull requests(PR). 
+All contributions to Janssen Project should be made via GitHub pull requests (PR).
 
 > New to PR workflow?? Learn and practice it at [first-contributions](https://github.com/firstcontributions/first-contributions)
 
@@ -468,14 +468,14 @@ Fork [Janssen repository](https://github.com/JanssenProject/jans). And create a 
 
 #### Implement the Change
 
-Start working on changes as required. 
+Start working on changes as required.
 
 - Make sure the [code conventions](#code-conventions-and-guidelines) are being followed.
 - Use static code analysis and linting tools to make sure the code is high-quality.
 - Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.
-- Create PR early and push often. 
-- Janssen uses Github actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
-- Engage PR reviewers at the start so that they can continue to reivew code as it is developed and in small chunks.
+- Create PR early and push often.
+- Janssen uses GitHub actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
+- Engage PR reviewers at the start so that they can continue to review code as it is developed and in small chunks.
 - For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.
 
 <!-- TODO: enable this once the workspace guide is ready and developers can test locally from workspace
@@ -490,7 +490,7 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 of the following :
   - A commit that follows [commit guidelines](#commits) with `docs:` message 
   - Changes in artifacts under `jans/docs`
-  
+
 - If PR does not need any documentation changes, then the developer needs to acknowledge that in one of two ways:
   - Add an empty commit to the PR (using `--allow-empty` git flag) with `docs:` message (i.e `docs: no doc changes required`)
   - Add footer to the commit message of one of the code commits with `docs:` message e.g
@@ -501,17 +501,17 @@ of the following :
 
   docs: no docs modification
   ```
-    
+
 
 ### Raise a PR
 - Make sure that PR title follows these [guidelines](#prs)
-- Janssen uses Github PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. Github will populate new PR's description with these instructions. You can edit PR description as per your requirements.
-- When PR is raised, Github will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
-- Once PR is raised, ensure that PR passes all the mandatory Github actions checks available on Github PR page. Github will not allow PR to be merged if any of the mandatory check is failing.
+- Janssen uses GitHub PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. GitHub will populate new PR's description with these instructions. You can edit PR description as per your requirements.
+- When PR is raised, GitHub will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
+- Once PR is raised, ensure that PR passes all the mandatory GitHub actions checks available on GitHub PR page. GitHub will not allow PR to be merged if any of the mandatory check is failing.
 
 ### Follow Through
 
-Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient. 
+Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient.
 
 Follow activities on your PR closely till the time PR is merged. PR reviewer may want to suggest a change or may need to ask a question to get more clarity. Make sure you are actively collaborating. Once Reviewer has completed the review and approved the changes, the PR will be merged.
 

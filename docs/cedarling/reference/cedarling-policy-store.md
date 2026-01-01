@@ -74,11 +74,14 @@ Default entities allow you to preload static entity records that are available t
 Format:
 
 - Each entry is a simple key-value pair where the key is the entity ID and the value is a Base64-encoded JSON object representing the entity payload.
+- Default entities support two formats:
+  - **Cedar format**: `{"uid": {"type": "...", "id": "..."}, "attrs": {...}, "parents": [...]}`
+  - **Legacy format**: `{"entity_type": "...", "entity_id": "...", ...attributes...}` (for backward compatibility)
 
 ```json
 "default_entities": {
-  "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==",
-  "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0="
+  "1694c954f8d9": "eyJ1aWQiOnsidHlwZSI6IkphbnM6Ok9yZ2FuaXphdGlvbiIsImlkIjoiMTY5NGM5NTRmOGQ5In0sImF0dHJzIjp7Im8iOiJBY21lIERvbHBoaW5zIERpdmlzaW9uIiwib3JnX2lkIjoiMTAwMTI5IiwiZG9tYWluIjoiYWNtZS1kb2xwaGluLnNlYSIsInJlZ2lvbnMiOlsiQXRsYW50aWMiLCJQYWNpZmljIiwiSW5kaWFuIl19LCJwYXJlbnRzIjpbXX0=",
+  "74d109b20248": "eyJ1aWQiOnsidHlwZSI6IkphbnM6OlByaWNlTGlzdCIsImlkIjoiNzRkMTA5YjIwMjQ4In0sImF0dHJzIjp7ImRlc2NyaXB0aW9uIjoiMjAyNSBQcmljZSBMaXN0IiwicHJvZHVjdHMiOnsiMTUwMjAiOjkuOTUsIjE1MDUwIjoxNC45NX0sInNlcnZpY2VzIjp7IjUxMDAxIjo5OS4wLCI1MTAyMCI6Mjk5LjB9fSwicGFyZW50cyI6W119"
 }
 ```
 
@@ -87,17 +90,29 @@ Example of the decoded payloads for two default entities:
 ```json
 {
   "1694c954f8d9": {
-    "entity_id": "1694c954f8d9",
-    "o": "Acme Dolphins Division",
-    "org_id": "100129",
-    "domain": "acme-dolphin.sea",
-    "regions": ["Atlantic", "Pacific", "Indian"]
+    "uid": {
+      "type": "Jans::Organization",
+      "id": "1694c954f8d9"
+    },
+    "attrs": {
+      "o": "Acme Dolphins Division",
+      "org_id": "100129",
+      "domain": "acme-dolphin.sea",
+      "regions": ["Atlantic", "Pacific", "Indian"]
+    },
+    "parents": []
   },
   "74d109b20248": {
-    "entity_id": "74d109b20248",
-    "description": "2025 Price List",
-    "products": { "15020": 9.95, "15050": 14.95 },
-    "services": { "51001": 99.0, "51020": 299.0 }
+    "uid": {
+      "type": "Jans::PriceList",
+      "id": "74d109b20248"
+    },
+    "attrs": {
+      "description": "2025 Price List",
+      "products": { "15020": 9.95, "15050": 14.95 },
+      "services": { "51001": 99.0, "51020": 299.0 }
+    },
+    "parents": []
   }
 }
 ```
@@ -385,8 +400,8 @@ Here is a non-normative example of a `cedarling_store.json` file:
     }
   },
   "default_entities": {
-    "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ==",
-    "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5Ljk1LCIxNTA1MCI6MTQuOTV9LCJzZXJ2aWNlcyI6eyI1MTAwMSI6OTkuMCwiNTEwMjAiOjI5OS4wfX0="
+    "1694c954f8d9": "eyJ1aWQiOnsidHlwZSI6IkphbnM6Ok9yZ2FuaXphdGlvbiIsImlkIjoiMTY5NGM5NTRmOGQ5In0sImF0dHJzIjp7Im8iOiJBY21lIERvbHBoaW5zIERpdmlzaW9uIiwib3JnX2lkIjoiMTAwMTI5IiwiZG9tYWluIjoiYWNtZS1kb2xwaGluLnNlYSIsInJlZ2lvbnMiOlsiQXRsYW50aWMiLCJQYWNpZmljIiwiSW5kaWFuIl19LCJwYXJlbnRzIjpbXX0=",
+    "74d109b20248": "eyJ1aWQiOnsidHlwZSI6IkphbnM6OlByaWNlTGlzdCIsImlkIjoiNzRkMTA5YjIwMjQ4In0sImF0dHJzIjp7ImRlc2NyaXB0aW9uIjoiMjAyNSBQcmljZSBMaXN0IiwicHJvZHVjdHMiOnsiMTUwMjAiOjkuOTUsIjE1MDUwIjoxNC45NX0sInNlcnZpY2VzIjp7IjUxMDAxIjo5OS4wLCI1MTAyMCI6Mjk5LjB9fSwicGFyZW50cyI6W119"
   }
 }
 ```
@@ -493,7 +508,7 @@ entity Tokens = {
 };
 ```
 
-The naming follows this pattern:  
+The naming follows this pattern:
 
 - **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim  
 - **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")  
