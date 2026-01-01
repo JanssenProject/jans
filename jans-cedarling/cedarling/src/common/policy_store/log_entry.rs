@@ -6,7 +6,7 @@
 //! Log entries for policy store operations.
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogLevel, LogType};
+use crate::log::{BaseLogEntry, LogLevel};
 use serde::Serialize;
 
 /// Log entry for policy store operations.
@@ -20,7 +20,8 @@ pub struct PolicyStoreLogEntry {
 impl PolicyStoreLogEntry {
     /// Create a new policy store log entry.
     pub fn new(msg: impl Into<String>, level: Option<LogLevel>) -> Self {
-        let mut base = BaseLogEntry::new_opt_request_id(LogType::System, None);
+        let mut base =
+            BaseLogEntry::new_system_opt_request_id(level.unwrap_or(LogLevel::TRACE), None);
         base.level = level;
         Self {
             base,

@@ -972,6 +972,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 async fn test_authorize_with_jwt_from_directory() {
     use crate::authz::request::Request;
     use crate::jwt::test_utils::MockServer;
+    use crate::log::StdOutLoggerMode;
     use crate::{
         AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, JwtConfig, LogConfig,
         LogTypeConfig, PolicyStoreConfig,
@@ -1135,7 +1136,7 @@ permit(
     let config = BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {

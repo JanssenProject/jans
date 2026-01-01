@@ -237,9 +237,11 @@ fn log_policy_store_metadata(
     }
 
     log.log_any(
-        LogEntry::new_with_data(LogType::System, None)
-            .set_level(LogLevel::DEBUG)
-            .set_message(details),
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::DEBUG,
+            None,
+        ))
+        .set_message(details),
     );
 
     // Log version compatibility check with current Cedar
@@ -247,34 +249,40 @@ fn log_policy_store_metadata(
     match metadata.is_compatible_with_cedar(&current_cedar_version) {
         Ok(true) => {
             log.log_any(
-                LogEntry::new_with_data(LogType::System, None)
-                    .set_level(LogLevel::DEBUG)
-                    .set_message(format!(
-                        "Policy store Cedar version {} is compatible with runtime version {}",
-                        metadata.cedar_version(),
-                        current_cedar_version
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::DEBUG,
+                    None,
+                ))
+                .set_message(format!(
+                    "Policy store Cedar version {} is compatible with runtime version {}",
+                    metadata.cedar_version(),
+                    current_cedar_version
+                )),
             );
         },
         Ok(false) => {
             log.log_any(
-                LogEntry::new_with_data(LogType::System, None)
-                    .set_level(LogLevel::WARN)
-                    .set_message(format!(
-                        "Policy store Cedar version {} may not be compatible with runtime version {}",
-                        metadata.cedar_version(),
-                        current_cedar_version
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "Policy store Cedar version {} may not be compatible with runtime version {}",
+                    metadata.cedar_version(),
+                    current_cedar_version
+                )),
             );
         },
         Err(e) => {
             log.log_any(
-                LogEntry::new_with_data(LogType::System, None)
-                    .set_level(LogLevel::WARN)
-                    .set_message(format!(
-                        "Could not check Cedar version compatibility: {}",
-                        e
-                    )),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "Could not check Cedar version compatibility: {}",
+                    e
+                )),
             );
         },
     }
@@ -282,12 +290,14 @@ fn log_policy_store_metadata(
     // Log parsed version for debugging if available
     if let Some(parsed_version) = metadata.version_parsed() {
         log.log_any(
-            LogEntry::new_with_data(LogType::System, None)
-                .set_level(LogLevel::TRACE)
-                .set_message(format!(
-                    "Policy store semantic version: {}.{}.{}",
-                    parsed_version.major, parsed_version.minor, parsed_version.patch
-                )),
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::TRACE,
+                None,
+            ))
+            .set_message(format!(
+                "Policy store semantic version: {}.{}.{}",
+                parsed_version.major, parsed_version.minor, parsed_version.patch
+            )),
         );
     }
 }
