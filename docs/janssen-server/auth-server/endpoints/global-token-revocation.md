@@ -5,24 +5,26 @@ tags:
 - session-revocation
 - endpoint
 ---
+
 # Global Token Revocation Endpoint
 
+The Global Token Revocation endpoint is a critical security feature that allows for the immediate invalidation of
+all tokens and sessions associated with a user. This is particularly useful in scenarios where a user's account may have been compromised,
+as it ensures that all active sessions are terminated and all tokens are revoked, preventing any further unauthorized access.
 
-Janssen Server provides global token revocation endpoint to enable the client to revoke all tokens and sessions of a user.
-Janssen Server provides this endpoint to allow greater
+Janssen Server provides this endpoint implementation to allow greater
 control and better management of sessions on OP.
 
-URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
-[configuration endpoint](./configuration.md) given below.
+The URL for the Global Token Revocation endpoint is specified in the Janssen Server's well-known [configuration endpoint](./configuration.md)
+response:
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`global_token_revocation_endpoint` claim in the response specifies the URL for global token revocation endpoint. By default, global token revocation endpoint
-looks like below:
+The `global_token_revocation_endpoint` claim in the response specifies the URL for the endpoint, which by default is:
 
-```
+```text
 https://janssen.server.host/jans-auth/restv1/global-token-revocation
 ```
 
@@ -72,9 +74,21 @@ disable `GLOBAL_TOKEN_REVOCATION` flag as required.
 
 ![](../../../assets/image-tui-enable-components.png)
 
-## Required Scopes
+## Required Scope
 
-A client must have the following scope in order to use this endpoint:
+A client must have the following scope to use this endpoint:
 
 - `global_token_revocation`
 
+## Difference with Front-Channel End Session
+
+The Global Token Revocation endpoint provides a comprehensive approach to session termination by
+revoking all tokens and sessions associated with a user across all applications.
+This is a "back-end" operation that ensures all access is immediately cut off.
+
+In contrast, the Front-Channel End Session (`/end_session`) is a "front-end" mechanism
+that logs a user out of a single application.
+It relies on the user's browser to clear the session cookie and does not guarantee that
+all tokens and sessions are invalidated across all applications.
+
+For more details, see [End Session](end-session.md).
