@@ -189,8 +189,8 @@ impl From<&Type> for ExpectedClaimType {
             Type::Set { element_type } => element_type
                 .as_ref()
                 .map(|t| Self::from(&**t))
-                // see: https://docs.rs/cedar-policy-validator/4.3.3/cedar_policy_validator/types/enum.Type.html#variant.Set
-                .expect("this should always be `Some`"),
+                // see: https://docs.rs/cedar-policy-core/latest/cedar_policy_core/validator/types/enum.Type.html#variant.Set
+                .expect("cedar-policy-core type `Type::Set` should always be `Some`, according to the documentation"),
             Type::EntityOrRecord(entity_record_kind) => entity_record_kind.into(),
             Type::ExtensionType { name } => Self::Extension(name.to_smolstr()),
         }
