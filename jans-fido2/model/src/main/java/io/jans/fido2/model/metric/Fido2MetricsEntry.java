@@ -7,6 +7,7 @@
 package io.jans.fido2.model.metric;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -16,6 +17,9 @@ import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,70 +31,71 @@ import java.util.Objects;
 @DataEntry
 @ObjectClass("jansFido2MetricsEntry")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Fido2MetricsEntry extends Entry implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @AttributeName(name = "jansId")
+    @AttributeName(name = "jansFido2MetricsId")
     private String id;
 
-    @AttributeName(name = "jansMetricType")
+    @AttributeName(name = "jansFido2MetricsType")
     private String metricType;
 
-    @AttributeName(name = "jansTimestamp")
-    private LocalDateTime timestamp;
+    @AttributeName(name = "jansFido2MetricsTimestamp")
+    private Date timestamp;
 
-    @AttributeName(name = "jansUserId")
+    @AttributeName(name = "jansFido2MetricsUserId")
     private String userId;
 
-    @AttributeName(name = "jansUsername")
+    @AttributeName(name = "jansFido2MetricsUsername")
     private String username;
 
-    @AttributeName(name = "jansOperationType")
+    @AttributeName(name = "jansFido2MetricsOperationType")
     private String operationType; // REGISTRATION, AUTHENTICATION, FALLBACK
 
-    @AttributeName(name = "jansStatus")
+    @AttributeName(name = "jansFido2MetricsStatus")
     private String status; // SUCCESS, FAILURE, ATTEMPT
 
-    @AttributeName(name = "jansDurationMs")
+    @AttributeName(name = "jansFido2MetricsDuration")
     private Long durationMs;
 
-    @AttributeName(name = "jansAuthenticatorType")
+    @AttributeName(name = "jansFido2MetricsAuthenticatorType")
     private String authenticatorType; // PLATFORM, CROSS_PLATFORM, SECURITY_KEY
 
-    @AttributeName(name = "jansDeviceInfo")
+    @AttributeName(name = "jansFido2MetricsDeviceInfo")
     @JsonObject
     private DeviceInfo deviceInfo;
 
-    @AttributeName(name = "jansErrorReason")
+    @AttributeName(name = "jansFido2MetricsErrorReason")
     private String errorReason;
 
-    @AttributeName(name = "jansErrorCategory")
+    @AttributeName(name = "jansFido2MetricsErrorCategory")
     private String errorCategory;
 
-    @AttributeName(name = "jansFallbackMethod")
+    @AttributeName(name = "jansFido2MetricsFallbackMethod")
     private String fallbackMethod;
 
-    @AttributeName(name = "jansFallbackReason")
+    @AttributeName(name = "jansFido2MetricsFallbackReason")
     private String fallbackReason;
 
-    @AttributeName(name = "jansUserAgent")
+    @AttributeName(name = "jansFido2MetricsUserAgent")
     private String userAgent;
 
-    @AttributeName(name = "jansIpAddress")
+    @AttributeName(name = "jansFido2MetricsIpAddress")
     private String ipAddress;
 
-    @AttributeName(name = "jansSessionId")
+    @AttributeName(name = "jansFido2MetricsSessionId")
     private String sessionId;
 
-    @AttributeName(name = "jansAdditionalData")
+    @AttributeName(name = "jansFido2MetricsAdditionalData")
     @JsonObject
     private transient Map<String, Object> additionalData;
 
-    @AttributeName(name = "jansNodeId")
+    @AttributeName(name = "jansFido2MetricsNodeId")
     private String nodeId;
 
-    @AttributeName(name = "jansApplicationType")
+    @AttributeName(name = "jansFido2MetricsApplicationType")
     private String applicationType;
 
     // Constructors
@@ -102,7 +107,8 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
         this.metricType = metricType;
         this.operationType = operationType;
         this.status = status;
-        this.timestamp = LocalDateTime.now();
+        // Use UTC timezone to align with FIDO2 services
+        this.timestamp = Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant());
     }
 
     // Getters and Setters
@@ -122,11 +128,11 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
         this.metricType = metricType;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -291,6 +297,7 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
      * Device information extracted from User-Agent
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DeviceInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 

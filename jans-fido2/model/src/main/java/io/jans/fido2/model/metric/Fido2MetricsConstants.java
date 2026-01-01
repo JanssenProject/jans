@@ -71,7 +71,7 @@ public final class Fido2MetricsConstants {
     public static final String MATURE = "MATURE";
 
     // Database Attributes
-    public static final String JANS_TIMESTAMP = "jansTimestamp";
+    public static final String JANS_TIMESTAMP = "jansFido2MetricsTimestamp";
     
     // Service Names
     public static final String METRICS_SERVICE = "metricsService";
