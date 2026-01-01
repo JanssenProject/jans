@@ -9,11 +9,11 @@
 //! policy IDs from @id() annotations. It provides validation and error
 //! reporting with file names and line numbers.
 
-use super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use cedar_policy::{Policy, PolicyId, PolicySet, Template};
-
 #[cfg(test)]
 use std::collections::HashMap;
+
+use super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 
 /// Represents a parsed Cedar policy with metadata.
 #[derive(Debug, Clone)]

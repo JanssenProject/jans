@@ -259,7 +259,7 @@ impl MockServer {
         let build_jwt_claims = move || {
             let now = chrono::Utc::now().timestamp();
             let exp = now + 3600; // defaults to 1 hour
-            let ttl_secs = ttl.unwrap_or(600); // defaults to 5 mins if the ttl is None
+            let ttl_secs = ttl.unwrap_or(300); // defaults to 5 mins if the ttl is None
             let claims = json!({
                 "sub": sub,
                 "status_list": {

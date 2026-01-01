@@ -9,9 +9,10 @@
 //! ensuring they are syntactically correct and semantically valid before being
 //! used for policy validation and evaluation.
 
-use super::errors::{CedarSchemaErrorType, PolicyStoreError};
 use cedar_policy::{Schema, SchemaFragment};
 use std::str::FromStr;
+
+use super::errors::{CedarSchemaErrorType, PolicyStoreError};
 
 /// A parsed and validated Cedar schema.
 ///

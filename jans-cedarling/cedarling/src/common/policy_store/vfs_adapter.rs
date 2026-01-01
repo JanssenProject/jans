@@ -85,8 +85,10 @@ impl PhysicalVfs {
     }
 
     /// Helper to get a VfsPath from a string path.
-    fn get_path(&self, path: &str) -> vfs::VfsPath {
-        self.root.join(path).unwrap()
+    fn get_path(&self, path: &str) -> io::Result<vfs::VfsPath> {
+        self.root
+            .join(path)
+            .map_err(|e| io::Error::other(format!("Invalid path '{}': {}", path, e)))
     }
 }
 
@@ -100,7 +102,7 @@ impl Default for PhysicalVfs {
 #[cfg(not(target_arch = "wasm32"))]
 impl VfsFileSystem for PhysicalVfs {
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>> {
-        let vfs_path = self.get_path(path);
+        let vfs_path = self.get_path(path)?;
         let file = vfs_path
             .open_file()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;
@@ -108,7 +110,7 @@ impl VfsFileSystem for PhysicalVfs {
     }
 
     fn read_dir(&self, path: &str) -> io::Result<Vec<DirEntry>> {
-        let vfs_path = self.get_path(path);
+        let vfs_path = self.get_path(path)?;
         let entries = vfs_path
             .read_dir()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;
@@ -130,19 +132,23 @@ impl VfsFileSystem for PhysicalVfs {
     }
 
     fn exists(&self, path: &str) -> bool {
-        self.get_path(path).exists().unwrap_or(false)
+        self.get_path(path)
+            .map(|p| p.exists().unwrap_or(false))
+            .unwrap_or(false)
     }
 
     fn is_dir(&self, path: &str) -> bool {
         self.get_path(path)
-            .metadata()
+            .ok()
+            .and_then(|p| p.metadata().ok())
             .map(|m| m.file_type == vfs::VfsFileType::Directory)
             .unwrap_or(false)
     }
 
     fn is_file(&self, path: &str) -> bool {
         self.get_path(path)
-            .metadata()
+            .ok()
+            .and_then(|p| p.metadata().ok())
             .map(|m| m.file_type == vfs::VfsFileType::File)
             .unwrap_or(false)
     }
@@ -168,13 +174,15 @@ impl MemoryVfs {
     }
 
     /// Helper to get a VfsPath from a string path.
-    fn get_path(&self, path: &str) -> vfs::VfsPath {
-        self.root.join(path).unwrap()
+    fn get_path(&self, path: &str) -> io::Result<vfs::VfsPath> {
+        self.root
+            .join(path)
+            .map_err(|e| io::Error::other(format!("Invalid path '{}': {}", path, e)))
     }
 
     /// Create a file with the given content.
     pub fn create_file(&self, path: &str, content: &[u8]) -> io::Result<()> {
-        let vfs_path = self.get_path(path);
+        let vfs_path = self.get_path(path)?;
 
         // Create parent directories if needed
         if let Some(parent) = Path::new(path).parent()
@@ -193,7 +201,7 @@ impl MemoryVfs {
 
     /// Create a directory and all of its parents.
     pub fn create_dir_all(&self, path: &str) -> io::Result<()> {
-        let vfs_path = self.get_path(path);
+        let vfs_path = self.get_path(path)?;
         vfs_path.create_dir_all().map_err(io::Error::other)
     }
 }
@@ -208,7 +216,7 @@ impl Default for MemoryVfs {
 #[cfg(test)]
 impl VfsFileSystem for MemoryVfs {
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>> {
-        let vfs_path = self.get_path(path);
+        let vfs_path = self.get_path(path)?;
         let file = vfs_path
             .open_file()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;
@@ -216,7 +224,7 @@ impl VfsFileSystem for MemoryVfs {
     }
 
     fn read_dir(&self, path: &str) -> io::Result<Vec<DirEntry>> {
-        let vfs_path = self.get_path(path);
+        let vfs_path = self.get_path(path)?;
         let entries = vfs_path
             .read_dir()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;
@@ -238,19 +246,23 @@ impl VfsFileSystem for MemoryVfs {
     }
 
     fn exists(&self, path: &str) -> bool {
-        self.get_path(path).exists().unwrap_or(false)
+        self.get_path(path)
+            .map(|p| p.exists().unwrap_or(false))
+            .unwrap_or(false)
     }
 
     fn is_dir(&self, path: &str) -> bool {
         self.get_path(path)
-            .metadata()
+            .ok()
+            .and_then(|p| p.metadata().ok())
             .map(|m| m.file_type == vfs::VfsFileType::Directory)
             .unwrap_or(false)
     }
 
     fn is_file(&self, path: &str) -> bool {
         self.get_path(path)
-            .metadata()
+            .ok()
+            .and_then(|p| p.metadata().ok())
             .map(|m| m.file_type == vfs::VfsFileType::File)
             .unwrap_or(false)
     }

@@ -95,6 +95,7 @@ forbid(
 }
 
 /// Extracts a zip archive to a temporary directory.
+#[cfg(not(target_arch = "wasm32"))]
 fn extract_archive_to_temp_dir(archive_bytes: &[u8]) -> TempDir {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let mut zip_archive =
@@ -1229,8 +1230,12 @@ permit(
     .expect("Request should be deserialized");
 
     let invalid_result = cedarling.authorize(invalid_request).await;
+    let err = invalid_result
+        .expect_err("Authorization should fail with tampered JWT when validation is enabled");
+    // Tampered JWT should result in a JWT validation error
     assert!(
-        invalid_result.is_err(),
-        "Authorization should fail with tampered JWT when validation is enabled"
+        matches!(&err, crate::authz::AuthorizeError::ProcessTokens(_)),
+        "Expected JWT processing error for tampered token, got: {:?}",
+        err
     );
 }

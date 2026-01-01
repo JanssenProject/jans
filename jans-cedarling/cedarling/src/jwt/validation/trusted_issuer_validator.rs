@@ -103,13 +103,6 @@ pub enum TrustedIssuerError {
 /// Result type for trusted issuer validation operations.
 pub type Result<T> = std::result::Result<T, TrustedIssuerError>;
 
-/// Validator for JWT tokens against trusted issuer configurations.
-///
-/// This validator provides the following functionality:
-/// - Issuer matching against configured trusted issuers
-/// - Required claims validation based on token metadata
-/// - JWKS fetching and caching
-/// - JWT signature verification
 use std::time::Duration;
 
 /// Default JWKS cache duration (1 hour) used when no Cache-Control header is present
@@ -437,9 +430,6 @@ impl TrustedIssuerValidator {
             ));
         }
 
-        // Validate required claims (on unverified token)
-        self.validate_required_claims(&unverified_token.claims, token_type, token_metadata)?;
-
         // Ensure JWKS keys are loaded for this issuer
         self.ensure_keys_loaded(&trusted_issuer).await?;
 
@@ -470,6 +460,9 @@ impl TrustedIssuerValidator {
         // Decode and validate signature
         let verified_token = decode::<JsonValue>(token, decoding_key, &validation)
             .map_err(|e| TrustedIssuerError::InvalidSignature(e.to_string()))?;
+
+        // Validate required claims (after signature verification)
+        self.validate_required_claims(&verified_token.claims, token_type, token_metadata)?;
 
         Ok((verified_token.claims, trusted_issuer))
     }

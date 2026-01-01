@@ -356,9 +356,19 @@ impl JwtService {
                 Ok(issuer) => Some(issuer),
                 Err(TrustedIssuerError::UntrustedIssuer(_)) => {
                     // Fall back to issuer_configs for backward compatibility
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!("Untrusted issuer '{}', falling back to issuer_configs", iss),
+                        Some(LogLevel::DEBUG),
+                    ));
                     self.get_issuer_ref(iss)
                 },
-                Err(_) => self.get_issuer_ref(iss),
+                Err(e) => {
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!("Error finding trusted issuer '{}': {}, falling back to issuer_configs", iss, e),
+                        Some(LogLevel::DEBUG),
+                    ));
+                    self.get_issuer_ref(iss)
+                },
             }
         } else {
             None
