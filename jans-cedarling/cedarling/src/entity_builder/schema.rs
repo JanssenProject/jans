@@ -130,7 +130,7 @@ mod test {
 
         let schema: MappingSchema = (&ValidatorSchema::from_str(schema)
             // note that unknown types will be handled already by the implementation
-            // of the cedar_policy_validator::ValidatorSchema's parser
+            // of the cedar_policy_core::validator::ValidatorSchema's parser
             .expect("should parse validator schema"))
             .try_into()
             .expect("should build mapping schema");
