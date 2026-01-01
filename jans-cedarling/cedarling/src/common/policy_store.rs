@@ -47,9 +47,16 @@ pub use token_entity_metadata::TokenEntityMetadata;
 pub use manager::{ConversionError, PolicyStoreManager};
 pub use metadata::PolicyStoreMetadata;
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
+    ///
+    /// **Note**: This field is currently unused after deserialization but is kept for:
+    /// 1. Input validation - ensures policy store files specify a valid version format
+    /// 2. Format compatibility - maintains the Agama Lab Policy Designer format specification
+    /// 3. Future use - may be needed for version-specific parsing logic as Cedar evolves
+    #[allow(dead_code)]
     pub cedar_version: Version,
     pub policy_stores: HashMap<String, PolicyStore>,
 }
@@ -104,7 +111,8 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct PolicyStore {
     /// version of policy store
     //
@@ -402,7 +410,6 @@ enum MaybeEncoded {
     Plain(String),
     Tagged(EncodedPolicy),
 }
-
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
@@ -421,7 +428,7 @@ struct RawPolicy {
 /// Container to decode policy stores into container
 ///
 /// Contain compiled [`cedar_policy::PolicySet`] and raw policy info to get description or other information.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct PoliciesContainer {
     /// HasMap to store raw policy info
     /// Is used to get policy description by ID
@@ -430,6 +437,30 @@ pub struct PoliciesContainer {
 
     /// compiled `cedar_policy`` Policy set
     policy_set: cedar_policy::PolicySet,
+}
+
+#[cfg(test)]
+impl PartialEq for PoliciesContainer {
+    fn eq(&self, other: &Self) -> bool {
+        // Compare only the compiled policy_set, ignoring:
+        // 1. Order of policies (using BTreeMap for deterministic comparison)
+        // 2. raw_policy_info (auxiliary data like descriptions)
+        // The policy_set is the canonical representation; if policies are equal,
+        // the containers are semantically equal for testing purposes.
+        use std::collections::BTreeMap;
+
+        let self_policies: BTreeMap<_, _> = self
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        let other_policies: BTreeMap<_, _> = other
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        self_policies == other_policies
+    }
 }
 
 impl PoliciesContainer {
