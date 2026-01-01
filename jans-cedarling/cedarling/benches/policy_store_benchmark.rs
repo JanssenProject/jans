@@ -10,7 +10,7 @@
 use std::hint::black_box as bb;
 use std::io::{Cursor, Write};
 
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
+use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
 use tempfile::TempDir;
 use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
@@ -168,12 +168,16 @@ fn bench_archive_parsing(c: &mut Criterion) {
     let archive = create_minimal_archive();
 
     c.bench_function("archive_parse_minimal", |b| {
-        b.iter(|| {
-            // Measure ZIP parsing overhead
-            let cursor = Cursor::new(bb(archive.clone()));
-            let archive = zip::ZipArchive::new(cursor).unwrap();
-            bb(archive.len())
-        })
+        b.iter_batched(
+            || archive.clone(),
+            |archive_bytes| {
+                // Measure ZIP parsing overhead (clone is done in setup, not measured)
+                let cursor = Cursor::new(bb(archive_bytes));
+                let archive = zip::ZipArchive::new(cursor).unwrap();
+                bb(archive.len())
+            },
+            BatchSize::PerIteration,
+        )
     });
 }
 

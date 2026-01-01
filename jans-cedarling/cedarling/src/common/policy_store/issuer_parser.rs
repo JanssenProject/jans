@@ -558,15 +558,9 @@ mod tests {
             filename: "file1.json".to_string(),
         }];
 
+        // Empty token_metadata is allowed for JWKS-only configurations
         let result = IssuerParser::validate_issuers(&issuers);
-        let errors = result.expect_err("Should warn about missing token metadata");
-
-        assert_eq!(errors.len(), 1, "Expected exactly one warning");
-        assert!(
-            errors[0].contains("no token metadata"),
-            "Error should mention missing token metadata, got: {}",
-            errors[0]
-        );
+        result.expect("Should accept issuer with empty token_metadata for JWKS-only use case");
     }
 
     #[test]

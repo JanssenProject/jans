@@ -16,19 +16,22 @@
 //! - **JWKS management**: Fetches and caches JWKS keys from issuer's OIDC endpoint with configurable TTL
 //! - **Signature verification**: Validates JWT signatures using cached JWKS keys
 
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
+
+use chrono::{DateTime, Utc};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
+use serde_json::Value as JsonValue;
+use thiserror::Error;
+use url::Url;
+
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use crate::jwt::JwtLogEntry;
 use crate::jwt::http_utils::{GetFromUrl, OpenIdConfig};
 use crate::jwt::key_service::{DecodingKeyInfo, KeyService, KeyServiceError};
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
-use chrono::{DateTime, Utc};
-use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
-use serde_json::Value as JsonValue;
-use std::collections::HashMap;
-use std::sync::Arc;
-use thiserror::Error;
-use url::Url;
 
 /// Errors that can occur during trusted issuer validation.
 #[derive(Debug, Error)]
@@ -65,7 +68,10 @@ pub enum TrustedIssuerError {
     JwksFetch(#[from] KeyServiceError),
 
     /// No matching key found in JWKS
-    #[error("No matching key found for kid: {}, algorithm: '{alg:?}'", kid.as_ref().map(|s| s.as_str()).unwrap_or("none"))]
+    #[error(
+        "No matching key found for kid: {}, algorithm: '{alg:?}'",
+        kid.as_ref().map(|s| s.as_str()).unwrap_or("none")
+    )]
     NoMatchingKey {
         /// The key ID from the JWT header
         kid: Option<String>,
@@ -102,8 +108,6 @@ pub enum TrustedIssuerError {
 
 /// Result type for trusted issuer validation operations.
 pub type Result<T> = std::result::Result<T, TrustedIssuerError>;
-
-use std::time::Duration;
 
 /// Default JWKS cache duration (1 hour) used when no Cache-Control header is present
 const DEFAULT_JWKS_CACHE_DURATION_SECS: u64 = 3600;

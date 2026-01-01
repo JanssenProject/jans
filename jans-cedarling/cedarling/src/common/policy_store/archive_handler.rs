@@ -574,8 +574,7 @@ mod tests {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
         std::fs::write(&archive_path, bytes).unwrap();
 
-        let result = ArchiveVfs::from_file(&archive_path);
-        assert!(result.is_ok());
+        ArchiveVfs::from_file(&archive_path).expect("should load valid .cjar file");
     }
 
     #[test]
