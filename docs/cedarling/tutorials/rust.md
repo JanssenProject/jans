@@ -80,6 +80,66 @@ let cedarling = Cedarling::new(bootstrap_config)
 
 See the [bootstrap properties docs](../reference/cedarling-properties.md) for other config loading options.
 
+### Policy Store Sources
+
+Rust bindings support all policy store source types:
+
+| Source Type                                | Description                      |
+| ------------------------------------------ | -------------------------------- |
+| `PolicyStoreSource::Json(String)`          | Inline JSON policy store         |
+| `PolicyStoreSource::Yaml(String)`          | Inline YAML policy store         |
+| `PolicyStoreSource::FileJson(PathBuf)`     | Local JSON file                  |
+| `PolicyStoreSource::FileYaml(PathBuf)`     | Local YAML file                  |
+| `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files |
+| `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file         |
+| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL  |
+| `PolicyStoreSource::LockServer(String)`    | Remote Lock Server               |
+| `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch) |
+
+**Loading from Bytes:**
+
+For advanced use cases (embedded archives, custom fetch logic):
+
+```rust
+use cedarling::*;
+
+// Option 1: Via PolicyStoreSource enum (recommended)
+let archive_bytes: Vec<u8> = fetch_archive_with_auth();
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::ArchiveBytes(archive_bytes));
+
+// Option 2: Direct function call
+use cedarling::common::policy_store::loader::load_policy_store_archive_bytes;
+let loaded = load_policy_store_archive_bytes(archive_bytes)?;
+```
+
+**Example programmatic configuration:**
+
+```rust
+use cedarling::*;
+use std::path::PathBuf;
+
+// Load from a directory
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::Directory(
+        PathBuf::from("/path/to/policy-store/")
+    ));
+
+// Load from a local .cjar archive (Cedar Archive)
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::CjarFile(
+        PathBuf::from("/path/to/policy-store.cjar")
+    ));
+
+// Load from a remote .cjar archive (Cedar Archive)
+let config = BootstrapConfig::default()
+    .with_policy_store_source(PolicyStoreSource::CjarUrl(
+        "https://example.com/policy-store.cjar".to_string()
+    ));
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
+
 ### Authorization
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.

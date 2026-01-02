@@ -318,6 +318,8 @@ pub enum ValidateJwtError {
     MissingStatusList,
     #[error("failed to deserialize the JWT's status claim: {0}")]
     DeserializeStatusClaim(#[from] serde_json::Error),
+    #[error("failed to validate the JWT's trusted issuer: {0}")]
+    TrustedIssuerValidation(String),
 }
 
 #[cfg(test)]

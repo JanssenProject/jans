@@ -1,5 +1,30 @@
+/**
+ * Bootstrap Configuration for Cedarling WASM
+ *
+ * POLICY STORE LOADING (WASM):
+ * ============================
+ *
+ * Option 1: URL-based loading (simple)
+ *   Use CEDARLING_POLICY_STORE_URI to fetch from a URL.
+ *   const cedarling = await init(config);
+ *
+ * Option 2: Inline JSON string
+ *   Use CEDARLING_POLICY_STORE_LOCAL for embedded policy stores.
+ *   const cedarling = await init(config);
+ *
+ * Option 3: Custom fetch with auth headers
+ *   Use init_from_archive_bytes() for advanced scenarios:
+ *   const response = await fetch(url, { headers: { Authorization: '...' } });
+ *   const bytes = new Uint8Array(await response.arrayBuffer());
+ *   const cedarling = await init_from_archive_bytes(config, bytes);
+ *
+ * NOT SUPPORTED IN WASM:
+ *   - CEDARLING_POLICY_STORE_LOCAL_FN (requires filesystem)
+ *   - Directory/CjarFile sources (requires filesystem)
+ */
 const BOOTSTRAP_CONFIG = {
   CEDARLING_APPLICATION_NAME: "My App",
+  // Policy store URL - can be JSON, YAML, or .cjar archive
   CEDARLING_POLICY_STORE_URI:
     "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/bindings/cedarling_python/example_files/policy-store.json",
   CEDARLING_LOG_TYPE: "memory",

@@ -83,8 +83,10 @@ impl Sender {
         loop {
             let response = match request().send().await {
                 Ok(resp) => resp,
-                Err(err) => {
-                    eprintln!("failed to complete HTTP request: {err}");
+                Err(_err) => {
+                    // Retry silently - callers receive the final error if all retries fail.
+                    // TODO: add optional debug-level logging hook here once a logger can be
+                    //       passed in without pulling logging into this low-level crate.
                     backoff
                         .snooze()
                         .await
@@ -95,8 +97,10 @@ impl Sender {
 
             let response = match response.error_for_status() {
                 Ok(resp) => resp,
-                Err(err) => {
-                    eprintln!("received an HTTP error response: {err}");
+                Err(_err) => {
+                    // Retry silently - callers receive the final error if all retries fail.
+                    // TODO: add optional debug-level logging hook here once a logger can be
+                    //       passed in without pulling logging into this low-level crate.
                     backoff
                         .snooze()
                         .await

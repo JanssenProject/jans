@@ -39,42 +39,54 @@ impl HttpClient {
 }
 
 impl HttpClient {
-    /// Sends a GET request to the specified URI with retry logic.
+    /// Private helper for GET requests with retry logic.
     ///
-    /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
-    /// between each attempt.
-    pub async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        // Fetch the JWKS from the jwks_uri
+    /// Retries are performed silently - the final error is returned if all attempts fail.
+    /// This keeps HttpClient as a simple, low-level utility without logging dependencies.
+    async fn get_with_retry(&self, uri: &str) -> Result<reqwest::Response, HttpClientError> {
         let mut attempts = 0;
-        let response = loop {
+        loop {
             match self.client.get(uri).send().await {
-                // Exit loop on success
-                Ok(response) => break response,
-
-                Err(e) if attempts < self.max_retries => {
+                Ok(response) => return Ok(response),
+                Err(_) if attempts < self.max_retries => {
                     attempts += 1;
-                    // TODO: pass this message to the logger
-                    eprintln!(
-                        "Request failed (attempt {} of {}): {}. Retrying...",
-                        attempts, self.max_retries, e
-                    );
+                    // Retry silently - callers can log the final error if needed
                     tokio::time::sleep(self.retry_delay * attempts).await;
                 },
-                // Exit if max retries exceeded
                 Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
             }
-        };
+        }
+    }
 
+    /// Sends a GET request to the specified URI with retry logic.
+    pub async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
+        let response = self.get_with_retry(uri).await?;
         let response = response
             .error_for_status()
             .map_err(HttpClientError::HttpStatus)?;
-
         Ok(Response {
             text: response
                 .text()
                 .await
                 .map_err(HttpClientError::DecodeResponseUtf8)?,
         })
+    }
+
+    /// Sends a GET request to the specified URI with retry logic, returning raw bytes.  
+    ///  
+    /// This method will attempt to fetch the resource up to the configured max_retries,  
+    /// with an increasing delay between each attempt. Useful for fetching binary content  
+    /// like archive files.  
+    pub async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
+        let response = self.get_with_retry(uri).await?;
+        let response = response
+            .error_for_status()
+            .map_err(HttpClientError::HttpStatus)?;
+        response
+            .bytes()
+            .await
+            .map(|b| b.to_vec())
+            .map_err(HttpClientError::DecodeResponseBody)
     }
 }
 
@@ -107,6 +119,8 @@ pub enum HttpClientError {
     /// Indicates a failure decode the response body to UTF-8
     #[error("Failed to decode the server's response to UTF-8: {0}")]
     DecodeResponseUtf8(#[source] reqwest::Error),
+    #[error("Failed to read the server's response body: {0}")]
+    DecodeResponseBody(#[source] reqwest::Error),
 }
 
 #[cfg(test)]
@@ -192,5 +206,61 @@ mod test {
         );
 
         mock_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn get_bytes_successful_fetch() {
+        let mut mock_server = Server::new_async().await;
+        let payload: Vec<u8> = vec![1, 2, 3, 4, 5, 6, 7, 8];
+        let mock_endpoint = mock_server
+            .mock("GET", "/binary")
+            .with_status(200)
+            .with_header("content-type", "application/octet-stream")
+            .with_body(payload.clone())
+            .expect(1)
+            .create_async();
+
+        let client =
+            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+        let link = &format!("{}/binary", mock_server.url());
+        let req_fut = client.get_bytes(link);
+        let (req_result, mock_result) = join!(req_fut, mock_endpoint);
+
+        let bytes = req_result.expect("Should get bytes");
+        assert_eq!(bytes, payload, "Expected bytes to match payload");
+        mock_result.assert();
+    }
+
+    #[tokio::test]
+    async fn get_bytes_http_error_status() {
+        let mut mock_server = Server::new_async().await;
+        let mock_endpoint = mock_server
+            .mock("GET", "/error-binary")
+            .with_status(500)
+            .expect(1)
+            .create_async();
+
+        let client =
+            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient.");
+        let link = &format!("{}/error-binary", mock_server.url());
+        let req_fut = client.get_bytes(link);
+        let (req_result, mock_result) = join!(req_fut, mock_endpoint);
+
+        assert!(
+            matches!(req_result, Err(HttpClientError::HttpStatus(_))),
+            "Expected error due to receiving an http error code: {req_result:?}"
+        );
+        mock_result.assert();
+    }
+
+    #[tokio::test]
+    async fn get_bytes_max_retries_exceeded() {
+        let client =
+            HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
+        let response = client.get_bytes("0.0.0.0").await;
+        assert!(
+            matches!(response, Err(HttpClientError::MaxHttpRetriesReached(_))),
+            "Expected error due to MaxHttpRetriesReached: {response:?}"
+        );
     }
 }

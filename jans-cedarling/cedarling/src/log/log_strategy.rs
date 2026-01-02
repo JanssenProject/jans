@@ -18,7 +18,7 @@ use crate::log::BaseLogEntry;
 use crate::log::loggable_fn::LoggableFn;
 use serde::Serialize;
 
-pub(crate) struct LogStrategy {
+pub struct LogStrategy {
     logger: LogStrategyLogger,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
@@ -37,7 +37,7 @@ pub(crate) enum LogStrategyLogger {
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(
+    pub(crate) fn new(
         config: &LogConfig,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,

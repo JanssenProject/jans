@@ -114,8 +114,7 @@ mod test {
             serde_json::from_value(json!({"client_id": "some-id-123"}))
                 .expect("valid token claims"),
             None,
-        )
-        .into();
+        );
         let id_token = Token::new(
             "id_token",
             serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
@@ -124,8 +123,7 @@ mod test {
         let tokens = HashMap::from([
             ("access_token".to_string(), Arc::new(access_token)),
             ("id_token".to_string(), Arc::new(id_token)),
-        ])
-        .into();
+        ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
 

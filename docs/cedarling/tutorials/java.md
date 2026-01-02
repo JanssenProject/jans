@@ -40,7 +40,6 @@ To use Cedarling Java bindings in Java Maven Project add following
 
 Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
 
-
 ## Usage
 
 ### Initialization
@@ -81,13 +80,46 @@ We need to initialize Cedarling first.
 
 ```
 
+### Policy Store Sources
+
+Java bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options and [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for format details.
+
+**Example configurations:**
+
+```java
+// Load from a directory
+String bootstrapJsonStr = """
+    {
+        "CEDARLING_APPLICATION_NAME": "MyApp",
+        "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/"
+    }
+    """;
+
+// Load from a local .cjar archive (Cedar Archive)
+String bootstrapJsonStr = """
+    {
+        "CEDARLING_APPLICATION_NAME": "MyApp",
+        "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar"
+    }
+    """;
+
+// Load from a remote .cjar archive (Cedar Archive)
+String bootstrapJsonStr = """
+    {
+        "CEDARLING_APPLICATION_NAME": "MyApp",
+        "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar"
+    }
+    """;
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
+
 ### Authorization
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
 - [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
-
 
 #### Token-Based Authorization
 
@@ -228,4 +260,3 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
-

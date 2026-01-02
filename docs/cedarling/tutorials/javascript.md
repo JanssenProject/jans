@@ -7,11 +7,9 @@ tags:
   - getting-started
 ---
 
-
 # Getting Started with Cedarling in a JavaScript app
 
 This guide combines the JavaScript usage instructions with the WebAssembly (WASM) build and API reference for Cedarling.
-
 
 ## Installation
 
@@ -25,9 +23,7 @@ npm i @janssenproject/cedarling_wasm
 
 Alternatively, see [here](#build-from-source), if you want to build Cedarling from the source.
 
-
 ### Build from Source
-
 
 #### Requirements
 
@@ -76,8 +72,6 @@ To view the WebAssembly project in action, you can run a local server. One way t
 python3 -m http.server
 ```
 
-
-
 ## Usage
 
 !!! info "Sample Apps"
@@ -95,7 +89,6 @@ Since Cedarling is a WASM module, you need to initialize it first.
 ```js
 import initWasm, { init } from "@janssenproject/cedarling_wasm";
 
-
 // initialize the WASM binary
 await initWasm();
 
@@ -109,8 +102,45 @@ let cedarling = init(
   "CEDARLING_WORKLOAD_AUTHZ": "disabled",
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
   "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
-);
+});
 ```
+
+### Policy Store Sources (WASM)
+
+In WASM environments, filesystem access is not available. Use one of these options:
+
+```javascript
+// Option 1: URL-based loading (simple)
+let cedarling = await init({
+  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  // ... other config
+});
+
+// Option 2: Inline JSON string
+let cedarling = await init({
+  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreObject),
+  // ... other config
+});
+
+// Option 3: Custom fetch with auth headers
+import initWasm, {
+  init_from_archive_bytes,
+} from "@janssenproject/cedarling_wasm";
+
+const response = await fetch("https://example.com/policy-store.cjar", {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const bytes = new Uint8Array(await response.arrayBuffer());
+let cedarling = await init_from_archive_bytes(config, bytes);
+```
+
+For the directory-based format, package your policy store as a `.cjar` file and host it:
+
+```bash
+cd policy-store && zip -r ../policy-store.cjar .
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for details.
 
 ### Authorization
 

@@ -100,6 +100,28 @@ cedarling = Cedarling(bootstrap_config)
 
 See the python documentation for `BootstrapConfig` for other config loading options.
 
+### Policy Store Sources
+
+Python bindings support all policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options.
+
+**Example configurations:**
+
+```py
+# Load from a directory
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store/"
+bootstrap_config = BootstrapConfig.from_env()
+
+# Load from a local .cjar archive (Cedar Archive)
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
+bootstrap_config = BootstrapConfig.from_env()
+
+# Load from a remote .cjar archive (Cedar Archive)
+os.environ["CEDARLING_POLICY_STORE_URI"] = "https://example.com/policy-store.cjar"
+bootstrap_config = BootstrapConfig.from_env()
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
+
 ### Authorization
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
@@ -348,13 +370,13 @@ else:
 
 **Key Differences from standard authentication**:
 
-| Feature | authorize | authorize_multi_issuer |
-|---------|-----------|------------------------|
-| Principal Model | User/Workload entities | No principals - token-based |
-| Token Sources | Single issuer expected | Multiple issuers supported |
-| Result Type | `AuthorizeResult` | `MultiIssuerAuthorizeResult` |
-| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean) |
-| Use Case | Standard RBAC/ABAC | Federation, multi-org access |
+| Feature         | authorize                                                     | authorize_multi_issuer       |
+| --------------- | ------------------------------------------------------------- | ---------------------------- |
+| Principal Model | User/Workload entities                                        | No principals - token-based  |
+| Token Sources   | Single issuer expected                                        | Multiple issuers supported   |
+| Result Type     | `AuthorizeResult`                                             | `MultiIssuerAuthorizeResult` |
+| Decision Access | `result.is_allowed()`, `result.workload()`, `result.person()` | `result.decision` (boolean)  |
+| Use Case        | Standard RBAC/ABAC                                            | Federation, multi-org access |
 
 ### Logging
 
