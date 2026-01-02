@@ -303,8 +303,9 @@ public class CertService {
                     Attribute[] attrs = rdn.getAttributes();
 
                     for (Attribute attr : attrs) {
-                        if (!map.containsKey(attr.getName())) {
-                            map.put(attr.getName(), attr.getValues()[0]);
+                        String name = attr.getName().toLowerCase();
+                        if (!map.containsKey(name)) {
+                            map.put(name, attr.getValues()[0]);
                         }
                     }
                 }
