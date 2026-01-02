@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
+import io.jans.as.model.configuration.rate.RateLimitConfig;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
@@ -749,12 +750,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Authorization challenge session lifetime in seconds")
     private Integer authorizationChallengeSessionLifetimeInSeconds;
 
-    @DocProperty(description = "Request count limit - for /register endpoint (Rate Limit)")
-    private Integer rateLimitRegistrationRequestCount;
-
-    @DocProperty(description = "Period in seconds limit - for /register endpoint (Rate Limit)")
-    private Integer rateLimitRegistrationPeriodInSeconds;
-
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
     private Boolean rotateDeviceSecret = false;
@@ -973,6 +968,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR. Only needed if softwareStatementValidationType=builtin")
     private List<SsaValidationConfig> dcrSsaValidationConfigs;
 
+    @DocProperty(description = "Rate Limit Configuration")
+    private RateLimitConfig rateLimitConfiguration;
+
     @DocProperty(description = "SSA Configuration")
     private SsaConfiguration ssaConfiguration;
 
@@ -1116,24 +1114,6 @@ public class AppConfiguration implements Configuration {
 
     public void setReturnDeviceSecretFromAuthzEndpoint(Boolean returnDeviceSecretFromAuthzEndpoint) {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
-    }
-
-    public Integer getRateLimitRegistrationRequestCount() {
-        return rateLimitRegistrationRequestCount;
-    }
-
-    public AppConfiguration setRateLimitRegistrationRequestCount(Integer rateLimitRegistrationRequestCount) {
-        this.rateLimitRegistrationRequestCount = rateLimitRegistrationRequestCount;
-        return this;
-    }
-
-    public Integer getRateLimitRegistrationPeriodInSeconds() {
-        return rateLimitRegistrationPeriodInSeconds;
-    }
-
-    public AppConfiguration setRateLimitRegistrationPeriodInSeconds(Integer rateLimitRegistrationPeriodInSeconds) {
-        this.rateLimitRegistrationPeriodInSeconds = rateLimitRegistrationPeriodInSeconds;
-        return this;
     }
 
     public Integer getAuthorizationChallengeSessionLifetimeInSeconds() {
@@ -3812,6 +3792,14 @@ public class AppConfiguration implements Configuration {
 
     public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
         this.ssaConfiguration = ssaConfiguration;
+    }
+
+    public RateLimitConfig getRateLimitConfiguration() {
+        return rateLimitConfiguration;
+    }
+
+    public void setRateLimitConfiguration(RateLimitConfig rateLimitConfiguration) {
+        this.rateLimitConfiguration = rateLimitConfiguration;
     }
 
     public Boolean getAuthorizationChallengeShouldGenerateSession() {
