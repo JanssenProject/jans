@@ -15695,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -18327,10 +18327,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -18501,10 +18501,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        logoutStatusJwt:
-          type: boolean
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18515,6 +18511,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
