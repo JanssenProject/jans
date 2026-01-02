@@ -31,9 +31,7 @@ use crate::common::default_entities::parse_default_entities_with_warns;
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
-#[cfg(not(target_arch = "wasm32"))]
 use cedar_policy_core::extensions::Extensions;
-#[cfg(not(target_arch = "wasm32"))]
 use cedar_policy_core::validator::ValidatorSchema;
 use semver::Version;
 use std::collections::HashMap;
@@ -206,8 +204,7 @@ impl PolicyStoreManager {
         })?;
 
         // Create ValidatorSchema
-        #[cfg(not(target_arch = "wasm32"))]
-        let validator_schema = Some(
+        let validator_schema =
             ValidatorSchema::from_json_str(&json_string, Extensions::all_available()).map_err(
                 |e| {
                     ConversionError::SchemaConversion(format!(
@@ -215,11 +212,7 @@ impl PolicyStoreManager {
                         e
                     ))
                 },
-            )?,
-        );
-
-        #[cfg(target_arch = "wasm32")]
-        let validator_schema = None;
+            )?;
 
         Ok(CedarSchema {
             schema,

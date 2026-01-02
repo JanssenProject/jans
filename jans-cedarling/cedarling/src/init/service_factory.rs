@@ -101,8 +101,11 @@ impl<'a> ServiceFactory<'a> {
         // Log warns that some default entities loaded not correctly
         // it will be logged only once.
         for warn in default_entities_with_warn.warns() {
-            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                .set_message(warn.to_string());
+            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warn.to_string());
 
             logger.log_any(log_entry);
         }
@@ -112,11 +115,11 @@ impl<'a> ServiceFactory<'a> {
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(logger));
-        let schema = policy_store.schema.validator_schema.as_ref();
+        let schema = &policy_store.schema.validator_schema;
         let entity_builder = EntityBuilder::new(
             config.clone(),
             issuers_index,
-            schema,
+            Some(schema),
             default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);

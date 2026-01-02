@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-#[cfg(not(target_arch = "wasm32"))]
 use cedar_policy_core::extensions::Extensions;
 use cedar_policy_core::validator::ValidatorSchema;
 use serde::Deserialize;
@@ -50,7 +49,7 @@ enum MaybeEncoded {
 pub struct CedarSchema {
     pub schema: cedar_policy::Schema,
     pub json: cedar_json::CedarSchemaJson,
-    pub validator_schema: Option<ValidatorSchema>,
+    pub validator_schema: ValidatorSchema,
 }
 
 #[cfg(test)]
@@ -159,8 +158,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
             ))
         })?;
 
-        #[cfg(not(target_arch = "wasm32"))]
-        let validator_schema = Some(
+        let validator_schema =
             ValidatorSchema::from_json_str(&json_string, Extensions::all_available()).map_err(
                 |err| {
                     serde::de::Error::custom(format!(
@@ -169,11 +167,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
                         err
                     ))
                 },
-            )?,
-        );
-
-        #[cfg(target_arch = "wasm32")]
-        let validator_schema = None;
+            )?;
 
         Ok(CedarSchema {
             schema,
@@ -194,7 +188,6 @@ mod deserialize {
         Parse,
         #[error("invalid utf8 detected while decoding cedar policy")]
         Utf8,
-        #[cfg(not(target_arch = "wasm32"))]
         #[error("failed to parse cedar schema from JSON")]
         ParseCedarSchemaJson,
     }
