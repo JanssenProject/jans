@@ -1,268 +1,303 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Cedarling Policy Store Schema",
-  "description": "Defines the structure of the policy store JSON format used by Cedarling.",
+  "description": "Defines the structure of the policy store used by Cedarling, which contains all data necessary to verify JWT tokens and evaluate Cedar policies.",
   "type": "object",
   "properties": {
-    "cedar_version": {
-      "description": "The version of the Cedar language that Cedarling should use for policy evaluation. If not set, Cedarling should default to the latest supported Cedar version.",
-      "type": "string"
-    },
-    "policy_store_version": {
-      "description": "The version identifier for this policy store, used to track changes across updates.",
-      "type": "string"
-    },
-    "policies": {
-      "description": "A collection of Cedar policies and their associated metadata.",
-      "$ref": "#/$defs/PolicyStore"
-    },
-    "policy_stores": {
-      "description": "A collection of logically separated policy stores. Each store can contain its own policies, trusted issuers, and schema.",
-      "$ref": "#/$defs/PolicyStore"
-    }
-  },
-  "additionalProperties": false,
-  "$defs": {
-    "PolicyStore": {
-      "description": "Represents a single policy store, which includes policies, trusted issuers, and the Cedar schema used for evaluation.",
-      "type": "object",
-      "properties": {
-        "policies": {
-          "description": "A map of policy identifiers to their associated Cedar policies.",
+      "cedar_version": {
+          "description": "The version of the Cedar language that Cedarling should use for policy evaluation. If not set, Cedarling should default to the latest supported Cedar version.",
+          "type": "string"
+      },
+      "policy_store_version": {
+          "description": "The version identifier for this policy store, used to track changes across updates.",
+          "type": "string"
+      },
+      "policies": {
+          "description": "A collection of Cedar policies and their associated metadata.",
           "type": "object",
           "patternProperties": {
-            "^[a-zA-Z0-9-_=]+$": {
-              "$ref": "#/$defs/CedarPolicy"
-            }
+              "^[a-zA-Z0-9-_=]+$": {
+                  "$ref": "#/$defs/CedarPolicy"
+              }
           },
           "additionalProperties": false
-        },
-        "trusted_issuers": {
-          "description": "A map of trusted issuers (by identifier) that defines which external identity providers can be trusted when evaluating authorization requests.",
+      },
+      "trusted_issuers": {
+          "description": "A collection of trusted issuers.",
           "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/TrustedIssuer"
-          }
-        },
-        "schema": {
-          "description": "The Cedar schema definition (encoded in Base64) that defines the shape of entities, actions, and context within this policy store.",
+          "patternProperties": {
+              "^[a-zA-Z0-9-_=]+$": {
+                  "$ref": "#/$defs/TrustedIssuer"
+              }
+          },
+          "additionalProperties": false
+      },
+      "schema": {
+          "description": "The Cedar schema definition (encoded in Base64).",
           "oneOf": [
-            {
-              "type": "string",
-              "description": "Base64-encoded Cedar schema string."
-            },
-            {
-              "$ref": "#/$defs/SchemaDefinition"
-            }
+              {
+                  "type": "string",
+                  "description": "Base64-encoded Cedar schema string."
+              },
+              {
+                  "$ref": "#/$defs/SchemaDefinition"
+              }
           ]
-        },
-        "default_entities": {
-          "description": "A map of default entity identifiers to Base64-encoded JSON objects. Each value MUST be a Base64 string encoding a JSON object representing the default entity.",
+      },
+      "default_entities": {
+          "description": "A collection of default entity identifiers to Base64-encoded JSON objects.",
           "type": "object",
           "additionalProperties": {
-            "type": "string",
-            "description": "Base64-encoded JSON object representing the default entity."
+              "type": "string",
+              "description": "Base64-encoded JSON object representing the default entity."
           }
-        },
-        "policy_stores": {
+      },
+      "policy_stores": {
           "description": "A collection of logically separated policy stores. Each store can contain its own policies, trusted issuers, and schema.",
           "type": "object",
           "patternProperties": {
-            "^[a-zA-Z0-9-_=]+$": {
-              "$ref": "#/$defs/PolicyStore"
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": true
-    },
-    "SchemaDefinition": {
-      "description": "Represents a Cedar schema with its encoding and content type.",
-      "type": "object",
-      "properties": {
-        "encoding": {
-          "description": "The encoding format of the schema body. 'none' means plain text, 'base64' means Base64-encoded.",
-          "type": "string",
-          "enum": ["none", "base64"],
-          "default": "none"
-        },
-        "content_type": {
-          "description": "The format of the Cedar schema. 'cedar' is the human-readable Cedar schema format, 'cedar-json' is the JSON representation.",
-          "type": "string",
-          "enum": ["cedar", "cedar-json"],
-          "default": "cedar"
-        },
-        "body": {
-          "description": "The actual schema content.",
-          "type": "string"
-        }
-      },
-      "required": ["body"],
-      "additionalProperties": false
-    },
-    "CedarPolicy": {
-      "description": "Represents an individual Cedar policy, including metadata and content.",
-      "type": "object",
-      "properties": {
-        "cedar_version": {
-          "description": "The version of the Cedar language that Cedarling should use for policy evaluation.",
-          "type": "string"
-        },
-        "name": {
-          "description": "A name for the policy.",
-          "type": "string"
-        },
-        "description": {
-          "description": "A short, optional description explaining the purpose of this policy.",
-          "type": "string",
-          "default": ""
-        },
-        "creation_date": {
-          "description": "The date the policy was created, typically in ISO 8601 format (e.g., 2025-03-03T12:00:00Z).",
-          "type": "string"
-        },
-        "policy_content": {
-          "description": "The Cedar policy content. Can be either a Base64-encoded string, or an object with encoding and content type information.",
-          "oneOf": [
-            {
-              "type": "string",
-              "description": "Base64-encoded Cedar policy string."
-            },
-            {
-              "$ref": "#/$defs/PolicyContent"
-            }
-          ]
-        }
-      },
-      "required": ["creation_date", "policy_content"],
-      "additionalProperties": true
-    },
-    "PolicyContent": {
-      "description": "Represents a Cedar policy with its encoding and content type.",
-      "type": "object",
-      "properties": {
-        "encoding": {
-          "description": "The encoding format of the policy body. 'none' means plain text, 'base64' means Base64-encoded.",
-          "type": "string",
-          "enum": ["none", "base64"],
-          "default": "none"
-        },
-        "content_type": {
-          "description": "The format of the Cedar policy. Currently only 'cedar' is supported due to limitations in the cedar-policy crate.",
-          "type": "string",
-          "enum": ["cedar"],
-          "default": "cedar"
-        },
-        "body": {
-          "description": "The actual policy content as a string (plain text or Base64-encoded).",
-          "type": "string"
-        }
-      },
-      "required": ["body"],
-      "additionalProperties": false
-    },
-    "TrustedIssuer": {
-      "description": "Represents an external identity provider (IDP) or trusted issuer, which issues tokens used during authorization evaluation.",
-      "type": "object",
-      "properties": {
-        "name": {
-          "description": "A user-defined, human-readable identifier for this trusted issuer (e.g., 'Google', 'Azure AD').",
-          "type": "string"
-        },
-        "description": {
-          "description": "A short description explaining the purpose of this trusted issuer.",
-          "type": "string",
-          "default": ""
-        },
-        "openid_configuration_endpoint": {
-          "description": "The URL to the trusted issuer's OpenID Connect discovery document, which contains metadata about the issuer (e.g., authorization endpoint, token endpoint).",
-          "type": "string",
-          "format": "uri"
-        },
-        "token_metadata": {
-          "description": "Metadata that describes how to interpret tokens issued by this trusted issuer.",
-          "type": "object",
-          "patternProperties": {
-            "^[a-zA-Z0-9-_=]+$": {
-              "$ref": "#/$defs/TokenMetadata"
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "required": ["name", "openid_configuration_endpoint"],
-      "additionalProperties": true
-    },
-    "TokenMetadata": {
-      "description": "Describes how Cedarling should interpret and map JWT tokens from a specific trusted issuer.",
-      "type": "object",
-      "properties": {
-        "trusted": {
-          "description": "Indicates whether tokens from this issuer should be considered trusted by default. Defaults to true.",
-          "type": "boolean",
-          "default": true
-        },
-        "entity_type_name": {
-          "description": "The Cedar entity type that tokens from this issuer should be mapped to (e.g., 'Jans::AccessToken'). This is required.",
-          "type": "string"
-        },
-        "principal_mapping": {
-          "description": "A list of Cedar principal types to which this token should be mapped (e.g., ['Jans::Workload']). Defaults to an empty list.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "uniqueItems": true
-        },
-        "token_id": {
-          "description": "The claim in the token that should be treated as the unique identifier for the token. Defaults to 'jti'.",
-          "type": "string",
-          "default": "jti"
-        },
-        "user_id": {
-          "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'sub' before failing.",
-          "type": "string",
-          "default": "sub"
-        },
-        "role_mapping": {
-          "description": "The claim in the token that lists the user's roles (e.g., 'role', 'group', 'memberOf'). Defaults to 'role'.",
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
+              "^[a-zA-Z0-9-_=]+$": {
+                  "$ref": "#/$defs/PolicyStore"
               }
-            }
-          ],
-          "default": "role"
-        },
-        "workload_id": {
-          "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'aud', followed by 'client_id', before failing.",
-          "type": "string",
-          "default": "aud"
-        },
-        "claim_mapping": {
-          "description": "An object defining custom mappings from token claims to Cedar entity attributes. Defaults to an empty object.",
-          "type": "object",
-          "default": {}
-        },
-        "required_claims": {
-          "description": "A list of claims that must be present in the token for it to be considered valid. Defaults to an empty list.",
-          "type": "array",
-          "items": {
-            "type": "string"
           },
-          "default": [],
-          "uniqueItems": true
-        }
+          "additionalProperties": false
+      }
+  },
+  "additionalProperties": false,
+  "$defs": {
+      "PolicyStore": {
+          "description": "Represents a single policy store, which includes policies, trusted issuers, and the Cedar schema used for evaluation.",
+          "type": "object",
+          "properties": {
+              "policies": {
+                  "description": "A map of policy identifiers to their associated Cedar policies.",
+                  "type": "object",
+                  "patternProperties": {
+                      "^[a-zA-Z0-9-_=]+$": {
+                          "$ref": "#/$defs/CedarPolicy"
+                      }
+                  },
+                  "additionalProperties": false
+              },
+              "trusted_issuers": {
+                  "description": "A map of trusted issuers (by identifier) that defines which external identity providers can be trusted when evaluating authorization requests.",
+                  "type": "object",
+                  "patternProperties": {
+                      "^[a-zA-Z0-9-_=]+$": {
+                          "$ref": "#/$defs/TrustedIssuer"
+                      }
+                  },
+                  "additionalProperties": false
+              },
+              "schema": {
+                  "description": "The Cedar schema definition (encoded in Base64) that defines the shape of entities, actions, and context within this policy store.",
+                  "oneOf": [
+                      {
+                          "type": "string",
+                          "description": "Base64-encoded Cedar schema string."
+                      },
+                      {
+                          "$ref": "#/$defs/SchemaDefinition"
+                      }
+                  ]
+              },
+              "default_entities": {
+                  "description": "A map of default entity identifiers to Base64-encoded JSON objects. Each value MUST be a Base64 string encoding a JSON object representing the default entity.",
+                  "type": "object",
+                  "additionalProperties": {
+                      "type": "string",
+                      "description": "Base64-encoded JSON object representing the default entity."
+                  }
+              }
+          },
+          "additionalProperties": true
       },
-      "required": ["entity_type_name"],
-      "additionalProperties": true
-    }
+      "SchemaDefinition": {
+          "description": "Represents a Cedar schema with its encoding and content type.",
+          "type": "object",
+          "properties": {
+              "encoding": {
+                  "description": "The encoding format of the schema body. 'none' means plain text, 'base64' means Base64-encoded.",
+                  "type": "string",
+                  "enum": ["none", "base64"],
+                  "default": "none"
+              },
+              "content_type": {
+                  "description": "The format of the Cedar schema. 'cedar' is the human-readable Cedar schema format, 'cedar-json' is the JSON representation.",
+                  "type": "string",
+                  "enum": ["cedar", "cedar-json"],
+                  "default": "cedar"
+              },
+              "body": {
+                  "description": "The actual schema content.",
+                  "type": "string"
+              }
+          },
+          "required": ["body"],
+          "additionalProperties": false
+      },
+      "CedarPolicy": {
+          "description": "Represents an individual Cedar policy, including metadata and content.",
+          "type": "object",
+          "properties": {
+              "cedar_version": {
+                  "description": "The version of the Cedar language that Cedarling should use for policy evaluation.",
+                  "type": "string"
+              },
+              "name": {
+                  "description": "A name for the policy.",
+                  "type": "string"
+              },
+              "description": {
+                  "description": "A short, optional description explaining the purpose of this policy.",
+                  "type": "string",
+                  "default": ""
+              },
+              "creation_date": {
+                  "description": "The date the policy was created, typically in ISO 8601 format (e.g., 2025-03-03T12:00:00Z).",
+                  "type": "string"
+              },
+              "policy_content": {
+                  "description": "The Cedar policy content. Can be either a Base64-encoded string, or an object with encoding and content type information.",
+                  "oneOf": [
+                      {
+                          "type": "string",
+                          "description": "Base64-encoded Cedar policy string."
+                      },
+                      {
+                          "$ref": "#/$defs/PolicyContent"
+                      }
+                  ]
+              }
+          },
+          "required": ["creation_date", "policy_content"],
+          "additionalProperties": true
+      },
+      "PolicyContent": {
+          "description": "Represents a Cedar policy with its encoding and content type.",
+          "type": "object",
+          "properties": {
+              "encoding": {
+                  "description": "The encoding format of the policy body. 'none' means plain text, 'base64' means Base64-encoded.",
+                  "type": "string",
+                  "enum": ["none", "base64"],
+                  "default": "none"
+              },
+              "content_type": {
+                  "description": "The format of the Cedar policy. Currently only 'cedar' is supported due to limitations in the cedar-policy crate.",
+                  "type": "string",
+                  "enum": ["cedar"],
+                  "default": "cedar"
+              },
+              "body": {
+                  "description": "The actual policy content as a string (plain text or Base64-encoded).",
+                  "type": "string"
+              }
+          },
+          "required": ["body"],
+          "additionalProperties": false
+      },
+      "TrustedIssuer": {
+          "description": "Represents an external identity provider (IDP) or trusted issuer, which issues tokens used during authorization evaluation.",
+          "type": "object",
+          "properties": {
+              "name": {
+                  "description": "A user-defined, human-readable identifier for this trusted issuer (e.g., 'Google', 'Azure AD').",
+                  "type": "string"
+              },
+              "description": {
+                  "description": "A short description explaining the purpose of this trusted issuer.",
+                  "type": "string",
+                  "default": ""
+              },
+              "openid_configuration_endpoint": {
+                  "description": "The URL to the trusted issuer's OpenID Connect discovery document, which contains metadata about the issuer (e.g., authorization endpoint, token endpoint).",
+                  "type": "string",
+                  "format": "uri"
+              },
+              "token_metadata": {
+                  "description": "Metadata that describes how to interpret tokens issued by this trusted issuer.",
+                  "type": "object",
+                  "patternProperties": {
+                      "^[a-zA-Z0-9-_=]+$": {
+                          "$ref": "#/$defs/TokenMetadata"
+                      }
+                  },
+                  "additionalProperties": false
+              }
+          },
+          "required": ["name", "openid_configuration_endpoint"],
+          "additionalProperties": true
+      },
+      "TokenMetadata": {
+          "description": "Describes how Cedarling should interpret and map JWT tokens from a specific trusted issuer.",
+          "type": "object",
+          "properties": {
+              "trusted": {
+                  "description": "Indicates whether tokens from this issuer should be considered trusted by default. Defaults to true.",
+                  "type": "boolean",
+                  "default": true
+              },
+              "entity_type_name": {
+                  "description": "The Cedar entity type that tokens from this issuer should be mapped to (e.g., 'Jans::AccessToken'). This is required.",
+                  "type": "string"
+              },
+              "principal_mapping": {
+                  "description": "A list of Cedar principal types to which this token should be mapped (e.g., ['Jans::Workload']). Defaults to an empty list.",
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  },
+                  "default": [],
+                  "uniqueItems": true
+              },
+              "token_id": {
+                  "description": "The claim in the token that should be treated as the unique identifier for the token. Defaults to 'jti'.",
+                  "type": "string",
+                  "default": "jti"
+              },
+              "user_id": {
+                  "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'sub' before failing.",
+                  "type": "string",
+                  "default": "sub"
+              },
+              "role_mapping": {
+                  "description": "The claim in the token that lists the user's roles (e.g., 'role', 'group', 'memberOf'). Defaults to 'role'.",
+                  "oneOf": [
+                      {
+                          "type": "string"
+                      },
+                      {
+                          "type": "array",
+                          "items": {
+                              "type": "string"
+                          }
+                      }
+                  ],
+                  "default": "role"
+              },
+              "workload_id": {
+                  "description": "The primary claim to extract from the token to create the Workload entity. If not specified, Cedarling will attempt to use 'aud', followed by 'client_id', before failing.",
+                  "type": "string",
+                  "default": "aud"
+              },
+              "claim_mapping": {
+                  "description": "An object defining custom mappings from token claims to Cedar entity attributes. Defaults to an empty object.",
+                  "type": "object",
+                  "default": {}
+              },
+              "required_claims": {
+                  "description": "A list of claims that must be present in the token for it to be considered valid. Defaults to an empty list.",
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  },
+                  "default": [],
+                  "uniqueItems": true
+              }
+          },
+          "required": ["entity_type_name"],
+          "additionalProperties": true
+      }
   }
 }
