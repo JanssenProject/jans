@@ -702,7 +702,7 @@ class SqlClient(SqlSchemaMixin):
                     conn.execute(text(query))
                     # refresh metadata as we have newly created table
                     self.metadata.reflect(conn)
-                except DatabaseError as exc:  # noqa: B902
+                except DatabaseError as exc:
                     self.adapter.on_create_table_error(exc)
 
     def get_table_mapping(self) -> dict[str, dict[str, str]]:
@@ -740,7 +740,7 @@ class SqlClient(SqlSchemaMixin):
             with conn.begin():
                 try:
                     conn.execute(text(query))
-                except DatabaseError as exc:  # noqa: B902
+                except DatabaseError as exc:
                     self.adapter.on_create_index_error(exc)
 
     def quoted_id(self, identifier: str) -> str:
@@ -770,7 +770,7 @@ class SqlClient(SqlSchemaMixin):
             with conn.begin():
                 try:
                     conn.execute(query)
-                except DatabaseError as exc:  # noqa: B902
+                except DatabaseError as exc:
                     self.adapter.on_insert_into_error(exc)
 
     def get(self, table_name: str, id_: str, column_names: _t.Union[list[str], None] = None) -> dict[str, _t.Any]:
