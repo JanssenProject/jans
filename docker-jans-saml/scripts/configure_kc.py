@@ -384,10 +384,12 @@ class MysqlKeycloak:
                 f"and KC_DB is set to 'mysql'; trying to grant required privilege {self.xa_grant_name} to {self.user!r} user ..."
             )
 
-            query = text("GRANT :grant_name ON *.* TO :username@'%';")
+            # Note: SQL identifiers (privilege names, table names) cannot be bound parameters
+            # Use quoted_identifier or direct interpolation for privilege name, bind for user
+            query = text(f"GRANT {self.xa_grant_name} ON *.* TO :username@'%';")
 
             try:
-                conn.execute(query, {"grant_name": self.xa_grant_name, "username": self.user})
+                conn.execute(query, {"username": self.user})
             except OperationalError as exc:
                 logger.warning(f"Unable to grant {self.xa_grant_name} privilege to {self.user!r} user; reason={exc.orig.args[1]}")
 
