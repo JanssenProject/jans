@@ -701,7 +701,7 @@ class SqlClient(SqlSchemaMixin):
                 try:
                     conn.execute(text(query))
                     # refresh metadata as we have newly created table
-                    self.metadata.reflect(self.engine)
+                    self.metadata.reflect(conn)
                 except DatabaseError as exc:  # noqa: B902
                     self.adapter.on_create_table_error(exc)
 
