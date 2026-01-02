@@ -98,12 +98,13 @@ class SqlLock(BaseLock):
         )
 
         with self.client.engine.connect() as conn:
-            try:
-                result = conn.execute(stmt)
-                created = bool(result.inserted_primary_key)
-            except IntegrityError:
-                created = False
-            return created
+            with conn.begin():
+                try:
+                    result = conn.execute(stmt)
+                    created = bool(result.inserted_primary_key)
+                except IntegrityError:
+                    created = False
+                return created
 
     def put(self, key: str, owner: str, ttl: float, updated_at: str) -> bool:
         """Update specific lock.
@@ -122,8 +123,9 @@ class SqlLock(BaseLock):
         )
 
         with self.client.engine.connect() as conn:
-            result = conn.execute(stmt)
-            return bool(result.rowcount)
+            with conn.begin():
+                result = conn.execute(stmt)
+                return bool(result.rowcount)
 
     def delete(self, key: str) -> bool:
         """Delete specific lock.
@@ -137,8 +139,9 @@ class SqlLock(BaseLock):
         stmt = self.table.delete().where(self.table.c.doc_id == key)
 
         with self.client.engine.connect() as conn:
-            result = conn.execute(stmt)
-            return bool(result.rowcount)
+            with conn.begin():
+                result = conn.execute(stmt)
+                return bool(result.rowcount)
 
     def connected(self) -> bool:
         """Check if connection is established.
