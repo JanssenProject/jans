@@ -112,11 +112,11 @@ impl<'a> ServiceFactory<'a> {
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(logger));
-        let schema = &policy_store.schema.validator_schema;
+        let schema = policy_store.schema.validator_schema.as_ref();
         let entity_builder = EntityBuilder::new(
             config.clone(),
             issuers_index,
-            Some(schema),
+            schema,
             default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);

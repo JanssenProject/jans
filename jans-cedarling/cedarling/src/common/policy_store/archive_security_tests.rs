@@ -14,7 +14,9 @@
 // Note: This module is cfg(test) via parent module declaration in policy_store.rs
 
 use super::archive_handler::ArchiveVfs;
+use super::entity_parser::{EntityParser, ParsedEntity};
 use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
+use super::issuer_parser::IssuerParser;
 use super::loader::DefaultPolicyStoreLoader;
 use super::test_utils::{
     PolicyStoreTestBuilder, create_corrupted_archive, create_deep_nested_archive,
@@ -286,15 +288,20 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let loaded = loader.load_directory(".").expect("should load directory");
 
-        // Should error during entity parsing
-        let err = result.expect_err("expected JSON parsing error for invalid entity JSON");
-        assert!(
-            matches!(&err, PolicyStoreError::JsonParsing { .. }),
-            "Expected JSON parsing error for invalid entity JSON, got: {:?}",
-            err
-        );
+        // Parse entities to trigger validation
+        for entity_file in &loaded.entities {
+            let result = EntityParser::parse_entities(&entity_file.content, &entity_file.name, None);
+            let err = result.expect_err("expected JSON parsing error for invalid entity JSON");
+            assert!(
+                matches!(&err, PolicyStoreError::JsonParsing { .. }),
+                "Expected JSON parsing error for invalid entity JSON, got: {:?}",
+                err
+            );
+            return; // Found the error, test passes
+        }
+        panic!("Expected to find invalid entity JSON but none found");
     }
 
     #[test]
@@ -304,15 +311,20 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let loaded = loader.load_directory(".").expect("should load directory");
 
-        // Should error during trusted issuer validation
-        let err = result.expect_err("expected TrustedIssuerError for invalid trusted issuer");
-        assert!(
-            matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
-            "Expected TrustedIssuerError for invalid trusted issuer, got: {:?}",
-            err
-        );
+        // Parse issuers to trigger validation
+        for issuer_file in &loaded.trusted_issuers {
+            let result = IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name);
+            let err = result.expect_err("expected TrustedIssuerError for invalid trusted issuer");
+            assert!(
+                matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
+                "Expected TrustedIssuerError for invalid trusted issuer, got: {:?}",
+                err
+            );
+            return; // Found the error, test passes
+        }
+        panic!("Expected to find invalid trusted issuer but none found");
     }
 
     #[test]
@@ -322,14 +334,23 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let result = loader.load_directory(".");
+        let loaded = loader.load_directory(".").expect("should load directory");
 
-        // Should detect duplicate entity UIDs
+        // Parse all entities and detect duplicates
+        let mut all_parsed_entities: Vec<ParsedEntity> = Vec::new();
+        for entity_file in &loaded.entities {
+            let parsed = EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
+                .expect("should parse entities");
+            all_parsed_entities.extend(parsed);
+        }
+
+        // Detect duplicates - this should error
+        let result = EntityParser::detect_duplicates(all_parsed_entities);
         let err = result.expect_err("expected CedarEntityError for duplicate entity UIDs");
+        // detect_duplicates returns Vec<String>, so we need to check the error message
         assert!(
-            matches!(&err, PolicyStoreError::CedarEntityError { .. }),
-            "Expected CedarEntityError for duplicate UIDs, got: {:?}",
-            err
+            !err.is_empty(),
+            "Expected duplicate entity UID error, got empty error list"
         );
     }
 

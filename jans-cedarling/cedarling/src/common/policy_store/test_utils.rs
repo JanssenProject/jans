@@ -21,7 +21,6 @@ use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
 
 /// Builder for creating test policy stores programmatically.
-
 pub struct PolicyStoreTestBuilder {
     /// Store ID (hex string)
     pub id: String,

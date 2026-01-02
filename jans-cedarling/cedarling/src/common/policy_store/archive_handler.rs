@@ -23,6 +23,7 @@
 use super::errors::ArchiveError;
 use super::vfs_adapter::{DirEntry, VfsFileSystem};
 use std::io::{Cursor, Read, Seek};
+#[cfg(not(target_arch = "wasm32"))]
 use std::path::Path;
 use std::sync::Mutex;
 use zip::ZipArchive;
@@ -84,7 +85,17 @@ where
 
             // Use enclosed_name() to validate and normalize the path
             // This properly handles path traversal, backslashes, and absolute paths
-            if file.enclosed_name().is_none() {
+            let normalized = file.enclosed_name();
+            if let Some(normalized_path) = normalized {
+                // Additional check: ensure normalized path doesn't contain .. sequences
+                // enclosed_name() normalizes but may not reject all .. patterns
+                let path_str = normalized_path.to_string_lossy();
+                if path_str.contains("..") {
+                    return Err(ArchiveError::PathTraversal {
+                        path: file.name().to_string(),
+                    });
+                }
+            } else {
                 return Err(ArchiveError::PathTraversal {
                     path: file.name().to_string(),
                 });
@@ -183,12 +194,10 @@ where
     fn path_exists(&self, path: &str) -> Result<bool, std::io::Error> {
         let normalized = self.normalize_path(path);
 
-        let mut archive = self.archive.lock().map_err(|e| {
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("archive mutex poisoned: {}", e),
-            )
-        })?;
+        let mut archive = self
+            .archive
+            .lock()
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
 
         // Check if it's a file
         if archive.by_name(&normalized).is_ok() {
@@ -217,12 +226,10 @@ where
     /// Check if a path is a directory in the archive.
     fn is_directory(&self, path: &str) -> Result<bool, std::io::Error> {
         let normalized = self.normalize_path(path);
-        let mut archive = self.archive.lock().map_err(|e| {
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("archive mutex poisoned: {}", e),
-            )
-        })?;
+        let mut archive = self
+            .archive
+            .lock()
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
         Ok(Self::is_directory_locked(&mut archive, &normalized))
     }
 
@@ -261,12 +268,10 @@ where
     fn read_file(&self, path: &str) -> Result<Vec<u8>, std::io::Error> {
         let normalized = self.normalize_path(path);
 
-        let mut archive = self.archive.lock().map_err(|e| {
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("archive mutex poisoned: {}", e),
-            )
-        })?;
+        let mut archive = self
+            .archive
+            .lock()
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
 
         let mut file = archive.by_name(&normalized).map_err(|e| {
             std::io::Error::new(
@@ -311,12 +316,10 @@ where
             format!("{}/", normalized)
         };
 
-        let mut archive = self.archive.lock().map_err(|e| {
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("archive mutex poisoned: {}", e),
-            )
-        })?;
+        let mut archive = self
+            .archive
+            .lock()
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
         let mut seen = std::collections::HashSet::new();
         let mut entry_paths = Vec::new();
 

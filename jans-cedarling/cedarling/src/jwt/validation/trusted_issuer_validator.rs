@@ -483,6 +483,7 @@ impl TrustedIssuerValidator {
 mod tests {
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
+    use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
     use std::collections::HashSet;
 
     fn create_test_issuer(id: &str, endpoint: &str) -> TrustedIssuer {
@@ -915,6 +916,45 @@ mod tests {
 
     #[tokio::test]
     async fn test_validate_token_missing_required_claims_integration() {
+        let mut server = mockito::Server::new_async().await;
+        let oidc_url = format!("{}/.well-known/openid-configuration", server.url());
+
+        // Mock OIDC configuration
+        let _oidc_mock = server
+            .mock("GET", "/.well-known/openid-configuration")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                serde_json::json!({
+                    "issuer": server.url(),
+                    "jwks_uri": format!("{}/jwks", server.url()),
+                })
+                .to_string(),
+            )
+            .create_async()
+            .await;
+
+        // Mock JWKS endpoint with the test secret key (HS256)
+        // For HS256, we need to provide the key in JWKS format
+        let _jwks_mock = server
+            .mock("GET", "/jwks")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                serde_json::json!({
+                    "keys": [{
+                        "kty": "oct",
+                        "kid": "test-kid",
+                        "use": "sig",
+                        "alg": "HS256",
+                        "k": BASE64_URL_SAFE_NO_PAD.encode(b"test_secret_key")
+                    }]
+                })
+                .to_string(),
+            )
+            .create_async()
+            .await;
+
         let mut metadata = HashMap::new();
         metadata.insert(
             "access_token".to_string(),
@@ -928,18 +968,14 @@ mod tests {
                 .build(),
         );
 
-        let issuer = create_test_issuer_with_metadata(
-            "test",
-            "https://test.com/.well-known/openid-configuration",
-            metadata,
-        );
+        let issuer = create_test_issuer_with_metadata("test", &oidc_url, metadata);
 
         let mut validator =
             TrustedIssuerValidator::new(HashMap::from([("test".to_string(), issuer)]));
 
         // Token missing "role" claim which is in required_claims
         let claims = serde_json::json!({
-            "iss": "test",
+            "iss": server.url(),
             "sub": "user123",
             "jti": "token123",
             // Missing "role" - which is required

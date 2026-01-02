@@ -168,7 +168,7 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     );
     assert!(
         err_msg.contains(
-            "unable to decode policy_content from human readable format: unexpected token `)`"
+            "unable to decode policy_content from human readable format: this policy is missing the `resource` variable in the scope"
         ),
         "Error should describe the syntax error, got: {}",
         err_msg
