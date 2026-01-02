@@ -318,7 +318,7 @@ class SQLBackend:
                                 "col_name": col_name
                             },
                         ):
-                            conn.execute(text(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}"))
+                            conn.execute(text(f"ALTER TABLE {table_name} DROP INDEX {self.client.quoted_id(idx[0])}"))
 
                     # change the type
                     conn.execute(text(query))
@@ -355,7 +355,7 @@ class SQLBackend:
                                 "col_name": col_name
                             },
                         ):
-                            conn.execute(text(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}"))
+                            conn.execute(text(f"ALTER TABLE {table_name} DROP INDEX {self.client.quoted_id(idx[0])}"))
 
                     # to change the storage format of a JSON column, drop the column and
                     # add the column back specifying the new storage format
