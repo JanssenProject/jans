@@ -1,4 +1,3 @@
-import base64
 import os
 import json
 import logging.config
@@ -358,8 +357,8 @@ class MysqlKeycloak:
             hide_parameters=True,
         )
 
-        metadata = MetaData(bind=self.engine)
-        metadata.reflect()
+        metadata = MetaData()
+        metadata.reflect(self.engine)
 
     @property
     def xa_grant_name(self):
@@ -370,7 +369,7 @@ class MysqlKeycloak:
 
         with self.engine.connect() as conn:
             query = text("SHOW GRANTS FOR :username")
-            for grant in conn.execute(query, username=self.user):
+            for grant in conn.execute(query, {"username": self.user}):
                 if self.xa_grant_name in grant[0]:
                     granted = True
                     break
@@ -388,7 +387,7 @@ class MysqlKeycloak:
             query = text("GRANT :grant_name ON *.* TO :username@'%';")
 
             try:
-                conn.execute(query, grant_name=self.xa_grant_name, username=self.user)
+                conn.execute(query, {"grant_name": self.xa_grant_name, "username": self.user})
             except OperationalError as exc:
                 logger.warning(f"Unable to grant {self.xa_grant_name} privilege to {self.user!r} user; reason={exc.orig.args[1]}")
 
