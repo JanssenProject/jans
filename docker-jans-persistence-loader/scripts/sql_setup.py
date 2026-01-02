@@ -346,13 +346,13 @@ class SQLBackend:
                                 "SELECT index_name "
                                 "FROM information_schema.statistics "
                                 "WHERE table_name = :table_name "
-                                "AND index_name LIKE :index_name '%' "
-                                "AND expression LIKE '%' :col_name '%';"
+                                "AND index_name LIKE :index_name "
+                                "AND expression LIKE :col_name;"
                             ),
                             {
                                 "table_name": table_name,
-                                "index_name": f"{table_name}_json_",
-                                "col_name": col_name
+                                "index_name": f"{table_name}_json_%",
+                                "col_name": f"%{col_name}%"
                             },
                         ):
                             conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP INDEX {self.client.quoted_id(idx[0])}"))
