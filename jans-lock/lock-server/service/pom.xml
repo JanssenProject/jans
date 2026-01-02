@@ -183,6 +183,30 @@
 			<artifactId>resteasy-jackson2-provider</artifactId>
 		</dependency>
 
+		<!-- gRPC dependencies -->
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty-shaded</artifactId>
+			<version>1.78.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+			<version>1.78.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>1.78.0</version>
+		</dependency>
+
+		<!-- RESTEasy gRPC Bridge -->
+		<dependency>
+			<groupId>dev.resteasy.grpc</groupId>
+			<artifactId>resteasy-grpc-bridge</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
+
 		<!-- Swagger -->
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>

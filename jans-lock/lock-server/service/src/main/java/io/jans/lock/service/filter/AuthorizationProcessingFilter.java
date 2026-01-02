@@ -9,6 +9,7 @@ import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
+import io.jans.lock.service.openid.OpenIdProtection;
 import io.jans.net.InetAddressUtility;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.Priority;

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
+import io.jans.lock.cedarling.service.CedarlingProtection;
 import io.jans.lock.cedarling.service.app.audit.ApplicationCedarlingAuditLogger;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.app.audit.AuditActionType;
@@ -70,7 +71,7 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		log.debug("REST call to '{}' intercepted", path);
 		
 		if (LockProtectionMode.CEDARLING.equals(appConfiguration.getProtectionMode())) {
-			Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
+			Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
 			boolean success = authorizationResponse == null;
 
 	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.CEDARLING_AUTHZ_FILTER);

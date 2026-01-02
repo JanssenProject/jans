@@ -1,4 +1,4 @@
-package io.jans.lock.cedarling.service.filter;
+package io.jans.lock.cedarling.service;
 
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -31,7 +31,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.cedarling.model.CedarlingPermission;
-import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.util.StringHelper;
@@ -71,7 +70,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
         }
     }
 
-    public Response processAuthorization(ContainerRequestContext requestContext, HttpHeaders headers, ResourceInfo resourceInfo) {
+    public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
         try {
             String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
             boolean authFound = StringUtils.isNotEmpty(token);

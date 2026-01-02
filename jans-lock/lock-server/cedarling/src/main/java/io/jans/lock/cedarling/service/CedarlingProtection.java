@@ -1,13 +1,13 @@
-package io.jans.lock.cedarling.service.filter;
+package io.jans.lock.cedarling.service;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
+import io.jans.service.security.protect.BaseAuthorizationProtection;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
-public interface CedarlingProtection {
+public interface CedarlingProtection extends BaseAuthorizationProtection {
 
-    Response processAuthorization(ContainerRequestContext requestContext, HttpHeaders httpHeaders, ResourceInfo resourceInfo);
+    Response processAuthorization(HttpHeaders httpHeaders, ResourceInfo resourceInfo);
 
     public static Response simpleResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();
