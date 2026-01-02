@@ -14,6 +14,7 @@ import jakarta.inject.Named;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
+import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -25,6 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -57,6 +60,10 @@ public class MetricService extends io.jans.service.metric.MetricService {
     @ReportMetric
     private PersistenceEntryManager persistenceEntryManager;
 
+    @Inject
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
+    private PersistenceEntryManager userPersistenceEntryManager;
+
 	@Inject
     private DeviceInfoExtractor deviceInfoExtractor;
 
@@ -65,7 +72,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
     @Inject
     @Named("fido2MetricsService")
-    private io.jans.fido2.service.metric.Fido2MetricsService fido2MetricsService;
+    private Instance<io.jans.fido2.service.metric.Fido2MetricsService> fido2MetricsServiceInstance;
+
+    @Inject
+    @Named("fido2UserMetricsService")
+    private Instance<io.jans.fido2.service.metric.Fido2UserMetricsService> fido2UserMetricsServiceInstance;
 
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
@@ -254,6 +265,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
             }
             
             storeFido2MetricsData(metricsData);
+            
+            // Update user-level metrics (skip for ATTEMPT status)
+            if (!ATTEMPT_STATUS.equals(status)) {
+                updateUserMetrics(metricsData);
+            }
         }
     }
     
@@ -290,8 +306,10 @@ public class MetricService extends io.jans.service.metric.MetricService {
                     metricsData.setUsername(username);
                     metricsData.setFallbackMethod(fallbackMethod);
                     metricsData.setFallbackReason(reason);
-                    metricsData.setStartTime(LocalDateTime.now());
-                    metricsData.setEndTime(LocalDateTime.now());
+                    // Use UTC timezone to align with FIDO2 services
+                    LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+                    metricsData.setStartTime(utcNow);
+                    metricsData.setEndTime(utcNow);
                     
                     storeFido2MetricsData(metricsData);
                 }
@@ -332,22 +350,58 @@ public class MetricService extends io.jans.service.metric.MetricService {
         metricsData.setOperationType(operationType);
         metricsData.setOperationStatus(status);
         metricsData.setUsername(username);
-        metricsData.setStartTime(LocalDateTime.now());
-        metricsData.setEndTime(LocalDateTime.now());
+        
+        // Look up the real userId (inum) from username
+        // This is the immutable unique identifier that should be used for analytics
+        String userId = getUserIdFromUsername(username);
+        metricsData.setUserId(userId);
+        
+        // Use UTC timezone to align with FIDO2 services
+        LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+        metricsData.setStartTime(utcNow);
+        metricsData.setEndTime(utcNow);
         
         if (authenticatorType != null) {
             metricsData.setAuthenticatorType(authenticatorType);
             incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
         }
         
-        if (request != null && appConfiguration.isFido2DeviceInfoCollection()) {
+        // Extract HTTP request details
+        if (request != null) {
             try {
-                metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
+                // Extract IP address - check proxy headers first, then fall back to remote address
+                String ipAddress = extractIpAddress(request);
+                metricsData.setIpAddress(ipAddress);
+                
+                // Extract User-Agent header
+                String userAgent = request.getHeader("User-Agent");
+                metricsData.setUserAgent(userAgent);
             } catch (Exception e) {
-                log.debug("Failed to extract device info: {}", e.getMessage());
-                metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
+                log.debug("Failed to extract request details: {}", e.getMessage());
+            }
+            
+            // Extract device info if enabled
+            if (appConfiguration.isFido2DeviceInfoCollection()) {
+                try {
+                    metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
+                } catch (Exception e) {
+                    log.debug("Failed to extract device info: {}", e.getMessage());
+                    metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
+                }
             }
         }
+        
+        // Set node identifier (for cluster environments) - only if available
+        try {
+            String nodeId = networkService.getMacAdress();
+            if (nodeId != null && !nodeId.trim().isEmpty()) {
+                metricsData.setNodeId(nodeId);
+            }
+        } catch (Exception e) {
+            log.debug("Failed to get node ID: {}", e.getMessage());
+        }
+        
+        // Note: applicationType is not set as it's always "FIDO2" and redundant
         
         return metricsData;
     }
@@ -384,10 +438,10 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     private void storeFido2MetricsData(Fido2MetricsData metricsData) {
         try {
-            if (fido2MetricsService != null) {
-                fido2MetricsService.storeMetricsData(metricsData);
+            if (fido2MetricsServiceInstance != null && !fido2MetricsServiceInstance.isUnsatisfied()) {
+                fido2MetricsServiceInstance.get().storeMetricsData(metricsData);
             } else {
-                log.warn("Fido2MetricsService not available, cannot store metrics data");
+                log.debug("Fido2MetricsService not available, skipping metrics data storage");
             }
         } catch (Exception e) {
             log.error("Failed to store FIDO2 metrics data: {}", e.getMessage(), e);
@@ -410,6 +464,154 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // For now, we'll log the FIDO2 timer metrics
         // In a production environment, you might want to integrate with the base metric system
         log.debug("FIDO2 Timer updated: {} - {} ms", fido2MetricType.getMetricName(), duration);
+    }
+
+    /**
+     * Extract IP address from HTTP request, checking proxy headers first
+     * Handles X-Forwarded-For, Proxy-Client-IP, and other common proxy headers
+     * 
+     * @param request HTTP servlet request
+     * @return Client IP address
+     */
+    private String extractIpAddress(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        
+        // List of headers to check (in order of preference)
+        String[] headersToTry = {
+            "X-Forwarded-For",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED",
+            "HTTP_VIA",
+            "REMOTE_ADDR"
+        };
+        
+        // Check each header
+        for (String header : headersToTry) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                // X-Forwarded-For can contain multiple IPs; take the first one
+                int commaIndex = ip.indexOf(',');
+                if (commaIndex > 0) {
+                    ip = ip.substring(0, commaIndex).trim();
+                }
+                return ip;
+            }
+        }
+        
+        // Fallback to remote address
+        return request.getRemoteAddr();
+    }
+
+    /**
+     * Look up the immutable userId (inum) from username
+     * This ensures we use the stable unique identifier for analytics
+     * 
+     * @param username The username to look up
+     * @return The user's inum (userId), or the username as fallback if lookup fails
+     */
+    private String getUserIdFromUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // In Janssen, users are stored with "uid" attribute as username
+            // and "inum" as the unique identifier
+            io.jans.orm.model.base.SimpleBranch usersBranch = new io.jans.orm.model.base.SimpleBranch();
+            usersBranch.setDn(staticConfiguration.getBaseDn().getPeople());
+            
+            // Search for user by uid (username)
+            io.jans.orm.search.filter.Filter filter = io.jans.orm.search.filter.Filter.createEqualityFilter("uid", username);
+            
+            // Use a simple user object to get the inum
+            java.util.List<io.jans.as.common.model.common.User> users = userPersistenceEntryManager.findEntries(
+                staticConfiguration.getBaseDn().getPeople(),
+                io.jans.as.common.model.common.User.class,
+                filter,
+                null,
+                1
+            );
+            
+            if (users != null && !users.isEmpty()) {
+                io.jans.as.common.model.common.User user = users.get(0);
+                String inum = user.getAttribute("inum");
+                if (inum != null && !inum.trim().isEmpty()) {
+                    log.debug("Resolved username '{}' to userId '{}'", username, inum);
+                    return inum;
+                }
+            }
+            
+            // Fallback: if we can't find the inum, use username as identifier
+            log.debug("Could not resolve userId for username '{}', using username as fallback", username);
+            return username;
+            
+        } catch (Exception e) {
+            // If lookup fails, use username as fallback (better than null)
+            log.debug("Failed to look up userId for username '{}': {}, using username as fallback", 
+                     username, e.getMessage());
+            return username;
+        }
+    }
+
+    /**
+     * Update user-level metrics based on the metrics data
+     */
+    private void updateUserMetrics(Fido2MetricsData metricsData) {
+        if (fido2UserMetricsServiceInstance == null || fido2UserMetricsServiceInstance.isUnsatisfied()) {
+            log.debug("Fido2UserMetricsService not available, skipping user metrics update");
+            return;
+        }
+
+        try {
+            io.jans.fido2.service.metric.Fido2UserMetricsService userMetricsService = fido2UserMetricsServiceInstance.get();
+            
+            UserMetricsUpdateRequest request = new UserMetricsUpdateRequest();
+            request.setUserId(metricsData.getUserId());
+            request.setUsername(metricsData.getUsername());
+            request.setSuccess("SUCCESS".equals(metricsData.getOperationStatus()));
+            request.setAuthenticatorType(metricsData.getAuthenticatorType());
+            request.setDurationMs(metricsData.getDurationMs());
+            
+            // Extract device info if available
+            if (metricsData.getDeviceInfo() != null) {
+                request.setDeviceType(metricsData.getDeviceInfo().getDeviceType());
+                request.setBrowser(metricsData.getDeviceInfo().getBrowser());
+                request.setOs(metricsData.getDeviceInfo().getOperatingSystem());
+            }
+            
+            request.setIpAddress(metricsData.getIpAddress());
+            request.setUserAgent(metricsData.getUserAgent());
+            request.setFallbackMethod(metricsData.getFallbackMethod());
+            request.setFallbackReason(metricsData.getFallbackReason());
+
+            // Call the appropriate user metrics update method based on operation type
+            String operationType = metricsData.getOperationType();
+            if ("REGISTRATION".equals(operationType)) {
+                userMetricsService.updateUserRegistrationMetrics(request);
+                log.debug("Updated user registration metrics for: {}", metricsData.getUsername());
+            } else if ("AUTHENTICATION".equals(operationType)) {
+                userMetricsService.updateUserAuthenticationMetrics(request);
+                log.debug("Updated user authentication metrics for: {}", metricsData.getUsername());
+            } else if ("FALLBACK".equals(operationType)) {
+                userMetricsService.updateUserFallbackMetrics(
+                    request.getUserId(),
+                    request.getUsername(),
+                    request.getIpAddress(),
+                    request.getUserAgent()
+                );
+                log.debug("Updated user fallback metrics for: {}", metricsData.getUsername());
+            }
+        } catch (Exception e) {
+            log.error("Failed to update user metrics: {}", e.getMessage(), e);
+        }
     }
 
 }

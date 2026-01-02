@@ -15,6 +15,7 @@ import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,10 +41,10 @@ public class Fido2UserMetrics extends Entry implements Serializable {
     private String username;
 
     @AttributeName(name = "jansFirstRegistrationDate")
-    private LocalDateTime firstRegistrationDate;
+    private Date firstRegistrationDate;
 
     @AttributeName(name = "jansLastActivityDate")
-    private LocalDateTime lastActivityDate;
+    private Date lastActivityDate;
 
     @AttributeName(name = "jansTotalRegistrations")
     private Integer totalRegistrations;
@@ -79,10 +80,10 @@ public class Fido2UserMetrics extends Entry implements Serializable {
     private String preferredOs;
 
     @AttributeName(name = "jansAvgRegistrationDuration")
-    private Double avgRegistrationDuration;
+    private Long avgRegistrationDuration;
 
     @AttributeName(name = "jansAvgAuthenticationDuration")
-    private Double avgAuthenticationDuration;
+    private Long avgAuthenticationDuration;
 
     @AttributeName(name = "jansLastIpAddress")
     private String lastIpAddress;
@@ -102,7 +103,7 @@ public class Fido2UserMetrics extends Entry implements Serializable {
     private transient Map<String, Object> behaviorPatterns;
 
     @AttributeName(name = "jansRiskScore")
-    private Double riskScore;
+    private Long riskScore;
 
     @AttributeName(name = "jansEngagementLevel")
     private String engagementLevel; // HIGH, MEDIUM, LOW
@@ -111,7 +112,7 @@ public class Fido2UserMetrics extends Entry implements Serializable {
     private String adoptionStage; // NEW, LEARNING, ADOPTED, EXPERT
 
     @AttributeName(name = "jansLastUpdated")
-    private LocalDateTime lastUpdated;
+    private Date lastUpdated;
 
     // Constructors
     public Fido2UserMetrics() {
@@ -123,11 +124,12 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         this.failedAuthentications = 0;
         this.fallbackEvents = 0;
         this.isActive = true;
-        this.lastUpdated = LocalDateTime.now();
+        this.lastUpdated = new Date();
     }
 
     public Fido2UserMetrics(String userId, String username) {
         this();
+        this.id = java.util.UUID.randomUUID().toString();
         this.userId = userId;
         this.username = username;
     }
@@ -157,19 +159,19 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         this.username = username;
     }
 
-    public LocalDateTime getFirstRegistrationDate() {
+    public Date getFirstRegistrationDate() {
         return firstRegistrationDate;
     }
 
-    public void setFirstRegistrationDate(LocalDateTime firstRegistrationDate) {
+    public void setFirstRegistrationDate(Date firstRegistrationDate) {
         this.firstRegistrationDate = firstRegistrationDate;
     }
 
-    public LocalDateTime getLastActivityDate() {
+    public Date getLastActivityDate() {
         return lastActivityDate;
     }
 
-    public void setLastActivityDate(LocalDateTime lastActivityDate) {
+    public void setLastActivityDate(Date lastActivityDate) {
         this.lastActivityDate = lastActivityDate;
     }
 
@@ -261,19 +263,19 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         this.preferredOs = preferredOs;
     }
 
-    public Double getAvgRegistrationDuration() {
+    public Long getAvgRegistrationDuration() {
         return avgRegistrationDuration;
     }
 
-    public void setAvgRegistrationDuration(Double avgRegistrationDuration) {
+    public void setAvgRegistrationDuration(Long avgRegistrationDuration) {
         this.avgRegistrationDuration = avgRegistrationDuration;
     }
 
-    public Double getAvgAuthenticationDuration() {
+    public Long getAvgAuthenticationDuration() {
         return avgAuthenticationDuration;
     }
 
-    public void setAvgAuthenticationDuration(Double avgAuthenticationDuration) {
+    public void setAvgAuthenticationDuration(Long avgAuthenticationDuration) {
         this.avgAuthenticationDuration = avgAuthenticationDuration;
     }
 
@@ -317,11 +319,11 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         this.behaviorPatterns = behaviorPatterns;
     }
 
-    public Double getRiskScore() {
+    public Long getRiskScore() {
         return riskScore;
     }
 
-    public void setRiskScore(Double riskScore) {
+    public void setRiskScore(Long riskScore) {
         this.riskScore = riskScore;
     }
 
@@ -341,11 +343,11 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         this.adoptionStage = adoptionStage;
     }
 
-    public LocalDateTime getLastUpdated() {
+    public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 
@@ -357,8 +359,8 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         } else {
             this.failedRegistrations++;
         }
-        this.lastActivityDate = LocalDateTime.now();
-        this.lastUpdated = LocalDateTime.now();
+        this.lastActivityDate = new Date();
+        this.lastUpdated = new Date();
     }
 
     public void incrementAuthentications(boolean success) {
@@ -368,14 +370,14 @@ public class Fido2UserMetrics extends Entry implements Serializable {
         } else {
             this.failedAuthentications++;
         }
-        this.lastActivityDate = LocalDateTime.now();
-        this.lastUpdated = LocalDateTime.now();
+        this.lastActivityDate = new Date();
+        this.lastUpdated = new Date();
     }
 
     public void incrementFallbackEvents() {
         this.fallbackEvents++;
-        this.lastActivityDate = LocalDateTime.now();
-        this.lastUpdated = LocalDateTime.now();
+        this.lastActivityDate = new Date();
+        this.lastUpdated = new Date();
     }
 
     public double getRegistrationSuccessRate() {
@@ -415,13 +417,15 @@ public class Fido2UserMetrics extends Entry implements Serializable {
     }
 
     public boolean isNewUser() {
-        return firstRegistrationDate != null && 
-               firstRegistrationDate.isAfter(LocalDateTime.now().minusDays(30));
+        if (firstRegistrationDate == null) return false;
+        long thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000);
+        return firstRegistrationDate.getTime() > thirtyDaysAgo;
     }
 
     public boolean isActiveUser() {
-        return lastActivityDate != null && 
-               lastActivityDate.isAfter(LocalDateTime.now().minusDays(30));
+        if (lastActivityDate == null) return false;
+        long thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000);
+        return lastActivityDate.getTime() > thirtyDaysAgo;
     }
 
     public void updateEngagementLevel() {

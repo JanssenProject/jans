@@ -16,6 +16,8 @@ import jakarta.inject.Named;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -87,8 +89,9 @@ public class Fido2AnalyticsService {
             report.put("recommendations", generateRecommendations(startTime, endTime));
             
             // Report metadata
+            // Use UTC timezone to align with FIDO2 services
             report.put("reportMetadata", Map.of(
-                "generatedAt", LocalDateTime.now(),
+                "generatedAt", ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime(),
                 "startTime", startTime,
                 "endTime", endTime,
                 "reportType", "COMPREHENSIVE"
@@ -561,7 +564,12 @@ public class Fido2AnalyticsService {
         // Analyze day-of-week patterns
         Map<String, Long> dayOfWeekUsage = new HashMap<>();
         for (Fido2MetricsAggregation agg : aggregations) {
-            String dayOfWeek = agg.getStartTime().getDayOfWeek().name();
+            // Convert Date to LocalDateTime to get day of week
+            LocalDateTime dateTime = LocalDateTime.ofInstant(
+                agg.getStartTime().toInstant(), 
+                ZoneId.of("UTC")
+            );
+            String dayOfWeek = dateTime.getDayOfWeek().name();
             long totalAttempts = getTotalAttempts(agg);
             dayOfWeekUsage.merge(dayOfWeek, totalAttempts, Long::sum);
         }
