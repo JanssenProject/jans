@@ -14902,7 +14902,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Build the certificate chain file: <code>cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt &gt; chain.pem</code></p>
 </li>
 <li>
-<p>Generate a private key and a certificate for <code>cn=Joe</code> (subject of the cert): <code>step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd</code>. This command will create a certificate signed with the intermediate certificate</p>
+<p>Create a private key and a certificate for <code>cn=Joe</code> (subject of the cert): <code>step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd</code>. This command will create a certificate signed with the intermediate certificate</p>
 </li>
 <li>
 <p>Inspect the created cert: <code>step certificate inspect joe.crt</code>. Note the expiration is of one day and that "Client authentication" is explicitly part of the extended key usages</p>
@@ -14929,15 +14929,15 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. <code>https://acme.co:444/</code>; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  </p>
-<p>The easiest way to set this up is adding a <code>VirtualHost</code> directive associated to a new port, for instance 444. This <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf">snippet</a> exemplifies a safe way to do so. Note you have to edit accordingly:</p>
+<p>The easiest way to set this up is adding a <code>VirtualHost</code> directive associated to a new port, for instance 444. This <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf">snippet</a> exemplifies a safe way to do so. Note you have to edit accordingly:</p>
 <ul>
-<li>The server name/alias</li>
+<li>The server name</li>
 <li>The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication</li>
 </ul>
 <p>Transfer the edited file to <code>/etc/apache2/sites-enabled</code>. Note there is already a file named <code>https_jans.conf</code> with a <code>VirtualHost</code> for port 443 that you can use as a guide. Finally, add a <code>Listen 444</code> directive to file <code>/etc/apache2/ports.conf</code>.</p>
 </div>
 <div class="tabbed-block">
-<p>This is the fastest approach and involves adding a directive inside the existing <code>VirtualHost</code> for port 443 in file <code>/etc/apache2/sites-enabled/https_jans.conf</code>. Copy this <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf">snippet</a> and paste it just after the closing of the <code>Location</code> directive associated to <code>/jans-casa</code>.</p>
+<p>This is the fastest approach and involves adding a directive inside the existing <code>VirtualHost</code> for port 443 in  <code>/etc/apache2/sites-enabled/https_jans.conf</code>. Copy this <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf">snippet</a> and paste it just after the closing of the <code>Location</code> directive associated to <code>/jans-casa</code>.</p>
 </div>
 </div>
 </div>
@@ -14950,7 +14950,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 </div>
 <ol>
 <li>
-<p>Download the certificate authentication Agama project archive: <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/0.0.0-nightly/cert-authn-agama-0.0.0-nightly-project.zip</code></p>
+<p>Download the certificate authentication Agama project archive: <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn-agama/replace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -&gt; "Upload project". Wait one minute</p>
@@ -14965,10 +14965,10 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Edit property <code>certPickupUrl</code> accordingly. This is the URL that displays the browser dialog for choosing a certificate</p>
 </li>
 <li>
-<p>If you did not <a href="#generate-testing-certificates">Generate testing certificates</a>, i.e. already owned some certs, create a file named <code>chain.pem</code> by concatenating the contents (in PEM format) of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included</p>
+<p>If you did not <a href="#generate-testing-certificates">Generate testing certificates</a>, i.e. already own some certs, create a file named <code>chain.pem</code> by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included</p>
 </li>
 <li>
-<p>Compute the contents for <code>certChainPEM</code>: <code>sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem</code>. This will produce a one liner JSON string</p>
+<p>Compute a one liner JSON string for the contents of <code>certChainPEM</code> property: <code>sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem</code></p>
 </li>
 <li>
 <p>Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file</p>
@@ -14997,7 +14997,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <h2 id="install-the-cert-authn-plugin">Install the cert-authn plugin<a class="headerlink" href="#install-the-cert-authn-plugin" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/0.0.0-nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code>. Alternatively upload the file using Casa itself: go to <code>Administration console</code> &gt; <code>Casa plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/replace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code>. Alternatively upload the file using Casa itself: go to <code>Administration console</code> &gt; <code>Casa plugins</code></p>
 </li>
 <li>
 <p>Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"</p>
@@ -15127,7 +15127,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 31, 2025 13:08:51 UTC"><span class="timeago" datetime="2025-12-31T13:08:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 31, 2025 13:08:51 UTC">2025-12-31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 2, 2026 16:43:20 UTC"><span class="timeago" datetime="2026-01-02T16:43:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 2, 2026 16:43:20 UTC">2026-01-02</span>
   </span>
 
     

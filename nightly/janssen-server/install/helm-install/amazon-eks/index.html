@@ -14752,7 +14752,7 @@ helm install nginx ingress-nginx/ingress-nginx
 <p>PostgreSQL for persistence storage</p>
 <p>In a production environment, a production-grade PostgreSQL server should be used such as <code>Amazon RDS</code></p>
 <p>For testing purposes, you can deploy it on the EKS cluster using the following commands:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
@@ -14771,7 +14771,7 @@ kubectl apply -f pgsql.yaml
 <p>MySQL for persistence storage</p>
 <p>In a production environment, a production-grade MySQL server should be used such as <code>Amazon RDS</code></p>
 <p>For testing purposes, you can deploy it on the EKS cluster using the following commands:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
