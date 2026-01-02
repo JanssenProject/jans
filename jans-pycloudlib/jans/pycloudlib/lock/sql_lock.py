@@ -69,14 +69,14 @@ class SqlLock(BaseLock):
         Returns:
             Mapping of lock data.
         """
-        stmt = select([self.table]).where(self.table.c.doc_id == key).limit(1)
+        stmt = select(self.table).where(self.table.c.doc_id == key).limit(1)
 
         with self.client.engine.connect() as conn:
             result = conn.execute(stmt)
             entry = result.fetchone()
 
             if entry:
-                rowset = dict(entry)
+                rowset = dict(entry._mapping)
                 return json.loads(rowset["jansData"]) | {"name": rowset["doc_id"]}
         return {}
 
