@@ -16,7 +16,8 @@ serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
 uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }
-cedar-policy = { version = "4.3.2", features = ["partial-eval"] }
+cedar-policy = { version = "4.8.2", features = ["partial-eval"] }
+cedar-policy-core = "4.8.2"
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
@@ -39,8 +40,6 @@ tokio-util = { workspace = true }
 rand = "0.8.5"
 smol_str = "0.3.2"
 strum = { version = "0.26", features = ["derive"] }
-cedar-policy-validator = "4.3.3"
-cedar-policy-core = "4.3.3"
 datalogic-rs = "2.1.2"
 flate2 = "1.1.1"
 async-trait = "0.1.88"

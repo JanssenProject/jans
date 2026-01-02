@@ -205,7 +205,7 @@ mod test {
     use super::*;
     use crate::{common::policy_store::ClaimMappings, entity_builder::schema::MappingSchema};
     use cedar_policy::{Entity, Schema};
-    use cedar_policy_validator::ValidatorSchema;
+    use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
     use std::{collections::HashSet, str::FromStr};
 
