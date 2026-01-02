@@ -115,6 +115,118 @@ permit(
 
 Each policy file must have an `@id` annotation that uniquely identifies the policy.
 
+#### Template Files
+
+Templates are stored as human-readable `.cedar` files in the `templates/` directory:
+
+```cedar
+@id("resource-access-template")
+permit(
+    principal == ?principal,
+    action,
+    resource == ?resource
+);
+```
+
+Each template file must have an `@id` annotation and use Cedar's template slot syntax (`?principal`, `?resource`).
+
+#### Entity Files
+
+Entity files in the `entities/` directory use the Cedar JSON entity format as a **JSON array**. Each file can contain one or more entity definitions:
+
+```json
+[
+  {
+    "uid": {
+      "type": "Jans::Organization",
+      "id": "acme-dolphins"
+    },
+    "attrs": {
+      "name": "Acme Dolphins Division",
+      "org_id": "100129",
+      "domain": "acme-dolphin.sea",
+      "regions": ["Atlantic", "Pacific", "Indian"]
+    },
+    "parents": []
+  },
+  {
+    "uid": {
+      "type": "Jans::Role",
+      "id": "admin"
+    },
+    "attrs": {
+      "name": "Administrator",
+      "permissions": ["read", "write", "delete"]
+    },
+    "parents": []
+  }
+]
+```
+
+Each entity requires:
+
+- **`uid`**: Object with `type` (Cedar entity type name, e.g., `"Jans::Organization"`) and `id` (unique entity identifier)
+- **`attrs`**: Object containing entity attributes matching your Cedar schema
+- **`parents`**: Optional array of parent entity references for hierarchical relationships
+
+Example with parent relationships (`entities/users.json`):
+
+```json
+[
+  {
+    "uid": {
+      "type": "Jans::User",
+      "id": "alice"
+    },
+    "attrs": {
+      "name": "Alice Smith",
+      "email": "alice@example.com"
+    },
+    "parents": [
+      {"type": "Jans::Role", "id": "admin"},
+      {"type": "Jans::Organization", "id": "acme-dolphins"}
+    ]
+  }
+]
+```
+
+#### Trusted Issuer Files
+
+Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. Each file contains a JSON object mapping issuer IDs to their configurations:
+
+```json
+{
+  "jans_issuer": {
+    "name": "Jans Server",
+    "description": "Primary Janssen Identity Provider",
+    "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
+    "token_metadata": {
+      "access_token": {
+        "trusted": true,
+        "entity_type_name": "Jans::Access_token",
+        "token_id": "jti",
+        "workload_id": "aud"
+      },
+      "id_token": {
+        "trusted": true,
+        "entity_type_name": "Jans::Id_token",
+        "user_id": "sub",
+        "role_mapping": "role"
+      }
+    }
+  }
+}
+```
+
+Each trusted issuer configuration includes:
+
+- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity)
+- **`description`**: Optional description of the issuer
+- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint
+- **`token_metadata`**: Map of token types to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema))
+
+You can define multiple issuers in a single file or split them across multiple files in the `trusted-issuers/` directory.
+
 #### Cedar Archive (.cjar) Format
 
 The directory structure can be packaged as a `.cjar` file (ZIP archive) for distribution:
