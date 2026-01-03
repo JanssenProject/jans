@@ -264,8 +264,9 @@ class SQLBackend:
             # to change the storage format of a JSON column, drop the column and
             # add the column back specifying the new storage format
             with self.client.engine.connect() as conn:
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+                with conn.begin():
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"))
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"))
 
             # force-reload metadata as we may have changed the schema before migrating old data
             self.client._metadata = None
@@ -287,7 +288,8 @@ class SQLBackend:
 
             data_type = self.get_data_type(col_name, table_name)
             with self.client.engine.connect() as conn:
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+                with conn.begin():
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"))
 
         def change_column_type(table_name, col_name, old_data_type, data_type):
             if self.client.dialect == "mysql":
@@ -298,27 +300,28 @@ class SQLBackend:
                         f"ALTER COLUMN {self.client.quoted_id(col_name)} TYPE {data_type}"
 
             with self.client.engine.connect() as conn:
-                # mysql will raise error if changing type to text but the column already indexed without explicit key length
-                # hence the associated index must be dropped first
-                if self.client.dialect == "mysql" and old_data_type.startswith("VARCHAR") and data_type == "TEXT":
-                    for idx in conn.execute(
-                        text(
-                            "SELECT index_name "
-                            "FROM information_schema.statistics "
-                            "WHERE table_name = :table_name "
-                            "AND index_name LIKE :index_name "
-                            "AND column_name = :col_name;"
-                        ),
-                        {
-                            "table_name": table_name,
-                            "index_name": f"{table_name}_{col_name}",
-                            "col_name": col_name
-                        },
-                    ):
-                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+                with conn.begin():
+                    # mysql will raise error if changing type to text but the column already indexed without explicit key length
+                    # hence the associated index must be dropped first
+                    if self.client.dialect == "mysql" and old_data_type.startswith("VARCHAR") and data_type == "TEXT":
+                        for idx in conn.execute(
+                            text(
+                                "SELECT index_name "
+                                "FROM information_schema.statistics "
+                                "WHERE table_name = :table_name "
+                                "AND index_name LIKE :index_name "
+                                "AND column_name = :col_name;"
+                            ),
+                            {
+                                "table_name": table_name,
+                                "index_name": f"{table_name}_{col_name}",
+                                "col_name": col_name
+                            },
+                        ):
+                            conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP INDEX {self.client.quoted_id(idx[0])}"))
 
-                # change the type
-                conn.execute(query)
+                    # change the type
+                    conn.execute(text(query))
 
         def column_from_multivalued(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
@@ -334,29 +337,30 @@ class SQLBackend:
             }
 
             with self.client.engine.connect() as conn:
-                # mysql will raise error if dropping column which has functional index,
-                # hence the associated index must be dropped first
-                if self.client.dialect == "mysql":
-                    for idx in conn.execute(
-                        text(
-                            "SELECT index_name "
-                            "FROM information_schema.statistics "
-                            "WHERE table_name = :table_name "
-                            "AND index_name LIKE :index_name '%' "
-                            "AND expression LIKE '%' :col_name '%';"
-                        ),
-                        {
-                            "table_name": table_name,
-                            "index_name": f"{table_name}_json_",
-                            "col_name": col_name
-                        },
-                    ):
-                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+                with conn.begin():
+                    # mysql will raise error if dropping column which has functional index,
+                    # hence the associated index must be dropped first
+                    if self.client.dialect == "mysql":
+                        for idx in conn.execute(
+                            text(
+                                "SELECT index_name "
+                                "FROM information_schema.statistics "
+                                "WHERE table_name = :table_name "
+                                "AND index_name LIKE :index_name "
+                                "AND expression LIKE :col_name;"
+                            ),
+                            {
+                                "table_name": table_name,
+                                "index_name": f"{table_name}_json_%",
+                                "col_name": f"%{col_name}%"
+                            },
+                        ):
+                            conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP INDEX {self.client.quoted_id(idx[0])}"))
 
-                # to change the storage format of a JSON column, drop the column and
-                # add the column back specifying the new storage format
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+                    # to change the storage format of a JSON column, drop the column and
+                    # add the column back specifying the new storage format
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"))
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"))
 
             # force-reload metadata as we may have changed the schema before migrating old data
             self.client._metadata = None

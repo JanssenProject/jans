@@ -35,10 +35,10 @@ def cleanup(limit):
 
             try:
                 if client.dialect == "mysql":
-                    query = text(f"DELETE FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit}")  # nosec: B608
+                    query = f"DELETE FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit}"  # nosec: B608
                 else:  # likely postgres
-                    query = text(f"DELETE FROM {client.quoted_id(table)} WHERE doc_id IN (SELECT doc_id FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit})")  # nosec: B608
-                conn.execute(query, {"deleted": True})
+                    query = f"DELETE FROM {client.quoted_id(table)} WHERE doc_id IN (SELECT doc_id FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit})"  # nosec: B608
+                conn.execute(text(query), {"deleted": True})
                 logger.info(f"Cleanup expired entries in {table}")
             except Exception as exc:
                 logger.warning(f"Unable to cleanup expired entries in {table}; reason={exc}")

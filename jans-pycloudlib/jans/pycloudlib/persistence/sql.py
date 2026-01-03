@@ -24,6 +24,7 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import delete
 from sqlalchemy import event
+from sqlalchemy import text
 from sqlalchemy.engine.url import URL
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
@@ -645,13 +646,14 @@ class SqlClient(SqlSchemaMixin):
         Note: When Cloud SQL Connector is enabled, this URL is not used.
         The connection is handled by the connector's creator function instead.
         """
-        return URL(
+        return URL.create(
             drivername=self.adapter.connector,
             username=os.environ.get("CN_SQL_DB_USER", "jans"),
             password=get_sql_password(self.manager),
             host=os.environ.get("CN_SQL_DB_HOST", "localhost"),
             port=int(os.environ.get("CN_SQL_DB_PORT", "3306")),
             database=os.environ.get("CN_SQL_DB_NAME", "jans"),
+            query={},
         )
 
     @property
@@ -670,14 +672,14 @@ class SqlClient(SqlSchemaMixin):
                 )
 
                 # do reflection on database table
-                self._metadata = MetaData(bind=self.engine)
-                self._metadata.reflect()
+                self._metadata = MetaData()
+                self._metadata.reflect(self.engine)
         return self._metadata
 
     def connected(self) -> bool:
         """Check whether connection is alive by executing simple query."""
         with self.engine.connect() as conn:
-            result = conn.execute("SELECT 1 AS is_alive")
+            result = conn.execute(text("SELECT 1 AS is_alive"))
             return bool(result.fetchone()[0] > 0)
 
     def create_table(self, table_name: str, column_mapping: dict[str, str], pk_column: str) -> None:
@@ -695,12 +697,13 @@ class SqlClient(SqlSchemaMixin):
         query = f"CREATE TABLE {self.quoted_id(table_name)} ({columns_fmt}, {pk_def})"
 
         with self.engine.connect() as conn:
-            try:
-                conn.execute(query)
-                # refresh metadata as we have newly created table
-                self.metadata.reflect()
-            except DatabaseError as exc:  # noqa: B902
-                self.adapter.on_create_table_error(exc)
+            with conn.begin():
+                try:
+                    conn.execute(text(query))
+                    # refresh metadata as we have newly created table
+                    self.metadata.reflect(conn)
+                except DatabaseError as exc:
+                    self.adapter.on_create_table_error(exc)
 
     def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
@@ -734,10 +737,11 @@ class SqlClient(SqlSchemaMixin):
     def create_index(self, query: str) -> None:
         """Create index using raw query."""
         with self.engine.connect() as conn:
-            try:
-                conn.execute(query)
-            except DatabaseError as exc:  # noqa: B902
-                self.adapter.on_create_index_error(exc)
+            with conn.begin():
+                try:
+                    conn.execute(text(query))
+                except DatabaseError as exc:
+                    self.adapter.on_create_index_error(exc)
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
@@ -749,7 +753,7 @@ class SqlClient(SqlSchemaMixin):
         if table is None:
             return False
 
-        query = select([func.count()]).select_from(table).where(
+        query = select(func.count()).select_from(table).where(
             table.c.doc_id == id_
         )
         with self.engine.connect() as conn:
@@ -763,10 +767,11 @@ class SqlClient(SqlSchemaMixin):
 
         query = table.insert().values(column_mapping)
         with self.engine.connect() as conn:
-            try:
-                conn.execute(query)
-            except DatabaseError as exc:  # noqa: B902
-                self.adapter.on_insert_into_error(exc)
+            with conn.begin():
+                try:
+                    conn.execute(query)
+                except DatabaseError as exc:
+                    self.adapter.on_insert_into_error(exc)
 
     def get(self, table_name: str, id_: str, column_names: _t.Union[list[str], None] = None) -> dict[str, _t.Any]:
         """Get a row from a table with matching ID."""
@@ -774,20 +779,18 @@ class SqlClient(SqlSchemaMixin):
 
         attrs = column_names or []
         if attrs:
-            cols = [table.c[attr] for attr in attrs]
+            _select = select(*[table.c[attr] for attr in attrs])
         else:
-            cols = [table]
+            _select = select(table)
 
-        query = select(cols).select_from(table).where(
-            table.c.doc_id == id_
-        )
+        query = _select.where(table.c.doc_id == id_)
         with self.engine.connect() as conn:
             result = conn.execute(query)
             entry = result.fetchone()
 
         if not entry:
             return {}
-        return dict(entry)
+        return dict(entry._mapping)
 
     def update(self, table_name: str, id_: str, column_mapping: dict[str, _t.Any]) -> bool:
         """Update a table row with matching ID."""
@@ -795,7 +798,8 @@ class SqlClient(SqlSchemaMixin):
 
         query = table.update().where(table.c.doc_id == id_).values(column_mapping)
         with self.engine.connect() as conn:
-            result = conn.execute(query)
+            with conn.begin():
+                result = conn.execute(query)
         return bool(result.rowcount)
 
     def search(self, table_name: str, column_names: _t.Union[list[str], None] = None) -> _t.Iterator[dict[str, _t.Any]]:
@@ -804,21 +808,21 @@ class SqlClient(SqlSchemaMixin):
 
         attrs = column_names or []
         if attrs:
-            cols = [table.c[attr] for attr in attrs]
+            query = select(*[table.c[attr] for attr in attrs])
         else:
-            cols = [table]
+            query = select(table)
 
-        query = select(cols).select_from(table)
         with self.engine.connect() as conn:
             result = conn.execute(query)
             for entry in result:
-                yield dict(entry)
+                yield dict(entry._mapping)
 
     @property
     def server_version(self) -> str:
         """Display server version."""
-        version: str = self.engine.scalar(self.adapter.server_version_query)
-        return version
+        with self.engine.connect() as conn:
+            version: str = conn.scalar(text(self.adapter.server_version_query))
+            return version
 
     def _transform_value(self, key: str, values: _t.Any) -> _t.Any:
         """Transform value from one to another based on its data type.
@@ -948,8 +952,9 @@ class SqlClient(SqlSchemaMixin):
 
         query = delete(table).where(table.c.doc_id == id_)
         with self.engine.connect() as conn:
-            result = conn.execute(query)
-            return bool(result.rowcount)
+            with conn.begin():
+                result = conn.execute(query)
+                return bool(result.rowcount)
 
     @property
     def use_simple_json(self):
@@ -980,8 +985,9 @@ class SqlClient(SqlSchemaMixin):
         column_mapping = self._apply_json_defaults(table, column_mapping)
 
         with self.engine.connect() as conn:
-            query = self.adapter.upsert_query(table, column_mapping, update_mapping)
-            conn.execute(query)
+            with conn.begin():
+                query = self.adapter.upsert_query(table, column_mapping, update_mapping)
+                conn.execute(query)
 
     def upsert_from_file(
         self,
