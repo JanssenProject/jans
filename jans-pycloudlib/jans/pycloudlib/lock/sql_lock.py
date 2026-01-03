@@ -39,9 +39,9 @@ class SqlLock(BaseLock):
             raise_on_error = False
 
             # if error is not about duplicated table, force raising exception
-            if self._dialect in ("pgsql", "postgresql") and exc.orig.pgcode != "42P07":
+            if self.client.dialect in ("pgsql", "postgresql") and exc.orig.pgcode != "42P07":
                 raise_on_error = True
-            elif self._dialect == "mysql" and exc.orig.args[0] != 1050:
+            elif self.client.dialect == "mysql" and exc.orig.args[0] != 1050:
                 raise_on_error = True
 
             if raise_on_error:
