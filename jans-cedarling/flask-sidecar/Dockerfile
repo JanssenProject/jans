@@ -1,5 +1,4 @@
-FROM python:3.10.16-slim-bookworm
-
+FROM python:3.10.16-slim-bookworm@sha256:5fb1a18941b20a1be253974bf5ad9e63c9e251279856649b356178962e8908a2
 # ===============
 # Debian packages
 # ===============
