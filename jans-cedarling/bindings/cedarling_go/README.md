@@ -269,65 +269,27 @@ logs := instance.GetLogsByTag("info")
 
 ### Policy Store Sources
 
-Cedarling supports multiple ways to load policy stores:
+Cedarling supports multiple ways to load policy stores. See [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats) for complete documentation on all supported formats.
 
-#### Legacy Single-File Formats
+**Example configurations:**
 
 ```go
 config := map[string]any{
     // From a local JSON file
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-    // Or from Lock Server URI
+
+    // From a directory with human-readable Cedar files
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
+
+    // From a local .cjar archive (Cedar Archive)
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+
+    // From a remote .cjar archive
+    "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar",
+
+    // From Lock Server
     "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
 }
-```
-
-#### New Directory-Based Format
-
-Policy stores can be structured as directories with human-readable Cedar files:
-
-```text
-policy-store/
-├── metadata.json           # Required: Store metadata (id, name, version)
-├── manifest.json           # Optional: File checksums for integrity validation
-├── schema.cedarschema      # Required: Cedar schema (human-readable)
-├── policies/               # Required: .cedar policy files
-│   ├── allow-read.cedar
-│   └── deny-guest.cedar
-├── templates/              # Optional: .cedar template files
-├── entities/               # Optional: .json entity files
-└── trusted-issuers/        # Optional: .json issuer configurations
-```
-
-**metadata.json structure:**
-
-```json
-{
-  "cedar_version": "4.4.0",
-  "policy_store": {
-    "id": "abc123def456",
-    "name": "My Application Policies",
-    "version": "1.0.0"
-  }
-}
-```
-
-**manifest.json structure (optional, for integrity validation):**
-
-```json
-{
-  "policy_store_id": "abc123def456",
-  "generated_date": "2024-01-01T12:00:00Z",
-  "files": {
-    "metadata.json": { "size": 245, "checksum": "sha256:abc123..." },
-    "schema.cedarschema": { "size": 1024, "checksum": "sha256:def456..." }
-  }
-}
-```
-
-#### Cedar Archive (.cjar) Format
-
-Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribution and deployment.
 
 ### ID Token Trust Mode
 
