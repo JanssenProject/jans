@@ -274,22 +274,31 @@ Cedarling supports multiple ways to load policy stores. See [Policy Store Format
 **Example configurations:**
 
 ```go
+// From a local JSON file
 config := map[string]any{
-    // From a local JSON file
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+}
 
-    // From a directory with human-readable Cedar files
+// From a directory with human-readable Cedar files
+config := map[string]any{
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
+}
 
-    // From a local .cjar archive (Cedar Archive)
+// From a local .cjar archive (Cedar Archive)
+config := map[string]any{
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+}
 
-    // From a remote .cjar archive
+// From a remote .cjar archive
+config := map[string]any{
     "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar",
+}
 
-    // From Lock Server
+// From Lock Server
+config := map[string]any{
     "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
 }
+```
 
 ### ID Token Trust Mode
 
