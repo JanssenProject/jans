@@ -7,86 +7,62 @@ mod spawn_task;
 
 pub use spawn_task::*;
 
+use http_utils::{Backoff, HttpRequestError, Sender};
 use reqwest::Client;
 use serde::Deserialize;
 use std::time::Duration;
 
-/// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
-/// with retry logic.
+/// A wrapper around `reqwest::Client` providing HTTP request functionality
+/// with retry logic using exponential backoff.
 ///
 /// The `HttpClient` struct allows for sending GET requests with a retry mechanism
 /// that attempts to fetch the requested resource up to a maximum number of times
-/// if an error occurs.
+/// if an error occurs, using the `Sender` and `Backoff` utilities from `http_utils`.
 #[derive(Debug)]
 pub struct HttpClient {
-    client: reqwest::Client,
+    client: Client,
+    base_delay: Duration,
     max_retries: u32,
-    retry_delay: Duration,
 }
 
 impl HttpClient {
     pub fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
         let client = Client::builder()
             .build()
-            .map_err(HttpClientError::Initialization)?;
+            .map_err(HttpRequestError::InitializeHttpClient)?;
 
         Ok(Self {
             client,
+            base_delay: retry_delay,
             max_retries,
-            retry_delay,
         })
     }
-}
 
-impl HttpClient {
-    /// Private helper for GET requests with retry logic.
-    ///
-    /// Retries are performed silently - the final error is returned if all attempts fail.
-    /// This keeps HttpClient as a simple, low-level utility without logging dependencies.
-    async fn get_with_retry(&self, uri: &str) -> Result<reqwest::Response, HttpClientError> {
-        let mut attempts = 0;
-        loop {
-            match self.client.get(uri).send().await {
-                Ok(response) => return Ok(response),
-                Err(_) if attempts < self.max_retries => {
-                    attempts += 1;
-                    // Retry silently - callers can log the final error if needed
-                    tokio::time::sleep(self.retry_delay * attempts).await;
-                },
-                Err(e) => return Err(HttpClientError::MaxHttpRetriesReached(e)),
-            }
-        }
+    /// Creates a new Sender with the configured backoff strategy.
+    fn create_sender(&self) -> Sender {
+        Sender::new(Backoff::new_exponential(
+            self.base_delay,
+            Some(self.max_retries),
+        ))
     }
 
     /// Sends a GET request to the specified URI with retry logic.
     pub async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        let response = self.get_with_retry(uri).await?;
-        let response = response
-            .error_for_status()
-            .map_err(HttpClientError::HttpStatus)?;
-        Ok(Response {
-            text: response
-                .text()
-                .await
-                .map_err(HttpClientError::DecodeResponseUtf8)?,
-        })
+        let mut sender = self.create_sender();
+        let client = &self.client;
+        let text = sender.send_text(|| client.get(uri)).await?;
+        Ok(Response { text })
     }
 
-    /// Sends a GET request to the specified URI with retry logic, returning raw bytes.  
-    ///  
-    /// This method will attempt to fetch the resource up to the configured max_retries,  
-    /// with an increasing delay between each attempt. Useful for fetching binary content  
-    /// like archive files.  
+    /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
+    ///
+    /// This method will attempt to fetch the resource up to the configured max_retries,
+    /// with exponential backoff between each attempt. Useful for fetching binary content
+    /// like archive files.
     pub async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
-        let response = self.get_with_retry(uri).await?;
-        let response = response
-            .error_for_status()
-            .map_err(HttpClientError::HttpStatus)?;
-        response
-            .bytes()
-            .await
-            .map(|b| b.to_vec())
-            .map_err(HttpClientError::DecodeResponseBody)
+        let mut sender = self.create_sender();
+        let client = &self.client;
+        sender.send_bytes(|| client.get(uri)).await
     }
 }
 
@@ -104,24 +80,8 @@ impl Response {
     }
 }
 
-/// Error type for the HttpClient
-#[derive(thiserror::Error, Debug)]
-pub enum HttpClientError {
-    /// Indicates failure to initialize the HTTP client.
-    #[error("Failed to initilize HTTP client: {0}")]
-    Initialization(#[source] reqwest::Error),
-    /// Indicates an HTTP error response received from an endpoint.
-    #[error("Received error HTTP status: {0}")]
-    HttpStatus(#[source] reqwest::Error),
-    /// Indicates a failure to reach the endpoint after 3 attempts.
-    #[error("Could not reach endpoint after trying 3 times: {0}")]
-    MaxHttpRetriesReached(#[source] reqwest::Error),
-    /// Indicates a failure decode the response body to UTF-8
-    #[error("Failed to decode the server's response to UTF-8: {0}")]
-    DecodeResponseUtf8(#[source] reqwest::Error),
-    #[error("Failed to read the server's response body: {0}")]
-    DecodeResponseBody(#[source] reqwest::Error),
-}
+/// Error type for the HttpClient - re-export from http_utils for compatibility
+pub type HttpClientError = HttpRequestError;
 
 #[cfg(test)]
 mod test {
@@ -177,19 +137,21 @@ mod test {
         let response = client.get("0.0.0.0").await;
 
         assert!(
-            matches!(response, Err(HttpClientError::MaxHttpRetriesReached(_))),
-            "Expected error due to MaxHttpRetriesReached: {response:?}"
+            matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
+            "Expected error due to MaxRetriesExceeded: {response:?}"
         );
     }
 
     #[tokio::test]
-    async fn errors_on_http_error_status() {
+    async fn retries_on_http_error_status_then_fails() {
         let mut mock_server = Server::new_async().await;
 
+        // The new implementation retries on HTTP error status codes too,
+        // so we expect multiple attempts before MaxRetriesExceeded
         let mock_endpoint_fut = mock_server
             .mock("GET", "/.well-known/openid-configuration")
             .with_status(500)
-            .expect(1)
+            .expect_at_least(1)
             .create_async();
 
         let client =
@@ -201,8 +163,8 @@ mod test {
         let (mock_endpoint, response) = join!(mock_endpoint_fut, client_fut);
 
         assert!(
-            matches!(response, Err(HttpClientError::HttpStatus(_))),
-            "Expected error due to receiving an http error code: {response:?}"
+            matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
+            "Expected error due to MaxRetriesExceeded after retrying on HTTP errors: {response:?}"
         );
 
         mock_endpoint.assert();
@@ -232,12 +194,14 @@ mod test {
     }
 
     #[tokio::test]
-    async fn get_bytes_http_error_status() {
+    async fn get_bytes_retries_on_http_error_status() {
         let mut mock_server = Server::new_async().await;
+
+        // The new implementation retries on HTTP error status codes too
         let mock_endpoint = mock_server
             .mock("GET", "/error-binary")
             .with_status(500)
-            .expect(1)
+            .expect_at_least(1)
             .create_async();
 
         let client =
@@ -247,8 +211,8 @@ mod test {
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
 
         assert!(
-            matches!(req_result, Err(HttpClientError::HttpStatus(_))),
-            "Expected error due to receiving an http error code: {req_result:?}"
+            matches!(req_result, Err(HttpClientError::MaxRetriesExceeded)),
+            "Expected MaxRetriesExceeded after retrying on HTTP error status: {req_result:?}"
         );
         mock_result.assert();
     }
@@ -259,8 +223,8 @@ mod test {
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
         let response = client.get_bytes("0.0.0.0").await;
         assert!(
-            matches!(response, Err(HttpClientError::MaxHttpRetriesReached(_))),
-            "Expected error due to MaxHttpRetriesReached: {response:?}"
+            matches!(response, Err(HttpClientError::MaxRetriesExceeded)),
+            "Expected error due to MaxRetriesExceeded: {response:?}"
         );
     }
 }

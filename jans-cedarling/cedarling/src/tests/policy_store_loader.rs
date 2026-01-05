@@ -849,44 +849,47 @@ async fn test_load_from_cjar_url_and_authorize_success() {
 }
 
 /// Test that CjarUrl handles HTTP errors gracefully.
+/// The HTTP client retries on HTTP error status codes before failing.
 #[test]
 async fn test_cjar_url_handles_http_error() {
     use super::utils::cedarling_util::get_config;
     use mockito::Server;
 
     // Create mock server that returns 404
+    // Note: The HTTP client will retry on HTTP errors, so expect multiple requests
     let mut server = Server::new_async().await;
     let mock = server
         .mock("GET", "/nonexistent.cjar")
         .with_status(404)
         .with_body("Not Found")
+        .expect_at_least(1)
         .create_async()
         .await;
 
     let cjar_url = format!("{}/nonexistent.cjar", server.url());
 
-    // Attempt to create Cedarling - should fail
+    // Attempt to create Cedarling - should fail after retries
     let config = get_config(PolicyStoreSource::CjarUrl(cjar_url));
 
     let err = Cedarling::new(&config)
         .await
         .err()
-        .expect("Cedarling initialization should fail with 404 error");
+        .expect("Cedarling initialization should fail after retries on 404 error");
 
-    // Verify the mock was called
+    // Verify the mock was called at least once
     mock.assert_async().await;
 
-    // Verify the error is an Archive error containing the HTTP error message
+    // Verify the error is an Archive error (max retries exceeded after HTTP errors)
     assert!(
         matches!(
             &err,
             crate::InitCedarlingError::ServiceConfig(
                 crate::init::service_config::ServiceConfigError::PolicyStore(
-                    crate::init::policy_store::PolicyStoreLoadError::Archive(msg)
+                    crate::init::policy_store::PolicyStoreLoadError::Archive(_)
                 )
-            ) if msg.contains("404")
+            )
         ),
-        "Expected Archive error with 404 status, got: {:?}",
+        "Expected Archive error after retries, got: {:?}",
         err
     );
 }
