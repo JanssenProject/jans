@@ -461,15 +461,23 @@ mod manifest_security {
         // Modify schema.cedarschema to trigger checksum mismatch
         // We modify a byte in the middle to avoid breaking the file structure
         let schema_path = temp_dir.path().join("schema.cedarschema");
-        if schema_path.exists() {
-            let mut schema_content = fs::read(&schema_path).unwrap();
-            if schema_content.len() > 10 {
-                // Modify a byte in the middle to change checksum without breaking structure
-                let mid_index = schema_content.len() / 2;
-                schema_content[mid_index] = schema_content[mid_index].wrapping_add(1);
-                fs::write(&schema_path, schema_content).unwrap();
-            }
-        }
+
+        // Assert preconditions to ensure the test actually exercises checksum detection
+        assert!(
+            schema_path.exists(),
+            "schema.cedarschema must exist for checksum mismatch test"
+        );
+        let mut schema_content = fs::read(&schema_path).unwrap();
+        assert!(
+            schema_content.len() > 10,
+            "schema.cedarschema must be >10 bytes for mutation, got {} bytes",
+            schema_content.len()
+        );
+
+        // Modify a byte in the middle to change checksum without breaking structure
+        let mid_index = schema_content.len() / 2;
+        schema_content[mid_index] = schema_content[mid_index].wrapping_add(1);
+        fs::write(&schema_path, schema_content).unwrap();
 
         // Attempt to load - should fail with checksum mismatch
         // Use the synchronous load_directory method directly for testing
