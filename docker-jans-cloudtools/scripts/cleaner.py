@@ -19,6 +19,7 @@ logger = logging.getLogger("cloudtools")
     help="How many expired entries need to be removed per table",
     default=1000,
     show_default=True,
+    type=int,
 )
 def cleanup(limit):
     """Cleanup expired entries in persistence."""
@@ -29,19 +30,20 @@ def cleanup(limit):
     start_time = time.time()
 
     with client.engine.connect() as conn:
-        for table, cols in client.get_table_mapping().items():
-            if not all(["del" in cols, "exp" in cols]):
-                continue
+        with conn.begin():
+            for table, cols in client.get_table_mapping().items():
+                if not all(["del" in cols, "exp" in cols]):
+                    continue
 
-            try:
-                if client.dialect == "mysql":
-                    query = f"DELETE FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit}"  # nosec: B608
-                else:  # likely postgres
-                    query = f"DELETE FROM {client.quoted_id(table)} WHERE doc_id IN (SELECT doc_id FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit})"  # nosec: B608
-                conn.execute(text(query), {"deleted": True})
-                logger.info(f"Cleanup expired entries in {table}")
-            except Exception as exc:
-                logger.warning(f"Unable to cleanup expired entries in {table}; reason={exc}")
+                try:
+                    if client.dialect == "mysql":
+                        query = f"DELETE FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit}"  # nosec: B608
+                    else:  # likely postgres
+                        query = f"DELETE FROM {client.quoted_id(table)} WHERE doc_id IN (SELECT doc_id FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit})"  # nosec: B608
+                    conn.execute(text(query), {"deleted": True})
+                    logger.info(f"Cleanup expired entries in {table}")
+                except Exception as exc:
+                    logger.warning(f"Unable to cleanup expired entries in {table}; reason={exc}")
 
     finish_time = time.time()
     logger.info(f"Cleanup process finished after {(finish_time - start_time):0.2f} seconds")
