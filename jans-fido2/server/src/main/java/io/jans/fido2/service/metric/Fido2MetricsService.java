@@ -89,8 +89,8 @@ public class Fido2MetricsService {
     public List<Fido2MetricsEntry> getMetricsEntries(LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Convert LocalDateTime to Date for SQL persistence filters
-            Date startDate = Date.from(startTime.atZone(ZoneId.of("UTC")).toInstant());
-            Date endDate = Date.from(endTime.atZone(ZoneId.of("UTC")).toInstant());
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
             
             Filter filter = Filter.createANDFilter(
                 Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startDate),
@@ -114,8 +114,8 @@ public class Fido2MetricsService {
     public List<Fido2MetricsEntry> getMetricsEntriesByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Convert LocalDateTime to Date for SQL persistence filters
-            Date startDate = Date.from(startTime.atZone(ZoneId.of("UTC")).toInstant());
-            Date endDate = Date.from(endTime.atZone(ZoneId.of("UTC")).toInstant());
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
             
             Filter filter = Filter.createANDFilter(
                 Filter.createEqualityFilter("jansFido2MetricsUserId", userId),
@@ -138,8 +138,8 @@ public class Fido2MetricsService {
     public List<Fido2MetricsEntry> getMetricsEntriesByOperation(String operationType, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Convert LocalDateTime to Date for SQL persistence filters
-            Date startDate = Date.from(startTime.atZone(ZoneId.of("UTC")).toInstant());
-            Date endDate = Date.from(endTime.atZone(ZoneId.of("UTC")).toInstant());
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
             
             Filter filter = Filter.createANDFilter(
                 Filter.createEqualityFilter("jansFido2MetricsOperationType", operationType),
@@ -290,8 +290,8 @@ public class Fido2MetricsService {
     public List<Fido2MetricsAggregation> getAggregations(String aggregationType, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Convert LocalDateTime to Date for SQL persistence filters
-            Date startDate = Date.from(startTime.atZone(ZoneId.of("UTC")).toInstant());
-            Date endDate = Date.from(endTime.atZone(ZoneId.of("UTC")).toInstant());
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
             
             // Interval overlap check: aggregation overlaps query if:
             // aggregation.startTime <= queryEndTime AND aggregation.endTime >= queryStartTime
@@ -628,8 +628,8 @@ public class Fido2MetricsService {
     private List<Fido2MetricsEntry> getMetricsEntriesByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Convert LocalDateTime to Date for SQL persistence filters
-            Date startDate = Date.from(startTime.atZone(ZoneId.of("UTC")).toInstant());
-            Date endDate = Date.from(endTime.atZone(ZoneId.of("UTC")).toInstant());
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
             
             Filter filter = Filter.createANDFilter(
                 Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startDate),
@@ -643,6 +643,13 @@ public class Fido2MetricsService {
             log.error("Failed to retrieve metrics entries for time range: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
+    }
+    
+    /**
+     * Convert LocalDateTime to Date for persistence layer compatibility
+     */
+    private Date convertToDate(LocalDateTime dateTime) {
+        return Date.from(dateTime.atZone(ZoneId.of("UTC")).toInstant());
     }
 
     // ========== HELPER METHODS ==========
@@ -665,96 +672,104 @@ public class Fido2MetricsService {
         
         // Convert LocalDateTime to Date for ORM compatibility (already in UTC)
         if (metricsData.getTimestamp() != null) {
-            entry.setTimestamp(Date.from(metricsData.getTimestamp().atZone(ZoneId.of("UTC")).toInstant()));
+            entry.setTimestamp(convertToDate(metricsData.getTimestamp()));
         }
         
         // Essential fields - always set
+        setEssentialFields(entry, metricsData);
+        
+        // Optional fields - only set if available
+        setOptionalFields(entry, metricsData);
+        
+        // Device info - only set if available and non-empty
+        setDeviceInfo(entry, metricsData);
+        
+        return entry;
+    }
+    
+    /**
+     * Set essential fields that are always present
+     */
+    private void setEssentialFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
         entry.setUserId(metricsData.getUserId());
         entry.setUsername(metricsData.getUsername());
         entry.setOperationType(metricsData.getOperationType());
         entry.setStatus(metricsData.getOperationStatus());
-        
-        // Performance metrics - only set if available
+    }
+    
+    /**
+     * Set optional fields that may be null or empty
+     */
+    private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+        // Performance metrics
         if (metricsData.getDurationMs() != null) {
             entry.setDurationMs(metricsData.getDurationMs());
         }
         
-        // Authenticator info - only set if available
-        if (metricsData.getAuthenticatorType() != null && !metricsData.getAuthenticatorType().trim().isEmpty()) {
-            entry.setAuthenticatorType(metricsData.getAuthenticatorType());
+        // Authenticator info
+        setIfNotEmpty(metricsData.getAuthenticatorType(), entry::setAuthenticatorType);
+        
+        // Error info
+        setIfNotEmpty(metricsData.getErrorReason(), entry::setErrorReason);
+        setIfNotEmpty(metricsData.getErrorCategory(), entry::setErrorCategory);
+        
+        // Fallback info
+        setIfNotEmpty(metricsData.getFallbackMethod(), entry::setFallbackMethod);
+        setIfNotEmpty(metricsData.getFallbackReason(), entry::setFallbackReason);
+        
+        // Network info
+        setIfNotEmpty(metricsData.getIpAddress(), entry::setIpAddress);
+        setIfNotEmpty(metricsData.getUserAgent(), entry::setUserAgent);
+        
+        // Session info
+        setIfNotEmpty(metricsData.getSessionId(), entry::setSessionId);
+        
+        // Cluster info
+        setIfNotEmpty(metricsData.getNodeId(), entry::setNodeId);
+    }
+    
+    /**
+     * Set field value if string is not null and not empty
+     */
+    private void setIfNotEmpty(String value, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(value);
+        }
+    }
+    
+    /**
+     * Set device info if available and non-empty
+     */
+    private void setDeviceInfo(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+        if (metricsData.getDeviceInfo() == null) {
+            return;
         }
         
-        // Error info - only set for failures
-        if (metricsData.getErrorReason() != null && !metricsData.getErrorReason().trim().isEmpty()) {
-            entry.setErrorReason(metricsData.getErrorReason());
-        }
-        if (metricsData.getErrorCategory() != null && !metricsData.getErrorCategory().trim().isEmpty()) {
-            entry.setErrorCategory(metricsData.getErrorCategory());
-        }
+        Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
+        boolean hasDeviceInfo = false;
         
-        // Fallback info - only set for fallback events
-        if (metricsData.getFallbackMethod() != null && !metricsData.getFallbackMethod().trim().isEmpty()) {
-            entry.setFallbackMethod(metricsData.getFallbackMethod());
-        }
-        if (metricsData.getFallbackReason() != null && !metricsData.getFallbackReason().trim().isEmpty()) {
-            entry.setFallbackReason(metricsData.getFallbackReason());
-        }
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowser(), deviceInfo::setBrowser);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowserVersion(), deviceInfo::setBrowserVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOperatingSystem(), deviceInfo::setOs);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOsVersion(), deviceInfo::setOsVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getDeviceType(), deviceInfo::setDeviceType);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getUserAgent(), deviceInfo::setUserAgent);
         
-        // Network info - only set if available
-        if (metricsData.getIpAddress() != null && !metricsData.getIpAddress().trim().isEmpty()) {
-            entry.setIpAddress(metricsData.getIpAddress());
+        if (hasDeviceInfo) {
+            entry.setDeviceInfo(deviceInfo);
         }
-        if (metricsData.getUserAgent() != null && !metricsData.getUserAgent().trim().isEmpty()) {
-            entry.setUserAgent(metricsData.getUserAgent());
+    }
+    
+    /**
+     * Set device field if value is not null and not empty
+     * @return true if field was set, false otherwise
+     */
+    private boolean setDeviceField(String value, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(value);
+            return true;
         }
-        
-        // Session info - only set if available
-        if (metricsData.getSessionId() != null && !metricsData.getSessionId().trim().isEmpty()) {
-            entry.setSessionId(metricsData.getSessionId());
-        }
-        
-        // Cluster info - only set if available (useful for multi-node deployments)
-        if (metricsData.getNodeId() != null && !metricsData.getNodeId().trim().isEmpty()) {
-            entry.setNodeId(metricsData.getNodeId());
-        }
-        
-        // Convert device info - only set if available and non-empty
-        if (metricsData.getDeviceInfo() != null) {
-            Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
-            boolean hasDeviceInfo = false;
-            
-            if (metricsData.getDeviceInfo().getBrowser() != null && !metricsData.getDeviceInfo().getBrowser().trim().isEmpty()) {
-                deviceInfo.setBrowser(metricsData.getDeviceInfo().getBrowser());
-                hasDeviceInfo = true;
-            }
-            if (metricsData.getDeviceInfo().getBrowserVersion() != null && !metricsData.getDeviceInfo().getBrowserVersion().trim().isEmpty()) {
-                deviceInfo.setBrowserVersion(metricsData.getDeviceInfo().getBrowserVersion());
-                hasDeviceInfo = true;
-            }
-            if (metricsData.getDeviceInfo().getOperatingSystem() != null && !metricsData.getDeviceInfo().getOperatingSystem().trim().isEmpty()) {
-                deviceInfo.setOs(metricsData.getDeviceInfo().getOperatingSystem());
-                hasDeviceInfo = true;
-            }
-            if (metricsData.getDeviceInfo().getOsVersion() != null && !metricsData.getDeviceInfo().getOsVersion().trim().isEmpty()) {
-                deviceInfo.setOsVersion(metricsData.getDeviceInfo().getOsVersion());
-                hasDeviceInfo = true;
-            }
-            if (metricsData.getDeviceInfo().getDeviceType() != null && !metricsData.getDeviceInfo().getDeviceType().trim().isEmpty()) {
-                deviceInfo.setDeviceType(metricsData.getDeviceInfo().getDeviceType());
-                hasDeviceInfo = true;
-            }
-            if (metricsData.getDeviceInfo().getUserAgent() != null && !metricsData.getDeviceInfo().getUserAgent().trim().isEmpty()) {
-                deviceInfo.setUserAgent(metricsData.getDeviceInfo().getUserAgent());
-                hasDeviceInfo = true;
-            }
-            
-            // Only set deviceInfo if we have at least one field populated
-            if (hasDeviceInfo) {
-                entry.setDeviceInfo(deviceInfo);
-            }
-        }
-        
-        return entry;
+        return false;
     }
 
     // ========== TREND ANALYSIS METHODS (GitHub Issue #4) ==========

@@ -108,6 +108,10 @@ public final class Fido2MetricsConstants {
     public static final String PREVIOUS_PERIOD = "previousPeriod";
     public static final String COMPARISON = "comparison";
     
+    // Query parameter names
+    public static final String PARAM_START_TIME = "startTime";
+    public static final String PARAM_END_TIME = "endTime";
+    
     // Fallback method constants
     public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";
     

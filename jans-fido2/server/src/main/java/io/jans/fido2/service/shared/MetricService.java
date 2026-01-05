@@ -81,6 +81,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
+    private static final String SUCCESS_STATUS = "SUCCESS";
 
     public void initTimer() {
     	initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
@@ -137,7 +138,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used
      */
     public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, "SUCCESS", null, Fido2MetricType.FIDO2_REGISTRATION_SUCCESS);
+        recordRegistrationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_REGISTRATION_SUCCESS);
     }
 
     /**
@@ -195,7 +196,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used
      */
     public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "SUCCESS", null, Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS);
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS);
     }
 
     /**
@@ -576,7 +577,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             UserMetricsUpdateRequest request = new UserMetricsUpdateRequest();
             request.setUserId(metricsData.getUserId());
             request.setUsername(metricsData.getUsername());
-            request.setSuccess("SUCCESS".equals(metricsData.getOperationStatus()));
+            request.setSuccess(SUCCESS_STATUS.equals(metricsData.getOperationStatus()));
             request.setAuthenticatorType(metricsData.getAuthenticatorType());
             request.setDurationMs(metricsData.getDurationMs());
             

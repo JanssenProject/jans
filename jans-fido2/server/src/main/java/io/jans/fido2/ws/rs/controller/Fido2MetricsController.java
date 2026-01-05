@@ -72,8 +72,8 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             List<?> entries = metricsService.getMetricsEntries(start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
@@ -102,8 +102,8 @@ public class Fido2MetricsController {
                 throw errorResponseFactory.invalidRequest("userId is required");
             }
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             List<?> entries = metricsService.getMetricsEntriesByUser(userId, start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
@@ -132,8 +132,8 @@ public class Fido2MetricsController {
                 throw errorResponseFactory.invalidRequest("operationType is required");
             }
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             List<?> entries = metricsService.getMetricsEntriesByOperation(operationType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
@@ -160,8 +160,8 @@ public class Fido2MetricsController {
             
             validateAggregationType(aggregationType);
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             List<?> aggregations = metricsService.getAggregations(aggregationType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(aggregations)).build();
@@ -188,8 +188,8 @@ public class Fido2MetricsController {
             
             validateAggregationType(aggregationType);
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             Map<String, Object> summary = metricsService.getAggregationSummary(aggregationType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(summary)).build();
@@ -212,8 +212,8 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             Map<String, Object> adoption = metricsService.getUserAdoptionMetrics(start, end);
             return Response.ok(dataMapperService.writeValueAsString(adoption)).build();
@@ -236,8 +236,8 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             Map<String, Object> performance = metricsService.getPerformanceMetrics(start, end);
             return Response.ok(dataMapperService.writeValueAsString(performance)).build();
@@ -260,8 +260,8 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             Map<String, Object> devices = metricsService.getDeviceAnalytics(start, end);
             return Response.ok(dataMapperService.writeValueAsString(devices)).build();
@@ -284,8 +284,8 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             Map<String, Object> errors = metricsService.getErrorAnalysis(start, end);
             return Response.ok(dataMapperService.writeValueAsString(errors)).build();
@@ -312,8 +312,8 @@ public class Fido2MetricsController {
             
             validateAggregationType(aggregationType);
             
-            LocalDateTime start = parseDateTime(startTime, "startTime");
-            LocalDateTime end = parseDateTime(endTime, "endTime");
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             
             Map<String, Object> trends = metricsService.getTrendAnalysis(aggregationType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(trends)).build();
@@ -465,10 +465,14 @@ public class Fido2MetricsController {
         try {
             return processor.process();
         } catch (WebApplicationException e) {
+            // Re-throw web application exceptions as-is (they already have proper status codes)
             throw e;
         } catch (Exception e) {
+            // Log the full exception with stack trace for debugging
             log.error("Error processing metrics request: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
+            // Wrap in a proper error response with context
+            String errorMessage = "An unexpected error occurred while processing the metrics request: " + e.getMessage();
+            throw errorResponseFactory.unknownError(errorMessage);
         }
     }
 

@@ -14,7 +14,6 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;

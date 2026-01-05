@@ -78,7 +78,9 @@ public class Fido2MetricsAggregationScheduler {
             bundle = ResourceBundle.getBundle("fido2-metrics");
         } catch (Exception e) {
             // Properties file not found - will use hardcoded defaults
-            System.err.println("WARN: fido2-metrics.properties not found, using defaults");
+            // Use logger factory since instance logger not available in static context
+            LoggerFactory.getLogger(Fido2MetricsAggregationScheduler.class)
+                .warn("fido2-metrics.properties not found, using defaults");
         }
         METRICS_CONFIG = bundle;
     }
