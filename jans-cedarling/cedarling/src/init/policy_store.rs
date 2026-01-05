@@ -153,16 +153,9 @@ async fn load_policy_store_from_cjar_file(
 async fn load_policy_store_from_cjar_file(
     _path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
-
-    // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_archive(_path).await {
-        Err(e) => Err(PolicyStoreLoadError::Archive(format!(
-            "Loading from file path is not supported in WASM. Use CjarUrl instead. Original error: {}",
-            e
-        ))),
-        Ok(_) => unreachable!("WASM stub should always return an error"),
-    }
+    Err(PolicyStoreLoadError::Archive(
+        "Loading from file path is not supported in WASM. Use CjarUrl instead.".to_string(),
+    ))
 }
 
 /// Loads the policy store from a Cedar Archive (.cjar) URL.
