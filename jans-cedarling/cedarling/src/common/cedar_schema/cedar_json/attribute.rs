@@ -9,7 +9,8 @@ use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum Attribute {
     String {
         required: bool,

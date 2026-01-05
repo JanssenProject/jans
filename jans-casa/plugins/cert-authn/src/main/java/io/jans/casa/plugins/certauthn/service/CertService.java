@@ -1,6 +1,7 @@
 package io.jans.casa.plugins.certauthn.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.unboundid.ldap.sdk.*;
 
 import io.jans.as.model.util.CertUtils;
 import io.jans.casa.core.model.*;
@@ -224,9 +225,6 @@ public class CertService {
         String fingerPrint = externalUid.replace(CERT_PREFIX, "");
         Certificate cert = new Certificate();
         cert.setFingerPrint(fingerPrint);
-
-        Function<String, String> keyFunc = t -> t.substring(0, t.indexOf('=')).toLowerCase();
-        Function<String, String> valFunc = t -> t.substring(t.indexOf('=') + 1);
         
         for (io.jans.scim.model.scim2.user.X509Certificate sc : scimCerts) {
             try {
@@ -234,8 +232,7 @@ public class CertService {
                 if (fingerPrint.equals(getFingerPrint(x509Certificate))) {
 
                     //Break the subject DN into its several pieces and store them in a map
-                    Map<String, String> attributes = Arrays.stream(sc.getDisplay().split(",\\s*"))
-                            .collect(Collectors.toMap(keyFunc, valFunc));
+                    Map<String, String> attributes = getDNAttributes(sc.getDisplay());
 
                     String cn = attributes.get("cn");
                     String ou = attributes.getOrDefault("ou", "");
@@ -292,4 +289,32 @@ public class CertService {
         return DigestUtils.sha1Hex(certificate.getEncoded());
     }
 
+    private Map<String, String> getDNAttributes(String dn) {
+        
+        Map<String, String> map = new HashMap<String, String>();
+        
+        if (Utils.isNotEmpty(dn)) {
+            try {
+                RDN[] rdns = DN.getRDNs(dn);
+                
+                //Collect the different attribute names and values in the map. The left-most attributes
+                //found are preferred over others when there are several attributes with the same name
+                for (RDN rdn: rdns) {
+                    Attribute[] attrs = rdn.getAttributes();
+
+                    for (Attribute attr : attrs) {
+                        String name = attr.getName().toLowerCase();
+                        if (!map.containsKey(name)) {
+                            map.put(name, attr.getValues()[0]);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        return map;
+        
+    }
+    
 }
