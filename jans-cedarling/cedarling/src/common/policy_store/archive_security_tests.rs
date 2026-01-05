@@ -292,7 +292,8 @@ mod input_validation {
 
         // Parse entities to trigger validation
         for entity_file in &loaded.entities {
-            let result = EntityParser::parse_entities(&entity_file.content, &entity_file.name, None);
+            let result =
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name, None);
             let err = result.expect_err("expected JSON parsing error for invalid entity JSON");
             assert!(
                 matches!(&err, PolicyStoreError::JsonParsing { .. }),
@@ -328,7 +329,7 @@ mod input_validation {
     }
 
     #[test]
-    fn test_rejects_duplicate_entity_uids() {
+    fn test_handles_duplicate_entity_uids_gracefully() {
         let builder = fixtures::duplicate_entity_uids();
         let archive = builder.build_archive().unwrap();
 
@@ -339,18 +340,25 @@ mod input_validation {
         // Parse all entities and detect duplicates
         let mut all_parsed_entities: Vec<ParsedEntity> = Vec::new();
         for entity_file in &loaded.entities {
-            let parsed = EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
-                .expect("should parse entities");
+            let parsed =
+                EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
+                    .expect("should parse entities");
             all_parsed_entities.extend(parsed);
         }
 
-        // Detect duplicates - this should error
-        let result = EntityParser::detect_duplicates(all_parsed_entities);
-        let err = result.expect_err("expected CedarEntityError for duplicate entity UIDs");
-        // detect_duplicates returns Vec<String>, so we need to check the error message
+        // Count entities before deduplication
+        let total_before = all_parsed_entities.len();
+
+        // Detect duplicates - this should succeed (duplicates handled gracefully)
+        // Using None for logger since we don't need to capture warnings in this test
+        let unique_entities = EntityParser::detect_duplicates(all_parsed_entities, &None);
+
+        // Should have fewer unique entities than total (duplicates were merged)
         assert!(
-            !err.is_empty(),
-            "Expected duplicate entity UID error, got empty error list"
+            unique_entities.len() < total_before,
+            "Expected fewer unique entities ({}) than total ({}) due to duplicates",
+            unique_entities.len(),
+            total_before
         );
     }
 
@@ -463,7 +471,6 @@ mod manifest_security {
             }
         }
 
-
         // Attempt to load - should fail with checksum mismatch
         // Use the synchronous load_directory method directly for testing
         use super::super::loader::DefaultPolicyStoreLoader;
@@ -471,7 +478,7 @@ mod manifest_security {
         let loader = DefaultPolicyStoreLoader::new(PhysicalVfs::new());
         let dir_str = temp_dir.path().to_str().unwrap();
         let loaded = loader.load_directory(dir_str).unwrap();
-        
+
         // Validate manifest - this should detect the checksum mismatch
         let result = loader.validate_manifest(dir_str, &loaded.metadata, &loaded.manifest.unwrap());
 

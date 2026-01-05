@@ -204,15 +204,13 @@ impl PolicyStoreManager {
         })?;
 
         // Create ValidatorSchema
-        let validator_schema =
-            ValidatorSchema::from_json_str(&json_string, Extensions::all_available()).map_err(
-                |e| {
-                    ConversionError::SchemaConversion(format!(
-                        "Failed to create ValidatorSchema: {}",
-                        e
-                    ))
-                },
-            )?;
+        let validator_schema = ValidatorSchema::from_json_str(
+            &json_string,
+            Extensions::all_available(),
+        )
+        .map_err(|e| {
+            ConversionError::SchemaConversion(format!("Failed to create ValidatorSchema: {}", e))
+        })?;
 
         Ok(CedarSchema {
             schema,
@@ -338,12 +336,11 @@ impl PolicyStoreManager {
             all_parsed_entities.extend(parsed);
         }
 
-        // Step 2: Detect duplicate entity UIDs
+        // Step 2: Detect duplicate entity UIDs (warns but doesn't fail on duplicates)
         // Note: We clone all_parsed_entities here because EntityParser::detect_duplicates
-        // currently takes ownership of the Vec and mutates it internally.
-        // This preserves the original all_parsed_entities for later hierarchy validation.
-        let unique_entities = EntityParser::detect_duplicates(all_parsed_entities.clone())
-            .map_err(|errors| ConversionError::EntityConversion(errors.join("; ")))?;
+        // takes ownership of the Vec. This preserves the original for later hierarchy validation.
+        // Duplicates are handled gracefully - the latest entity wins and a warning is logged.
+        let unique_entities = EntityParser::detect_duplicates(all_parsed_entities.clone(), logger);
 
         // Step 3: Validate entity hierarchy (optional - parent entities may be provided at runtime)
         // This ensures all parent references point to entities that exist in this store

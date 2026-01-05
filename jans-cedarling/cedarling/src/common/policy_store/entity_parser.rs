@@ -10,6 +10,9 @@
 //! parent relationships.
 
 use super::errors::{CedarEntityErrorType, PolicyStoreError};
+use super::log_entry::PolicyStoreLogEntry;
+use crate::log::Logger;
+use crate::log::interface::LogWriter;
 use cedar_policy::{Entities, Entity, EntityId, EntityTypeName, EntityUid, Schema};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
@@ -211,34 +214,32 @@ impl EntityParser {
         Ok(EntityUid::from_type_name_and_id(entity_type, entity_id))
     }
 
-    /// Detect and resolve duplicate entity UIDs.
+    /// Detect and handle duplicate entity UIDs.
     ///
     /// Returns a map of entity UIDs to their parsed entities.
-    /// If duplicates are found, returns an error with details about the conflicts.
+    /// If duplicates are found, logs warnings and uses the latest entity (last-write-wins).
+    /// This approach ensures Cedarling can start even with duplicate entities,
+    /// avoiding crashes of dependent applications while still alerting developers.
     pub fn detect_duplicates(
         entities: Vec<ParsedEntity>,
-    ) -> Result<HashMap<EntityUid, ParsedEntity>, Vec<String>> {
+        logger: &Option<Logger>,
+    ) -> HashMap<EntityUid, ParsedEntity> {
         let mut entity_map: HashMap<EntityUid, ParsedEntity> =
             HashMap::with_capacity(entities.len());
-        let mut duplicates: Vec<String> = Vec::new();
 
         for entity in entities {
             if let Some(existing) = entity_map.get(&entity.uid) {
-                duplicates.push(format!(
-                    "Duplicate entity UID '{}' found in files '{}' and '{}'",
+                // Warn about duplicate but continue - use the latest entity
+                logger.log_any(PolicyStoreLogEntry::warn(format!(
+                    "Duplicate entity UID '{}' found in files '{}' and '{}'. Using the latter.",
                     entity.uid, existing.filename, entity.filename
-                ));
-                // Don't insert the duplicate - keep the first occurrence
-            } else {
-                entity_map.insert(entity.uid.clone(), entity);
+                )));
             }
+            // Always insert - latest entity wins (last-write-wins semantics)
+            entity_map.insert(entity.uid.clone(), entity);
         }
 
-        if duplicates.is_empty() {
-            Ok(entity_map)
-        } else {
-            Err(duplicates)
-        }
+        entity_map
     }
 
     /// Create a Cedar Entities store from parsed entities.
@@ -478,12 +479,15 @@ mod tests {
             },
         ];
 
-        let map = EntityParser::detect_duplicates(entities).expect("Should have no duplicates");
+        // No logger needed for this test - duplicates are handled gracefully
+        let map = EntityParser::detect_duplicates(entities, &None);
         assert_eq!(map.len(), 2, "Should have 2 unique entities");
     }
 
     #[test]
-    fn test_detect_duplicates_found() {
+    fn test_detect_duplicates_uses_latest() {
+        // Create two entities with the same UID but different filenames
+        // The second (latest) one should be used
         let entities = vec![
             ParsedEntity {
                 entity: Entity::new(
@@ -509,16 +513,21 @@ mod tests {
             },
         ];
 
-        let result = EntityParser::detect_duplicates(entities);
-        let errors = result.expect_err("Should detect duplicates");
+        // Duplicates should be handled gracefully - no error, just warning (no logger here)
+        let map = EntityParser::detect_duplicates(entities, &None);
 
-        assert_eq!(errors.len(), 1, "Should have 1 duplicate error");
-        assert!(
-            errors[0].contains("User::\"alice\"")
-                && errors[0].contains("user1.json")
-                && errors[0].contains("user2.json"),
-            "Error should reference User::alice, user1.json and user2.json, got: {}",
-            errors[0]
+        // Should have 1 unique entity (the duplicate was handled)
+        assert_eq!(
+            map.len(),
+            1,
+            "Should have 1 unique entity after handling duplicate"
+        );
+
+        // The latest entity (from user2.json) should be used
+        let alice = map.get(&"User::\"alice\"".parse().unwrap()).unwrap();
+        assert_eq!(
+            alice.filename, "user2.json",
+            "Should use the latest entity (last-write-wins)"
         );
     }
 
