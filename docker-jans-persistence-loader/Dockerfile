@@ -18,7 +18,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=436bf147b379c2bf005f554db4b8cce3971c58ad
+ENV JANS_SOURCE_VERSION=abcbf28f7422a6f293669bfd172fcf546b4ecf42
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
