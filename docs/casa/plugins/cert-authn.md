@@ -88,7 +88,7 @@ The steps given are supposed to be executed in a developer or administrative mac
 
     1. Build the certificate chain file: `cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt > chain.pem`
 
-    1. Generate a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd`. This command will create a certificate signed with the intermediate certificate
+    1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd`. This command will create a certificate signed with the intermediate certificate
 
     1. Inspect the created cert: `step certificate inspect joe.crt`. Note the expiration is of one day and that "Client authentication" is explicitly part of the extended key usages
 
@@ -117,14 +117,14 @@ The instructions to setup this URL vary depending on the TLS version required an
 
     The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
 
-    - The server name/alias
+    - The server name
     - The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
 
     Transfer the edited file to `/etc/apache2/sites-enabled`. Note there is already a file named `https_jans.conf` with a `VirtualHost` for port 443 that you can use as a guide. Finally, add a `Listen 444` directive to file `/etc/apache2/ports.conf`.
 
 === "Apache 2.4 with TLS 1.2"
 
-    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in file `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
 
 ### Test
 
@@ -135,7 +135,7 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-1. Download the certificate authentication Agama project archive: `https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/replace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
+1. Download the certificate authentication Agama project archive: `https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn-agama/replace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
 
@@ -145,9 +145,9 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 
 1. Edit property `certPickupUrl` accordingly. This is the URL that displays the browser dialog for choosing a certificate
 
-1. If you did not [Generate testing certificates](#generate-testing-certificates), i.e. already owned some certs, create a file named `chain.pem` by concatenating the contents (in PEM format) of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
+1. If you did not [Generate testing certificates](#generate-testing-certificates), i.e. already own some certs, create a file named `chain.pem` by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
 
-1. Compute the contents for `certChainPEM`: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`. This will produce a one liner JSON string
+1. Compute a one liner JSON string for the contents of `certChainPEM` property: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
 
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
