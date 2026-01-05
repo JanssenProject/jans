@@ -159,7 +159,7 @@ impl PolicyStoreManager {
 
     /// Convert raw schema string to `CedarSchema`.
     ///
-    /// Uses `SchemaParser` to parse and validate the schema, then converts
+    /// Uses `ParsedSchema::parse` to parse and validate the schema, then converts
     /// to the `CedarSchema` format required by the legacy system.
     ///
     /// The `CedarSchema` requires:
@@ -167,13 +167,13 @@ impl PolicyStoreManager {
     /// - `json: CedarSchemaJson`
     /// - `validator_schema: ValidatorSchema`
     fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
-        use super::schema_parser::SchemaParser;
+        use super::schema_parser::ParsedSchema;
         use cedar_policy::SchemaFragment;
         use std::str::FromStr;
 
-        // Parse and validate schema using SchemaParser
-        let parsed_schema = SchemaParser::parse_schema(schema_content, "schema.cedarschema")
-            .map_err(|e| {
+        // Parse and validate schema
+        let parsed_schema =
+            ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
                 ConversionError::SchemaConversion(format!("Failed to parse schema: {}", e))
             })?;
 
@@ -188,7 +188,7 @@ impl PolicyStoreManager {
         // Convert to JSON for CedarSchemaJson and ValidatorSchema
         // NOTE: This parses the schema content again (SchemaFragment::from_str).
         // For large schemas, this double-parsing could be optimized by having
-        // SchemaParser return both the validated schema and the fragment, but
+        // ParsedSchema return both the validated schema and the fragment, but
         // this is a performance consideration rather than a correctness issue.
         let fragment = SchemaFragment::from_str(schema_content).map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to parse schema fragment: {}", e))

@@ -13,7 +13,7 @@ use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationEr
 use super::super::issuer_parser::IssuerParser;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::manifest_validator::ManifestValidator;
-use super::super::schema_parser::SchemaParser;
+use super::super::schema_parser::ParsedSchema;
 use super::super::vfs_adapter::{MemoryVfs, PhysicalVfs};
 use super::*;
 use std::fs::{self, File};
@@ -546,8 +546,8 @@ fn test_load_and_parse_schema_end_to_end() {
     assert!(!loaded.schema.is_empty(), "Schema should not be empty");
 
     // Parse the schema
-    let parsed = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
-        .expect("Should parse schema");
+    let parsed =
+        ParsedSchema::parse(&loaded.schema, "schema.cedarschema").expect("Should parse schema");
     assert_eq!(parsed.filename, "schema.cedarschema");
     assert_eq!(parsed.content, schema_content);
 
@@ -1110,8 +1110,8 @@ fn test_complete_policy_store_with_issuers() {
     // Parse and validate all components
 
     // Schema
-    let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
-        .expect("Should parse schema");
+    let parsed_schema =
+        ParsedSchema::parse(&loaded.schema, "schema.cedarschema").expect("Should parse schema");
     parsed_schema.validate().expect("Schema should be valid");
 
     // Policies
@@ -1231,7 +1231,7 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 5: Verify components can be parsed
 
-    let parsed_schema = SchemaParser::parse_schema(&loaded.schema, "schema.cedarschema")
+    let parsed_schema = ParsedSchema::parse(&loaded.schema, "schema.cedarschema")
         .expect("Should parse schema from archive");
 
     let parsed_entities = EntityParser::parse_entities(
