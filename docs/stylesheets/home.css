@@ -1029,16 +1029,6 @@ div.tabbed-content {
   margin: 0 0 1.5rem 0;
 }
 
-.tabbed-content ul {
-  margin: 1.5rem 0;
-}
-
-.tabbed-content li {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--md-default-fg-color--light);
-  margin-bottom: 0.5rem;
-}
 
 .tabbed-content .md-button {
   margin-top: 1.5rem;
@@ -1148,13 +1138,20 @@ div.tabbed-content {
 }
 
 .tabbed-content ul {
-  margin: 1.5rem 0;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
 }
 
 .tabbed-content li {
-  margin-bottom: 0.75rem;
-  color: var(--janssen-gray);
-  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+  color: var(--janssen-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.tabbed-content li::marker {
+  font-size: 0.8em;
 }
 
 /* Smooth scrolling behavior */
