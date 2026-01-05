@@ -466,7 +466,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         for entry in entries {
             if !entry.is_dir {
                 // Validate .json extension
-                if !entry.name.ends_with(".json") {
+                if !entry.name.to_lowercase().ends_with(".json") {
                     return Err(ValidationError::InvalidFileExtension {
                         file: entry.path.clone(),
                         expected: ".json".to_string(),
@@ -533,7 +533,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                 self.load_cedar_files_recursive(&entry.path, files)?;
             } else {
                 // Validate .cedar extension
-                if !entry.name.ends_with(".cedar") {
+                if !entry.name.to_lowercase().ends_with(".cedar") {
                     return Err(ValidationError::InvalidFileExtension {
                         file: entry.path.clone(),
                         expected: ".cedar".to_string(),
@@ -587,7 +587,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         for entry in entries {
             if !entry.is_dir {
                 // Validate .json extension
-                if !entry.name.ends_with(".json") {
+                if !entry.name.to_lowercase().ends_with(".json") {
                     return Err(ValidationError::InvalidFileExtension {
                         file: entry.path.clone(),
                         expected: ".json".to_string(),
