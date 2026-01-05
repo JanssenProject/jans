@@ -108,17 +108,6 @@ pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore,
     })?
 }
 
-/// Load a policy store from a Cedar Archive (.cjar) file (WASM stub).
-///
-/// File-based archive loading is not supported in WASM environments.
-/// Use `load_policy_store_archive_bytes` instead.
-#[cfg(target_arch = "wasm32")]
-pub async fn load_policy_store_archive(
-    _path: &Path,
-) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    Err(super::errors::ArchiveError::WasmUnsupported.into())
-}
-
 /// Load a policy store from archive bytes.
 ///
 /// This function is useful for:

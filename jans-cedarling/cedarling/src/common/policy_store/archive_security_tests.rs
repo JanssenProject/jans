@@ -13,6 +13,11 @@
 
 // Note: This module is cfg(test) via parent module declaration in policy_store.rs
 
+use std::io::{Cursor, Write};
+
+use zip::write::{ExtendedFileOptions, FileOptions};
+use zip::{CompressionMethod, ZipWriter};
+
 use super::archive_handler::ArchiveVfs;
 use super::entity_parser::{EntityParser, ParsedEntity};
 use super::errors::{ArchiveError, PolicyStoreError, ValidationError};
@@ -23,9 +28,6 @@ use super::test_utils::{
     create_path_traversal_archive, fixtures,
 };
 use super::vfs_adapter::VfsFileSystem;
-use std::io::{Cursor, Write};
-use zip::write::{ExtendedFileOptions, FileOptions};
-use zip::{CompressionMethod, ZipWriter};
 
 // ============================================================================
 // Path Traversal Tests
