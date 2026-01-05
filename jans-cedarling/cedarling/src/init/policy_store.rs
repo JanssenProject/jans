@@ -175,7 +175,7 @@ async fn load_policy_store_from_cjar_url(
     use crate::common::policy_store::loader;
 
     // Fetch the archive bytes via HTTP
-    let client = HttpClient::new(3, Duration::from_secs(30))?;
+    let client = HttpClient::new(3, Duration::from_secs(3))?;
     let bytes = client
         .get_bytes(url)
         .await

@@ -416,9 +416,7 @@ impl JwtService {
                                 return Err(ValidateJwtError::MissingClaims(vec![claim]));
                             },
                             _ => {
-                                return Err(ValidateJwtError::TrustedIssuerValidation(
-                                    err.to_string(),
-                                ));
+                                return Err(ValidateJwtError::TrustedIssuerValidation(err));
                             },
                         }
                     }
