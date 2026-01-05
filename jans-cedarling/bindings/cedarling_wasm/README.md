@@ -72,15 +72,22 @@ export function init(config: any): Promise<Cedarling>;
 
 /**
  * Create a new instance of the Cedarling application from archive bytes.
- * Use this when you need custom fetch logic (e.g., with auth headers).
  *
- * @param config - Bootstrap configuration (policy store config is ignored)
- * @param archive_bytes - The .cjar archive as Uint8Array
+ * This function allows loading a policy store from a Cedar Archive (.cjar)
+ * that was fetched with custom logic (e.g., with authentication headers).
+ *
+ * # Arguments
+ * * `config` - Bootstrap configuration (Map or Object). Policy store config is ignored.
+ * * `archive_bytes` - The .cjar archive bytes (Uint8Array)
+ *
+ * # Example
+ * ```javascript
+ * const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
+ * const bytes = new Uint8Array(await response.arrayBuffer());
+ * const cedarling = await init_from_archive_bytes(config, bytes);
+ * ```
  */
-export function init_from_archive_bytes(
-  config: any,
-  archive_bytes: Uint8Array
-): Promise<Cedarling>;
+export function init_from_archive_bytes(config: any, archive_bytes: Uint8Array): Promise<Cedarling>;
 
 /**
  * The instance of the Cedarling application.
