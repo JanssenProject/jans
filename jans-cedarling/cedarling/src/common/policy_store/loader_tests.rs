@@ -1342,10 +1342,11 @@ fn test_archive_vfs_with_manifest_validation() {
     // including ArchiveVfs (not just PhysicalVfs)
     let validation_result = validator.validate(Some("abc123def456"));
 
-    // Expected validation to fail for input "abc123def456" due to policy store ID mismatch
+    // Validation should succeed when the expected ID matches the manifest's policy_store_id
     assert!(
-        !validation_result.is_valid,
-        "expected validation to fail for input 'abc123def456'"
+        validation_result.is_valid,
+        "expected validation to succeed when IDs match, but got errors: {:?}",
+        validation_result.errors
     );
 }
 

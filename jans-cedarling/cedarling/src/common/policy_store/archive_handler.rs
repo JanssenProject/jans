@@ -179,10 +179,12 @@ where
     /// Handles:
     /// - Converting absolute paths to relative
     /// - Removing leading slashes
+    /// - Removing leading "./" prefix
     /// - Converting "." to ""
     /// - Normalizing path separators
     fn normalize_path(&self, path: &str) -> String {
         let path = path.trim_start_matches('/');
+        let path = path.strip_prefix("./").unwrap_or(path);
         if path == "." || path.is_empty() {
             String::new()
         } else {
