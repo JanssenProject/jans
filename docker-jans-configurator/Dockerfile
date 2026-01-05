@@ -27,7 +27,7 @@ RUN mkdir -p /opt/jans/configurator/javalibs \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=6bcc41a0e7f2708e52fe2c950d357dc872b87498
+ENV JANS_SOURCE_VERSION=436bf147b379c2bf005f554db4b8cce3971c58ad
 
 ARG GIT_CLONE_DEPTH=100
 WORKDIR /tmp/jans
