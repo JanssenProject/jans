@@ -19,6 +19,7 @@ logger = logging.getLogger("cloudtools")
     help="How many expired entries need to be removed per table",
     default=1000,
     show_default=True,
+    type=int,
 )
 def cleanup(limit):
     """Cleanup expired entries in persistence."""
