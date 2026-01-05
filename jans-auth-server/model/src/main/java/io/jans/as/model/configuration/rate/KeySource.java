@@ -14,7 +14,6 @@ public enum KeySource {
     BODY("body"),
     HEADER("header"),
     QUERY("query"),
-    PATH("path"),
     UNKNOWN("unknown");
 
     private final String jsonValue;

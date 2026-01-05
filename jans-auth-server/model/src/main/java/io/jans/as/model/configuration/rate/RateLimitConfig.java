@@ -15,6 +15,7 @@ import java.util.Objects;
 public class RateLimitConfig {
 
     private List<RateLimitRule> rateLimitRules = new ArrayList<>();
+    private boolean rateLoggingEnabled = false;
 
     public RateLimitConfig() {
     }
@@ -22,6 +23,16 @@ public class RateLimitConfig {
     @JsonCreator
     public RateLimitConfig(@JsonProperty("rateLimitRules") List<RateLimitRule> rateLimitRules) {
         setRateLimitRules(rateLimitRules);
+    }
+
+    @JsonProperty("rateLoggingEnabled")
+    public boolean isRateLoggingEnabled() {
+        return rateLoggingEnabled;
+    }
+
+    @JsonProperty("rateLoggingEnabled")
+    public void setRateLoggingEnabled(boolean rateLoggingEnabled) {
+        this.rateLoggingEnabled = rateLoggingEnabled;
     }
 
     @JsonProperty("rateLimitRules")
@@ -51,6 +62,7 @@ public class RateLimitConfig {
     public String toString() {
         return "RateLimitConfig{" +
                 "rateLimitRules=" + getRateLimitRules() +
+                "rateLoggingEnabled=" + rateLoggingEnabled +
                 '}';
     }
 }
