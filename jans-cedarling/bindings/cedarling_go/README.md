@@ -267,6 +267,39 @@ logs := instance.GetLogsByTag("info")
 
 ## Configuration
 
+### Policy Store Sources
+
+Cedarling supports multiple ways to load policy stores. See [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats) for complete documentation on all supported formats.
+
+**Example configurations:**
+
+```go
+// From a local JSON file
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+}
+
+// From a directory with human-readable Cedar files
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
+}
+
+// From a local .cjar archive (Cedar Archive)
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+}
+
+// From a remote .cjar archive
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar",
+}
+
+// From Lock Server
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+}
+```
+
 ### ID Token Trust Mode
 
 The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:

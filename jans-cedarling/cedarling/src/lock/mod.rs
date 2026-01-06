@@ -120,7 +120,7 @@ struct WorkerSenderAndHandle {
 
 /// Stores logs in a buffer then sends them to the lock server in the background
 #[derive(Debug)]
-pub(crate) struct LockService {
+pub struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
