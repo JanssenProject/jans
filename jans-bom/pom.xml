@@ -697,11 +697,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>dev.resteasy.grpc</groupId>
-				<artifactId>grpc-bridge</artifactId>
-				<version>1.0.0.Final</version>
-			</dependency>
 
 			<!-- JSON -->
 			<dependency>
