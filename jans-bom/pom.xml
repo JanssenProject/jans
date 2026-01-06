@@ -689,6 +689,20 @@
 				<type>pom</type>
 			</dependency>
 
+			<!-- gRPC -->
+			<dependency>
+				<groupId>dev.resteasy.grpc</groupId>
+				<artifactId>resteasy-grpc-bom</artifactId>
+				<version>1.0.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>dev.resteasy.grpc</groupId>
+				<artifactId>grpc-bridge</artifactId>
+				<version>1.0.0.Final</version>
+			</dependency>
+
 			<!-- JSON -->
 			<dependency>
 				<groupId>org.json</groupId>

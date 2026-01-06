@@ -31,8 +31,6 @@ import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
-import io.jans.lock.service.filter.openid.OpenIdProtectionService;
-import io.jans.lock.service.grpc.security.context.GrpcSecurityContext;
 import io.jans.lock.service.openid.OpenIdProtection;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebService;
 import io.jans.service.security.api.ProtectedApi;
@@ -40,6 +38,7 @@ import io.jans.service.security.protect.BaseAuthorizationProtection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 import java.lang.annotation.Annotation;
@@ -49,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -75,6 +75,9 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
+    private static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY = 
+            Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
+    
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
             ServerCall<ReqT, RespT> call,
@@ -107,7 +110,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             log.debug("gRPC call requires access to: {}", resourceInfo);
 
             // Process authorization
-            Response authorizationResponse = authorizationProtection.processAuthorization(headers, resourceInfo);
+            Response authorizationResponse = authorizationProtection.processAuthorization(extractBearerToken(headers), resourceInfo);
             boolean success = authorizationResponse == null;
 
             // Audit logging
@@ -119,8 +122,8 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
                 log.warn("Authorization failed for gRPC call '{}': {}", methodName, authorizationResponse.getEntity());
                 
                 // Map HTTP status to gRPC status
-                Status grpcStatus = mapHttpStatusToGrpcStatus(authorizationResponse.getStatus());
-                call.close(grpcStatus.withDescription(authorizationResponse.getEntity()), new Metadata());
+                Status grpcStatus = mapHttpStatusToGrpcStatus(authorizationResponse.getStatusInfo().toEnum());
+                call.close(grpcStatus.withDescription(String.valueOf(authorizationResponse.getEntity())), new Metadata());
                 
                 return new ServerCall.Listener<ReqT>() {};
             }
@@ -138,6 +141,16 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             
             return new ServerCall.Listener<ReqT>() {};
         }
+    }
+
+    private String extractBearerToken(Metadata headers) {
+        String authHeader = headers.get(AUTHORIZATION_METADATA_KEY);
+        
+        if (StringUtils.isEmpty(authHeader)) {
+            return null;
+        }
+
+        return authHeader.replaceFirst("(?i)Bearer\\s+", "");
     }
 
     /**
@@ -217,7 +230,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
         for (Method method : clazz.getMethods()) {
         	Optional<ProtectedApi> protectedApi = getProtectedApiAnnotation(method);
         	if (protectedApi.isPresent()) {
-       			if (grpcMethodName.equals(protectedApi.grpcMethodName())) {
+       			if (grpcMethodName.equals(protectedApi.get().grpcMethodName())) {
        				GrpcResourceInfo grpcResourceInfo = new GrpcResourceInfo(clazz, method);
     				return Optional.ofNullable(grpcResourceInfo);
     			}

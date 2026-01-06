@@ -70,10 +70,9 @@ public class CedarlingProtectionService implements CedarlingProtection {
         }
     }
 
-    public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
+    public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
         try {
-            String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
-            boolean authFound = StringUtils.isNotEmpty(token);
+            boolean authFound = StringUtils.isNotEmpty(bearerToken);
             log.info("Authorization header {} found", authFound ? "" : "not");
             
             if (!authFound) {
@@ -82,8 +81,8 @@ public class CedarlingProtectionService implements CedarlingProtection {
                 return simpleResponse(UNAUTHORIZED, "No authorization header found");
             }
             
-            token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
+            log.debug("Validating token {}", bearerToken);
 
             List<CedarlingPermission> requestedPermissions = getRequestedOperations(resourceInfo);
             log.info("Check access to requested opearations: {}", requestedPermissions);
@@ -91,7 +90,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
             }
 
-            Jwt jwt = tokenAsJwt(token);
+            Jwt jwt = tokenAsJwt(bearerToken);
             if (jwt == null) {
                 return simpleResponse(FORBIDDEN, "Provided token isn't JWT encoded");
             }
@@ -123,7 +122,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 
             if (valid) {
 	            boolean authorized = true;
-	            Map<String, String> tokens = getCedarlingTokens(token);
+	            Map<String, String> tokens = getCedarlingTokens(bearerToken);
 	            for (CedarlingPermission requestedPermission : requestedPermissions) {
 	            	authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
 	            			getCedarlingResource(requestedPermission), getCedarlingContext());

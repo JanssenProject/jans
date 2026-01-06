@@ -17,9 +17,8 @@
 package io.jans.service.security.protect;
 
 import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 public interface BaseAuthorizationProtection {
-    Response processAuthorization(HttpHeaders httpHeaders, ResourceInfo resourceInfo);
+    Response processAuthorization(String bearerToken, ResourceInfo resourceInfo);
 }

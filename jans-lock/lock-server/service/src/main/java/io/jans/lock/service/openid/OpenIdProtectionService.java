@@ -75,14 +75,13 @@ public class OpenIdProtectionService implements OpenIdProtection {
      * <p>Accepts either a JWT or an opaque token. For opaque tokens, performs token introspection. For JWTs, validates issuer, expiration,
      * cryptographic signature (HMAC-signed tokens are rejected), and required scopes for the target resource.</p>
      *
-     * @param headers      HTTP headers containing the Authorization header
+     * @param bearerToken Authorization bearer token
      * @param resourceInfo information about the target resource used to determine required scopes
      * @return a Response describing the authorization failure (UNAUTHORIZED, FORBIDDEN, or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
      */
-    public Response processAuthorization(HttpHeaders headers, ResourceInfo resourceInfo) {
+    public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
         try {
-            String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
-            boolean authFound = StringUtils.isNotEmpty(token);
+            boolean authFound = StringUtils.isNotEmpty(bearerToken);
             log.debug("Authorization header{} found", authFound ? "" : " not");
             
             if (!authFound) {
@@ -91,18 +90,18 @@ public class OpenIdProtectionService implements OpenIdProtection {
                 return simpleResponse(UNAUTHORIZED, "No authorization header found");
             }
             
-            token = token.replaceFirst("Bearer\\s+","");
+            bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
             log.debug("Validating bearer token");
 
             List<String> scopes = getRequestedScopes(resourceInfo);
             log.debug("Call requires scopes: {}", scopes);
 
-            Jwt jwt = tokenAsJwt(token);
+            Jwt jwt = tokenAsJwt(bearerToken);
             if (jwt == null) {
                 // Do standard token validation
                 IntrospectionResponse iresp = null;
                 try {
-                    iresp = introspectionService.introspectToken("Bearer " + token, token);
+                    iresp = introspectionService.introspectToken("Bearer " + bearerToken, bearerToken);
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
