@@ -11,11 +11,13 @@ use super::service_config::ServiceConfig;
 use crate::LogLevel;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuersValidationError};
+use crate::common::policy_store::{
+    PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
+};
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
-use crate::log::{self, LogEntry, LogType};
+use crate::log::{self, BaseLogEntry, LogEntry};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -59,6 +61,14 @@ impl<'a> ServiceFactory<'a> {
         Ok(&self.service_config.policy_store)
     }
 
+    /// Get the policy store metadata if available.
+    ///
+    /// Metadata is only available when the policy store is loaded from the new
+    /// directory/archive format. Legacy JSON/YAML formats do not include metadata.
+    pub fn policy_store_metadata(&self) -> Option<&PolicyStoreMetadata> {
+        self.service_config.policy_store.metadata.as_ref()
+    }
+
     // get log service
     pub fn log_service(&mut self) -> log::Logger {
         self.log_service.clone()
@@ -91,9 +101,11 @@ impl<'a> ServiceFactory<'a> {
         // Log warns that some default entities loaded not correctly
         // it will be logged only once.
         for warn in default_entities_with_warn.warns() {
-            let log_entry = LogEntry::new_with_data(LogType::System, None)
-                .set_level(LogLevel::WARN)
-                .set_message(warn.to_string());
+            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warn.to_string());
 
             logger.log_any(log_entry);
         }
@@ -102,10 +114,11 @@ impl<'a> ServiceFactory<'a> {
         let policy_store = self.policy_store()?;
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(logger));
         let schema = &policy_store.schema.validator_schema;
         let entity_builder = EntityBuilder::new(
             config.clone(),
-            &trusted_issuers,
+            issuers_index,
             Some(schema),
             default_entities_with_warn.entities().to_owned(),
         )?;

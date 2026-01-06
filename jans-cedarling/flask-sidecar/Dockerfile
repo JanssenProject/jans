@@ -1,5 +1,4 @@
-FROM python:3.10.16-slim-bookworm
-
+FROM python:3.10.16-slim-bookworm@sha256:5fb1a18941b20a1be253974bf5ad9e63c9e251279856649b356178962e8908a2
 # ===============
 # Debian packages
 # ===============
@@ -31,7 +30,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=e9e5450c54750da81da4b3cfa64694d032a12053
+ENV JANS_SOURCE_VERSION=6bcc41a0e7f2708e52fe2c950d357dc872b87498
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh

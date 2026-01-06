@@ -8,6 +8,7 @@ use std::collections::HashSet;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use crate::jwt::decode::*;
 use crate::jwt::key_service::DecodingKeyInfo;
+use crate::jwt::validation::TrustedIssuerError;
 use crate::jwt::*;
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
@@ -318,6 +319,8 @@ pub enum ValidateJwtError {
     MissingStatusList,
     #[error("failed to deserialize the JWT's status claim: {0}")]
     DeserializeStatusClaim(#[from] serde_json::Error),
+    #[error("failed to validate the JWT's trusted issuer: {0}")]
+    TrustedIssuerValidation(#[source] TrustedIssuerError),
 }
 
 #[cfg(test)]
