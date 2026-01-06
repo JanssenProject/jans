@@ -4,7 +4,16 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedar_policy_core::extensions::Extensions;
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy_core::validator::ValidatorSchema;
+use serde::Deserialize;
+
+fn trimmed_string<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    Ok(s.trim_end().to_string())
+}
 
 pub(crate) mod cedar_json;
 pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
@@ -17,6 +26,7 @@ pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 struct EncodedSchema {
     pub encoding: super::Encoding,
     pub content_type: super::ContentType,
+    #[serde(deserialize_with = "trimmed_string")]
     pub body: String,
 }
 
@@ -42,44 +52,12 @@ pub struct CedarSchema {
     pub validator_schema: ValidatorSchema,
 }
 
+#[cfg(test)]
 impl PartialEq for CedarSchema {
     fn eq(&self, other: &Self) -> bool {
-        // Have to check principals, resources, action_groups, entity_types,
-        // actions. Those can contain duplicates, and are not stored in comparison order.
-        // So use HashSet to compare them.
-        use std::collections::HashSet;
-
-        let self_principals = self.schema.principals().collect::<HashSet<_>>();
-        let other_principals = other.schema.principals().collect::<HashSet<_>>();
-        if self_principals != other_principals {
-            return false;
-        }
-
-        let self_resources = self.schema.resources().collect::<HashSet<_>>();
-        let other_resources = other.schema.resources().collect::<HashSet<_>>();
-        if self_resources != other_resources {
-            return false;
-        }
-
-        let self_action_groups = self.schema.action_groups().collect::<HashSet<_>>();
-        let other_action_groups = other.schema.action_groups().collect::<HashSet<_>>();
-        if self_action_groups != other_action_groups {
-            return false;
-        }
-
-        let self_entity_types = self.schema.entity_types().collect::<HashSet<_>>();
-        let other_entity_types = other.schema.entity_types().collect::<HashSet<_>>();
-        if self_entity_types != other_entity_types {
-            return false;
-        }
-
-        let self_actions = self.schema.actions().collect::<HashSet<_>>();
-        let other_actions = other.schema.actions().collect::<HashSet<_>>();
-        if self_actions != other_actions {
-            return false;
-        }
-
-        // and this only checks the schema anyway
+        // Compare only the JSON representation, which is the canonical form.
+        // The schema and validator_schema are derived from the JSON representation,
+        // so if the JSON is equal, the schemas are semantically equal.
         self.json == other.json
     }
 }
@@ -118,6 +96,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
                 })?
             },
         };
+        let decoded_body = decoded_body.trim_end().to_string();
 
         // Need both of these because CedarSchema wants both.
         let (schema_fragment, json_string) = match encoded_schema.content_type {

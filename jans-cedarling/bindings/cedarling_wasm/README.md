@@ -71,6 +71,25 @@ Before using any function from library you need initialize WASM runtime by calli
 export function init(config: any): Promise<Cedarling>;
 
 /**
+ * Create a new instance of the Cedarling application from archive bytes.
+ *
+ * This function allows loading a policy store from a Cedar Archive (.cjar)
+ * that was fetched with custom logic (e.g., with authentication headers).
+ *
+ * # Arguments
+ * * `config` - Bootstrap configuration (Map or Object). Policy store config is ignored.
+ * * `archive_bytes` - The .cjar archive bytes (Uint8Array)
+ *
+ * # Example
+ * ```javascript
+ * const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
+ * const bytes = new Uint8Array(await response.arrayBuffer());
+ * const cedarling = await init_from_archive_bytes(config, bytes);
+ * ```
+ */
+export function init_from_archive_bytes(config: any, archive_bytes: Uint8Array): Promise<Cedarling>;
+
+/**
  * The instance of the Cedarling application.
  */
 export class Cedarling {
@@ -248,6 +267,50 @@ export class PolicyEvaluationError {
 
 ## Configuration
 
+### Policy Store Sources
+
+Cedarling supports multiple ways to load policy stores. **In WASM environments, only URL-based loading is available** (no filesystem access).
+
+#### WASM-Supported Options
+
+```javascript
+// Option 1: Fetch policy store from URL (simple)
+const BOOTSTRAP_CONFIG = {
+  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  // ... other config
+};
+const cedarling = await init(BOOTSTRAP_CONFIG);
+
+// Option 2: Inline JSON string (for embedded policy stores)
+// policyStoreJson is the policy store JSON as a string
+// See: https://docs.jans.io/stable/cedarling/reference/cedarling-policy-store/
+const policyStoreJson = '{"cedar_version":"4.0","policy_stores":{...}}';
+const BOOTSTRAP_CONFIG = {
+  CEDARLING_POLICY_STORE_LOCAL: policyStoreJson,
+  // ... other config
+};
+const cedarling = await init(BOOTSTRAP_CONFIG);
+
+// Option 3: Custom fetch with auth headers (use init_from_archive_bytes)
+const response = await fetch("https://example.com/policy-store.cjar", {
+  headers: { Authorization: `Bearer ${token}` },
+});
+const bytes = new Uint8Array(await response.arrayBuffer());
+const cedarling = await init_from_archive_bytes(BOOTSTRAP_CONFIG, bytes);
+```
+
+> **Note:** Directory-based loading and file-based loading are **NOT supported in WASM** (no filesystem access). Use URL-based loading or `init_from_archive_bytes` for custom fetch scenarios.
+
+#### Cedar Archive (.cjar) Format
+
+For the new directory-based format in WASM, package the directory structure as a `.cjar` file (ZIP archive):
+
+```bash
+cd policy-store && zip -r ../policy-store.cjar .
+```
+
+See [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats) for details on the directory structure and metadata.json format.
+
 ### ID Token Trust Mode
 
 The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
@@ -271,8 +334,4 @@ const BOOTSTRAP_CONFIG = {
 };
 ```
 
-For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md) or on [our page](https://docs.jans.io/stable/cedarling/cedarling-properties/) .
-
-```
-
-```
+For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md) or on [our page](https://docs.jans.io/stable/cedarling/cedarling-properties/).

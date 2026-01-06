@@ -124,6 +124,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     post:
       tags:
       - SAML - Identity Broker
@@ -201,6 +205,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/idp/{inum}:
     get:
       tags:
@@ -267,6 +275,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
+      - oauth2:
+        - https://jans.io/idp/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     delete:
       tags:
       - SAML - Identity Broker
@@ -292,6 +306,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.delete
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/delete-all
   /kc/saml/idp:
     get:
       tags:
@@ -469,6 +487,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
+      - oauth2:
+        - https://jans.io/idp/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /kc/saml/idp/sp-metadata/{inum}:
     get:
       tags:
@@ -497,6 +521,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
+      - oauth2:
+        - https://jans.io/idp/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /kc/saml/idp/sp-metadata-file/{inum}:
     get:
       tags:
@@ -525,6 +555,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
+      - oauth2:
+        - https://jans.io/idp/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /kc/samlConfig:
     get:
       tags:
@@ -546,6 +582,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/saml-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - SAML - Configuration
@@ -595,6 +637,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     patch:
       tags:
       - SAML - Configuration
@@ -645,6 +691,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/trust-relationship/upload:
     put:
       tags:
@@ -692,6 +742,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     post:
       tags:
       - SAML - Trust Relationship
@@ -738,6 +792,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/trust-relationship/{id}:
     delete:
       tags:
@@ -761,7 +819,11 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/saml.write
+        - https://jans.io/oauth/config/saml.delete
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/delete-all
   /kc/saml/trust-relationship:
     get:
       tags:
@@ -785,6 +847,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/trust-relationship/id/{id}:
     get:
       tags:
@@ -819,6 +889,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /kc/saml/trust-relationship/sp-metadata-file/{id}:
     get:
       tags:
@@ -860,6 +938,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+      - oauth2:
+        - https://jans.io/oauth/config/saml.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     BrokerIdentityProviderForm:
@@ -1307,7 +1393,19 @@ components:
           scopes:
             https://jans.io/oauth/config/saml.readonly: View SAML related information
             https://jans.io/oauth/config/saml.write: Manage SAML related information
+            https://jans.io/oauth/config/saml.delete: Delete SAML related information
             https://jans.io/oauth/config/saml-config.readonly: View SAML configuration
               related information
             https://jans.io/oauth/config/saml-config.write: Manage SAML configuration
               related information
+            https://jans.io/idp/saml.readonly: View SAML IDP related information
+            https://jans.io/idp/saml.write: Manage SAML IDP related information
+            https://jans.io/idp/saml.delete: Delete SAML IDP related information
+            https://jans.io/oauth/config/saml.admin: Admin to manage SAML configuration
+              related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

@@ -37,6 +37,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Fido2 - Configuration
@@ -63,6 +69,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /fido2/registration/id/{jansId}:
     get:
       tags:
@@ -141,6 +151,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     delete:
       tags:
       - Fido2 - Registration
@@ -180,6 +196,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.delete
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/delete-all
   /fido2/registration/entries/{username}:
     get:
       tags:
@@ -333,6 +353,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /fido2/registration:
     get:
       tags:
@@ -523,6 +549,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
 components:
   schemas:
     AppConfiguration:
@@ -833,3 +865,9 @@ components:
             https://jans.io/oauth/config/fido2.readonly: View fido2 related information
             https://jans.io/oauth/config/fido2.write: Manage fido2 related information
             https://jans.io/oauth/config/fido2.delete: Delete fido2 related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information
