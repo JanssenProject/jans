@@ -22,10 +22,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -207,5 +205,16 @@ public class CommonUtils {
      */
     public static boolean toPrimitiveOrDefaultFalse(Boolean booleanObject) {
         return booleanObject != null ? booleanObject : false;
+    }
+
+    public static Date addMinutes(Date date, int minutesToAdd) {
+        // Convert the Date to an Instant
+        Instant instant = date.toInstant();
+
+        // Add the minutes using ChronoUnit
+        Instant updatedInstant = instant.plus(minutesToAdd, ChronoUnit.MINUTES);
+
+        // Convert the Instant back to a Date
+        return Date.from(updatedInstant);
     }
 }

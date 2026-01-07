@@ -15,6 +15,8 @@ public enum ErrorResponse {
     ERROR_READING_ROLE_PERMISSION_MAP("Error in reading role-permissions mapping from Auth Server."),
     ROLE_PERMISSION_MAP_NOT_FOUND("Role-permissions mapping not found."),
     ROLE_NOT_FOUND("Bad Request: Admin UI Role not found in Auth Server."),
+    UJWT_NOT_FOUND("Bad Request: Admin UI UJWT not found in request body."),
+    SIGNATURE_NOT_VALID("Bad Request: The signature of user-info JWT is not valid."),
     PERMISSION_NOT_FOUND("Bad Request: Admin UI permission not found in Auth Server."),
     ERROR_IN_MAPPING_ROLE_PERMISSION("Error in mapping role-permission."),
     ERROR_IN_DELETING_ROLE_PERMISSION("Error in deleting role-permission."),

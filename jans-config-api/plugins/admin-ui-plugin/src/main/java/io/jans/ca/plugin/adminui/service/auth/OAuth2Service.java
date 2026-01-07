@@ -13,6 +13,8 @@ import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.model.adminui.AdminUISession;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.EncryptionService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -21,6 +23,8 @@ import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+
+import static io.jans.ca.plugin.adminui.utils.CommonUtils.addMinutes;
 
 @Singleton
 public class OAuth2Service extends BaseService {
@@ -32,6 +36,11 @@ public class OAuth2Service extends BaseService {
 
     @Inject
     EncryptionService encryptionService;
+
+    @Inject
+    private PersistenceEntryManager entryManager;
+
+    private static final String SID_GET_MSG = "Error in get Admin UI Session by sid:{}";
 
     /**
      * The function `getApiProtectionToken` retrieves an API protection token based on the provided parameters and handles
@@ -68,7 +77,7 @@ public class OAuth2Service extends BaseService {
                     log.warn(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
                     tokenRequest.setScope(scopeAsString(Arrays.asList(OAuth2Resource.SCOPE_OPENID)));
                 }
-                tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), apiTokenRequest.getUjwt(), apiTokenRequest.getPermissionTag());
+                tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), apiTokenRequest.getUjwt());
             }
 
             Optional<Map<String, Object>> introspectionResponse = introspectToken(tokenResponse.getAccessToken(), auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint());
@@ -118,5 +127,39 @@ public class OAuth2Service extends BaseService {
         Set<String> scope = Sets.newHashSet();
         scope.addAll(scopes);
         return CommonUtils.joinAndUrlEncode(scope);
+    }
+
+    private String getDnForSession(String sessionId) {
+        return String.format("inum=%s,%s", sessionId, "ou=configApiSession,ou=admin-ui,o=jans");
+    }
+
+    public void setAdminUISession(String sessionId, String ujwt) throws Exception {
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+        Date currentDate = new Date();
+        AdminUISession adminUISession = new AdminUISession();
+        adminUISession.setInum(sessionId);
+        adminUISession.setDn(getDnForSession(sessionId));
+        adminUISession.setSessionId(sessionId);
+        adminUISession.setUjwt(ujwt);
+        adminUISession.setCreationDate(currentDate);
+        adminUISession.setExpirationDate(addMinutes(currentDate, auiConfiguration.getSessionTimeoutInMins()));
+
+        entryManager.persist(adminUISession);
+    }
+
+    public AdminUISession getSession(String sessionId) {
+        AdminUISession configApiSession = null;
+        try {
+            configApiSession = entryManager
+                    .find(AdminUISession.class, getDnForSession(sessionId));
+        } catch (Exception ex) {
+            log.error(SID_GET_MSG + sessionId, ex);
+        }
+        return configApiSession;
+    }
+
+    public void removeSession(String sessionId) {
+        AdminUISession configApiSession = getSession(sessionId);
+        entryManager.remove(configApiSession);
     }
 }

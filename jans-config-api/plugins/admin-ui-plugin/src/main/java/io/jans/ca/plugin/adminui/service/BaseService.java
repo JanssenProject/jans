@@ -32,7 +32,7 @@ public class BaseService {
     Logger log;
 
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) throws NoSuchAlgorithmException {
-        return getToken(tokenRequest, tokenEndpoint, null, null);
+        return getToken(tokenRequest, tokenEndpoint, null);
     }
 
 
@@ -48,13 +48,9 @@ public class BaseService {
      * @param userInfoJwt The `userInfoJwt` parameter in the `getToken` method is a JSON Web Token (JWT) that contains user
      * information. This token is typically used to provide information about the authenticated user to the authorization
      * server when requesting an access token. The user information in the JWT can include details such as the user
-     * @param permissionTags The `permissionTags` parameter in the `getToken` method is a list of strings that represent
-     * permission tags. These permission tags are used to specify the permissions that the client application is
-     * requesting. The method processes these permission tags and includes them in the request body when making a call to
-     * the token endpoint.
      * @return The method is returning a `io.jans.as.client.TokenResponse` object.
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) throws NoSuchAlgorithmException {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws NoSuchAlgorithmException {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -68,10 +64,6 @@ public class BaseService {
 
             if (!Strings.isNullOrEmpty(userInfoJwt)) {
                 body.putSingle("ujwt", userInfoJwt);
-            }
-
-            if (permissionTags != null && !permissionTags.isEmpty()) {
-                body.put("permission_tag", Collections.singletonList(String.join(" ", permissionTags)));
             }
 
             if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {

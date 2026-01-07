@@ -2,8 +2,8 @@ package io.jans.ca.plugin.adminui.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.as.model.config.adminui.KeyValuePair;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
+import io.jans.configapi.core.model.adminui.CedarlingLogType;
+import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -149,7 +149,7 @@ public class AppConfigResponse {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
-    public CedarlingLogType getCedarlingLogType() {
+    public io.jans.configapi.core.model.adminui.CedarlingLogType getCedarlingLogType() {
         return cedarlingLogType;
     }
 

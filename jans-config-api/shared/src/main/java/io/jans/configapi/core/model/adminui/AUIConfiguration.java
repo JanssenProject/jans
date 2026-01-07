@@ -1,10 +1,6 @@
-package io.jans.ca.plugin.adminui.model.config;
-
+package io.jans.configapi.core.model.adminui;
 
 import io.jans.as.model.config.adminui.KeyValuePair;
-import io.jans.configapi.core.model.adminui.CedarlingLogType;
-import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
-import io.jans.configapi.core.model.adminui.LicenseConfiguration;
 
 import java.util.List;
 
@@ -361,3 +357,4 @@ public class AUIConfiguration {
                 '}';
     }
 }
+
