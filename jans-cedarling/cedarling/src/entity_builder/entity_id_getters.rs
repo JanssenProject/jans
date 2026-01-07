@@ -9,12 +9,14 @@ use serde_json::Value;
 use smol_str::{SmolStr, ToSmolStr};
 use std::fmt::Display;
 
-pub enum EntityIdSrc<'a> {
+pub(super) enum EntityIdSrc<'a> {
     Token { token: &'a Token, claim: &'a str },
     String(&'a str),
 }
 
-pub fn get_first_valid_entity_id(id_srcs: &[EntityIdSrc]) -> Result<SmolStr, BuildEntityErrorKind> {
+pub(super) fn get_first_valid_entity_id(
+    id_srcs: &[EntityIdSrc],
+) -> Result<SmolStr, BuildEntityErrorKind> {
     let mut errors = Vec::new();
 
     for src in id_srcs.iter() {
@@ -56,7 +58,7 @@ pub fn get_first_valid_entity_id(id_srcs: &[EntityIdSrc]) -> Result<SmolStr, Bui
     Err(BuildEntityErrorKind::MissingEntityId(errors.into()))
 }
 
-pub fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
+pub(super) fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
     id_srcs
         .iter()
         .filter_map(|src| match src {
@@ -106,7 +108,7 @@ pub struct GetEntityIdError {
 }
 
 #[derive(Debug, thiserror::Error, PartialEq)]
-pub enum GetEntityIdErrorReason {
+pub(super) enum GetEntityIdErrorReason {
     #[error("the claim cannot be an empty string")]
     EmptyString,
     #[error("the claim was not present in the token")]

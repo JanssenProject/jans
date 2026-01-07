@@ -90,7 +90,7 @@ mod lock_config;
 mod log_entry;
 mod log_worker;
 mod register_client;
-pub mod ssa_validation;
+pub(crate) mod ssa_validation;
 
 use crate::app_types::PdpID;
 use crate::common::issuer_utils::normalize_issuer;
@@ -110,7 +110,7 @@ use std::time::Duration;
 use tokio_util::sync::CancellationToken;
 
 /// The base duration to wait for if an http request fails for workers.
-pub const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
+pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
 #[derive(Debug)]
 struct WorkerSenderAndHandle {
@@ -126,7 +126,7 @@ pub struct LockService {
     cancel_tkn: CancellationToken,
 }
 
-pub fn init_http_client(
+pub(crate) fn init_http_client(
     default_headers: Option<HeaderMap>,
     accept_invalid_certs: bool,
 ) -> Result<Client, reqwest::Error> {

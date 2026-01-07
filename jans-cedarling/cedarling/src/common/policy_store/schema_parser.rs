@@ -18,7 +18,7 @@ use super::errors::{CedarSchemaErrorType, PolicyStoreError};
 ///
 /// Contains the schema and metadata about the source file.
 #[derive(Debug, Clone)]
-pub struct ParsedSchema {
+pub(super) struct ParsedSchema {
     /// The Cedar schema
     pub schema: Schema,
     /// Source filename
@@ -33,7 +33,7 @@ impl ParsedSchema {
     /// Parses the schema content using Cedar's schema parser and returns
     /// a `ParsedSchema` with metadata. The schema is validated for correct
     /// syntax and structure during parsing.
-    pub fn parse(content: &str, filename: &str) -> Result<Self, PolicyStoreError> {
+    pub(super) fn parse(content: &str, filename: &str) -> Result<Self, PolicyStoreError> {
         // Parse the schema using Cedar's schema parser
         // Cedar uses SchemaFragment to parse human-readable schema syntax
         let fragment =
@@ -60,7 +60,7 @@ impl ParsedSchema {
     /// Get a reference to the Cedar Schema.
     ///
     /// Returns the validated Cedar Schema that can be used for policy validation.
-    pub fn get_schema(&self) -> &Schema {
+    pub(super) fn get_schema(&self) -> &Schema {
         &self.schema
     }
 
@@ -72,7 +72,7 @@ impl ParsedSchema {
     ///
     /// # Errors
     /// Returns `PolicyStoreError::CedarSchemaError` if the schema file is empty.
-    pub fn validate(&self) -> Result<(), PolicyStoreError> {
+    pub(super) fn validate(&self) -> Result<(), PolicyStoreError> {
         // Check that content is not empty
         if self.content.trim().is_empty() {
             return Err(PolicyStoreError::CedarSchemaError {

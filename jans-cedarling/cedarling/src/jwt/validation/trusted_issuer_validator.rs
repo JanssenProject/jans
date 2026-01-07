@@ -107,7 +107,7 @@ pub enum TrustedIssuerError {
 }
 
 /// Result type for trusted issuer validation operations.
-pub type Result<T> = std::result::Result<T, TrustedIssuerError>;
+type Result<T> = std::result::Result<T, TrustedIssuerError>;
 
 /// Default JWKS cache duration (1 hour) used when no Cache-Control header is present
 const DEFAULT_JWKS_CACHE_DURATION_SECS: u64 = 3600;

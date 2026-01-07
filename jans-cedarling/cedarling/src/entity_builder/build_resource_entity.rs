@@ -7,7 +7,7 @@ use super::*;
 use crate::EntityData;
 
 impl EntityBuilder {
-    pub fn build_resource_entity(
+    pub(super) fn build_resource_entity(
         &self,
         resource_data: &EntityData,
     ) -> Result<Entity, BuildEntityError> {

@@ -1,7 +1,7 @@
 use serde_json::Value;
 use std::mem::size_of;
 
-pub fn calculate_memory_usage(value: &Value) -> usize {
+pub(super) fn calculate_memory_usage(value: &Value) -> usize {
     let mut total = size_of::<Value>(); // Root stack size (32 bytes)
     add_heap_usage(value, &mut total);
     total

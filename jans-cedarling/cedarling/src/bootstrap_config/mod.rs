@@ -247,12 +247,6 @@ impl From<serde_json::Error> for BootstrapConfigLoadingError {
     }
 }
 
-impl From<std::convert::Infallible> for BootstrapConfigLoadingError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!("Infallible cannot be instantiated")
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use jsonwebtoken::Algorithm;

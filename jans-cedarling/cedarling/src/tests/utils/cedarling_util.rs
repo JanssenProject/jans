@@ -5,12 +5,12 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
-pub use crate::{
+pub(crate) use crate::{
     BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 
 /// fixture for [`BootstrapConfig`]
-pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
+pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
     BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -40,7 +40,7 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+pub(crate) async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
     Cedarling::new(&get_config(policy_source))
         .await
         .expect("bootstrap config should initialize correctly")
@@ -48,7 +48,10 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
 /// with a callback function to modify the bootstrap configuration.
-pub async fn get_cedarling_with_callback<F>(policy_source: PolicyStoreSource, cb: F) -> Cedarling
+pub(crate) async fn get_cedarling_with_callback<F>(
+    policy_source: PolicyStoreSource,
+    cb: F,
+) -> Cedarling
 where
     F: FnOnce(&mut BootstrapConfig),
 {
@@ -61,7 +64,7 @@ where
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub async fn get_cedarling_with_authorization_conf(
+pub(crate) async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
     entity_builder_conf: EntityBuilderConfig,
@@ -91,7 +94,7 @@ pub async fn get_cedarling_with_authorization_conf(
 }
 
 /// util function for convenient conversion Reason ID to string
-pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
+pub(crate) fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
     resp.as_ref().map(|v| {
         v.diagnostics()
             .reason()
@@ -137,7 +140,9 @@ macro_rules! cmp_policy {
 }
 
 /// util function for convenient conversion Decision
-pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
+pub(crate) fn get_decision(
+    resp: &Option<cedar_policy::Response>,
+) -> Option<cedar_policy::Decision> {
     resp.as_ref().map(|v| {
         println!("diagnostics: {:?}\n", v.diagnostics());
         v.decision()

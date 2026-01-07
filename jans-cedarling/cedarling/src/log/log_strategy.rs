@@ -190,7 +190,7 @@ impl LogWriter for LogStrategy {
 }
 
 impl<E: Loggable> LogEntryWithClientInfo<E> {
-    pub fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
+    pub(crate) fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
         Self {
             entry,
             pdp_id,

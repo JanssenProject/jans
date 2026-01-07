@@ -10,5 +10,5 @@ mod validator_cache;
 pub use trusted_issuer_validator::{
     TrustedIssuerError, TrustedIssuerValidator, validate_required_claims,
 };
-pub use validator::*;
-pub use validator_cache::*;
+pub(super) use validator::*;
+pub(super) use validator_cache::*;

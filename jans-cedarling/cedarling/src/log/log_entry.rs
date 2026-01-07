@@ -219,7 +219,7 @@ pub struct Diagnostics {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize)]
-pub struct DiagnosticsSummary {
+pub(crate) struct DiagnosticsSummary {
     /// `PolicyId`s of the policies that contributed to the decision.
     pub reason: HashSet<PolicyInfo>,
     /// Errors that occurred during authorization.
@@ -227,7 +227,7 @@ pub struct DiagnosticsSummary {
 }
 
 impl DiagnosticsSummary {
-    pub fn from_diagnostics(diagnostics: &[Diagnostics]) -> Self {
+    pub(crate) fn from_diagnostics(diagnostics: &[Diagnostics]) -> Self {
         let mut reason: HashSet<PolicyInfo> = HashSet::new();
         let mut errors = Vec::new();
 
@@ -278,7 +278,7 @@ impl Diagnostics {
 
 /// log entry for decision
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct DecisionLogEntry {
+pub(crate) struct DecisionLogEntry {
     /// base information of entry
     /// it is unwrap to flatten structure
     #[serde(flatten)]
@@ -316,7 +316,7 @@ pub struct DecisionLogEntry {
 }
 
 impl DecisionLogEntry {
-    pub fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
+    pub(crate) fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
         let mut tags = Vec::with_capacity(2);
         if user {
             tags.push("User".into());
@@ -327,7 +327,7 @@ impl DecisionLogEntry {
         tags
     }
 
-    pub fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
+    pub(crate) fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
         principals
             .iter()
             .map(|uid| uid.type_name().to_smolstr())
@@ -360,7 +360,7 @@ impl Loggable for DecisionLogEntry {
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
 // Static variable initialize only once at start of program and available during all program live cycle.
 // Import inside function guarantee that it is used only inside function.
-pub fn gen_uuid7() -> Uuid {
+pub(crate) fn gen_uuid7() -> Uuid {
     use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
@@ -496,10 +496,10 @@ impl Loggable for BaseLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
+pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
 
 impl LogTokensInfo {
-    pub fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
+    pub(crate) fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
         let tokens_logging_info = tokens
             .iter()
             .map(|(tkn_name, tkn)| (tkn_name.clone(), tkn.logging_info(decision_log_jwt_id)))
@@ -512,7 +512,7 @@ impl LogTokensInfo {
         Self(HashMap::new())
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }

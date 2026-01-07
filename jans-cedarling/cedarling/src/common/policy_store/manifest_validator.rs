@@ -8,6 +8,9 @@
 //! This module provides functionality to validate the integrity of a policy store
 //! using a manifest file that contains SHA-256 checksums for all files.
 
+// This file is not compiled for WebAssembly targets.
+#![cfg(not(target_arch = "wasm32"))]
+
 use std::collections::HashSet;
 use std::path::PathBuf;
 
@@ -20,8 +23,7 @@ use super::vfs_adapter::VfsFileSystem;
 
 /// Result of manifest validation with detailed information.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg(not(target_arch = "wasm32"))]
-pub struct ManifestValidationResult {
+pub(crate) struct ManifestValidationResult {
     /// Whether validation passed (all required checks passed)
     pub is_valid: bool,
     /// Files that passed validation
@@ -34,18 +36,16 @@ pub struct ManifestValidationResult {
 
 /// Detailed error information for manifest validation failures.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg(not(target_arch = "wasm32"))]
-pub struct ManifestValidationError {
+pub(crate) struct ManifestValidationError {
     /// Type of error
     pub error_type: ManifestErrorType,
     /// File path related to the error (if applicable)
     pub file: Option<String>,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl ManifestValidationResult {
     /// Create a new validation result.
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             is_valid: true,
             validated_files: Vec::new(),
@@ -72,7 +72,6 @@ impl ManifestValidationResult {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl Default for ManifestValidationResult {
     fn default() -> Self {
         Self::new()
@@ -80,21 +79,19 @@ impl Default for ManifestValidationResult {
 }
 
 /// Manifest validator for policy store integrity validation.
-#[cfg(not(target_arch = "wasm32"))]
-pub struct ManifestValidator<V: VfsFileSystem> {
+pub(super) struct ManifestValidator<V: VfsFileSystem> {
     vfs: V,
     base_path: PathBuf,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl<V: VfsFileSystem> ManifestValidator<V> {
     /// Create a new manifest validator.
-    pub fn new(vfs: V, base_path: PathBuf) -> Self {
+    pub(super) fn new(vfs: V, base_path: PathBuf) -> Self {
         Self { vfs, base_path }
     }
 
     /// Load and parse the manifest file.
-    pub fn load_manifest(&self) -> Result<PolicyStoreManifest, PolicyStoreError> {
+    pub(super) fn load_manifest(&self) -> Result<PolicyStoreManifest, PolicyStoreError> {
         let manifest_path = format!("{}/manifest.json", self.base_path.display());
 
         // Check if manifest exists
@@ -132,7 +129,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
     ///
     /// Useful for manifest generation and file integrity verification in tests and tooling.
     #[cfg(test)]
-    pub fn compute_checksum(&self, file_path: &str) -> Result<String, PolicyStoreError> {
+    pub(super) fn compute_checksum(&self, file_path: &str) -> Result<String, PolicyStoreError> {
         let content_bytes =
             self.vfs
                 .read_file(file_path)
@@ -274,7 +271,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
     }
 
     /// Validate the entire policy store against the manifest.
-    pub fn validate(&self, metadata_id: Option<&str>) -> ManifestValidationResult {
+    pub(crate) fn validate(&self, metadata_id: Option<&str>) -> ManifestValidationResult {
         let mut result = ManifestValidationResult::new();
 
         // Load manifest

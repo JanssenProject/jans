@@ -21,7 +21,7 @@ use zip::write::{ExtendedFileOptions, FileOptions};
 use zip::{CompressionMethod, ZipWriter};
 
 /// Builder for creating test policy stores programmatically.
-pub struct PolicyStoreTestBuilder {
+pub(crate) struct PolicyStoreTestBuilder {
     /// Store ID (hex string)
     pub id: String,
     /// Store name
@@ -56,7 +56,7 @@ impl Default for PolicyStoreTestBuilder {
 
 impl PolicyStoreTestBuilder {
     /// Create a new builder with the given store ID.
-    pub fn new(id: impl Into<String>) -> Self {
+    pub(crate) fn new(id: impl Into<String>) -> Self {
         Self {
             id: id.into(),
             name: "Test Policy Store".to_string(),
@@ -74,7 +74,7 @@ impl PolicyStoreTestBuilder {
     }
 
     /// Default minimal Cedar schema for testing.
-    pub fn default_schema() -> String {
+    pub(crate) fn default_schema() -> String {
         r#"namespace TestApp {
     entity User;
     entity Resource;
@@ -95,19 +95,19 @@ impl PolicyStoreTestBuilder {
     }
 
     /// Set the store name.
-    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+    pub(crate) fn with_name(mut self, name: impl Into<String>) -> Self {
         self.name = name.into();
         self
     }
 
     /// Set the store version.
-    pub fn with_version(mut self, version: impl Into<String>) -> Self {
+    pub(crate) fn with_version(mut self, version: impl Into<String>) -> Self {
         self.version = version.into();
         self
     }
 
     /// Set the description.
-    pub fn with_description(mut self, desc: impl Into<String>) -> Self {
+    pub(crate) fn with_description(mut self, desc: impl Into<String>) -> Self {
         self.description = Some(desc.into());
         self
     }
@@ -115,7 +115,7 @@ impl PolicyStoreTestBuilder {
     /// Set a custom Cedar schema.
     ///
     /// If not called, a default minimal schema is used.
-    pub fn with_schema(mut self, schema: impl Into<String>) -> Self {
+    pub(crate) fn with_schema(mut self, schema: impl Into<String>) -> Self {
         self.schema = schema.into();
         self
     }
@@ -125,7 +125,11 @@ impl PolicyStoreTestBuilder {
     /// # Arguments
     /// * `name` - Filename without .cedar extension (e.g., "policy1" or "auth/admin")
     /// * `content` - Cedar policy content with @id annotation
-    pub fn with_policy(mut self, name: impl Into<String>, content: impl Into<String>) -> Self {
+    pub(crate) fn with_policy(
+        mut self,
+        name: impl Into<String>,
+        content: impl Into<String>,
+    ) -> Self {
         self.policies.insert(name.into(), content.into());
         self
     }
@@ -135,13 +139,17 @@ impl PolicyStoreTestBuilder {
     /// # Arguments
     /// * `name` - Filename without .json extension (e.g., "users" or "roles/admin")
     /// * `content` - JSON entity content
-    pub fn with_entity(mut self, name: impl Into<String>, content: impl Into<String>) -> Self {
+    pub(crate) fn with_entity(
+        mut self,
+        name: impl Into<String>,
+        content: impl Into<String>,
+    ) -> Self {
         self.entities.insert(name.into(), content.into());
         self
     }
 
     /// Add a trusted issuer file.
-    pub fn with_trusted_issuer(
+    pub(crate) fn with_trusted_issuer(
         mut self,
         name: impl Into<String>,
         content: impl Into<String>,
@@ -151,13 +159,13 @@ impl PolicyStoreTestBuilder {
     }
 
     /// Enable manifest generation with checksums.
-    pub fn with_manifest(mut self) -> Self {
+    pub(crate) fn with_manifest(mut self) -> Self {
         self.generate_manifest = true;
         self
     }
 
     /// Generate metadata.json content.
-    pub fn build_metadata_json(&self) -> String {
+    pub(crate) fn build_metadata_json(&self) -> String {
         let mut metadata = serde_json::json!({
             "cedar_version": self.cedar_version,
             "policy_store": {
@@ -260,7 +268,7 @@ impl PolicyStoreTestBuilder {
     /// Build policy store as .cjar archive bytes.
     ///
     /// Returns the archive as a byte vector suitable for `ArchiveVfs::from_buffer()`.
-    pub fn build_archive(&self) -> Result<Vec<u8>, PolicyStoreError> {
+    pub(crate) fn build_archive(&self) -> Result<Vec<u8>, PolicyStoreError> {
         let files = self.build_files();
         let buffer = Vec::new();
         let cursor = Cursor::new(buffer);
@@ -286,11 +294,11 @@ impl PolicyStoreTestBuilder {
 // ============================================================================
 
 /// Pre-built test fixtures for common scenarios.
-pub mod fixtures {
+pub(crate) mod fixtures {
     use super::*;
 
     /// Creates a minimal valid policy store.
-    pub fn minimal_valid() -> PolicyStoreTestBuilder {
+    pub(crate) fn minimal_valid() -> PolicyStoreTestBuilder {
         PolicyStoreTestBuilder::new("abc123def456").with_policy(
             "allow-all",
             r#"@id("allow-all")
@@ -299,7 +307,7 @@ permit(principal, action, resource);"#,
     }
 
     /// Creates a policy store with multiple policies.
-    pub fn with_multiple_policies(count: usize) -> PolicyStoreTestBuilder {
+    pub(crate) fn with_multiple_policies(count: usize) -> PolicyStoreTestBuilder {
         let mut builder = PolicyStoreTestBuilder::new("multipolicy123");
 
         for i in 0..count {
@@ -321,7 +329,7 @@ permit(
     }
 
     /// Creates a policy store with multiple entities.
-    pub fn with_multiple_entities(count: usize) -> PolicyStoreTestBuilder {
+    pub(crate) fn with_multiple_entities(count: usize) -> PolicyStoreTestBuilder {
         let mut builder = PolicyStoreTestBuilder::new("multientity123").with_policy(
             "allow-all",
             r#"@id("allow-all") permit(principal, action, resource);"#,
@@ -350,7 +358,7 @@ permit(
     // ========================================================================
 
     /// Creates a policy store with invalid metadata JSON.
-    pub fn invalid_metadata_json() -> PolicyStoreTestBuilder {
+    pub(crate) fn invalid_metadata_json() -> PolicyStoreTestBuilder {
         let mut builder = minimal_valid();
         builder
             .extra_files
@@ -359,13 +367,13 @@ permit(
     }
 
     /// Creates a policy store with invalid policy syntax.
-    pub fn invalid_policy_syntax() -> PolicyStoreTestBuilder {
+    pub(crate) fn invalid_policy_syntax() -> PolicyStoreTestBuilder {
         PolicyStoreTestBuilder::new("invalidpolicy")
             .with_policy("bad-policy", "permit ( principal action resource );")
     }
 
     /// Creates a policy store with duplicate entity UIDs.
-    pub fn duplicate_entity_uids() -> PolicyStoreTestBuilder {
+    pub(crate) fn duplicate_entity_uids() -> PolicyStoreTestBuilder {
         let users1 = serde_json::json!([{
             "uid": {"type": "TestApp::User", "id": "alice"},
             "attrs": {},
@@ -384,7 +392,7 @@ permit(
     }
 
     /// Creates a policy store with invalid trusted issuer config.
-    pub fn invalid_trusted_issuer() -> PolicyStoreTestBuilder {
+    pub(crate) fn invalid_trusted_issuer() -> PolicyStoreTestBuilder {
         let issuer = serde_json::json!({
             "bad-issuer": {
                 "name": "Missing OIDC endpoint"
@@ -401,7 +409,7 @@ permit(
 // ============================================================================
 
 /// Creates a test archive with path traversal attempt.
-pub fn create_path_traversal_archive() -> Vec<u8> {
+pub(super) fn create_path_traversal_archive() -> Vec<u8> {
     let buffer = Vec::new();
     let cursor = Cursor::new(buffer);
     let mut zip = ZipWriter::new(cursor);
@@ -415,7 +423,7 @@ pub fn create_path_traversal_archive() -> Vec<u8> {
 }
 
 /// Creates a corrupted archive (invalid ZIP structure).
-pub fn create_corrupted_archive() -> Vec<u8> {
+pub(super) fn create_corrupted_archive() -> Vec<u8> {
     // Start with valid ZIP header but corrupt it
     let mut bytes = vec![0x50, 0x4B, 0x03, 0x04]; // ZIP local file header
     bytes.extend_from_slice(&[0xFF; 100]); // Corrupted data
@@ -423,7 +431,7 @@ pub fn create_corrupted_archive() -> Vec<u8> {
 }
 
 /// Creates a deeply nested archive for path length testing.
-pub fn create_deep_nested_archive(depth: usize) -> Vec<u8> {
+pub(super) fn create_deep_nested_archive(depth: usize) -> Vec<u8> {
     let buffer = Vec::new();
     let cursor = Cursor::new(buffer);
     let mut zip = ZipWriter::new(cursor);
@@ -448,7 +456,7 @@ pub fn create_deep_nested_archive(depth: usize) -> Vec<u8> {
 /// * `policy_count` - Number of policies to generate
 /// * `entity_count` - Number of entities to generate
 /// * `issuer_count` - Number of trusted issuers to generate
-pub fn create_large_policy_store(
+pub(super) fn create_large_policy_store(
     policy_count: usize,
     entity_count: usize,
     issuer_count: usize,

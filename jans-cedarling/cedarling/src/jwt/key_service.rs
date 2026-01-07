@@ -164,12 +164,12 @@ impl KeyService {
 /// This struct allows us to iterate over each in in the JwkSet and handle deserializing
 /// each one independently.
 #[derive(Deserialize)]
-pub struct JwkSet {
+pub(super) struct JwkSet {
     keys: Vec<serde_json::Value>,
 }
 
 impl JwkSet {
-    pub fn unwrap_keys(self) -> (Vec<Jwk>, Vec<serde_json::Error>) {
+    fn unwrap_keys(self) -> (Vec<Jwk>, Vec<serde_json::Error>) {
         let mut keys = Vec::new();
         let mut errs = Vec::new();
 

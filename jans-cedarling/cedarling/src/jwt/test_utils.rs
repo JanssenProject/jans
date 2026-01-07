@@ -20,7 +20,7 @@ use {jsonwebkey as jwk, jsonwebtoken as jwt};
 
 /// A pair of encoding and decoding keys.
 #[derive(Clone)]
-pub struct KeyPair {
+pub(crate) struct KeyPair {
     kid: Option<String>,
     encoding_key: jwt::EncodingKey,
     decoding_key: jwt::jwk::Jwk,
@@ -28,13 +28,13 @@ pub struct KeyPair {
 }
 
 impl KeyPair {
-    pub fn decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
+    pub(crate) fn decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
         DecodingKey::from_jwk(&self.decoding_key)
     }
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum KeyGenerationError {
+pub(crate) enum KeyGenerationError {
     #[error("Failed to serialize the decoding key onto the right struct")]
     SerializeDecodingKey(#[from] serde_json::Error),
     #[error("The given key was generated with the wrong algorithm")]
@@ -42,7 +42,7 @@ pub enum KeyGenerationError {
 }
 
 /// Generates a HS256-signed token using the given claims.
-pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> Result<KeyPair, KeyGenerationError> {
+pub(crate) fn generate_keypair_hs256(kid: Option<impl ToString>) -> Result<KeyPair, KeyGenerationError> {
     let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256));
     jwk.set_algorithm(jwk::Algorithm::HS256)
         .expect("should set encryption algorithm");
@@ -72,13 +72,13 @@ pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> Result<KeyPair, Key
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum TokenGenerationError {
+pub(crate) enum TokenGenerationError {
     #[error("Failed to encode token into a JWT string")]
     Encode(#[from] jwt::errors::Error),
 }
 
 /// Generates a token string in the given format: `"header.claim.signature"`
-pub fn generate_token_using_claims(
+pub(crate) fn generate_token_using_claims(
     claims: &impl Serialize,
     keypair: &KeyPair,
 ) -> Result<String, TokenGenerationError> {
@@ -93,7 +93,7 @@ pub fn generate_token_using_claims(
 }
 
 /// Generates a JwkSet from the given keys
-pub fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
+pub(crate) fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
     let keys = keys
         .iter()
         .map(|key_pair| key_pair.decoding_key.clone())
@@ -101,20 +101,20 @@ pub fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
     jwt::jwk::JwkSet { keys }
 }
 
-pub struct MockServer {
+pub(crate) struct MockServer {
     pub endpoints: MockEndpoints,
     server: ServerGuard,
     keys: KeyPair,
 }
 
-pub struct MockEndpoints {
+pub(crate) struct MockEndpoints {
     pub oidc: Option<Mock>,
     pub jwks: Option<Mock>,
     pub status_list: Option<Mock>,
 }
 
 impl MockEndpoints {
-    pub fn new_with_defaults(server: &mut Server, keys: &KeyPair) -> Self {
+    pub(crate) fn new_with_defaults(server: &mut Server, keys: &KeyPair) -> Self {
         let oidc = Some(
             server
                 .mock("GET", "/.well-known/openid-configuration")
@@ -178,7 +178,7 @@ const MOCK_STATUS_LIST_ENDPOINT: &str = "/jans-auth/restv1/status_list";
 const MOCK_JWKS_URI: &str = "/jans-auth/restv1/jwks";
 
 impl MockServer {
-    pub async fn new_with_defaults() -> Result<Self, KeyGenerationError> {
+    pub(crate) async fn new_with_defaults() -> Result<Self, KeyGenerationError> {
         let mut server = Server::new_async().await;
 
         let keys = generate_keypair_hs256(Some("some_hs256_key"))?;
@@ -196,7 +196,7 @@ impl MockServer {
     ///
     /// If `jwt_status_idx` is [`Some`], the jwt will also havae a `status` claim.
     #[track_caller]
-    pub fn generate_token_with_hs256sig(
+    pub(crate) fn generate_token_with_hs256sig(
         &mut self,
         claims: &mut Value,
         jwt_status_idx: Option<usize>,
@@ -228,7 +228,7 @@ impl MockServer {
     }
 
     /// Generates a [`TrustedIssuer`] for this instance of the [`MockServer`].
-    pub fn trusted_issuer(&self) -> TrustedIssuer {
+    pub(crate) fn trusted_issuer(&self) -> TrustedIssuer {
         TrustedIssuer {
             oidc_endpoint: Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT))
                 .expect("should be a valid url"),
@@ -238,7 +238,7 @@ impl MockServer {
 
     /// Use this to generate the status list JWT
     #[track_caller]
-    pub fn generate_status_list_endpoint(
+    pub(crate) fn generate_status_list_endpoint(
         &mut self,
         status_list_bits: StatusBitSize,
         status_list: &[u8],
@@ -291,7 +291,7 @@ impl MockServer {
     }
 
     /// Helper function for generating a status list JWT for this mock server
-    pub async fn status_list_jwt(&self) -> Result<String, reqwest::Error> {
+    pub(crate) async fn status_list_jwt(&self) -> Result<String, reqwest::Error> {
         static CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
         let url = self.status_list_endpoint().expect("the status list endpoint hasn't been generated yet. call `generate_status_list_endpoint` first");
         CLIENT
@@ -303,7 +303,7 @@ impl MockServer {
             .await
     }
 
-    pub fn status_list_endpoint(&self) -> Option<Url> {
+    pub(crate) fn status_list_endpoint(&self) -> Option<Url> {
         self.endpoints.status_list.as_ref()?;
 
         Some(
@@ -312,7 +312,7 @@ impl MockServer {
         )
     }
 
-    pub fn openid_config_endpoint(&self) -> Option<Url> {
+    pub(crate) fn openid_config_endpoint(&self) -> Option<Url> {
         self.endpoints.oidc.as_ref()?;
 
         Some(
@@ -320,28 +320,28 @@ impl MockServer {
         )
     }
 
-    pub fn jwks_endpoint(&self) -> Option<Url> {
+    pub(crate) fn jwks_endpoint(&self) -> Option<Url> {
         self.endpoints.jwks.as_ref()?;
 
         Some(Url::parse(&(self.server.url() + MOCK_JWKS_URI)).expect("invalid status list url"))
     }
 
-    pub fn jwt_decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
+    pub(crate) fn jwt_decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
         self.keys.decoding_key()
     }
 
-    pub fn jwt_decoding_key_and_id(
+    pub(crate) fn jwt_decoding_key_and_id(
         &self,
     ) -> Result<(DecodingKey, Option<String>), jsonwebtoken::errors::Error> {
         Ok((self.keys.decoding_key()?, self.keys.kid.clone()))
     }
 
-    pub fn issuer(&self) -> String {
+    pub(crate) fn issuer(&self) -> String {
         self.server.url()
     }
 
     #[track_caller]
-    pub fn openid_config(&self) -> OpenIdConfig {
+    pub(crate) fn openid_config(&self) -> OpenIdConfig {
         OpenIdConfig {
             issuer: self.issuer(),
             jwks_uri: self.jwks_endpoint().unwrap(),

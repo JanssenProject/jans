@@ -78,10 +78,10 @@ mod validation;
 #[cfg(test)]
 pub(crate) mod test_utils;
 
-pub use decode::*;
-pub use error::*;
-pub use token::{Token, TokenClaimTypeError, TokenClaims};
-pub use token_cache::TokenCache;
+pub(crate) use decode::*;
+pub(crate) use error::*;
+pub(crate) use token::{Token, TokenClaimTypeError, TokenClaims};
+pub(crate) use token_cache::TokenCache;
 // Re-export trusted issuer validation for public API
 pub use validation::{TrustedIssuerError, TrustedIssuerValidator, validate_required_claims};
 
