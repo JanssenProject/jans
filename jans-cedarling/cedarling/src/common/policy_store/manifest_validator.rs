@@ -14,7 +14,6 @@
 use std::collections::HashSet;
 use std::path::PathBuf;
 
-use hex;
 use sha2::{Digest, Sha256};
 
 use super::errors::{ManifestErrorType, PolicyStoreError};
