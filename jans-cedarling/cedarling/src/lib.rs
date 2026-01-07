@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 #![deny(missing_docs)]
+#![deny(unreachable_pub)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
