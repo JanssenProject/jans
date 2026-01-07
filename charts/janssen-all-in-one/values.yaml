@@ -591,6 +591,22 @@ certManager:
     issuerName: ""
     issuerGroup: cert-manager.io
     tlsSecretName: tls-certificate
+gatewayApi:
+  # -- Boolean flag to enable/disable the Gateway and HTTPRoute resources.
+  enabled: false
+  gatewayClassName: nginx
+  # The name of the Gateway resource to create
+  name: jans-gateway
+  # Secret containing the TLS certificate for the Gateway
+  tlsSecretName: tls-certificate
+  # Specific labels for the Gateway resource
+  gatewayLabels: {}
+  # Specific annotations for the Gateway resource
+  gatewayAnnotations: {}
+  # Specific labels for the HTTPRoute resource
+  routeLabels: {}
+  # Specific annotations for the HTTPRoute resource
+  routeAnnotations: {}
 nginx-ingress:
   # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
   enabled: true
@@ -614,9 +630,9 @@ nginx-ingress:
     tlsSecretName: tls-certificate
 # Service manifest properties
 service:
-  # -- The name of the aio port within the aio service. Please keep it as default.
+  # -- The name of the Kubernetes Service resource.
   name: http-aio
-  # -- Port of the fido2 service. Please keep it as default.
+  # -- The port number exposed by the All-in-One service.
   port: 8080
   # -- Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP
   sessionAffinity: None
