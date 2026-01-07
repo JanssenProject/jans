@@ -478,6 +478,7 @@ nav:
             - 'Consent Management': 'casa/plugins/consent-management.md'
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
             - 'Email OTP': 'casa/plugins/email-otp.md'
+            - 'Certificate authentication': 'casa/plugins/cert-authn.md'
         - 'FAQ': 'casa/administration/faq.md'
     - Developer Guide:
         - 'Overview': 'casa/developer/overview.md'

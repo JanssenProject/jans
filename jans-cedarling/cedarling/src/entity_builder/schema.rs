@@ -6,7 +6,7 @@
 mod attr_src;
 
 use attr_src::BuildAttrSrcError;
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy_core::validator::ValidatorSchema;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display};
 use thiserror::Error;
@@ -41,10 +41,13 @@ impl TryFrom<&ValidatorSchema> for MappingSchema {
                 .iter()
                 .map(|(attr_name, attr_type)| {
                     AttrSrc::from_type(attr_name, &attr_type.attr_type).map(|attr_src| {
-                        (attr_name.clone(), AttrsShape {
-                            is_required: attr_type.is_required(),
-                            attr_src,
-                        })
+                        (
+                            attr_name.clone(),
+                            AttrsShape {
+                                is_required: attr_type.is_required(),
+                                attr_src,
+                            },
+                        )
                     })
                 })
                 .partition_result();
@@ -98,7 +101,7 @@ impl AttrsShape {
 mod test {
     use super::*;
     use crate::entity_builder::schema::attr_src::TknClaimAttrSrc;
-    use cedar_policy_validator::ValidatorSchema;
+    use cedar_policy_core::validator::ValidatorSchema;
     use std::{collections::HashSet, str::FromStr};
     use test_utils::assert_eq;
 
@@ -127,7 +130,7 @@ mod test {
 
         let schema: MappingSchema = (&ValidatorSchema::from_str(schema)
             // note that unknown types will be handled already by the implementation
-            // of the cedar_policy_validator::ValidatorSchema's parser
+            // of the cedar_policy_core::validator::ValidatorSchema's parser
             .expect("should parse validator schema"))
             .try_into()
             .expect("should build mapping schema");

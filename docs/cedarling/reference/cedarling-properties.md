@@ -26,12 +26,24 @@ To load policy store one of the following keys must be provided:
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
 
-- **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local.
+- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format:
+  - URLs ending in `.cjar` → loads as Cedar Archive
+  - Other URLs → loads as legacy JSON from Lock Server
 
-- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Local file with JSON object with policy store
+- **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format:
+  - Directories → loads as directory-based policy store
+  - `.cjar` files → loads as Cedar Archive
+  - `.json` files → loads as JSON
+  - `.yaml`/`.yml` files → loads as YAML
+
+**New Directory-Based Format** (Native platforms only):
+
+Cedarling now supports a directory-based policy store format with human-readable Cedar files. See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
+
+**Note:** In WASM environments, only `CEDARLING_POLICY_STORE_URI` and `CEDARLING_POLICY_STORE_LOCAL` are available. File and directory sources (`CEDARLING_POLICY_STORE_LOCAL_FN`) are not supported in WASM due to lack of filesystem access.
 
 !!! NOTE
-    All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
+All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 
 **Auxilliary properties**
 
@@ -59,15 +71,18 @@ To load policy store one of the following keys must be provided:
 - **`CEDARLING_LOG_TYPE`** : `off`, `memory`, `std_out`
 - **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](./cedarling-logs.md). Default to `WARN`
 - **`CEDARLING_DECISION_LOG_USER_CLAIMS`** : List of claims to map from user entity, such as ["sub", "email", "username", ...]
-- **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+- **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from workload entity, such as ["client_id", "rp_id", ...]
 - **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
 - **`CEDARLING_LOG_TTL`** : in case of `memory` store, TTL (time to live) of log entities in seconds.
 - **`CEDARLING_LOG_MAX_ITEMS`** : Maximum number of log entities that can be stored using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
 - **`CEDARLING_LOG_MAX_ITEM_SIZE`** : Maximum size of a single log entity in bytes using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
+- **`CEDARLING_STDOUT_MODE`** : Logging mode for stdout logger: `async` or `immediate` (default). Only applicable for native targets (not WASM). Defaults to `immediate`.
+- **`CEDARLING_STDOUT_TIMEOUT_MILLIS`** : Flush timeout in milliseconds for async stdout logging. Only applicable for native targets (not WASM). Defaults to 100 ms.
+- **`CEDARLING_STDOUT_BUFFER_LIMIT`** : Buffer size limit in bytes for async stdout logging. Only applicable for native targets (not WASM). Defaults to 1 MB (2^20 bytes).
 
 **The following bootstrap properties are needed to configure JWT and cryptographic behavior:**
 
-- **`CEDARLING_LOCAL_JWKS`** : JWKS file with public keys
+- **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS
 
 - **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. This requires an `iss` is present.
 - **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info.
