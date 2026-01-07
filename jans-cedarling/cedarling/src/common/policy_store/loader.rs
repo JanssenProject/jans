@@ -73,7 +73,7 @@ pub(crate) async fn load_policy_store_directory(
 /// Directory loading is not supported in WASM environments.
 /// Use `load_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub async fn load_policy_store_directory(
+pub(crate) async fn load_policy_store_directory(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())

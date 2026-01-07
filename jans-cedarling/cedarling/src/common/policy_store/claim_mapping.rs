@@ -5,7 +5,6 @@
 
 use std::collections::HashMap;
 
-use regex;
 use regex::Regex;
 use serde::{Deserialize, de};
 use serde_json::Value;
