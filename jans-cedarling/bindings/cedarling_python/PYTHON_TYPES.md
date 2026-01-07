@@ -4,8 +4,13 @@
 This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
-AuthorizeMultiIssuerRequest
-===========================
+## Policy Store Sources
+
+For details on the new directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
+
+---
+
+# AuthorizeMultiIssuerRequest
 
 A Python wrapper for the Rust `cedarling::AuthorizeMultiIssuerRequest` struct.
 Represents a multi-issuer authorization request with multiple JWT tokens from different issuers.

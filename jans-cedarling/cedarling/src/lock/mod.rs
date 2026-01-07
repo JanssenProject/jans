@@ -120,7 +120,7 @@ struct WorkerSenderAndHandle {
 
 /// Stores logs in a buffer then sends them to the lock server in the background
 #[derive(Debug)]
-pub(crate) struct LockService {
+pub struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
@@ -248,6 +248,7 @@ impl LockService {
     }
 }
 
+// TODO: Lock service should be refactored and add filtering based on log type/level
 impl LogWriter for LockService {
     fn log_any<T: Loggable>(&self, entry: T) {
         let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref() else {
@@ -275,6 +276,15 @@ impl LogWriter for LockService {
                 err
             )));
         }
+    }
+
+    fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(crate::log::BaseLogEntry) -> R,
+    {
+        let entry = log_fn.build();
+        self.log_any(entry);
     }
 }
 

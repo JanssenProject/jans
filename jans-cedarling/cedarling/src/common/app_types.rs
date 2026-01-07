@@ -13,10 +13,10 @@ use uuid7::{Uuid, uuid4};
 /// represents a unique ID for application
 /// generated one on startup
 #[derive(Debug, Clone, Copy, Serialize, PartialEq, Display)]
-pub(crate) struct PdpID(pub Uuid);
+pub struct PdpID(pub Uuid);
 
 impl PdpID {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         // we use uuid v4 because it is generated based on random numbers.
         PdpID(uuid4())
     }

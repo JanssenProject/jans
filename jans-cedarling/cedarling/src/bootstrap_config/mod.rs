@@ -35,7 +35,7 @@ pub use entity_builder_config::{
 };
 pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
-pub use log_config::{LogConfig, LogConfigRaw, LogTypeConfig, MemoryLogConfig};
+pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
 
@@ -227,6 +227,12 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when the lock server configuration URI is invalid.
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
+
+    /// Error returned when cjar_url is missing or empty.
+    #[error(
+        "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
+    )]
+    MissingCjarUrl,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {

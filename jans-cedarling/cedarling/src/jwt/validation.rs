@@ -3,8 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+mod trusted_issuer_validator;
 mod validator;
 mod validator_cache;
 
+pub use trusted_issuer_validator::{
+    TrustedIssuerError, TrustedIssuerValidator, validate_required_claims,
+};
 pub use validator::*;
 pub use validator_cache::*;
