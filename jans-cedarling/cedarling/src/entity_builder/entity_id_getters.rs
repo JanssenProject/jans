@@ -14,6 +14,7 @@ pub(super) enum EntityIdSrc<'a> {
     String(&'a str),
 }
 
+/// Tries to get the first valid entity ID from the provided sources.
 pub(super) fn get_first_valid_entity_id(
     id_srcs: &[EntityIdSrc],
 ) -> Result<SmolStr, BuildEntityErrorKind> {
