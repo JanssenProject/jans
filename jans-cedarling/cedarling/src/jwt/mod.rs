@@ -82,8 +82,7 @@ pub(crate) use decode::*;
 pub(crate) use error::*;
 pub(crate) use token::{Token, TokenClaimTypeError, TokenClaims};
 pub(crate) use token_cache::TokenCache;
-// Re-export trusted issuer validation for public API
-pub use validation::{TrustedIssuerError, TrustedIssuerValidator, validate_required_claims};
+pub(crate) use validation::TrustedIssuerError;
 
 use crate::JwtConfig;
 use crate::LogLevel;
@@ -107,7 +106,7 @@ use validation::*;
 type IssClaim = String;
 
 /// Handles JWT validation
-pub struct JwtService {
+pub(crate) struct JwtService {
     validators: JwtValidatorCache,
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
@@ -140,7 +139,7 @@ impl JwtService {
     /// # Errors
     ///
     /// Returns `JwtServiceInitError` if initialization fails (e.g., failed to fetch OIDC config)
-    pub async fn new(
+    pub(crate) async fn new(
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
@@ -248,7 +247,7 @@ impl JwtService {
     /// # Returns
     ///
     /// Map of token names to validated `Token` objects, or an error if any token fails validation.
-    pub async fn validate_tokens<'a>(
+    pub(crate) async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
@@ -435,7 +434,7 @@ impl JwtService {
     /// - Non-deterministic token detection (duplicate issuer+type combinations)
     ///
     /// Returns a result containing validated tokens or detailed error information.
-    pub fn validate_multi_issuer_tokens(
+    pub(crate) fn validate_multi_issuer_tokens(
         &self,
         tokens: &[TokenInput],
     ) -> Result<HashMap<String, Arc<Token>>, MultiIssuerValidationError> {

@@ -54,8 +54,6 @@ use log::LogEntry;
 use log::interface::LogWriter;
 pub use log::{LogLevel, LogStorage};
 
-// JWT validation exports
-pub use jwt::{JwtService, TrustedIssuerError, TrustedIssuerValidator, validate_required_claims};
 use semver::Version;
 
 #[doc(hidden)]

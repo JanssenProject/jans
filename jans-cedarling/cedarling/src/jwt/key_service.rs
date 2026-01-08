@@ -15,7 +15,7 @@ use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
-pub struct DecodingKeyInfo {
+pub(crate) struct DecodingKeyInfo {
     pub issuer: Option<String>,
     pub kid: Option<String>,
     pub algorithm: Algorithm,
@@ -36,12 +36,12 @@ pub struct DecodingKeyInfo {
 ///
 /// [`RFC 7517 v41`]: https://datatracker.ietf.org/doc/html/draft-ietf-jose-json-web-key-41
 #[derive(Default)]
-pub struct KeyService {
+pub(super) struct KeyService {
     keys: HashMap<DecodingKeyInfo, DecodingKey>,
 }
 
 impl KeyService {
-    pub fn new() -> Self {
+    pub(super) fn new() -> Self {
         Default::default()
     }
 
@@ -64,7 +64,7 @@ impl KeyService {
     /// - and the values contains the JSON Web Keys as defined in [`RFC 7517`].
     ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
-    pub fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), KeyServiceError> {
+    pub(super) fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
 
@@ -92,7 +92,7 @@ impl KeyService {
         Ok(())
     }
 
-    pub async fn get_keys_using_oidc(
+    pub(super) async fn get_keys_using_oidc(
         &mut self,
         openid_config: &OpenIdConfig,
         logger: &Option<Logger>,
@@ -150,11 +150,11 @@ impl KeyService {
         Ok(())
     }
 
-    pub fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<&DecodingKey> {
+    pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<&DecodingKey> {
         self.keys.get(key_info)
     }
 
-    pub fn has_keys(&self) -> bool {
+    pub(super) fn has_keys(&self) -> bool {
         !self.keys.is_empty()
     }
 }

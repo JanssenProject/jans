@@ -25,7 +25,7 @@ pub(super) trait GetFromUrl<T> {
 }
 
 #[derive(Deserialize)]
-pub struct OpenIdConfig {
+pub(super) struct OpenIdConfig {
     pub issuer: String,
     #[serde(deserialize_with = "deserialize_url")]
     pub jwks_uri: Url,

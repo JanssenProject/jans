@@ -120,7 +120,7 @@ struct WorkerSenderAndHandle {
 
 /// Stores logs in a buffer then sends them to the lock server in the background
 #[derive(Debug)]
-pub struct LockService {
+pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
@@ -152,7 +152,7 @@ pub(crate) fn init_http_client(
 }
 
 impl LockService {
-    pub async fn new(
+    pub(crate) async fn new(
         pdp_id: PdpID,
         bootstrap_conf: &LockServiceConfig,
         logger: Option<LoggerWeak>,
@@ -240,7 +240,7 @@ impl LockService {
         })
     }
 
-    pub async fn shut_down(&mut self) {
+    pub(crate) async fn shut_down(&mut self) {
         self.cancel_tkn.cancel();
         if let Some(log_worker) = self.log_worker.take() {
             _ = log_worker.handle.await_result().await;
