@@ -86,7 +86,8 @@ jobs:
       working-directory: jans-cedarling
       run: |
         rustup component add clippy
-        cargo clippy --workspace --all-targets --target wasm32-unknown-unknown -- -D warnings
+        rustup target add wasm32-unknown-unknown
+        cargo clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
   python_tests:
     runs-on: ubuntu-latest
     strategy:
