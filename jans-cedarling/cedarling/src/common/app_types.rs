@@ -24,7 +24,7 @@ impl PdpID {
 
 /// Name of application from configuration
 #[derive(Debug, Clone, Default, PartialEq, serde::Serialize, serde::Deserialize)]
-pub(crate) struct ApplicationName(pub String);
+pub(crate) struct ApplicationName(pub(crate) String);
 
 impl From<String> for ApplicationName {
     fn from(value: String) -> Self {
