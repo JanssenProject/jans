@@ -9,6 +9,7 @@
 //! using a manifest file that contains SHA-256 checksums for all files.
 
 // This file is not compiled for WebAssembly targets.
+// Because manifest validation relies on filesystem access which is not available in WASM.
 #![cfg(not(target_arch = "wasm32"))]
 
 use std::collections::HashSet;
