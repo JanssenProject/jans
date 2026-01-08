@@ -47,7 +47,6 @@ First, retrieve the `admin password` required to log in to the TUI interface by 
 Use the following command to launch the TUI client:
 
 ```bash title="Command"
-# Add --noverify if your FQDN is not registered
 python3 jans-cli-tui-linux-ubuntu-X86-64.pyz \
     --host $FQDN \
     --client-id $TUI_CLIENT_ID \
