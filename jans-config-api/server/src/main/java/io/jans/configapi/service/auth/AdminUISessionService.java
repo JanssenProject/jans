@@ -16,6 +16,7 @@ import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -37,7 +38,8 @@ public class AdminUISessionService {
     private static final String SID_MSG = "Get Config API Session by sid:{}";
     private static final String SID_ERROR = "Failed to load  Config API session entry with sid ";
     private static final String ADMIN_UI_CONFIG_DN = "ou=admin-ui,ou=configuration,o=jans";
-    private static final String SCOPE_OPENID = "openid";
+    private static final String SID = "sid";
+    private static final String SESSION_DN = "ou=configApiSession,ou=admin-ui,o=jans";
     @Inject
     Logger logger;
 
@@ -64,17 +66,19 @@ public class AdminUISessionService {
         try {
             configApiSession = persistenceEntryManager
                     .find(AdminUISession.class, getDnForSession(sessionId));
-            //remove session entry if expired
-            if((configApiSession.getExpirationDate().getTime() - configApiSession.getCreationDate().getTime()) < 0) {
-                removeSession(sessionId);
-                return null;
-            }
         } catch (Exception ex) {
             logger.error(SID_ERROR + sessionId, ex);
         }
         return configApiSession;
     }
 
+    public void removeAllExpiredSessions() {
+        final Filter filter = Filter.createPresenceFilter(SID);
+        List<AdminUISession> adminUISessions =  persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
+        adminUISessions.stream().filter(ele ->
+                ((ele.getExpirationDate().getTime() - ele.getCreationDate().getTime()) < 0))
+                .forEach(e -> persistenceEntryManager.remove(e));
+    }
     public void removeSession(String sessionId) {
         AdminUISession configApiSession = getSession(sessionId);
         persistenceEntryManager.remove(configApiSession);

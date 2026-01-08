@@ -82,6 +82,7 @@ public class OAuth2Resource {
                     .path("/")
                     .secure(true) // Set to true if using HTTPS
                     .httpOnly(true) // Makes the cookie inaccessible to JavaScript (recommended for auth tokens)
+                    .sameSite(NewCookie.SameSite.NONE)
                     .build();
 
             oAuth2Service.setAdminUISession(sessionId, apiTokenRequest.getUjwt());

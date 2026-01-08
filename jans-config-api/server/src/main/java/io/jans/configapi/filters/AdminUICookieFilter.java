@@ -59,7 +59,9 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         log.info("Inside AdminUICookieFilter filter...");
         Map<String, Cookie> cookies = requestContext.getCookies();
         initializeCaches();
+        removeExpiredSessions();
         Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
+        //return if session rcord is not present in the database
         if(ujwtOptional.isEmpty()) {
             return;
         }
@@ -77,6 +79,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (InvalidJwtException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void removeExpiredSessions() {
+        configApiSessionService.removeAllExpiredSessions();
     }
 
     private String getAccessToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException, InvalidJwtException {
