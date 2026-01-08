@@ -222,7 +222,7 @@ mod tests {
         let valid_entities = DefaultEntities {
             inner: entities_map.clone(),
         };
-        let _ = limits
+        limits
             .validate_default_entities(&valid_entities)
             .expect("added only one entity, should not exceed limit");
 
