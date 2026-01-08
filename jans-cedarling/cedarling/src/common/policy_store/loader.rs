@@ -632,7 +632,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// (e.g., `PhysicalVfs`), callers should use higher-level helpers such as
     /// `load_policy_store_directory` or call `validate_manifest` explicitly on
     /// `DefaultPolicyStoreLoader<PhysicalVfs>`.
-    pub(crate) fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    pub(super) fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
 

@@ -22,7 +22,7 @@ use super::vfs_adapter::VfsFileSystem;
 
 /// Result of manifest validation with detailed information.
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) struct ManifestValidationResult {
+pub(super) struct ManifestValidationResult {
     /// Whether validation passed (all required checks passed)
     pub is_valid: bool,
     /// Files that passed validation
@@ -35,7 +35,7 @@ pub(crate) struct ManifestValidationResult {
 
 /// Detailed error information for manifest validation failures.
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) struct ManifestValidationError {
+pub(super) struct ManifestValidationError {
     /// Type of error
     pub error_type: ManifestErrorType,
     /// File path related to the error (if applicable)
