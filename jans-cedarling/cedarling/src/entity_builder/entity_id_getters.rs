@@ -59,6 +59,7 @@ pub(super) fn get_first_valid_entity_id(
     Err(BuildEntityErrorKind::MissingEntityId(errors.into()))
 }
 
+/// Collects all valid entity IDs from the provided sources.
 pub(super) fn collect_all_valid_entity_ids(id_srcs: &[EntityIdSrc]) -> Vec<SmolStr> {
     id_srcs
         .iter()
