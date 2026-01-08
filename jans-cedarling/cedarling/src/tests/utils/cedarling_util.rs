@@ -143,10 +143,7 @@ macro_rules! cmp_policy {
 pub(crate) fn get_decision(
     resp: &Option<cedar_policy::Response>,
 ) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| {
-        println!("diagnostics: {:?}\n", v.diagnostics());
-        v.decision()
-    })
+    resp.as_ref().map(|v| v.decision())
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
