@@ -216,8 +216,7 @@ impl JwtService {
         let key_service = Arc::new(key_service);
 
         // Create TrustedIssuerValidator for advanced validation scenarios
-        let trusted_issuer_validator =
-            TrustedIssuerValidator::with_logger(trusted_issuers_for_validator, logger.clone());
+        let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers_for_validator);
 
         Ok(Self {
             validators,
