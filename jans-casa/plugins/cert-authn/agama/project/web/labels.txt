@@ -1,0 +1,4 @@
+
+# Casa selector page label
+
+casa.selector.certauthn=A digital certificate imported into this browser

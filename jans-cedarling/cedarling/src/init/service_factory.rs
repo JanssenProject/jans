@@ -8,12 +8,16 @@
 //! Module to lazily initialize internal cedarling services
 
 use super::service_config::ServiceConfig;
+use crate::LogLevel;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::{
+    PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
+};
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
-use crate::log;
+use crate::log::interface::LogWriter;
+use crate::log::{self, BaseLogEntry, LogEntry};
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -48,8 +52,21 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get policy store
-    pub fn policy_store(&self) -> PolicyStoreWithID {
-        self.service_config.policy_store.clone()
+    pub fn policy_store(&self) -> Result<&PolicyStoreWithID, ServiceInitError> {
+        // it potentyally can be called many times, but it is only during initialization so it shouldn't be a problem
+        self.service_config
+            .policy_store
+            .validate_trusted_issuers()?;
+
+        Ok(&self.service_config.policy_store)
+    }
+
+    /// Get the policy store metadata if available.
+    ///
+    /// Metadata is only available when the policy store is loaded from the new
+    /// directory/archive format. Legacy JSON/YAML formats do not include metadata.
+    pub fn policy_store_metadata(&self) -> Option<&PolicyStoreMetadata> {
+        self.service_config.policy_store.metadata.as_ref()
     }
 
     // get log service
@@ -63,17 +80,9 @@ impl<'a> ServiceFactory<'a> {
             Ok(jwt_service.clone())
         } else {
             let config = &self.bootstrap_config.jwt_config;
-            let trusted_issuers = self.policy_store().trusted_issuers.clone();
+            let trusted_issuers = self.policy_store()?.trusted_issuers.clone();
             let logger = self.log_service();
-            let service = Arc::new(
-                JwtService::new(
-                    config,
-                    trusted_issuers,
-                    Some(logger),
-                    self.bootstrap_config.token_cache_max_ttl_secs,
-                )
-                .await?,
-            );
+            let service = Arc::new(JwtService::new(config, trusted_issuers, Some(logger)).await?);
             self.container.jwt_service = Some(service.clone());
             Ok(service)
         }
@@ -86,23 +95,32 @@ impl<'a> ServiceFactory<'a> {
         }
 
         let logger = self.log_service();
+        let policy_store = &self.policy_store()?.store;
+
+        let default_entities_with_warn = &policy_store.default_entities;
+        // Log warns that some default entities loaded not correctly
+        // it will be logged only once.
+        for warn in default_entities_with_warn.warns() {
+            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warn.to_string());
+
+            logger.log_any(log_entry);
+        }
 
         let config = &self.bootstrap_config.entity_builder_config;
-        let trusted_issuers = self
-            .policy_store()
-            .trusted_issuers
-            .clone()
-            .unwrap_or_default();
-        let schema = &self.policy_store().schema.validator_schema;
-        let policy_store = &self.policy_store().store;
-        let namespace = Some(policy_store.name.as_str());
+        let policy_store = self.policy_store()?;
+
+        let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(logger));
+        let schema = &policy_store.schema.validator_schema;
         let entity_builder = EntityBuilder::new(
             config.clone(),
-            &trusted_issuers,
+            issuers_index,
             Some(schema),
-            policy_store.default_entities.as_ref(),
-            namespace,
-            logger,
+            default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);
         self.container.entity_builder_service = Some(service.clone());
@@ -116,7 +134,7 @@ impl<'a> ServiceFactory<'a> {
         } else {
             let config = AuthzConfig {
                 log_service: self.log_service(),
-                policy_store: self.policy_store(),
+                policy_store: self.policy_store()?.clone(),
                 jwt_service: self.jwt_service().await?,
                 entity_builder: self.entity_builder()?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
@@ -137,4 +155,6 @@ pub enum ServiceInitError {
     JwtService(#[from] JwtServiceInitError),
     #[error(transparent)]
     EntityBuilder(#[from] InitEntityBuilderError),
+    #[error(transparent)]
+    PolicyStore(#[from] TrustedIssuersValidationError),
 }

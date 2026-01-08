@@ -9,11 +9,11 @@ tags:
 
 # Community Content References
 
-This is a list of helpful learning resources outside the official documentation 
-about the Janssen Project. Most of the content is created by the community 
+This is a list of helpful learning resources outside the official documentation
+about the Janssen Project. Most of the content is created by the community
 at large,
-along with the core team. This is not a complete list of all the 
-content created by the community on various platforms. Please 
+along with the core team. This is not a complete list of all the
+content created by the community on various platforms. Please
 help us keep it updated by raising a PR for adding more links.
 
 The Janssen team usually publishes content in the following locations:
@@ -22,7 +22,7 @@ The Janssen team usually publishes content in the following locations:
 * [Linkedin Page](https://www.linkedin.com/company/janssen-project)
 * [Medium Article](https://medium.com/janssen-project-feed)
 
-## Additional Content 
+## Additional Content
 
 ### Articles and Blogs
 

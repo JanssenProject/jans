@@ -6,6 +6,7 @@
 //! Integration tests for SSA JWT validation functionality
 
 use crate::common::json_rules::JsonRule;
+use crate::log::StdOutLoggerMode;
 use crate::{
     AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
     JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
@@ -40,7 +41,7 @@ async fn test_cedarling_with_valid_ssa() {
     let result = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -51,6 +52,7 @@ async fn test_cedarling_with_valid_ssa() {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -69,7 +71,6 @@ async fn test_cedarling_with_valid_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 0,
     })
     .await;
 
@@ -99,7 +100,7 @@ async fn test_cedarling_without_ssa() {
     let result = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -110,6 +111,7 @@ async fn test_cedarling_without_ssa() {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -128,7 +130,6 @@ async fn test_cedarling_without_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await;
 

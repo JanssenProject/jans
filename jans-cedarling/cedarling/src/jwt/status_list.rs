@@ -331,7 +331,7 @@ mod test {
             status_list.sub,
             server.status_list_endpoint().unwrap().to_string()
         );
-        assert_eq!(status_list.ttl, Some(600));
+        assert_eq!(status_list.ttl, Some(300));
         assert_eq!(
             status_list.status_list,
             StatusListClaim {

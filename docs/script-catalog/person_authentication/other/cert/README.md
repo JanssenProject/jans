@@ -16,7 +16,7 @@ The module has a few properties:
 3) use_generic_validator, use_path_validator, use_ocsp_validator, use_crl_validator - Enable/Disable specific certificate validation.
    Allowed values: true/false
    Example: true
-   
+
 4) crl_max_response_size - Specify maximum allowed size of CRL response
    Allowed values: integer value greater that 0
    Example: 10485760
@@ -463,9 +463,9 @@ Convert a PEM certificate file and a private key to PKCS#12 (.pfx .p12)
 ```
 openssl pkcs12 -export -out enduser-certs/user-gluu.org.pfx -inkey enduser-certs/user-gluu.org.key -in enduser-certs/user-gluu.org.crt -certfile enduser-certs/user-gluu.org.chain
 ```
-                                                                                                                                                                          
+
 ## Quick Certificates for Testing
-   
+
 ### 1. Create a user_cert.conf file and update `user_dn` section:
 
 ```

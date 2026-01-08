@@ -5,6 +5,7 @@
 
 use std::{collections::HashMap, sync::Arc};
 
+use super::errors::IdTokenTrustModeError;
 use crate::jwt::{Token, TokenClaimTypeError};
 
 /// Enforces the trust mode setting set by the `CEDARLING_ID_TOKEN_TRUST_MODE`
@@ -99,24 +100,6 @@ fn get_tkn_claim_as_str(
         })
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum IdTokenTrustModeError {
-    #[error("the access token's `client_id` does not match with the id token's `aud`")]
-    AccessTokenClientIdMismatch,
-    #[error("an access token is required when using strict mode")]
-    MissingAccessToken,
-    #[error("an id token is required when using strict mode")]
-    MissingIdToken,
-    #[error("the id token's `sub` does not match with the userinfo token's `sub`")]
-    SubMismatchIdTokenUserinfo,
-    #[error("the access token's `client_id` does not match with the userinfo token's `aud`")]
-    ClientIdUserinfoAudMismatch,
-    #[error("missing a required claim `{0}` from `{1}` token")]
-    MissingRequiredClaim(String, String),
-    #[error("invalid claim type in {0} token: {1}")]
-    TokenClaimTypeError(String, TokenClaimTypeError),
-}
-
 #[cfg(test)]
 mod test {
     use super::{IdTokenTrustModeError, validate_id_tkn_trust_mode};
@@ -131,8 +114,7 @@ mod test {
             serde_json::from_value(json!({"client_id": "some-id-123"}))
                 .expect("valid token claims"),
             None,
-        )
-        .into();
+        );
         let id_token = Token::new(
             "id_token",
             serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
@@ -141,8 +123,7 @@ mod test {
         let tokens = HashMap::from([
             ("access_token".to_string(), Arc::new(access_token)),
             ("id_token".to_string(), Arc::new(id_token)),
-        ])
-        .into();
+        ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
 

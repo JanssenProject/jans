@@ -6,26 +6,26 @@
 [![DPG Badge](https://img.shields.io/badge/Verified-DPG-3333AB?logo=data:image/svg%2bxml;base64,PHN2ZyB3aWR0aD0iMzEiIGhlaWdodD0iMzMiIHZpZXdCb3g9IjAgMCAzMSAzMyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjIwMDggMjEuMzY3OEwxMC4xNzM2IDE4LjAxMjRMMTEuNTIxOSAxNi40MDAzTDEzLjk5MjggMTguNDU5TDE5LjYyNjkgMTIuMjExMUwyMS4xOTA5IDEzLjYxNkwxNC4yMDA4IDIxLjM2NzhaTTI0LjYyNDEgOS4zNTEyN0wyNC44MDcxIDMuMDcyOTdMMTguODgxIDUuMTg2NjJMMTUuMzMxNCAtMi4zMzA4MmUtMDVMMTEuNzgyMSA1LjE4NjYyTDUuODU2MDEgMy4wNzI5N0w2LjAzOTA2IDkuMzUxMjdMMCAxMS4xMTc3TDMuODQ1MjEgMTYuMDg5NUwwIDIxLjA2MTJMNi4wMzkwNiAyMi44Mjc3TDUuODU2MDEgMjkuMTA2TDExLjc4MjEgMjYuOTkyM0wxNS4zMzE0IDMyLjE3OUwxOC44ODEgMjYuOTkyM0wyNC44MDcxIDI5LjEwNkwyNC42MjQxIDIyLjgyNzdMMzAuNjYzMSAyMS4wNjEyTDI2LjgxNzYgMTYuMDg5NUwzMC42NjMxIDExLjExNzdMMjQuNjI0MSA5LjM1MTI3WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://digitalpublicgoods.net/r/janssen-project)
 
 Janssen is a self-funded project chartered directly under the Linux Foundation
-to foster the development of enterprise digital identity and access management 
-infrastructure. As the lead Contributors, the [Gluu team](https://gluu.org) drives the 
-priorities on a day-to-day basis, governed and guided by the Janssen community 
-Technical Steering Commitee.
+to foster the development of enterprise digital identity and access management
+infrastructure. As the lead Contributors, the [Gluu team](https://gluu.org) drives the
+priorities on a day-to-day basis, governed and guided by the Janssen community
+Technical Steering Committee.
 
-There are several Janssen Components in different stages of development, from demos 
-to stable releases. Janssen Project software has batteries included. You 
-will find binaries, cloud native deployment assets, documentation and more-- 
-enabling you to build a product or mission critical cybersecurity service with 
+There are several Janssen Components in different stages of development, from demos
+to stable releases. Janssen Project software has batteries included. You
+will find binaries, cloud-native deployment assets, documentation and more--
+enabling you to build a product or mission-critical cybersecurity service with
 Janssen software.
 
-If your enteprise needs Janssen for a production deployment, Gluu offers a 
-commercial distribution of Janssen Project Components called 
+If your enterprise needs Janssen for a production deployment, Gluu offers a
+commercial distribution of Janssen Project Components called
 [Gluu Flex](https://gluu.org/flex) and [Gluu Solo](https://gluu.org/solo).
 
 ----
 
 **Releases**: [Latest](https://github.com/JanssenProject/jans/releases/latest) | [All](https://github.com/JanssenProject/jans/releases)
 
-**Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://gitter.im/JanssenProject/Lobby)
+**Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/)
 
 **Docs**: [Documentation](https://docs.jans.io/)
 
@@ -46,7 +46,7 @@ commercial distribution of Janssen Project Components called
 
 ## Janssen Components
 
-The table below lists components of the Janssen Project and their 
+The table below lists components of the Janssen Project and their
 [maturity stages](https://docs.jans.io/stable/CONTRIBUTING/#project-maturity-stages).
 
 | Component                                    | Description                                                                                                                                                                                                                                 | Lifecycle Stage                                                  |
@@ -69,17 +69,17 @@ The table below lists components of the Janssen Project and their
 
 ## Installation
 
-You can install the Janssen federation stack in a Kubernetes cluster or as a 
-single VM. 
+You can install the Janssen federation stack in a Kubernetes cluster or as a
+single VM.
 
-Development environments: [Quick Start](https://docs.jans.io/head/janssen-server/install/docker-install/quick-start/) 
+Development environments: [Quick Start](https://docs.jans.io/head/janssen-server/install/docker-install/quick-start/)
 | [Local K8S](https://docs.jans.io/head/janssen-server/install/helm-install/local/) | [VM install](https://docs.jans.io/head/janssen-server/install/vm-install/vm-requirements/)
 
 
 Production deployments: [Amazon EKS](https://docs.jans.io/head/janssen-server/install/helm-install/amazon-eks/) | [Microsoft Azure AKS](https://docs.jans.io/head/janssen-server/install/helm-install/microsoft-azure/) | [Google GKE](https://docs.jans.io/head/janssen-server/install/helm-install/google-gke/) | [Rancher](https://docs.jans.io/head/janssen-server/install/helm-install/rancher/)
 
-Check out the 
-[Janssen Documentation](https://docs.jans.io/head/janssen-server/install/) 
+Check out the
+[Janssen Documentation](https://docs.jans.io/head/janssen-server/install/)
 for details.
 
 ## Community
@@ -116,7 +116,7 @@ If you find a bug in the Janssen project, would like to suggest a new feature, o
 have a "howto" question, please post on
 [GitHub Discussions](https://github.com/JanssenProject/jans/discussions), which
 is the main channel for community support. There is also a
-[community chat on Gitter](https://app.gitter.im/#/room/#JanssenProject_Lobby:gitter.im).
+[community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/).
 
 ### Releases
 
@@ -133,7 +133,7 @@ deployment assets.
 
 ### Why the name Janssen?
 
-Pigeons (or doves...) are universally regarded as a symbol of peace--which 
+Pigeons (or doves...) are universally regarded as a symbol of peace--which
 we need more of today. But pigeons are also really fast,
 capable of flying 1000 kilometers in a single day, powered by
 a handful of seeds. The **Janssen brothers of Arendonk** in Belgium bred the

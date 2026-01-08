@@ -8,6 +8,7 @@ use std::collections::HashSet;
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use crate::jwt::decode::*;
 use crate::jwt::key_service::DecodingKeyInfo;
+use crate::jwt::validation::TrustedIssuerError;
 use crate::jwt::*;
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
@@ -62,7 +63,7 @@ pub struct RefJwtStatusList {
 #[derive(Debug, Clone)]
 pub struct JwtValidator {
     pub(crate) validation: Validation,
-    required_claims: HashSet<Box<str>>,
+    required_claims: HashSet<String>,
     validate_signature: bool,
     validate_status_list: bool,
     status_list_cache: StatusListCache,
@@ -98,12 +99,52 @@ impl JwtValidator {
             validation.insecure_disable_signature_validation();
         }
 
-        let required_claims = token_metadata
-            .required_claims
-            .iter()
-            .cloned()
-            .map(|s| s.into_boxed_str())
-            .collect();
+        let required_claims = token_metadata.required_claims.iter().cloned().collect();
+
+        let key = ValidatorInfo {
+            iss,
+            token_kind,
+            algorithm,
+        };
+
+        let validator = JwtValidator {
+            validation,
+            required_claims,
+            validate_signature,
+            validate_status_list,
+            status_list_cache: status_lists,
+        };
+
+        (validator, key)
+    }
+
+    /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
+    pub fn new_multi_issuer_tkn_validator<'a>(
+        iss: Option<&'a str>,
+        tkn_name: &'a str,
+        token_metadata: &TokenEntityMetadata,
+        algorithm: Algorithm,
+        status_lists: StatusListCache,
+        validate_signature: bool,
+        validate_status_list: bool,
+    ) -> (Self, ValidatorInfo<'a>) {
+        let token_kind = TokenKind::AuthorizeMultiIssuer(tkn_name);
+
+        let mut validation = Validation::new(algorithm);
+        if let Some(iss) = iss {
+            validation.set_issuer(&[iss])
+        }
+        validation.validate_exp = token_metadata.required_claims.contains("exp");
+        validation.validate_nbf = token_metadata.required_claims.contains("nbf");
+
+        validation.required_spec_claims.clear();
+        validation.validate_aud = false;
+
+        if !validate_signature {
+            validation.insecure_disable_signature_validation();
+        }
+
+        let required_claims = token_metadata.required_claims.iter().cloned().collect();
 
         let key = ValidatorInfo {
             iss,
@@ -197,9 +238,9 @@ impl JwtValidator {
         let missing_claims = self
             .required_claims
             .iter()
-            .filter(|claim| validated_jwt.claims.get(claim.as_ref()).is_none())
+            .filter(|claim| validated_jwt.claims.get(claim).is_none())
             .cloned()
-            .collect::<Vec<Box<str>>>();
+            .collect::<Vec<String>>();
         if !missing_claims.is_empty() {
             Err(ValidateJwtError::MissingClaims(missing_claims))?
         }
@@ -269,7 +310,7 @@ pub enum ValidateJwtError {
     #[error("failed to validate the JWT: {0}")]
     ValidateJwt(#[from] jwt::errors::Error),
     #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
-    MissingClaims(Vec<Box<str>>),
+    MissingClaims(Vec<String>),
     #[error("failed to get the status for the JWT: {0}")]
     GetJwtStatus(#[from] JwtStatusError),
     #[error("the token is rejected because it's status is: {0}")]
@@ -278,6 +319,8 @@ pub enum ValidateJwtError {
     MissingStatusList,
     #[error("failed to deserialize the JWT's status claim: {0}")]
     DeserializeStatusClaim(#[from] serde_json::Error),
+    #[error("failed to validate the JWT's trusted issuer: {0}")]
+    TrustedIssuerValidation(#[source] TrustedIssuerError),
 }
 
 #[cfg(test)]
@@ -295,8 +338,7 @@ mod test {
 
     #[track_caller]
     fn generate_keys() -> KeyPair {
-        let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
-        keys
+        generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys")
     }
 
     static TEST_TKN_ENTITY_METADATA: LazyLock<TokenEntityMetadata> =
@@ -332,7 +374,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -373,7 +415,7 @@ mod test {
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into()]);
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -409,7 +451,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -450,7 +492,7 @@ mod test {
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into(), "nbf".into()]);
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -491,7 +533,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -535,7 +577,7 @@ mod test {
             HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -560,7 +602,7 @@ mod test {
             HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
-            "access_token".into(),
+            "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
             StatusListCache::default(),
@@ -576,7 +618,7 @@ mod test {
             matches!(
             err,
             ValidateJwtError::MissingClaims(missing_claims)
-                if missing_claims == ["nbf"].map(|s| s.into())
+                if missing_claims == vec!["nbf".to_string()]
             ),
             "expected an error due to missing `nbf` claim"
         );
@@ -614,7 +656,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(&iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             status_lists,
@@ -670,7 +712,7 @@ mod test {
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(&iss),
-            "access_token".into(),
+            "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
             status_lists,

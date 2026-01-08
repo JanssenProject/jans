@@ -156,6 +156,12 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         execute_in_runtime!(instance.authorize_unsigned(request))
     }
 
+    fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result {
+        let request = from_json_str!(request_json);
+        let instance = get_instance!(instance_id);
+        execute_in_runtime!(instance.authorize_multi_issuer(request))
+    }
+
     fn pop_logs(instance_id: usize) -> Vec<String> {
         let instance = get_instance_or_return!(instance_id);
         instance.pop_logs().iter().map(|v| v.to_string()).collect()

@@ -86,7 +86,6 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -112,11 +111,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let access_token = Token::new(
@@ -166,11 +163,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             None,
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let access_token = Token::new(

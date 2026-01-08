@@ -27,7 +27,7 @@ To code the flow corresponding to the authentication method to add, you can use 
 
 The flow will be passed an Agama _map_ containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are _strings_.
 
-The flow should terminate with a `true` outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, `false` must be returned and an optional error message can be included for the caller flow (`io.jans.casa.authn.main`) to show it in the screen. Any additional data attached in the `Finish` instruction will not be processed. 
+The flow should terminate with a `true` outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, `false` must be returned and an optional error message can be included for the caller flow (`io.jans.casa.authn.main`) to show it in the screen. Any additional data attached in the `Finish` instruction will not be processed.
 
 If for some reason your flow crashes, the corresponding exception will be printed to the logs, the caller will continue running, and the browser taken to the [selector page](#the-selector-page) where an error message will be displayed.
 
@@ -53,7 +53,7 @@ Then call the `main` macro and supply your markup, like this:
 
 The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The _casa_ project makes heavy use the Tachyons CSS. You may like to use those for building templates instead of incorporating yet another styling framework.
 
-It is highly recommended to include the following near the bottom of your markup (still inside the `main` call block): 
+It is highly recommended to include the following near the bottom of your markup (still inside the `main` call block):
 
 ```
 <@com.alternative />
@@ -110,7 +110,7 @@ Alternatively, a pointer to a localized message can be used instead of `text`. T
             ...
 ```
 
-as long as the message key `foodAuth.methodTitle` is defined in the project's `labels.txt` file, or elsewhere in another project. Note `textKey` takes precedence over `text` when rendering the page. 
+as long as the message key `foodAuth.methodTitle` is defined in the project's `labels.txt` file, or elsewhere in another project. Note `textKey` takes precedence over `text` when rendering the page.
 
 Both `icon` and `textKey` (or `text`) may contain HTML markup. In this example we are using the font awesome library available in the selector page for rendering a nice [icon](https://fontawesome.com/v5/search?q=pizza&o=r&m=free) but we could have used any other thing here like an `img` tag, for instance.
 
@@ -132,7 +132,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties("flow qname");
 ```
 
 Out-of-the-box methods in Casa employ this strategy. Also when you do this, every time a change in project configuration is detected, your Java code gets notified: a call to method `reloadConfiguration` of your extension is issued, see class `SampleCredentialAuthnMethod` in the [sample credential](#enrollment-plugin) plugin.
- 
+
 #### Retries
 
 Giving the user only one chance to pass an authentication challenge is unfair. Code your flow so users have a couple of opportunities to fail before finishing with `false` as outcome. Agama's `Repeat` directive helps you cover this case.
@@ -140,7 +140,7 @@ Giving the user only one chance to pass an authentication challenge is unfair. C
 
 ### Key questions
 
-As you try to assemble your project, you will come up with some design decisions, for instance: 
+As you try to assemble your project, you will come up with some design decisions, for instance:
 
 - How to model and store credentials associated to the authentication method? 
 - What kind of parameters are relevant for the authentication method?
@@ -155,7 +155,7 @@ Coding a Casa plugin is mainly a Java development task. You can use the "Sample 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
 
 - A copy of the Jans repository (a shallow clone of `main` branch is OK): https://github.com/JanssenProject/jans
- 
+
 ### Plugin deployment
 
 Start with deploying the plugin to get acquainted with the process:
@@ -166,7 +166,7 @@ Start with deploying the plugin to get acquainted with the process:
 
 Access Casa admin console and in the plugins page, upload the file suffixed with `jar-with-dependencies.jar`. After one minute approximately, visit the "Authentication methods" page, check the "Favorite color" widget, and click on "Save". Then logout.
 
-Login again, this time with a non administrative account. In the landing page (user's dashboard), an item labeled "Your favorite color" will be shown on the left (under the "2FA credentials" heading). Also, a panel in the central area of the page will be added in accordance. 
+Login again, this time with a non administrative account. In the landing page (user's dashboard), an item labeled "Your favorite color" will be shown on the left (under the "2FA credentials" heading). Also, a panel in the central area of the page will be added in accordance.
 
 Click on "Your favorite color" and you'll land a page to let Casa know what your favorite color is!. This color will be used as a second factor for authentication. Ensure you have enabled another method such as OTP so you can enroll an additional credential in order to be able to active 2FA for this account.
 

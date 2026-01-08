@@ -62,6 +62,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /lock/audit/log/search:
     get:
       tags:
@@ -107,6 +115,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /lock/audit/telemetry/search:
     get:
       tags:
@@ -152,6 +168,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /lock/audit/health/bulk:
     post:
       tags:
@@ -192,6 +216,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/log/bulk:
     post:
       tags:
@@ -232,6 +262,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/telemetry/bulk:
     post:
       tags:
@@ -272,6 +308,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/health:
     post:
       tags:
@@ -310,6 +352,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/log:
     post:
       tags:
@@ -348,6 +396,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/audit/telemetry:
     post:
       tags:
@@ -386,6 +440,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/lockConfig:
     get:
       tags:
@@ -407,6 +467,16 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.readonly
+      - oauth2:
+        - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     put:
       tags:
       - Lock - Configuration
@@ -437,6 +507,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
     patch:
       tags:
       - Lock - Configuration
@@ -469,6 +545,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock-config.write
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/lock/write-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /lock/lockStat:
     get:
       tags:
@@ -520,6 +602,12 @@ paths:
       - oauth2:
         - https://jans.io/oauth/lock/read-all
         - jans_stat
+      - oauth2:
+        - https://jans.io/oauth/config/lock.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     HealthEntry:
@@ -649,6 +737,20 @@ components:
         openIdIssuer:
           type: string
           description: OpenID issuer URL
+        protectionMode:
+          type: string
+          description: Protection mode for the Lock server (OAuth or Cedarling)
+          enum:
+          - oauth
+          - cedarling
+        auditPersistenceMode:
+          type: string
+          description: Audit persistence mode
+          enum:
+          - internal
+          - config-api
+        cedarlingConfiguration:
+          $ref: "#/components/schemas/CedarlingConfiguration"
         statEnabled:
           type: boolean
           description: Active stat enabled
@@ -668,30 +770,6 @@ components:
         clientPassword:
           type: string
           description: Lock client password
-        tokenUrl:
-          type: string
-          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint
-        endpointGroups:
-          type: object
-          additionalProperties:
-            type: array
-            description: Endpoint groups
-            items:
-              type: string
-              description: Endpoint groups
-          description: Endpoint groups
-        endpointDetails:
-          type: object
-          additionalProperties:
-            type: array
-            description: Jans URL of config-api audit endpoints and corresponding
-              scope details
-            items:
-              type: string
-              description: Jans URL of config-api audit endpoints and corresponding
-                scope details
-          description: Jans URL of config-api audit endpoints and corresponding scope
-            details
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers
@@ -729,6 +807,51 @@ components:
           description: Each clean up iteration fetches chunk of expired data per base
             dn and removes it from storage
           format: int32
+    CedarlingConfiguration:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if Cedraling is enabled
+        policySources:
+          type: array
+          description: List of Policy Sources
+          items:
+            $ref: "#/components/schemas/PolicySource"
+        logType:
+          type: string
+          description: "Log type: off, memory, std_out"
+          enum:
+          - "OFF"
+          - MEMORY
+          - STD_OUT
+        logLevel:
+          type: string
+          description: System Log Level
+          enum:
+          - FATAL
+          - ERROR
+          - WARN
+          - INFO
+          - DEBUG
+          - TRACE
+        externalPolicyStoreUri:
+          type: string
+          description: External policy store URI
+      description: Cedarling configuration
+    PolicySource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if policy source is enabled
+        authorizationToken:
+          type: string
+          description: Authorization token to access URI
+        policyStoreUri:
+          type: string
+          description: URI to policy store. Policy store can be either json/zip
+      description: List of Policy Sources
     JsonPatch:
       type: object
     JsonNode:
@@ -756,3 +879,12 @@ components:
               information
             https://jans.io/oauth/lock/telemetry.write: Manage Lock telemetry related
               information
+            https://jans.io/oauth/config/lock.admin: Lock Admin access to manage all
+              Lock configuration related information
+            https://jans.io/oauth/config/read-all: Super admin read access to all
+              configuration resources
+            https://jans.io/oauth/config/write-all: Super admin write access to all
+              configuration resources
+            https://jans.io/oauth/config/delete-all: Super admin delete access to
+              all configuration resources
+            jans_stat: Auth Server Stats Authorization Scope

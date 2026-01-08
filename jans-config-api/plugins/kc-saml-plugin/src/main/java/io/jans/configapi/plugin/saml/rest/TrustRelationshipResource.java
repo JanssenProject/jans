@@ -8,6 +8,7 @@ import io.jans.configapi.plugin.saml.model.MetadataSourceType;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.plugin.saml.service.SamlService;
 
@@ -56,31 +57,55 @@ public class TrustRelationshipResource extends BaseResource {
     @Inject
     SamlService samlService;
 
+    /**
+     * Retrieves all SAML trust relationships.
+     *
+     * @return a Response containing a JSON array of TrustRelationship objects
+     */
     @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationships", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS }, groupScopes = {
+            Constants.SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAllTrustRelationship() {
         List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationships();
         logger.info("All trustRelationshipList:{}", trustRelationshipList);
         return Response.ok(trustRelationshipList).build();
     }
 
+    /**
+     * Retrieve a TrustRelationship by its identifier.
+     *
+     * @param id the unique identifier (inum) of the trust relationship to retrieve
+     * @return a Response containing the TrustRelationship with HTTP 200 when found;
+     *         otherwise a HTTP 404 Response with an ApiError describing the missing resource
+     */
     @Operation(summary = "Get TrustRelationship by Id", description = "Get TrustRelationship by Id", operationId = "get-trust-relationship-by-id", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Trust relationship not found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS }, groupScopes = {
+            Constants.SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
     public Response getTrustRelationshipById(
             @Parameter(description = "Unique identifier - Id") @PathParam(Constants.ID) @NotNull String id) {
@@ -102,9 +127,21 @@ public class TrustRelationshipResource extends BaseResource {
         }
     }
 
+    /**
+     * Create a new SAML Trust Relationship from a multipart form, optionally using an uploaded SP metadata file.
+     *
+     * Validates the submitted form and trust relationship (including unique name and SP metadata source requirements),
+     * persists the new trust relationship, and returns the created entity.
+     *
+     * @param trustRelationshipForm multipart form containing the TrustRelationship and optional metadata file
+     * @param metadatafile optional metadata InputStream (used when SP metadata is supplied as a file)
+     * @return the created TrustRelationship
+     */
     @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
@@ -115,7 +152,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            Constants.SAML_WRITE_ACCESS })
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @POST
     public Response createTrustRelationshipWithFile(@MultipartForm TrustRelationshipForm trustRelationshipForm,
             InputStream metadatafile) throws IOException {
@@ -132,10 +169,12 @@ public class TrustRelationshipResource extends BaseResource {
             checkNotNull(trustRelationship.getName(), "Name");
 
             // check if TrustRelationship with same name already exists
+            logger.debug(" trustRelationship.getName():{} ", trustRelationship.getName());
             List<TrustRelationship> existingTrustRelationship = samlService
                     .getAllTrustRelationshipByName(trustRelationship.getName());
             logger.debug(" existingTrustRelationship:{} ", existingTrustRelationship);
             if (existingTrustRelationship != null && !existingTrustRelationship.isEmpty()) {
+                logger.error(" TrustRelationship with same name exists :{} ", existingTrustRelationship);
                 throwBadRequestException(NAME_CONFLICT, String.format(NAME_CONFLICT_MSG, trustRelationship.getName()));
             }
 
@@ -152,17 +191,33 @@ public class TrustRelationshipResource extends BaseResource {
 
             trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
-            logger.info("Create created by TrustRelationship:{}", trustRelationship);
-        } catch (Exception ex) {
-            throwInternalServerException("Error while creating by TrustRelationship - {" + trustRelationship + "}", ex);
-
+            logger.info("Create TrustRelationship:{}", trustRelationship);
+        } catch (WebApplicationException wex) {
+            logger.error("WebApplicationException while creating TR - wex.getResponse().getStatusInfo():{}, wex.getResponse().getEntity():{}, ",wex.getResponse().getStatusInfo(), wex.getResponse().getEntity(), wex);
+            return Response.status(wex.getResponse().getStatusInfo()).entity(wex.getResponse().getEntity()).build();
+        }catch(Exception ex) {
+            logger.error("Exception while creating TR", ex);
+            throwInternalServerException("Error while creating TrustRelationship - {" + trustRelationship + "}", ex);
         }
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
+    /**
+     * Update an existing SAML TrustRelationship using multipart form data.
+     *
+     * Validates the provided form and trust relationship, enforces name uniqueness,
+     * applies metadata from the uploaded file or existing record as appropriate,
+     * and returns the updated TrustRelationship after persistence.
+     *
+     * @param trustRelationshipForm multipart form containing the TrustRelationship and optional metadata file
+     * @param metadatafile raw InputStream of the uploaded metadata file; may be null or empty
+     * @return the updated TrustRelationship
+     */
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
@@ -170,7 +225,8 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @PUT
@@ -231,21 +287,33 @@ public class TrustRelationshipResource extends BaseResource {
             trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
             logger.info("Post update trustRelationship:{}", trustRelationship);
-        } catch (Exception ex) {
-            throwInternalServerException("Error while updating by TrustRelationship - {" + trustRelationship + "}", ex);
-
+        } catch (WebApplicationException wex) {
+            logger.error("WebApplicationException while updating TR - wex.getResponse().getStatusInfo():{}, wex.getResponse().getEntity():{}, ",wex.getResponse().getStatusInfo(), wex.getResponse().getEntity(), wex);
+            return Response.status(wex.getResponse().getStatusInfo()).entity(wex.getResponse().getEntity()).build();
+        }catch(Exception ex) {
+            logger.error("Exception while updating TR", ex);
+            throwInternalServerException("Error while creating TrustRelationship - {" + trustRelationship + "}", ex);
         }
         return Response.ok(trustRelationship).build();
     }
 
+    /**
+     * Delete a trust relationship by its identifier.
+     *
+     * @param id the unique identifier (inum) of the trust relationship to delete
+     * @return a 204 No Content response when the trust relationship is successfully deleted; produces a 404 response if the trust relationship does not exist
+     */
     @Operation(summary = "Delete TrustRelationship", description = "Delete TrustRelationship", operationId = "delete-trust-relationship", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Path(Constants.ID_PATH_PARAM)
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @DELETE
     public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
@@ -264,16 +332,23 @@ public class TrustRelationshipResource extends BaseResource {
     }
 
     @Operation(summary = "Get TrustRelationship file metadata", description = "Get TrustRelationship file metadata", operationId = "get-trust-relationship-file-metadata", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }), responses = {
-                            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_XML, schema = @Schema(type = "string", format = "binary"))),
-                            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-                            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
-                            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+            "SAML - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_XML, schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @Path(Constants.SP_METADATA_FILE_PATH + Constants.ID_PATH_PARAM)
     @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS }, groupScopes = {
+            Constants.SAML_WRITE_ACCESS }, superScopes = { Constants.SAML_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response gettrustRelationshipFileMetadata(
             @Parameter(description = "TrustRelationship inum") @PathParam(Constants.ID) @NotNull String id) {
 

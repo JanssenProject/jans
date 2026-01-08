@@ -14,6 +14,10 @@ pub enum JwtProcessingError {
     StringDeserialization(#[from] serde_json::Error),
     #[error("failed to validate '{0}' token: {1}")]
     ValidateJwt(String, ValidateJwtError),
+    #[error(
+        "signed authorization is not available because no trusted issuers or JWKS were configured"
+    )]
+    SignedAuthzUnavailable,
 }
 
 #[derive(Debug, thiserror::Error)]

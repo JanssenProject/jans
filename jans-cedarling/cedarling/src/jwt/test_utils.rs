@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::sync::LazyLock;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use super::http_utils::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
@@ -148,13 +147,6 @@ impl MockEndpoints {
             status_list: None,
         }
     }
-
-    #[track_caller]
-    pub fn assert(&self) {
-        self.oidc.as_ref().map(|x| x.assert());
-        self.jwks.as_ref().map(|x| x.assert());
-        self.status_list.as_ref().map(|x| x.assert());
-    }
 }
 
 #[derive(Clone, Copy)]
@@ -165,18 +157,18 @@ pub enum TokenTypeHeader {
     Jwt,
 }
 
-impl Into<&str> for TokenTypeHeader {
-    fn into(self) -> &'static str {
-        match self {
+impl From<TokenTypeHeader> for &str {
+    fn from(val: TokenTypeHeader) -> Self {
+        match val {
             TokenTypeHeader::StatusListJwt => "statuslist+jwt",
             TokenTypeHeader::Jwt => "JWT",
         }
     }
 }
 
-impl Into<Option<String>> for TokenTypeHeader {
-    fn into(self) -> Option<String> {
-        let typ_str: &str = self.into();
+impl From<TokenTypeHeader> for Option<String> {
+    fn from(val: TokenTypeHeader) -> Self {
+        let typ_str: &str = val.into();
         Some(typ_str.into())
     }
 }
@@ -265,14 +257,9 @@ impl MockServer {
         };
         let encoding_key = self.keys.encoding_key.clone();
         let build_jwt_claims = move || {
-            let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-            let exp = iat + Duration::from_secs(3600); // defaults to 1 hour
-            let ttl = ttl
-                .map(|x| Duration::from_secs(x))
-                .unwrap_or_else(|| 
-                    // defaults to 5 mins if the ttl is None
-                    Duration::from_secs(600)
-                );
+            let now = chrono::Utc::now().timestamp();
+            let exp = now + 3600; // defaults to 1 hour
+            let ttl_secs = ttl.unwrap_or(300); // defaults to 5 mins if the ttl is None
             let claims = json!({
                 "sub": sub,
                 "status_list": {
@@ -280,9 +267,9 @@ impl MockServer {
                   "lst": lst,
                 },
                 "iss": iss,
-                "exp": exp.as_secs(),
-                "ttl": ttl.as_secs(),
-                "iat": iat.as_secs(),
+                "exp": exp,
+                "ttl": ttl_secs,
+                "iat": now,
             });
 
             jwt::encode(&header, &claims, &encoding_key)
@@ -317,9 +304,7 @@ impl MockServer {
     }
 
     pub fn status_list_endpoint(&self) -> Option<Url> {
-        if self.endpoints.status_list.is_none() {
-            return None;
-        }
+        self.endpoints.status_list.as_ref()?;
 
         Some(
             Url::parse(&(self.server.url() + MOCK_STATUS_LIST_ENDPOINT))
@@ -328,9 +313,7 @@ impl MockServer {
     }
 
     pub fn openid_config_endpoint(&self) -> Option<Url> {
-        if self.endpoints.oidc.is_none() {
-            return None;
-        }
+        self.endpoints.oidc.as_ref()?;
 
         Some(
             Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT)).expect("invalid status list url"),
@@ -338,9 +321,7 @@ impl MockServer {
     }
 
     pub fn jwks_endpoint(&self) -> Option<Url> {
-        if self.endpoints.jwks.is_none() {
-            return None;
-        }
+        self.endpoints.jwks.as_ref()?;
 
         Some(Url::parse(&(self.server.url() + MOCK_JWKS_URI)).expect("invalid status list url"))
     }

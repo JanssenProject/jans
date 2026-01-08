@@ -77,3 +77,21 @@ impl From<core::AuthorizeResult> for AuthorizeResult {
         }
     }
 }
+
+/// Result of multi-issuer authorization
+#[derive(Debug, uniffi::Record)]
+pub struct MultiIssuerAuthorizeResult {
+    pub response: Response,
+    pub decision: bool,
+    pub request_id: String,
+}
+
+impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
+    fn from(result: core::MultiIssuerAuthorizeResult) -> Self {
+        MultiIssuerAuthorizeResult {
+            response: result.response.into(),
+            decision: result.decision,
+            request_id: result.request_id,
+        }
+    }
+}
