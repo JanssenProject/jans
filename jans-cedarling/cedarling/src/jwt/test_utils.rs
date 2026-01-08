@@ -42,7 +42,9 @@ pub(crate) enum KeyGenerationError {
 }
 
 /// Generates a HS256-signed token using the given claims.
-pub(crate) fn generate_keypair_hs256(kid: Option<impl ToString>) -> Result<KeyPair, KeyGenerationError> {
+pub(crate) fn generate_keypair_hs256(
+    kid: Option<impl ToString>,
+) -> Result<KeyPair, KeyGenerationError> {
     let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256));
     jwk.set_algorithm(jwk::Algorithm::HS256)
         .expect("should set encryption algorithm");
@@ -341,7 +343,7 @@ impl MockServer {
     }
 
     #[track_caller]
-    pub(crate) fn openid_config(&self) -> OpenIdConfig {
+    pub(super) fn openid_config(&self) -> OpenIdConfig {
         OpenIdConfig {
             issuer: self.issuer(),
             jwks_uri: self.jwks_endpoint().unwrap(),
