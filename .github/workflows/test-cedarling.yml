@@ -28,7 +28,7 @@ jobs:
       working-directory: jans-cedarling
       run: |
         rustup component add clippy
-        cargo clippy -- -Dwarnings
+        cargo clippy --workspace --all-targets -- -D warnings
   rust_benchmarks:
     runs-on: ubuntu-latest
     steps:
@@ -86,13 +86,7 @@ jobs:
       working-directory: jans-cedarling
       run: |
         rustup component add clippy
-        cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
-
-    - name: Run Clippy on WASM target
-      working-directory: jans-cedarling
-      run: |
-        rustup component add clippy
-        cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
+        cargo clippy --workspace --all-targets --target wasm32-unknown-unknown -- -D warnings
   python_tests:
     runs-on: ubuntu-latest
     strategy:
