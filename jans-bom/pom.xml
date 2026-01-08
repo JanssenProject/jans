@@ -1108,6 +1108,16 @@
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
+				<plugin>
+					<groupId>org.xolstice.maven.plugins</groupId>
+					<artifactId>protobuf-maven-plugin</artifactId>
+					<version>0.6.1</version>
+				</plugin>
+				<plugin>
+					<groupId>kr.motd.maven</groupId>
+					<artifactId>os-maven-plugin</artifactId>
+					<version>1.7.1</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

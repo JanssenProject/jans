@@ -62,11 +62,11 @@
 					</execution>
 				</executions>
 			</plugin>
-<!-- Protobuf Maven Plugin -->
+
+			<!-- Protobuf Maven Plugin -->
 	        <plugin>
 	            <groupId>org.xolstice.maven.plugins</groupId>
 	            <artifactId>protobuf-maven-plugin</artifactId>
-	            <version>0.6.1</version>
 	            <configuration>
 	                <protocArtifact>com.google.protobuf:protoc:4.33.2:exe:${os.detected.classifier}</protocArtifact>
 	                <pluginId>grpc-java</pluginId>
@@ -88,7 +88,6 @@
 	        <plugin>
 	            <groupId>kr.motd.maven</groupId>
 	            <artifactId>os-maven-plugin</artifactId>
-	            <version>1.7.1</version>
 	            <executions>
 	                <execution>
 	                    <phase>initialize</phase>

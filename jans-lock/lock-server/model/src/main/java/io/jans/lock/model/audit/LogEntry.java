@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.orm.annotation.AttributeName;
@@ -32,6 +33,7 @@ import io.jans.orm.model.base.BaseEntry;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Log audit entry")
+@JsonIgnoreProperties(ignoreUnknown = true)
 @DataEntry(sortByName = "eventTime")
 @ObjectClass(value = "jansLogEntry")
 public class LogEntry extends BaseEntry implements Serializable {
