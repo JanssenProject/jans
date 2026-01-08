@@ -18,10 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Cookie;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.NewCookie;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -134,6 +131,7 @@ public class OAuth2Resource {
     public Response getApiProtectionToken(@Valid @NotNull ApiTokenRequest apiTokenRequest, @PathParam("appType") String appType) {
         try {
             log.info("Api protection token request to Auth Server.");
+
             TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(apiTokenRequest, appType);
             log.info("Api protection token received from Auth Server.");
             return Response.ok(tokenResponse).build();

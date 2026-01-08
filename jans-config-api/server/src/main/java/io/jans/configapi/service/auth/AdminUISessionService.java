@@ -1,12 +1,8 @@
 package io.jans.configapi.service.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
@@ -24,7 +20,6 @@ import jakarta.inject.Inject;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -78,10 +73,6 @@ public class AdminUISessionService {
         adminUISessions.stream().filter(ele ->
                 ((ele.getExpirationDate().getTime() - ele.getCreationDate().getTime()) < 0))
                 .forEach(e -> persistenceEntryManager.remove(e));
-    }
-    public void removeSession(String sessionId) {
-        AdminUISession configApiSession = getSession(sessionId);
-        persistenceEntryManager.remove(configApiSession);
     }
 
     public TokenResponse getApiProtectionToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException {
@@ -183,14 +174,4 @@ public class AdminUISessionService {
         return persistenceEntryManager.find(AdminConf.class, ADMIN_UI_CONFIG_DN);
     }
 
-    private static String joinAndUrlEncode(Collection<String> list) throws UnsupportedEncodingException {
-        if (list == null || list.isEmpty()) {
-            return "";
-        }
-        return encode(Joiner.on(" ").join(list));
-    }
-
-    private static String encode(String str) throws UnsupportedEncodingException {
-        return URLEncoder.encode(str, "UTF-8");
-    }
 }
