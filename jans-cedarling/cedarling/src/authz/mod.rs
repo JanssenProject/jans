@@ -673,6 +673,7 @@ impl Authz {
     }
 
     #[cfg(test)]
+    #[allow(clippy::result_large_err)]
     pub fn build_entities(
         &self,
         request: &Request,
