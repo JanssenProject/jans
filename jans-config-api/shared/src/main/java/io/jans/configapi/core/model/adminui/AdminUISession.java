@@ -17,6 +17,8 @@ public class AdminUISession {
     private String inum;
     @AttributeName(name = "sid")
     private String sessionId;
+    @AttributeName(name = "jansUsrDN")
+    private String jansUsrDN;
     @AttributeName(name = "jansUjwt")
     private String ujwt;
     @AttributeName(name = "creationDate")
@@ -70,5 +72,13 @@ public class AdminUISession {
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public String getJansUsrDN() {
+        return jansUsrDN;
+    }
+
+    public void setJansUsrDN(String jansUsrDN) {
+        this.jansUsrDN = jansUsrDN;
     }
 }

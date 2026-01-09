@@ -71,7 +71,9 @@ public enum ErrorResponse {
     WEBHOOK_RECORD_NOT_EXIST("Record does not exist."),
     NO_WEBHOOK_FOUND("No webhook mapped to feature."),
     WEBHOOK_CONTENT_TYPE_REQUIRED("Content-Type required."),
-    FETCH_DATA_ERROR("Error in fetching data.")
+    FETCH_DATA_ERROR("Error in fetching data."),
+    ADMINUI_SESSION_CREATE_ERROR("Error in creating Admin UI session"),
+    ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session")
     ;
 
     private final String description;

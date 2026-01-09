@@ -22,6 +22,7 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -51,10 +52,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     TtlCache<String, String> ujwtTokenCache;
 
     private static final String CONFIG_API_SESSION_ID = "config_api_session_id";
-    private static final long CACHE_TTL = 180000; // 30 mins
+    private static final long CACHE_TTL = 90000; // 15 mins
     private static final String AUTHENTICATION_SCHEME = "Bearer";
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         try {
         log.info("Inside AdminUICookieFilter filter...");
         Map<String, Cookie> cookies = requestContext.getCookies();
@@ -71,13 +72,17 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             return;
         }
 
-        String accessToken = getAccessToken(ujwtOptional.get(), auiConfiguration);
-
-        requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
-        } catch (StringEncrypter.EncryptionException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidJwtException e) {
-            throw new RuntimeException(e);
+            String accessToken = null;
+            try {
+                accessToken = getAccessToken(ujwtOptional.get(), auiConfiguration);
+            } catch (JsonProcessingException e) {
+                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in parsing token generated for accessing Config API: " + e.getMessage());
+            } catch (InvalidJwtException | StringEncrypter.EncryptionException e) {
+                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "JWT token generated for accessing Config API is not valid: " + e.getMessage());
+            }
+            requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
+        } catch (Exception e) {
+            abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -101,12 +106,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         }
     }
 
-    private String getSubjectFromUJWT(String ujwtString) throws InvalidJwtException {
+    private String getSubjectFromUJWT(String ujwtString) {
         final Jwt tokenJwt;
         try {
             tokenJwt = Jwt.parse(ujwtString);
-
-            Map<String, Object> claims = getClaims(tokenJwt);
+            Map<String, Object> claims = configApiSessionService.getClaims(tokenJwt);
 
             if (claims.get("sub") == null) {
                 throw new RuntimeException("The `sub` claim missing in User-Info JWT");
@@ -177,37 +181,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         auiConfiguration.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
     }
 
-    /**
-     * It takes a JWT object and returns a Map of the claims
-     *
-     * @param jwtObj The JWT object that you want to get the claims from.
-     * @return A map of claims.
-     */
-    private Map<String, Object> getClaims(Jwt jwtObj) {
-        Map<String, Object> claims = Maps.newHashMap();
-        if (jwtObj == null) {
-            return claims;
-        }
-        JwtClaims jwtClaims = jwtObj.getClaims();
-        Set<String> keys = jwtClaims.keys();
-        keys.forEach(key -> {
-
-            if (jwtClaims.getClaim(key) instanceof String)
-                claims.put(key, jwtClaims.getClaim(key).toString());
-            if (jwtClaims.getClaim(key) instanceof Integer)
-                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Long)
-                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Boolean)
-                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
-
-            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
-                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
-                claims.put(key, sourceArr);
-            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
-                claims.put(key, (jwtClaims.getClaim(key)));
-        });
-        return claims;
+    private void abortWithException(ContainerRequestContext requestContext,  Response.Status status, String errMsg) {
+        requestContext.abortWith(Response.status(status)
+                .entity(errMsg)
+                .build());
     }
 
 }

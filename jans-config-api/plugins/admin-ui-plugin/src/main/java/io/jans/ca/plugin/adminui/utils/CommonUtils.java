@@ -4,9 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -216,5 +220,38 @@ public class CommonUtils {
 
         // Convert the Instant back to a Date
         return Date.from(updatedInstant);
+    }
+
+    /**
+     * It takes a JWT object and returns a Map of the claims
+     *
+     * @param jwtObj The JWT object that you want to get the claims from.
+     * @return A map of claims.
+     */
+    public static Map<String, Object> getClaims(Jwt jwtObj) {
+        Map<String, Object> claims = Maps.newHashMap();
+        if (jwtObj == null) {
+            return claims;
+        }
+        JwtClaims jwtClaims = jwtObj.getClaims();
+        Set<String> keys = jwtClaims.keys();
+        keys.forEach(key -> {
+
+            if (jwtClaims.getClaim(key) instanceof String)
+                claims.put(key, jwtClaims.getClaim(key).toString());
+            if (jwtClaims.getClaim(key) instanceof Integer)
+                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
+            if (jwtClaims.getClaim(key) instanceof Long)
+                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
+            if (jwtClaims.getClaim(key) instanceof Boolean)
+                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
+
+            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
+                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
+                claims.put(key, sourceArr);
+            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
+                claims.put(key, (jwtClaims.getClaim(key)));
+        });
+        return claims;
     }
 }

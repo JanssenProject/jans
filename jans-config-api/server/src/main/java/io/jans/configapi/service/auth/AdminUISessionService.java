@@ -3,10 +3,13 @@ package io.jans.configapi.service.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.service.ConfigHttpService;
@@ -19,6 +22,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +83,6 @@ public class AdminUISessionService {
     public TokenResponse getApiProtectionToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException {
         try {
             logger.debug("Getting api-protection token");
-
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setAuthUsername(auiConfiguration.getAuiBackendApiServerClientId());
             tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuiBackendApiServerClientSecret()));
@@ -172,6 +176,39 @@ public class AdminUISessionService {
 
     public AdminConf fetchAdminUIConfiguration() {
         return persistenceEntryManager.find(AdminConf.class, ADMIN_UI_CONFIG_DN);
+    }
+
+    /**
+     * It takes a JWT object and returns a Map of the claims
+     *
+     * @param jwtObj The JWT object that you want to get the claims from.
+     * @return A map of claims.
+     */
+    public Map<String, Object> getClaims(Jwt jwtObj) {
+        Map<String, Object> claims = Maps.newHashMap();
+        if (jwtObj == null) {
+            return claims;
+        }
+        JwtClaims jwtClaims = jwtObj.getClaims();
+        Set<String> keys = jwtClaims.keys();
+        keys.forEach(key -> {
+
+            if (jwtClaims.getClaim(key) instanceof String)
+                claims.put(key, jwtClaims.getClaim(key).toString());
+            if (jwtClaims.getClaim(key) instanceof Integer)
+                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
+            if (jwtClaims.getClaim(key) instanceof Long)
+                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
+            if (jwtClaims.getClaim(key) instanceof Boolean)
+                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
+
+            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
+                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
+                claims.put(key, sourceArr);
+            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
+                claims.put(key, (jwtClaims.getClaim(key)));
+        });
+        return claims;
     }
 
 }

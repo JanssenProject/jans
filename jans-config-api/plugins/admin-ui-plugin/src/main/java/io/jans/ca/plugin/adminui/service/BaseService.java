@@ -1,14 +1,13 @@
 package io.jans.ca.plugin.adminui.service;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.DCRResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
@@ -19,8 +18,6 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.security.NoSuchAlgorithmException;
@@ -113,7 +110,7 @@ public class BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.BLANK_JWT.getDescription());
             }
             final Jwt tokenJwt = Jwt.parse(ssaJwt);
-            Map<String, Object> claims = getClaims(tokenJwt);
+            Map<String, Object> claims = CommonUtils.getClaims(tokenJwt);
 
             if (claims.get("iss") == null) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ISS_CLAIM_NOT_FOUND.getDescription());
@@ -156,39 +153,6 @@ public class BaseService {
             return null;
         }
 
-    }
-
-    /**
-     * It takes a JWT object and returns a Map of the claims
-     *
-     * @param jwtObj The JWT object that you want to get the claims from.
-     * @return A map of claims.
-     */
-    public Map<String, Object> getClaims(Jwt jwtObj) {
-        Map<String, Object> claims = Maps.newHashMap();
-        if (jwtObj == null) {
-            return claims;
-        }
-        JwtClaims jwtClaims = jwtObj.getClaims();
-        Set<String> keys = jwtClaims.keys();
-        keys.forEach(key -> {
-
-            if (jwtClaims.getClaim(key) instanceof String)
-                claims.put(key, jwtClaims.getClaim(key).toString());
-            if (jwtClaims.getClaim(key) instanceof Integer)
-                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Long)
-                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Boolean)
-                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
-
-            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
-                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
-                claims.put(key, sourceArr);
-            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
-                claims.put(key, (jwtClaims.getClaim(key)));
-        });
-        return claims;
     }
 
     public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) throws NoSuchAlgorithmException {

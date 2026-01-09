@@ -6,15 +6,14 @@ import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
-import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.util.security.StringEncrypter;
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
@@ -29,11 +28,11 @@ import java.util.UUID;
 public class OAuth2Resource {
     //appType: admin-ui, ads
     static final String SESSION = "/{appType}/oauth2/session";
-    static final String OAUTH2_CONFIG = "/{appType}/oauth2/config";
+    static final String USER_DN_VARIABLE = "/{userDn}";
+    static final String USER_DN_CONST = "userDn";
     static final String OAUTH2_API_PROTECTION_TOKEN = "/{appType}/oauth2/api-protection-token";
     static final String CONFIG_API_SESSION_ID = "config_api_session_id";
     public static final String SCOPE_OPENID = "openid";
-    public static final String ADMINUI_CONF_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write";
     static final String ADMINUI_SESSION_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write";
     static final String ADMINUI_SESSION_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete";
 
@@ -84,17 +83,17 @@ public class OAuth2Resource {
 
             oAuth2Service.setAdminUISession(sessionId, apiTokenRequest.getUjwt());
 
-            return Response.ok(true)
+            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Sessions created successfully."))
                     .cookie(cookie)
                     .build();
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
+            log.error(ErrorResponse.ADMINUI_SESSION_CREATE_ERROR.getDescription(), e);
             return Response
                     .status(e.getErrorCode())
                     .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
                     .build();
         } catch (Exception e) {
-            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
+            log.error(ErrorResponse.ADMINUI_SESSION_CREATE_ERROR.getDescription(), e);
             return Response
                     .serverError()
                     .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription()))
@@ -106,23 +105,51 @@ public class OAuth2Resource {
     @Path(SESSION)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
-    public Response deleteSession(@CookieParam(CONFIG_API_SESSION_ID) Cookie sessionCookie) {
-        log.error("sessionCookie name: "+ sessionCookie.getName() + "value: "+ sessionCookie.getValue());
+    public Response deleteSessionBySessionCookie(@CookieParam(CONFIG_API_SESSION_ID) Cookie sessionCookie) {
+        log.debug("Inside deleteSessionBySessionId method. Session Cookie name: "+ sessionCookie.getName() + "value: "+ sessionCookie.getValue());
         //remove session from database
-        oAuth2Service.removeSession(sessionCookie.getValue());
-        //remove session from browser
-        NewCookie sessionCookieInvalidated = new NewCookie.Builder(CONFIG_API_SESSION_ID)
-                .value(sessionCookie.getValue())
-                .maxAge(0) // Sets Max-Age to 0, instructing the browser to delete it immediately
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .build();
+        try {
+            oAuth2Service.removeSession(sessionCookie.getValue());
+            //remove session from browser
+            NewCookie sessionCookieInvalidated = new NewCookie.Builder(CONFIG_API_SESSION_ID)
+                    .value(sessionCookie.getValue())
+                    .maxAge(0) // Sets Max-Age to 0, instructing the browser to delete it immediately
+                    .path("/")
+                    .httpOnly(true)
+                    .secure(true)
+                    .build();
 
-        // Return a response with the new, invalidated cookie
-        return Response.ok("Session revoked successfully", MediaType.TEXT_PLAIN)
-                .cookie(sessionCookieInvalidated)
-                .build();
+            // Return a response with the new, invalidated cookie
+            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Sessions revoked successfully."))
+                    .cookie(sessionCookieInvalidated)
+                    .build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ADMINUI_SESSION_REMOVE_ERROR.getDescription(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
+        }
+    }
+
+    @DELETE
+    @Path(SESSION + USER_DN_VARIABLE)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
+    public Response deleteSessionsByUserDn(@Parameter(description = "User DN") @PathParam(USER_DN_CONST) @NotNull String userDn) {
+        log.debug("Inside deleteSessionsByUserDn method...");
+        //remove sessions from database by userDn
+        try {
+            oAuth2Service.removeAdminUIUserSessionByDn(userDn);
+            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Sessions revoked successfully."))
+                    .build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ADMINUI_SESSION_REMOVE_ERROR.getDescription(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
+        }
     }
 
     @POST
@@ -149,5 +176,4 @@ public class OAuth2Resource {
                     .build();
         }
     }
-
 }
