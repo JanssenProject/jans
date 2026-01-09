@@ -1,7 +1,6 @@
 package io.jans.ca.plugin.adminui.service.auth;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
@@ -10,11 +9,9 @@ import io.jans.ca.plugin.adminui.model.auth.ApiTokenRequest;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
-import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
-import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.model.adminui.AdminUISession;
@@ -196,6 +193,6 @@ public class OAuth2Service extends BaseService {
     }
 
     private String getDnForUser(String userInum) {
-        return String.format("inum=%s,%s", userInum, ",ou=people,o=jans");
+        return String.format("inum=%s,%s", userInum, "ou=people,o=jans");
     }
 }

@@ -1,13 +1,11 @@
 package io.jans.configapi.filters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.Maps;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
@@ -25,14 +23,9 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Provider
 @Priority(500)

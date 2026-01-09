@@ -10,7 +10,6 @@ import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.util.security.StringEncrypter;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.inject.Inject;
@@ -158,9 +157,9 @@ public class OAuth2Resource {
     public Response getApiProtectionToken(@Valid @NotNull ApiTokenRequest apiTokenRequest, @PathParam("appType") String appType) {
         try {
             log.info("Api protection token request to Auth Server.");
-
             TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(apiTokenRequest, appType);
             log.info("Api protection token received from Auth Server.");
+
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
