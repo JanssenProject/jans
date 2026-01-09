@@ -163,13 +163,8 @@ The current version of CLA can be found
 [here](governance/cla.md). This is just for your reference.
 This same CLA will be signed digitally by following the steps below:
 
-1. The contributor sends an e-mail (`legal@jans.io`) expressing willingness to contribute and 
-sign the CLA. In the email, mention your GitHub account 
-username from which the contributions will be made. If contributions will be
-made on behalf of an organization, then along with the GitHub username, mention the
-job title and organization's name in the email.
-2. Contributor receives an email with CLA and instructions on how to sign digitally.
-Follow the instructions and complete the signing process. 
+1. The contributor sends an e-mail (`legal@jans.io`) expressing willingness to contribute and sign the CLA. In the email, mention your GitHub account username from which the contributions will be made. If contributions will be made on behalf of an organization, then along with the GitHub username, mention the job title and organization's name in the email.
+2. Contributor receives an email with CLA and instructions on how to sign digitally. Follow the instructions and complete the signing process.
 
 ## Project Maturity Stages
 
@@ -189,6 +184,10 @@ Follow the instructions and complete the signing process.
 
 * Projects focused on tooling. These projects might be of a transient nature, not committed by Janssen Project roadmap.
 
+**Sunsetting**
+
+* Projects that are in the process of being retired. These components are no longer under active development.
+
 ## Contributing to the documentation
 
 Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process.
@@ -199,7 +198,7 @@ In order to ensure consistency of style, language, format, and terminology acros
 
 This glossary helps to keep terms and their meanings consistent across documentation.
 
-- `Janssen Project` or `Jans`: 
+- `Janssen Project` or `Jans`:
 
   Refers to the official project name under Linux Foundation that seeks to build the world’s fastest and most comprehensive cloud native identity and access management software platform
 
@@ -207,9 +206,9 @@ This glossary helps to keep terms and their meanings consistent across documenta
 
   Refers to a set of software components developed under the Janssen Project . Components of the Janssen Server include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group. 
 
-- `jans-auth-server`: 
+- `jans-auth-server`:
 
-  Refers to a module within the Janssen Server named `jans-auth-server`. This is one of the significant modules of the Janssen Server that has an implementation for OAuth and OpenId Connect. 
+  Refers to a module within the Janssen Server named `jans-auth-server`. This is one of the significant modules of the Janssen Server that has an implementation for OAuth and OpenId Connect.
 
 - Janssen Server module names:
 
@@ -285,6 +284,7 @@ might not work as it is. Users will have to manually replace the marker or use t
 for previous releases.
 
 #### General Text
+
  - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
  - Keep explanations short and clear
  - Use complete sentences when possible
@@ -292,14 +292,16 @@ for previous releases.
  - To **bold** text, put a double `*` on each end, like this: `**word**`
  - Leave a blank line between paragraphs. Count a header as a paragraph for this purpose
  - Avoid passive voice as much as possible. It's clearer to say that a subject does something than to say a result was done
- - Avoid using `you` in statements as much as possible. For example, instead of saying `You can navigate to...` simply say `Navigate to...` 
+ - Avoid using `you` in statements as much as possible. For example, instead of saying `You can navigate to...` simply say `Navigate to...`
 
 #### Page Setup
+
  - Start your page with a title on the first line
  - Follow with a concise overview of the document / product's purpose
  - Organize the information in the document from least technical to most technical if possible. Start conceptual, then get detailed
 
 #### Lists
+
  - Leave a blank line between text and first item in the list
  - Only use a numbered list if the order of the list matters
  - A line of a list should not end with a period. If it's multiple sentences, like this one, drop the last period
@@ -307,7 +309,7 @@ for previous releases.
  - End each item in the list with at least three spaces. This makes sure the line breaks properly
  - To make a *bulleted* list, start each line with `-`
  - To make a *numbered* list, start each line with `1.` For example:
- 
+
     ```
     1. This is the first item
     1. This is the second item
