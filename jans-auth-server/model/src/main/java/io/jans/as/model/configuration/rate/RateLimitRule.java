@@ -14,7 +14,7 @@ import java.util.Objects;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RateLimitRule {
 
-    private String endpoint;
+    private String path;
     private List<String> methods = new ArrayList<>();
     private Integer requestCount;
     private Integer periodInSeconds;
@@ -25,27 +25,27 @@ public class RateLimitRule {
 
     @JsonCreator
     public RateLimitRule(
-            @JsonProperty("endpoint") String endpoint,
+            @JsonProperty("path") String path,
             @JsonProperty("methods") List<String> methods,
             @JsonProperty("requestCount") Integer requestCount,
             @JsonProperty("periodInSeconds") Integer periodInSeconds,
             @JsonProperty("keyExtractors") List<KeyExtractor> keyExtractors
     ) {
-        setEndpoint(endpoint);
+        setPath(path);
         setMethods(methods);
         setRequestCount(requestCount);
         setPeriodInSeconds(periodInSeconds);
         setKeyExtractors(keyExtractors);
     }
 
-    @JsonProperty("endpoint")
-    public String getEndpoint() {
-        return endpoint;
+    @JsonProperty("path")
+    public String getPath() {
+        return path;
     }
 
-    @JsonProperty("endpoint")
-    public void setEndpoint(String endpoint) {
-        this.endpoint = (endpoint == null || endpoint.trim().isEmpty()) ? null : endpoint.trim();
+    @JsonProperty("path")
+    public void setPath(String path) {
+        this.path = (path == null || path.trim().isEmpty()) ? null : path.trim();
     }
 
     @JsonProperty("methods")
@@ -107,7 +107,7 @@ public class RateLimitRule {
      * Non-throwing helper for validation-style checks in business logic.
      */
     public boolean isWellFormed() {
-        return endpoint != null
+        return path != null
                 && !getMethods().isEmpty()
                 && requestCount != null
                 && periodInSeconds != null
@@ -119,7 +119,7 @@ public class RateLimitRule {
         if (this == o) return true;
         if (!(o instanceof RateLimitRule)) return false;
         RateLimitRule that = (RateLimitRule) o;
-        return Objects.equals(endpoint, that.endpoint)
+        return Objects.equals(path, that.path)
                 && Objects.equals(getMethods(), that.getMethods())
                 && Objects.equals(requestCount, that.requestCount)
                 && Objects.equals(periodInSeconds, that.periodInSeconds)
@@ -128,13 +128,13 @@ public class RateLimitRule {
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpoint, getMethods(), requestCount, periodInSeconds, getKeyExtractors());
+        return Objects.hash(path, getMethods(), requestCount, periodInSeconds, getKeyExtractors());
     }
 
     @Override
     public String toString() {
         return "RateLimitRule{" +
-                "endpoint='" + endpoint + '\'' +
+                "path='" + path + '\'' +
                 ", methods=" + getMethods() +
                 ", requestCount=" + requestCount +
                 ", periodInSeconds=" + periodInSeconds +
