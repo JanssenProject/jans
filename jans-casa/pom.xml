@@ -27,7 +27,7 @@
         <maven.min-version>3.6.3</maven.min-version>
         <weld.version>4.0.3.Final</weld.version>
         <pf4j.version>3.13.0</pf4j.version>
-        <log4j.version>2.24.1</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
         <jackson.version>2.18.1</jackson.version>
         <zk.version>10.1.0-jakarta</zk.version>
         <ldapsdk.version>7.0.3</ldapsdk.version>
