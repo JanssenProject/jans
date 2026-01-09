@@ -9,7 +9,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 
 /// Deserialize a [`Value`] to a to the attrs of a [`AttributeKind::Record`]
-pub fn deserialize_record_attrs<'de, D>(
+pub(super) fn deserialize_record_attrs<'de, D>(
     attrs: Value,
 ) -> Result<HashMap<AttributeName, Attribute>, D::Error>
 where

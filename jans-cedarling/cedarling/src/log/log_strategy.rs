@@ -18,7 +18,7 @@ use crate::log::BaseLogEntry;
 use crate::log::loggable_fn::LoggableFn;
 use serde::Serialize;
 
-pub struct LogStrategy {
+pub(crate) struct LogStrategy {
     logger: LogStrategyLogger,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
@@ -125,14 +125,14 @@ impl LogStrategy {
         }
     }
 
-    pub fn set_lock_service(&self, lock_service: LockService) {
+    pub(crate) fn set_lock_service(&self, lock_service: LockService) {
         *self
             .lock_service
             .write()
             .expect("obtain lock_service write lock") = Some(lock_service);
     }
 
-    pub async fn shut_down(&self) {
+    pub(crate) async fn shut_down(&self) {
         let lock = self
             .lock_service
             .write()
@@ -190,7 +190,7 @@ impl LogWriter for LogStrategy {
 }
 
 impl<E: Loggable> LogEntryWithClientInfo<E> {
-    pub fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
+    pub(crate) fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
         Self {
             entry,
             pdp_id,

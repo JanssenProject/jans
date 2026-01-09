@@ -138,7 +138,7 @@ impl DefaultEntitiesWithWarns {
 }
 
 /// Parse default entities from raw data, returning entities and warnings
-pub fn parse_default_entities_with_warns(
+pub(super) fn parse_default_entities_with_warns(
     raw_data: Option<HashMap<String, Value>>,
 ) -> Result<DefaultEntitiesWithWarns, ParseDefaultEntityError> {
     let limits = DefaultEntitiesLimits::default();
@@ -202,13 +202,13 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
 
 #[derive(Debug, thiserror::Error)]
 #[error("failed to parse default entity, id: \"{entry_id}\" error: {error}")]
-pub struct ParseDefaultEntityError {
+pub(super) struct ParseDefaultEntityError {
     pub entry_id: String,
     pub error: Box<ParseEntityErrorKind>,
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum ParseEntityErrorKind {
+pub(super) enum ParseEntityErrorKind {
     #[error("unable to decode base64 string: {0}")]
     Base64Decode(#[from] base64::DecodeError),
     #[error("unable to decode base64 string as utf8: {0}")]
@@ -341,7 +341,7 @@ fn validate_entry_id(entry_id: &str) -> Result<(), ParseDefaultEntityError> {
 }
 
 /// Result structure for entity parsing with named parameters
-pub struct EntityParseResultData<'a> {
+struct EntityParseResultData<'a> {
     pub entity_type: &'a str,
     pub entity_id: &'a str,
     pub cedar_attrs: HashMap<String, RestrictedExpression>,

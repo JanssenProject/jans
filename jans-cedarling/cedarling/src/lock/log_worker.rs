@@ -22,10 +22,10 @@ use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
-pub type SerializedLogEntry = Box<str>;
+pub(super) type SerializedLogEntry = Box<str>;
 
 /// Responsible for sending logs to the lock server
-pub struct LogWorker {
+pub(super) struct LogWorker {
     // it would be nice to store a struct here but we can't really store
     // `VecDeque<dyn Loggable>` so we just serialize the logs before storing them in the
     // buffer. We use `Box<str>`s to save some memory.
@@ -40,7 +40,7 @@ pub struct LogWorker {
 }
 
 impl LogWorker {
-    pub fn new(
+    pub(super) fn new(
         log_interval: Duration,
         http_client: Arc<Client>,
         log_endpoint: Url,
@@ -55,7 +55,7 @@ impl LogWorker {
         }
     }
 
-    pub async fn run(
+    pub(super) async fn run(
         &mut self,
         mut log_rx: mpsc::Receiver<SerializedLogEntry>,
         cancel_tkn: CancellationToken,
