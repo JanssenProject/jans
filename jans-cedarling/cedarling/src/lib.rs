@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 #![deny(missing_docs)]
+#![warn(unreachable_pub)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -33,6 +34,7 @@ mod tests;
 use std::sync::Arc;
 
 pub use crate::common::json_rules::JsonRule;
+pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 use crate::log::BaseLogEntry;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
@@ -52,8 +54,6 @@ use log::LogEntry;
 use log::interface::LogWriter;
 pub use log::{LogLevel, LogStorage};
 
-// JWT validation exports
-pub use jwt::{JwtService, TrustedIssuerError, TrustedIssuerValidator, validate_required_claims};
 use semver::Version;
 
 #[doc(hidden)]
@@ -187,7 +187,7 @@ impl Cedarling {
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub async fn build_entities(
+    pub(crate) async fn build_entities(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {

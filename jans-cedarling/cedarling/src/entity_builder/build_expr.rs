@@ -30,7 +30,7 @@ impl Attribute {
 }
 
 impl TknClaimAttrSrc {
-    pub fn build_expr(
+    pub(super) fn build_expr(
         &self,
         src: &Value,
     ) -> Result<Option<RestrictedExpression>, BuildExprErrorVec> {
@@ -39,7 +39,7 @@ impl TknClaimAttrSrc {
 }
 
 impl EntityRefAttrSrc {
-    pub fn build_expr(&self, id: &str) -> Result<RestrictedExpression, Box<BuildExprError>> {
+    pub(super) fn build_expr(&self, id: &str) -> Result<RestrictedExpression, Box<BuildExprError>> {
         let uid = EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
             .map_err(|e| Box::new(e.into()))?;
         Ok(RestrictedExpression::new_entity_uid(uid))
@@ -47,7 +47,10 @@ impl EntityRefAttrSrc {
 }
 
 impl EntityRefSetSrc {
-    pub fn build_expr(&self, ids: &[SmolStr]) -> Result<RestrictedExpression, BuildExprErrorVec> {
+    pub(super) fn build_expr(
+        &self,
+        ids: &[SmolStr],
+    ) -> Result<RestrictedExpression, BuildExprErrorVec> {
         let (uids, errs): (Vec<_>, Vec<_>) = ids
             .iter()
             .map(|id| {

@@ -9,15 +9,15 @@ use crate::JwtConfig;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
 
-pub fn default_jti() -> String {
+pub(super) fn default_jti() -> String {
     "jti".to_string()
 }
 
-pub fn default_true() -> bool {
+pub(super) fn default_true() -> bool {
     true
 }
 
-pub fn default_token_cache_capacity() -> usize {
+pub(super) fn default_token_cache_capacity() -> usize {
     JwtConfig::default().token_cache_capacity
 }
 

@@ -27,7 +27,7 @@ pub enum DefaultEntitiesLimitsError {
 
 /// Configuration for limiting default entities to prevent DoS and memory exhaustion attacks
 #[derive(Debug, Clone)]
-pub struct DefaultEntitiesLimits {
+pub(super) struct DefaultEntitiesLimits {
     /// Maximum number of default entities allowed
     pub max_entities: usize,
     /// Maximum size of entity JSON representation in bytes
@@ -45,11 +45,11 @@ impl Default for DefaultEntitiesLimits {
 
 impl DefaultEntitiesLimits {
     /// Default maximum number of entities allowed
-    pub const DEFAULT_MAX_ENTITIES: usize = 1000;
+    pub(super) const DEFAULT_MAX_ENTITIES: usize = 1000;
     /// Default maximum size of entity JSON representation in bytes
-    pub const DEFAULT_MAX_ENTITY_SIZE: usize = 1024 * 1024;
+    pub(super) const DEFAULT_MAX_ENTITY_SIZE: usize = 1024 * 1024;
 
-    pub fn validate_default_entity_data_size(
+    fn validate_default_entity_data_size(
         &self,
         entity_id: &str,
         entity_str: &str,
@@ -65,7 +65,7 @@ impl DefaultEntitiesLimits {
         }
     }
 
-    pub fn validate_default_entity(
+    pub(super) fn validate_default_entity(
         &self,
         entity_id: &str,
         entity_data: &serde_json::Value,
@@ -78,14 +78,14 @@ impl DefaultEntitiesLimits {
         }
     }
 
-    pub fn validate_entities_len(
+    fn validate_entities_len(
         &self,
         entities: &DefaultEntities,
     ) -> Result<(), DefaultEntitiesLimitsError> {
         self.validate_entities_count(entities.len())
     }
 
-    pub fn validate_entities_count(
+    pub(super) fn validate_entities_count(
         &self,
         entity_count: usize,
     ) -> Result<(), DefaultEntitiesLimitsError> {
@@ -100,7 +100,7 @@ impl DefaultEntitiesLimits {
         }
     }
 
-    pub fn validate_default_entities(
+    pub(super) fn validate_default_entities(
         &self,
         entities: &DefaultEntities,
     ) -> Result<(), DefaultEntitiesLimitsError> {

@@ -16,7 +16,7 @@ use url::Url;
 
 /// A parsed trusted issuer configuration with metadata.
 #[derive(Debug, Clone)]
-pub struct ParsedIssuer {
+pub(super) struct ParsedIssuer {
     /// The issuer name (used as key/id)
     pub id: String,
     /// The trusted issuer configuration
@@ -26,13 +26,13 @@ pub struct ParsedIssuer {
 }
 
 /// Issuer parser for loading and validating trusted issuer configurations.
-pub struct IssuerParser;
+pub(super) struct IssuerParser;
 
 impl IssuerParser {
     /// Parse a trusted issuer configuration from JSON content.
     ///
     /// Validates the required fields and token metadata structure.
-    pub fn parse_issuer(
+    pub(super) fn parse_issuer(
         content: &str,
         filename: &str,
     ) -> Result<Vec<ParsedIssuer>, PolicyStoreError> {
@@ -198,7 +198,7 @@ impl IssuerParser {
     }
 
     /// Validate a collection of parsed issuers for conflicts and completeness.
-    pub fn validate_issuers(issuers: &[ParsedIssuer]) -> Result<(), Vec<String>> {
+    pub(super) fn validate_issuers(issuers: &[ParsedIssuer]) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
         let mut seen_ids = HashMap::with_capacity(issuers.len());
 
@@ -229,7 +229,7 @@ impl IssuerParser {
     }
 
     /// Create a consolidated map of all issuers.
-    pub fn create_issuer_map(
+    pub(super) fn create_issuer_map(
         issuers: Vec<ParsedIssuer>,
     ) -> Result<HashMap<String, TrustedIssuer>, PolicyStoreError> {
         let mut issuer_map = HashMap::with_capacity(issuers.len());
