@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
 import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
+import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
@@ -57,6 +58,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Cedarling configuration")
     @Schema(description = "Cedarling configuration")
     private CedarlingConfiguration cedarlingConfiguration;
+
+    @DocProperty(description = "gRPC server configuration")
+    @Schema(description = "gRPC server configuration")
+    private GrpcConfiguration grpcConfiguration;
 
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
@@ -191,6 +196,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setCedarlingConfiguration(CedarlingConfiguration cedarlingConfiguration) {
 		this.cedarlingConfiguration = cedarlingConfiguration;
+	}
+
+	public GrpcConfiguration getGrpcConfiguration() {
+		return grpcConfiguration;
+	}
+
+	public void setGrpcConfiguration(GrpcConfiguration grpcConfiguration) {
+		this.grpcConfiguration = grpcConfiguration;
 	}
 
 	public boolean isStatEnabled() {

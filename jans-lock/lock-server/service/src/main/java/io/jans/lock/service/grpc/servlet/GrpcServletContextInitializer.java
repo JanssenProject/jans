@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2025, Janssen Project
  */
-
-package io.jans.lock.service.grpc.config;
+package io.jans.lock.service.grpc.servlet;
 
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.servlet.ServletContainerInitializer;

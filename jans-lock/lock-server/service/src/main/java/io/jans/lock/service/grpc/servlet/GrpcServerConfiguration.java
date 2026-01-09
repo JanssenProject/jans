@@ -3,11 +3,12 @@
  *
  * Copyright (c) 2025, Janssen Project
  */
-
-package io.jans.lock.service.grpc.config;
+package io.jans.lock.service.grpc.servlet;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.jans.lock.service.grpc.audit.GrpcAuditServiceImpl;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
 import jakarta.annotation.PostConstruct;
@@ -34,18 +35,15 @@ public class GrpcServerConfiguration {
     private Logger log;
 
     @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private GrpcAuditServiceImpl grpcAuditService;
 
     @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
 
     private Server grpcServer;
-    private int grpcPort = 50051; // Default gRPC port
-
-    // TLS/ALPN support (Netty-based)
-    private boolean useTls = false;
-    private String tlsCertChainFilePath; // PEM cert chain file
-    private String tlsPrivateKeyFilePath; // PEM private key file
 
     @PostConstruct
     public void init() {
@@ -64,34 +62,40 @@ public class GrpcServerConfiguration {
      * @throws IOException if server fails to start
      */
     private void startGrpcServer() throws IOException {
-        if (useTls) {
+    	GrpcConfiguration grpcConfiguration = appConfiguration.getGrpcConfiguration();
+    	if (grpcConfiguration == null || !grpcConfiguration.isEnabled()) {
+			log.info("gRPC server is disabled in configuration");
+			return;
+		}
+
+    	if (grpcConfiguration.isUseTls()) {
             // Use Netty-based server with TLS/ALPN
             try {
                 // Use shaded Netty classes bundled with gRPC
                 io.grpc.netty.shaded.io.netty.handler.ssl.SslContext sslContext =
-                        buildSslContext(tlsCertChainFilePath, tlsPrivateKeyFilePath);
+                        buildSslContext(grpcConfiguration.getTlsCertChainFilePath(), grpcConfiguration.getTlsPrivateKeyFilePath());
 
                 io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder nettyBuilder =
-                        io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder.forPort(grpcPort)
+                        io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder.forPort(grpcConfiguration.getGrpcPort())
                                 .sslContext(sslContext)
                                 .addService(grpcAuditService)
                                 .intercept(authorizationInterceptor);
 
                 grpcServer = nettyBuilder.build().start();
 
-                log.info("gRPC (Netty) server started on port {} with TLS/ALPN and authorization enabled", grpcPort);
+                log.info("gRPC (Netty) server started on port {} with TLS/ALPN and authorization enabled", grpcConfiguration.getGrpcPort());
             } catch (Exception e) {
                 log.error("Failed to start Netty-based gRPC server with TLS", e);
                 throw new IOException("Failed to start Netty-based gRPC server with TLS", e);
             }
         } else {
-            grpcServer = ServerBuilder.forPort(grpcPort)
+            grpcServer = ServerBuilder.forPort(grpcConfiguration.getGrpcPort())
                     .addService(grpcAuditService)
                     .intercept(authorizationInterceptor)  // Add authorization interceptor
                     .build()
                     .start();
 
-            log.info("gRPC server started on port {} with authorization enabled", grpcPort);
+            log.info("gRPC server started on port {} with authorization enabled", grpcConfiguration.getGrpcPort());
         }
 
         // Add shutdown hook
@@ -164,36 +168,4 @@ public class GrpcServerConfiguration {
         }
     }
 
-    public void setGrpcPort(int port) {
-        this.grpcPort = port;
-    }
-
-    public int getGrpcPort() {
-        return grpcPort;
-    }
-
-    // TLS configuration setters/getters
-    public void setUseTls(boolean useTls) {
-        this.useTls = useTls;
-    }
-
-    public boolean isUseTls() {
-        return useTls;
-    }
-
-    public void setTlsCertChainFilePath(String tlsCertChainFilePath) {
-        this.tlsCertChainFilePath = tlsCertChainFilePath;
-    }
-
-    public void setTlsPrivateKeyFilePath(String tlsPrivateKeyFilePath) {
-        this.tlsPrivateKeyFilePath = tlsPrivateKeyFilePath;
-    }
-
-    public String getTlsCertChainFilePath() {
-        return tlsCertChainFilePath;
-    }
-
-    public String getTlsPrivateKeyFilePath() {
-        return tlsPrivateKeyFilePath;
-    }
 }
