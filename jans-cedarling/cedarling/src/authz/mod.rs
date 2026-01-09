@@ -673,16 +673,15 @@ impl Authz {
     }
 
     #[cfg(test)]
-    #[allow(clippy::result_large_err)]
     pub fn build_entities(
         &self,
         request: &Request,
         tokens: &HashMap<String, Arc<Token>>,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        Ok(self
-            .config
+    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
+        self.config
             .entity_builder
-            .build_entities(tokens, &request.resource)?)
+            .build_entities(tokens, &request.resource)
+            .map_err(|e| Box::new(AuthorizeError::from(e)))
     }
 
     /// Log policy evaluation errors for diagnostics
