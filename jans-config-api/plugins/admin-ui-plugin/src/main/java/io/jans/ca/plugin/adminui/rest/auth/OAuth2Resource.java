@@ -104,7 +104,7 @@ public class OAuth2Resource {
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
     public Response deleteSessionBySessionCookie(@CookieParam(ADMIN_UI_SESSION_ID) Cookie sessionCookie) {
-        log.debug("Inside deleteSessionBySessionCookie method. Session Cookie name: " + sessionCookie.getName() + "value: " + sessionCookie.getValue());
+        log.debug("Inside deleteSessionBySessionCookie method. Session Cookie name: {}value: {}", sessionCookie.getName(), sessionCookie.getValue());
         //remove session from database
         try {
             oAuth2Service.removeSession(sessionCookie.getValue());

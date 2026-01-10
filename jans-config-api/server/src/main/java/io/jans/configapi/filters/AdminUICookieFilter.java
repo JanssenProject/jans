@@ -11,6 +11,7 @@ import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
 import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
+import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.configapi.service.auth.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.TtlCache;
@@ -69,17 +70,12 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             }
 
             String accessToken = null;
-            try {
-                accessToken = getAccessToken(ujwtOptional.get(), auiConfiguration);
-                if (Strings.isNullOrEmpty(accessToken)) {
-                    abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in generating Config Api access token.");
-                }
-                requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
-            } catch (JsonProcessingException e) {
-                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in parsing token generated for accessing Config API: " + e.getMessage());
-            } catch (InvalidJwtException | StringEncrypter.EncryptionException e) {
-                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "JWT token generated for accessing Config API is not valid: " + e.getMessage());
+
+            accessToken = getAccessToken(ujwtOptional.get(), auiConfiguration);
+            if (Strings.isNullOrEmpty(accessToken)) {
+                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in generating Config Api access token.");
             }
+            requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -89,15 +85,25 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         configApiSessionService.removeAllExpiredSessions();
     }
 
-    private String getAccessToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException, InvalidJwtException {
+    private String getAccessToken(String ujwtString, AUIConfiguration auiConfiguration) throws ConfigApiApplicationException {
         String sub = getSubjectFromUJWT(ujwtString);
         if (ujwtTokenCache.get(sub) != null) {
             String cachedToken = ujwtTokenCache.get(sub);
-            if (configApiSessionService.isCackedTokenValid(cachedToken, auiConfiguration)) {
-                return cachedToken;
+            try {
+                if (configApiSessionService.isCachedTokenValid(cachedToken, auiConfiguration)) {
+                    return cachedToken;
+                }
+            } catch (JsonProcessingException e) {
+                log.warn("Error occurred while introspecting the cached token to access the Config API.");
+                //generate a new token if cachedToken is not valid without throwing exception
             }
         }
-        TokenResponse tokenResponse = configApiSessionService.getApiProtectionToken(ujwtString, auiConfiguration);
+        TokenResponse tokenResponse = null;
+        try {
+            tokenResponse = configApiSessionService.getApiProtectionToken(ujwtString, auiConfiguration);
+        } catch (Exception e) {
+            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error in generating token generated for accessing Config API: " + e.getMessage());
+        }
         ujwtTokenCache.put(sub, tokenResponse.getAccessToken(), CACHE_TTL);
         return tokenResponse.getAccessToken();
     }
@@ -108,18 +114,18 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         }
     }
 
-    private String getSubjectFromUJWT(String ujwtString) {
+    private String getSubjectFromUJWT(String ujwtString) throws ConfigApiApplicationException {
         final Jwt tokenJwt;
         try {
             tokenJwt = Jwt.parse(ujwtString);
             Map<String, Object> claims = configApiSessionService.getClaims(tokenJwt);
 
             if (claims.get("sub") == null) {
-                throw new RuntimeException("The `sub` claim missing in User-Info JWT");
+                throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "The `sub` claim missing in User-Info JWT");
             }
             return ((String) claims.get("sub"));
         } catch (InvalidJwtException e) {
-            throw new RuntimeException("Invalid User-Info JWT : {}", e);
+            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Invalid User-Info JWT : {}" + e.getMessage());
         }
     }
 

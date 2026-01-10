@@ -1,7 +1,5 @@
 package io.jans.ca.plugin.adminui.model.auth;
 
-import java.util.List;
-
 public class ApiTokenRequest {
 
     private String ujwt;

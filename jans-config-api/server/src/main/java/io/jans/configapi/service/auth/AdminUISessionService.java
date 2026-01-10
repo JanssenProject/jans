@@ -40,6 +40,7 @@ public class AdminUISessionService {
     private static final String ADMIN_UI_CONFIG_DN = "ou=admin-ui,ou=configuration,o=jans";
     private static final String SID = "sid";
     private static final String SESSION_DN = "ou=configApiSession,ou=admin-ui,o=jans";
+    private static final String TOKEN_GENERATION_ERROR = "Error in generating token to access Config API endpoints";
     @Inject
     Logger logger;
 
@@ -67,7 +68,7 @@ public class AdminUISessionService {
             configApiSession = persistenceEntryManager
                     .find(AdminUISession.class, getDnForSession(sessionId));
         } catch (Exception ex) {
-            logger.error(SID_ERROR + sessionId, ex);
+            logger.error(SID_ERROR + "{}", sessionId, ex);
         }
         return configApiSession;
     }
@@ -81,8 +82,8 @@ public class AdminUISessionService {
                 .forEach(e -> persistenceEntryManager.remove(e));
     }
 
-    public boolean isCackedTokenValid(String token, AUIConfiguration auiConfiguration) throws JsonProcessingException {
-        logger.debug("Inside isCackedTokenValid : Token introspection from auth-server.");
+    public boolean isCachedTokenValid(String token, AUIConfiguration auiConfiguration) throws JsonProcessingException {
+        logger.debug("Inside isCachedTokenValid : Token introspection from auth-server.");
 
         Map<String, String> body = new HashMap<>();
 
@@ -100,7 +101,7 @@ public class AdminUISessionService {
                 && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
             logger.debug(
-                    " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                    "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                     httpServiceResponse.getHttpResponse().getEntity());
             if(httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
@@ -116,7 +117,7 @@ public class AdminUISessionService {
                     }
                     return false;
                 }
-                logger.error("Error in getting access token requested by Admin UI. Token entity in Response is null.");
+                logger.error("Error in introspection of token to access Config API endpoints. Response is null.");
             }
         }
         return false;
@@ -133,7 +134,7 @@ public class AdminUISessionService {
 
             HashMap<String, Object> tokenResponse = null;
             if (Strings.isNullOrEmpty(ujwtString)) {
-                logger.warn("User-Info JWT is null or empty. Config Api will not be generated.");
+                logger.warn("User-Info JWT is null or empty. Token to access Config Api will not be generated.");
                 return null;
             }
             tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), ujwtString);
@@ -142,7 +143,7 @@ public class AdminUISessionService {
             tokenResp.setAccessToken((String) tokenResponse.get("access_token"));
             return tokenResp;
         } catch (Exception e) {
-            logger.error("Error in generating access-token: {}", e.getMessage());
+            logger.error(TOKEN_GENERATION_ERROR, e);
             throw e;
         }
     }
@@ -193,13 +194,13 @@ public class AdminUISessionService {
                         tokenMap.remove("token_type");
                         return tokenMap;
                     }
-                    logger.error("Error in getting access token requested by Admin UI. Token entity in Response is null.");
+                    logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response entity is null.");
                 }
 
             }
-            logger.error("Error in getting access token requested by Admin UI. Token Response is null.");
+            logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response is null.");
         } catch (Exception e) {
-            logger.error("Problems processing token call requested by Admin UI: {}", e.getMessage());
+            logger.error(TOKEN_GENERATION_ERROR, e);
             throw e;
         }
         return null;

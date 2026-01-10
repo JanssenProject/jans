@@ -5,9 +5,8 @@ import jakarta.ws.rs.client.Invocation;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.util.List;
 
 public class ClientFactory {
 
@@ -19,19 +18,14 @@ public class ClientFactory {
         return INSTANCE;
     }
 
-    public static Invocation.Builder getClientBuilder(String url) throws NoSuchAlgorithmException {
+    public static Invocation.Builder getClientBuilder(String url) throws NoSuchAlgorithmException, KeyManagementException {
 
         /*
          * Prefer TLS 1.3, allow TLS 1.2 fallback
          * GH issue: https://github.com/JanssenProject/jans/issues/12484
          */
         SSLContext sslContext = SSLContext.getInstance("TLS");
-        try {
-            sslContext.init(null, null, null);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize SSLContext", e);
-        }
-
+        sslContext.init(null, null, null);
         SSLParameters sslParameters = sslContext.getDefaultSSLParameters();
 
         /*

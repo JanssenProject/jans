@@ -133,7 +133,7 @@ public class OAuth2Service extends BaseService {
     }
 
     private String getDnForSession(String sessionId) {
-        return String.format("inum=%s,%s", sessionId, "ou=configApiSession,ou=admin-ui,o=jans");
+        return String.format("inum=%s,%s", sessionId, SESSION_DN);
     }
 
     public void setAdminUISession(String sessionId, String ujwt) throws Exception {
