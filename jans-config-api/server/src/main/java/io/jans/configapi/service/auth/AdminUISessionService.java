@@ -75,9 +75,51 @@ public class AdminUISessionService {
     public void removeAllExpiredSessions() {
         final Filter filter = Filter.createPresenceFilter(SID);
         List<AdminUISession> adminUISessions =  persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
+        Date currentDate = new Date();
         adminUISessions.stream().filter(ele ->
-                ((ele.getExpirationDate().getTime() - ele.getCreationDate().getTime()) < 0))
+                ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
                 .forEach(e -> persistenceEntryManager.remove(e));
+    }
+
+    public boolean isCackedTokenValid(String token, AUIConfiguration auiConfiguration) throws JsonProcessingException {
+        logger.debug("Inside isCackedTokenValid : Token introspection from auth-server.");
+
+        Map<String, String> body = new HashMap<>();
+
+        if (!Strings.isNullOrEmpty(token)) {
+            body.put("token", token);
+        }
+
+        HttpServiceResponse httpServiceResponse = httpService
+                .executePost(auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint(),
+                        token, toUrlEncodedString(body),
+                        ContentType.APPLICATION_FORM_URLENCODED,
+                        "Bearer " );
+        String jsonString = null;
+        if (httpServiceResponse.getHttpResponse() != null
+                && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+
+            logger.debug(
+                    " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                    httpServiceResponse.getHttpResponse().getEntity());
+            if(httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+                ObjectMapper mapper = new ObjectMapper();
+
+                HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                if (httpEntity != null) {
+                    jsonString = httpService.getContent(httpEntity);
+
+                    HashMap<String, Object> payloadMap = mapper.readValue(jsonString, HashMap.class);
+                    if(payloadMap.containsKey("active")) {
+                        return (boolean) payloadMap.get("active");
+                    }
+                    return false;
+                }
+                logger.error("Error in getting access token requested by Admin UI. Token entity in Response is null.");
+            }
+        }
+        return false;
     }
 
     public TokenResponse getApiProtectionToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException {
@@ -136,7 +178,7 @@ public class AdminUISessionService {
             if (httpServiceResponse.getHttpResponse() != null
                     && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
-                logger.error(
+                logger.debug(
                         " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                         httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                         httpServiceResponse.getHttpResponse().getEntity());

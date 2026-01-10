@@ -20,6 +20,7 @@ import jakarta.ws.rs.core.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import io.jans.as.model.crypto.AuthCryptoProvider;
+
 import java.util.UUID;
 
 @Hidden
@@ -30,7 +31,7 @@ public class OAuth2Resource {
     static final String USER_DN_VARIABLE = "/{userDn}";
     static final String USER_DN_CONST = "userDn";
     static final String OAUTH2_API_PROTECTION_TOKEN = "/{appType}/oauth2/api-protection-token";
-    static final String CONFIG_API_SESSION_ID = "config_api_session_id";
+    static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
     public static final String SCOPE_OPENID = "openid";
     static final String ADMINUI_SESSION_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write";
     static final String ADMINUI_SESSION_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete";
@@ -56,34 +57,32 @@ public class OAuth2Resource {
     public Response createSession(@Valid @NotNull ApiTokenRequest apiTokenRequest) {
         try {
             //Bad Request: if UJWT is null
-            if(apiTokenRequest.getUjwt() == null) {
+            if (apiTokenRequest.getUjwt() == null) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.UJWT_NOT_FOUND.getDescription());
             }
 
             String sessionId = UUID.randomUUID().toString();
 
-            if(authCryptoProvider == null) {
+            if (authCryptoProvider == null) {
                 authCryptoProvider = new AuthCryptoProvider();
             }
 
             Jwt userInfoJwt = Jwt.parse(apiTokenRequest.getUjwt());
             boolean isValidJWTSignature = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), new JSONObject(configurationFactory.getJwks()), null, userInfoJwt.getHeader().getSignatureAlgorithm());
-            if(!isValidJWTSignature) {
+            if (!isValidJWTSignature) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.SIGNATURE_NOT_VALID.getDescription());
             }
 
-            NewCookie cookie = new NewCookie.Builder(CONFIG_API_SESSION_ID)
-                    .value(sessionId)
-                    .path("/")
-                    .secure(true) // Set to true if using HTTPS
-                    .httpOnly(true) // Makes the cookie inaccessible to JavaScript (recommended for auth tokens)
-                    .sameSite(NewCookie.SameSite.NONE)
-                    .build();
-
+            String cookie =
+                    ADMIN_UI_SESSION_ID + "=" + sessionId +
+                            "; Path=/" +
+                            "; HttpOnly" +
+                            "; Secure" +
+                            "; SameSite=None";
             oAuth2Service.setAdminUISession(sessionId, apiTokenRequest.getUjwt());
 
-            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Sessions created successfully."))
-                    .cookie(cookie)
+            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Session created successfully."))
+                    .header(HttpHeaders.SET_COOKIE, cookie)
                     .build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ADMINUI_SESSION_CREATE_ERROR.getDescription(), e);
@@ -104,13 +103,13 @@ public class OAuth2Resource {
     @Path(SESSION)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
-    public Response deleteSessionBySessionCookie(@CookieParam(CONFIG_API_SESSION_ID) Cookie sessionCookie) {
-        log.debug("Inside deleteSessionBySessionId method. Session Cookie name: "+ sessionCookie.getName() + "value: "+ sessionCookie.getValue());
+    public Response deleteSessionBySessionCookie(@CookieParam(ADMIN_UI_SESSION_ID) Cookie sessionCookie) {
+        log.debug("Inside deleteSessionBySessionCookie method. Session Cookie name: " + sessionCookie.getName() + "value: " + sessionCookie.getValue());
         //remove session from database
         try {
             oAuth2Service.removeSession(sessionCookie.getValue());
             //remove session from browser
-            NewCookie sessionCookieInvalidated = new NewCookie.Builder(CONFIG_API_SESSION_ID)
+            NewCookie sessionCookieInvalidated = new NewCookie.Builder(ADMIN_UI_SESSION_ID)
                     .value(sessionCookie.getValue())
                     .maxAge(0) // Sets Max-Age to 0, instructing the browser to delete it immediately
                     .path("/")
@@ -119,7 +118,7 @@ public class OAuth2Resource {
                     .build();
 
             // Return a response with the new, invalidated cookie
-            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Sessions revoked successfully."))
+            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Session revoked successfully."))
                     .cookie(sessionCookieInvalidated)
                     .build();
         } catch (ApplicationException e) {
@@ -140,7 +139,7 @@ public class OAuth2Resource {
         //remove sessions from database by userDn
         try {
             oAuth2Service.removeAdminUIUserSessionByDn(userDn);
-            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Sessions revoked successfully."))
+            return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Sessions revoked successfully."))
                     .build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ADMINUI_SESSION_REMOVE_ERROR.getDescription(), e);

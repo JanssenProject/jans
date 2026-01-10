@@ -159,11 +159,10 @@ public class OAuth2Service extends BaseService {
 
     public void removeAdminUIUserSessionByDn(String userDn) throws ApplicationException {
         try {
-            Filter searchFilter = null;
             List<Filter> filters = new ArrayList<>();
             Filter userDnFilter = Filter.createSubstringFilter(JANS_USR_DN, null, new String[]{userDn}, null);
             filters.add(userDnFilter);
-            searchFilter = Filter.createORFilter(filters);
+            Filter searchFilter = Filter.createORFilter(filters);
             List<AdminUISession> adminUISessions =  entryManager.findEntries(SESSION_DN, AdminUISession.class, searchFilter);
 
             for(AdminUISession adminUISession : adminUISessions) {

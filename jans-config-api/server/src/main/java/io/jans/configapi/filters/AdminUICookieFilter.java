@@ -1,6 +1,7 @@
 package io.jans.configapi.filters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Strings;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -24,6 +25,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,36 +46,40 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
     TtlCache<String, String> ujwtTokenCache;
 
-    private static final String CONFIG_API_SESSION_ID = "config_api_session_id";
-    private static final long CACHE_TTL = 90000; // 15 mins
+    private static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
+    private static final long CACHE_TTL = 360000; // 1 hour
     private static final String AUTHENTICATION_SCHEME = "Bearer";
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-        log.info("Inside AdminUICookieFilter filter...");
-        Map<String, Cookie> cookies = requestContext.getCookies();
-        initializeCaches();
-        removeExpiredSessions();
-        Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
-        //return if session rcord is not present in the database
-        if(ujwtOptional.isEmpty()) {
-            return;
-        }
+            log.info("Inside AdminUICookieFilter filter...");
+            Map<String, Cookie> cookies = requestContext.getCookies();
+            initializeCaches();
+            removeExpiredSessions();
+            Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
+            //return if session record is not present in the database
+            if (ujwtOptional.isEmpty()) {
+                return;
+            }
 
-        initializeAdminUIConfiguration();
-        if(auiConfiguration == null) {
-            return;
-        }
+            initializeAdminUIConfiguration();
+            if (auiConfiguration == null) {
+                return;
+            }
 
             String accessToken = null;
             try {
                 accessToken = getAccessToken(ujwtOptional.get(), auiConfiguration);
+                if (Strings.isNullOrEmpty(accessToken)) {
+                    abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in generating Config Api access token.");
+                }
+                requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
             } catch (JsonProcessingException e) {
                 abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in parsing token generated for accessing Config API: " + e.getMessage());
             } catch (InvalidJwtException | StringEncrypter.EncryptionException e) {
                 abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "JWT token generated for accessing Config API is not valid: " + e.getMessage());
             }
-            requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -85,8 +91,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
     private String getAccessToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException, InvalidJwtException {
         String sub = getSubjectFromUJWT(ujwtString);
-        if(ujwtTokenCache.get(sub) != null) {
-            return ujwtTokenCache.get(sub);
+        if (ujwtTokenCache.get(sub) != null) {
+            String cachedToken = ujwtTokenCache.get(sub);
+            if (configApiSessionService.isCackedTokenValid(cachedToken, auiConfiguration)) {
+                return cachedToken;
+            }
         }
         TokenResponse tokenResponse = configApiSessionService.getApiProtectionToken(ujwtString, auiConfiguration);
         ujwtTokenCache.put(sub, tokenResponse.getAccessToken(), CACHE_TTL);
@@ -94,7 +103,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     }
 
     private void initializeCaches() {
-        if(ujwtTokenCache == null) {
+        if (ujwtTokenCache == null) {
             ujwtTokenCache = new TtlCache<>();
         }
     }
@@ -119,14 +128,14 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         if (cookies == null) {
             return Optional.empty();
         }
-        if(!cookies.containsKey(CONFIG_API_SESSION_ID)) {
+        if (!cookies.containsKey(ADMIN_UI_SESSION_ID)) {
             return Optional.empty();
         }
-        Cookie adminUISessionCookie = cookies.get(CONFIG_API_SESSION_ID);
+        Cookie adminUISessionCookie = cookies.get(ADMIN_UI_SESSION_ID);
         String sessionId = adminUISessionCookie.getValue();
         AdminUISession configApiSession = configApiSessionService.getSession(sessionId);
         //if config api session does not exist
-        if(configApiSession == null) {
+        if (configApiSession == null) {
             return Optional.empty();
         }
         String ujwtString = configApiSession.getUjwt();
@@ -134,7 +143,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     }
 
     private void initializeAdminUIConfiguration() {
-        if(auiConfiguration != null) {
+        if (auiConfiguration != null) {
             return;
         }
         AdminConf adminConf = configApiSessionService.fetchAdminUIConfiguration();
@@ -174,7 +183,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         auiConfiguration.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
     }
 
-    private void abortWithException(ContainerRequestContext requestContext,  Response.Status status, String errMsg) {
+    private void abortWithException(ContainerRequestContext requestContext, Response.Status status, String errMsg) {
         requestContext.abortWith(Response.status(status)
                 .entity(errMsg)
                 .build());
