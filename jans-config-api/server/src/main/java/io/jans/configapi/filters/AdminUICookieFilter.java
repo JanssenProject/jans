@@ -15,7 +15,6 @@ import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.configapi.service.auth.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.TtlCache;
-import io.jans.util.security.StringEncrypter;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;

@@ -39,7 +39,7 @@ public class AdminUISessionService {
     private static final String SID_ERROR = "Failed to load  Config API session entry with sid ";
     private static final String ADMIN_UI_CONFIG_DN = "ou=admin-ui,ou=configuration,o=jans";
     private static final String SID = "sid";
-    private static final String SESSION_DN = "ou=configApiSession,ou=admin-ui,o=jans";
+    private static final String SESSION_DN = "ou=adminUISession,ou=admin-ui,o=jans";
     private static final String TOKEN_GENERATION_ERROR = "Error in generating token to access Config API endpoints";
     @Inject
     Logger logger;
@@ -55,7 +55,7 @@ public class AdminUISessionService {
     ConfigHttpService httpService;
 
     private String getDnForSession(String sessionId) {
-        return String.format("inum=%s,%s", sessionId, "ou=configApiSession,ou=admin-ui,o=jans");
+        return String.format("inum=%s,%s", sessionId, SESSION_DN);
     }
 
     public AdminUISession getSession(String sessionId) {
@@ -132,7 +132,7 @@ public class AdminUISessionService {
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setRedirectUri(auiConfiguration.getAuiBackendApiServerRedirectUrl());
 
-            HashMap<String, Object> tokenResponse = null;
+            Map<String, Object> tokenResponse = null;
             if (Strings.isNullOrEmpty(ujwtString)) {
                 logger.warn("User-Info JWT is null or empty. Token to access Config Api will not be generated.");
                 return null;
@@ -148,7 +148,7 @@ public class AdminUISessionService {
         }
     }
 
-    public HashMap<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws JsonProcessingException {
+    public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws JsonProcessingException {
 
         try {
             Map<String, String> body = new HashMap<>();
@@ -203,7 +203,7 @@ public class AdminUISessionService {
             logger.error(TOKEN_GENERATION_ERROR, e);
             throw e;
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     private static String toUrlEncodedString(Map<String, String> params) {

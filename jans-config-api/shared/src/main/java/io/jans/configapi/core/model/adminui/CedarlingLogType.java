@@ -47,6 +47,7 @@ public enum CedarlingLogType {
         return mapByValues.get(value);
     }
 
+    @Override
     @JsonValue
     public String toString() {
         return value;

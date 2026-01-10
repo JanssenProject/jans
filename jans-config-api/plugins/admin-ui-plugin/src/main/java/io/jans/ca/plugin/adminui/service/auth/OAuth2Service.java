@@ -44,7 +44,7 @@ public class OAuth2Service extends BaseService {
 
     private static final String SID_GET_MSG = "Error in get Admin UI Session by sid:{}";
     private static final String JANS_USR_DN = "jansUsrDN";
-    private static final String SESSION_DN = "ou=configApiSession,ou=admin-ui,o=jans";
+    private static final String SESSION_DN = "ou=adminUISession,ou=admin-ui,o=jans";
     /**
      * The function `getApiProtectionToken` retrieves an API protection token based on the provided parameters and handles
      * exceptions accordingly.
