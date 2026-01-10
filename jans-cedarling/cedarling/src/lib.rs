@@ -190,8 +190,8 @@ impl Cedarling {
     pub(crate) async fn build_entities(
         &self,
         request: &Request,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let tokens = self.authz.decode_tokens(request).await?;
+    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
+        let tokens = self.authz.decode_tokens(request).await.map_err(Box::new)?;
         self.authz.build_entities(request, &tokens)
     }
 
