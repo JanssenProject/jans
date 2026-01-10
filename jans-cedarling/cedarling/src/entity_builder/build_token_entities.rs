@@ -8,7 +8,7 @@ use super::*;
 use derive_more::derive::Deref;
 
 impl EntityBuilder {
-    pub fn build_tkn_entity(
+    pub(super) fn build_tkn_entity(
         &self,
         tkn_type_name: &str,
         token: &Token,

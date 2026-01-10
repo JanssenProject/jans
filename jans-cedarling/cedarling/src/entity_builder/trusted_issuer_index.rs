@@ -23,7 +23,7 @@ use crate::{
 /// will be used for origin-based lookups. A warning is logged when this occurs. Full URL lookups
 /// remain unaffected and will correctly resolve to each specific issuer.
 #[derive(Debug, Clone)]
-pub struct TrustedIssuerIndex {
+pub(crate) struct TrustedIssuerIndex {
     /// Index mapping full URL to trusted issuer
     url_index: HashMap<String, Arc<TrustedIssuer>>,
     /// Index mapping origin to trusted issuer
@@ -31,7 +31,7 @@ pub struct TrustedIssuerIndex {
 }
 
 impl TrustedIssuerIndex {
-    pub fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<Logger>) -> Self {
+    pub(crate) fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<Logger>) -> Self {
         let mut origin_index: HashMap<String, Arc<TrustedIssuer>> = HashMap::new();
         let mut url_index = HashMap::new();
 
@@ -62,14 +62,14 @@ impl TrustedIssuerIndex {
     }
 
     /// Finds a trusted issuer by URL, checking full URL first, then origin.
-    pub fn find(&self, url: &str) -> Option<&Arc<TrustedIssuer>> {
+    pub(super) fn find(&self, url: &str) -> Option<&Arc<TrustedIssuer>> {
         self.url_index
             .get(url)
             .or_else(|| self.origin_index.get(url))
     }
 
     /// Returns an iterator over references to all trusted issuers.
-    pub fn values(&self) -> impl Iterator<Item = &TrustedIssuer> + '_ {
+    pub(super) fn values(&self) -> impl Iterator<Item = &TrustedIssuer> + '_ {
         self.url_index.values().map(AsRef::as_ref)
     }
 }

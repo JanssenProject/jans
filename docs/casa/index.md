@@ -54,6 +54,7 @@ Casa is a plugin-oriented, Java web application. Existing functionality can be e
 - [Custom branding](./plugins/custom-branding.md)
 - [BioID](./plugins/bioid.md)
 - [Email OTP](./plugins/email-otp.md)
+- [Certificate authentication](./plugins/cert-authn.md)
 
 If you are interested in onboarding additional authentication methods to Casa, read this [guide](./developer/add-authn-methods.md).
 

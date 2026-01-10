@@ -50,7 +50,7 @@
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
 mod err_log_entry;
-pub mod interface;
+pub(crate) mod interface;
 
 mod log_entry;
 mod log_level;
@@ -89,7 +89,7 @@ pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
 #[allow(dead_code)]
 #[cfg(test)]
-pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
+pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(init_test_logger);
 
 /// Initialize logger.
 /// entry point for initialize logger

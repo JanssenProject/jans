@@ -14,14 +14,14 @@ use std::{collections::HashMap, sync::Arc};
 /// Structure representing a validated JWT token, used to derive a Cedar token entity.
 /// Make sure to provide a `TrustedIssuer`; otherwise, the `iss` field may not be constructed.
 #[derive(Debug, PartialEq, Clone)]
-pub struct Token {
+pub(crate) struct Token {
     pub name: String,
     pub iss: Option<Arc<TrustedIssuer>>,
     pub(crate) claims: TokenClaims,
 }
 
 impl Token {
-    pub fn new(name: &str, claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
+    pub(crate) fn new(name: &str, claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
         Self {
             name: name.to_string(),
             iss,
@@ -29,32 +29,32 @@ impl Token {
         }
     }
 
-    pub fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
+    pub(crate) fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
         self.iss.as_ref()?.get_token_metadata(&self.name)
     }
 
-    pub fn claim_mappings(&self) -> Option<&ClaimMappings> {
+    pub(crate) fn claim_mappings(&self) -> Option<&ClaimMappings> {
         self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
-    pub fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
+    pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
         self.claims.get_claim(name)
     }
 
-    pub fn get_claim_val(&self, name: &str) -> Option<&Value> {
+    pub(crate) fn get_claim_val(&self, name: &str) -> Option<&Value> {
         self.claims.claims.get(name)
     }
 
-    pub fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
+    pub(crate) fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         self.claims.logging_info(claim)
     }
 
-    pub fn claims_value(&self) -> &HashMap<String, Value> {
+    pub(crate) fn claims_value(&self) -> &HashMap<String, Value> {
         &self.claims.claims
     }
 
     /// Extract normalized issuer URL from a token
-    pub fn extract_normalized_issuer(&self) -> Option<String> {
+    pub(crate) fn extract_normalized_issuer(&self) -> Option<String> {
         // Method 1: From TrustedIssuer reference (preferred)
         if let Some(trusted_issuer) = &self.iss {
             return Some(trusted_issuer.normalized_issuer());
@@ -68,7 +68,7 @@ impl Token {
 }
 
 #[derive(Debug, PartialEq, Default, Deserialize, Clone)]
-pub struct TokenClaims {
+pub(crate) struct TokenClaims {
     #[serde(flatten)]
     claims: HashMap<String, Value>,
 }
@@ -87,14 +87,14 @@ impl From<Value> for TokenClaims {
 }
 
 impl TokenClaims {
-    pub fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
+    pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
         self.claims.get(name).map(|value| TokenClaim {
             key: name.to_string(),
             value,
         })
     }
 
-    pub fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
+    pub(crate) fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         let claim = if !claim.is_empty() { claim } else { "jti" };
 
         self.claims
@@ -105,7 +105,7 @@ impl TokenClaims {
 
     // Update TokenClaims claim value by consuming itself.
     // Consuming allows to be sure that only one instance exist.
-    pub fn with_claim(self, k: String, v: Value) -> Self {
+    pub(crate) fn with_claim(self, k: String, v: Value) -> Self {
         let mut claims = self;
         claims.claims.insert(k, v);
 
@@ -113,13 +113,13 @@ impl TokenClaims {
     }
 }
 
-pub struct TokenClaim<'a> {
+pub(crate) struct TokenClaim<'a> {
     key: String,
     value: &'a serde_json::Value,
 }
 
 impl TokenClaim<'_> {
-    pub fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
+    pub(crate) fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
         self.value
             .as_str()
             .ok_or(TokenClaimTypeError::type_mismatch(
@@ -127,7 +127,7 @@ impl TokenClaim<'_> {
             ))
     }
 
-    pub fn value(&self) -> &Value {
+    pub(crate) fn value(&self) -> &Value {
         self.value
     }
 }

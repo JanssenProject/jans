@@ -3,9 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#[cfg(test)]
+mod archive_security_tests;
 mod claim_mapping;
+pub(crate) mod log_entry;
 #[cfg(test)]
 mod test;
+#[cfg(test)]
+pub(crate) mod test_utils;
 mod token_entity_metadata;
 
 use crate::common::{
@@ -13,6 +18,19 @@ use crate::common::{
     default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
     issuer_utils::normalize_issuer,
 };
+
+pub(crate) mod archive_handler;
+pub(crate) mod entity_parser;
+pub(crate) mod errors;
+pub(crate) mod issuer_parser;
+pub(crate) mod loader;
+pub(crate) mod manager;
+pub(crate) mod manifest_validator;
+pub(crate) mod metadata;
+pub(crate) mod policy_parser;
+pub(crate) mod schema_parser;
+pub(crate) mod validator;
+pub(crate) mod vfs_adapter;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
 use cedar_policy::{Policy, PolicyId};
@@ -22,12 +40,22 @@ use std::collections::HashMap;
 use url::Url;
 
 pub(crate) use claim_mapping::ClaimMappings;
-pub use token_entity_metadata::TokenEntityMetadata;
+pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
+// Re-export types used by init/policy_store.rs and external consumers
+pub(crate) use manager::ConversionError;
+pub(crate) use metadata::PolicyStoreMetadata;
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
-#[derive(Debug, Clone, PartialEq)]
-pub struct AgamaPolicyStore {
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+pub(crate) struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
+    ///
+    /// **Note**: This field is currently unused after deserialization but is kept for:
+    /// 1. Input validation - ensures policy store files specify a valid version format
+    /// 2. Format compatibility - maintains the Agama Lab Policy Designer format specification
+    /// 3. Future use - may be needed for version-specific parsing logic as Cedar evolves
+    #[allow(dead_code)]
     pub cedar_version: Version,
     pub policy_stores: HashMap<String, PolicyStore>,
 }
@@ -82,7 +110,8 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct PolicyStore {
     /// version of policy store
     //
@@ -162,14 +191,20 @@ pub struct TrustedIssuersValidationError {
     oidc_url: String,
 }
 
-/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
+/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
+///
+/// When loaded from the new directory/archive format, includes optional metadata
+/// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
 pub struct PolicyStoreWithID {
     /// ID of policy store
-    pub id: String,
+    pub(crate) id: String,
     /// Policy store value
     #[deref]
-    pub store: PolicyStore,
+    pub(crate) store: PolicyStore,
+    /// Optional metadata from new format policy stores.
+    /// Contains cedar_version, policy_store info (name, version, description, etc.)
+    pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -374,10 +409,12 @@ enum MaybeEncoded {
     Plain(String),
     Tagged(EncodedPolicy),
 }
-
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
+// TODO: We only use the `description` field at runtime. The raw `policy_content`
+//       is not needed once policies are compiled into a `PolicySet`. Refactor
+//       to remove `RawPolicy` (and stored raw content) and keep only descriptions.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 struct RawPolicy {
     /// Base64-encoded content of the policy.
@@ -390,7 +427,7 @@ struct RawPolicy {
 /// Container to decode policy stores into container
 ///
 /// Contain compiled [`cedar_policy::PolicySet`] and raw policy info to get description or other information.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct PoliciesContainer {
     /// HasMap to store raw policy info
     /// Is used to get policy description by ID
@@ -401,7 +438,70 @@ pub struct PoliciesContainer {
     policy_set: cedar_policy::PolicySet,
 }
 
+#[cfg(test)]
+impl PartialEq for PoliciesContainer {
+    fn eq(&self, other: &Self) -> bool {
+        // Compare only the compiled policy_set, ignoring:
+        // 1. Order of policies (using BTreeMap for deterministic comparison)
+        // 2. raw_policy_info (auxiliary data like descriptions)
+        // The policy_set is the canonical representation; if policies are equal,
+        // the containers are semantically equal for testing purposes.
+        use std::collections::BTreeMap;
+
+        let self_policies: BTreeMap<_, _> = self
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        let other_policies: BTreeMap<_, _> = other
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        self_policies == other_policies
+    }
+}
+
 impl PoliciesContainer {
+    /// Create a new `PoliciesContainer` from a policy set and description map.
+    ///
+    /// This constructor is used by the policy store manager when converting
+    /// from the new directory/archive format to the legacy format.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_set` - The compiled Cedar policy set
+    /// * `descriptions` - Map of policy ID to description (typically filename)
+    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+        let raw_policy_info = descriptions
+            .into_iter()
+            .map(|(id, desc)| {
+                (
+                    id,
+                    RawPolicy {
+                        policy_content: MaybeEncoded::Plain(String::new()),
+                        description: desc,
+                    },
+                )
+            })
+            .collect();
+
+        Self {
+            policy_set,
+            raw_policy_info,
+        }
+    }
+
+    /// Create an empty `PoliciesContainer` with the given policy set.
+    ///
+    /// Used when there are no policy descriptions available.
+    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+        Self {
+            policy_set,
+            raw_policy_info: HashMap::new(),
+        }
+    }
+
     /// Get [`cedar_policy::PolicySet`]
     pub fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set
@@ -508,7 +608,7 @@ where
 }
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
-pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
 {
