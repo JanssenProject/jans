@@ -109,17 +109,17 @@ public class OAuth2Resource {
         try {
             oAuth2Service.removeSession(sessionCookie.getValue());
             //remove session from browser
-            NewCookie sessionCookieInvalidated = new NewCookie.Builder(ADMIN_UI_SESSION_ID)
-                    .value(sessionCookie.getValue())
-                    .maxAge(0) // Sets Max-Age to 0, instructing the browser to delete it immediately
-                    .path("/")
-                    .httpOnly(true)
-                    .secure(true)
-                    .build();
+            String cookie =
+                    ADMIN_UI_SESSION_ID + "=" + sessionCookie.getValue() +
+                            "; Path=/" +
+                            "; Max-Age=0" +
+                            "; HttpOnly" +
+                            "; Secure" +
+                            "; SameSite=None";
 
             // Return a response with the new, invalidated cookie
             return Response.ok(CommonUtils.createGenericResponse(true, 200, "Admin UI Session revoked successfully."))
-                    .cookie(sessionCookieInvalidated)
+                    .header(HttpHeaders.SET_COOKIE, cookie)
                     .build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ADMINUI_SESSION_REMOVE_ERROR.getDescription(), e);
