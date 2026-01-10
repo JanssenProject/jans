@@ -40,29 +40,31 @@ impl TknClaimAttrSrc {
 
 impl EntityRefAttrSrc {
     pub fn build_expr(&self, id: &str) -> Result<RestrictedExpression, Box<BuildExprError>> {
-        let uid = EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
-            .map_err(|e| Box::new(e.into()))?;
+        let entity_type_name =
+            cedar_policy::EntityTypeName::from_str(&self.0).map_err(|e| Box::new(e.into()))?;
+        let entity_id = cedar_policy::EntityId::from_str(id).unwrap_or_else(|e| match e {});
+
+        let uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(RestrictedExpression::new_entity_uid(uid))
     }
 }
 
 impl EntityRefSetSrc {
     pub fn build_expr(&self, ids: &[SmolStr]) -> Result<RestrictedExpression, BuildExprErrorVec> {
-        let (uids, errs): (Vec<_>, Vec<_>) = ids
+        let entity_type_name = cedar_policy::EntityTypeName::from_str(&self.0)
+            .map_err(|e| BuildExprErrorVec(vec![e.into()]))?;
+
+        let uids: Vec<_> = ids
             .iter()
             .map(|id| {
-                EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
-                    .map(RestrictedExpression::new_entity_uid)
-            })
-            .partition_result();
+                let entity_id = cedar_policy::EntityId::from_str(id).unwrap_or_else(|e| match e {});
 
-        if !errs.is_empty() {
-            return Err(BuildExprErrorVec::from(
-                errs.into_iter()
-                    .map(BuildExprError::ParseUid)
-                    .collect::<Vec<_>>(),
-            ));
-        }
+                RestrictedExpression::new_entity_uid(EntityUid::from_type_name_and_id(
+                    entity_type_name.clone(),
+                    entity_id,
+                ))
+            })
+            .collect();
 
         Ok(RestrictedExpression::new_set(uids))
     }
