@@ -3,6 +3,7 @@ tags:
 - Casa
 - 2FA
 - Certificate
+- Smartcards
 ---
 
 # Client certificate authentication
@@ -11,7 +12,7 @@ tags:
 
 At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in a SSL/TLS session.
 
-The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server.
+The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports smart cards as well.
 
 ### Requisites
 
@@ -126,9 +127,11 @@ The instructions to setup this URL vary depending on the TLS version required an
 
     This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
 
+    In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
+
 ### Test
 
-Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL configured, e.g. `https://acme.co:444` (TLS 1.3) or `https://acme.co/jans-casa/pl/cert-authn/` (TLS 1.2). This will display a browser dialog like [this](../../assets/casa/plugins/cert-authn-browser_dialog.png) listing the certificates imported so far. Do not select anything and close the browser window.
+Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL configured, e.g. `https://acme.co:444` (TLS 1.3) or `https://acme.co/jans-casa/pl/cert-authn/` (TLS 1.2). This will display a dialog like [this](../../assets/casa/plugins/cert-authn-browser_dialog.png) listing the certificates imported so far. Do not select anything and close the browser window.
 
 ## Deploy and configure the Agama project
 
