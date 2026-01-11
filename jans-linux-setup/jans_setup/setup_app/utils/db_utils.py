@@ -139,9 +139,10 @@ class DBUtils:
                 self.sql_data_types[attr] = self.rdbm_json_types
 
         for attr in self.jans_attributes:
-            attr_name = attr['names'][0] if attr.get('names', []) else None
-            if attr_name and 'sql_types' in attr and attr_name not in self.sql_data_types:
-                 self.sql_data_types[attr_name] = attr.pop('sql_types')
+            if 'names' in attr and len(attr['names']) > 0:
+                attr_name = attr['names'][0]
+                if attr_name and 'sql_types' in attr and attr_name not in self.sql_data_types:
+                    self.sql_data_types[attr_name] = attr.pop('sql_types')
 
     def exec_rdbm_query(self, query, getresult=False):
         base.logIt("Executing {} Query: {}".format(Config.rdbm_type, query))
