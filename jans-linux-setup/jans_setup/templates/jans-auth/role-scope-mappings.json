@@ -6,7 +6,7 @@
       "deletable": true
     }
   ],
- "permissions": [
+  "permissions": [
     {
       "permission": "https://jans.io/oauth/config/attributes.readonly",
       "description": null,
@@ -484,7 +484,7 @@
       "tag": "authorizations"
     },
     {
-      "permission":"https://jans.io/oauth/config/jans-link.readonly",
+      "permission": "https://jans.io/oauth/config/jans-link.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
@@ -785,21 +785,21 @@
       "tag": "lock-config"
     },
     {
-      "permission": "https://jans.io/oauth/config/asset.readonly",
+      "permission": "https://jans.io/oauth/config/jans_asset-read",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
       "tag": "jans_asset"
     },
     {
-      "permission": "https://jans.io/oauth/config/asset.write",
+      "permission": "https://jans.io/oauth/config/jans_asset-write",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
       "tag": "jans_asset"
     },
     {
-      "permission": "https://jans.io/oauth/config/asset.admin",
+      "permission": "https://jans.io/oauth/config/jans_asset-delete",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
@@ -911,45 +911,69 @@
       "essentialPermissionInAdminUI": false
     },
     {
-     "tag": "kc-link-config",
-     "permission": "https://jans.io/oauth/kc-link-config.readonly",
-     "description": "",
-     "defaultPermissionInToken": false,
-     "essentialPermissionInAdminUI": false
+      "tag": "kc-link-config",
+      "permission": "https://jans.io/oauth/kc-link-config.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
     },
-   {
-     "tag": "kc-link-config",
-     "permission": "https://jans.io/oauth/kc-link-config.write",
-     "description": "",
-     "defaultPermissionInToken": false,
-     "essentialPermissionInAdminUI": false
-   },
-   {
-     "tag": "database",
-     "permission": "https://jans.io/oauth/config/database.readonly",
-     "description": "",
-     "defaultPermissionInToken": false,
-     "essentialPermissionInAdminUI": false
-   },
-   {
-     "tag": "ssa",
-     "permission": "https://jans.io/oauth/config/ssa.readonly",
-     "description": "",
-     "defaultPermissionInToken": false,
-     "essentialPermissionInAdminUI": false
-   },
-   {
-     "tag": "ssa",
-     "permission": "https://jans.io/oauth/config/ssa.write",
-     "description": "",
-     "defaultPermissionInToken": false,
-     "essentialPermissionInAdminUI": false
-   }
+    {
+      "tag": "kc-link-config",
+      "permission": "https://jans.io/oauth/kc-link-config.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "database",
+      "permission": "https://jans.io/oauth/config/database.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "ssa",
+      "permission": "https://jans.io/oauth/config/ssa.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "ssa",
+      "permission": "https://jans.io/oauth/config/ssa.write",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "adminui_session",
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.readonly",
+      "description": "",
+      "defaultPermissionInToken": true,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "adminui_session",
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write",
+      "description": "",
+      "defaultPermissionInToken": true,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "adminui_session",
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete",
+      "description": "",
+      "defaultPermissionInToken": true,
+      "essentialPermissionInAdminUI": false
+    }
   ],
   "rolePermissionMapping": [
     {
       "role": "admin",
       "permissions": [
+      "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete",
         "https://jans.io/oauth/config/attributes.readonly",
         "https://jans.io/oauth/config/attributes.write",
         "https://jans.io/oauth/config/attributes.delete",
@@ -1065,9 +1089,9 @@
         "https://jans.io/oauth/kc-link-config.write",
         "https://jans.io/oauth/lock-config.readonly",
         "https://jans.io/oauth/lock-config.write",
-        "https://jans.io/oauth/config/asset.readonly",
-        "https://jans.io/oauth/config/asset.write",
-        "https://jans.io/oauth/config/asset.admin",
+        "https://jans.io/oauth/config/jans_asset-read",
+        "https://jans.io/oauth/config/jans_asset-write",
+        "https://jans.io/oauth/config/jans_asset-delete",
         "https://jans.io/oauth/lock/audit.readonly",
         "https://jans.io/oauth/lock/audit.write",
         "https://jans.io/oauth/lock/health.readonly",
