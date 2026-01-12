@@ -8,7 +8,7 @@ use super::{
     schema::{EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc},
 };
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use cedar_policy::{EntityUid, RestrictedExpression};
+use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display, str::FromStr};
@@ -40,9 +40,9 @@ impl TknClaimAttrSrc {
 
 impl EntityRefAttrSrc {
     pub(super) fn build_expr(&self, id: &str) -> Result<RestrictedExpression, Box<BuildExprError>> {
-        let entity_type_name =
-            cedar_policy::EntityTypeName::from_str(&self.0).map_err(|e| Box::new(e.into()))?;
-        let entity_id = cedar_policy::EntityId::from_str(id).unwrap_or_else(|e| match e {});
+        let entity_type_name = EntityTypeName::from_str(&self.0).map_err(|e| Box::new(e.into()))?;
+        // This should never fail since EntityId::from_str returns Result<_, Infallible>
+        let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
 
         let uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(RestrictedExpression::new_entity_uid(uid))
@@ -54,13 +54,14 @@ impl EntityRefSetSrc {
         &self,
         ids: &[SmolStr],
     ) -> Result<RestrictedExpression, BuildExprErrorVec> {
-        let entity_type_name = cedar_policy::EntityTypeName::from_str(&self.0)
-            .map_err(|e| BuildExprErrorVec(vec![e.into()]))?;
+        let entity_type_name =
+            EntityTypeName::from_str(&self.0).map_err(|e| BuildExprErrorVec(vec![e.into()]))?;
 
         let uids: Vec<_> = ids
             .iter()
             .map(|id| {
-                let entity_id = cedar_policy::EntityId::from_str(id).unwrap_or_else(|e| match e {});
+                // This should never fail since EntityId::from_str returns Result<_, Infallible>
+                let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
 
                 RestrictedExpression::new_entity_uid(EntityUid::from_type_name_and_id(
                     entity_type_name.clone(),
