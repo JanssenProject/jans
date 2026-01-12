@@ -73,7 +73,8 @@ public enum ErrorResponse {
     WEBHOOK_CONTENT_TYPE_REQUIRED("Content-Type required."),
     FETCH_DATA_ERROR("Error in fetching data."),
     ADMINUI_SESSION_CREATE_ERROR("Error in creating Admin UI session"),
-    ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session")
+    ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session"),
+    ORG_ID_CLAIM_NOT_FOUND("org_id claim not fount in jwt")
     ;
 
     private final String description;

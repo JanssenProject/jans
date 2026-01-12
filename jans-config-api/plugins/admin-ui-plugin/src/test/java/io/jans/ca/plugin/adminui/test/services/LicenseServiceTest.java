@@ -111,7 +111,7 @@ public class LicenseServiceTest {
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
         lenient().when(licenseConfiguration.getHardwareId()).thenReturn("hardware-key-123");
-        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");//License key missing
+        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");
         lenient().when(licenseConfiguration.getScanApiHostname()).thenReturn("https://scan.api.hostname");
         lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
         lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());

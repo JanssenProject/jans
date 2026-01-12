@@ -35,8 +35,6 @@ public class BaseService {
      * @param tokenRequest   the token request parameters (may include grant type, code, verifier, client credentials, etc.)
      * @param tokenEndpoint  the token endpoint URL to send the request to
      * @return               a TokenResponse containing the token data on success, or {@code null} on failure
-     * @throws NoSuchAlgorithmException if the underlying HTTP client or cryptography setup requires an unavailable algorithm
-     * @throws KeyManagementException   if there is an error initializing key management for the HTTP client
      */
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
         return getToken(tokenRequest, tokenEndpoint, null);
@@ -76,7 +74,9 @@ public class BaseService {
                 body.putSingle("code_verifier", tokenRequest.getCodeVerifier());
             }
 
-            body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
+            if (tokenRequest.getGrantType() != null) {
+                body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
+            }
             body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
             body.putSingle("client_id", tokenRequest.getAuthUsername());
 
@@ -123,6 +123,10 @@ public class BaseService {
 
             if (claims.get("iss") == null) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ISS_CLAIM_NOT_FOUND.getDescription());
+            }
+
+            if (claims.get("org_id") == null) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ORG_ID_CLAIM_NOT_FOUND.getDescription());
             }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
             String hardwareId = claims.get("org_id").toString();
