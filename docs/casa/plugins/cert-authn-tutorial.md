@@ -11,7 +11,7 @@ tags:
 
 With Casa's [certificate authentication plugin](./cert-authn.md) administrators can configure client certificate authentication so users can present digital certificates as a form of second-factor authentication. Some organizations opt to deploy certificate authentication through the use of smart cards - physical cards with embedded integrated circuits that act as security tokens. This practice is considered to offer a high level of security compared to other forms of multi-factor authentication. A well-known example of smart card usage is the U.S. Department of Defense (DoD).
 
-In this document we present a basic example on how to use security keys from the [YubiKey 5 series](https://www.yubico.com/authentication-standards/smart-card/) for smart card authentication. 
+In this document we present a basic example on how to use security keys from the [YubiKey 5 series](https://www.yubico.com/authentication-standards/smart-card/) for smart card authentication.
 
 ## Requisites
 
