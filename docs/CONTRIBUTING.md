@@ -349,7 +349,7 @@ It will look like this:
 
 1. The following list item
 
- ** **
+ **Other formatting considerations**
 
 * Admonitions cannot be nested inside a list. They must be aligned all the way left. Inserting them within a list will break the list sequence (starting back over from 1).
 
