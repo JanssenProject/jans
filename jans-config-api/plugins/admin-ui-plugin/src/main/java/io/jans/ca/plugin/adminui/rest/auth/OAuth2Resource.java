@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 
+import java.security.KeyStoreException;
 import java.util.UUID;
 
 @Hidden
@@ -45,21 +46,33 @@ public class OAuth2Resource {
     @Inject
     OAuth2Service oAuth2Service;
 
-    AuthCryptoProvider authCryptoProvider;
-
     @Inject
     ConfigurationFactory configurationFactory;
 
+    private volatile AuthCryptoProvider authCryptoProvider;
+    private final Object cryptoProviderLock = new Object();
+
+    private AuthCryptoProvider getAuthCryptoProvider() throws KeyStoreException {
+        if (authCryptoProvider == null) {
+            synchronized (cryptoProviderLock) {
+                if (authCryptoProvider == null) {
+                    authCryptoProvider = new AuthCryptoProvider();
+                }
+            }
+        }
+        return authCryptoProvider;
+    }
+
     /**
      * Create an Admin UI session and set an HttpOnly, Secure session cookie.
-     *
+     * <p>
      * Validates that the provided API token request contains a user JWT (UJWT) and that the JWT's signature is valid
      * against the configured JWKS; on success a new session is persisted and a Set-Cookie header with the
      * `admin_ui_session_id` is returned.
      *
      * @param apiTokenRequest request containing the UJWT used to authenticate and create the session; must include a signed UJWT
      * @return a Response with a success entity and a Set-Cookie header containing the `admin_ui_session_id` on success;
-     *         on failure the Response contains an error entity and an appropriate HTTP status code
+     * on failure the Response contains an error entity and an appropriate HTTP status code
      */
     @POST
     @Path(SESSION)
@@ -74,9 +87,8 @@ public class OAuth2Resource {
 
             String sessionId = UUID.randomUUID().toString();
 
-            if (authCryptoProvider == null) {
-                authCryptoProvider = new AuthCryptoProvider();
-            }
+            authCryptoProvider = getAuthCryptoProvider();
+
 
             Jwt userInfoJwt = Jwt.parse(apiTokenRequest.getUjwt());
             boolean isValidJWTSignature = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), new JSONObject(configurationFactory.getJwks()), null, userInfoJwt.getHeader().getSignatureAlgorithm());
@@ -105,7 +117,7 @@ public class OAuth2Resource {
             log.error(ErrorResponse.ADMINUI_SESSION_CREATE_ERROR.getDescription(), e);
             return Response
                     .serverError()
-                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription()))
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ADMINUI_SESSION_CREATE_ERROR.getDescription()))
                     .build();
         }
     }
@@ -121,7 +133,12 @@ public class OAuth2Resource {
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
     public Response deleteSessionBySessionCookie(@CookieParam(ADMIN_UI_SESSION_ID) Cookie sessionCookie) {
-        log.debug("Inside deleteSessionBySessionCookie method. Session Cookie name: {}value: {}", sessionCookie.getName(), sessionCookie.getValue());
+        if (sessionCookie == null || sessionCookie.getName() == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(CommonUtils.createGenericResponse(false, 400, "Session cookie not found"))
+                    .build();
+        }
+        log.debug("Inside deleteSessionBySessionCookie method. Session Cookie name: {}", sessionCookie.getName());
         //remove session from database
         try {
             oAuth2Service.removeSession(sessionCookie.getValue());
@@ -152,7 +169,7 @@ public class OAuth2Resource {
      *
      * @param userDn the user's distinguished name whose Admin UI sessions will be revoked
      * @return an HTTP response: 200 with a success payload when sessions are revoked; otherwise a response
-     *         with the error status code and an error payload describing the failure
+     * with the error status code and an error payload describing the failure
      */
     @DELETE
     @Path(SESSION + USER_DN_VARIABLE)
@@ -178,7 +195,7 @@ public class OAuth2Resource {
      * Requests an API protection token from the OAuth2 service for the specified app type.
      *
      * @param apiTokenRequest the credentials and parameters required to request the token
-     * @param appType the application type for which the token is requested
+     * @param appType         the application type for which the token is requested
      * @return a Response whose entity is a TokenResponse on success, or a generic error payload with an HTTP error status on failure
      */
     @POST

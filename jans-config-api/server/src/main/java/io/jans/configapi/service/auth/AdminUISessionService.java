@@ -12,6 +12,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
+import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.orm.PersistenceEntryManager;
@@ -20,6 +21,7 @@ import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
@@ -87,7 +89,6 @@ public class AdminUISessionService {
 
     /**
      * Removes all AdminUISession entries whose expirationDate is earlier than the current time.
-     *
      * This method queries sessions under the service's session base DN and deletes any persisted
      * AdminUISession whose expiration date has already passed.
      */
@@ -158,7 +159,7 @@ public class AdminUISessionService {
      * @throws StringEncrypter.EncryptionException if decrypting the client secret fails
      * @throws JsonProcessingException             if parsing token responses fails
      */
-    public TokenResponse getApiProtectionToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException {
+    public TokenResponse getApiProtectionToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, ConfigApiApplicationException {
         try {
             logger.debug("Getting api-protection token");
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -190,9 +191,9 @@ public class AdminUISessionService {
      * @param tokenEndpoint the token endpoint URL to call
      * @param userInfoJwt   optional user-info JWT to include in the request as `ujwt`
      * @return              a map of token response parameters (for example `access_token`, `expires_in`), with any `token_type` entry removed; returns an empty map if the exchange fails
-     * @throws JsonProcessingException if the token endpoint response cannot be parsed as JSON
+     * @throws ConfigApiApplicationException if the token endpoint response cannot be parsed as JSON
      */
-    public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws JsonProcessingException {
+    public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws ConfigApiApplicationException {
 
         try {
             Map<String, String> body = new HashMap<>();
@@ -243,11 +244,11 @@ public class AdminUISessionService {
 
             }
             logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response is null.");
+            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), TOKEN_GENERATION_ERROR + "Response is null.");
         } catch (Exception e) {
             logger.error(TOKEN_GENERATION_ERROR, e);
-            throw e;
+            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
         }
-        return Collections.emptyMap();
     }
 
     /**
@@ -293,11 +294,11 @@ public class AdminUISessionService {
 
             if (jwtClaims.getClaim(key) instanceof String)
                 claims.put(key, jwtClaims.getClaim(key).toString());
-            if (jwtClaims.getClaim(key) instanceof Integer)
+            else if (jwtClaims.getClaim(key) instanceof Integer)
                 claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Long)
+            else if (jwtClaims.getClaim(key) instanceof Long)
                 claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Boolean)
+            else if (jwtClaims.getClaim(key) instanceof Boolean)
                 claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
 
             else if (jwtClaims.getClaim(key) instanceof JSONArray) {

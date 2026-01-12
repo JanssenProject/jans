@@ -8,7 +8,6 @@ import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.ca.plugin.adminui.model.adminui.AdminUIResourceScopesMapping;
 import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
@@ -16,6 +15,7 @@ import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.ca.plugin.adminui.utils.security.PolicyStoreMapperHelper;
+import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -71,7 +71,7 @@ public class AdminUISecurityService {
             // If the remote Policy Store URL is configured and enabled
             if(auiConfiguration.getCedarlingPolicyStoreRetrievalPoint() == CedarlingPolicyStrRetrievalPoint.REMOTE &&
                     !Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
-                Invocation.Builder request = ClientFactory.getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
+                Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
                 request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
                 Response response = request.get();
 
@@ -129,7 +129,7 @@ public class AdminUISecurityService {
             }
 
             // Build the client request for the remote policy store
-            Invocation.Builder request = ClientFactory
+            Invocation.Builder request = ClientFactory.instance()
                     .getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl())
                     .header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
 

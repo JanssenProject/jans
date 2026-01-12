@@ -159,7 +159,7 @@ public class AppConfigResponse {
      *
      * @return the configured `CedarlingLogType`, or `null` if not set
      */
-    public io.jans.configapi.core.model.adminui.CedarlingLogType getCedarlingLogType() {
+    public CedarlingLogType getCedarlingLogType() {
         return cedarlingLogType;
     }
 

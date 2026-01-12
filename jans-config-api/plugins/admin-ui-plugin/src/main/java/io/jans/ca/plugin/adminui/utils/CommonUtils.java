@@ -212,11 +212,14 @@ public class CommonUtils {
     /**
      * Return a new Date representing the given date plus the specified number of minutes.
      *
-     * @param date the base date to adjust
+     * @param date         the base date to adjust
      * @param minutesToAdd the number of minutes to add; may be negative to subtract minutes
      * @return the adjusted Date shifted by {@code minutesToAdd} minutes from {@code date}
      */
     public static Date addMinutes(Date date, int minutesToAdd) {
+        if (date == null) {
+            return null;
+        }
         // Convert the Date to an Instant
         Instant instant = date.toInstant();
 
@@ -245,20 +248,22 @@ public class CommonUtils {
         Set<String> keys = jwtClaims.keys();
         keys.forEach(key -> {
 
-            if (jwtClaims.getClaim(key) instanceof String)
-                claims.put(key, jwtClaims.getClaim(key).toString());
-            if (jwtClaims.getClaim(key) instanceof Integer)
-                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Long)
-                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Boolean)
-                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
+            Object claimValue = jwtClaims.getClaim(key);
 
-            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
+            if (claimValue instanceof String) {
+                claims.put(key, jwtClaims.getClaim(key).toString());
+            } else if (claimValue instanceof Integer) {
+                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
+            } else if (claimValue instanceof Long) {
+                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
+            } else if (claimValue instanceof Boolean) {
+                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
+            } else if (claimValue instanceof JSONArray) {
                 List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
                 claims.put(key, sourceArr);
-            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
-                claims.put(key, (jwtClaims.getClaim(key)));
+            } else if (claimValue instanceof JSONObject) {
+                claims.put(key, claimValue);
+            }
         });
         return claims;
     }

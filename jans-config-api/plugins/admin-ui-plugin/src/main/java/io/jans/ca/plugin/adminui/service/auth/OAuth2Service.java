@@ -4,16 +4,17 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.ca.plugin.adminui.model.auth.ApiTokenRequest;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -42,12 +43,12 @@ public class OAuth2Service extends BaseService {
     @Inject
     private PersistenceEntryManager entryManager;
 
-    private static final String SID_GET_MSG = "Error in get Admin UI Session by sid:{}";
+    private static final String SID_GET_MSG = "Error in get Admin UI Session by sid: ";
     private static final String JANS_USR_DN = "jansUsrDN";
     private static final String SESSION_DN = "ou=adminUISession,ou=admin-ui,o=jans";
+
     /**
      * Obtain an API protection token for the specified application and populate its token claims.
-     *
      * Uses the AUI configuration for the given appType to request a client-credentials token; when an ApiTokenRequest
      * with a user JWT (ujwt) is provided, the request includes that JWT. The returned TokenResponse contains the
      * access, ID, and refresh tokens and, when available from token introspection, scopes, issued-at (iat), expiration (exp),
@@ -74,12 +75,12 @@ public class OAuth2Service extends BaseService {
 
             io.jans.as.client.TokenResponse tokenResponse = null;
             if (apiTokenRequest == null) {
-                tokenRequest.setScope(scopeAsString(Arrays.asList(OAuth2Resource.SCOPE_OPENID)));
+                tokenRequest.setScope(scopeAsString(List.of(OAuth2Resource.SCOPE_OPENID)));
                 tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint());
             } else {
                 if (Strings.isNullOrEmpty(apiTokenRequest.getUjwt())) {
                     log.warn(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
-                    tokenRequest.setScope(scopeAsString(Arrays.asList(OAuth2Resource.SCOPE_OPENID)));
+                    tokenRequest.setScope(scopeAsString(List.of(OAuth2Resource.SCOPE_OPENID)));
                 }
                 tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiBackendApiServerTokenEndpoint(), apiTokenRequest.getUjwt());
             }
@@ -92,7 +93,7 @@ public class OAuth2Service extends BaseService {
             tokenResp.setIdToken(tokenResponse.getIdToken());
             tokenResp.setRefreshToken(tokenResponse.getRefreshToken());
 
-            if (!introspectionResponse.isPresent()) {
+            if (introspectionResponse.isEmpty()) {
                 return tokenResp;
             }
             final String SCOPE = "scope";
@@ -106,11 +107,11 @@ public class OAuth2Service extends BaseService {
                 }
             }
             if (claims.get("iat") != null) {
-                tokenResp.setIat(Long.valueOf(claims.get("iat").toString()));
+                tokenResp.setIat(Long.parseLong(claims.get("iat").toString()));
             }
 
             if (claims.get("exp") != null) {
-                tokenResp.setExp(Long.valueOf(claims.get("exp").toString()));
+                tokenResp.setExp(Long.parseLong(claims.get("exp").toString()));
             }
 
             if (claims.get("iss") != null) {
@@ -118,9 +119,6 @@ public class OAuth2Service extends BaseService {
             }
 
             return tokenResp;
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
-            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
@@ -157,11 +155,16 @@ public class OAuth2Service extends BaseService {
      * @param ujwt      the user-info JWT string containing an "inum" claim that identifies the user
      * @throws ApplicationException if the "inum" claim is missing from the provided JWT
      */
-    public void setAdminUISession(String sessionId, String ujwt) throws Exception {
+    public void setAdminUISession(String sessionId, String ujwt) throws ApplicationException {
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
         Date currentDate = new Date();
 
-        Jwt tokenJwt = Jwt.parse(ujwt);
+        Jwt tokenJwt = null;
+        try {
+            tokenJwt = Jwt.parse(ujwt);
+        } catch (InvalidJwtException e) {
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error in parsing user-info JWT.");
+        }
         Map<String, Object> claims = CommonUtils.getClaims(tokenJwt);
         if (claims.get("inum") == null) {
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "The user `inum` claim missing in User-Info JWT");
@@ -186,13 +189,10 @@ public class OAuth2Service extends BaseService {
      */
     public void removeAdminUIUserSessionByDn(String userDn) throws ApplicationException {
         try {
-            List<Filter> filters = new ArrayList<>();
-            Filter userDnFilter = Filter.createSubstringFilter(JANS_USR_DN, null, new String[]{userDn}, null);
-            filters.add(userDnFilter);
-            Filter searchFilter = Filter.createORFilter(filters);
-            List<AdminUISession> adminUISessions =  entryManager.findEntries(SESSION_DN, AdminUISession.class, searchFilter);
+            Filter userDnFilter = Filter.createEqualityFilter(JANS_USR_DN, userDn);
+            List<AdminUISession> adminUISessions = entryManager.findEntries(SESSION_DN, AdminUISession.class, userDnFilter);
 
-            for(AdminUISession adminUISession : adminUISessions) {
+            for (AdminUISession adminUISession : adminUISessions) {
                 entryManager.remove(adminUISession);
             }
         } catch (Exception e) {
@@ -214,7 +214,7 @@ public class OAuth2Service extends BaseService {
             adminUISession = entryManager
                     .find(AdminUISession.class, getDnForSession(sessionId));
         } catch (Exception ex) {
-            log.error(SID_GET_MSG,  sessionId, ex);
+            log.error(SID_GET_MSG + "{}", sessionId, ex);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), SID_GET_MSG + sessionId);
         }
         return adminUISession;
@@ -228,6 +228,10 @@ public class OAuth2Service extends BaseService {
      */
     public void removeSession(String sessionId) throws ApplicationException {
         AdminUISession configApiSession = getSession(sessionId);
+        if (configApiSession == null) {
+            log.warn("Session not found for removal: {}", sessionId);
+            return;
+        }
         entryManager.remove(configApiSession);
     }
 

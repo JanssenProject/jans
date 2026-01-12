@@ -5,6 +5,7 @@ import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import java.util.Date;
+import java.util.Objects;
 
 @DataEntry
 @ObjectClass(value = "adminUISession")
@@ -152,5 +153,30 @@ public class AdminUISession {
      */
     public void setJansUsrDN(String jansUsrDN) {
         this.jansUsrDN = jansUsrDN;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AdminUISession)) return false;
+        AdminUISession that = (AdminUISession) o;
+        return Objects.equals(dn, that.dn) && Objects.equals(inum, that.inum) && Objects.equals(sessionId, that.sessionId) && Objects.equals(jansUsrDN, that.jansUsrDN);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dn, inum, sessionId, jansUsrDN);
+    }
+
+    @Override
+    public String toString() {
+        return "AdminUISession{" +
+                "dn='" + dn + '\'' +
+                ", inum='" + inum + '\'' +
+                ", sessionId='" + sessionId + '\'' +
+                ", jansUsrDN='" + jansUsrDN + '\'' +
+                ", ujwt='" + ujwt + '\'' +
+                ", creationDate=" + creationDate +
+                ", expirationDate=" + expirationDate +
+                '}';
     }
 }

@@ -37,7 +37,7 @@ private ClientFactory() {}
      * @throws NoSuchAlgorithmException if the TLS SSLContext algorithm is not available
      * @throws KeyManagementException if the SSLContext cannot be initialized
      */
-    public static Invocation.Builder getClientBuilder(String url) throws NoSuchAlgorithmException, KeyManagementException {
+    public Invocation.Builder getClientBuilder(String url) throws NoSuchAlgorithmException, KeyManagementException {
 
         /*
          * Prefer TLS 1.3, allow TLS 1.2 fallback

@@ -57,7 +57,7 @@ public class TtlCache<K, V> {
         }
 
         if (entry.isExpired()) {
-            cache.remove(key);
+            cache.remove(key, entry);
             return null;
         }
 

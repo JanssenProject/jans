@@ -7,11 +7,11 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
 import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.configapi.core.model.adminui.LicenseConfiguration;
@@ -42,7 +42,7 @@ public class AUIConfigurationService extends BaseService {
     @Inject
     ConfigurationService configurationService;
 
-    public AUIConfiguration getAUIConfiguration() throws Exception {
+    public AUIConfiguration getAUIConfiguration() {
         return getAUIConfiguration(null);
     }
 
@@ -50,10 +50,9 @@ public class AUIConfigurationService extends BaseService {
      * It reads the configuration from the LDAP server and stores it in a map
      *
      * @param appType The application type. This is either "adminUI" or "ads".
-     * @throws Exception
      * @return The AUIConfiguration object
      */
-    public AUIConfiguration getAUIConfiguration(String appType) throws Exception {
+    public AUIConfiguration getAUIConfiguration(String appType) {
         logger.info("Inside method to read the configuration from the persistence and stores it in a map.");
         try {
             if (Strings.isNullOrEmpty(appType)) {
@@ -171,8 +170,8 @@ public class AUIConfigurationService extends BaseService {
             tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
 
             logger.info("Trying to get access token from auth server: {}", opHost);
-            String scanLicenseApiHostname = (new StringBuffer()).append(StringUtils.removeEnd(opHost, "/"))
-                    .append("/jans-auth/restv1/token").toString();
+            String scanLicenseApiHostname = StringUtils.removeEnd(opHost, "/") +
+                    "/jans-auth/restv1/token";
             io.jans.as.client.TokenResponse tokenResponse = null;
             tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
             return tokenResponse;
