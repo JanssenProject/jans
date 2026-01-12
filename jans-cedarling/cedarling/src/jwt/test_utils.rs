@@ -138,7 +138,9 @@ impl MockEndpoints {
                 .mock("GET", MOCK_JWKS_URI)
                 .with_status(200)
                 .with_header("content-type", "application/json")
-                .with_body(json!({"keys": generate_jwks(&[keys.clone()]).keys}).to_string())
+                .with_body(
+                    json!({"keys": generate_jwks(std::slice::from_ref(keys)).keys}).to_string(),
+                )
                 .expect(1)
                 .create(),
         );
