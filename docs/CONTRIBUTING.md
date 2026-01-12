@@ -80,7 +80,7 @@ Janssen Project mandates all commits to follow guidelines as below.
 
 * **Add GPG signature to your commit**
 
-    To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key setup already then just use `-S` switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
+    To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by GitHub. If you have GPG key setup already then just use `-S` switch with your commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions in [GitHub's commit signature verification guide](https://docs.github.com/en/authentication/managing-commit-signature-verification)
 
 * **Add DCO sign-off**
   
@@ -116,7 +116,7 @@ Branch name should have component name as prefix, eg `jans-core-mybranch`
 * Squash commits into small number of cohesive commits before raising a PR
 * PR should be rebased on main branch so that there are minimal or no conflicts at the time of merge
 * PR should only have changes related to target feature or issue. Create a separate PR for formatting or other quick bug fixes
-* PR should include relevent documentaton changes
+* PR should include relevant documentation changes
 * PR should include unit and integration tests
 
 #### Issues
@@ -201,11 +201,11 @@ This glossary helps to keep terms and their meanings consistent across documenta
 
 * `Janssen Project` or `Jans`:
 
-    Refers to the official project name under Linux Foundation that seeks to build the world’s fastest and most comprehensive cloud native identity and access management software platform
+    Refers to the official project name under Linux Foundation that seeks to build the world's fastest and most comprehensive cloud-native identity and access management software platform
 
 * `Janssen Server`:
 
-    Refers to a set of software components developed under the Janssen Project . Components of the Janssen Server include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group.
+    Refers to a set of software components developed under the Janssen Project. Components of the Janssen Server include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. The term `Janssen Server` is used to refer to these components as a group.
 
 * `jans-auth-server`:
 
@@ -216,8 +216,6 @@ This glossary helps to keep terms and their meanings consistent across documenta
     For correct naming of other modules of the Janssen Server, please refer to [README](https://github.com/JanssenProject/jans#janssen-modules)
 
 ### Documentation Style Guide
-
-page.locator("button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.css-egnned")
 
 Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents.
 
