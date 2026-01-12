@@ -16,16 +16,20 @@
 
 package io.jans.lock.service.grpc.security;
 
-import io.grpc.Context;
-import io.grpc.Contexts;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
-import io.jans.lock.cedarling.model.CedarlingPermission;
 import io.jans.lock.cedarling.service.CedarlingProtection;
-import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.app.audit.AuditActionType;
 import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
@@ -38,18 +42,7 @@ import io.jans.service.security.protect.BaseAuthorizationProtection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 /**
  * gRPC Server Interceptor for authorization.

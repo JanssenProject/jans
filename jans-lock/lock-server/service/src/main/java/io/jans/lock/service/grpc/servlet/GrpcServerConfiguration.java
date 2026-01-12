@@ -5,21 +5,22 @@
  */
 package io.jans.lock.service.grpc.servlet;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
-import io.jans.lock.service.grpc.audit.GrpcAuditServiceImpl;
+import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Configuration and lifecycle management for gRPC server.
@@ -38,7 +39,7 @@ public class GrpcServerConfiguration {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private GrpcAuditServiceImpl grpcAuditService;
+    private GrpcAuditServiceProvider grpcAuditServiceProvider;
 
     @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
@@ -78,8 +79,8 @@ public class GrpcServerConfiguration {
                 io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder nettyBuilder =
                         io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder.forPort(grpcConfiguration.getGrpcPort())
                                 .sslContext(sslContext)
-                                .addService(grpcAuditService)
-                                .intercept(authorizationInterceptor);
+                                .addService(grpcAuditServiceProvider.getService())  // Get service from provider
+                                .intercept(authorizationInterceptor);  // Add authorization interceptor
 
                 grpcServer = nettyBuilder.build().start();
 
@@ -90,7 +91,7 @@ public class GrpcServerConfiguration {
             }
         } else {
             grpcServer = ServerBuilder.forPort(grpcConfiguration.getGrpcPort())
-                    .addService(grpcAuditService)
+                    .addService(grpcAuditServiceProvider.getService())  // Get service from provider
                     .intercept(authorizationInterceptor)  // Add authorization interceptor
                     .build()
                     .start();

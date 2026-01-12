@@ -1,1 +1,1 @@
-io.jans.lock.service.grpc.config.GrpcServletContextInitializer
+io.jans.lock.service.grpc.servlet.GrpcServletContextInitializer

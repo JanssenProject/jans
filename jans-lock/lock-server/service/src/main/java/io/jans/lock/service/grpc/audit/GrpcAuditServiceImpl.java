@@ -6,42 +6,49 @@
 
 package io.jans.lock.service.grpc.audit;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-
 import io.grpc.stub.StreamObserver;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
-import io.jans.lock.model.audit.grpc.AuditResponse;
-import io.jans.lock.model.audit.grpc.AuditServiceGrpc;
-import io.jans.lock.model.audit.grpc.BulkHealthRequest;
-import io.jans.lock.model.audit.grpc.BulkLogRequest;
-import io.jans.lock.model.audit.grpc.BulkTelemetryRequest;
+import io.jans.lock.model.audit.grpc.*;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * gRPC service implementation for Audit operations.
  * This service acts as a bridge between gRPC and REST endpoints.
  * 
+ * Note: This class is NOT a CDI bean because the base class AuditServiceImplBase
+ * contains final methods which are not proxyable by Weld CDI.
+ * Instead, it's created by GrpcAuditServiceProvider.
+ * 
  * @author Yuriy Movchan
  */
-@ApplicationScoped
 public class GrpcAuditServiceImpl extends AuditServiceGrpc.AuditServiceImplBase {
 
-    @Inject
-    private Logger log;
+    private final Logger log;
+    private final AuditRestWebService auditRestWebService;
+    private final GrpcToJavaMapper mapper;
 
-    @Inject
-    private AuditRestWebService auditRestWebService;
-
-    @Inject
-    private GrpcToJavaMapper mapper;
+    /**
+     * Constructor for manual instantiation (not CDI).
+     * 
+     * @param auditRestWebService REST service to delegate to
+     * @param mapper mapper for proto to Java conversion
+     * @param log logger instance
+     */
+    public GrpcAuditServiceImpl(
+            AuditRestWebService auditRestWebService,
+            GrpcToJavaMapper mapper,
+            Logger log) {
+        this.auditRestWebService = auditRestWebService;
+        this.mapper = mapper;
+        this.log = log;
+    }
 
     @Override
     public void processHealth(io.jans.lock.model.audit.grpc.HealthRequest request,

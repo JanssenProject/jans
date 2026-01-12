@@ -5,8 +5,12 @@
  */
 package io.jans.lock.service.grpc.servlet;
 
+import org.slf4j.Logger;
+
+import com.google.common.collect.ImmutableList;
+
 import io.grpc.servlet.jakarta.GrpcServlet;
-import io.jans.lock.service.grpc.audit.GrpcAuditServiceImpl;
+import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
@@ -14,9 +18,6 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletRegistration;
 import jakarta.servlet.annotation.WebListener;
-import org.slf4j.Logger;
-
-import com.google.common.collect.ImmutableList;
 
 @ApplicationScoped
 @WebListener
@@ -26,7 +27,7 @@ public class RestEasyGrpcBridgeConfiguration implements ServletContextListener {
     private Logger log;
 
     @Inject
-    private GrpcAuditServiceImpl grpcAuditService;
+    private GrpcAuditServiceProvider grpcAuditServiceProvider;
 
     /**
      * Initialize and register gRPC servlet for RESTEasy gRPC Bridge.
@@ -43,7 +44,7 @@ public class RestEasyGrpcBridgeConfiguration implements ServletContextListener {
                 return;
             }
 
-            GrpcServlet grpcServlet = new GrpcServlet(ImmutableList.of(grpcAuditService));
+            GrpcServlet grpcServlet = new GrpcServlet(ImmutableList.of(grpcAuditServiceProvider.getService()));
 
             // Register as a servlet
             ServletRegistration.Dynamic registration = servletContext.addServlet("grpcServlet", grpcServlet);
