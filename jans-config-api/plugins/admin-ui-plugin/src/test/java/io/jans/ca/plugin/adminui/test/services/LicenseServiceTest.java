@@ -106,7 +106,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_ValidLicense() throws Exception {
+    public void testCheckLicense_ValidLicense() {
         // Mock the admin config and license config
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
@@ -127,7 +127,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_MAUIsNull() throws Exception {
+    public void testCheckLicense_MAUIsNull() {
         // Mock the admin config and license config
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
@@ -149,7 +149,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_NoLicenseKey() throws Exception {
+    public void testCheckLicense_NoLicenseKey() {
         // Mock missing license key
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);

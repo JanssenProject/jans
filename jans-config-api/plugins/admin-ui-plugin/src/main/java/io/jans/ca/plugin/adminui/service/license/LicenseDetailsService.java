@@ -177,7 +177,7 @@ public class LicenseDetailsService extends BaseService {
     /**
      * Deletes the license-related configuration in both the persistent and in-memory Admin UI configuration.
      */
-    public GenericResponse deleteLicenseConfiguration() throws Exception {
+    public GenericResponse deleteLicenseConfiguration() {
         log.info("Deleting Admin UI license configuration.");
 
         // Fetch current persisted Admin UI configuration
@@ -768,7 +768,7 @@ public class LicenseDetailsService extends BaseService {
      * @param dcrResponse DCRResponse is an object that contains the response data from a Dynamic Client Registration (DCR)
      *                    request. It has the following properties:
      */
-    private void saveCreateClientInPersistence(String ssa, DCRResponse dcrResponse) throws Exception {
+    private void saveCreateClientInPersistence(String ssa, DCRResponse dcrResponse) {
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
         LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
         licenseConfig.setSsa(ssa);

@@ -38,7 +38,7 @@ public class BaseService {
      * @throws NoSuchAlgorithmException if the underlying HTTP client or cryptography setup requires an unavailable algorithm
      * @throws KeyManagementException   if there is an error initializing key management for the HTTP client
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) throws NoSuchAlgorithmException, KeyManagementException {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
         return getToken(tokenRequest, tokenEndpoint, null);
     }
 
@@ -56,7 +56,7 @@ public class BaseService {
      * @param userInfoJwt optional JWT to include as the {@code ujwt} form parameter when present
      * @return a {@code io.jans.as.client.TokenResponse} populated from the server JSON on HTTP 200, {@code null} otherwise
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws NoSuchAlgorithmException, KeyManagementException {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
