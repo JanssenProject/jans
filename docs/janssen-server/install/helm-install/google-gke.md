@@ -73,10 +73,9 @@ tags:
         1. Run the initial Helm install **without** setting `global.lbIp`.
 
         2. Wait for the cloud provider to assign an IP to the Gateway. Retrieve it using:
-        ```bash
-        kubectl get gateway -n <janssen-namespace>
 
-        ```
+          `kubectl get gateway -n <janssen-namespace>`
+
         3. Add the retrieved IP to `global.lbIp` in your `override.yaml`.
 
         4. Run `helm upgrade` to apply the IP change to the application configuration.
@@ -108,7 +107,7 @@ tags:
     ```
 
 
-#### Option 2: Using Kubernetes Ingress resrouces(Legacy)
+#### Option 2: Using Kubernetes Ingress resources(Legacy)
 
 1.  Install the retired [ingress-nginx](https://github.com/kubernetes/ingress-nginx)
     

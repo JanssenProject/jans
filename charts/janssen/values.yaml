@@ -1078,7 +1078,7 @@ global:
   # -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable.
   lbIp: 22.22.22.22
   gatewayApi:
-  # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
+    # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
     enabled: false
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
