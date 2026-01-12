@@ -9,7 +9,7 @@ use crate::log::interface::{Indexed, Loggable};
 use serde::Serialize;
 
 #[derive(Serialize, Clone)]
-pub struct LockLogEntry {
+pub(super) struct LockLogEntry {
     message: String,
     level: LogLevel,
     id: uuid7::Uuid,
@@ -17,7 +17,7 @@ pub struct LockLogEntry {
 
 impl LockLogEntry {
     /// Helper function to create a [`LogLevel::ERROR`] entry.
-    pub fn error(msg: impl Into<String>) -> Self {
+    pub(super) fn error(msg: impl Into<String>) -> Self {
         Self {
             message: msg.into(),
             level: LogLevel::ERROR,
@@ -26,7 +26,7 @@ impl LockLogEntry {
     }
 
     /// Helper function to create a [`LogLevel::INFO`] entry.
-    pub fn info(msg: impl Into<String>) -> Self {
+    pub(super) fn info(msg: impl Into<String>) -> Self {
         Self {
             message: msg.into(),
             level: LogLevel::INFO,
@@ -35,7 +35,7 @@ impl LockLogEntry {
     }
 
     /// Helper function to create a [`LogLevel::WARN`] entry.
-    pub fn warn(msg: impl Into<String>) -> Self {
+    pub(super) fn warn(msg: impl Into<String>) -> Self {
         Self {
             message: msg.into(),
             level: LogLevel::WARN,

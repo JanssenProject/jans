@@ -18,7 +18,7 @@ use super::{BuildAttrsError, BuildAttrsErrorVec};
 /// Builds Cedar entity attributes using the given attribute source
 ///
 /// This function will *JOIN* the token attributes built from each token
-pub fn build_entity_attrs(
+pub(super) fn build_entity_attrs(
     attrs_src: &HashMap<String, Value>,
     entities: &BuiltEntities,
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
@@ -32,7 +32,7 @@ pub fn build_entity_attrs(
 }
 
 /// Uses the schema as guide in building the attributes
-pub fn build_entity_attrs_with_shape(
+fn build_entity_attrs_with_shape(
     attrs_src: &HashMap<String, Value>,
     entities: &BuiltEntities,
     attrs_shape: &HashMap<SmolStr, AttrsShape>,
@@ -155,7 +155,7 @@ pub fn build_entity_attrs_with_shape(
 }
 
 /// Will do it's best to create the entity without a schema
-pub fn build_entity_attrs_without_schema(
+fn build_entity_attrs_without_schema(
     attrs_src: &HashMap<String, Value>,
     claim_mappings: Option<&ClaimMappings>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {

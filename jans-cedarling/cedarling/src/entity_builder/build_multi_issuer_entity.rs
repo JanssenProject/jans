@@ -110,7 +110,7 @@ fn determine_token_entity_type(token: &Token) -> String {
 
 impl EntityBuilder {
     /// Build all entities for multi-issuer authorization (tokens, principals, resource, roles)
-    pub fn build_multi_issuer_entities(
+    pub(crate) fn build_multi_issuer_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
         resource: &EntityData,

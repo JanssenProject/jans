@@ -7,8 +7,7 @@ mod trusted_issuer_validator;
 mod validator;
 mod validator_cache;
 
-pub use trusted_issuer_validator::{
-    TrustedIssuerError, TrustedIssuerValidator, validate_required_claims,
-};
-pub use validator::*;
-pub use validator_cache::*;
+pub(crate) use trusted_issuer_validator::TrustedIssuerError;
+pub(super) use trusted_issuer_validator::{TrustedIssuerValidator, validate_required_claims};
+pub(super) use validator::*;
+pub(super) use validator_cache::*;

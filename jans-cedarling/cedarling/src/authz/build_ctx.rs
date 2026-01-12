@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use super::errors::BuildContextError;
 
 /// Constructs the authorization context by adding the built entities from the tokens
-pub fn build_context(
+pub(super) fn build_context(
     config: &AuthzConfig,
     request_context: Value,
     build_entities: &BuiltEntities,
@@ -96,7 +96,7 @@ pub fn build_context(
 /// - Individual token entities are accessible via context.tokens.{issuer}_{token_type}
 /// - All JWT claims are stored as entity tags (Set of String by default)
 /// - Provides ergonomic policy syntax for cross-token validation
-pub fn build_multi_issuer_context(
+pub(super) fn build_multi_issuer_context(
     request_context: Value,
     token_entities: &HashMap<String, Entity>,
     schema: &cedar_policy::Schema,
@@ -204,7 +204,7 @@ fn map_entity_id(
     }
 }
 
-pub fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {
+fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {
     if let (Some(base_map), Some(additional_map)) = (base.as_object_mut(), other.as_object()) {
         for (key, value) in additional_map {
             if let Entry::Vacant(entry) = base_map.entry(key) {

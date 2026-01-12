@@ -65,26 +65,16 @@ pub enum ConversionError {
 }
 
 /// Policy Store Manager handles conversion between new and legacy formats.
-pub struct PolicyStoreManager;
+pub(crate) struct PolicyStoreManager;
 
 impl PolicyStoreManager {
     /// Convert a `LoadedPolicyStore` (new format) to `PolicyStore` (legacy format).
     ///
     /// This is the main entry point for converting policy stores loaded from
     /// directory or archive format into the legacy format used by the rest of Cedarling.
-    ///
-    /// # Arguments
-    ///
-    /// * `loaded` - The loaded policy store from the new loader
-    ///
-    /// # Returns
-    ///
-    /// Returns a `PolicyStore` that can be used with existing Cedarling services.
-    ///
-    /// # Errors
-    ///
-    /// Returns `ConversionError` if any component fails to convert.
-    pub fn convert_to_legacy(loaded: LoadedPolicyStore) -> Result<PolicyStore, ConversionError> {
+    pub(crate) fn convert_to_legacy(
+        loaded: LoadedPolicyStore,
+    ) -> Result<PolicyStore, ConversionError> {
         Self::convert_to_legacy_with_logger(loaded, None)
     }
 
@@ -92,20 +82,7 @@ impl PolicyStoreManager {
     ///
     /// This version accepts an optional logger for structured logging during conversion.
     /// Use this when a logger is available to get detailed conversion logs.
-    ///
-    /// # Arguments
-    ///
-    /// * `loaded` - The loaded policy store from the new loader
-    /// * `logger` - Optional logger for structured logging
-    ///
-    /// # Returns
-    ///
-    /// Returns a `PolicyStore` that can be used with existing Cedarling services.
-    ///
-    /// # Errors
-    ///
-    /// Returns `ConversionError` if any component fails to convert.
-    pub fn convert_to_legacy_with_logger(
+    fn convert_to_legacy_with_logger(
         loaded: LoadedPolicyStore,
         logger: Option<Logger>,
     ) -> Result<PolicyStore, ConversionError> {

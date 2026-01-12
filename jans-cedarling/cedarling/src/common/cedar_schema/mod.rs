@@ -179,7 +179,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchema {
 
 mod deserialize {
     #[derive(Debug, thiserror::Error)]
-    pub enum ParseCedarSchemaSetMessage {
+    pub(super) enum ParseCedarSchemaSetMessage {
         #[error("unable to decode cedar policy schema base64")]
         Base64,
         #[error("unable to unmarshal cedar policy schema json to the structure")]
