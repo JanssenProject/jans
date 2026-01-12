@@ -25,10 +25,10 @@ spec:
   {{- end }}
   listeners:
   - name: http
-    port: 80
+    port: {{ .Values.gatewayApi.httpPort }}
     protocol: HTTP
   - name: https
-    port: 443
+    port: {{ .Values.gatewayApi.httpsPort }}
     protocol: HTTPS
     tls:
       mode: Terminate

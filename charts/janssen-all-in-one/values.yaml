@@ -592,11 +592,16 @@ certManager:
     issuerGroup: cert-manager.io
     tlsSecretName: tls-certificate
 gatewayApi:
-  # -- Boolean flag to enable/disable the Gateway and HTTPRoute resources.
+  # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
   enabled: false
+  # Set the gatewayClassName based on the controller used (e.g., 'nginx', 'istio')
   gatewayClassName: nginx
-  # The name of the Gateway resource to create
+  # The name of the Gateway resource to be created
   name: jans-gateway
+  # Gateway http port number
+  httpPort: 80 
+  # Gateway https port number
+  httpsPort: 443
   # Secret containing the TLS certificate for the Gateway
   tlsSecretName: tls-certificate
   # Specific labels for the Gateway resource
