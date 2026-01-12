@@ -36,8 +36,10 @@ public class TtlCache<K, V> {
         evictIfNeeded();
 
         CacheEntry<V> entry = new CacheEntry<>(value, ttlMillis);
-        cache.put(key, entry);
-        insertionOrder.offer(key);
+        CacheEntry<V> previous = cache.put(key, entry);
+        if (previous == null) {
+            insertionOrder.offer(key);
+        }
     }
 
     public V get(K key) {
@@ -56,6 +58,7 @@ public class TtlCache<K, V> {
 
     public void remove(K key) {
         cache.remove(key);
+        // Note: key remains in insertionOrder for lazy cleanup during eviction
     }
 
     private void evictIfNeeded() {
@@ -72,7 +75,12 @@ public class TtlCache<K, V> {
             if (oldestKey == null) {
                 break;
             }
-            cache.remove(oldestKey);
+            // Only remove if still the original entry; skip if key was re-inserted
+            CacheEntry<V> entry = cache.get(oldestKey);
+            if (entry != null && entry.isExpired()) {
+                cache.remove(oldestKey, entry);
+            }
+            // If entry exists and not expired, it was re-inserted; don't evict
         }
     }
 }

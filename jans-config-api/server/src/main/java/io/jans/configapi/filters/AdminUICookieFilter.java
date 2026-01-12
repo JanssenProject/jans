@@ -156,6 +156,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * Ensures the per-subject token TTL cache is initialized before use.
      */
     private void initializeCaches() {
+        //to prevent entry in synchronized block if ujwtTokenCache already initialized
+        if (ujwtTokenCache != null) {
+            return;
+        }
         synchronized (cacheLock) {
             if (ujwtTokenCache == null) {
                 ujwtTokenCache = new TtlCache<>(CACHE_MAX_SIZE);
@@ -247,7 +251,6 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             return; // auiConfiguration remains null, handled by caller
         }
 
-        auiConfiguration = new AUIConfiguration();
         AUIConfiguration config = new AUIConfiguration();
         AppConfiguration appConfiguration = configurationService.find();
         config.setAppType("admin_ui");

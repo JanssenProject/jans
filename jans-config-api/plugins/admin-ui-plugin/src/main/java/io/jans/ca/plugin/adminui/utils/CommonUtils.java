@@ -251,7 +251,7 @@ public class CommonUtils {
             Object claimValue = jwtClaims.getClaim(key);
 
             if (claimValue instanceof String) {
-                claims.put(key, claimValue.toString());
+                claims.put(key, claimValue);
             } else if (claimValue instanceof Integer) {
                 claims.put(key, claimValue);
             } else if (claimValue instanceof Long) {
