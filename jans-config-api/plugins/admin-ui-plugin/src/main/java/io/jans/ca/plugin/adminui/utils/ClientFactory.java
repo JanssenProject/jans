@@ -12,12 +12,31 @@ public class ClientFactory {
 
     private static final ClientFactory INSTANCE = new ClientFactory();
 
-    private ClientFactory() {}
+    /**
+ * Prevents external instantiation to enforce the singleton pattern for this class.
+ */
+private ClientFactory() {}
 
+    /**
+     * Obtain the application's single shared ClientFactory.
+     *
+     * @return the shared ClientFactory instance
+     */
     public static ClientFactory instance() {
         return INSTANCE;
     }
 
+    /**
+     * Create an Invocation.Builder backed by a JAX-RS client configured with a custom TLS setup for the given URL.
+     *
+     * <p>The client is configured to prefer TLS 1.3 with TLS 1.2 as a fallback and restricts TLS 1.2 cipher suites
+     * to a predefined allow-list.</p>
+     *
+     * @param url the target endpoint URL for the returned Invocation.Builder
+     * @return an Invocation.Builder targeting the provided URL, using a client configured with the described TLS settings
+     * @throws NoSuchAlgorithmException if the TLS SSLContext algorithm is not available
+     * @throws KeyManagementException if the SSLContext cannot be initialized
+     */
     public static Invocation.Builder getClientBuilder(String url) throws NoSuchAlgorithmException, KeyManagementException {
 
         /*

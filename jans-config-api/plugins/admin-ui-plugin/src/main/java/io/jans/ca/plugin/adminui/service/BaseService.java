@@ -29,24 +29,32 @@ public class BaseService {
     @Inject
     Logger log;
 
+    /**
+     * Obtain an access token from the authorization server using the provided token request.
+     *
+     * @param tokenRequest   the token request parameters (may include grant type, code, verifier, client credentials, etc.)
+     * @param tokenEndpoint  the token endpoint URL to send the request to
+     * @return               a TokenResponse containing the token data on success, or {@code null} on failure
+     * @throws NoSuchAlgorithmException if the underlying HTTP client or cryptography setup requires an unavailable algorithm
+     * @throws KeyManagementException   if there is an error initializing key management for the HTTP client
+     */
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) throws NoSuchAlgorithmException, KeyManagementException {
         return getToken(tokenRequest, tokenEndpoint, null);
     }
 
 
     /**
-     * This Java function sends a token request to a specified endpoint and returns the token response if successful.
+     * Request an access token from the token endpoint using the provided TokenRequest.
      *
-     * @param tokenRequest The `getToken` method you provided is used to exchange authorization code for an access token.
-     * The `TokenRequest` parameter contains information required for this token exchange process, such as code, scope,
-     * grant type, redirect URI, client ID, etc.
-     * @param tokenEndpoint The `tokenEndpoint` parameter in the `getToken` method is the URL where the token request will
-     * be sent to in order to obtain an access token. This URL typically belongs to the authorization server that issues
-     * the access tokens.
-     * @param userInfoJwt The `userInfoJwt` parameter in the `getToken` method is a JSON Web Token (JWT) that contains user
-     * information. This token is typically used to provide information about the authenticated user to the authorization
-     * server when requesting an access token. The user information in the JWT can include details such as the user
-     * @return The method is returning a `io.jans.as.client.TokenResponse` object.
+     * Builds a form using fields from {@code tokenRequest} (code, scope, code_verifier, grant_type, redirect_uri,
+     * client_id) and includes {@code userInfoJwt} as the {@code ujwt} parameter when present, then POSTs the form to
+     * {@code tokenEndpoint} using the client credentials in {@code tokenRequest}.
+     *
+     * @param tokenRequest contains values used to construct the token request (authorization code, scope, PKCE verifier,
+     *                     grant type, redirect URI, client identifier, and encoded client credentials)
+     * @param tokenEndpoint the URL of the authorization server token endpoint to which the request will be sent
+     * @param userInfoJwt optional JWT to include as the {@code ujwt} form parameter when present
+     * @return a {@code io.jans.as.client.TokenResponse} populated from the server JSON on HTTP 200, {@code null} otherwise
      */
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws NoSuchAlgorithmException, KeyManagementException {
 
@@ -98,10 +106,10 @@ public class BaseService {
     }
 
     /**
-     * It takes a software statement assertion (SSA) as input, and returns a client ID and client secret
+     * Performs Dynamic Client Registration (DCR) using the provided Software Statement Assertion (SSA).
      *
-     * @param ssaJwt The Software Statement Assertion (SSA) JWT that you received from the Scan server.
-     * @return The client id and client secret of the newly created client.
+     * @param ssaJwt the SSA JWT issued by the Scan server
+     * @return a DCRResponse containing the registered client's ID, secret, issuer (opHost), hardwareId, and scan hostname when registration succeeds; `null` if registration fails
      */
     public DCRResponse executeDCR(String ssaJwt) {
         try {
@@ -156,6 +164,15 @@ public class BaseService {
 
     }
 
+    /**
+     * Perform token introspection against the given introspection endpoint.
+     *
+     * @param accessToken           the access token to be introspected
+     * @param introspectionEndpoint the full URL of the introspection endpoint
+     * @return                      an Optional containing the introspection response as a Map when the server returns HTTP 200, `Optional.empty()` otherwise
+     * @throws NoSuchAlgorithmException if a required cryptographic algorithm is unavailable when building the HTTP client
+     * @throws KeyManagementException   if an error occurs initializing key management for the HTTP client
+     */
     public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) throws NoSuchAlgorithmException, KeyManagementException {
         log.info("Token introspection from auth-server.");
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);

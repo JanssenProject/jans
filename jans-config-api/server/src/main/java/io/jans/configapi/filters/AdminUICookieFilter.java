@@ -50,6 +50,17 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     private static final long CACHE_TTL = 360000; // 1 hour
     private static final String AUTHENTICATION_SCHEME = "Bearer";
 
+    /**
+     * Authenticates Admin UI requests by extracting a user-info JWT from the Admin UI session cookie,
+     * exchanging or reusing a cached Config API access token, and injecting a Bearer Authorization header.
+     *
+     * The filter locates the Admin UI session cookie, removes expired sessions, initializes Admin UI
+     * configuration if needed, obtains or refreshes an access token (caching it per subject), and sets
+     * the Authorization header to "Bearer <token>". If no Admin UI session is found the request is
+     * left unchanged; on internal errors the request is aborted with an INTERNAL_SERVER_ERROR response.
+     *
+     * @param requestContext the JAX-RS request context whose headers may be modified or whose request may be aborted
+     */
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
@@ -80,10 +91,21 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         }
     }
 
+    /**
+     * Removes expired Admin UI sessions from the session store.
+     */
     private void removeExpiredSessions() {
         configApiSessionService.removeAllExpiredSessions();
     }
 
+    /**
+     * Obtain a Config API access token associated with the given Admin UI user-info JWT, reusing a valid cached token when possible.
+     *
+     * @param ujwtString the user-info JWT extracted from the Admin UI session
+     * @param auiConfiguration the Admin UI configuration used to introspect or request tokens
+     * @return the access token to use for Config API requests
+     * @throws ConfigApiApplicationException if the JWT is invalid or a new access token cannot be generated
+     */
     private String getAccessToken(String ujwtString, AUIConfiguration auiConfiguration) throws ConfigApiApplicationException {
         String sub = getSubjectFromUJWT(ujwtString);
         if (ujwtTokenCache.get(sub) != null) {
@@ -107,12 +129,24 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         return tokenResponse.getAccessToken();
     }
 
+    /**
+     * Lazily creates the ujwtTokenCache instance when it is null.
+     *
+     * Ensures the per-subject token TTL cache is initialized before use.
+     */
     private void initializeCaches() {
         if (ujwtTokenCache == null) {
             ujwtTokenCache = new TtlCache<>();
         }
     }
 
+    /**
+     * Extracts the JWT subject (`sub` claim) from a User-Info JWT string.
+     *
+     * @param ujwtString the User-Info JWT as a compact serialized string
+     * @return the value of the `sub` claim from the JWT
+     * @throws ConfigApiApplicationException if the JWT is invalid or the `sub` claim is missing (HTTP 500)
+     */
     private String getSubjectFromUJWT(String ujwtString) throws ConfigApiApplicationException {
         final Jwt tokenJwt;
         try {
@@ -128,6 +162,12 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         }
     }
 
+    /**
+     * Retrieve the User-Info JWT (ujwt) associated with the Admin UI session cookie, if present.
+     *
+     * @param cookies the request cookies map keyed by cookie name
+     * @return an Optional containing the ujwt string from the persisted Admin UI session, or Optional.empty() if the cookie or session is not present
+     */
     private Optional<String> fetchUJWTFromAdminUISession(Map<String, Cookie> cookies) {
         //if no cookies
         if (cookies == null) {
@@ -149,6 +189,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         return Optional.of(ujwtString);
     }
 
+    /**
+     * Loads the Admin UI integration settings into the in-memory AUIConfiguration if not already initialized.
+     *
+     * Fetches the persisted Admin UI configuration and populates the in-memory AUIConfiguration instance.
+     */
     private void initializeAdminUIConfiguration() {
         if (auiConfiguration != null) {
             return;
@@ -157,6 +202,13 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         addPropertiesToAUIConfiguration(adminConf);
     }
 
+    /**
+     * Populate the AUIConfiguration instance with settings from the provided AdminConf and the persisted AppConfiguration.
+     *
+     * Creates a new AUIConfiguration and sets OIDC/web-client values (host, client id/secret, scopes, redirect and logout URIs,
+     * ACR values), endpoints (authorization, token, introspection, userinfo, end-session), backend API client credentials and
+     * endpoints, UI settings (session timeout, SMTP keystore edit flag, additional parameters), and Cedarling policy/store settings.
+     */
     private void addPropertiesToAUIConfiguration(AdminConf appConf) {
         auiConfiguration = new AUIConfiguration();
         AppConfiguration appConfiguration = configurationService.find();
@@ -190,6 +242,13 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         auiConfiguration.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
     }
 
+    /**
+     * Abort the provided request context by sending an HTTP response with the given status and message.
+     *
+     * @param requestContext the JAX-RS request context to abort
+     * @param status the HTTP status to return
+     * @param errMsg the response body containing the error message
+     */
     private void abortWithException(ContainerRequestContext requestContext, Response.Status status, String errMsg) {
         requestContext.abortWith(Response.status(status)
                 .entity(errMsg)

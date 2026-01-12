@@ -54,10 +54,22 @@ public class AdminUISessionService {
     @Inject
     ConfigHttpService httpService;
 
+    /**
+     * Builds the LDAP distinguished name (DN) for a session identifier.
+     *
+     * @param sessionId the session identifier to include in the DN
+     * @return the session DN in the form "inum={sessionId},<base session DN>"
+     */
     private String getDnForSession(String sessionId) {
         return String.format("inum=%s,%s", sessionId, SESSION_DN);
     }
 
+    /**
+     * Load the Admin UI session corresponding to the given session identifier.
+     *
+     * @param sessionId the session identifier used to build the session DN
+     * @return the matching AdminUISession, or `null` if no session is found or an error occurs
+     */
     public AdminUISession getSession(String sessionId) {
         if (logger.isInfoEnabled()) {
             logger.info(SID_MSG, escapeLog(sessionId));
@@ -73,6 +85,12 @@ public class AdminUISessionService {
         return configApiSession;
     }
 
+    /**
+     * Removes all AdminUISession entries whose expirationDate is earlier than the current time.
+     *
+     * This method queries sessions under the service's session base DN and deletes any persisted
+     * AdminUISession whose expiration date has already passed.
+     */
     public void removeAllExpiredSessions() {
         final Filter filter = Filter.createPresenceFilter(SID);
         List<AdminUISession> adminUISessions =  persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
@@ -82,6 +100,14 @@ public class AdminUISessionService {
                 .forEach(e -> persistenceEntryManager.remove(e));
     }
 
+    /**
+     * Checks whether a cached token is active by calling the Admin UI introspection endpoint.
+     *
+     * @param token the token to introspect; may be null or empty
+     * @param auiConfiguration configuration holding the introspection endpoint URL
+     * @return `true` if the introspection response contains `"active": true`, `false` otherwise
+     * @throws JsonProcessingException if the introspection response body cannot be parsed as JSON
+     */
     public boolean isCachedTokenValid(String token, AUIConfiguration auiConfiguration) throws JsonProcessingException {
         logger.debug("Inside isCachedTokenValid : Token introspection from auth-server.");
 
@@ -123,6 +149,15 @@ public class AdminUISessionService {
         return false;
     }
 
+    /**
+     * Obtains an API protection access token for the Admin UI backend using client credentials and a user-info JWT.
+     *
+     * @param ujwtString       the user-info JWT to include in the token request; must be non-null and non-empty to generate a token
+     * @param auiConfiguration configuration containing the backend token endpoint, client ID, encrypted client secret, and redirect URI
+     * @return                 a TokenResponse containing the access token, or `null` if `ujwtString` is null or empty
+     * @throws StringEncrypter.EncryptionException if decrypting the client secret fails
+     * @throws JsonProcessingException             if parsing token responses fails
+     */
     public TokenResponse getApiProtectionToken(String ujwtString, AUIConfiguration auiConfiguration) throws StringEncrypter.EncryptionException, JsonProcessingException {
         try {
             logger.debug("Getting api-protection token");
@@ -148,6 +183,15 @@ public class AdminUISessionService {
         }
     }
 
+    /**
+     * Exchanges the provided token request parameters with the authorization server and returns the parsed token response.
+     *
+     * @param tokenRequest  the token request details (grant type, client credentials, redirect URI, optional code and PKCE verifier)
+     * @param tokenEndpoint the token endpoint URL to call
+     * @param userInfoJwt   optional user-info JWT to include in the request as `ujwt`
+     * @return              a map of token response parameters (for example `access_token`, `expires_in`), with any `token_type` entry removed; returns an empty map if the exchange fails
+     * @throws JsonProcessingException if the token endpoint response cannot be parsed as JSON
+     */
     public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws JsonProcessingException {
 
         try {
@@ -206,6 +250,12 @@ public class AdminUISessionService {
         return Collections.emptyMap();
     }
 
+    /**
+     * Builds a UTF-8 URL-encoded query string from the provided parameters.
+     *
+     * @param params a map of parameter names to values; entries with a null value are omitted
+     * @return a URL-encoded string of `key=value` pairs joined with `&`, encoded using UTF-8
+     */
     private static String toUrlEncodedString(Map<String, String> params) {
         return params.entrySet()
                 .stream()
@@ -217,15 +267,20 @@ public class AdminUISessionService {
                 .collect(Collectors.joining("&"));
     }
 
+    /**
+     * Loads the Admin UI configuration entry from persistence.
+     *
+     * @return the AdminConf instance stored at ADMIN_UI_CONFIG_DN, or {@code null} if not found
+     */
     public AdminConf fetchAdminUIConfiguration() {
         return persistenceEntryManager.find(AdminConf.class, ADMIN_UI_CONFIG_DN);
     }
 
     /**
-     * It takes a JWT object and returns a Map of the claims
+     * Extracts the claims from a Jwt into a map keyed by claim name.
      *
-     * @param jwtObj The JWT object that you want to get the claims from.
-     * @return A map of claims.
+     * @param jwtObj the Jwt to extract claims from; may be null
+     * @return a map of claim names to their values. Values are `String`, `Integer`, `Long`, `Boolean`, `List<String>` for JSON arrays, or `JSONObject`; returns an empty map if `jwtObj` is null or contains no claims
      */
     public Map<String, Object> getClaims(Jwt jwtObj) {
         Map<String, Object> claims = Maps.newHashMap();

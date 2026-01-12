@@ -201,16 +201,21 @@ public class CommonUtils {
     }
 
     /**
-     * Converts a Boolean object to a boolean primitive.
-     * Returns false if the input Boolean object is null.
+     * Convert a Boolean reference to its primitive form, using a default value when the input is null.
      *
-     * @param booleanObject The Boolean object to convert.
-     * @return The boolean primitive value, or false if the input is null.
+     * @return `true` if the input is `Boolean.TRUE`, `false` if the input is `Boolean.FALSE` or `null`.
      */
     public static boolean toPrimitiveOrDefaultFalse(Boolean booleanObject) {
         return booleanObject != null ? booleanObject : false;
     }
 
+    /**
+     * Return a new Date representing the given date plus the specified number of minutes.
+     *
+     * @param date the base date to adjust
+     * @param minutesToAdd the number of minutes to add; may be negative to subtract minutes
+     * @return the adjusted Date shifted by {@code minutesToAdd} minutes from {@code date}
+     */
     public static Date addMinutes(Date date, int minutesToAdd) {
         // Convert the Date to an Instant
         Instant instant = date.toInstant();
@@ -223,10 +228,13 @@ public class CommonUtils {
     }
 
     /**
-     * It takes a JWT object and returns a Map of the claims
+     * Extracts claims from a Jwt into a Map keyed by claim name.
      *
-     * @param jwtObj The JWT object that you want to get the claims from.
-     * @return A map of claims.
+     * <p>The returned map contains claim values using appropriate Java types:
+     * Strings, Integer, Long, Boolean, List<String> for JSON arrays, or JSONObject for JSON objects.</p>
+     *
+     * @param jwtObj the Jwt to extract claims from; may be null
+     * @return a map of claim names to claim values, empty if {@code jwtObj} is null
      */
     public static Map<String, Object> getClaims(Jwt jwtObj) {
         Map<String, Object> claims = Maps.newHashMap();

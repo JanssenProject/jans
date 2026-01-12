@@ -50,6 +50,17 @@ public class OAuth2Resource {
     @Inject
     ConfigurationFactory configurationFactory;
 
+    /**
+     * Create an Admin UI session and set an HttpOnly, Secure session cookie.
+     *
+     * Validates that the provided API token request contains a user JWT (UJWT) and that the JWT's signature is valid
+     * against the configured JWKS; on success a new session is persisted and a Set-Cookie header with the
+     * `admin_ui_session_id` is returned.
+     *
+     * @param apiTokenRequest request containing the UJWT used to authenticate and create the session; must include a signed UJWT
+     * @return a Response with a success entity and a Set-Cookie header containing the `admin_ui_session_id` on success;
+     *         on failure the Response contains an error entity and an appropriate HTTP status code
+     */
     @POST
     @Path(SESSION)
     @Produces(MediaType.APPLICATION_JSON)
@@ -99,6 +110,12 @@ public class OAuth2Resource {
         }
     }
 
+    /**
+     * Revokes the Admin UI session identified by the provided session cookie and invalidates that cookie in the client.
+     *
+     * @param sessionCookie the request cookie named "admin_ui_session_id" identifying the session to remove
+     * @return a Response containing a generic success payload and a Set-Cookie header that clears the session cookie; on failure a Response with the error status and message
+     */
     @DELETE
     @Path(SESSION)
     @Produces(MediaType.APPLICATION_JSON)
@@ -130,6 +147,13 @@ public class OAuth2Resource {
         }
     }
 
+    /**
+     * Revoke all Admin UI sessions associated with the specified user DN.
+     *
+     * @param userDn the user's distinguished name whose Admin UI sessions will be revoked
+     * @return an HTTP response: 200 with a success payload when sessions are revoked; otherwise a response
+     *         with the error status code and an error payload describing the failure
+     */
     @DELETE
     @Path(SESSION + USER_DN_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -150,6 +174,13 @@ public class OAuth2Resource {
         }
     }
 
+    /**
+     * Requests an API protection token from the OAuth2 service for the specified app type.
+     *
+     * @param apiTokenRequest the credentials and parameters required to request the token
+     * @param appType the application type for which the token is requested
+     * @return a Response whose entity is a TokenResponse on success, or a generic error payload with an HTTP error status on failure
+     */
     @POST
     @Path(OAUTH2_API_PROTECTION_TOKEN)
     @Produces(MediaType.APPLICATION_JSON)
