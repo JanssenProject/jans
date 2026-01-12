@@ -9,7 +9,7 @@ tags:
 
 # Tutorial: smart card authentication in Janssen
 
-With Casa's [certificate authentication plugin](./cert-authn.md) administrators can configure client certificate authentication so users can present digital certificates as a form of second-factor authentication. Some organizations opt to deploy certificate authentication through the use of smart cards - physical cards with embedded integrated circuits that act as security tokens. This practice is considered to offer a high level of security compared to other forms of multi-factor authentication. A well known example of smart card usage is the the U.S. Department of Defense (DoD). 
+With Casa's [certificate authentication plugin](./cert-authn.md) administrators can configure client certificate authentication so users can present digital certificates as a form of second-factor authentication. Some organizations opt to deploy certificate authentication through the use of smart cards - physical cards with embedded integrated circuits that act as security tokens. This practice is considered to offer a high level of security compared to other forms of multi-factor authentication. A well-known example of smart card usage is the U.S. Department of Defense (DoD).
 
 In this document we present a basic example on how to use security keys from the [YubiKey 5 series](https://www.yubico.com/authentication-standards/smart-card/) for smart card authentication. 
 
@@ -43,7 +43,7 @@ This is a piece of software that allows Windows (and Edge) to interface smoothly
 
 ### Import a certificate
 
-When setting up the Casa plugin, admins (or users themselves) imported their certificates in the certificate manager of the web browser. Here, the certificate has to be imported into they Yubikey instead. Here's how to do so:
+When setting up the Casa plugin, admins (or users themselves) imported their certificates in the certificate manager of the web browser. Here, the certificate has to be imported into the Yubikey instead. Here's how to do so:
 
 1. As administrator, run the following commands:
 
@@ -69,19 +69,19 @@ This is a [tool](https://developers.yubico.com/yubico-piv-tool/) that provides a
 
 ### Import a certificate
 
-When setting up the Casa plugin, admins (or users themselves) imported their certificates in the certificate manager of the web browser. Here, the certificate has to be imported into they Yubikey instead. Follow the steps below:
+When setting up the Casa plugin, admins (or users themselves) imported their certificates in the certificate manager of the web browser. Here, the certificate has to be imported into the Yubikey instead. Follow the steps below:
 
 1. In a command line window, run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -s9a -aimport-certificate  -i C:\Path\to\user.p12`. Enter the Yubikey PIN when prompted. This will import the end-entity certificate into slot `9a` - more about slots [here](https://developers.yubico.com/PIV/Introduction/Certificate_slots.html)
 
 1. You can run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -astatus` to ensure the certificate was properly added
 
-1. Open Firefox settings. In the certificate manager, go to the "Authorities" tab and import the issuer certificate (of  the end-entity cert)
+1. Open Firefox settings. In the certificate manager, go to the "Authorities" tab and import the issuer certificate (of the end-entity cert)
 
 ### Load YKCS11
 
 1. As administrator, ensure the `bin` directory of the PIV tool is added to the `Path` environment variable. This path may look like `c:\Program Files\Yubico\Yubico PIV Tool\bin`
 
-1. Still in the Firefox settings, locate "Securiy devices" and click on "Load". Choose a name for the Yubikey PKCS#11  module and browse to the `bin` directory of the PIV tool. Finally select the file `libykcs11.dll`
+1. Still in the Firefox settings, locate "Security devices" and click on "Load". Choose a name for the Yubikey PKCS#11  module and browse to the `bin` directory of the PIV tool. Finally select the file `libykcs11.dll`
 
 1. Restart Firefox
 

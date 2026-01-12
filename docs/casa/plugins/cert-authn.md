@@ -239,7 +239,7 @@ This is not possible - at least from Janssen server.
 
 ### Is the plugin compatible with smart cards?
 
-Yes. There is a simple demonstrative tutorial [here](./cert-authn-tutorial.md).
+Yes. There is a simple demonstrative [tutorial](./cert-authn-tutorial.md) available.
 
 ### Does the plugin support revocation?
 
