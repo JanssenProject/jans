@@ -13,7 +13,7 @@ const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 impl EntityBuilder {
     // TODO: we might need to add support for setting the 'spiffe_id' attribute to be
     // either the 'aud' or 'client_id' claim eventually
-    pub fn build_workload_entity(
+    pub(crate) fn build_workload_entity(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
@@ -57,7 +57,7 @@ impl EntityBuilder {
 ///
 /// This struct provides a method to extract workload-related entity IDs from a set of
 /// tokens. It looks for predefined claims within specific tokens to identify workloads.
-pub struct WorkloadIdSrcResolver;
+struct WorkloadIdSrcResolver;
 
 impl WorkloadIdSrcResolver {
     /// Resolves workload entity IDs from the provided authentication tokens.
@@ -71,7 +71,7 @@ impl WorkloadIdSrcResolver {
     /// - `access_token.aud`
     /// - `access_token.client_id`
     /// - `id_token.aud`
-    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
+    fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "access_token",

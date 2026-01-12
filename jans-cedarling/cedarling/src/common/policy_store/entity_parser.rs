@@ -23,7 +23,7 @@ use std::str::FromStr;
 ///
 /// Contains the Cedar entity and metadata about the source file.
 #[derive(Debug, Clone)]
-pub struct ParsedEntity {
+pub(super) struct ParsedEntity {
     /// The Cedar entity
     pub entity: Entity,
     /// The entity's UID
@@ -38,7 +38,7 @@ pub struct ParsedEntity {
 ///
 /// This matches Cedar's JSON entity format with uid, attrs, and parents fields.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RawEntityJson {
+struct RawEntityJson {
     /// Entity unique identifier
     pub uid: EntityUidJson,
     /// Entity attributes as a map of attribute names to values (optional)
@@ -51,7 +51,7 @@ pub struct RawEntityJson {
 
 /// Entity UID in JSON format.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub struct EntityUidJson {
+struct EntityUidJson {
     /// Entity type (e.g., "Jans::User")
     #[serde(rename = "type")]
     pub entity_type: String,
@@ -74,7 +74,7 @@ enum RawEntitiesWrapper {
 }
 
 /// Entity parser for loading and validating Cedar entities.
-pub struct EntityParser;
+pub(crate) struct EntityParser;
 
 impl EntityParser {
     /// Parse a single Cedar entity from JSON value.
@@ -89,7 +89,7 @@ impl EntityParser {
     /// - UID format is invalid
     /// - Parent UID format is invalid
     /// - Schema validation fails (if schema provided)
-    pub fn parse_entity(
+    fn parse_entity(
         entity_json: &JsonValue,
         filename: &str,
         schema: Option<&Schema>,
@@ -150,7 +150,7 @@ impl EntityParser {
     ///
     /// Supports both array format: `[{entity1}, {entity2}]`
     /// And object format: `{"entity_id1": {entity1}, "entity_id2": {entity2}}`
-    pub fn parse_entities(
+    pub(super) fn parse_entities(
         content: &str,
         filename: &str,
         schema: Option<&Schema>,
@@ -220,7 +220,7 @@ impl EntityParser {
     /// If duplicates are found, logs warnings and uses the latest entity (last-write-wins).
     /// This approach ensures Cedarling can start even with duplicate entities,
     /// avoiding crashes of dependent applications while still alerting developers.
-    pub fn detect_duplicates(
+    pub(super) fn detect_duplicates(
         entities: Vec<ParsedEntity>,
         logger: &Option<Logger>,
     ) -> HashMap<EntityUid, ParsedEntity> {
@@ -245,7 +245,7 @@ impl EntityParser {
     /// Create a Cedar Entities store from parsed entities.
     ///
     /// Validates that all entities are compatible and can be used together.
-    pub fn create_entities_store(
+    pub(super) fn create_entities_store(
         entities: Vec<ParsedEntity>,
     ) -> Result<Entities, PolicyStoreError> {
         let entity_list: Vec<Entity> = entities.into_iter().map(|p| p.entity).collect();
@@ -259,7 +259,7 @@ impl EntityParser {
     /// Validate entity hierarchy.
     ///
     /// Ensures that all parent references point to entities that exist in the collection.
-    pub fn validate_hierarchy(entities: &[ParsedEntity]) -> Result<(), Vec<String>> {
+    pub(super) fn validate_hierarchy(entities: &[ParsedEntity]) -> Result<(), Vec<String>> {
         let entity_uids: HashSet<&EntityUid> = entities.iter().map(|e| &e.uid).collect();
         let mut errors: Vec<String> = Vec::new();
 

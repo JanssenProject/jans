@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Debug, PartialEq, Deserialize, Clone)]
-pub struct ValidatedJwt {
+pub(crate) struct ValidatedJwt {
     #[serde(flatten)]
     pub claims: Value,
     #[serde(skip)]
@@ -26,7 +26,7 @@ impl ValidatedJwt {
     /// Gets the value of the status list claim in the [`referenced token`]
     ///
     /// [`referenced token`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-referenced-token
-    pub fn get_ref_status(&self) -> Result<Option<RefJwtStatusList>, serde_json::Error> {
+    pub(crate) fn get_ref_status(&self) -> Result<Option<RefJwtStatusList>, serde_json::Error> {
         let Some(status) = self.claims.get("status") else {
             return Ok(None);
         };
@@ -41,7 +41,7 @@ impl ValidatedJwt {
 ///
 /// [`referenced token`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-referenced-token
 #[derive(Debug, Deserialize, PartialEq)]
-pub struct RefJwtStatusListClaim {
+struct RefJwtStatusListClaim {
     status_list: RefJwtStatusList,
 }
 
@@ -49,7 +49,7 @@ pub struct RefJwtStatusListClaim {
 ///
 /// [`referenced token`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-referenced-token
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-pub struct RefJwtStatusList {
+pub(crate) struct RefJwtStatusList {
     pub idx: usize,
     pub uri: String,
     /// Maximum amount of time, in seconds, that the Status List Token can be cached
@@ -61,7 +61,7 @@ pub struct RefJwtStatusList {
 /// This struct is a wrapper over [`jsonwebtoken::Validation`] which implements an
 /// additional check for requiring custom JWT claims.
 #[derive(Debug, Clone)]
-pub struct JwtValidator {
+pub(crate) struct JwtValidator {
     pub(crate) validation: Validation,
     required_claims: HashSet<String>,
     validate_signature: bool,
@@ -71,7 +71,7 @@ pub struct JwtValidator {
 
 impl JwtValidator {
     /// Creates a new validator for the tokens passed through [`crate::Cedarling::authorize`]
-    pub fn new_input_tkn_validator<'a>(
+    pub(super) fn new_input_tkn_validator<'a>(
         iss: Option<&'a str>,
         tkn_name: &'a str,
         token_metadata: &TokenEntityMetadata,
@@ -119,7 +119,7 @@ impl JwtValidator {
     }
 
     /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
-    pub fn new_multi_issuer_tkn_validator<'a>(
+    pub(super) fn new_multi_issuer_tkn_validator<'a>(
         iss: Option<&'a str>,
         tkn_name: &'a str,
         token_metadata: &TokenEntityMetadata,
@@ -164,7 +164,7 @@ impl JwtValidator {
     }
 
     /// Creates a new validator for status list tokens
-    pub fn new_status_list_tkn_validator(
+    pub(super) fn new_status_list_tkn_validator(
         iss: Option<&'_ str>,
         status_list_uri: Option<String>,
         algorithm: Algorithm,
@@ -216,7 +216,7 @@ impl JwtValidator {
     ///
     /// [`invalid`]: JwtStatus::Invalid
     /// [`suspended`]: JwtStatus::Suspended
-    pub fn validate_jwt(
+    pub(crate) fn validate_jwt(
         &self,
         jwt: &str,
         decoding_key: Option<&DecodingKey>,
@@ -273,11 +273,11 @@ impl JwtValidator {
 }
 
 impl DecodedJwt {
-    pub fn iss(&self) -> Option<&str> {
+    pub(crate) fn iss(&self) -> Option<&str> {
         self.claims.inner.get("iss").and_then(|x| x.as_str())
     }
 
-    pub fn decoding_key_info(&self) -> DecodingKeyInfo {
+    pub(crate) fn decoding_key_info(&self) -> DecodingKeyInfo {
         DecodingKeyInfo {
             issuer: self.iss().map(|x| x.to_string()),
             kid: self.header.kid.clone(),
