@@ -72,7 +72,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
             accessToken = getAccessToken(ujwtOptional.get(), auiConfiguration);
             if (Strings.isNullOrEmpty(accessToken)) {
-                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Error in generating Config Api access token.");
+                abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, "Generated Config Api access token is null or empty.");
             }
             requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
         } catch (Exception e) {
@@ -136,6 +136,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         if (!cookies.containsKey(ADMIN_UI_SESSION_ID)) {
             return Optional.empty();
         }
+        log.debug("Found a Admin UI session cookie in request header.");
         Cookie adminUISessionCookie = cookies.get(ADMIN_UI_SESSION_ID);
         String sessionId = adminUISessionCookie.getValue();
         AdminUISession configApiSession = configApiSessionService.getSession(sessionId);
@@ -143,6 +144,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         if (configApiSession == null) {
             return Optional.empty();
         }
+        log.debug("Admin UI session exist in persistence.");
         String ujwtString = configApiSession.getUjwt();
         return Optional.of(ujwtString);
     }
