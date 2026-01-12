@@ -1,0 +1,147 @@
+operation-01:
+  #pass-this: true
+  id: "get-attributes"
+  expected-status-code: 200
+  endpoint-args:
+    sortBy: "jansAttrName"
+    limit: "5"
+  schema:
+    type: "object"
+    properties:
+      start:
+        type: "integer"
+      totalEntriesCount:
+        type: "integer"
+      entriesCount:
+        type: "integer"
+      entries:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            dn:
+              type: "string"
+            inum:
+              type: "string"
+            name:
+              type: "string"
+            displayName:
+              type: "string"
+            dataType:
+              type: "string"
+            selected:
+              type: "boolean"
+          required:
+          - dn
+          - inum
+          - name
+          - dataType
+          - selected
+  expected-output:
+    /entriesCount: 5
+    /entries/0/name: "address"
+
+
+operation-02:
+  pass-this: true
+  id: "post-attributes"
+  expected-status-code: 201
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      displayName:
+        type: "string"
+      dataType:
+        type: "string"
+      selected:
+        type: "boolean"
+    required:
+    - dn
+    - inum
+    - name
+    - dataType
+    - selected
+
+  json-data: '{"selected": false, "name": "test1", "displayName": "Test_Attribute by Auto Test", "description": "This attribute was created by Auto Test", "origin": "jansCustomPerson", "dataType": "string", "editType": ["user", "admin"], "viewType": ["user", "admin"], "claimName": "test_claim", "status": "inactive", "saml1Uri": "urn:mace:dir:attribute-def:cn", "saml2Uri": "urn:oid:2.5.4.3", "urn": "urn:mace:dir:attribute-def:cn", "oxMultiValuedAttribute": false, "custom": false, "adminCanView": true, "adminCanEdit": true, "userCanView": true, "userCanEdit": true, "adminCanAccess": true, "userCanAccess": true, "whitePagesCanView": false}'
+  store-output-name: "sample-attribute"
+
+operation-03:
+  #pass-this: true
+  id: "get-attributes-by-inum"
+  expected-status-code: 200
+  url-suffix:
+    inum: "42E0"
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      displayName:
+        type: "string"
+      dataType:
+        type: "string"
+      selected:
+        type: "boolean"
+    required:
+    - dn
+    - inum
+    - name
+    - dataType
+    - selected
+
+  expected-output:
+    /name: uid
+    /displayName: "Username"
+    /claimName: "user_name"
+
+
+#Fixme
+operation-04:
+  pass-this: true
+  id: "put-attributes"
+  expected-status-code: 201
+  schema:
+    type: "object"
+    properties:
+      dn:
+        type: "string"
+      inum:
+        type: "string"
+      name:
+        type: "string"
+      displayName:
+        type: "string"
+      dataType:
+        type: "string"
+      selected:
+        type: "boolean"
+    required:
+    - dn
+    - inum
+    - name
+    - dataType
+    - selected
+
+
+#Fixme
+operation-05:
+  pass-this: true
+  id: "delete-attributes-by-inum"
+
+
+#Fixme
+operation-06:
+  pass-this: true
+  id: "patch-attributes-by-inum"
+
+

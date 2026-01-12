@@ -1,0 +1,351 @@
+operation-01:
+  id: "get-config-cache"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      cacheProviderType:
+        type: "string"
+      memcachedConfiguration:
+        type: "object"
+      inMemoryConfiguration:
+        type: "object"
+      redisConfiguration:
+        type: "object"
+      nativePersistenceConfiguration:
+        type: "object"
+    required:
+    - cacheProviderType
+    - memcachedConfiguration
+    - redisConfiguration
+    - nativePersistenceConfiguration
+
+  expected-output:
+    /cacheProviderType: "NATIVE_PERSISTENCE"
+
+
+operation-02:
+  id: "patch-config-cache"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      redisConfiguration:
+        type: "object"
+    required:
+    - redisConfiguration
+  data:
+    - op: "replace"
+      path: "/redisConfiguration/redisProviderType"
+      value: "SENTINEL"
+  expected-output:
+    /redisConfiguration/redisProviderType: "SENTINEL"
+
+operation-03:
+  id: "get-config-cache-in-memory"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      defaultPutExpiration:
+        type: "integer"
+    required:
+    - defaultPutExpiration
+
+  expected-output:
+    /defaultPutExpiration: 60
+
+
+operation-04:
+  id: "put-config-cache-in-memory"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      defaultPutExpiration:
+        type: "integer"
+    required:
+    - defaultPutExpiration
+
+  data:
+    defaultPutExpiration: 61
+
+  expected-output:
+    /defaultPutExpiration: 61
+
+operation-05:
+  id: "patch-config-cache-in-memory"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      defaultPutExpiration:
+        type: "integer"
+    required:
+    - defaultPutExpiration
+
+  data:
+    - op: replace
+      path: /defaultPutExpiration
+      value: 60
+
+  expected-output:
+    /defaultPutExpiration: 60
+
+
+operation-06:
+  id: "get-config-cache-memcached"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      servers:
+        type: "string"
+      maxOperationQueueLength:
+        type: "integer"
+      bufferSize:
+        type: "integer"
+      defaultPutExpiration:
+        type: "integer"
+      connectionFactoryType:
+        type: "string"
+    required:
+    - maxOperationQueueLength
+    - bufferSize
+    - defaultPutExpiration
+    - connectionFactoryType
+
+  expected-output:
+    /connectionFactoryType: "DEFAULT"
+
+
+operation-07:
+  id: "put-config-cache-memcached"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      servers:
+        type: "string"
+      maxOperationQueueLength:
+        type: "integer"
+      bufferSize:
+        type: "integer"
+      defaultPutExpiration:
+        type: "integer"
+      connectionFactoryType:
+        type: "string"
+    required:
+    - maxOperationQueueLength
+    - bufferSize
+    - defaultPutExpiration
+    - connectionFactoryType
+
+  data:
+    servers: "testhostname:11211"
+    maxOperationQueueLength: 100001
+    bufferSize: 3276
+    defaultPutExpiration: 81
+    connectionFactoryType: "DEFAULT"
+
+  expected-output:
+    /servers: "testhostname:11211"
+    /maxOperationQueueLength: 100001
+    /defaultPutExpiration: 81
+
+
+operation-08:
+  id: "patch-config-cache-memcached"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      servers:
+        type: "string"
+      maxOperationQueueLength:
+        type: "integer"
+      bufferSize:
+        type: "integer"
+      defaultPutExpiration:
+        type: "integer"
+      connectionFactoryType:
+        type: "string"
+    required:
+    - maxOperationQueueLength
+    - bufferSize
+    - defaultPutExpiration
+    - connectionFactoryType
+
+  data:
+    - op: replace
+      path: /maxOperationQueueLength
+      value: 100002
+
+  expected-output:
+    /maxOperationQueueLength: 100002
+
+
+operation-09:
+  id: "get-config-cache-native-persistence"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      defaultPutExpiration:
+        type: "integer"
+      defaultCleanupBatchSize:
+        type: "integer"
+      deleteExpiredOnGetRequest:
+        type: "boolean"
+      disableAttemptUpdateBeforeInsert:
+        type: "boolean"
+    required:
+    - defaultPutExpiration
+    - defaultCleanupBatchSize
+    - deleteExpiredOnGetRequest
+    - disableAttemptUpdateBeforeInsert
+
+  expected-output:
+    /defaultPutExpiration: 60
+
+
+operation-10:
+  id: "put-config-cache-native-persistence"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      defaultPutExpiration:
+        type: "integer"
+      defaultCleanupBatchSize:
+        type: "integer"
+      deleteExpiredOnGetRequest:
+        type: "boolean"
+      disableAttemptUpdateBeforeInsert:
+        type: "boolean"
+    required:
+    - defaultPutExpiration
+    - defaultCleanupBatchSize
+    - deleteExpiredOnGetRequest
+    - disableAttemptUpdateBeforeInsert
+
+  data:
+    defaultPutExpiration: 60
+    defaultCleanupBatchSize: 100001
+    deleteExpiredOnGetRequest: true
+    disableAttemptUpdateBeforeInsert: false
+
+  expected-output:
+    /defaultCleanupBatchSize: 100001
+    /deleteExpiredOnGetRequest: true
+
+
+operation-11:
+  id: "patch-config-cache-native-persistence"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      defaultPutExpiration:
+        type: "integer"
+      defaultCleanupBatchSize:
+        type: "integer"
+      deleteExpiredOnGetRequest:
+        type: "boolean"
+      disableAttemptUpdateBeforeInsert:
+        type: "boolean"
+    required:
+    - defaultPutExpiration
+    - defaultCleanupBatchSize
+    - deleteExpiredOnGetRequest
+    - disableAttemptUpdateBeforeInsert
+
+  data:
+    - op: replace
+      path: /defaultCleanupBatchSize
+      value: 100002
+    - op: replace
+      path: /deleteExpiredOnGetRequest
+      value: true
+
+  expected-output:
+    /defaultCleanupBatchSize: 100002
+    /deleteExpiredOnGetRequest: true
+
+operation-12:
+  id: "get-config-cache-redis"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      redisProviderType:
+        type: "string"
+      servers:
+        type: "string"
+    required:
+    - redisProviderType
+    - servers
+
+  expected-output:
+    /servers: "localhost:6379"
+
+
+operation-13:
+  id: "put-config-cache-redis"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      redisProviderType:
+        type: "string"
+      servers:
+        type: "string"
+    required:
+    - redisProviderType
+    - servers
+
+  data:
+    redisProviderType: "SHARDED"
+    servers: "localhost:6379"
+    defaultPutExpiration: 60
+    useSSL: false
+    maxIdleConnections: 20
+    maxTotalConnections: 500
+    connectionTimeout: 3000
+    soTimeout: 3000
+    maxRetryAttempts: 7
+
+  expected-output:
+    /redisProviderType: "SHARDED"
+    /maxIdleConnections: 20
+    /maxRetryAttempts: 7
+
+operation-14:
+  id: "patch-config-cache-redis"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      redisProviderType:
+        type: "string"
+      servers:
+        type: "string"
+    required:
+    - redisProviderType
+    - servers
+
+  data:
+    - op: replace
+      path: /redisProviderType
+      value: "STANDALONE"
+    - op: replace
+      path: /maxIdleConnections
+      value: 10
+    - op: replace
+      path: /maxRetryAttempts
+      value: 5
+
+  expected-output:
+    /redisProviderType: "STANDALONE"
+    /maxIdleConnections: 10
+    /maxRetryAttempts: 5

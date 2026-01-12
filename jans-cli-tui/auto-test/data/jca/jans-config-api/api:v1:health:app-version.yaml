@@ -1,0 +1,25 @@
+operation-01:
+  id: "get-app-version"
+  expected-status-code: 200
+  schema:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        version:
+          type: "string"
+        build:
+          type: "string"
+        buildDate:
+          type: "string"
+        branch:
+          type: "string"
+        file:
+          type: "string"
+      required:
+       - title
+       - version
+       - build
+       - file
