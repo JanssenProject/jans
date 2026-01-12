@@ -10,10 +10,10 @@ use super::metadata::{PolicyStoreInfo, PolicyStoreMetadata};
 use semver::Version;
 
 /// Maximum allowed length for policy store description.
-pub const DESCRIPTION_MAX_LENGTH: usize = 1000;
+const DESCRIPTION_MAX_LENGTH: usize = 1000;
 
 /// Validator for policy store metadata.
-pub struct MetadataValidator;
+pub(super) struct MetadataValidator;
 
 impl MetadataValidator {
     /// Validate a PolicyStoreMetadata structure.
@@ -23,7 +23,7 @@ impl MetadataValidator {
     /// - Policy store name is not empty
     /// - Policy store version is valid semantic version (if provided)
     /// - Policy store ID format is valid (if provided)
-    pub fn validate(metadata: &PolicyStoreMetadata) -> Result<(), ValidationError> {
+    pub(super) fn validate(metadata: &PolicyStoreMetadata) -> Result<(), ValidationError> {
         // Validate cedar_version
         Self::validate_cedar_version(&metadata.cedar_version)?;
 
@@ -122,7 +122,7 @@ impl MetadataValidator {
     }
 
     /// Parse and validate metadata from JSON string.
-    pub fn parse_and_validate(json: &str) -> Result<PolicyStoreMetadata, ValidationError> {
+    pub(super) fn parse_and_validate(json: &str) -> Result<PolicyStoreMetadata, ValidationError> {
         // Parse JSON
         let metadata: PolicyStoreMetadata =
             serde_json::from_str(json).map_err(|e| ValidationError::MetadataJsonParseFailed {
@@ -140,47 +140,47 @@ impl MetadataValidator {
 /// Accessor methods for policy store metadata.
 impl PolicyStoreMetadata {
     /// Get the Cedar version.
-    pub fn cedar_version(&self) -> &str {
+    pub(crate) fn cedar_version(&self) -> &str {
         &self.cedar_version
     }
 
     /// Get the policy store ID.
-    pub fn id(&self) -> &str {
+    pub(crate) fn id(&self) -> &str {
         &self.policy_store.id
     }
 
     /// Get the policy store name.
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         &self.policy_store.name
     }
 
     /// Get the policy store description.
-    pub fn description(&self) -> Option<&str> {
+    pub(crate) fn description(&self) -> Option<&str> {
         self.policy_store.description.as_deref()
     }
 
     /// Get the policy store version.
-    pub fn version(&self) -> &str {
+    pub(crate) fn version(&self) -> &str {
         &self.policy_store.version
     }
 
     /// Get the policy store version as a parsed semantic version.
-    pub fn version_parsed(&self) -> Option<Version> {
+    pub(crate) fn version_parsed(&self) -> Option<Version> {
         Version::parse(&self.policy_store.version).ok()
     }
 
     /// Get the policy store created date.
-    pub fn created_date(&self) -> Option<chrono::DateTime<chrono::Utc>> {
+    pub(crate) fn created_date(&self) -> Option<chrono::DateTime<chrono::Utc>> {
         self.policy_store.created_date
     }
 
     /// Get the policy store updated date.
-    pub fn updated_date(&self) -> Option<chrono::DateTime<chrono::Utc>> {
+    pub(crate) fn updated_date(&self) -> Option<chrono::DateTime<chrono::Utc>> {
         self.policy_store.updated_date
     }
 
     /// Check if this policy store is compatible with a given Cedar version.
-    pub fn is_compatible_with_cedar(
+    pub(crate) fn is_compatible_with_cedar(
         &self,
         required_version: &Version,
     ) -> Result<bool, ValidationError> {

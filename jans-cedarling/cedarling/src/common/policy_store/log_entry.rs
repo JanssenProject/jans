@@ -12,7 +12,7 @@ use crate::log::{BaseLogEntry, LogLevel};
 
 /// Log entry for policy store operations.
 #[derive(Serialize, Clone)]
-pub struct PolicyStoreLogEntry {
+pub(super) struct PolicyStoreLogEntry {
     #[serde(flatten)]
     base: BaseLogEntry,
     msg: String,
@@ -26,7 +26,7 @@ impl PolicyStoreLogEntry {
     /// If no level is provided, defaults to TRACE. This is the most flexible option
     /// for system-level policy store logs where the severity needs to be explicitly
     /// controlled based on the operation context.
-    pub fn new(msg: impl Into<String>, level: Option<LogLevel>) -> Self {
+    fn new(msg: impl Into<String>, level: Option<LogLevel>) -> Self {
         let base = BaseLogEntry::new_system_opt_request_id(level.unwrap_or(LogLevel::TRACE), None);
         Self {
             base,
@@ -40,7 +40,7 @@ impl PolicyStoreLogEntry {
     /// operations, such as successful loads, completed validations, or routine status
     /// updates. This is the recommended choice for most non-error, non-warning policy
     /// store events that should be visible in production logs.
-    pub fn info(msg: impl Into<String>) -> Self {
+    pub(super) fn info(msg: impl Into<String>) -> Self {
         Self::new(msg, Some(LogLevel::INFO))
     }
 
@@ -50,7 +50,7 @@ impl PolicyStoreLogEntry {
     /// be noted, such as missing optional files, deprecated feature usage, or
     /// recoverable validation issues. These logs help identify potential problems
     /// without disrupting normal policy store functionality.
-    pub fn warn(msg: impl Into<String>) -> Self {
+    pub(super) fn warn(msg: impl Into<String>) -> Self {
         Self::new(msg, Some(LogLevel::WARN))
     }
 }

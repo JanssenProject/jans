@@ -11,7 +11,7 @@ use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display};
 use thiserror::Error;
 
-pub use attr_src::*;
+pub(super) use attr_src::*;
 
 use super::PartitionResult;
 
@@ -20,7 +20,7 @@ type AttrName = SmolStr;
 
 /// Cedar Schema wrapper that makes retrieving the instructions on how to build an
 /// entity easier
-pub struct MappingSchema {
+pub(super) struct MappingSchema {
     entities: HashMap<EntityTypeName, HashMap<AttrName, AttrsShape>>,
 }
 
@@ -75,24 +75,27 @@ impl Display for BuildMappingSchemaError {
 impl MappingSchema {
     /// Returns the entity's shape if the entity exists in the schema but
     /// returns `None` for unknown entities.
-    pub fn get_entity_shape(&self, type_name: &str) -> Option<&HashMap<AttrName, AttrsShape>> {
+    pub(super) fn get_entity_shape(
+        &self,
+        type_name: &str,
+    ) -> Option<&HashMap<AttrName, AttrsShape>> {
         self.entities.get(type_name)
     }
 }
 
 /// Info on how to build the attributes
 #[derive(Debug)]
-pub struct AttrsShape {
+pub(super) struct AttrsShape {
     is_required: bool,
     attr_src: AttrSrc,
 }
 
 impl AttrsShape {
-    pub fn is_required(&self) -> bool {
+    pub(super) fn is_required(&self) -> bool {
         self.is_required
     }
 
-    pub fn src(&self) -> &AttrSrc {
+    pub(super) fn src(&self) -> &AttrSrc {
         &self.attr_src
     }
 }

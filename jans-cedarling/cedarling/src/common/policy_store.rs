@@ -10,7 +10,7 @@ pub(crate) mod log_entry;
 #[cfg(test)]
 mod test;
 #[cfg(test)]
-pub mod test_utils;
+pub(crate) mod test_utils;
 mod token_entity_metadata;
 
 use crate::common::{
@@ -21,13 +21,12 @@ use crate::common::{
 
 pub(crate) mod archive_handler;
 pub(crate) mod entity_parser;
-pub mod errors;
+pub(crate) mod errors;
 pub(crate) mod issuer_parser;
 pub(crate) mod loader;
-pub mod manager;
-#[cfg(not(target_arch = "wasm32"))]
+pub(crate) mod manager;
 pub(crate) mod manifest_validator;
-pub mod metadata;
+pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
 pub(crate) mod validator;
@@ -41,15 +40,15 @@ use std::collections::HashMap;
 use url::Url;
 
 pub(crate) use claim_mapping::ClaimMappings;
-pub use token_entity_metadata::TokenEntityMetadata;
+pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
-pub use manager::{ConversionError, PolicyStoreManager};
-pub use metadata::PolicyStoreMetadata;
+pub(crate) use manager::ConversionError;
+pub(crate) use metadata::PolicyStoreMetadata;
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct AgamaPolicyStore {
+pub(crate) struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     ///
     /// **Note**: This field is currently unused after deserialization but is kept for:
@@ -199,13 +198,13 @@ pub struct TrustedIssuersValidationError {
 #[derive(Clone, derive_more::Deref)]
 pub struct PolicyStoreWithID {
     /// ID of policy store
-    pub id: String,
+    pub(crate) id: String,
     /// Policy store value
     #[deref]
-    pub store: PolicyStore,
+    pub(crate) store: PolicyStore,
     /// Optional metadata from new format policy stores.
     /// Contains cedar_version, policy_store info (name, version, description, etc.)
-    pub metadata: Option<metadata::PolicyStoreMetadata>,
+    pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -609,7 +608,7 @@ where
 }
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
-pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
 {
