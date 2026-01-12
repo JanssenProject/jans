@@ -145,10 +145,20 @@ public class AppConfigResponse {
         this.frontChannelLogoutUrl = frontChannelLogoutUrl;
     }
 
+    /**
+     * Set the Post-Logout Redirect URL used by the client for OIDC logout redirection.
+     *
+     * @param postLogoutRedirectUri the redirect URL to use after logout; may be null to clear the value
+     */
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
+    /**
+     * Retrieves the Cedarling log type configured for the Admin UI.
+     *
+     * @return the configured `CedarlingLogType`, or `null` if not set
+     */
     public io.jans.configapi.core.model.adminui.CedarlingLogType getCedarlingLogType() {
         return cedarlingLogType;
     }

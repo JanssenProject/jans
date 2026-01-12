@@ -46,18 +46,19 @@ public class OAuth2Service extends BaseService {
     private static final String JANS_USR_DN = "jansUsrDN";
     private static final String SESSION_DN = "ou=adminUISession,ou=admin-ui,o=jans";
     /**
-     * The function `getApiProtectionToken` retrieves an API protection token based on the provided parameters and handles
-     * exceptions accordingly.
+     * Obtain an API protection token for the specified application and populate its token claims.
      *
-     * @param apiTokenRequest The `getApiProtectionToken` method is responsible for obtaining an API protection token based
-     * on the provided `ApiTokenRequest` and `appType`. The method first retrieves the necessary configuration from
-     * `auiConfigurationService` based on the `appType`. It then constructs a `TokenRequest` object
-     * @param appType The `appType` parameter in the `getApiProtectionToken` method is used to specify the type of the
-     * application for which the API protection token is being requested. It is passed as a String parameter to the method.
-     * The `appType` parameter helps in determining the specific configuration settings and endpoints
-     * @throws ApplicationException
-     * @return The method `getApiProtectionToken` returns a `TokenResponse` object containing the access token, id token,
-     * refresh token, scopes, iat (issued at) timestamp, exp (expiration) timestamp, and issuer information.
+     * Uses the AUI configuration for the given appType to request a client-credentials token; when an ApiTokenRequest
+     * with a user JWT (ujwt) is provided, the request includes that JWT. The returned TokenResponse contains the
+     * access, ID, and refresh tokens and, when available from token introspection, scopes, issued-at (iat), expiration (exp),
+     * and issuer (iss) claims.
+     *
+     * @param apiTokenRequest optional request parameters; when null a default OpenID scope is requested, otherwise the
+     *                        contained `ujwt` (if present) is used to obtain the token
+     * @param appType         identifier of the application configuration to use for token endpoint, client credentials,
+     *                        and introspection endpoint lookup
+     * @return a TokenResponse populated with accessToken, idToken, refreshToken and, if available, scopes, iat, exp, and issuer
+     * @throws ApplicationException on error while obtaining or processing the token
      */
     public TokenResponse getApiProtectionToken(ApiTokenRequest apiTokenRequest, String appType) throws ApplicationException {
         try {
@@ -126,16 +127,36 @@ public class OAuth2Service extends BaseService {
         }
     }
 
+    /**
+     * Convert a list of scope values into a URL-encoded space-delimited string with duplicates removed.
+     *
+     * @param scopes the list of scope strings; may contain duplicates
+     * @return a URL-encoded space-delimited string of unique scopes
+     * @throws UnsupportedEncodingException if the required character encoding is not supported during URL-encoding
+     */
     private static String scopeAsString(List<String> scopes) throws UnsupportedEncodingException {
         Set<String> scope = Sets.newHashSet();
         scope.addAll(scopes);
         return CommonUtils.joinAndUrlEncode(scope);
     }
 
+    /**
+     * Constructs the distinguished name (DN) for an Admin UI session.
+     *
+     * @param sessionId the session identifier (inum) to include in the DN
+     * @return the DN in the form "inum=&lt;sessionId&gt;,ou=adminUISession,ou=admin-ui,o=jans"
+     */
     private String getDnForSession(String sessionId) {
         return String.format("inum=%s,%s", sessionId, SESSION_DN);
     }
 
+    /**
+     * Create and persist an AdminUISession for the given sessionId using claims extracted from the provided user-info JWT.
+     *
+     * @param sessionId the identifier for the admin UI session; used as the session's inum and to build its DN
+     * @param ujwt      the user-info JWT string containing an "inum" claim that identifies the user
+     * @throws ApplicationException if the "inum" claim is missing from the provided JWT
+     */
     public void setAdminUISession(String sessionId, String ujwt) throws Exception {
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
         Date currentDate = new Date();
@@ -157,6 +178,12 @@ public class OAuth2Service extends BaseService {
         entryManager.persist(adminUISession);
     }
 
+    /**
+     * Removes all AdminUISession entries whose jansUsrDN contains the provided user DN.
+     *
+     * @param userDn the user distinguished name to match within stored AdminUISession jansUsrDN values
+     * @throws ApplicationException if an error occurs while searching for or removing sessions (results in HTTP 500)
+     */
     public void removeAdminUIUserSessionByDn(String userDn) throws ApplicationException {
         try {
             List<Filter> filters = new ArrayList<>();
@@ -174,6 +201,13 @@ public class OAuth2Service extends BaseService {
         }
     }
 
+    /**
+     * Load an AdminUISession by its session identifier.
+     *
+     * @param sessionId the session identifier used to build the session DN
+     * @return the matching AdminUISession, or `null` if no session exists for the given id
+     * @throws ApplicationException if an error occurs while retrieving the session (results in HTTP 500)
+     */
     public AdminUISession getSession(String sessionId) throws ApplicationException {
         AdminUISession adminUISession = null;
         try {
@@ -186,11 +220,23 @@ public class OAuth2Service extends BaseService {
         return adminUISession;
     }
 
+    /**
+     * Removes the Admin UI session identified by the given sessionId.
+     *
+     * @param sessionId the Admin UI session identifier
+     * @throws ApplicationException if the session cannot be retrieved or removed
+     */
     public void removeSession(String sessionId) throws ApplicationException {
         AdminUISession configApiSession = getSession(sessionId);
         entryManager.remove(configApiSession);
     }
 
+    /**
+     * Build the distinguished name (DN) for a user identified by its inum.
+     *
+     * @param userInum the user's inum identifier
+     * @return the LDAP DN for the user, e.g. "inum={userInum},ou=people,o=jans"
+     */
     private String getDnForUser(String userInum) {
         return String.format("inum=%s,%s", userInum, "ou=people,o=jans");
     }
