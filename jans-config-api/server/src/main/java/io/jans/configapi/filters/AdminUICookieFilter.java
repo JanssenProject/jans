@@ -50,9 +50,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     private final Object configLock = new Object();
 
     private static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
-    private static final long CACHE_TTL = 3600000; // 1 hour
-    private static final long CACHE_MAX_SIZE = 100;
     private static final String AUTHENTICATION_SCHEME = "Bearer";
+    private static final long CACHE_TTL_MS = 3600000; // 1 hour
+    private static final int CACHE_MAX_SIZE = 100;
+    private volatile long lastCleanupTime = 0;
+    private static final long CLEANUP_INTERVAL_MS = 300000; // 5 minutes
 
     /**
      * Authenticates Admin UI requests by extracting a user-info JWT from the Admin UI session cookie,
@@ -68,10 +70,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info("Inside AdminUICookieFilter filter...");
+            log.debug("Inside AdminUICookieFilter filter...");
             Map<String, Cookie> cookies = requestContext.getCookies();
             initializeCaches();
-            removeExpiredSessions();
+            removeExpiredSessionsIfNeeded();
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
             //return if session record is not present in the database
             if (ujwtOptional.isEmpty()) {
@@ -80,6 +82,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
             initializeAdminUIConfiguration();
             if (auiConfiguration == null) {
+                log.warn("Admin UI configuration could not be initialized. Skipping token injection.");
                 return;
             }
 
@@ -99,8 +102,16 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     /**
      * Removes expired Admin UI sessions from the session store.
      */
-    private void removeExpiredSessions() {
-        configApiSessionService.removeAllExpiredSessions();
+    private void removeExpiredSessionsIfNeeded() {
+        long now = System.currentTimeMillis();
+        if (now - lastCleanupTime > CLEANUP_INTERVAL_MS) {
+            synchronized (cacheLock) {
+                if (now - lastCleanupTime > CLEANUP_INTERVAL_MS) {
+                    configApiSessionService.removeAllExpiredSessions();
+                    lastCleanupTime = now;
+                }
+            }
+        }
     }
 
     /**
@@ -132,7 +143,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error in generating token generated for accessing Config API: " + e.getMessage());
         }
-        ujwtTokenCache.put(sub, tokenResponse.getAccessToken(), CACHE_TTL);
+        if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
+            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to obtain a valid access token for Config API");
+        }
+        ujwtTokenCache.put(sub, tokenResponse.getAccessToken(), CACHE_TTL_MS);
         return tokenResponse.getAccessToken();
     }
 
@@ -144,7 +158,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     private void initializeCaches() {
         synchronized (cacheLock) {
             if (ujwtTokenCache == null) {
-                ujwtTokenCache = new TtlCache<>(100);
+                ujwtTokenCache = new TtlCache<>(CACHE_MAX_SIZE);
             }
         }
     }
@@ -167,7 +181,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             }
             return ((String) claims.get("sub"));
         } catch (InvalidJwtException e) {
-            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Invalid User-Info JWT : {}" + e.getMessage());
+            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Invalid User-Info JWT: " + e.getMessage());
         }
     }
 
@@ -195,7 +209,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         }
         log.debug("Admin UI session exist in persistence.");
         String ujwtString = configApiSession.getUjwt();
-        return Optional.of(ujwtString);
+        return Optional.ofNullable(ujwtString);
     }
 
     /**
@@ -224,36 +238,49 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * endpoints, UI settings (session timeout, SMTP keystore edit flag, additional parameters), and Cedarling policy/store settings.
      */
     private void addPropertiesToAUIConfiguration(AdminConf appConf) {
+        if (appConf == null || appConf.getMainSettings() == null
+                || appConf.getMainSettings().getOidcConfig() == null
+                || appConf.getMainSettings().getOidcConfig().getAuiWebClient() == null
+                || appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient() == null
+                || appConf.getMainSettings().getUiConfig() == null) {
+            log.error("Admin UI configuration is incomplete or null");
+            return; // auiConfiguration remains null, handled by caller
+        }
+
         auiConfiguration = new AUIConfiguration();
+        AUIConfiguration config = new AUIConfiguration();
         AppConfiguration appConfiguration = configurationService.find();
-        auiConfiguration.setAppType("admin_ui");
-        auiConfiguration.setAuiWebServerHost(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getOpHost());
-        auiConfiguration.setAuiWebServerClientId(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getClientId());
-        auiConfiguration.setAuiWebServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getClientSecret());
-        auiConfiguration.setAuiWebServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getScopes(), "+"));
-        auiConfiguration.setAuiWebServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getRedirectUri());
-        auiConfiguration.setAuiWebServerFrontChannelLogoutUrl(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getFrontchannelLogoutUri());
-        auiConfiguration.setAuiWebServerPostLogoutRedirectUri(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getPostLogoutUri());
-        auiConfiguration.setAuiWebServerAuthzBaseUrl(appConfiguration.getAuthorizationEndpoint());
-        auiConfiguration.setAuiWebServerTokenEndpoint(appConfiguration.getTokenEndpoint());
-        auiConfiguration.setAuiWebServerIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
-        auiConfiguration.setAuiWebServerUserInfoEndpoint(appConfiguration.getUserInfoEndpoint());
-        auiConfiguration.setAuiWebServerEndSessionEndpoint(appConfiguration.getEndSessionEndpoint());
-        auiConfiguration.setAuiWebServerAcrValues(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAcrValues(), "+"));
+        config.setAppType("admin_ui");
+        config.setAuiWebServerHost(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getOpHost());
+        config.setAuiWebServerClientId(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getClientId());
+        config.setAuiWebServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getClientSecret());
+        config.setAuiWebServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getScopes(), "+"));
+        config.setAuiWebServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getRedirectUri());
+        config.setAuiWebServerFrontChannelLogoutUrl(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getFrontchannelLogoutUri());
+        config.setAuiWebServerPostLogoutRedirectUri(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getPostLogoutUri());
+        config.setAuiWebServerAuthzBaseUrl(appConfiguration.getAuthorizationEndpoint());
+        config.setAuiWebServerTokenEndpoint(appConfiguration.getTokenEndpoint());
+        config.setAuiWebServerIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
+        config.setAuiWebServerUserInfoEndpoint(appConfiguration.getUserInfoEndpoint());
+        config.setAuiWebServerEndSessionEndpoint(appConfiguration.getEndSessionEndpoint());
+        config.setAuiWebServerAcrValues(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAcrValues(), "+"));
 
-        auiConfiguration.setAuiBackendApiServerClientId(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientId());
-        auiConfiguration.setAuiBackendApiServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientSecret());
-        auiConfiguration.setAuiBackendApiServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getScopes(), "+"));
-        auiConfiguration.setAuiBackendApiServerTokenEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getTokenEndpoint());
-        auiConfiguration.setAuiBackendApiServerIntrospectionEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getIntrospectionEndpoint());
+        config.setAuiBackendApiServerClientId(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientId());
+        config.setAuiBackendApiServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getClientSecret());
+        config.setAuiBackendApiServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getScopes(), "+"));
+        config.setAuiBackendApiServerTokenEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getTokenEndpoint());
+        config.setAuiBackendApiServerIntrospectionEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getIntrospectionEndpoint());
 
-        auiConfiguration.setSessionTimeoutInMins(appConf.getMainSettings().getUiConfig().getSessionTimeoutInMins());
-        auiConfiguration.setAllowSmtpKeystoreEdit(appConf.getMainSettings().getUiConfig().getAllowSmtpKeystoreEdit());
-        auiConfiguration.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
-        auiConfiguration.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
-        auiConfiguration.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
-        auiConfiguration.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.fromString(appConf.getMainSettings().getUiConfig().getCedarlingPolicyStoreRetrievalPoint()));
-        auiConfiguration.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
+        config.setSessionTimeoutInMins(appConf.getMainSettings().getUiConfig().getSessionTimeoutInMins());
+        config.setAllowSmtpKeystoreEdit(appConf.getMainSettings().getUiConfig().getAllowSmtpKeystoreEdit());
+        config.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
+        config.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
+        config.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
+        config.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.fromString(appConf.getMainSettings().getUiConfig().getCedarlingPolicyStoreRetrievalPoint()));
+        config.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
+
+        // Assign fully-constructed object last
+        auiConfiguration = config;
     }
 
     /**

@@ -251,13 +251,13 @@ public class CommonUtils {
             Object claimValue = jwtClaims.getClaim(key);
 
             if (claimValue instanceof String) {
-                claims.put(key, jwtClaims.getClaim(key).toString());
+                claims.put(key, claimValue.toString());
             } else if (claimValue instanceof Integer) {
-                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
+                claims.put(key, claimValue);
             } else if (claimValue instanceof Long) {
-                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
+                claims.put(key, claimValue);
             } else if (claimValue instanceof Boolean) {
-                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
+                claims.put(key, claimValue);
             } else if (claimValue instanceof JSONArray) {
                 List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
                 claims.put(key, sourceArr);

@@ -8,14 +8,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class TtlCache<K, V> {
 
     private static class CacheEntry<V> {
-        V value;
-        long expiryTime;
-        long createdAt;
+        private final V value;
+        private final long expiryTime;
 
         CacheEntry(V value, long ttlMillis) {
             this.value = value;
             this.expiryTime = System.currentTimeMillis() + ttlMillis;
-            this.createdAt = System.currentTimeMillis();
         }
 
         boolean isExpired() {

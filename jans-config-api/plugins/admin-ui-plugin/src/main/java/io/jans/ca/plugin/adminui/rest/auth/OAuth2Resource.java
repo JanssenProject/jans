@@ -133,7 +133,7 @@ public class OAuth2Resource {
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
     public Response deleteSessionBySessionCookie(@CookieParam(ADMIN_UI_SESSION_ID) Cookie sessionCookie) {
-        if (sessionCookie == null || sessionCookie.getName() == null) {
+        if (sessionCookie == null || sessionCookie.getValue() == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(CommonUtils.createGenericResponse(false, 400, "Session cookie not found"))
                     .build();
@@ -177,6 +177,12 @@ public class OAuth2Resource {
     @ProtectedApi(scopes = {ADMINUI_SESSION_DELETE}, superScopes = {ADMINUI_SESSION_DELETE})
     public Response deleteSessionsByUserDn(@Parameter(description = "User DN") @PathParam(USER_DN_CONST) @NotNull String userDn) {
         log.debug("Inside deleteSessionsByUserDn method...");
+        // Validate DN format to prevent malicious injection
+        if (!userDn.matches("^inum=[a-zA-Z0-9\\-]+,ou=people,o=jans$")) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(CommonUtils.createGenericResponse(false, 400, "Invalid user DN format"))
+                    .build();
+        }
         //remove sessions from database by userDn
         try {
             oAuth2Service.removeAdminUIUserSessionByDn(userDn);
