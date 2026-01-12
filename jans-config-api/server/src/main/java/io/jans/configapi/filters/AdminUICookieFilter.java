@@ -51,6 +51,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
     private static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
     private static final long CACHE_TTL = 3600000; // 1 hour
+    private static final long CACHE_MAX_SIZE = 100;
     private static final String AUTHENTICATION_SCHEME = "Bearer";
 
     /**
@@ -141,12 +142,9 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * Ensures the per-subject token TTL cache is initialized before use.
      */
     private void initializeCaches() {
-        if (ujwtTokenCache == null) {
-            ujwtTokenCache = new TtlCache<>();
-            synchronized (cacheLock) {
-                if (ujwtTokenCache == null) {
-                    ujwtTokenCache = new TtlCache<>();
-                }
+        synchronized (cacheLock) {
+            if (ujwtTokenCache == null) {
+                ujwtTokenCache = new TtlCache<>(100);
             }
         }
     }
