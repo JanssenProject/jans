@@ -363,14 +363,16 @@ class JCA_CLI:
                     else:
                         hidden_password_str = '*****'
 
-                        if 'customAttributes' in log_data:
-                            for prop in log_data['customAttributes']:
-                                if prop['name'] == 'userPassword':
-                                    prop['value'] = hidden_password_str
+                        if log_data:
 
-                        for prop in log_data:
-                            if prop in ('userPassword', 'clientSecret'):
-                                log_data[prop] = hidden_password_str
+                            if 'customAttributes' in log_data:
+                                for prop in log_data['customAttributes']:
+                                    if prop['name'] == 'userPassword':
+                                        prop['value'] = hidden_password_str
+
+                            for prop in log_data:
+                                if prop in ('userPassword', 'clientSecret'):
+                                    log_data[prop] = hidden_password_str
 
                         log_args[1] = str(log_data)
                         self.cli_logger.debug(" ".join(log_args))
@@ -389,9 +391,10 @@ class JCA_CLI:
         log_data = copy.deepcopy(data)
         # don't log passwords
         hpass = '*****'
-        for prop in log_data:
-            if prop in ('userPassword', 'clientSecret'):
-                log_data[prop] = hpass
+        if log_data:
+            for prop in log_data:
+                if prop in ('userPassword', 'clientSecret'):
+                    log_data[prop] = hpass
 
         if isinstance(log_data, dict):
             for cad in log_data.get('customAttributes', []):
