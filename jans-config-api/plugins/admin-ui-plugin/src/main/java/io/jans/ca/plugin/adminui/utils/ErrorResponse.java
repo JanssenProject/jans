@@ -44,7 +44,7 @@ public enum ErrorResponse {
     REWRITING_DEFAULT_POLICY_STORE_ERROR("Error in overwriting default policy-store with remote policy-store."),
     SYNC_ROLE_SCOPES_MAPPING_ERROR("Error in syncing role-to-scope mapping from policy-store."),
     BLANK_JWT("JWT is blank or empty"),
-    ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
+    ISS_CLAIM_NOT_FOUND("ISS claim not found in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
     LICENSE_NOT_PRESENT("Active license not present in configuration."),
     LICENSE_EXPIRY_DATE_NOT_PRESENT("Active license expiry date not present."),
@@ -74,7 +74,7 @@ public enum ErrorResponse {
     FETCH_DATA_ERROR("Error in fetching data."),
     ADMINUI_SESSION_CREATE_ERROR("Error in creating Admin UI session"),
     ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session"),
-    ORG_ID_CLAIM_NOT_FOUND("org_id claim not fount in jwt")
+    ORG_ID_CLAIM_NOT_FOUND("org_id claim not found in jwt")
     ;
 
     private final String description;

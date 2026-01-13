@@ -77,8 +77,12 @@ public class BaseService {
             if (tokenRequest.getGrantType() != null) {
                 body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
             }
-            body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
-            body.putSingle("client_id", tokenRequest.getAuthUsername());
+            if (tokenRequest.getRedirectUri() != null) {
+                body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
+            }
+            if (tokenRequest.getAuthUsername() != null) {
+                body.putSingle("client_id", tokenRequest.getAuthUsername());
+            }
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(tokenEndpoint);
             Response response = request
