@@ -59,13 +59,13 @@ When setting up the Casa plugin, admins (or users themselves) imported their cer
 
 ### Test
 
-Using Microsoft Edge, follow steps similar those when the plugin was formerly [tested](./cert-authn.md#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
+Using Microsoft Edge, follow steps similar to those when the plugin was formerly [tested](./cert-authn.md#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
 
 ## Smart card authentication with Firefox
 
 ### Install the Yubico PIV Tool
 
-This is a [tool](https://developers.yubico.com/yubico-piv-tool/) that provides administrative [PIV](https://developers.yubico.com/PIV/) capabilities for Yubikeys and also bundles a [PKCS#11](https://en.wikipedia.org/wiki/PKCS_11) module that enables a communication bridge between the Yubikeys and other software such as Firefox. Installers for Windows are available [here](https://www.yubico.com/support/download/smart-card-drivers-tools/)
+This is a [tool](https://developers.yubico.com/yubico-piv-tool/) that provides administrative [PIV](https://developers.yubico.com/PIV/) capabilities for Yubikeys and also bundles a [PKCS#11](https://en.wikipedia.org/wiki/PKCS_11) module that enables a communication bridge between the Yubikeys and other software such as Firefox. Installers for Windows are available at [Yubico website](https://www.yubico.com/support/download/smart-card-drivers-tools/)
 
 ### Import a certificate
 
@@ -87,7 +87,7 @@ When setting up the Casa plugin, admins (or users themselves) imported their cer
 
 ### Test
 
-Using Firefox, follow steps similar those when the plugin was formerly [tested](./cert-authn.md#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
+Using Firefox, follow steps similar to those when the plugin was formerly [tested](./cert-authn.md#testing). Here, the browser dialog for picking a cert will be shown, and then a prompt will appear for entering the Yubikey PIN.
 
 ## Useful resources
 
