@@ -102,9 +102,8 @@ public class BaseService {
             log.error("Error in getting access token: {}", response.getEntity());
 
         } catch (Exception e) {
-            log.error("Problems processing token call");
+            log.error("Problems processing token call", e);
             throw e;
-
         }
         return null;
     }
