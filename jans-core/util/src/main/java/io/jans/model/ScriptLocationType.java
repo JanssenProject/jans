@@ -23,8 +23,7 @@ public enum ScriptLocationType implements AttributeEnum {
      */
     @Deprecated 
     LDAP("ldap", "Ldap"), //Todo: migrate existing scripts with LDAP to DB
-    DB("db", "Database"), 
-    FILE("file", "File");
+    DB("db", "Database");
 
     private String value;
     private String displayName;
