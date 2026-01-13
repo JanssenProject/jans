@@ -74,13 +74,13 @@ public class BaseService {
                 body.putSingle("code_verifier", tokenRequest.getCodeVerifier());
             }
 
-            if (tokenRequest.getGrantType() != null) {
+            if (tokenRequest.getGrantType() != null && !Strings.isNullOrEmpty(tokenRequest.getGrantType().getValue())) {
                 body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
             }
-            if (tokenRequest.getRedirectUri() != null) {
+            if (!Strings.isNullOrEmpty(tokenRequest.getRedirectUri())) {
                 body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
             }
-            if (tokenRequest.getAuthUsername() != null) {
+            if (!Strings.isNullOrEmpty(tokenRequest.getAuthUsername())) {
                 body.putSingle("client_id", tokenRequest.getAuthUsername());
             }
 
@@ -133,7 +133,6 @@ public class BaseService {
             }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
             String hardwareId = claims.get("org_id").toString();
-            //claims.get("iss").toString();
             Map<String, String> body = new HashMap<>();
             body.put("software_statement", ssaJwt);
             body.put("response_types", "token");
