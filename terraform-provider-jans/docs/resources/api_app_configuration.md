@@ -137,6 +137,8 @@ Optional:
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # The API App configuration is a global resource that has to be imported, 
 # before it can be managed (it cannot be created or deleted). You can choose 

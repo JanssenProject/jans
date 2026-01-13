@@ -102,6 +102,8 @@ Optional:
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 # When importing attributes, make sure to pick a name that does
 # not consist only of the INUM, as this will not work with INUMs

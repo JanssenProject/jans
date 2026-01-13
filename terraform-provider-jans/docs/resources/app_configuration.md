@@ -28,8 +28,8 @@ resource "jans_app_configuration" "global" {
 - `access_evaluation_script_name` (String) Name of the access evaluation script.
 - `access_token_lifetime` (Number) The lifetime of the short-lived Access Token. Example: 3600
 - `access_token_signing_alg_values_supported` (List of String) A list of the access token signing algorithms (alg values) supported by the OP. 
-							One of "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
-							"ES512", "PS256", "PS384", "PS512"
+                                                        One of "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
+                                                        "ES512", "PS256", "PS384", "PS512"
 - `acr_mappings` (Map of String) A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }
 - `acr_to_agama_consent_flow_mapping` (Map of String) A map of ACR to agama consent flow mapping. Example: { "acr1": "agama1", "acr2": "agama2" }
 - `acr_to_consent_script_mapping` (Map of String) A map of ACR to consent script mapping. Example: { "acr1": "script1", "acr2": "script2" }
@@ -39,6 +39,7 @@ resource "jans_app_configuration" "global" {
 - `all_response_types_supported` (List of String) List of all response types supported.
 - `allow_all_value_for_revoke_endpoint` (Boolean) Boolean value true allow all value for revoke endpoint.
 - `allow_blank_values_in_discovery_response` (Boolean) Boolean value specifying whether to allow blank values in discovery response.
+- `allow_client_assertion_aud_without_strict_issuer_match` (Boolean) Boolean value to allow client assertion audience without strict issuer match
 - `allow_end_session_with_unmatched_sid` (Boolean) Boolean value specifying whether to allow end session with unmatched SID.
 - `allow_id_token_without_implicit_grant_type` (Boolean) Specifies if a token without implicit grant types is allowed.
 - `allow_post_logout_redirect_without_validation` (Boolean) Allows post logout redirect without validation for End Session Endpoint.
@@ -109,7 +110,7 @@ resource "jans_app_configuration" "global" {
 - `dcr_signature_validation_software_statement_jwks_uri_claim` (String) Specifies claim name inside software statement. Value of claim should point to JWKS URI.
 - `dcr_ssa_validation_configs` (Block List) List of DCR SSA Validation Configs. (see [below for nested schema](#nestedblock--dcr_ssa_validation_configs))
 - `default_signature_algorithm` (String) The default signature algorithm to sign ID Tokens. One of "HS256", "HS384", "HS512", 
-							"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"
+                                                        "RS256", "RS384", "RS512", "ES256", "ES384", "ES512"
 - `default_subject_type` (String) Default Subject Type used for Dynamic Client Registration. Valid types include pairwise and public.
 - `device_authz_acr` (String) ACR used to process device authz requests.
 - `device_authz_endpoint` (String) URL for the Device Authorization Endpoint. Example: https://server.example.com/restv1/device_authorization
@@ -123,10 +124,10 @@ resource "jans_app_configuration" "global" {
 - `disable_prompt_login` (Boolean) Boolean value specifying whether to disable prompt login.
 - `disable_u2f_endpoint` (Boolean) Enable/Disable U2F endpoints.
 - `discovery_allowed_keys` (List of String) List of configuration response claim allowed to be displayed in discovery endpoint. Example: authorization_endpoint, 
-				token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..
+                                token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..
 - `discovery_cache_lifetime_in_minutes` (Number) Lifetime of discovery cache.
 - `discovery_deny_keys` (List of String) List of configuration response claims which must not be displayed in discovery endpoint response. 
-								Example: id_generation_endpoint, auth_level_mapping, etc.
+                                                                Example: id_generation_endpoint, auth_level_mapping, etc.
 - `display_values_supported` (List of String) A list of the display parameter values that the OpenID Provider supports. One of 'page', 'popup'.
 - `dn_name` (String) DN of certificate issuer.
 - `dpop_jkt_force_for_authorization_code` (Boolean) Demonstration of Proof-of-Possession (DPoP) JWK Thumbprint force for authorization code.
@@ -164,28 +165,28 @@ resource "jans_app_configuration" "global" {
 - `front_channel_logout_session_supported` (Boolean) Boolean value to specify support for front channel logout session.
 - `grant_types_and_response_types_autofix_enabled` (Boolean) Boolean value specifying whether to Grant types and Response types can be auto fixed.
 - `grant_types_supported` (List of String) A list of the OAuth 2.0 Grant Type values that this OP supports. One of"none", "authorization_code", 
-							"client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
-							"urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
-							"urn:openid:params:grant-type:ciba".
+                                                        "client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
+                                                        "urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
+                                                        "urn:openid:params:grant-type:ciba".
 - `grant_types_supported_by_dynamic_registration` (List of String) List of the OAuth 2.0 Grant Type values that it's possible to set via client 
-							registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
-							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.
+                                                        registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
+                                                        'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.
 - `http_logging_enabled` (Boolean) Enable/Disable request/response logging filter.
 - `http_logging_exclude_paths` (List of String) List of base URI for which request/response logging filter should not record activity. Example: "/auth/img", "/auth/stylesheet"
 - `http_logging_response_body_content` (Boolean) Boolean value specifying whether to log response body content.
 - `id_generation_endpoint` (String) URL for the ID Generation Endpoint. Example: https://server.example.com/restv1/id
 - `id_token_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) supported by the OP 
-							for the ID Token to encode the Claims in a JWT. One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW".
+                                                        for the ID Token to encode the Claims in a JWT. One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW".
 - `id_token_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (enc values) supported by the OP for 
-							the ID Token to encode the Claims in a JWT. One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
+                                                        the ID Token to encode the Claims in a JWT. One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
 - `id_token_filter_claims_based_on_access_token` (Boolean) Boolean value specifying whether idToken filters claims based on accessToken.
 - `id_token_lifetime` (Number) The lifetime of the ID Token. Example: 3600
 - `id_token_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) supported by the OP for the ID 
-							Token to encode the Claims in a JWT. One of "none", "HS256", "HS384", "HS512", "RS256", 
-							"RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"
+                                                        Token to encode the Claims in a JWT. One of "none", "HS256", "HS384", "HS512", "RS256", 
+                                                        "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"
 - `id_token_token_binding_cnf_values_supported` (List of String) Array containing a list of the JWT Confirmation Method member names supported by the OP for Token 
-								Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. 
-								If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens. One of 'tbh'.
+                                                                Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. 
+                                                                If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens. One of 'tbh'.
 - `img_location` (String) The location for image files.
 - `include_sid_in_response` (Boolean) Boolean value specifying whether to include sessionId in response.
 - `introspection_access_token_must_have_introspection_scope` (Boolean) Reject introspection requests if access_token in Authorization header does not have introspection scope.
@@ -207,8 +208,9 @@ resource "jans_app_configuration" "global" {
 - `jms_user_name` (String) JMS UserName.
 - `js_location` (String) The location for JavaScript files.
 - `jwks_algorithms_supported` (List of String) A list of algorithms that will be used in JWKS endpoint. One of 'RS256', 'RS384', 'RS512', 
-							'ES256', 'ES384", 'ES512', 'PS256', 'PS384', 'PS512', 'RSA1_5', 'RSA-OAEP'.
+                                                        'ES256', 'ES384", 'ES512', 'PS256', 'PS384', 'PS512', 'RSA1_5', 'RSA-OAEP'.
 - `jwks_uri` (String) URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP. Example: https://server.example.com/restv1/jwks
+- `jwt_grant_allow_user_by_uid_in_assertion` (Boolean) Boolean value to indicate if JWT grant allows user identification by UID in assertion
 - `keep_authenticator_attributes_on_acr_change` (Boolean) Boolean value specifying whether to keep authenticator attributes on ACR change.
 - `key_algs_allowed_for_generation` (List of String) List of algorithm allowed to be used for key generation. Example: 'RS256', 'RS512', 'ES384', 'PS256'
 - `key_regeneration_enabled` (Boolean) Boolean value specifying whether to regenerate keys.
@@ -228,13 +230,13 @@ resource "jans_app_configuration" "global" {
 - `metric_reporter_keep_data_days` (Number) The days to keep metric reported data.
 - `mtls_authorization_challenge_endpoint` (String) URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Challenge Endpoint.
 - `mtls_authorization_endpoint` (String) URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint.
-							Example: 'https://server.example.com/jans-auth/restv1/mtls'
+                                                        Example: 'https://server.example.com/jans-auth/restv1/mtls'
 - `mtls_check_session_iframe` (String) URL for MTLS IFrame that supports cross-origin communications for session state information with the RP 
-							Client using the HTML5 postMessage API. Example: 'https://server.example.com/jans-auth/restv1/mtls/opiframe.htm'
+                                                        Client using the HTML5 postMessage API. Example: 'https://server.example.com/jans-auth/restv1/mtls/opiframe.htm'
 - `mtls_client_info_endpoint` (String) URL for MTLS Client Info endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/clientinfo'
 - `mtls_device_authz_endpoint` (String) URL for MTLS Device Authorization endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/device_authorization'
 - `mtls_end_session_endpoint` (String) URL for MTLS to which an RP can perform a redirect to request that the end user be logged out at the OP.
-           		Example: 'https://server.example.com/jans-auth/restv1/mtls/end_session'
+                        Example: 'https://server.example.com/jans-auth/restv1/mtls/end_session'
 - `mtls_id_generation_endpoint` (String) URL for MTLS Id generation endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/id'
 - `mtls_introspection_endpoint` (String) URL for MTLS Introspection endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/introspection'
 - `mtls_jwks_uri` (String) URL for MTLS of the OP\'s JSON Web Key Set (JWK) document. Example: 'https://server.example.com/jans-auth/restv1/mtls/jwks'
@@ -244,9 +246,9 @@ resource "jans_app_configuration" "global" {
 - `mtls_token_revocation_endpoint` (String) URL for MTLS Authorization token revocation endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/revoke'
 - `mtls_user_info_endpoint` (String) URL for MTLS User Info endpoint. Example: 'https://server.example.com/jans-auth/restv1/mtls/userinfo'
 - `op_policy_uri` (String) URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the 
-								Relying Party can use the data provided by the OP. Example: http://ox.gluu.org/doku.php?id=jans:policy
+                                                                Relying Party can use the data provided by the OP. Example: http://ox.gluu.org/doku.php?id=jans:policy
 - `op_tos_uri` (String) URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of 
-								service. Example: http://ox.gluu.org/doku.php?id=jans:tos
+                                                                service. Example: http://ox.gluu.org/doku.php?id=jans:tos
 - `openid_configuration_endpoint` (String) URL for the Open ID Connect Configuration Endpoint. Example: https://server.example.com/.well-known/openid-configuration
 - `openid_discovery_endpoint` (String) URL of the OpenID Discovery Endpoint. Example: https://server.example.com/.well-known/webfinger
 - `openid_scope_backward_compatibility` (Boolean) Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
@@ -255,6 +257,7 @@ resource "jans_app_configuration" "global" {
 - `pairwise_calculation_salt` (String) Salt to calculate algorithmic pairwise IDs.
 - `pairwise_id_type` (String) The pairwise ID type.
 - `par_endpoint` (String) URL for Pushed Authorisation Request (PAR) Endpoint. Example: https://server.example.com/jans-auth/restv1/par
+- `par_forbid_public_client` (Boolean) Boolean value to indicate if PAR is forbidden for public clients
 - `persist_id_token` (Boolean) Specifies whether to persist id_token (otherwise saves into cache).
 - `persist_refresh_token` (Boolean) Specifies whether to persist refresh_token (otherwise saves into cache).
 - `person_custom_object_class_list` (List of String) LDAP custom object class list for dynamic person enrolment. One of 'gluuCustomPerson', 'gluuPerson'.
@@ -269,11 +272,11 @@ resource "jans_app_configuration" "global" {
 - `reject_jwt_with_none_alg` (Boolean) Boolean value specifying whether reject JWT requested or validated with algorithm None.
 - `remove_refresh_tokens_for_client_on_logout` (Boolean) Boolean value specifying whether to remove refresh tokens on logout.
 - `request_object_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects. 
-							One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW".
+                                                        One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW".
 - `request_object_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects.
-							One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
+                                                        One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
 - `request_object_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects. One of "none",
-							"HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512".
+                                                        "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512".
 - `request_parameter_supported` (Boolean) Boolean value specifying whether the OP supports use of the request parameter.
 - `request_uri_block_list` (List of String) Block list for requestUri that can come to Authorization Endpoint (e.g. 'localhost')
 - `request_uri_hash_verification_enabled` (Boolean) Boolean value specifying whether the OP supports use of the request_uri hash verification.
@@ -282,9 +285,9 @@ resource "jans_app_configuration" "global" {
 - `require_pkce` (Boolean) Boolean value true check for Proof Key for Code Exchange (PKCE).
 - `require_request_object_encryption` (Boolean) Boolean value true encrypts request object
 - `require_request_uri_registration` (Boolean) Boolean value specifying whether the OP requires any request_uri values used to be 
-				pre-registered using the request_uris registration parameter.
+                                pre-registered using the request_uris registration parameter.
 - `response_modes_supported` (List of String) A list of the OAuth 2.0 Response Mode values that this OP supports. One of "query", 
-							"fragment", "form_post", "query.jwt", "fragment.jwt", "form_post.jwt", "jwt".
+                                                        "fragment", "form_post", "query.jwt", "fragment.jwt", "form_post.jwt", "jwt".
 - `response_types_supported` (List of List of String) A list of the OAuth 2.0 response_type values that this OP supports. One of "code", "token", "id_token".
 - `return_client_secret_on_read` (Boolean) Boolean value specifying whether a client_secret is returned on client GET or PUT. False value means not to return secret.
 - `return_device_secret_from_authz_endpoint` (Boolean) Boolean value to specify if the device secret should be returned by the authz endpoint.
@@ -295,7 +298,8 @@ resource "jans_app_configuration" "global" {
 - `sector_identifier_cache_lifetime_in_minutes` (Number) The cache lifetime in minutes of the sector identifier.
 - `server_session_id_lifetime` (Number) The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
 - `service_documentation` (String) URL of a page containing human-readable information that developers might want or need to know 
-							when using the OpenID Provider. Example: http://gluu.org/docs
+                                                        when using the OpenID Provider. Example: http://gluu.org/docs
+- `session_authn_time_check_during_prompt_login_threshold_ms` (Number) Session authentication time check threshold in milliseconds during prompt login
 - `session_id_cookie_lifetime` (Number) The lifetime of session id cookie in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.
 - `session_id_lifetime` (Number) The lifetime of session id in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.
 - `session_id_persist_in_cache` (Boolean) Boolean value specifying whether to persist session_id in cache.
@@ -307,6 +311,7 @@ resource "jans_app_configuration" "global" {
 - `skip_authentication_filter_options_method` (Boolean) Boolean value specifying whether to skip authentication filter for options method calls.
 - `skip_authorization_for_open_id_scope_and_pairwise_id` (Boolean) If a client has only openid scope and pairwise id, person should not have to authorize.
 - `skip_refresh_token_during_refreshing` (Boolean) Boolean value specifying whether to skip refreshing tokens on refreshing.
+- `skip_session_authn_time_check_during_prompt_login` (Boolean) Boolean value to skip session authentication time check during prompt login
 - `software_statement_validation_claim_name` (String) Validation claim name for software statement.
 - `software_statement_validation_type` (String) Validation type used for software statement.
 - `spontaneous_scope_lifetime` (Number) The lifetime of spontaneous scope in seconds.
@@ -324,8 +329,8 @@ resource "jans_app_configuration" "global" {
 - `token_endpoint` (String) The token endpoint URL. Example: https://server.example.com/restv1/token
 - `token_endpoint_auth_methods_supported` (List of String) A list of Client Authentication methods supported by this Token Endpoint.
 - `token_endpoint_auth_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature 
-							on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt 
-							authentication methods. One of 'HS256', 'HS384', 'HS512', 'RS256", 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512'.
+                                                        on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt 
+                                                        authentication methods. One of 'HS256', 'HS384', 'HS512', 'RS256", 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512'.
 - `token_revocation_endpoint` (String) The URL for the access_token or refresh_token revocation endpoint. Example: https://server.example.com/restv1/revoke
 - `trusted_client_enabled` (Boolean) Boolean value specifying whether a client is trusted and no authorization is required.
 - `trusted_ssa_issuers` (Block List) List of trusted SSA issuers. (see [below for nested schema](#nestedblock--trusted_ssa_issuers))
@@ -346,18 +351,19 @@ resource "jans_app_configuration" "global" {
 - `uma_validate_claim_token` (Boolean) Validate claim_token as id_token assuming it is issued by local idp.
 - `update_client_access_time` (Boolean) Boolean value to specify if application should update oxLastAccessTime/oxLastLogonTime attributes on client authentication.
 - `update_user_last_logon_time` (Boolean) Boolean value to specify if application should update oxLastLogonTime attribute on user authentication.
+- `uppercase_response_keys_in_account_access_consent` (Boolean) Boolean value to use uppercase response keys in account access consent
 - `use_highest_level_script_if_acr_script_not_found` (Boolean) Enable/Disable usage of highest level script in case ACR script does not exist.
 - `use_local_cache` (Boolean) Boolean value specifying whether to enable local in-memory cache.
 - `use_nested_jwt_during_encryption` (Boolean) Boolean value specifying whether to use nested Jwt during encryption.
 - `use_openid_sub_attribute_value_for_pairwise_local_account_id` (Boolean) Use OpenID sub attribute value for Pairwise Local Account ID.
 - `user_info_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) JWA supported by the UserInfo 
-							Endpoint to encode the Claims in a JWT. One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW"
+                                                        Endpoint to encode the Claims in a JWT. One of "RSA1_5", "RSA-OAEP", "A128KW", "A256KW"
 - `user_info_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (enc values) JWA supported by the UserInfo Endpoint 
-							to encode the Claims in a JWT. One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
+                                                        to encode the Claims in a JWT. One of "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM".
 - `user_info_lifetime` (Number) The lifetime of the User Info Token. Example: 3600
 - `user_info_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode 
-								the Claims in a JWT. One of "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
-								"ES512", "PS256", "PS384", "PS512".
+                                                                the Claims in a JWT. One of "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
+                                                                "ES512", "PS256", "PS384", "PS512".
 - `userinfo_endpoint` (String) The User Info endpoint URL. Example: https://server.example.com/restv1/userinfo
 - `web_keys_storage` (String) Web Key Storage Type.
 
@@ -519,6 +525,8 @@ Optional:
 ## Import
 
 Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 # The App configuration is a global resource that has to be
