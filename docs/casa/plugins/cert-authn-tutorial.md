@@ -39,7 +39,7 @@ The Yubico PIV Tool (required for Firefox) may also be used to set PIN, PUK, and
 
 ### Install the smart card minidriver
 
-This is a piece of software that allows Windows (and Edge) to interface smoothly with Yubikeys as smart cards. Installers available [here](https://www.yubico.com/support/download/smart-card-drivers-tools/).
+This is a piece of software that allows Windows (and Edge) to interface smoothly with Yubikeys as smart cards. Installers available at [Yubico website](https://www.yubico.com/support/download/smart-card-drivers-tools/).
 
 ### Import a certificate
 
@@ -71,13 +71,13 @@ This is a [tool](https://developers.yubico.com/yubico-piv-tool/) that provides a
 
 When setting up the Casa plugin, admins (or users themselves) imported their certificates in the certificate manager of the web browser. Here, the certificate has to be imported into the Yubikey instead. Follow the steps below:
 
-1. In a command line window, run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -s9a -aimport-certificate  -i C:\Path\to\user.p12`. Enter the Yubikey PIN when prompted. This will import the end-entity certificate into slot `9a` - more about slots [here](https://developers.yubico.com/PIV/Introduction/Certificate_slots.html)
+1. In a command line window, run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -s9a -KPKCS12 -aimport-key -aimport-certificate -i C:\Path\to\user.p12`. Enter the Yubikey PIN when prompted. This will import the end-entity certificate into slot `9a` - more about slots [here](https://developers.yubico.com/PIV/Introduction/Certificate_slots.html)
 
 1. You can run `c:\Program Files\Yubico\Yubico PIV Tool\bin\yubico-piv-tool -astatus` to ensure the certificate was properly added
 
 1. Open Firefox settings. In the certificate manager, go to the "Authorities" tab and import the issuer certificate (of the end-entity cert)
 
-### Load YKCS11
+### Load YKCS11 module
 
 1. As administrator, ensure the `bin` directory of the PIV tool is added to the `Path` environment variable. This path may look like `c:\Program Files\Yubico\Yubico PIV Tool\bin`
 
