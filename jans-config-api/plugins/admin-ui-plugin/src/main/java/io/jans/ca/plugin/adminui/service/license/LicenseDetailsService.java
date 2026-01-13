@@ -10,8 +10,6 @@ import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
 import io.jans.as.model.config.adminui.OIDCClientSettings;
 import io.jans.ca.plugin.adminui.model.auth.*;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
-import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
@@ -19,6 +17,8 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.model.adminui.AUIConfiguration;
+import io.jans.configapi.core.model.adminui.LicenseConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -177,7 +177,7 @@ public class LicenseDetailsService extends BaseService {
     /**
      * Deletes the license-related configuration in both the persistent and in-memory Admin UI configuration.
      */
-    public GenericResponse deleteLicenseConfiguration() throws Exception {
+    public GenericResponse deleteLicenseConfiguration() {
         log.info("Deleting Admin UI license configuration.");
 
         // Fetch current persisted Admin UI configuration
@@ -768,7 +768,7 @@ public class LicenseDetailsService extends BaseService {
      * @param dcrResponse DCRResponse is an object that contains the response data from a Dynamic Client Registration (DCR)
      *                    request. It has the following properties:
      */
-    private void saveCreateClientInPersistence(String ssa, DCRResponse dcrResponse) throws Exception {
+    private void saveCreateClientInPersistence(String ssa, DCRResponse dcrResponse) {
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
         LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
         licenseConfig.setSsa(ssa);
