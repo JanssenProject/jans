@@ -31,10 +31,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class CertAuthenticationSummaryVM {
 
-    //Max. time it can take from the redirect to the cert pickup url until the user 
-    //effectively selects the cert
-    private static final int ENTRY_EXP_SECONDS = 20;
-
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @WireVariable
@@ -76,10 +72,15 @@ public class CertAuthenticationSummaryVM {
         String key = ("" + random.nextDouble()).substring(2);
         String encKey = URLEncoder.encode(stringEncrypter.encrypt(key), UTF_8);
         
-        //We cannot store a Reference object straight in the cache because the 
-        //the class is not in the class used by the provider
-        JSONObject job = new JSONObject(new Reference(userId, true));
-        cacheProvider.put(ENTRY_EXP_SECONDS, key, job.toString());
+        //This is the max. time it can take from here (cert detail page) to the cert  
+        //pickup url until the user effectively selects the cert
+        int time = certService.getRoundTripMaxTime();
+        
+        Reference ref = new Reference(userId, true, System.currentTimeMillis() + 1000L*time);
+
+        //We cannot store a Reference object straight in the cache because the class is not 
+        //in the class loader used by the cache provider, thus a plain string is used
+        cacheProvider.put(time, key, new JSONObject(ref).toString());
 
         Executions.getCurrent().sendRedirect(
                 certService.getCertPickupUrl() + "?" + CertAuthnVM.RND_KEY + "=" + encKey);
