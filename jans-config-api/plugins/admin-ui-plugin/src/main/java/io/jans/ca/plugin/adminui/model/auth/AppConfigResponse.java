@@ -2,8 +2,8 @@ package io.jans.ca.plugin.adminui.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.as.model.config.adminui.KeyValuePair;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlingLogType;
-import io.jans.ca.plugin.adminui.model.adminui.CedarlingPolicyStrRetrievalPoint;
+import io.jans.configapi.core.model.adminui.CedarlingLogType;
+import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -145,10 +145,20 @@ public class AppConfigResponse {
         this.frontChannelLogoutUrl = frontChannelLogoutUrl;
     }
 
+    /**
+     * Set the Post-Logout Redirect URL used by the client for OIDC logout redirection.
+     *
+     * @param postLogoutRedirectUri the redirect URL to use after logout; may be null to clear the value
+     */
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
+    /**
+     * Retrieves the Cedarling log type configured for the Admin UI.
+     *
+     * @return the configured `CedarlingLogType`, or `null` if not set
+     */
     public CedarlingLogType getCedarlingLogType() {
         return cedarlingLogType;
     }
