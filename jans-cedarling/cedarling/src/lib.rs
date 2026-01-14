@@ -16,6 +16,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod data;
 mod entity_builder;
 mod http;
 mod init;
