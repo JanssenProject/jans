@@ -150,7 +150,7 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 
 1. If you did not [Generate testing certificates](#generate-testing-certificates), i.e. already own some certs, create a file named `chain.pem` by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
 
-1. Compute a one liner JSON string for the contents of `certChainPEM` property, for example: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
+1. Compute a one-liner JSON string for the contents of `certChainPEM` property, for example: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
 
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
@@ -279,6 +279,6 @@ We chose not to require the presence of the purpose.
 
 ### What's the `roundTripMaxTime` property in the Agama project used for?
 
-The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning back to the page that originated the task. A default value of 30 seconds is used.
+The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning to the page that originated the task. A default value of 30 seconds is used.
 
 If the process is not completed in this timeframe, it will fail and the log will report errors regarding expired cache entries. In this case, consider using a higher value for `roundTripMaxTime`.
