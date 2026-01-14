@@ -111,7 +111,7 @@ public class CertAuthnVM {
             
             if (!enroll) {                
                 //number of seconds available for returning to agama flow in a safe manner
-                Long timeLeft = Long.valueOf(ref.getExpiresAt() - System.currentTimeMillis()) / 1000;
+                Long timeLeft = (ref.getExpiresAt() - System.currentTimeMillis()) / 1000;
                 
                 if (timeLeft <= 0) {                    
                     logger.warn("Expired cache entry");
