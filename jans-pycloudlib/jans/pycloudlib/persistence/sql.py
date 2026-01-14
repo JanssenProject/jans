@@ -435,7 +435,7 @@ class SqlSchemaMixin:
         for fn in self.schema_files:
             with open(fn) as f:
                 schema = json.loads(f.read())
-                types += schema["attributeTypes"]
+                types += schema.get("attributeTypes", [])
         return types
 
     @cached_property
