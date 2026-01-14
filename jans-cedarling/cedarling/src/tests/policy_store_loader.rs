@@ -994,24 +994,23 @@ async fn test_authorize_with_jwt_from_directory() {
     // Uses "Jans" as the issuer name to match the default entity builder namespace
     let trusted_issuer_json = format!(
         r#"{{
-    "mock_issuer": {{
-        "name": "Jans",
-        "description": "Test issuer for JWT validation",
-        "openid_configuration_endpoint": "{}",
-        "token_metadata": {{
-            "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "workload_id": "client_id",
-                "principal_mapping": ["Jans::Workload"]
-            }},
-            "id_token": {{
-                "entity_type_name": "Jans::Id_token"
-            }},
-            "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
-            }}
+    "id": "mock_issuer",
+    "name": "Jans",
+    "description": "Test issuer for JWT validation",
+    "configuration_endpoint": "{}",
+    "token_metadata": {{
+        "access_token": {{
+            "entity_type_name": "Jans::Access_token",
+            "workload_id": "client_id",
+            "principal_mapping": ["Jans::Workload"]
+        }},
+        "id_token": {{
+            "entity_type_name": "Jans::Id_token"
+        }},
+        "userinfo_token": {{
+            "entity_type_name": "Jans::Userinfo_token",
+            "user_id": "sub",
+            "role_mapping": "role"
         }}
     }}
 }}"#,
