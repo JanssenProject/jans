@@ -13,6 +13,7 @@ import weakref
 from collections import defaultdict
 from collections.abc import Callable
 from functools import cached_property
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import javaproperties
@@ -377,15 +378,41 @@ class SqlSchemaMixin:
     @property
     def schema_files(self) -> list[str]:
         """Get list of schema files."""
-        return [
-            "/app/schema/jans_schema.json",
-            "/app/schema/custom_schema.json",
+        parent_dir = "/app/schema"
+
+        default_files = [
+            os.path.join(parent_dir, "jans_schema.json"),
+            os.path.join(parent_dir, "custom_schema.json"),
         ]
+
+        # collect all files that specified as schema
+        files = [
+            str(fn.resolve())
+            for fn in Path(parent_dir).glob("*_schema.json")
+        ]
+
+        # fallback to default files if collected files are empty
+        return files or default_files
 
     @cached_property
     def sql_data_types(self) -> dict[str, dict[str, _t.Any]]:
         """Get list of data types from pre-defined file."""
         data_types = {}
+
+        # collect sql_types embedded in schema files (only if it doesn't exist in data_types)
+        for attr_type in self.attr_types:
+            names = attr_type.get("names") or []
+
+            # skip if it doesn't have names
+            if not names:
+                continue
+
+            # the first value in names is the actual name (don't need to handle IndexError
+            # as empty list is skipped in previous block)
+            name = names[0]
+            if name and "sql_types" in attr_type and name not in data_types:
+                data_types[name] = attr_type["sql_types"]
+
         with open("/app/static/rdbm/sql_data_types.json") as f:
             data_types.update(json.loads(f.read()))
 
