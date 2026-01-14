@@ -24,7 +24,7 @@ resource "jans_json_web_key" "ecdh_encryption" {
   name  = "id_token ECDH-ES+A256KW Encryption Key"
   x     = "Z3xu2YigqjJPpvFvQs_qMIhKDTGShQD5XPGpbhqXc8w"
   y     = "kjMUo48I0sGd65k1nRPgRe8r1AnCqrblmi9pPhYHaug"
-  exp   = 1661931735188
+  exp   = 2051222400000  # January 1, 2035 00:00:00 UTC
   alg   = "ECDH-ES+A256KW"
   
   x5c = [
@@ -43,7 +43,7 @@ resource "jans_json_web_key" "rsa_signing" {
   kid   = "rsa-sig-key-001"
   name  = "RS256 Signing Key"
   alg   = "RS256"
-  exp   = 1735689600000
+  exp   = 2051222400000  # January 1, 2035 00:00:00 UTC
   n     = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2..."
   e     = "AQAB"
 }

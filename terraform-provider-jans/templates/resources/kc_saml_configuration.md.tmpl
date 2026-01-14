@@ -14,19 +14,26 @@ Resource for managing Keycloak SAML Configuration.
 ```terraform
 resource "jans_kc_saml_configuration" "example" {
   application_name = "example-saml-app"
-  sp_hostname      = "https://sp.example.com"
-  idp_hostname     = "https://idp.example.com"
-  
-  sp_config = {
-    entity_id                = "https://sp.example.com/metadata"
-    assertion_consumer_service_url = "https://sp.example.com/acs"
-    single_logout_service_url      = "https://sp.example.com/sls"
-  }
-  
-  idp_config = {
-    entity_id = "https://idp.example.com/metadata"
-    sso_service_url = "https://idp.example.com/sso"
-    slo_service_url = "https://idp.example.com/slo"
+  enabled          = true
+  server_url       = "https://keycloak.example.com"
+  realm            = "master"
+  client_id        = "jans-saml-client"
+  client_secret    = "your-client-secret"
+  grant_type       = "client_credentials"
+  scope            = "openid"
+
+  idp_root_dir          = "/opt/jans/idp"
+  idp_metadata_dir      = "/opt/jans/idp/metadata"
+  idp_metadata_file     = "idp-metadata.xml"
+  idp_metadata_temp_dir = "/opt/jans/idp/temp"
+  idp_url               = "https://idp.example.com"
+
+  sp_metadata_dir  = "/opt/jans/sp/metadata"
+  sp_metadata_file = "sp-metadata.xml"
+  sp_metadata_url  = "https://sp.example.com/metadata"
+
+  lifecycle {
+    ignore_changes = [client_secret, password]
   }
 }
 ```

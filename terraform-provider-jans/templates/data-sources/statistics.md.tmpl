@@ -80,8 +80,8 @@ output "october_statistics" {
 output "auth_metrics" {
   value = {
     month      = data.jans_statistics.current_month.month
-    stat_count = length(data.jans_statistics.current_month.statistics)
-    statistics = data.jans_statistics.current_month.statistics
+    stat_count = length(jsondecode(data.jans_statistics.current_month.statistics))
+    statistics = jsondecode(data.jans_statistics.current_month.statistics)
   }
   description = "Authentication and usage statistics for monitoring"
 }
