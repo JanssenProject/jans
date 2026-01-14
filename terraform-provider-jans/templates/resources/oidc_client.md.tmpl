@@ -7,7 +7,7 @@ description: |-
 
 # {{.Name}} ({{.Type}})
 
-Resource for managing OIDC/OAuth2 clients in the Janssen authorization server. 
+Resource for managing OIDC/OAuth2 clients in the Janssen authorization server.
 Clients are applications that request access tokens to access protected resources.
 
 ## Example Usage
@@ -28,7 +28,7 @@ resource "jans_oidc_client" "example" {
   response_types = ["code"]
   grant_types = ["authorization_code", "refresh_token"]
   
-  scope = ["openid", "profile", "email"]
+  scopes = ["openid", "profile", "email"]
   
   token_endpoint_auth_method = "client_secret_basic"
   

@@ -5,18 +5,18 @@ VERSION=0.1.0
 OS_ARCH=darwin_amd64
 
 test:
-	go test -v ./...
+        go test -v ./...
 
 build:
-	go build -o ${BINARY}
+        go build -o ${BINARY}
 
 install: build
-	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
+        mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
+        mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 
 generate-docs:
-	tfplugindocs generate
+        tfplugindocs generate --provider-name jans
 
 sanitize:
-	go fmt ./...
-	go vet ./...
+        go fmt ./...
+        go vet ./...

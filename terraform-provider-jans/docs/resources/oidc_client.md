@@ -28,7 +28,7 @@ resource "jans_oidc_client" "example" {
   response_types = ["code"]
   grant_types = ["authorization_code", "refresh_token"]
   
-  scope = ["openid", "profile", "email"]
+  scopes = ["openid", "profile", "email"]
   
   token_endpoint_auth_method = "client_secret_basic"
   
@@ -92,29 +92,29 @@ resource "jans_oidc_client" "jwt_bearer_client" {
 ### Required
 
 - `redirect_uris` (List of String) Redirection URI values used by the Client. One of these registered Redirection URI values must exactly 
-						match the redirect_uri parameter value used in each Authorization Request Example: [https://client.example.org/cb]
+                                                match the redirect_uri parameter value used in each Authorization Request Example: [https://client.example.org/cb]
 
 ### Optional
 
 - `access_token_as_jwt` (Boolean) Specifies whether access token as signed JWT.
 - `access_token_lifetime` (Number) Specifies the Client-specific access token expiration. Example: 100000000
 - `access_token_signing_alg` (String) Specifies signing algorithm that has to be used during JWT signing. If it's not specified, 
-						then the default OP signing algorithm will be used.
+                                                then the default OP signing algorithm will be used.
 - `application_type` (String) Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients 
-						using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use 
-						localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the
-						http scheme with localhost as the hostname.
+                                                using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use 
+                                                localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the
+                                                http scheme with localhost as the hostname.
 - `attributes` (Block List, Max: 1) (see [below for nested schema](#nestedblock--attributes))
 - `authorized_origins` (List of String) Specifies authorized JavaScript origins.
 - `backchannel_authentication_request_signing_alg` (String) The JWS algorithm alg value that the Client will use for signing authentication request, as described 
-							in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.
+                                                        in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.
 - `backchannel_client_notification_endpoint` (String) Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication 
-							of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
-							request to the token endpoint to obtain the tokens.
+                                                        of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
+                                                        request to the token endpoint to obtain the tokens.
 - `backchannel_token_delivery_mode` (String) specifies how backchannel token will be delivered.
 - `backchannel_user_code_parameter` (Boolean) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
 - `claim_redirect_uris` (List of String) Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the 
-						requesting party's user agent after completing its interaction.
+                                                requesting party's user agent after completing its interaction.
 - `claims` (List of String) Provide list of claims granted to the client.
 - `client_id_issued_at` (String)
 - `client_name_localized` (Map of String)
@@ -126,7 +126,7 @@ resource "jans_oidc_client" "jwt_bearer_client" {
 - `custom_attributes` (Block List) (see [below for nested schema](#nestedblock--custom_attributes))
 - `custom_object_classes` (List of String)
 - `default_acr_values` (List of String) Array of default requested Authentication Context Class Reference values that the Authorization Server 
-						must use for processing requests from the Client.
+                                                must use for processing requests from the Client.
 - `default_max_age` (Number) Specifies the Default Maximum Authentication Age. Example: 1000000
 - `deletable` (Boolean)
 - `description` (String) Description of the client.
@@ -141,17 +141,17 @@ resource "jans_oidc_client" "jwt_bearer_client" {
 - `id_token_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
 - `id_token_signed_response_alg` (String) JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
 - `id_token_token_binding_cnf` (String) Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving 
-						Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID 
-						Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.
+                                                Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID 
+                                                Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.
 - `include_claims_in_id_token` (Boolean) If true then claims are included in token id, default value is false.
 - `initiate_login_uri` (String) Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
 - `inum` (String) XRI i-number. Client Identifier to uniquely identify the client.
 - `jwks` (String) List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object 
-							represent properties of the key, including its value. Example: { "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }
+                                                        represent properties of the key, including its value. Example: { "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }
 - `jwks_uri` (String) URL for the Client's JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. 
-							The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the responses to the Client. 
-							When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the 
-							document to indicate each key's intended usage.
+                                                        The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the responses to the Client. 
+                                                        When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the 
+                                                        document to indicate each key's intended usage.
 - `last_access_time` (Number) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.
 - `last_logon_time` (Number) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.
 - `logo_uri` (String) URL that references a logo for the Client application.
@@ -161,7 +161,7 @@ resource "jans_oidc_client" "jwt_bearer_client" {
 - `policy_uri` (String) URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
 - `policy_uri_localized` (Map of String)
 - `post_logout_redirect_uris` (List of String) Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has 
-						been performed. Example: [https://client.example.org/logout/page1 https://client.example.org/logout/page2 https://client.example.org/logout/page3]
+                                                been performed. Example: [https://client.example.org/logout/page1 https://client.example.org/logout/page2 https://client.example.org/logout/page3]
 - `refresh_token_lifetime` (Number) Specifies the Client-specific refresh token expiration. Example: 100000000
 - `registration_access_token` (String)
 - `request_object_encryption_alg` (String) JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
@@ -169,22 +169,22 @@ resource "jans_oidc_client" "jwt_bearer_client" {
 - `request_object_signing_alg` (String) JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
 - `request_uris` (List of String) Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
 - `response_types` (List of String) A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself 
-						to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.
+                                                to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.
 - `rpt_as_jwt` (Boolean) Specifies whether RPT should be return as signed JWT.
 - `scopes` (List of String) Provide list of scopes granted to the client (scope dn or scope id). Example: [read write dolphin]
 - `sector_identifier_uri` (String) URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
 - `software_id` (String) Specifies a unique identifier string (UUID) assigned by the client developer or software 
-							publisher used by registration endpoints to identify the client software to be dynamically 
-							registered. Example: 4NRB1-0XZABZI9E6-5SM3R
+                                                        publisher used by registration endpoints to identify the client software to be dynamically 
+                                                        registered. Example: 4NRB1-0XZABZI9E6-5SM3R
 - `software_statement` (String) Specifies a software statement containing client metadata values about the client software as 
-							claims. This is a string value containing the entire signed JWT.
+                                                        claims. This is a string value containing the entire signed JWT.
 - `software_version` (String) Specifies a version identifier string for the client software identified by 'software_id'. 
-							The value of the 'software_version' should change on any update to the client software identified 
-							by the same 'software_id'. Example: 2.1
+                                                        The value of the 'software_version' should change on any update to the client software identified 
+                                                        by the same 'software_id'. Example: 2.1
 - `subject_type` (String) Subject type requested for the Client ID. Valid types include pairwise and public.
 - `token_endpoint_auth_method` (String) Requested Client Authentication method for the Token Endpoint.
 - `token_endpoint_auth_signing_alg` (String) JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint 
-							for the private_key_jwt and client_secret_jwt authentication methods.
+                                                        for the private_key_jwt and client_secret_jwt authentication methods.
 - `tos_uri` (String) URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
 - `tos_uri_localized` (Map of String)
 - `trusted_client` (Boolean) Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
@@ -210,7 +210,7 @@ Optional:
 - `allow_spontaneous_scopes` (Boolean) boolean, whether to allow spontaneous scopes for client.
 - `authorization_details_types` (List of String) List of authorization details types.
 - `backchannel_logout_session_required` (Boolean) Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in 
-									the Logout Token to identify the RP session with the OP when true. Default value is false.
+                                                                        the Logout Token to identify the RP session with the OP when true. Default value is false.
 - `backchannel_logout_uri` (List of String) List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
 - `consent_gathering_scripts` (List of String) List of consent gathering scripts.
 - `dpop_bound_access_token` (Boolean) boolean value to indicate if DPoP bound access token is required.
@@ -225,7 +225,7 @@ Optional:
 - `jans_auth_signed_resp_alg` (String) JWS alg algorithm JWA required for signing authorization responses.
 - `jans_authorized_acr` (List of String) List of thentication Context Class Reference (ACR) that must exist.
 - `jans_default_prompt_login` (Boolean) sets prompt=login to the authorization request, which causes the authorization server 
-									to force the user to sign in again before it will show the authorization prompt.
+                                                                        to force the user to sign in again before it will show the authorization prompt.
 - `jans_sub_attr` (String) custom subject identifier attribute.
 - `keep_client_authorization_after_expiration` (Boolean) boolean property which indicates whether to keep client authorization after expiration.
 - `minimum_acr_level` (Number) Specifies the minimum Authentication Context Class Reference (ACR) level.
@@ -240,11 +240,11 @@ Optional:
 - `ropc_scripts` (List of String) List of Resource Owner Password Credentials (ROPC) scripts.
 - `rpt_claims_scripts` (List of String) List of Requesting Party Token (RPT) claims scripts.
 - `run_introspection_script_before_jwt_creation` (Boolean) boolean property which indicates whether to run introspection script and then include claims 
-									from result into access_token as JWT.
+                                                                        from result into access_token as JWT.
 - `spontaneous_scope_script_dns` (List of String) List of spontaneous scope scripts.
 - `spontaneous_scopes` (List of String) List of spontaneous scope regular expression.
 - `tls_client_auth_subject_dn` (String) String representation of the expected subject distinguished name of the certificate, which 
-									the OAuth client will use in mutual TLS authentication.
+                                                                        the OAuth client will use in mutual TLS authentication.
 - `token_exchange_scripts` (List of String) List of token exchange scripts.
 - `tx_token_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting the TX Token response.
 - `tx_token_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the TX Token response.
