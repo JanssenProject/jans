@@ -68,9 +68,9 @@ resource "jans_json_web_key" "rsa_signing" {
 - `key_ops_type` (List of String) The key operations type.
 - `n` (String) The modulus for the RSA public key.
 - `name` (String) Name of the key.
-- `x` (String) The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
+- `x` (String) The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big-endian representation.
 - `x5c` (List of String) The x.509 certificate chain. The first entry in the array is the certificate to use for token verification; the other certificates can be used to verify this first certificate.
-- `y` (String) The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
+- `y` (String) The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big-endian representation.
 
 ### Read-Only
 
