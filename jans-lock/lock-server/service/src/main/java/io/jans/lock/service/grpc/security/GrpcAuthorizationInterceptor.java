@@ -24,6 +24,8 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import io.grpc.Context;
+import io.grpc.Contexts;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
@@ -37,6 +39,7 @@ import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.openid.OpenIdProtection;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebService;
+import io.jans.lock.util.ServerUtil;
 import io.jans.service.security.api.ProtectedApi;
 import io.jans.service.security.protect.BaseAuthorizationProtection;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -102,12 +105,14 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
         	ResourceInfo resourceInfo = extractResourceInfo(methodName);
             log.debug("gRPC call requires access to: {}", resourceInfo);
 
+            String clientIp = ServerUtil.getGrpcClientIpAddress(call, headers);
+            Context context = ServerUtil.setClientContextIpAddress(clientIp);
+
             // Process authorization
             Response authorizationResponse = authorizationProtection.processAuthorization(extractBearerToken(headers), resourceInfo);
             boolean success = authorizationResponse == null;
 
             // Audit logging
-            String clientIp = extractClientIp(headers);
             AuditLogEntry auditLogEntry = new AuditLogEntry(clientIp, AuditActionType.GRPC_AUTHZ_FILTER);
             applicationAuditLogger.log(auditLogEntry, success);
 
@@ -123,8 +128,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
 
             log.debug("Authorization passed for gRPC call '{}'", methodName);
 
-            return next.startCall(call, headers);
-
+            return Contexts.interceptCall(context, call, headers, next);
         } catch (Exception e) {
             log.error("Error during gRPC authorization for '{}'", methodName, e);
             
@@ -144,24 +148,6 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
         }
 
         return authHeader.replaceFirst("(?i)Bearer\\s+", "");
-    }
-
-    /**
-     * Extract client IP address from gRPC metadata.
-     *
-     * @param headers gRPC metadata
-     * @return client IP address or "unknown"
-     */
-    private String extractClientIp(Metadata headers) {
-        Metadata.Key<String> clientIpKey = Metadata.Key.of("x-forwarded-for", Metadata.ASCII_STRING_MARSHALLER);
-        String clientIp = headers.get(clientIpKey);
-        
-        if (clientIp == null) {
-            clientIpKey = Metadata.Key.of("x-real-ip", Metadata.ASCII_STRING_MARSHALLER);
-            clientIp = headers.get(clientIpKey);
-        }
-        
-        return clientIp != null ? clientIp : "unknown";
     }
 
     /**
