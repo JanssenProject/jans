@@ -37,10 +37,12 @@ policy_stores:
             entity_type_name: "Dolphin::Dolphin_Token"
             principal_mapping:
               - "Dolphin::User"
+          userinfo_token:
+            entity_type_name: "Dolphin::Userinfo_token"
     policies:
       basic_token_query_1:
         description: Query tokens from specific issuer with claim check
-        creation_date: '2024-12-19T10:00:00.000000'
+        creation_date: "2024-12-19T10:00:00.000000"
         policy_content:
           encoding: none
           content_type: cedar
@@ -56,7 +58,7 @@ policy_stores:
             };
       basic_token_query_1.1_default_entity:
         description: Query for default entity Acme::Resource::"1694c954f8a3"
-        creation_date: '2024-12-19T10:00:00.000000'
+        creation_date: "2024-12-19T10:00:00.000000"
         policy_content:
           encoding: none
           content_type: cedar
@@ -72,7 +74,7 @@ policy_stores:
             };
       basic_token_query_2:
         description: Query specific token type with scope
-        creation_date: '2024-12-19T10:00:00.000000'
+        creation_date: "2024-12-19T10:00:00.000000"
         policy_content:
           encoding: none
           content_type: cedar
@@ -88,7 +90,7 @@ policy_stores:
             };
       basic_token_query_3:
         description: Handle custom token type like DolphinToken
-        creation_date: '2024-12-19T10:00:00.000000'
+        creation_date: "2024-12-19T10:00:00.000000"
         policy_content:
           encoding: none
           content_type: cedar
@@ -102,9 +104,24 @@ policy_stores:
                 context.tokens.dolphin_dolphin_token.hasTag("waiver") &&
                 context.tokens.dolphin_dolphin_token.getTag("waiver").contains("signed")
             };
+      basic_token_query_4:
+        description: Handle custom token type like Userinfo_token with role mapping
+        creation_date: "2026-01-14T10:00:00.000000"
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Acme::Action::"CheckRoleFoodApprover",
+                resource == Acme::Resource::"ApprovedDolphinFoods"
+            ) when {
+                context has tokens.dolphin_userinfo_token.role &&
+                context.tokens.dolphin_userinfo_token.role.contains("admin")
+            };
       multi_token_scope_1:
         description: Allow action if any token from different issuers has required scope
-        creation_date: '2024-12-19T10:00:00.000000'
+        creation_date: "2024-12-19T10:00:00.000000"
         policy_content:
           encoding: none
           content_type: cedar
@@ -123,7 +140,7 @@ policy_stores:
             };
       multi_token_scope_2:
         description: Require tokens from multiple issuers with specific scopes
-        creation_date: '2024-12-19T10:00:00.000000'
+        creation_date: "2024-12-19T10:00:00.000000"
         policy_content:
           encoding: none
           content_type: cedar
@@ -181,6 +198,11 @@ policy_stores:
           entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
           entity Resource = {"name": String};
           entity Any;
+          action "CheckRoleFoodApprover" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
           action "GetFood" appliesTo {
             principal: [Any],
             resource: [Resource],
@@ -207,7 +229,7 @@ policy_stores:
             context: Context
           };
         }
-        
+
         namespace Dolphin {
           entity User = {
             sub?: String,
@@ -241,9 +263,18 @@ policy_stores:
             sub?: String,
             waiver?: String,
           } tags Set<String>;
+          entity Userinfo_token = {
+            token_type: String,
+            jti: String,
+            iss: TrustedIssuer,
+            validated_at: Long,
+            exp: Long,
+            
+            role?: Set<String>
+          } tags Set<String>;
           entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
         }
-        
+
         namespace Jans {
           type Url = {"host": String, "path": String, "protocol": String};
           entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
@@ -258,12 +289,13 @@ policy_stores:
             context: {}
           };
         }
-        
+
         type Context = {
           tokens: {
             acme_access_token?: Acme::Access_Token,
             dolphin_access_token?: Dolphin::Access_Token,
             dolphin_dolphin_token?: Dolphin::Dolphin_Token,
+            dolphin_userinfo_token?: Dolphin::Userinfo_token,
             total_token_count: Long
           }
         };
