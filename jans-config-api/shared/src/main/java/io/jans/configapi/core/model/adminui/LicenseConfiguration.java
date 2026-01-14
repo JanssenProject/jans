@@ -1,4 +1,4 @@
-package io.jans.ca.plugin.adminui.model.config;
+package io.jans.configapi.core.model.adminui;
 
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
