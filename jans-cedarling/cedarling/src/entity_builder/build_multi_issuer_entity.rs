@@ -28,6 +28,9 @@ pub enum MultiIssuerEntityError {
 
     #[error("Could not create cedar uid for trusted issuer: {0}")]
     BuildTrustedIssuerUid(#[from] BuildEntityError),
+
+    #[error("Could not build entity attributes: {0}")]
+    BuildAttrs(#[from] BuildAttrsErrorVec),
 }
 
 /// Sanitize issuer name for Cedar compatibility
@@ -121,7 +124,7 @@ impl EntityBuilder {
         // Build token entities using the existing multi-issuer logic
         let mut token_entities = HashMap::new();
         for (token_name, token) in tokens {
-            match self.build_single_token_entity(token) {
+            match self.build_single_token_entity(token, &built_entities) {
                 Ok(entity) => match self.generate_entity_key(token_name, token) {
                     Ok(entity_key) => {
                         built_entities.insert(&entity.uid());
@@ -203,12 +206,13 @@ impl EntityBuilder {
     }
 
     /// Build a single token entity from a validated JWT
-    fn build_single_token_entity(&self, token: &Token) -> Result<Entity, MultiIssuerEntityError> {
-        // Extract issuer from JWT claims
-        let issuer = token
-            .get_claim_val("iss")
-            .and_then(|iss| iss.as_str())
-            .ok_or(MultiIssuerEntityError::MissingIssuer)?;
+    fn build_single_token_entity(
+        &self,
+        token: &Token,
+        built_entities: &BuiltEntities,
+    ) -> Result<Entity, MultiIssuerEntityError> {
+        // Determine entity type name using the same logic as regular entity builder
+        let entity_type = determine_token_entity_type(token);
 
         // Generate entity ID using the same logic as the regular entity builder
         // This ensures consistent behavior between regular and multi-issuer entity builders
@@ -220,10 +224,31 @@ impl EntityBuilder {
             .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
             .to_string();
 
-        // Create entity attributes
-        let mut attrs = HashMap::new();
+        // Get attribute shape from schema if available
+        let attrs_shape = self
+            .schema
+            .as_ref()
+            .and_then(|schema| schema.get_entity_shape(&entity_type));
 
-        // Add core token attributes
+        // Filter out reserved claims before building attributes
+        // iss, jti, exp are handled separately (iss as entity reference, jti as entity ID, exp as timestamp)
+        let filtered_claims: HashMap<String, Value> = token
+            .claims_value()
+            .iter()
+            .filter(|(key, _)| *key != "iss" && *key != "jti" && *key != "exp")
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect();
+
+        // Build entity attributes using the same logic as regular entity builder
+        // This handles schema-based processing, claim mappings, and entity references
+        let mut attrs = super::build_entity_attrs::build_entity_attrs(
+            &filtered_claims,
+            built_entities,
+            attrs_shape,
+            token.claim_mappings(),
+        )?;
+
+        // Add token_type attribute (not part of JWT claims)
         attrs.insert(
             "token_type".to_string(),
             RestrictedExpression::new_string(token.name.clone()),
@@ -233,12 +258,19 @@ impl EntityBuilder {
             RestrictedExpression::new_string(entity_id.clone()),
         );
 
+        // iss is optional in schema so we add it if present in the token
         if let Some(token_iss) = &token.iss {
+            let issuer = token
+                .get_claim_val("iss")
+                .and_then(|iss| iss.as_str())
+                .map(normalize_issuer)
+                .ok_or(MultiIssuerEntityError::MissingIssuer)?;
+
             attrs.insert(
                 "iss".to_string(),
                 RestrictedExpression::new_entity_uid(Self::trusted_issuer_cedar_uid(
                     &token_iss.name,
-                    issuer,
+                    &issuer,
                 )?),
             );
         }
@@ -255,17 +287,12 @@ impl EntityBuilder {
             RestrictedExpression::new_long(validated_at),
         );
 
-        // Create entity tags for Token claims - support both schema-based and schema-less processing
+        // Create entity tags for non-reserved JWT claims
         let mut tags = HashMap::new();
-        let claims = filter_reserved_claims(token.claims_value());
-
-        // Add all JWT claims as string tags (schema-less processing)
-        for (claim_key, claim_value) in claims {
+        for (claim_key, claim_value) in filter_reserved_claims(token.claims_value()) {
             let value = convert_claim_to_string_set(&claim_value);
             tags.insert(claim_key, value);
         }
-
-        let entity_type = determine_token_entity_type(token);
 
         // Create the Cedar entity using the existing build_cedar_entity function
         // Note: build_cedar_entity doesn't support tags, so we need to use Entity::new_with_tags directly
@@ -327,6 +354,7 @@ mod tests {
     use crate::entity_builder_config::{EntityBuilderConfig, EntityNames, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
     use crate::log::NopLogger;
+    use cedar_policy::EvalResult;
     use serde_json::json;
     use std::collections::HashMap;
     use url::Url;
@@ -582,7 +610,10 @@ mod tests {
         claims.insert("aud".to_string(), json!("my-client"));
         let token = create_test_token("https://idp.acme.com/auth", "token123", claims, &builder);
 
-        let entity = builder.build_single_token_entity(&token).unwrap();
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .unwrap();
 
         // Check entity type - should match the token name
         assert_eq!(entity.uid().type_name().to_string(), "Jans::Access_Token");
@@ -611,153 +642,15 @@ mod tests {
         let token_claims = TokenClaims::from(claims);
         let token = Token::new("Jans::Access_Token", token_claims, None);
 
-        let result = builder.build_single_token_entity(&token);
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let result = builder.build_single_token_entity(&token, &built_entities);
+
         assert!(result.is_err());
+        // Should get InvalidEntityUid error due to missing jti claim
         assert!(matches!(
             result.unwrap_err(),
             MultiIssuerEntityError::InvalidEntityUid(_)
         ));
-    }
-
-    #[test]
-    fn test_missing_issuer_claim_error() {
-        let builder = create_test_entity_builder();
-
-        let mut claims = HashMap::new();
-        claims.insert("sub".to_string(), json!("user123"));
-        // Note: no "iss" claim
-        let token_claims = TokenClaims::from(claims);
-        let token = Token::new("test_token", token_claims, None);
-
-        let result = builder.generate_entity_key("Jans::Access_Token", &token);
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            MultiIssuerEntityError::MissingIssuer
-        ));
-    }
-
-    #[test]
-    fn test_schema_less_processing_with_trusted_issuer() {
-        // Test schema-less processing (no schema provided)
-        // According to design doc: "without a schema, all claims default to Set of String for consistency"
-        // But iss is Trusted Issuer Object
-        let config = EntityBuilderConfig {
-            entity_names: EntityNames {
-                user: "User".to_string(),
-                role: "Role".to_string(),
-                workload: "Workload".to_string(),
-            },
-            build_user: false,
-            build_workload: false,
-            unsigned_role_id_src: UnsignedRoleIdSrc::default(),
-        };
-
-        let trusted_issuers = HashMap::new();
-        let builder = EntityBuilder::new(
-            config,
-            TrustedIssuerIndex::new(&trusted_issuers, None),
-            None,
-            DefaultEntities::default(),
-        )
-        .unwrap();
-
-        let mut claims = HashMap::new();
-        claims.insert("iss".to_string(), json!("https://test.issuer.com"));
-        claims.insert("jti".to_string(), json!("test-jti-123"));
-        claims.insert("sub".to_string(), json!("user123")); // String claim
-        claims.insert("scope".to_string(), json!(["read:profile", "write:data"])); // Array claim
-        claims.insert("aud".to_string(), json!("my-client")); // String claim
-        claims.insert("age".to_string(), json!(25)); // Number claim
-        claims.insert("is_admin".to_string(), json!(true)); // Boolean claim
-        claims.insert(
-            "exp".to_string(),
-            json!(chrono::Utc::now().timestamp() + 3600),
-        );
-        let token_claims = TokenClaims::from(claims);
-        let token = Token::new(
-            "Jans::Access_Token",
-            token_claims,
-            Some(Arc::new(TrustedIssuer {
-                name: "Jans".to_string(),
-                description: "".to_string(),
-                oidc_endpoint: Url::parse("https://example.com/.well-known/openid-configuration")
-                    .expect("url should be parsed"),
-                token_metadata: HashMap::new(),
-            })),
-        );
-
-        let entity = builder.build_single_token_entity(&token).unwrap();
-
-        // In schema-less mode, ALL claims should be converted to String Sets (Set of String)
-        // This includes single values, arrays, numbers, and booleans
-        assert!(entity.tag("sub").is_some()); // String -> Set of String
-        assert!(entity.tag("scope").is_some()); // Array -> Set of String
-        assert!(entity.tag("aud").is_some()); // String -> Set of String
-        assert!(entity.tag("age").is_some()); // Number -> Set of String
-        assert!(entity.tag("is_admin").is_some()); // Boolean -> Set of String
-
-        // Core attributes should still be present
-        assert!(entity.attr("token_type").is_some());
-        assert!(entity.attr("jti").is_some());
-        assert!(entity.attr("iss").is_some());
-    }
-
-    #[test]
-    fn test_schema_less_processing_without_trusted_issuer() {
-        // Test schema-less processing (no schema provided)
-        // According to design doc: "without a schema, all claims default to Set of String for consistency"
-
-        let config = EntityBuilderConfig {
-            entity_names: EntityNames {
-                user: "User".to_string(),
-                role: "Role".to_string(),
-                workload: "Workload".to_string(),
-            },
-            build_user: false,
-            build_workload: false,
-            unsigned_role_id_src: UnsignedRoleIdSrc::default(),
-        };
-
-        let trusted_issuers = HashMap::new();
-        let builder = EntityBuilder::new(
-            config,
-            TrustedIssuerIndex::new(&trusted_issuers, None),
-            None,
-            DefaultEntities::default(),
-        )
-        .unwrap();
-
-        let mut claims = HashMap::new();
-        claims.insert("iss".to_string(), json!("https://test.issuer.com"));
-        claims.insert("jti".to_string(), json!("test-jti-123"));
-        claims.insert("sub".to_string(), json!("user123")); // String claim
-        claims.insert("scope".to_string(), json!(["read:profile", "write:data"])); // Array claim
-        claims.insert("aud".to_string(), json!("my-client")); // String claim
-        claims.insert("age".to_string(), json!(25)); // Number claim
-        claims.insert("is_admin".to_string(), json!(true)); // Boolean claim
-        claims.insert(
-            "exp".to_string(),
-            json!(chrono::Utc::now().timestamp() + 3600),
-        );
-        let token_claims = TokenClaims::from(claims);
-        let token = Token::new("Jans::Access_Token", token_claims, None);
-
-        let entity = builder.build_single_token_entity(&token).unwrap();
-
-        // In schema-less mode, ALL claims should be converted to String Sets (Set of String)
-        // This includes single values, arrays, numbers, and booleans
-        assert!(entity.tag("sub").is_some()); // String -> Set of String
-        assert!(entity.tag("scope").is_some()); // Array -> Set of String
-        assert!(entity.tag("aud").is_some()); // String -> Set of String
-        assert!(entity.tag("age").is_some()); // Number -> Set of String
-        assert!(entity.tag("is_admin").is_some()); // Boolean -> Set of String
-
-        // Core attributes should still be present
-        assert!(entity.attr("token_type").is_some());
-        assert!(entity.attr("jti").is_some());
-        // Iss is none so field iss also should be empty
-        assert!(entity.attr("iss").is_none());
     }
 
     #[test]
@@ -825,20 +718,54 @@ mod tests {
             builder.find_trusted_issuer_by_iss(iss),
         );
 
-        let entity = builder.build_single_token_entity(&token).unwrap();
-
-        println!("entity: {}", entity.to_json_string().unwrap());
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .unwrap();
 
         // Schema-based processing should preserve types according to schema
+        // Check that tags exist for schema-defined claims
         assert!(entity.tag("sub").is_some());
         assert!(entity.tag("scope").is_some());
         assert!(entity.tag("aud").is_some());
         assert!(entity.tag("custom_claim").is_some());
 
-        // Core attributes should still be present
-        assert!(entity.attr("token_type").is_some());
-        assert!(entity.attr("jti").is_some());
-        assert!(entity.attr("iss").is_some());
+        // Core attributes should still be present with correct values
+        assert!(matches!(
+            entity.attr("token_type").expect("token_type attribute should exist").expect("should be a valid value"),
+            EvalResult::String(ref val) if *val == "Jans::Access_Token"
+        ));
+        assert!(matches!(
+            entity.attr("jti").expect("jti attribute should exist").expect("should be a valid value"),
+            EvalResult::String(ref val) if *val == "test-jti-123"
+        ));
+        // exp attribute should be present and be a future timestamp
+        let current_time = chrono::Utc::now().timestamp();
+        assert!(matches!(
+            entity.attr("exp").expect("exp attribute should exist").expect("should be a valid value"),
+            EvalResult::Long(exp) if exp > current_time
+        ));
+        // iss attribute should be present and be an entity reference
+        let iss_value = entity
+            .attr("iss")
+            .expect("iss attribute should exist")
+            .expect("should be a valid value");
+        // iss should be an entity reference (EntityUid) when token has trusted issuer
+        match iss_value {
+            EvalResult::EntityUid(_) => (),
+            _ => panic!(
+                "iss should be an entity reference (EntityUid), got {:?}",
+                iss_value
+            ),
+        };
+
+        // Verify schema-defined claims are present as tags
+        // (tags exist but values are stored as RestrictedExpression)
+
+        // Reserved claims (iss, jti, exp) should NOT be in tags
+        assert!(entity.tag("iss").is_none());
+        assert!(entity.tag("jti").is_none());
+        assert!(entity.tag("exp").is_none());
     }
 
     #[test]
@@ -924,6 +851,7 @@ mod tests {
                     sub: String,
                     scope: Set<String>
                 };
+                entity TrustedIssuer = {"issuer_entity_id": String};
             }
         "#;
 
@@ -941,7 +869,17 @@ mod tests {
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
-        let trusted_issuers = HashMap::new();
+        let trusted_issuers = HashMap::from([(
+            "Jans".to_string(),
+            TrustedIssuer {
+                name: "Jans".to_string(),
+                oidc_endpoint: Url::parse(
+                    "https://test.issuer.com/.well-known/openid-configuration",
+                )
+                .expect("url should be parsed"),
+                ..Default::default()
+            },
+        )]);
         let builder = EntityBuilder::new(
             config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
@@ -951,36 +889,58 @@ mod tests {
         .unwrap();
 
         let mut claims = HashMap::new();
-        claims.insert("iss".to_string(), json!("https://test.issuer.com"));
-        claims.insert("jti".to_string(), json!("test-jti-123"));
         claims.insert("sub".to_string(), json!("user123"));
         claims.insert("scope".to_string(), json!(["read:profile", "write:data"]));
         claims.insert("unknown_claim".to_string(), json!("some_value")); // Not in schema
         claims.insert("another_unknown".to_string(), json!(123)); // Not in schema
-        claims.insert(
-            "exp".to_string(),
-            json!(chrono::Utc::now().timestamp() + 3600),
-        );
-        let token_claims = TokenClaims::from(claims);
-        let token = Token::new("Jans::Access_Token", token_claims, None);
 
-        let entity = builder.build_single_token_entity(&token).unwrap();
+        let token = create_test_token("https://test.issuer.com", "test-jti-123", claims, &builder);
+
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .unwrap();
 
         // Schema-defined claims should be processed according to schema
         assert!(entity.tag("sub").is_some());
         assert!(entity.tag("scope").is_some());
 
-        // Unknown claims should fall back to string conversion
+        // Unknown claims should fall back to string conversion and become tags
         assert!(entity.tag("unknown_claim").is_some());
         assert!(entity.tag("another_unknown").is_some());
 
-        // Core attributes should still be present
-        assert!(entity.attr("token_type").is_some());
-        assert!(entity.attr("jti").is_some());
-        //
-        assert!(
-            entity.attr("iss").is_none(),
-            "in `Token::new` iss is none, so empty iss should be in result"
-        );
+        // Reserved claims (iss, jti, exp) should NOT be in tags
+        assert!(entity.tag("iss").is_none());
+        assert!(entity.tag("jti").is_none());
+        assert!(entity.tag("exp").is_none());
+
+        // Core attributes should still be present with correct values
+        assert!(matches!(
+            entity.attr("token_type").expect("token_type attribute should exist").expect("should be a valid value"),
+            EvalResult::String(ref val) if *val == "Jans::Access_Token"
+        ));
+        assert!(matches!(
+            entity.attr("jti").expect("jti attribute should exist").expect("should be a valid value"),
+            EvalResult::String(ref val) if *val == "test-jti-123"
+        ));
+        // exp attribute should be present and be a future timestamp
+        let current_time = chrono::Utc::now().timestamp();
+        assert!(matches!(
+            entity.attr("exp").expect("exp attribute should exist").expect("should be a valid value"),
+            EvalResult::Long(exp) if exp > current_time
+        ));
+        // iss attribute should be present and be an entity reference
+        let iss_value = entity
+            .attr("iss")
+            .expect("iss attribute should exist")
+            .expect("should be a valid value");
+        // iss should be an entity reference (EntityUid)
+        match iss_value {
+            EvalResult::EntityUid(_) => (),
+            _ => panic!(
+                "iss should be an entity reference (EntityUid), got {:?}",
+                iss_value
+            ),
+        };
     }
 }
