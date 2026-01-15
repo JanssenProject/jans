@@ -382,7 +382,7 @@ casa:
   cnCustomJavaOptions: ""
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
-    # -- Enable casa endpoints /casa
+    # -- Enable casa endpoints /jans-casa
     casaEnabled: false
     # -- Casa ingress resource labels. key app is taken
     casaLabels: { }

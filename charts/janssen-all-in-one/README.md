@@ -124,7 +124,7 @@ Kubernetes: `>=v1.23.0-0`
 | casa.enabled | bool | `true` | Boolean flag to enable/disable the casa chart. |
 | casa.ingress | object | `{"casaAdditionalAnnotations":{},"casaEnabled":false,"casaLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | casa.ingress.casaAdditionalAnnotations | object | `{}` | Casa ingress resource additional annotations. |
-| casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /casa |
+| casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /jans-casa |
 | casa.ingress.casaLabels | object | `{}` | Casa ingress resource labels. key app is taken |
 | certManager.certificate.enabled | bool | `false` |  |
 | certManager.certificate.issuerGroup | string | `"cert-manager.io"` |  |
