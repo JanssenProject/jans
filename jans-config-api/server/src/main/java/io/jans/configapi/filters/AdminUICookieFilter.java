@@ -75,6 +75,12 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             initializeCaches();
             removeExpiredSessionsIfNeeded();
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
+            //return 406 error if Admin UI session is not present on server
+            if (cookies.containsKey(ADMIN_UI_SESSION_ID)
+                    && requestContext.getHeaders().get(HttpHeaders.AUTHORIZATION) == null
+                    && ujwtOptional.isEmpty()) {
+                abortWithException(requestContext, Response.Status.NOT_ACCEPTABLE, "Admin UI session is not present on server");
+            }
             //return if session record is not present in the database
             if (ujwtOptional.isEmpty()) {
                 return;
