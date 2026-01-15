@@ -271,6 +271,7 @@ policy_stores:
             iss: TrustedIssuer,
             validated_at: Long,
             exp: Long,
+            sub?: String,
             
             role?: Set<String>
           } tags Set<String>;
