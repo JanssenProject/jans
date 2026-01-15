@@ -116,7 +116,9 @@ policy_stores:
                 action == Acme::Action::"CheckRoleFoodApprover",
                 resource == Acme::Resource::"ApprovedDolphinFoods"
             ) when {
-                context has tokens.dolphin_userinfo_token.role &&
+                context has tokens &&
+                context.tokens has dolphin_userinfo_token &&
+                context.tokens.dolphin_userinfo_token has role &&
                 context.tokens.dolphin_userinfo_token.role.contains("admin")
             };
       multi_token_scope_1:
