@@ -51,12 +51,9 @@ func resourceJsonWebKey() *schema.Resource {
 				Description: "The specific cryptographic algorithm used with the key.",
 			},
 			"crv": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The crv member identifies the cryptographic curve used with the key. Values defined
-                                                by this specification are P-256, P-384 and P-521. Additional crv values MAY be used, provided
-                                                they are understood by implementations using that Elliptic Curve key. The crv value is case
-                                                sensitive.`,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The crv member identifies the cryptographic curve used with the key. Values defined by this specification are P-256, P-384 and P-521. Additional crv values MAY be used, provided they are understood by implementations using that Elliptic Curve key. The crv value is case sensitive.",
 			},
 			"exp": {
 				Type:        schema.TypeInt,
@@ -64,10 +61,9 @@ func resourceJsonWebKey() *schema.Resource {
 				Description: "Contains the token expiration timestamp",
 			},
 			"x5c": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Description: `The x.509 certificate chain. The first entry in the array is the certificate to use
-                                                for token verification; the other certificates can be used to verify this first certificate.`,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The x.509 certificate chain. The first entry in the array is the certificate to use for token verification; the other certificates can be used to verify this first certificate.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -83,16 +79,14 @@ func resourceJsonWebKey() *schema.Resource {
 				Description: "The exponent for the RSA public key.",
 			},
 			"x": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The x member contains the x coordinate for the elliptic curve point. It is represented
-                                                as the base64url encoding of the coordinate's big-endian representation.`,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big-endian representation.",
 			},
 			"y": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The y member contains the y coordinate for the elliptic curve point. It is represented
-                                                as the base64url encoding of the coordinate's big-endian representation.`,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big-endian representation.",
 			},
 			"key_ops_type": {
 				Type:        schema.TypeList,
