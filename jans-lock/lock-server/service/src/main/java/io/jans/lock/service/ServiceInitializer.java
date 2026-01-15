@@ -19,7 +19,7 @@ package io.jans.lock.service;
 import org.slf4j.Logger;
 
 import io.jans.lock.service.config.ConfigurationFactory;
-import io.jans.lock.service.grpc.GrpcServerStarter;
+import io.jans.lock.service.grpc.server.GrpcServerStarter;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;

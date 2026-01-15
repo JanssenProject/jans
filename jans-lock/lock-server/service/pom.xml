@@ -244,6 +244,11 @@
 			<artifactId>grpc-servlet-jakarta</artifactId>
 			<version>1.78.0</version>
 		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-services</artifactId>
+			<version>1.78.0</version>
+		</dependency>
 
 		<!-- RESTEasy gRPC Bridge -->
 		<dependency>

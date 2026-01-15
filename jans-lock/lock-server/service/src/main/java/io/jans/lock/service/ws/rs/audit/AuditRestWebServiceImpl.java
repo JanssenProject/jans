@@ -96,7 +96,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			throwBadRequestException("Health entry is required");
 		}
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_HEALTH_WRITE);
 
 		Response response = null;
@@ -125,7 +125,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			throwBadRequestException("Health entries list is required and cannot be empty");
 		}
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_HEALTH_BULK_WRITE);
 
 		Response response = null;
@@ -136,6 +136,15 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		}
 
 		return response;
+	}
+
+	private String getClientIpAddress(HttpServletRequest request) {
+		if (request != null) {
+			return InetAddressUtility.getIpAddress(request);
+		} else {
+			// gRPC request
+			return ServerUtil.getClientContextIpAddress();
+		}
 	}
 
 	/**
@@ -154,7 +163,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			throwBadRequestException("Log entry is required");
 		}
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_LOG_WRITE);
 
 		Response response = null;
@@ -185,7 +194,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			throwBadRequestException("Log entries list is required and cannot be empty");
 		}
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_LOG_BULK_WRITE);
 
 		Response response = null;
@@ -218,7 +227,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			throwBadRequestException("Telemetry entry is required");
 		}
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_TELEMETRY_WRITE);
 
 		Response response = null;
@@ -247,7 +256,7 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			throwBadRequestException("Telemetry entries list is required and cannot be empty");
 		}
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_TELEMETRY_BULK_WRITE);
 
 		Response response = null;

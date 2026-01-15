@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2025, Janssen Project
  */
-package io.jans.lock.service.grpc.servlet;
+package io.jans.lock.service.grpc.server;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +14,10 @@ import org.slf4j.Logger;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.config.GrpcServerMode;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,7 +30,7 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan
  */
 @ApplicationScoped
-public class GrpcServerConfiguration {
+public class GrpcServerStarter {
 
     @Inject
     private Logger log;
@@ -46,13 +46,15 @@ public class GrpcServerConfiguration {
 
     private Server grpcServer;
 
-    @PostConstruct
-    public void init() {
+    public void initGrpcServer() {
         try {
-            startGrpcServer();
+        	if (grpcServer == null) {
+        		startGrpcServer();
+        	} else {
+				log.warn("gRPC server is already started");
+			}
         } catch (IOException e) {
             log.error("Failed to start gRPC server", e);
-            throw new RuntimeException("Failed to start gRPC server", e);
         }
     }
 
@@ -64,12 +66,13 @@ public class GrpcServerConfiguration {
      */
     private void startGrpcServer() throws IOException {
     	GrpcConfiguration grpcConfiguration = appConfiguration.getGrpcConfiguration();
-    	if (grpcConfiguration == null || !grpcConfiguration.isEnabled()) {
-			log.info("gRPC server is disabled in configuration");
+    	if (grpcConfiguration == null || grpcConfiguration.getServerMode() == null ||
+    			!(GrpcServerMode.PLAIN_SERVER == grpcConfiguration.getServerMode() || GrpcServerMode.TLS_SERVER == grpcConfiguration.getServerMode())) {
+			log.info("gRPC inproc server was disabled in configuration");
 			return;
 		}
 
-    	if (grpcConfiguration.isUseTls()) {
+    	if (GrpcServerMode.TLS_SERVER == grpcConfiguration.getServerMode()) {
             // Use Netty-based server with TLS/ALPN
             try {
                 // Use shaded Netty classes bundled with gRPC
@@ -102,13 +105,8 @@ public class GrpcServerConfiguration {
         // Add shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down gRPC server due to JVM shutdown");
-            try {
-                stopGrpcServer();
-            } catch (InterruptedException e) {
-                log.error("Error during gRPC server shutdown", e);
-                Thread.currentThread().interrupt();
-            }
-        }));
+            stopGrpcServer();
+		}));
     }
 
     /**
@@ -140,21 +138,29 @@ public class GrpcServerConfiguration {
      * @throws InterruptedException if shutdown is interrupted
      */
     @PreDestroy
-    public void stopGrpcServer() throws InterruptedException {
+    public void stopGrpcServer() {
         if (grpcServer != null) {
             log.info("Stopping gRPC server...");
             grpcServer.shutdown();
-
-            if (!grpcServer.awaitTermination(30, TimeUnit.SECONDS)) {
-                log.warn("gRPC server did not terminate gracefully, forcing shutdown");
-                grpcServer.shutdownNow();
-
-                if (!grpcServer.awaitTermination(10, TimeUnit.SECONDS)) {
-                    log.error("gRPC server did not terminate");
+            
+            try {
+                if (!grpcServer.awaitTermination(30, TimeUnit.SECONDS)) {
+                    log.warn("gRPC server did not terminate gracefully, forcing shutdown");
+                    grpcServer.shutdownNow();
+                    
+                    if (!grpcServer.awaitTermination(10, TimeUnit.SECONDS)) {
+                        log.error("gRPC server did not terminate");
+                    }
                 }
+                
+                log.info("gRPC server stopped");
+            } catch (InterruptedException e) {
+                log.error("gRPC server shutdown was interrupted", e);
+                // Restore interrupt status
+                Thread.currentThread().interrupt();
+                // Force shutdown
+                grpcServer.shutdownNow();
             }
-
-            log.info("gRPC server stopped");
         }
     }
 

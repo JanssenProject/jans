@@ -9,6 +9,7 @@ package io.jans.lock.model.config.grpc;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.jans.lock.model.config.GrpcServerMode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -19,10 +20,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GrpcConfiguration {
 
-	@DocProperty(description = "Specify if Native gRPC endpoint is enabled", defaultValue = "false")
-	@Schema(description = "Specify if gRPC is enabled")
-	private boolean enabled = false;
-
+    @DocProperty(description = "gRPC server mode")
+    @Schema(description = "gRPC server mode")
+    private GrpcServerMode serverMode = GrpcServerMode.BRIDGE;
+    
 	@DocProperty(description = "Specify grpc port", defaultValue = "50051")
 	@Schema(description = "Specify grpc port")
     private int grpcPort = 50051; // Default gRPC port
@@ -40,12 +41,12 @@ public class GrpcConfiguration {
 	@Schema(description = "TLS Private Key File Path")
     private String tlsPrivateKeyFilePath; // PEM private key file
 
-	public boolean isEnabled() {
-		return enabled;
+	public GrpcServerMode getServerMode() {
+		return serverMode;
 	}
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
+	public void setServerMode(GrpcServerMode serverMode) {
+		this.serverMode = serverMode;
 	}
 
 	public int getGrpcPort() {
@@ -82,7 +83,7 @@ public class GrpcConfiguration {
 
 	@Override
 	public String toString() {
-		return "GpcConfiguration [enabled=" + enabled + ", grpcPort=" + grpcPort + ", useTls=" + useTls
+		return "GrpcConfiguration [serverMode=" + serverMode + ", grpcPort=" + grpcPort + ", useTls=" + useTls
 				+ ", tlsCertChainFilePath=" + tlsCertChainFilePath + ", tlsPrivateKeyFilePath=" + tlsPrivateKeyFilePath
 				+ "]";
 	}
