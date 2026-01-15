@@ -76,7 +76,10 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-mono
 ```
 
 Give execute permission to the scripts
-`chmod u+x up.sh down.sh clean.sh`
+
+```bash
+    chmod u+x up.sh down.sh clean.sh
+```
 
 ## Create and Start Containers
 
@@ -131,14 +134,24 @@ To stop the containers.
 
 ## Configure Janssen Server
 
-1. Access the Docker container shell using:
-    ```bash
+- Access the Docker container shell using:
 
-    docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
-    ```
-2. You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+    === "MySQL"
 
-3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
+        ```bash
+        docker compose -f jans-mysql-compose.yml exec jans /bin/bash 
+        ```
+
+    === "PostgreSQL"
+
+        ```bash
+        docker compose -f jans-postgres-compose.yml exec jans /bin/bash
+        ```
+
+- You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+
+- Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
+
     ```bash
     python3 /opt/jans/jans-cli/config-cli-tui.py
     ```
