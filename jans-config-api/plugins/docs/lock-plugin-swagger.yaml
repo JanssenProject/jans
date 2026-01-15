@@ -838,6 +838,8 @@ components:
           - config-api
         cedarlingConfiguration:
           $ref: "#/components/schemas/CedarlingConfiguration"
+        grpcConfiguration:
+          $ref: "#/components/schemas/GrpcConfiguration"
         statEnabled:
           type: boolean
           description: Active stat enabled
@@ -928,6 +930,31 @@ components:
           type: string
           description: External policy store URI
       description: Cedarling configuration
+    GrpcConfiguration:
+      type: object
+      properties:
+        serverMode:
+          type: string
+          description: gRPC server mode
+          enum:
+          - disabled
+          - bridge
+          - plain_server
+          - tls_server
+        grpcPort:
+          type: integer
+          description: Specify grpc port
+          format: int32
+        useTls:
+          type: boolean
+          description: Use TLS for gRPC communication
+        tlsCertChainFilePath:
+          type: string
+          description: TLS Cert Chain File Path
+        tlsPrivateKeyFilePath:
+          type: string
+          description: TLS Private Key File Path
+      description: gRPC server configuration
     PolicySource:
       type: object
       properties:
