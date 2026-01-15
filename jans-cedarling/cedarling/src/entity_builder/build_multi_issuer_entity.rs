@@ -232,12 +232,7 @@ impl EntityBuilder {
 
         // Filter out reserved claims before building attributes
         // iss, jti, exp are handled separately (iss as entity reference, jti as entity ID, exp as timestamp)
-        let filtered_claims: HashMap<String, Value> = token
-            .claims_value()
-            .iter()
-            .filter(|(key, _)| *key != "iss" && *key != "jti" && *key != "exp")
-            .map(|(k, v)| (k.clone(), v.clone()))
-            .collect();
+        let filtered_claims = filter_reserved_claims(token.claims_value());
 
         // Build entity attributes using the same logic as regular entity builder
         // This handles schema-based processing, claim mappings, and entity references
@@ -289,7 +284,7 @@ impl EntityBuilder {
 
         // Create entity tags for non-reserved JWT claims
         let mut tags = HashMap::new();
-        for (claim_key, claim_value) in filter_reserved_claims(token.claims_value()) {
+        for (claim_key, claim_value) in filtered_claims {
             let value = convert_claim_to_string_set(&claim_value);
             tags.insert(claim_key, value);
         }
