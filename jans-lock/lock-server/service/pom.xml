@@ -223,31 +223,22 @@
 			<artifactId>resteasy-jackson2-provider</artifactId>
 		</dependency>
 
-		<!-- gRPC dependencies -->
+		<!-- gRPC -->
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.78.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-protobuf</artifactId>
-			<version>1.78.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-stub</artifactId>
-			<version>1.78.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-servlet-jakarta</artifactId>
-			<version>1.78.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-services</artifactId>
-			<version>1.78.0</version>
 		</dependency>
 
 		<!-- RESTEasy gRPC Bridge -->
