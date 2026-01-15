@@ -1,0 +1,33 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Resource for managing the SMTP configuration of the Janssen Server.
+---
+
+# {{.Name}} ({{.Type}})
+
+Resource for managing the SMTP configuration of the Janssen Server.
+This resource cannot be created or deleted, only imported and updated.
+
+## Example Usage
+
+```terraform
+resource "jans_smtp_configuration" "global" {
+  host                                 = "smtp.example.com"
+  port                                 = 587
+  requires_ssl                         = true
+  trust_host                           = true
+  from_name                            = "Janssen"
+  from_email_address                   = "noreply@example.com"
+  requires_authentication              = true
+  smtp_authentication_account_username = "smtp-user"
+  smtp_authentication_account_password = "smtp-password"
+
+  lifecycle {
+    ignore_changes = [smtp_authentication_account_password]
+  }
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

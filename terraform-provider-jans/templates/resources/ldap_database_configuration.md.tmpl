@@ -1,0 +1,33 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Resource for managing LDAP database configuration in the Janssen Server.
+---
+
+# {{.Name}} ({{.Type}})
+
+Resource for managing LDAP database configuration in the Janssen Server.
+This resource allows you to configure external LDAP servers for user authentication and data storage.
+
+## Example Usage
+
+```terraform
+resource "jans_ldap_database_configuration" "example" {
+  config_id         = "auth_ldap_server"
+  local_primary_key = "uid"
+  primary_key       = "uid"
+  max_connections   = 200
+  servers           = ["ldap.example.com:1636"]
+  use_ssl           = true
+  bind_dn           = "cn=directory manager"
+  bind_password     = "your-secure-password"
+  base_dns          = ["ou=people,o=jans"]
+
+  lifecycle {
+    ignore_changes = [bind_password]
+  }
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}
