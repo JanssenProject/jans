@@ -16,10 +16,21 @@ use super::error::DataError;
 
 const MUTEX_EXPECT_MESSAGE: &str = "DataStore storage mutex should unlock";
 
+/// Effectively infinite TTL in seconds (approximately 10 years).
+/// This is used when `None` is specified for TTL to mean "no automatic expiration".
+/// We use 10 years instead of i64::MAX to avoid chrono Duration overflow issues.
+const INFINITE_TTL_SECS: i64 = 315_360_000; // 10 years in seconds
+
 /// Thread-safe key-value data store with TTL support and capacity management.
 ///
 /// Built on top of SparKV in-memory store for consistency with other Cedarling components.
 /// Provides automatic expiration, capacity limits, and thread-safe concurrent access.
+///
+/// ## TTL Semantics
+///
+/// - `config.default_ttl = None` means entries without explicit TTL will effectively never expire (10 years)
+/// - `config.max_ttl = None` means no upper limit on TTL values (10 years max)
+/// - When both `ttl` parameter and `config.default_ttl` are `None`, entries use the infinite TTL
 pub struct DataStore {
     storage: Mutex<SparKV<Value>>,
     config: DataStoreConfig,
@@ -27,6 +38,11 @@ pub struct DataStore {
 
 impl DataStore {
     /// Create a new DataStore with the given configuration.
+    ///
+    /// ## TTL Defaults
+    ///
+    /// - If `config.max_ttl` is `None`, uses 10 years (effectively infinite)
+    /// - If `config.default_ttl` is `None`, uses 10 years (effectively infinite)
     pub fn new(config: DataStoreConfig) -> Self {
         let sparkv_config = SparKVConfig {
             max_items: config.max_entries,
@@ -34,11 +50,11 @@ impl DataStore {
             max_ttl: config
                 .max_ttl
                 .map(|d| std_duration_to_chrono_duration(d))
-                .unwrap_or_else(|| ChronoDuration::seconds(60 * 60)), // Default 1 hour
+                .unwrap_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS)),
             default_ttl: config
                 .default_ttl
                 .map(|d| std_duration_to_chrono_duration(d))
-                .unwrap_or_else(|| ChronoDuration::seconds(5 * 60)), // Default 5 minutes
+                .unwrap_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS)),
             auto_clear_expired: true,
             earliest_expiration_eviction: false,
         };
@@ -59,7 +75,8 @@ impl DataStore {
     /// Push a value into the store with an optional TTL.
     ///
     /// If the key already exists, the value will be replaced.
-    /// If TTL is not provided, the default TTL from config will be used (if set).
+    /// If TTL is not provided, the default TTL from config will be used.
+    /// If both are `None`, uses infinite TTL (10 years).
     ///
     /// # Errors
     ///
@@ -69,12 +86,7 @@ impl DataStore {
     /// - Value size exceeds `max_entry_size`
     /// - Storage capacity is exceeded
     /// - TTL exceeds `max_ttl`
-    pub fn push(
-        &self,
-        key: String,
-        value: Value,
-        ttl: Option<StdDuration>,
-    ) -> Result<(), DataError> {
+    pub fn push(&self, key: &str, value: Value, ttl: Option<StdDuration>) -> Result<(), DataError> {
         // Validate key
         if key.is_empty() {
             return Err(DataError::InvalidKey);
@@ -92,23 +104,33 @@ impl DataStore {
             });
         }
 
-        // Validate TTL
-        let ttl_to_use = ttl.or(self.config.default_ttl);
-        if let Some(ttl_val) = ttl_to_use {
+        // Determine the effective TTL to use
+        // Priority: explicit ttl > config.default_ttl > infinite (10 years)
+        let requested_ttl = ttl
+            .or(self.config.default_ttl)
+            .unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64));
+
+        // If an explicit TTL was provided, validate it against max_ttl
+        if ttl.is_some() {
             if let Some(max_ttl) = self.config.max_ttl {
-                if ttl_val > max_ttl {
+                if requested_ttl > max_ttl {
                     return Err(DataError::TTLExceeded {
-                        requested: ttl_val,
+                        requested: requested_ttl,
                         max: max_ttl,
                     });
                 }
             }
         }
 
-        // Convert std::time::Duration to chrono::Duration
-        let chrono_ttl = ttl_to_use
-            .map(std_duration_to_chrono_duration)
-            .unwrap_or_else(|| ChronoDuration::seconds(5 * 60)); // Default 5 minutes
+        // Cap the effective TTL at max_ttl if set
+        let effective_ttl = if let Some(max_ttl) = self.config.max_ttl {
+            requested_ttl.min(max_ttl)
+        } else {
+            requested_ttl
+        };
+
+        // Convert to chrono::Duration
+        let chrono_ttl = std_duration_to_chrono_duration(effective_ttl);
 
         let mut storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
 
@@ -126,8 +148,11 @@ impl DataStore {
                 SparKVError::TTLTooLong => {
                     // This shouldn't happen since we validated above, but handle it anyway
                     DataError::TTLExceeded {
-                        requested: ttl_to_use.unwrap_or_default(),
-                        max: self.config.max_ttl.unwrap_or_default(),
+                        requested: effective_ttl,
+                        max: self
+                            .config
+                            .max_ttl
+                            .unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64)),
                     }
                 },
             })?;
@@ -183,12 +208,19 @@ impl DataStore {
 
 /// Convert `std::time::Duration` to `chrono::Duration`.
 ///
-/// Note: This conversion may lose precision for very large durations,
-/// but should be sufficient for TTL values (typically seconds to hours).
+/// Uses saturating conversion to prevent overflow for very large durations.
+/// Durations exceeding `i64::MAX` seconds will be capped at a safe maximum.
 fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
     let secs = d.as_secs();
     let nanos = d.subsec_nanos();
-    ChronoDuration::seconds(secs as i64) + ChronoDuration::nanoseconds(nanos as i64)
+
+    // Saturating conversion: i64::MAX seconds is ~292 billion years
+    // We cap at a safe maximum to prevent chrono panics
+    // i64::MAX / 1000 (milliseconds per second) is a safe upper bound
+    const MAX_SAFE_SECS: u64 = (i64::MAX / 1000) as u64;
+    let secs_capped = secs.min(MAX_SAFE_SECS);
+
+    ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(nanos as i64)
 }
 
 #[cfg(test)]
@@ -209,7 +241,7 @@ mod tests {
 
         // Push a simple value
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push simple value");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
@@ -220,7 +252,7 @@ mod tests {
             "active": true
         });
         store
-            .push("key2".to_string(), complex_value.clone(), None)
+            .push("key2", complex_value.clone(), None)
             .expect("failed to push complex value");
         assert_eq!(store.get("key2"), Some(complex_value));
     }
@@ -230,13 +262,13 @@ mod tests {
         let store = create_test_store();
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push initial value");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
         // Replace with new value
         store
-            .push("key1".to_string(), json!("value2"), None)
+            .push("key1", json!("value2"), None)
             .expect("failed to replace value");
         assert_eq!(store.get("key1"), Some(json!("value2")));
     }
@@ -245,7 +277,7 @@ mod tests {
     fn test_push_empty_key() {
         let store = create_test_store();
 
-        let result = store.push("".to_string(), json!("value"), None);
+        let result = store.push("", json!("value"), None);
         assert!(matches!(result, Err(DataError::InvalidKey)));
     }
 
@@ -261,7 +293,7 @@ mod tests {
         let store = create_test_store();
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push value for remove test");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
@@ -278,10 +310,10 @@ mod tests {
         let store = create_test_store();
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push key1 for clear test");
         store
-            .push("key2".to_string(), json!("value2"), None)
+            .push("key2", json!("value2"), None)
             .expect("failed to push key2 for clear test");
         assert_eq!(store.count(), 2);
 
@@ -298,12 +330,12 @@ mod tests {
         assert_eq!(store.count(), 0);
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push key1 for count test");
         assert_eq!(store.count(), 1);
 
         store
-            .push("key2".to_string(), json!("value2"), None)
+            .push("key2", json!("value2"), None)
             .expect("failed to push key2 for count test");
         assert_eq!(store.count(), 2);
 
@@ -318,10 +350,10 @@ mod tests {
         assert!(store.list_keys().is_empty());
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push key1 for list_keys test");
         store
-            .push("key2".to_string(), json!("value2"), None)
+            .push("key2", json!("value2"), None)
             .expect("failed to push key2 for list_keys test");
 
         let keys = store.list_keys();
@@ -335,10 +367,10 @@ mod tests {
         let store = create_test_store();
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push key1 for get_all test");
         store
-            .push("key2".to_string(), json!("value2"), None)
+            .push("key2", json!("value2"), None)
             .expect("failed to push key2 for get_all test");
 
         let all = store.get_all();
@@ -354,11 +386,7 @@ mod tests {
 
         // Push with very short TTL
         store
-            .push(
-                "key1".to_string(),
-                json!("value1"),
-                Some(StdDuration::from_millis(100)),
-            )
+            .push("key1", json!("value1"), Some(StdDuration::from_millis(100)))
             .expect("failed to push value with TTL");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
@@ -378,14 +406,14 @@ mod tests {
         let store = DataStore::new(config);
 
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push key1 for max_entries test");
         store
-            .push("key2".to_string(), json!("value2"), None)
+            .push("key2", json!("value2"), None)
             .expect("failed to push key2 for max_entries test");
 
         // Third entry should fail
-        let result = store.push("key3".to_string(), json!("value3"), None);
+        let result = store.push("key3", json!("value3"), None);
         assert!(matches!(
             result,
             Err(DataError::StorageLimitExceeded { max: 2 })
@@ -402,12 +430,12 @@ mod tests {
 
         // Small value should work
         store
-            .push("key1".to_string(), json!("small"), None)
+            .push("key1", json!("small"), None)
             .expect("failed to push small value for max_entry_size test");
 
         // Large value should fail
         let large_value = json!("this is a very long string that exceeds the limit");
-        let result = store.push("key2".to_string(), large_value, None);
+        let result = store.push("key2", large_value, None);
         assert!(matches!(result, Err(DataError::ValueTooLarge { .. })));
     }
 
@@ -421,19 +449,11 @@ mod tests {
 
         // TTL within limit should work
         store
-            .push(
-                "key1".to_string(),
-                json!("value1"),
-                Some(StdDuration::from_secs(30)),
-            )
+            .push("key1", json!("value1"), Some(StdDuration::from_secs(30)))
             .expect("failed to push value with valid TTL");
 
         // TTL exceeding limit should fail
-        let result = store.push(
-            "key2".to_string(),
-            json!("value2"),
-            Some(StdDuration::from_secs(120)),
-        );
+        let result = store.push("key2", json!("value2"), Some(StdDuration::from_secs(120)));
         assert!(matches!(result, Err(DataError::TTLExceeded { .. })));
     }
 
@@ -448,7 +468,7 @@ mod tests {
 
         // Push without explicit TTL should use default
         store
-            .push("key1".to_string(), json!("value1"), None)
+            .push("key1", json!("value1"), None)
             .expect("failed to push value with default TTL");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
@@ -465,25 +485,25 @@ mod tests {
 
         // String
         store
-            .push("str".to_string(), json!("test"), None)
+            .push("str", json!("test"), None)
             .expect("failed to push string value");
         assert_eq!(store.get("str"), Some(json!("test")));
 
         // Number
         store
-            .push("num".to_string(), json!(42), None)
+            .push("num", json!(42), None)
             .expect("failed to push number value");
         assert_eq!(store.get("num"), Some(json!(42)));
 
         // Boolean
         store
-            .push("bool".to_string(), json!(true), None)
+            .push("bool", json!(true), None)
             .expect("failed to push boolean value");
         assert_eq!(store.get("bool"), Some(json!(true)));
 
         // Array
         store
-            .push("arr".to_string(), json!([1, 2, 3]), None)
+            .push("arr", json!([1, 2, 3]), None)
             .expect("failed to push array value");
         assert_eq!(store.get("arr"), Some(json!([1, 2, 3])));
 
@@ -494,7 +514,7 @@ mod tests {
             "c": [1, 2, 3]
         });
         store
-            .push("obj".to_string(), obj.clone(), None)
+            .push("obj", obj.clone(), None)
             .expect("failed to push object value");
         assert_eq!(store.get("obj"), Some(obj));
     }
@@ -514,7 +534,7 @@ mod tests {
                 for j in 0..10 {
                     let key = format!("key_{}_{}", i, j);
                     store_clone
-                        .push(key, json!(format!("value_{}_{}", i, j)), None)
+                        .push(&key, json!(format!("value_{}_{}", i, j)), None)
                         .expect("failed to push value in thread");
                 }
             });
@@ -556,8 +576,9 @@ mod tests {
 
         // Populate store
         for i in 0..20 {
+            let key = format!("key_{}", i);
             store
-                .push(format!("key_{}", i), json!(i), None)
+                .push(&key, json!(i), None)
                 .expect("failed to populate store for concurrent remove test");
         }
 
