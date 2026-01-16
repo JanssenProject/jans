@@ -28,17 +28,17 @@ use crate::{
 use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
 
 /// The value of the `status_list_uri` claim from a JWT
-pub type StatusListUri = String;
+type StatusListUri = String;
 
 /// Contains an Arc<RwLock<_>> internally so clone should be fine
 #[derive(Debug, Default, Clone)]
-pub struct StatusListCache {
+pub(crate) struct StatusListCache {
     pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusList>>>,
 }
 
 impl StatusListCache {
     /// Initializes the statuslist for the given issuer
-    pub async fn init_for_iss(
+    pub(crate) async fn init_for_iss(
         &mut self,
         iss_config: &IssuerConfig,
         validators: &JwtValidatorCache,

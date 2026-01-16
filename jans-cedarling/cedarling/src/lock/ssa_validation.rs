@@ -87,7 +87,7 @@ use thiserror::Error;
 /// This struct allows customization of validation behavior including
 /// required claims, allowed algorithms, and validation behavior.
 #[derive(Debug, Clone)]
-pub struct SsaValidationConfig {
+pub(crate) struct SsaValidationConfig {
     /// Set of required claims that must be present in the SSA JWT.
     /// Default includes: software_id, grant_types, iss, exp, iat, jti (RFC 7591/RFC 7519)
     /// plus org_id, software_roles (Cedarling custom requirements)
@@ -155,7 +155,7 @@ impl Default for SsaValidationConfig {
 /// 
 /// This struct includes both RFC 7591 defined claims and custom Cedarling requirements.
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
-pub struct SsaClaims {
+pub(crate) struct SsaClaims {
     /// Software identifier (RFC 7591)
     pub software_id: String,
     /// Grant types the software is authorized to use (RFC 7591)
@@ -181,7 +181,7 @@ pub struct SsaClaims {
 ///
 /// This is a convenience function that uses the default validation settings.
 /// For custom validation options, use `validate_ssa_jwt_with_config`.
-pub async fn validate_ssa_jwt(
+pub(crate) async fn validate_ssa_jwt(
     ssa_jwt: &str,
     jwks_uri: &str,
     accept_invalid_certs: bool,
@@ -197,7 +197,7 @@ pub async fn validate_ssa_jwt(
 ///
 /// This function allows full customization of validation behavior including
 /// required claims, allowed algorithms, and validation options.
-pub async fn validate_ssa_jwt_with_config(
+pub(crate) async fn validate_ssa_jwt_with_config(
     ssa_jwt: &str,
     jwks_uri: &str,
     config: &SsaValidationConfig,
@@ -228,7 +228,7 @@ pub async fn validate_ssa_jwt_with_config(
 }
 
 /// Validates the basic structure and required claims of an SSA JWT with custom configuration
-pub fn validate_ssa_structure_with_config(
+pub(crate) fn validate_ssa_structure_with_config(
     decoded_jwt: &DecodedJwt,
     config: &SsaValidationConfig,
 ) -> Result<(), SsaValidationError> {
@@ -405,7 +405,7 @@ fn validate_ssa_signature_and_claims_with_config(
 
 /// Errors that can occur during SSA JWT validation
 #[derive(Debug, Error)]
-pub enum SsaValidationError {
+pub(crate) enum SsaValidationError {
     /// Failed to decode the JWT structure
     #[error("failed to decode JWT: {0}")]
     DecodeJwt(#[from] DecodeJwtError),

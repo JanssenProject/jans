@@ -14,7 +14,7 @@ from prompt_toolkit.widgets import Button, Label, TextArea, RadioList,\
     Button, Dialog, Frame
 
 from utils.multi_lang import _
-from utils.static import DialogResult
+from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils, common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
@@ -81,27 +81,23 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             prop['value2'] = val_
                         data[prop_container.jans_name].append(prop)
 
-        data['locationType'] = data.get('locationType')
         data['internal'] = self.data.get('internal', False)
         data['modified'] = self.data.get('modified', False)
         data['revision'] = self.data.get('revision', 0) + 1
         data['script'] = self.script
 
-        if data['locationType'] != 'file':
-            data['locationType'] = 'db'
-
         if not 'moduleProperties' in data:
             data['moduleProperties'] = []
 
-        for prop in data['moduleProperties'][:]:
-            if prop['value1'] in ('location_type', 'location_path'):
-                data['moduleProperties'].remove(prop)
+        if 'locationType' not in data:
+            data['locationType'] = 'db'
 
-        location_type = data.pop('locationType')
-        data['moduleProperties'].append({'value1': 'location_type', 'value2': location_type})
-
-        if location_type == 'file':
-            data['moduleProperties'].append({'value1': 'location_path', 'value2': data.pop('locationPath')})
+        for mod_prop in data['moduleProperties']:
+            if mod_prop.get('value1') == 'location_type':
+                mod_prop['value2'] = 'db'
+                break
+        else:
+            data['moduleProperties'].append({'value1': 'location_type', 'value2': 'db'})
 
         if self.data.get('baseDn'):
             data['baseDn'] = self.data['baseDn']
@@ -129,24 +125,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             script_types.append((scr_type, scr_name))
         script_types.sort()
 
-
-        file_name = ''
-        if self.data.get('locationType') == 'file':
-            for prop in self.data['moduleProperties'][:]:
-                if prop['value1'] == 'location_path':
-                    location_path = prop.get('value2', '')
-                    file_name = os.path.basename(location_path)
-
-        self.location_widget = self.myparent.getTitledText(
-            _("          File Name"), 
-            name='locationPath', 
-            value=file_name,
-            style='class:script-titledtext', 
-            jans_help="locationPath"
-            )
-
-        self.set_location_widget_state(self.data.get('locationType') == 'file')
-
         config_properties_title = _("Config Properties: ")
         add_property_title = _("Add Property")
         module_properties_title = _("Module Properties: ")
@@ -168,8 +146,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 on_display=self.myparent.data_display_dialog,
                 get_help=(self.get_help,'Properties'),
                 selectes=0,
-                headerColor='class:outh-client-navbar-headcolor',
-                entriesColor='class:outh-client-navbar-entriescolor',
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
                 all_data=config_properties_data,
                 underline_headings=False,
                 max_width=44,
@@ -196,8 +174,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 on_display=self.myparent.data_display_dialog,
                 get_help=(self.get_help,'Properties'),
                 selectes=0,
-                headerColor='class:outh-client-navbar-headcolor',
-                entriesColor='class:outh-client-navbar-entriescolor',
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
                 all_data=module_properties_data,
                 underline_headings=False,
                 max_width=44,
@@ -214,7 +192,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         import_script_button.window.jans_help="Enter to import script for local file"
 
         self.edit_dialog_content = [
-                    self.myparent.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'inum'), read_only=True),
+                    self.myparent.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style=cli_style.titled_text, jans_help=self.myparent.get_help_from_schema(schema, 'inum'), read_only=True),
                     self.myparent.getTitledWidget(
                                 _("Script Type"),
                                 name='scriptType',
@@ -223,24 +201,11 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                     value=self.data.get('scriptType', '')
                                     ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'scriptType'),
-                                style='class:outh-client-dropdown'),
+                                style=cli_style.drop_down),
 
-                    self.myparent.getTitledCheckBox(_("Enabled"), name='enabled', checked=self.data.get('enabled'), style='class:script-checkbox', jans_help=self.myparent.get_help_from_schema(schema, 'enabled')),
-                    self.myparent.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'name')),
-                    self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'description')),
-
-
-                    self.myparent.getTitledRadioButton(
-                            _("Location"),
-                            name='locationType',
-                            values=[('db', _("Database")), ('file', _("File System"))],
-                            current_value= 'file' if self.data.get('locationType') == 'file' else 'db',
-                            jans_help=_("Where to save script"),
-                            style='class:outh-client-radiobutton',
-                            on_selection_changed=self.script_location_changed,
-                            ),
-
-                     self.location_widget,
+                    self.myparent.getTitledCheckBox(_("Enabled"), name='enabled', checked=self.data.get('enabled'), style=cli_style.check_box, jans_help=self.myparent.get_help_from_schema(schema, 'enabled')),
+                    self.myparent.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style=cli_style.titled_text, jans_help=self.myparent.get_help_from_schema(schema, 'name')),
+                    self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style=cli_style.titled_text, jans_help=self.myparent.get_help_from_schema(schema, 'description')),
 
                     self.myparent.getTitledWidget(
                                 _("Programming Language"),
@@ -251,7 +216,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                     on_value_changed=self.script_lang_changed,
                                     ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'programmingLanguage'),
-                                style='class:outh-client-dropdown'),
+                                style=cli_style.drop_down),
 
                     self.myparent.getTitledWidget(
                                 _("Level"),
@@ -260,10 +225,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                     value=self.data.get('level', 0)
                                     ),
                                 jans_help=self.myparent.get_help_from_schema(schema, 'level'),
-                                style='class:outh-client-dropdown'),
+                                style=cli_style.drop_down),
 
                     VSplit([
-                            Label(text=config_properties_title, style='class:script-label', width=len(config_properties_title)+1), 
+                            Label(text=config_properties_title, style=cli_style.label, width=len(config_properties_title)+1), 
                             self.config_properties_container,
                             Window(width=2),
                             HSplit([
@@ -275,7 +240,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             ),
 
                     VSplit([
-                            Label(text=module_properties_title, style='class:script-label', width=len(module_properties_title)+1), 
+                            Label(text=module_properties_title, style=cli_style.label, width=len(module_properties_title)+1), 
                             self.module_properties_container,
                             Window(width=2),
                             HSplit([
@@ -320,20 +285,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         """
         self.cur_lang = value
 
-    def set_location_widget_state(
-        self, 
-        state: bool,
-        ) -> None:
-        """This method check the state of the location to save script
-
-        Args:
-            state (bool): state is changed or not
-        """
-        self.location_widget.me.read_only = not state
-        self.location_widget.me.focusable = state
-        if not state:
-            self.location_widget.me.text = ''
-
     def script_location_changed(
         self, 
         redio_button: RadioList,
@@ -356,8 +307,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             title = _("Enter Configuration Properties")
 
         prop_data = kwargs.get('passed', ('',''))
-        key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=prop_data[0], style='class:script-titledtext', jans_help=_("Script propery Key"))
-        val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=prop_data[1], style='class:script-titledtext', jans_help=_("Script property Value"))
+        key_widget = self.myparent.getTitledText(_("Key"), name='property_key', value=prop_data[0], style=cli_style.titled_text, jans_help=_("Script propery Key"))
+        val_widget = self.myparent.getTitledText(_("Value"), name='property_val', value=prop_data[1], style=cli_style.titled_text, jans_help=_("Script property Value"))
 
         def add_property(dialog: Dialog) -> None:
             key_ = key_widget.me.text

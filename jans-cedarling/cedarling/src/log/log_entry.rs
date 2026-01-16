@@ -15,6 +15,7 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
 use smol_str::{SmolStr, ToSmolStr};
 use uuid7::Uuid;
@@ -48,9 +49,9 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
+    pub(crate) fn new(base: BaseLogEntry) -> LogEntry {
         Self {
-            base: BaseLogEntry::new_opt_request_id(log_type, request_id),
+            base,
             auth_info: None,
             msg: String::new(),
             error_msg: None,
@@ -77,11 +78,6 @@ impl LogEntry {
     pub(crate) fn set_cedar_version(mut self) -> Self {
         self.cedar_lang_version = Some(cedar_policy::get_lang_version());
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
-        self
-    }
-
-    pub(crate) fn set_level(mut self, level: LogLevel) -> Self {
-        self.base.level = Some(level);
         self
     }
 }
@@ -223,7 +219,7 @@ pub struct Diagnostics {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize)]
-pub struct DiagnosticsSummary {
+pub(crate) struct DiagnosticsSummary {
     /// `PolicyId`s of the policies that contributed to the decision.
     pub reason: HashSet<PolicyInfo>,
     /// Errors that occurred during authorization.
@@ -231,7 +227,7 @@ pub struct DiagnosticsSummary {
 }
 
 impl DiagnosticsSummary {
-    pub fn from_diagnostics(diagnostics: &[Diagnostics]) -> Self {
+    pub(crate) fn from_diagnostics(diagnostics: &[Diagnostics]) -> Self {
         let mut reason: HashSet<PolicyInfo> = HashSet::new();
         let mut errors = Vec::new();
 
@@ -282,7 +278,7 @@ impl Diagnostics {
 
 /// log entry for decision
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct DecisionLogEntry {
+pub(crate) struct DecisionLogEntry {
     /// base information of entry
     /// it is unwrap to flatten structure
     #[serde(flatten)]
@@ -320,7 +316,7 @@ pub struct DecisionLogEntry {
 }
 
 impl DecisionLogEntry {
-    pub fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
+    pub(crate) fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
         let mut tags = Vec::with_capacity(2);
         if user {
             tags.push("User".into());
@@ -331,7 +327,7 @@ impl DecisionLogEntry {
         tags
     }
 
-    pub fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
+    pub(crate) fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
         principals
             .iter()
             .map(|uid| uid.type_name().to_smolstr())
@@ -364,7 +360,7 @@ impl Loggable for DecisionLogEntry {
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
 // Static variable initialize only once at start of program and available during all program live cycle.
 // Import inside function guarantee that it is used only inside function.
-pub fn gen_uuid7() -> Uuid {
+pub(crate) fn gen_uuid7() -> Uuid {
     use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
@@ -403,29 +399,51 @@ pub struct BaseLogEntry {
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(log_type: LogType, request_id: Uuid) -> Self {
-        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
-
-        let default_log_level = if log_type == LogType::System {
-            Some(LogLevel::TRACE)
-        } else {
-            None
-        };
-
-        Self {
-            id: gen_uuid7(),
-            request_id: Some(request_id),
-            timestamp: Some(local_time_string),
-            log_kind: log_type,
-            level: default_log_level,
-        }
+    /// Create new BaseLogEntry for System log with required request_id
+    pub(crate) fn new_system(log_level: LogLevel, request_id: Uuid) -> Self {
+        Self::new_system_opt_request_id(log_level, Some(request_id))
     }
 
-    pub(crate) fn new_opt_request_id(log_type: LogType, request_id: Option<Uuid>) -> Self {
+    /// Create new BaseLogEntry for Decision log with required request_id
+    pub(crate) fn new_decision(request_id: Uuid) -> Self {
+        Self::new_decision_opt_request_id(Some(request_id))
+    }
+
+    #[allow(dead_code)]
+    /// Create new BaseLogEntry for Metric log with required request_id
+    pub(crate) fn new_metric(request_id: Uuid) -> Self {
+        Self::new_metric_opt_request_id(Some(request_id))
+    }
+
+    /// Create new BaseLogEntry for System log with optional request_id
+    /// Only System log can have log level
+    pub(crate) fn new_system_opt_request_id(log_level: LogLevel, request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::System, Some(log_level), request_id)
+    }
+
+    /// Create new BaseLogEntry for Decision log with optional request_id
+    pub(crate) fn new_decision_opt_request_id(request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::Decision, None, request_id)
+    }
+
+    /// Create new BaseLogEntry for Metric log with optional request_id
+    pub(crate) fn new_metric_opt_request_id(request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::Metric, None, request_id)
+    }
+
+    fn new_opt_request_id(
+        log_type: LogType,
+        log_level: Option<LogLevel>,
+        request_id: Option<Uuid>,
+    ) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
-            Some(LogLevel::TRACE)
+            Some(if let Some(log_level_val) = log_level {
+                log_level_val
+            } else {
+                LogLevel::TRACE
+            })
         } else {
             None
         };
@@ -437,6 +455,15 @@ impl BaseLogEntry {
             log_kind: log_type,
             level: default_log_level,
         }
+    }
+
+    /// Create LoggableFn from BaseLogEntry
+    pub(crate) fn with_fn<F, R>(self, builder: F) -> LoggableFn<F>
+    where
+        R: Loggable + Indexed,
+        for<'a> F: Fn(BaseLogEntry) -> R,
+    {
+        LoggableFn::new(self, builder)
     }
 }
 
@@ -469,10 +496,10 @@ impl Loggable for BaseLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
+pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
 
 impl LogTokensInfo {
-    pub fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
+    pub(crate) fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
         let tokens_logging_info = tokens
             .iter()
             .map(|(tkn_name, tkn)| (tkn_name.clone(), tkn.logging_info(decision_log_jwt_id)))
@@ -485,7 +512,7 @@ impl LogTokensInfo {
         Self(HashMap::new())
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }

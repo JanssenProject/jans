@@ -50,17 +50,19 @@
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
 mod err_log_entry;
-pub mod interface;
+pub(crate) mod interface;
 
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;
+pub(crate) mod loggable_fn;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
 pub use log_entry::*;
 pub use log_level::*;
+pub use stdout_logger::StdOutLoggerMode;
 
 #[cfg(test)]
 pub(crate) use nop_logger::NopLogger;
@@ -75,8 +77,6 @@ use std::sync::{Arc, Weak};
 pub use interface::LogStorage;
 pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
-#[cfg(all(not(target_arch = "wasm32"), not(test)))]
-pub(crate) use log_strategy::LogStrategyLogger;
 
 use crate::LockServiceConfig;
 use crate::app_types::{ApplicationName, PdpID};
@@ -89,7 +89,7 @@ pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
 #[allow(dead_code)]
 #[cfg(test)]
-pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
+pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(init_test_logger);
 
 /// Initialize logger.
 /// entry point for initialize logger
@@ -115,47 +115,11 @@ pub(crate) fn init_test_logger() -> Logger {
         LogStrategy::new(
             &LogConfig {
                 log_level: LogLevel::DEBUG,
-                log_type: crate::LogTypeConfig::StdOut,
+                log_type: crate::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             },
             PdpID::new(),
             Some("test".to_string().into()),
         )
         .unwrap(),
     )
-}
-
-/// Logs an entry, offloading to a background thread on native (except MemoryLogger), synchronously on WASM and during tests.
-///
-/// This function offloads synchronous log serialization to a background thread (via `tokio::task::spawn_blocking`)
-/// in native builds to avoid blocking the authorization response path. The MemoryLogger remains synchronous
-/// even on native to ensure logs are immediately available for retrieval. In WASM builds and during unit tests,
-/// logging is performed synchronously in the calling thread to maintain deterministic behavior.
-///
-/// # Arguments
-///
-/// * `logger` - The logger instance to use
-/// * `entry` - The log entry to write
-#[cfg(all(not(target_arch = "wasm32"), not(test)))]
-pub(crate) fn log_async<T>(logger: &Logger, entry: T)
-where
-    T: interface::Loggable + Send + 'static,
-{
-    if matches!(logger.logger(), LogStrategyLogger::MemoryLogger(_)) {
-        // Memory logger must remain synchronous so clients can immediately read logs.
-        logger.log_any(entry);
-        return;
-    }
-
-    let logger = logger.clone();
-    tokio::task::spawn_blocking(move || {
-        logger.log_any(entry);
-    });
-}
-
-#[cfg(any(target_arch = "wasm32", test))]
-pub(crate) fn log_async<T>(logger: &Logger, entry: T)
-where
-    T: interface::Loggable + Send + 'static,
-{
-    logger.log_any(entry);
 }

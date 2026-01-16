@@ -76,13 +76,13 @@ mod token_cache;
 mod validation;
 
 #[cfg(test)]
-#[allow(dead_code)]
-mod test_utils;
+pub(crate) mod test_utils;
 
-pub use decode::*;
-pub use error::*;
-pub use token::{Token, TokenClaimTypeError, TokenClaims};
-pub use token_cache::TokenCache;
+pub(crate) use decode::*;
+pub(crate) use error::*;
+pub(crate) use token::{Token, TokenClaimTypeError, TokenClaims};
+pub(crate) use token_cache::TokenCache;
+pub(crate) use validation::TrustedIssuerError;
 
 use crate::JwtConfig;
 use crate::LogLevel;
@@ -100,17 +100,18 @@ use serde_json::json;
 use status_list::*;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use std::sync::RwLock;
 use validation::*;
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
 
 /// Handles JWT validation
-pub struct JwtService {
+pub(crate) struct JwtService {
     validators: JwtValidatorCache,
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
+    /// Trusted issuer validator for advanced validation scenarios
+    trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
     signed_authz_available: bool,
@@ -126,7 +127,19 @@ struct IssuerConfig {
 }
 
 impl JwtService {
-    pub async fn new(
+    /// Creates a new JWT service with the given configuration.
+    ///
+    /// # Arguments
+    ///
+    /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
+    /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
+    /// * `logger` - Optional logger for diagnostic messages
+    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 to disable caching)
+    ///
+    /// # Errors
+    ///
+    /// Returns `JwtServiceInitError` if initialization fails (e.g., failed to fetch OIDC config)
+    pub(crate) async fn new(
         jwt_config: &JwtConfig,
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
@@ -145,6 +158,9 @@ impl JwtService {
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
         let has_trusted_issuers = !trusted_issuers.is_empty();
+
+        // Clone trusted_issuers before consumption - original is iterated and consumed below
+        let trusted_issuers_for_validator = trusted_issuers.clone();
 
         for (issuer_id, iss) in trusted_issuers.into_iter() {
             // this is what we expect to find in the JWT `iss` claim
@@ -199,10 +215,14 @@ impl JwtService {
         }
         let key_service = Arc::new(key_service);
 
+        // Create TrustedIssuerValidator for advanced validation scenarios
+        let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers_for_validator);
+
         Ok(Self {
             validators,
             key_service,
             issuer_configs,
+            trusted_issuer_validator,
             logger,
             token_cache,
             signed_authz_available,
@@ -210,7 +230,23 @@ impl JwtService {
         })
     }
 
-    pub async fn validate_tokens<'a>(
+    /// Validates multiple JWT tokens against trusted issuers.
+    ///
+    /// This method validates each token in the provided map, checking:
+    /// - JWT signature validation (if enabled)
+    /// - Token expiration and other standard claims
+    /// - Required claims as specified in the trusted issuer configuration
+    ///
+    /// Tokens from untrusted issuers are skipped with a warning.
+    ///
+    /// # Arguments
+    ///
+    /// * `tokens` - Map of token names to JWT strings (e.g., "access_token" -> "eyJ...")
+    ///
+    /// # Returns
+    ///
+    /// Map of token names to validated `Token` objects, or an error if any token fails validation.
+    pub(crate) async fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
@@ -292,10 +328,10 @@ impl JwtService {
             token_kind,
             algorithm: decoded_jwt.header.alg,
         };
-        let validator: Arc<RwLock<JwtValidator>> = self
-            .validators
-            .get(&validator_key)
-            .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
+        let validator: Arc<std::sync::RwLock<JwtValidator>> =
+            self.validators
+                .get(&validator_key)
+                .ok_or(ValidateJwtError::MissingValidator(validator_key.owned()))?;
 
         // validate JWT
         // NOTE: the JWT will be validated depending on the validator's settings that
@@ -307,9 +343,84 @@ impl JwtService {
                 .validate_jwt(jwt, decoding_key)?
         };
 
-        // The users of the validated JWT will need a reference to the TrustedIssuer
-        // to do some processing so we include it here for convenience
-        validated_jwt.trusted_iss = decoded_jwt.iss().and_then(|iss| self.get_issuer_ref(iss));
+        // Use TrustedIssuerValidator to find and validate against trusted issuer
+        // This implements Requirement 5: "WHEN processing JWT tokens THEN the Cedarling
+        // SHALL check if the token issuer matches any configured trusted issuers"
+        let iss_claim = decoded_jwt.iss();
+
+        // Try to find trusted issuer using TrustedIssuerValidator
+        let trusted_iss = if let Some(iss) = iss_claim {
+            match self.trusted_issuer_validator.find_trusted_issuer(iss) {
+                Ok(issuer) => Some(issuer),
+                Err(TrustedIssuerError::UntrustedIssuer(_)) => {
+                    // Fall back to issuer_configs for backward compatibility
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!("Untrusted issuer '{}', falling back to issuer_configs", iss),
+                        Some(LogLevel::DEBUG),
+                    ));
+                    self.get_issuer_ref(iss)
+                },
+                Err(e) => {
+                    self.logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Error finding trusted issuer '{}': {}, falling back to issuer_configs",
+                            iss, e
+                        ),
+                        Some(LogLevel::DEBUG),
+                    ));
+                    self.get_issuer_ref(iss)
+                },
+            }
+        } else {
+            None
+        };
+
+        // Set trusted issuer reference on validated JWT
+        validated_jwt.trusted_iss = trusted_iss.clone();
+
+        // Validate required claims based on trusted issuer configuration
+        // This implements Requirement 5: "WHEN a JWT token is from a trusted issuer
+        // THEN the Cedarling SHALL validate required claims as specified in the issuer configuration"
+        if let Some(trusted_iss) = &trusted_iss {
+            // Get the token type name from token_kind (skip for StatusList tokens)
+            let token_type: Option<&str> = match &token_kind {
+                TokenKind::AuthzRequestInput(name) => Some(*name),
+                TokenKind::AuthorizeMultiIssuer(name) => Some(name),
+                TokenKind::StatusList => None, // Skip required claims validation for status list tokens
+            };
+
+            if let Some(token_type) = token_type {
+                // Get token metadata for this token type
+                if let Some(token_metadata) = trusted_iss.token_metadata.get(token_type) {
+                    // NOTE: This is the ONLY place where trusted-issuer-driven "required claims"
+                    //       validation occurs. Standard JWT validation (signature, expiration,
+                    //       audience, etc.) happens earlier in the validation pipeline (via the
+                    //       JWT validator). The policy-driven required_claims are validated only
+                    //       here, once per token, after we've resolved the TrustedIssuer and
+                    //       token_metadata for that token type.
+                    if let Err(err) =
+                        validate_required_claims(&validated_jwt.claims, token_type, token_metadata)
+                    {
+                        self.logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "Token '{}' failed required claims validation: {}",
+                                token_type, err
+                            ),
+                            Some(LogLevel::ERROR),
+                        ));
+                        // Convert TrustedIssuerError to ValidateJwtError
+                        match err {
+                            TrustedIssuerError::MissingRequiredClaim { claim, .. } => {
+                                return Err(ValidateJwtError::MissingClaims(vec![claim]));
+                            },
+                            _ => {
+                                return Err(ValidateJwtError::TrustedIssuerValidation(err));
+                            },
+                        }
+                    }
+                }
+            }
+        }
 
         Ok(validated_jwt)
     }
@@ -322,7 +433,7 @@ impl JwtService {
     /// - Non-deterministic token detection (duplicate issuer+type combinations)
     ///
     /// Returns a result containing validated tokens or detailed error information.
-    pub fn validate_multi_issuer_tokens(
+    pub(crate) fn validate_multi_issuer_tokens(
         &self,
         tokens: &[TokenInput],
     ) -> Result<HashMap<String, Arc<Token>>, MultiIssuerValidationError> {
@@ -600,7 +711,6 @@ mod test {
             None,
         )
         .await
-        .inspect_err(|e| eprintln!("error msg: {}", e))
         .expect("Should create JwtService");
         let iss = Arc::new(iss);
 

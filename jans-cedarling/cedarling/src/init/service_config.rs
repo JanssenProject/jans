@@ -24,7 +24,7 @@ pub enum ServiceConfigError {
 }
 
 impl ServiceConfig {
-    pub async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
+    pub(crate) async fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
         let policy_store = load_policy_store(&bootstrap.policy_store_config).await?;
 
         Ok(Self { policy_store })

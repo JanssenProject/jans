@@ -10,6 +10,9 @@
         <param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
         <param-value>false</param-value>
     </context-param>
+    <session-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
 
     <!-- weld -->
     <listener>
