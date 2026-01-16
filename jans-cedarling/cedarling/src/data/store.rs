@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::RwLock;
 use std::time::Duration as StdDuration;
 
 use chrono::Duration as ChronoDuration;
@@ -14,7 +14,7 @@ use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 use super::config::DataStoreConfig;
 use super::error::DataError;
 
-const MUTEX_EXPECT_MESSAGE: &str = "DataStore storage mutex should unlock";
+const RWLOCK_EXPECT_MESSAGE: &str = "DataStore storage lock should not be poisoned";
 
 /// Effectively infinite TTL in seconds (approximately 10 years).
 /// This is used when `None` is specified for TTL to mean "no automatic expiration".
@@ -32,7 +32,7 @@ const INFINITE_TTL_SECS: i64 = 315_360_000; // 10 years in seconds
 /// - `config.max_ttl = None` means no upper limit on TTL values (10 years max)
 /// - When both `ttl` parameter and `config.default_ttl` are `None`, entries use the infinite TTL
 pub struct DataStore {
-    storage: Mutex<SparKV<Value>>,
+    storage: RwLock<SparKV<Value>>,
     config: DataStoreConfig,
 }
 
@@ -64,7 +64,7 @@ impl DataStore {
             Some(|v| serde_json::to_string(v).map(|s| s.len()).unwrap_or(0));
 
         Self {
-            storage: Mutex::new(SparKV::with_config_and_sizer(
+            storage: RwLock::new(SparKV::with_config_and_sizer(
                 sparkv_config,
                 size_calculator,
             )),
@@ -132,7 +132,7 @@ impl DataStore {
         // Convert to chrono::Duration
         let chrono_ttl = std_duration_to_chrono_duration(effective_ttl);
 
-        let mut storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
 
         // Use empty index keys since we don't need indexing for data store
         storage
@@ -163,42 +163,48 @@ impl DataStore {
     /// Get a value from the store by key.
     ///
     /// Returns `None` if the key doesn't exist or the entry has expired.
+    /// Uses read lock for concurrent access.
     pub fn get(&self, key: &str) -> Option<Value> {
-        let storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage.get(key).cloned()
     }
 
     /// Remove a value from the store by key.
     ///
     /// Returns `true` if the key existed and was removed, `false` otherwise.
+    /// Uses write lock for exclusive access.
     pub fn remove(&self, key: &str) -> bool {
-        let mut storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
         storage.pop(key).is_some()
     }
 
     /// Clear all entries from the store.
+    /// Uses write lock for exclusive access.
     pub fn clear(&self) {
-        let mut storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
         storage.clear();
     }
 
     /// Get the number of entries currently in the store.
+    /// Uses read lock for concurrent access.
     pub fn count(&self) -> usize {
-        let storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage.len()
     }
 
     /// List all keys currently in the store.
+    /// Uses read lock for concurrent access.
     pub fn list_keys(&self) -> Vec<String> {
-        let storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage.get_keys()
     }
 
     /// Get all active (non-expired) entries as a HashMap.
     ///
     /// This is used for context injection during authorization.
+    /// Uses read lock for concurrent access.
     pub fn get_all(&self) -> HashMap<String, Value> {
-        let storage = self.storage.lock().expect(MUTEX_EXPECT_MESSAGE);
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
