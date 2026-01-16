@@ -7,7 +7,7 @@
 
 /// Cedar schema-specific errors.
 #[derive(Debug, thiserror::Error)]
-pub enum CedarSchemaErrorType {
+pub(crate) enum CedarSchemaErrorType {
     /// Schema file is empty
     #[error("Schema file is empty")]
     EmptySchema,
@@ -23,7 +23,7 @@ pub enum CedarSchemaErrorType {
 
 /// Cedar entity-specific errors.
 #[derive(Debug, thiserror::Error)]
-pub enum CedarEntityErrorType {
+pub(crate) enum CedarEntityErrorType {
     /// Failed to parse entity from JSON
     #[error("Failed to parse entity from JSON: {0}")]
     JsonParseError(String),
@@ -43,14 +43,10 @@ pub enum CedarEntityErrorType {
 
 /// Trusted issuer-specific errors.
 #[derive(Debug, thiserror::Error)]
-pub enum TrustedIssuerErrorType {
+pub(crate) enum TrustedIssuerErrorType {
     /// Trusted issuer file is not a JSON object
     #[error("Trusted issuer file must be a JSON object")]
     NotAnObject,
-
-    /// Issuer configuration is not an object
-    #[error("Issuer '{issuer_id}' must be a JSON object")]
-    IssuerNotAnObject { issuer_id: String },
 
     /// Missing required field in issuer configuration
     #[error("Issuer '{issuer_id}': missing required field '{field}'")]
@@ -79,7 +75,7 @@ pub enum TrustedIssuerErrorType {
 /// Manifest validation-specific errors.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 #[cfg(not(target_arch = "wasm32"))]
-pub enum ManifestErrorType {
+pub(crate) enum ManifestErrorType {
     /// Manifest file not found
     #[error("Manifest file not found (manifest.json is required for integrity validation)")]
     ManifestNotFound,
@@ -123,7 +119,7 @@ pub enum ManifestErrorType {
 
 /// Errors that can occur during policy store operations.
 #[derive(Debug, thiserror::Error)]
-pub enum PolicyStoreError {
+pub(crate) enum PolicyStoreError {
     /// IO error during file operations
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
@@ -204,7 +200,7 @@ pub enum PolicyStoreError {
 
 /// Details about Cedar parsing errors.
 #[derive(Debug, Clone, thiserror::Error)]
-pub enum CedarParseErrorDetail {
+pub(crate) enum CedarParseErrorDetail {
     /// Missing @id() annotation
     #[error("No @id() annotation found and could not derive ID from filename")]
     MissingIdAnnotation,
@@ -224,7 +220,7 @@ pub enum CedarParseErrorDetail {
 
 /// Validation errors for policy store components.
 #[derive(Debug, thiserror::Error)]
-pub enum ValidationError {
+pub(crate) enum ValidationError {
     /// Failed to parse metadata JSON
     #[error("Invalid metadata in file {file}: failed to parse JSON")]
     MetadataJsonParseFailed {
@@ -309,7 +305,7 @@ pub enum ValidationError {
 
 /// Errors related to archive (.cjar) handling.
 #[derive(Debug, thiserror::Error)]
-pub enum ArchiveError {
+pub(crate) enum ArchiveError {
     /// Invalid file extension (expected .cjar)
     #[error("Invalid file extension: expected '{expected}', found '{found}'")]
     #[cfg(not(target_arch = "wasm32"))]

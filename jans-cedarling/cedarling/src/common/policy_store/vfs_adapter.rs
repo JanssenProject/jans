@@ -20,7 +20,7 @@ use std::path::Path;
 
 /// Represents a directory entry from VFS.
 #[derive(Debug, Clone)]
-pub struct DirEntry {
+pub(super) struct DirEntry {
     /// The file name
     pub name: String,
     /// The full path
@@ -32,7 +32,7 @@ pub struct DirEntry {
 /// Trait for virtual filesystem operations.
 ///
 /// This trait abstracts filesystem operations to enable testing and cross-platform support.
-pub trait VfsFileSystem: Send + Sync + 'static {
+pub(super) trait VfsFileSystem: Send + Sync + 'static {
     /// Open a file and return a reader.
     ///
     /// This is the primary method for reading files, allowing callers to:
@@ -72,14 +72,14 @@ pub trait VfsFileSystem: Send + Sync + 'static {
 /// Uses the actual filesystem via the `vfs::PhysicalFS` backend.
 #[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug)]
-pub struct PhysicalVfs {
+pub(super) struct PhysicalVfs {
     root: vfs::VfsPath,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 impl PhysicalVfs {
     /// Create a new physical VFS rooted at the system root.
-    pub fn new() -> Self {
+    pub(super) fn new() -> Self {
         let root = vfs::PhysicalFS::new("/").into();
         Self { root }
     }
@@ -161,14 +161,14 @@ impl VfsFileSystem for PhysicalVfs {
 /// - Building policy stores programmatically in memory for tests
 #[cfg(test)]
 #[derive(Debug)]
-pub struct MemoryVfs {
+pub(super) struct MemoryVfs {
     root: vfs::VfsPath,
 }
 
 #[cfg(test)]
 impl MemoryVfs {
     /// Create a new empty in-memory VFS.
-    pub fn new() -> Self {
+    pub(super) fn new() -> Self {
         let root = vfs::MemoryFS::new().into();
         Self { root }
     }
@@ -181,7 +181,7 @@ impl MemoryVfs {
     }
 
     /// Create a file with the given content.
-    pub fn create_file(&self, path: &str, content: &[u8]) -> io::Result<()> {
+    pub(super) fn create_file(&self, path: &str, content: &[u8]) -> io::Result<()> {
         let vfs_path = self.get_path(path)?;
 
         // Create parent directories if needed
@@ -200,7 +200,7 @@ impl MemoryVfs {
     }
 
     /// Create a directory and all of its parents.
-    pub fn create_dir_all(&self, path: &str) -> io::Result<()> {
+    pub(super) fn create_dir_all(&self, path: &str) -> io::Result<()> {
         let vfs_path = self.get_path(path)?;
         vfs_path.create_dir_all().map_err(io::Error::other)
     }

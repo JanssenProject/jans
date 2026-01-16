@@ -8,28 +8,35 @@ use std::time::Duration;
 use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::{
-    AgamaPolicyStore, ConversionError, PolicyStoreManager, PolicyStoreWithID,
-};
+use crate::common::policy_store::manager::PolicyStoreManager;
+use crate::common::policy_store::{AgamaPolicyStore, ConversionError, PolicyStoreWithID};
 use crate::http::{HttpClient, HttpClientError};
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
 pub enum PolicyStoreLoadError {
+    /// Failed to parse policy store from JSON string.
     #[error("failed to parse the policy store from policy_store json: {0}")]
     ParseJson(#[from] serde_json::Error),
+    /// Failed to parse policy store from YAML string.
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_yml::Error),
+    /// Failed to fetch the policy store from the lock server.
     #[error("failed to fetch the policy store from the lock server")]
     FetchFromLockServer(#[from] HttpClientError),
+    /// Invalid structure in the policy store.
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
+    /// Failed to read or parse the policy store file.
     #[error("Failed to load policy store from {0}: {1}")]
     ParseFile(Box<Path>, io::Error),
+    /// Failed to parse the policy store from file.
     #[error("Failed to convert loaded policy store: {0}")]
     Conversion(#[from] ConversionError),
+    /// Failed to load policy store from archive.
     #[error("Failed to load policy store from archive: {0}")]
     Archive(String),
+    /// Failed to load policy store from directory.
     #[error("Failed to load policy store from directory: {0}")]
     Directory(String),
 }
@@ -70,7 +77,7 @@ fn extract_first_policy_store(
 /// Loads the policy store based on the provided configuration.
 ///
 /// This function supports multiple sources for loading policies.
-pub(crate) async fn load_policy_store(
+pub async fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let policy_store = match &config.source {
@@ -127,7 +134,7 @@ async fn load_policy_store_from_lock_master(
 async fn load_policy_store_from_cjar_file(
     path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-    use crate::common::policy_store::loader;
+    use crate::common::policy_store::{loader, manager::PolicyStoreManager};
 
     let loaded = loader::load_policy_store_archive(path).await.map_err(|e| {
         PolicyStoreLoadError::Archive(format!("Failed to load from archive: {}", e))

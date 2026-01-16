@@ -1,5 +1,5 @@
 ---
-page_title: "jans_agama_repository Data Source - terraform-provider-jans"
+page_title: "jans_agama_repository Data Source - jans"
 subcategory: ""
 description: |-
   Data source for retrieving Agama flow repositories from Janssen server
@@ -27,15 +27,14 @@ output "agama_repos" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `repositories` (List of Object) List of Agama repositories (see [below for nested schema](#nestedatt--repositories))
+- `repositories` (List of Object) List of Agama repositories. (see [below for nested schema](#nestedatt--repositories))
 
 <a id="nestedatt--repositories"></a>
-
 ### Nested Schema for `repositories`
 
 Read-Only:
 
-- `description` (String) Description of the repository
-- `metadata` (String) Repository metadata as JSON string
-- `name` (String) Repository name
-- `url` (String) Repository URL
+- `description` (String)
+- `metadata` (String)
+- `name` (String)
+- `url` (String)

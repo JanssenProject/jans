@@ -10,7 +10,7 @@ use std::collections::HashSet;
 const USER_ATTR_SRC_TKNS: &[&str] = &["userinfo_token", "id_token"];
 
 impl EntityBuilder {
-    pub fn build_user_entity(
+    pub(crate) fn build_user_entity(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
@@ -52,7 +52,7 @@ impl EntityBuilder {
 ///
 /// This struct provides a method to extract workload-related entity IDs from a set of
 /// tokens. It looks for predefined claims within specific tokens to identify workloads.
-pub struct UserIdSrcResolver;
+struct UserIdSrcResolver;
 
 impl UserIdSrcResolver {
     /// Resolves user entity IDs from the provided authentication tokens.
@@ -65,7 +65,7 @@ impl UserIdSrcResolver {
     /// The method checks the following tokens and claims in order:
     /// - `userinfo_token.sub`
     /// - `id_token.sub`
-    pub fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
+    fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_USER_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "userinfo_token",

@@ -7,13 +7,11 @@ use cedar_policy::{ContextJsonError, ParseErrors, RequestValidationError};
 use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
-pub use crate::common::json_rules::ApplyRuleError;
+use crate::common::json_rules::ApplyRuleError;
 use crate::entity_builder::MultiIssuerEntityError;
-pub use crate::entity_builder::{
-    BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError,
-};
-pub use crate::jwt::{JwtProcessingError, TokenClaimTypeError};
-pub use cedar_policy::entities_errors::EntitiesError;
+use crate::entity_builder::{BuildEntityError, BuildUnsignedEntityError, InitEntityBuilderError};
+use crate::jwt::{JwtProcessingError, TokenClaimTypeError};
+use cedar_policy::entities_errors::EntitiesError;
 
 /// Error type for multi-issuer validation
 #[derive(Debug, thiserror::Error)]

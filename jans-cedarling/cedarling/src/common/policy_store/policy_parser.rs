@@ -17,7 +17,7 @@ use super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 
 /// Represents a parsed Cedar policy with metadata.
 #[derive(Debug, Clone)]
-pub struct ParsedPolicy {
+pub(super) struct ParsedPolicy {
     /// The policy ID (from Cedar engine or @id annotation)
     pub id: PolicyId,
     /// The original filename
@@ -28,7 +28,7 @@ pub struct ParsedPolicy {
 
 /// Represents a parsed Cedar template with metadata.
 #[derive(Debug, Clone)]
-pub struct ParsedTemplate {
+pub(super) struct ParsedTemplate {
     /// The original filename
     pub filename: String,
     /// The parsed Cedar template
@@ -39,7 +39,7 @@ pub struct ParsedTemplate {
 ///
 /// Provides methods for parsing Cedar policies and templates from text,
 /// extracting @id() annotations, and validating syntax.
-pub struct PolicyParser;
+pub(super) struct PolicyParser;
 
 impl PolicyParser {
     /// Parse a single policy from Cedar policy text.
@@ -50,7 +50,10 @@ impl PolicyParser {
     ///
     /// Pass the ID to `Policy::parse()` using the annotation or the filename (without
     /// the .cedar extension).
-    pub fn parse_policy(content: &str, filename: &str) -> Result<ParsedPolicy, PolicyStoreError> {
+    pub(super) fn parse_policy(
+        content: &str,
+        filename: &str,
+    ) -> Result<ParsedPolicy, PolicyStoreError> {
         // Extract policy ID from @id() annotation or derive from filename
         let policy_id_str = Self::extract_id_annotation(content)
             .or_else(|| Self::derive_id_from_filename(filename));
@@ -91,7 +94,7 @@ impl PolicyParser {
     /// The template ID is extracted from @id() annotation or derived from filename.
     ///
     /// the ID to `Template::parse()` based on annotation or filename.
-    pub fn parse_template(
+    pub(super) fn parse_template(
         content: &str,
         filename: &str,
     ) -> Result<ParsedTemplate, PolicyStoreError> {
@@ -132,7 +135,7 @@ impl PolicyParser {
     ///
     /// Useful for batch processing of policy files in tests and tooling.
     #[cfg(test)]
-    pub fn parse_policies<'a, I>(
+    pub(super) fn parse_policies<'a, I>(
         policy_files: I,
     ) -> Result<HashMap<PolicyId, String>, PolicyStoreError>
     where
@@ -153,7 +156,7 @@ impl PolicyParser {
     ///
     /// Validates that all policies and templates can be successfully added
     /// to the policy set, ensuring no ID conflicts or other issues.
-    pub fn create_policy_set(
+    pub(super) fn create_policy_set(
         policies: Vec<ParsedPolicy>,
         templates: Vec<ParsedTemplate>,
     ) -> Result<PolicySet, PolicyStoreError> {
@@ -186,7 +189,7 @@ impl PolicyParser {
     ///
     /// Removes the .cedar extension, sanitizes characters, and returns the ID.
     /// Returns None if the filename is empty or invalid.
-    pub fn derive_id_from_filename(filename: &str) -> Option<String> {
+    fn derive_id_from_filename(filename: &str) -> Option<String> {
         // Extract just the filename without path
         let base_name = filename.rsplit('/').next().unwrap_or(filename);
 
@@ -216,7 +219,7 @@ impl PolicyParser {
     /// Extract @id() annotation from Cedar policy text.
     ///
     /// Looks for @id("...") or @id('...') pattern in comments.
-    pub fn extract_id_annotation(content: &str) -> Option<String> {
+    fn extract_id_annotation(content: &str) -> Option<String> {
         // Look for @id("...") or @id('...') pattern
         for line in content.lines() {
             let trimmed = line.trim();
@@ -236,7 +239,7 @@ impl PolicyParser {
     }
 
     /// Validate policy ID format (alphanumeric, underscore, hyphen, colon only).
-    pub fn validate_policy_id(id: &str, filename: &str) -> Result<(), ValidationError> {
+    fn validate_policy_id(id: &str, filename: &str) -> Result<(), ValidationError> {
         if id.is_empty() {
             return Err(ValidationError::EmptyPolicyId {
                 file: filename.to_string(),
