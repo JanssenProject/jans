@@ -50,19 +50,19 @@ public class RateLimitConfig {
         if (this == o) return true;
         if (!(o instanceof RateLimitConfig)) return false;
         RateLimitConfig that = (RateLimitConfig) o;
-        return Objects.equals(getRateLimitRules(), that.getRateLimitRules());
+        return Objects.equals(getRateLimitRules(), that.getRateLimitRules()) && rateLoggingEnabled == that.rateLoggingEnabled;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRateLimitRules());
+        return Objects.hash(getRateLimitRules(), rateLoggingEnabled);
     }
 
     @Override
     public String toString() {
         return "RateLimitConfig{" +
                 "rateLimitRules=" + getRateLimitRules() +
-                "rateLoggingEnabled=" + rateLoggingEnabled +
+                ", rateLoggingEnabled=" + rateLoggingEnabled +
                 '}';
     }
 }

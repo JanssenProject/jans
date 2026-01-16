@@ -75,7 +75,7 @@ Rate limiting is applied based on rules which consists of :
 **Key** is value which is dynamically constructed from request by applying key extractors. Rate limiting is made by key.
 
 Here is sample request
-```
+```http request
 POST /jans-auth/restv1/register
 X-ClientCert: test_cert
 { 
@@ -92,6 +92,12 @@ Key extractors are set as following
           "source": "body",
           "parameterNames": [
             "redirect_uris"
+          ]
+        },
+        {
+          "source": "body",
+          "parameterNames": [
+            "software_statement"
           ]
         },
         {

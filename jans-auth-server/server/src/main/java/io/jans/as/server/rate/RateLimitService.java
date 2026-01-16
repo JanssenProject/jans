@@ -98,7 +98,7 @@ public class RateLimitService {
                 if (!bucket.tryConsume(1)) {
                     String msg = String.format("Rate limited '%s'. Exceeds limit %s requests per %s seconds. Key: %s", requestPath, requestLimit, periodLimit, key);
                     log.debug(msg);
-                    throw new RateLimitedException(RateLimitType.REGISTRATION, msg);
+                    throw new RateLimitedException(msg);
                 }
             } catch (ExecutionException e) {
                 log.error(e.getMessage(), e);

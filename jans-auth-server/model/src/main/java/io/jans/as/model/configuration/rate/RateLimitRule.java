@@ -61,7 +61,7 @@ public class RateLimitRule {
             for (String m : methods) {
                 if (m == null) continue;
                 String v = m.trim();
-                if (!v.isEmpty()) safe.add(v);
+                if (!v.isEmpty()) safe.add(v.toUpperCase());
             }
         }
         this.methods = safe;
@@ -111,7 +111,8 @@ public class RateLimitRule {
                 && !getMethods().isEmpty()
                 && requestCount != null
                 && periodInSeconds != null
-                && !getKeyExtractors().isEmpty();
+                && !getKeyExtractors().isEmpty()
+                && getKeyExtractors().stream().allMatch(KeyExtractor::isWellFormed);
     }
 
     @Override

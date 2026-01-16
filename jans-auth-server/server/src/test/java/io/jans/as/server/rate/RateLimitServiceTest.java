@@ -58,7 +58,7 @@ public class RateLimitServiceTest {
                 "\"redirect_uris\": [\n" +
                 "      \"https://client.example.com/callback\",\n" +
                 "      \"https://client.example.com/callback2\"\n" +
-                "    ],}";
+                "    ]}";
 
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         when(httpServletRequest.getRequestURI()).thenReturn("/jans-auth/restv1/register");
@@ -95,7 +95,7 @@ public class RateLimitServiceTest {
                     "\"redirect_uris\": [\n" +
                     "      \"https://client.example.com/callback\",\n" +
                     "      \"https://client.example.com/callback2\"\n" +
-                    "    ],}";
+                    "    ]}";
 
             KeyExtractor bodyExtractor = new KeyExtractor();
             bodyExtractor.setSource(KeySource.BODY);
@@ -303,12 +303,12 @@ public class RateLimitServiceTest {
 
         RateLimitContext context = new RateLimitContext(httpServletRequest, true);
 
-        // Body extractor
-        KeyExtractor bodyExtractor = new KeyExtractor();
-        bodyExtractor.setSource(KeySource.HEADER);
-        bodyExtractor.setParameterNames(List.of("X-ClientCert"));
+        // Header extractor
+        KeyExtractor extractor = new KeyExtractor();
+        extractor.setSource(KeySource.HEADER);
+        extractor.setParameterNames(List.of("X-ClientCert"));
 
-        String extractedKey = rateLimitService.extractKey(bodyExtractor, context);
+        String extractedKey = rateLimitService.extractKey(extractor, context);
 
         assertEquals("test_cert_", extractedKey);
     }
@@ -379,6 +379,6 @@ public class RateLimitServiceTest {
     public void saveSpaceIfNeeded_whenKeyIsShort_shouldReturnSameKey() {
         String shortKey = StringUtils.repeat("a", RateLimitService.KEY_LENGTH_LIMIT_FOR_DIGEST - 1);
         String resultKey = RateLimitService.saveSpaceIfNeeded(shortKey);
-        assertEquals(resultKey, shortKey);
+        assertEquals(shortKey, resultKey);
     }
 }
