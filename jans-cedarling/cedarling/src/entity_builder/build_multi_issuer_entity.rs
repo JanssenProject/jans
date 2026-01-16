@@ -112,7 +112,7 @@ fn add_reserved_claims(
                     .get_claim_val("iss")
                     .and_then(|iss| iss.as_str())
                     .map(normalize_issuer)
-                    // it should newer be None here since token iss exists
+                    // it should never be None here since token iss exists
                     .unwrap_or_else(|| UNDEFINED_ISSUER.to_string());
 
                 attrs.insert(
