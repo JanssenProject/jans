@@ -320,7 +320,7 @@ public class RateLimitServiceTest {
         rule1.setMethods(List.of("POST"));
         rule1.setPeriodInSeconds(60);
         rule1.setRequestCount(10);
-        rule1.setKeyExtractors(List.of(new KeyExtractor()));
+        rule1.setKeyExtractors(List.of(new KeyExtractor(KeySource.BODY, List.of("redirect_uris"))));
         AssertJUnit.assertTrue(rule1.isWellFormed());
 
         RateLimitRule rule2 = new RateLimitRule();
@@ -328,7 +328,7 @@ public class RateLimitServiceTest {
         rule2.setMethods(List.of("POST"));
         rule2.setPeriodInSeconds(60);
         rule2.setRequestCount(10);
-        rule2.setKeyExtractors(List.of(new KeyExtractor()));
+        rule2.setKeyExtractors(List.of(new KeyExtractor(KeySource.BODY, List.of("redirect_uris"))));
         AssertJUnit.assertTrue(rule2.isWellFormed());
 
         RateLimitConfig config = new RateLimitConfig();
@@ -352,7 +352,7 @@ public class RateLimitServiceTest {
         rule1.setMethods(List.of("POST"));
         rule1.setPeriodInSeconds(60);
         rule1.setRequestCount(10);
-        rule1.setKeyExtractors(List.of(new KeyExtractor()));
+        rule1.setKeyExtractors(List.of(new KeyExtractor(KeySource.BODY, List.of("redirect_uris"))));
         AssertJUnit.assertTrue(rule1.isWellFormed());
 
         RateLimitConfig config = new RateLimitConfig();
