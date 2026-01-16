@@ -19,13 +19,13 @@ static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 //
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
 #[async_trait(?Send)]
-pub trait GetFromUrl<T> {
+pub(super) trait GetFromUrl<T> {
     /// Send a get request to receive the resource from a URL
     async fn get_from_url(url: &Url) -> Result<T, HttpError>;
 }
 
 #[derive(Deserialize)]
-pub struct OpenIdConfig {
+pub(super) struct OpenIdConfig {
     pub issuer: String,
     #[serde(deserialize_with = "deserialize_url")]
     pub jwks_uri: Url,
@@ -33,7 +33,7 @@ pub struct OpenIdConfig {
     pub status_list_endpoint: Option<Url>,
 }
 
-pub fn deserialize_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
+fn deserialize_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -43,7 +43,7 @@ where
     Ok(url)
 }
 
-pub fn deserialize_opt_url<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
+fn deserialize_opt_url<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -94,10 +94,10 @@ impl GetFromUrl<JwkSet> for JwkSet {
     }
 }
 
-// NOTE: we cant use the async_trait here since this is called from another aysnc 
+// NOTE: we cant use the async_trait here since this is called from another async
 // function which requires this to be Send.
 impl StatusListJwtStr {
-    pub async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
+    pub(super) async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let response = HTTP_CLIENT
             .get(url.as_str())
             .header("Content-Type", "application/statuslist+jwt")

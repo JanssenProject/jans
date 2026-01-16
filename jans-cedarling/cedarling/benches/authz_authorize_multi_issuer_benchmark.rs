@@ -43,7 +43,7 @@ fn authorize_multi_issuer(c: &mut Criterion) {
                             assert!(v.decision, "should be true")
                         },
                         Err(e) => {
-                            panic!("{}, {:?}", e.to_string(), e)
+                            panic!("{}, {:?}", e, e)
                         },
                     }
                 }

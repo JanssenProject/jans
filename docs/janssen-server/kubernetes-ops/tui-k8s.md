@@ -10,14 +10,13 @@ tags:
 
 
 
-  <div>
-    <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
-      <p>Using the TUI with a Janssen Kubernetes Setup - Watch Video</p>
-    </a>
-    <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
-      <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/36688669f0aa4c22be2eaf3f711fe488-with-play.gif">
-    </a>
-  </div>
+<div>
+  <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
+    <p>Using the TUI with a Janssen Kubernetes Setup - Watch Video</p>
+  </a>
+  <a href="https://www.loom.com/share/36688669f0aa4c22be2eaf3f711fe488">
+    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/36688669f0aa4c22be2eaf3f711fe488-with-play.gif">
+  </a>
 </div>
 
 ## Installing TUI and connecting to a Kubernetes installation

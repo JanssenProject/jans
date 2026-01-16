@@ -132,7 +132,7 @@ fn create_archive_with_entities(entity_count: usize) -> Vec<u8> {
 
     // Entities in batches
     let batch_size = 500;
-    let batches = (entity_count + batch_size - 1) / batch_size;
+    let batches = entity_count.div_ceil(batch_size);
 
     for batch in 0..batches {
         let start = batch * batch_size;
