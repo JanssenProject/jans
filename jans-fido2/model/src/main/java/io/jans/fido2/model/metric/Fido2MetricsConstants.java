@@ -71,7 +71,7 @@ public final class Fido2MetricsConstants {
     public static final String MATURE = "MATURE";
 
     // Database Attributes
-    public static final String JANS_TIMESTAMP = "jansTimestamp";
+    public static final String JANS_TIMESTAMP = "jansFido2MetricsTimestamp";
     
     // Service Names
     public static final String METRICS_SERVICE = "metricsService";
@@ -107,6 +107,10 @@ public final class Fido2MetricsConstants {
     public static final String CURRENT_PERIOD = "currentPeriod";
     public static final String PREVIOUS_PERIOD = "previousPeriod";
     public static final String COMPARISON = "comparison";
+    
+    // Query parameter names
+    public static final String PARAM_START_TIME = "startTime";
+    public static final String PARAM_END_TIME = "endTime";
     
     // Fallback method constants
     public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";
