@@ -15695,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16382,6 +16382,8 @@ components:
         logClientNameOnClientAuthentication:
           type: boolean
         disableJdkLogger:
+          type: boolean
+        disableExternalLoggerConfiguration:
           type: boolean
         authorizationRequestCustomAllowedParameters:
           uniqueItems: true
@@ -17859,9 +17861,6 @@ components:
           enum:
           - ldap
           - db
-          - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -18493,9 +18492,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
