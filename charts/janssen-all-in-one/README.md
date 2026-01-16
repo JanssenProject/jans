@@ -295,15 +295,15 @@ Kubernetes: `>=v1.23.0-0`
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
 | gatewayApi.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
-| gatewayApi.gatewayAnnotations | object | `{}` |  |
-| gatewayApi.gatewayClassName | string | `"nginx"` |  |
-| gatewayApi.gatewayLabels | object | `{}` |  |
-| gatewayApi.httpPort | int | `80` |  |
-| gatewayApi.httpsPort | int | `443` |  |
-| gatewayApi.name | string | `"jans-gateway"` |  |
-| gatewayApi.routeAnnotations | object | `{}` |  |
-| gatewayApi.routeLabels | object | `{}` |  |
-| gatewayApi.tlsSecretName | string | `"tls-certificate"` |  |
+| gatewayApi.gatewayAnnotations | object | `{}` | Specific annotations for the Gateway resource |
+| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik') | https://gateway-api.sigs.k8s.io/implementations/#conformant |
+| gatewayApi.gatewayLabels | object | `{}` | Specific labels for the Gateway resource |
+| gatewayApi.httpPort | int | `80` | Gateway http port number |
+| gatewayApi.httpsPort | int | `443` | Gateway https port number |
+| gatewayApi.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
+| gatewayApi.routeAnnotations | object | `{}` | Specific annotations for the HTTPRoute resource |
+| gatewayApi.routeLabels | object | `{}` | Specific labels for the HTTPRoute resource |
+| gatewayApi.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |
 | hpa.behavior | object | `{}` | Scaling Policies |
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |

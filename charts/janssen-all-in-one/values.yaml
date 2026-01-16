@@ -594,23 +594,23 @@ certManager:
 gatewayApi:
   # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
   enabled: false
-  # Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik') | https://gateway-api.sigs.k8s.io/implementations/#conformant
+  # -- Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik') | https://gateway-api.sigs.k8s.io/implementations/#conformant
   gatewayClassName: nginx
-  # The name of the Gateway resource to be created
+  # -- The name of the Gateway resource to be created
   name: jans-gateway
-  # Gateway http port number
+  # -- Gateway http port number
   httpPort: 80 
-  # Gateway https port number
+  # -- Gateway https port number
   httpsPort: 443
-  # Secret containing the TLS certificate for the Gateway
+  # -- Secret containing the TLS certificate for the Gateway
   tlsSecretName: tls-certificate
-  # Specific labels for the Gateway resource
+  # -- Specific labels for the Gateway resource
   gatewayLabels: {}
-  # Specific annotations for the Gateway resource
+  # -- Specific annotations for the Gateway resource
   gatewayAnnotations: {}
-  # Specific labels for the HTTPRoute resource
+  # -- Specific labels for the HTTPRoute resource
   routeLabels: {}
-  # Specific annotations for the HTTPRoute resource
+  # -- Specific annotations for the HTTPRoute resource
   routeAnnotations: {}
 nginx-ingress:
   # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
