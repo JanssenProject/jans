@@ -154,7 +154,6 @@ fn add_reserved_claims(
                 RestrictedExpression::new_long(validated_at),
             );
         }
-        // add exp claim
     } else {
         // No schema shape provided, add all reserved claims as is
 
