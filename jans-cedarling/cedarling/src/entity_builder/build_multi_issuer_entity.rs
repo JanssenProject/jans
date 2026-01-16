@@ -731,12 +731,13 @@ mod tests {
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let result = builder.build_single_token_entity(&token, &built_entities);
 
-        assert!(result.is_err());
-        // Should get InvalidEntityUid error due to missing jti claim
-        assert!(matches!(
-            result.unwrap_err(),
-            MultiIssuerEntityError::InvalidEntityUid(_)
-        ));
+        assert!(
+            matches!(
+                result.unwrap_err(),
+                MultiIssuerEntityError::InvalidEntityUid(_)
+            ),
+            "Should get InvalidEntityUid error due to missing jti claim"
+        );
     }
 
     #[test]
@@ -917,13 +918,11 @@ mod tests {
 
         let result =
             builder.build_multi_issuer_entities(&tokens, &create_test_resource(), &NopLogger);
-        assert!(result.is_err());
 
-        // Should return NoValidTokens error when all tokens are invalid
-        assert!(matches!(
-            result.unwrap_err(),
-            MultiIssuerEntityError::NoValidTokens
-        ));
+        assert!(
+            matches!(result.unwrap_err(), MultiIssuerEntityError::NoValidTokens),
+            "Should return NoValidTokens error when all tokens are invalid"
+        );
     }
 
     #[test]
