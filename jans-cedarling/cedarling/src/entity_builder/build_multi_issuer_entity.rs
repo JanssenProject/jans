@@ -17,6 +17,9 @@ pub enum MultiIssuerEntityError {
     #[error("Missing issuer claim in JWT")]
     MissingIssuer,
 
+    #[error("Missing exp claim in JWT")]
+    MissingExpClaim,
+
     #[error("Invalid entity UID: {0}")]
     InvalidEntityUid(String),
 
@@ -68,6 +71,127 @@ fn filter_reserved_claims(claims: &HashMap<String, Value>) -> HashMap<String, Va
         .filter(|(key, _)| key.as_str() != "iss" && key.as_str() != "jti" && key.as_str() != "exp")
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect()
+}
+
+/// Add reserved claims to entity attributes based on schema shape
+fn add_reserved_claims(
+    attrs: &mut HashMap<String, RestrictedExpression>,
+    token: &Token,
+    entity_id: &str,
+    attrs_shape_opt: Option<&HashMap<smol_str::SmolStr, schema::AttrsShape>>,
+) -> Result<(), MultiIssuerEntityError> {
+    const TOKEN_TYPE: &str = "token_type";
+    const JTI_CLAIM: &str = "jti";
+    const ISS_CLAIM: &str = "iss";
+    const EXP_CLAIM: &str = "exp";
+    const VALIDATED_AT_CLAIM: &str = "validated_at";
+
+    if let Some(attrs_shape) = attrs_shape_opt {
+        // add token_type claim
+        if attrs_shape.contains_key(TOKEN_TYPE) {
+            attrs.insert(
+                TOKEN_TYPE.to_string(),
+                RestrictedExpression::new_string(token.name.clone()),
+            );
+        }
+
+        // add jti claim
+        if attrs_shape.contains_key(JTI_CLAIM) {
+            attrs.insert(
+                JTI_CLAIM.to_string(),
+                RestrictedExpression::new_string(entity_id.to_string()),
+            );
+        }
+
+        // add iss claim
+        if let Some(shape) = attrs_shape.get(ISS_CLAIM) {
+            if let Some(token_iss) = &token.iss {
+                let issuer = token
+                    .get_claim_val("iss")
+                    .and_then(|iss| iss.as_str())
+                    .map(normalize_issuer)
+                    .unwrap_or_default();
+
+                attrs.insert(
+                    ISS_CLAIM.to_string(),
+                    RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
+                        &token_iss.name,
+                        &issuer,
+                    )?),
+                );
+            } else if shape.is_required() {
+                // iss is required but token has no issuer (in trusted issuer)
+                attrs.insert(
+                    "iss".to_string(),
+                    RestrictedExpression::new_string(
+                        token
+                            .get_claim(ISS_CLAIM)
+                            .map_or("undefined".to_string(), |v| v.value().to_string()),
+                    ),
+                );
+            }
+        }
+
+        // add exp claim
+        if let Some(shape) = attrs_shape.get(EXP_CLAIM) {
+            if let Some(exp) = token.get_claim_val(EXP_CLAIM).and_then(|v| v.as_i64()) {
+                attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
+            } else if shape.is_required() {
+                // exp is required but missing in token
+                return Err(MultiIssuerEntityError::MissingExpClaim);
+            }
+        }
+
+        // add validated_at claim
+        if attrs_shape.contains_key(VALIDATED_AT_CLAIM) {
+            let validated_at = chrono::Utc::now().timestamp();
+            attrs.insert(
+                VALIDATED_AT_CLAIM.to_string(),
+                RestrictedExpression::new_long(validated_at),
+            );
+        }
+        // add exp claim
+    } else {
+        // No schema shape provided, add all reserved claims as is
+
+        attrs.insert(
+            TOKEN_TYPE.to_string(),
+            RestrictedExpression::new_string(token.name.clone()),
+        );
+
+        attrs.insert(
+            JTI_CLAIM.to_string(),
+            RestrictedExpression::new_string(entity_id.to_string()),
+        );
+
+        if let Some(token_iss) = &token.iss {
+            let issuer = token
+                .get_claim_val("iss")
+                .and_then(|iss| iss.as_str())
+                .map(normalize_issuer)
+                .ok_or(MultiIssuerEntityError::MissingIssuer)?;
+
+            attrs.insert(
+                ISS_CLAIM.to_string(),
+                RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
+                    &token_iss.name,
+                    &issuer,
+                )?),
+            );
+        }
+
+        if let Some(exp) = token.get_claim_val(EXP_CLAIM).and_then(|v| v.as_i64()) {
+            attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
+        }
+
+        let validated_at = chrono::Utc::now().timestamp();
+        attrs.insert(
+            VALIDATED_AT_CLAIM.to_string(),
+            RestrictedExpression::new_long(validated_at),
+        );
+    }
+
+    Ok(())
 }
 
 /// Convert a claim value to a Set of String
@@ -243,44 +367,8 @@ impl EntityBuilder {
             token.claim_mappings(),
         )?;
 
-        // Add token_type attribute (not part of JWT claims)
-        attrs.insert(
-            "token_type".to_string(),
-            RestrictedExpression::new_string(token.name.clone()),
-        );
-        attrs.insert(
-            "jti".to_string(),
-            RestrictedExpression::new_string(entity_id.clone()),
-        );
-
-        // iss is optional in schema so we add it if present in the token
-        if let Some(token_iss) = &token.iss {
-            let issuer = token
-                .get_claim_val("iss")
-                .and_then(|iss| iss.as_str())
-                .map(normalize_issuer)
-                .ok_or(MultiIssuerEntityError::MissingIssuer)?;
-
-            attrs.insert(
-                "iss".to_string(),
-                RestrictedExpression::new_entity_uid(Self::trusted_issuer_cedar_uid(
-                    &token_iss.name,
-                    &issuer,
-                )?),
-            );
-        }
-
-        // Add expiration timestamp
-        if let Some(exp) = token.get_claim_val("exp").and_then(|v| v.as_i64()) {
-            attrs.insert("exp".to_string(), RestrictedExpression::new_long(exp));
-        }
-
-        // Add validation timestamp
-        let validated_at = chrono::Utc::now().timestamp();
-        attrs.insert(
-            "validated_at".to_string(),
-            RestrictedExpression::new_long(validated_at),
-        );
+        // Add reserved claims to attributes
+        add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape)?;
 
         // Create entity tags for non-reserved JWT claims
         let mut tags = HashMap::new();
