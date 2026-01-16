@@ -105,12 +105,15 @@ fn add_reserved_claims(
 
         // add iss claim
         if let Some(shape) = attrs_shape.get(ISS_CLAIM) {
+            const UNDEFINED_ISSUER: &str = "undefined";
+
             if let Some(token_iss) = &token.iss {
                 let issuer = token
                     .get_claim_val("iss")
                     .and_then(|iss| iss.as_str())
                     .map(normalize_issuer)
-                    .unwrap_or_default();
+                    // it should newer be None here since token iss exists
+                    .unwrap_or_else(|| UNDEFINED_ISSUER.to_string());
 
                 attrs.insert(
                     ISS_CLAIM.to_string(),
@@ -126,7 +129,8 @@ fn add_reserved_claims(
                     RestrictedExpression::new_string(
                         token
                             .get_claim(ISS_CLAIM)
-                            .map_or("undefined".to_string(), |v| v.value().to_string()),
+                            .and_then(|v| v.value().as_str().map(|s| s.to_string()))
+                            .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
                     ),
                 );
             }
