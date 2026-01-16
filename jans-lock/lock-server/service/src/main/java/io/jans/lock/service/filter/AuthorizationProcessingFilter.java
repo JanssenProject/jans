@@ -2,6 +2,7 @@ package io.jans.lock.service.filter;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.lock.model.app.audit.AuditActionType;
@@ -9,6 +10,7 @@ import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
+import io.jans.lock.service.openid.OpenIdProtection;
 import io.jans.net.InetAddressUtility;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.Priority;
@@ -70,7 +72,7 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 		log.debug("REST call to '{}' intercepted", path);
 
 		if (LockProtectionMode.OAUTH.equals(appConfiguration.getProtectionMode()) || (appConfiguration.getProtectionMode() == null)) {
-			Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
+			Response authorizationResponse = protectionService.processAuthorization(extractBearerToken(), resourceInfo);
 	        boolean success = authorizationResponse == null;
 
 	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.OPENID_AUTHZ_FILTER);
@@ -85,6 +87,15 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 		}
 	}
 
+    private String extractBearerToken() {
+        String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);
+        
+        if (StringUtils.isEmpty(authHeader)) {
+            return null;
+        }
+
+        return authHeader.replaceFirst("(?i)Bearer\\s+", "");
+    }
     private Response unprotectedApiResponse(String name) {
         return Response.status(Response.Status.UNAUTHORIZED).entity(name + " API not protected")
                 .build();

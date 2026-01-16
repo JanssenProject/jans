@@ -9,11 +9,11 @@ package io.jans.lock.model.config;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * @author Yuriy Movchan Date: 12/02/2024
+ * @author Yuriy Movchan Date: 15/1/2022
  */
-public enum AuditPersistenceMode {
+public enum GrpcServerMode {
 
-	INTERNAL("internal"), CONFIG_API("config-api");
+	DISABLED("disabled"), BRIDGE("bridge"), PLAIN_SERVER("plain_server"), TLS_SERVER("tls_server");
 
 	private final String mode;
 
@@ -22,14 +22,14 @@ public enum AuditPersistenceMode {
      *
      * @param mode the string value to use as this enum constant's JSON representation
      */
-    private AuditPersistenceMode(String mode) {
+    private GrpcServerMode(String mode) {
         this.mode = mode;
     }
 
 	/**
 	 * Mode string used for JSON serialization of the enum constant.
 	 *
-	 * @return the enum's mode string ("internal" or "config-api")
+	 * @return the enum's mode string
 	 */
 	@JsonValue
 	public String getMode() {

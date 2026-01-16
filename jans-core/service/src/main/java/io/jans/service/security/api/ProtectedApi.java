@@ -17,4 +17,6 @@ public @interface ProtectedApi {
      */
 	String[] scopes() default {};
 
+	String grpcMethodName() default "";
+
 }
