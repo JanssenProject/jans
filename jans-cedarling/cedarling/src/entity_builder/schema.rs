@@ -6,12 +6,12 @@
 mod attr_src;
 
 use attr_src::BuildAttrSrcError;
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy_core::validator::ValidatorSchema;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display};
 use thiserror::Error;
 
-pub use attr_src::*;
+pub(super) use attr_src::*;
 
 use super::PartitionResult;
 
@@ -20,7 +20,7 @@ type AttrName = SmolStr;
 
 /// Cedar Schema wrapper that makes retrieving the instructions on how to build an
 /// entity easier
-pub struct MappingSchema {
+pub(super) struct MappingSchema {
     entities: HashMap<EntityTypeName, HashMap<AttrName, AttrsShape>>,
 }
 
@@ -41,10 +41,13 @@ impl TryFrom<&ValidatorSchema> for MappingSchema {
                 .iter()
                 .map(|(attr_name, attr_type)| {
                     AttrSrc::from_type(attr_name, &attr_type.attr_type).map(|attr_src| {
-                        (attr_name.clone(), AttrsShape {
-                            is_required: attr_type.is_required(),
-                            attr_src,
-                        })
+                        (
+                            attr_name.clone(),
+                            AttrsShape {
+                                is_required: attr_type.is_required(),
+                                attr_src,
+                            },
+                        )
                     })
                 })
                 .partition_result();
@@ -72,24 +75,27 @@ impl Display for BuildMappingSchemaError {
 impl MappingSchema {
     /// Returns the entity's shape if the entity exists in the schema but
     /// returns `None` for unknown entities.
-    pub fn get_entity_shape(&self, type_name: &str) -> Option<&HashMap<AttrName, AttrsShape>> {
+    pub(super) fn get_entity_shape(
+        &self,
+        type_name: &str,
+    ) -> Option<&HashMap<AttrName, AttrsShape>> {
         self.entities.get(type_name)
     }
 }
 
 /// Info on how to build the attributes
 #[derive(Debug)]
-pub struct AttrsShape {
+pub(super) struct AttrsShape {
     is_required: bool,
     attr_src: AttrSrc,
 }
 
 impl AttrsShape {
-    pub fn is_required(&self) -> bool {
+    pub(super) fn is_required(&self) -> bool {
         self.is_required
     }
 
-    pub fn src(&self) -> &AttrSrc {
+    pub(super) fn src(&self) -> &AttrSrc {
         &self.attr_src
     }
 }
@@ -98,7 +104,7 @@ impl AttrsShape {
 mod test {
     use super::*;
     use crate::entity_builder::schema::attr_src::TknClaimAttrSrc;
-    use cedar_policy_validator::ValidatorSchema;
+    use cedar_policy_core::validator::ValidatorSchema;
     use std::{collections::HashSet, str::FromStr};
     use test_utils::assert_eq;
 
@@ -127,7 +133,7 @@ mod test {
 
         let schema: MappingSchema = (&ValidatorSchema::from_str(schema)
             // note that unknown types will be handled already by the implementation
-            // of the cedar_policy_validator::ValidatorSchema's parser
+            // of the cedar_policy_core::validator::ValidatorSchema's parser
             .expect("should parse validator schema"))
             .try_into()
             .expect("should build mapping schema");

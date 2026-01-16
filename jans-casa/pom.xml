@@ -5,7 +5,7 @@
 
     <groupId>io.jans</groupId>
     <artifactId>casa-base</artifactId>
-	<version>1.15.0</version>
+	<version>0.0.0-nightly</version>
     <packaging>pom</packaging>
 
     <distributionManagement>
@@ -27,12 +27,12 @@
         <maven.min-version>3.6.3</maven.min-version>
         <weld.version>4.0.3.Final</weld.version>
         <pf4j.version>3.13.0</pf4j.version>
-        <log4j.version>2.24.1</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
         <jackson.version>2.18.1</jackson.version>
         <zk.version>10.1.0-jakarta</zk.version>
         <ldapsdk.version>7.0.3</ldapsdk.version>
         <resteasy.version>6.2.12.Final</resteasy.version>
-        <tika.version>3.0.0</tika.version>
+        <tika.version>3.2.2</tika.version>
         <bc.version>1.82</bc.version>
         <!-- SonarCloud integration properties -->
         <sonar.projectKey>JanssenProject_jans-casa</sonar.projectKey>
@@ -77,6 +77,8 @@
         <module>app-fips</module>
         <module>plugins/acct-linking</module>
         <module>plugins/acct-linking/agama</module>
+        <module>plugins/cert-authn</module>
+        <module>plugins/cert-authn/agama</module>
         <module>plugins/client-authorizations</module>
         <module>plugins/custom-branding</module>
         <module>plugins/strong-authn-settings</module>

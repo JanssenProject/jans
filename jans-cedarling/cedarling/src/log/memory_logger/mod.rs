@@ -14,6 +14,8 @@ use super::err_log_entry::ErrorLogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
+use crate::log::BaseLogEntry;
+use crate::log::loggable_fn::LoggableFn;
 
 mod memory_calc;
 use memory_calc::calculate_memory_usage;
@@ -29,7 +31,7 @@ pub(crate) struct MemoryLogger {
 }
 
 impl MemoryLogger {
-    pub fn new(
+    pub(crate) fn new(
         config: MemoryLogConfig,
         log_level: LogLevel,
         pdp_id: PdpID,
@@ -58,96 +60,13 @@ impl MemoryLogger {
             app_name,
         }
     }
-}
 
-/// In case of failure in MemoryLogger, log to stderr where supported.
-/// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
-mod fallback {
-    use crate::LogLevel;
-    use crate::app_types::{ApplicationName, PdpID};
-    use crate::log::log_strategy::LogStrategyLogger;
-    use crate::log::stdout_logger::StdOutLogger;
-
-    /// conform to Loggable requirement imposed by LogStrategy
-    #[derive(serde::Serialize, Clone)]
-    struct StrWrap<'a>(&'a str);
-
-    impl crate::log::interface::Indexed for StrWrap<'_> {
-        fn get_id(&self) -> uuid7::Uuid {
-            crate::log::log_entry::gen_uuid7()
-        }
-
-        fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
-            Vec::new()
-        }
-
-        fn get_tags(&self) -> Vec<&str> {
-            Vec::new()
-        }
-    }
-
-    impl crate::log::interface::Loggable for StrWrap<'_> {
-        fn get_log_level(&self) -> Option<LogLevel> {
-            // These must always be logged.
-            Some(LogLevel::TRACE)
-        }
-    }
-
-    /// Fetch the correct logger. That takes some work, and it's done on every
-    /// call. But this is a fallback logger, so it is not intended to be used
-    /// often, and in this case correctness and non-fallibility are far more
-    /// important than performance.
-    ///
-    /// # Panics
-    ///
-    /// Panics when:
-    /// - A runtime to initialize a new LogStrategy could not be built.
-    /// - A fallback logger could not be initialized.
-    pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
-        // level is so that all messages passed here are logged.
-        let logger = StdOutLogger::new(LogLevel::TRACE);
-
-        // This should always be a LogStrategy::StdOut(StdOutLogger)
-        let log_strategy = crate::log::LogStrategy::new_with_logger(
-            LogStrategyLogger::StdOut(logger),
-            *pdp_id,
-            app_name.clone(),
-            None,
-        );
-
-        use crate::log::interface::LogWriter;
-        // a string is always serializable
-        log_strategy.log_any(StrWrap(msg))
-    }
-}
-
-fn to_json_value<T: Loggable>(entry: &T) -> Value {
-    match serde_json::to_value(entry) {
-        Ok(json) => json,
-        Err(err) => {
-            let err_msg = format!("failed to serialize log entry to JSON: {err}");
-            serde_json::to_value(ErrorLogEntry::from_loggable(entry, err_msg.clone()))
-                .expect(&err_msg)
-        },
-    }
-}
-
-// Implementation of LogWriter
-impl LogWriter for MemoryLogger {
-    fn log_any<T: Loggable>(&self, entry: T) {
-        if !entry.can_log(self.log_level) {
-            // do nothing
-            return;
-        }
-
+    fn log_entry<T: Loggable>(&self, entry: T) {
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
         let json = to_json_value(&entry);
-
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
-
         let set_result = storage.set(&entry_id, json, index_keys.as_slice());
-
         let err = match set_result {
             Ok(_) => return,
             Err(Error::CapacityExceeded) => {
@@ -175,12 +94,107 @@ impl LogWriter for MemoryLogger {
             },
             Err(err) => err,
         };
-
         fallback::log(
             &format!("could not store LogEntry to memory: {err:?}"),
             &self.pdp_id,
             &self.app_name,
         );
+    }
+}
+
+/// In case of failure in MemoryLogger, log to stderr where supported.
+/// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
+mod fallback {
+    use crate::LogLevel;
+    use crate::app_types::{ApplicationName, PdpID};
+    use crate::log::StdOutLoggerMode;
+    use crate::log::log_strategy::LogStrategyLogger;
+    use crate::log::stdout_logger::StdOutLogger;
+
+    /// conform to Loggable requirement imposed by LogStrategy
+    #[derive(serde::Serialize, Clone)]
+    struct StrWrap(String);
+
+    impl crate::log::interface::Indexed for StrWrap {
+        fn get_id(&self) -> uuid7::Uuid {
+            crate::log::log_entry::gen_uuid7()
+        }
+
+        fn get_additional_ids(&self) -> Vec<uuid7::Uuid> {
+            Vec::new()
+        }
+
+        fn get_tags(&self) -> Vec<&str> {
+            Vec::new()
+        }
+    }
+
+    impl crate::log::interface::Loggable for StrWrap {
+        fn get_log_level(&self) -> Option<LogLevel> {
+            // These must always be logged.
+            Some(LogLevel::TRACE)
+        }
+    }
+
+    /// Fetch the correct logger. That takes some work, and it's done on every
+    /// call. But this is a fallback logger, so it is not intended to be used
+    /// often, and in this case correctness and non-fallibility are far more
+    /// important than performance.
+    ///
+    /// # Panics
+    ///
+    /// Panics when:
+    /// - A runtime to initialize a new LogStrategy could not be built.
+    /// - A fallback logger could not be initialized.
+    pub(super) fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
+        // level is so that all messages passed here are logged.
+        let logger = StdOutLogger::new(LogLevel::TRACE, StdOutLoggerMode::Immediate);
+
+        // This should always be a LogStrategy::StdOut(StdOutLogger)
+        let log_strategy = crate::log::LogStrategy::new_with_logger(
+            LogStrategyLogger::StdOut(logger),
+            *pdp_id,
+            app_name.clone(),
+            None,
+        );
+
+        use crate::log::interface::LogWriter;
+        // a string is always serializable
+        log_strategy.log_any(StrWrap(msg.to_string()))
+    }
+}
+
+fn to_json_value<T: Loggable>(entry: &T) -> Value {
+    match serde_json::to_value(entry) {
+        Ok(json) => json,
+        Err(err) => {
+            let err_msg = format!("failed to serialize log entry to JSON: {err}");
+            serde_json::to_value(ErrorLogEntry::from_loggable(entry, err_msg.clone()))
+                .expect(&err_msg)
+        },
+    }
+}
+
+// Implementation of LogWriter
+impl LogWriter for MemoryLogger {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if !entry.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
+        self.log_entry(entry)
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if log_fn.can_log(self.log_level) {
+            let entry = log_fn.build();
+            self.log_entry(entry);
+        }
     }
 }
 
@@ -269,7 +283,7 @@ mod tests {
         let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(LogType::Decision, None)
+        let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
             .set_message("some message".to_string())
             .set_auth_info(AuthorizationLogInfo {
                 action: "test_action".to_string(),
@@ -280,7 +294,10 @@ mod tests {
                 entities: serde_json::json!({}),
             });
 
-        let entry2 = LogEntry::new_with_data(LogType::System, None);
+        let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ));
 
         assert!(
             entry1.base.id < entry2.base.id,
@@ -327,8 +344,8 @@ mod tests {
         let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(LogType::Decision, None);
-        let entry2 = LogEntry::new_with_data(LogType::Metric, None);
+        let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
+        let entry2 = LogEntry::new(BaseLogEntry::new_metric_opt_request_id(None));
 
         // log entries
         logger.log_any(entry1.clone());
@@ -365,23 +382,29 @@ mod tests {
             None,
         );
 
-        let entry_decision = LogEntry::new_with_data(LogType::Decision, None);
+        let entry_decision = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
         logger.log_any(entry_decision);
 
-        let entry_system_info =
-            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::INFO);
+        let entry_system_info = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            Some(request_id),
+        ));
         logger.log_any(entry_system_info);
 
-        let entry_system_debug =
-            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::DEBUG);
+        let entry_system_debug = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::DEBUG,
+            Some(request_id),
+        ));
         logger.log_any(entry_system_debug);
 
-        let entry_metric = LogEntry::new_with_data(LogType::Metric, None);
+        let entry_metric = LogEntry::new(BaseLogEntry::new_metric_opt_request_id(None));
         logger.log_any(entry_metric);
 
         // without request id
-        let entry_system_warn =
-            LogEntry::new_with_data(LogType::System, None).set_level(LogLevel::WARN);
+        let entry_system_warn = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ));
         logger.log_any(entry_system_warn);
 
         assert!(

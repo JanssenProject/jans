@@ -43,30 +43,52 @@ public class LoggingResource extends ConfigBaseResource {
     @Inject
     ConfigurationService configurationService;
 
+    /**
+     * Retrieve the current Jans Authorization Server logging configuration.
+     *
+     * @return an HTTP response whose entity is the current Logging configuration serialized as JSON
+     */
     @Operation(summary = "Returns Jans Authorization Server logging settings", description = "Returns Jans Authorization Server logging settings", operationId = "get-config-logging", tags = {
-            "Configuration – Logging" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.LOGGING_READ_ACCESS }))
+            "Configuration – Logging" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class) , examples = @ExampleObject(name = "Response json example", value = "example/logging/logging.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class), examples = @ExampleObject(name = "Response json example", value = "example/logging/logging.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS } , groupScopes = {
-            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getLogging() {
         return Response.ok(this.getLoggingConfiguration()).build();
     }
 
+    /**
+     * Update Jans Authorization Server logging settings from the provided model and persist the changes.
+     *
+     * The request's values are applied to the server's live logging configuration; after persisting,
+     * the current effective logging configuration is returned.
+     *
+     * @param logging the logging settings to apply (fields left blank will not overwrite existing values)
+     * @return the current Logging configuration after the update
+     */
     @Operation(summary = "Updates Jans Authorization Server logging settings", description = "Updates Jans Authorization Server logging settings", operationId = "put-config-logging", tags = {
-            "Configuration – Logging" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.LOGGING_WRITE_ACCESS }))
-    @RequestBody(description = "Logging object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class) , examples = @ExampleObject(name = "Request json example", value = "example/logging/logging.json")))
+            "Configuration – Logging" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @RequestBody(description = "Logging object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class), examples = @ExampleObject(name = "Request json example", value = "example/logging/logging.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class) , examples = @ExampleObject(name = "Response json example", value = "example/logging/logging.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class), examples = @ExampleObject(name = "Response json example", value = "example/logging/logging.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.LOGGING_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateLogConf(@Valid Logging logging) {
         log.debug("LOGGING configuration to be updated -logging:{}", logging);
         Conf conf = configurationService.findConf();

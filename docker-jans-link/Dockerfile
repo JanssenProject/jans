@@ -33,7 +33,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ======
 
 ARG JYTHON_VERSION=2.7.4
-ARG JYTHON_BUILD_DATE='2025-11-03 10:48'
+ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
@@ -44,8 +44,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 
-ENV CN_VERSION=1.7.0
-ENV CN_BUILD_DATE='2025-12-19 07:52'
+ENV CN_VERSION=0.0.0-nightly
+ENV CN_BUILD_DATE='2025-12-18 08:31'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
@@ -63,7 +63,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-link
 
-ENV JANS_SOURCE_VERSION=e9fea40a2f3627e51747143abdfaf82661b58f48
+ENV JANS_SOURCE_VERSION=4317fdfcd2dc458415f173644cdae97120d8bc7c
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -199,7 +199,7 @@ EXPOSE $CN_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.15.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="Janssen Link" \
     org.opencontainers.image.description=""
 

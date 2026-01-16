@@ -57,6 +57,11 @@
 - Use smol_str for string optimization where appropriate
 - Prefer strong typing over stringly-typed APIs
 
+**Visibility:**
+- Use the most restrictive visibility level possible: private (no modifier) better than `pub(super)`, `pub(super)` better than `pub(crate)`, `pub(crate)` better than `pub`.
+- `pub` items must always be exported in the root `lib.rs` to be truly public.
+- Be extremely careful about what you make public; prefer to expose minimal API surface.
+
 **Documentation:**
 - Use standard Rust docstrings without Python-style sections
 - Document public API items

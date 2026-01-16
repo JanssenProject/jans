@@ -11,14 +11,14 @@ use std::sync::{Arc, RwLock};
 use crate::LogLevel;
 use crate::jwt::token::Token;
 use crate::jwt::validation::TokenKind;
-use crate::log::{LogEntry, LogType, LogWriter, Logger};
+use crate::log::{BaseLogEntry, LogEntry, LogWriter, Logger};
 
 /// A dedicated cache for storing validated JWT tokens.
 ///
 /// The cache uses a thread-safe key-value store with automatic expiration
 /// based on token expiration claims and a configurable maximum TTL.
 #[derive(Clone)]
-pub struct TokenCache {
+pub(crate) struct TokenCache {
     cache: Arc<RwLock<SparKV<Arc<Token>>>>,
     max_ttl: usize,
     logger: Option<Logger>,
@@ -38,7 +38,7 @@ impl TokenCache {
     /// Creates a new `TokenCache` with the specified maximum TTL in seconds.
     ///
     /// If `max_ttl` is set to 0, tokens will use their natural expiration or default TTL.
-    pub fn new(
+    pub(crate) fn new(
         max_ttl: usize,
         capacity: usize,
         earliest_expiration_eviction: bool,
@@ -59,9 +59,11 @@ impl TokenCache {
     fn log_warn(&self, msg: String) {
         if let Some(logger) = &self.logger {
             logger.log_any(
-                LogEntry::new_with_data(LogType::System, None)
-                    .set_level(LogLevel::WARN)
-                    .set_message(msg),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(msg),
             );
         }
     }
@@ -70,7 +72,7 @@ impl TokenCache {
     ///
     /// Returns `Some(Arc<Token>)` if the token is found in cache and not expired,
     /// otherwise returns `None`.
-    pub fn find(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
+    pub(crate) fn find(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
         let key = hash_jwt_token(kind, jwt);
         self.cache
             .read()
@@ -85,7 +87,7 @@ impl TokenCache {
     /// 1. The token's expiration claim (if present and valid)
     /// 2. The configured maximum TTL (if set)
     /// 3. Default TTL (5 minutes) if neither applies
-    pub fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
+    pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
         if self.check_token_expired(&token, now) {
             // token is expired, no need to save it
             return;
@@ -161,7 +163,7 @@ impl TokenCache {
     ///
     /// This should be called periodically to prevent memory leaks from
     /// accumulated expired tokens.
-    pub fn clear_expired(&self) {
+    pub(crate) fn clear_expired(&self) {
         self.cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
@@ -169,7 +171,7 @@ impl TokenCache {
     }
 
     /// Remove tokens from cache by index key
-    pub fn invalidate_by_index(&self, index_key: IndexKey) {
+    pub(crate) fn invalidate_by_index(&self, index_key: IndexKey) {
         self.cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
@@ -207,7 +209,7 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
 //
 // thiserror is used for usefull string conversation
 #[derive(Debug, derive_more::Display)]
-pub enum IndexKey {
+pub(crate) enum IndexKey {
     #[display("iss:{_0}")]
     Iss(String),
 }

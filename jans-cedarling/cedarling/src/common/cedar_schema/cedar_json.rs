@@ -21,15 +21,15 @@ mod deserialize;
 
 const CEDAR_EMPTY_NAMESPACE: &str = "";
 
-pub type ActionName = String;
-pub type ActionGroupName = String;
-pub type AttributeName = String;
-pub type CommonTypeName = String;
-pub type EntityName = String;
-pub type EntityTypeName = String;
-pub type EntityOrCommonName = String;
-pub type ExtensionName = String;
-pub type NamespaceName = String;
+type ActionName = String;
+type ActionGroupName = String;
+type AttributeName = String;
+type CommonTypeName = String;
+type EntityName = String;
+type EntityTypeName = String;
+type EntityOrCommonName = String;
+type ExtensionName = String;
+type NamespaceName = String;
 
 /// Joins the given type name with the given namespace if it's not an empty string.
 fn join_namespace(namespace: &str, type_name: &str) -> String {
@@ -39,7 +39,8 @@ fn join_namespace(namespace: &str, type_name: &str) -> String {
     [namespace, type_name].join(CEDAR_NAMESPACE_SEPARATOR)
 }
 
-#[derive(Debug, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct CedarSchemaJson {
     #[serde(flatten)]
     namespaces: HashMap<NamespaceName, Namespace>,
@@ -63,9 +64,10 @@ impl CedarSchemaJson {
         let basename = entity_type_name.basename();
 
         if !namespace.is_empty()
-            && let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename) {
-                return Ok(Some((entity_type_name, entity_schema)));
-            }
+            && let Some(entity_schema) = self.get_comon_type_from_namespace(&namespace, basename)
+        {
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace {
@@ -91,9 +93,10 @@ impl CedarSchemaJson {
 
     fn get_comon_type_from_namespace(&self, namespace: &str, basename: &str) -> Option<&Attribute> {
         if let Some(namespace) = self.namespaces.get(namespace)
-            && let Some(entity_type) = namespace.common_types.get(basename) {
-                return Some(entity_type);
-            }
+            && let Some(entity_type) = namespace.common_types.get(basename)
+        {
+            return Some(entity_type);
+        }
         None
     }
 
@@ -114,19 +117,19 @@ impl CedarSchemaJson {
 
         if !namespace.is_empty()
             && let Some(entity_schema) = self.get_entity_schema_from_namespace(&namespace, basename)
-            {
-                return Ok(Some((entity_type_name, entity_schema)));
-            }
+        {
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
 
         // If namespace is empty (in type_name), look for the type in the default namespace.
         if let Some(namespace) = default_namespace
             && let Some(entity_schema) = self.get_entity_schema_from_namespace(namespace, basename)
-            {
-                let entity_type_name =
-                    cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
+        {
+            let entity_type_name =
+                cedar_policy::EntityTypeName::from_str(&join_namespace(namespace, type_name))?;
 
-                return Ok(Some((entity_type_name, entity_schema)));
-            }
+            return Ok(Some((entity_type_name, entity_schema)));
+        }
 
         // If the type is not found in the default namespace, look for it in the empty namespace.
         if let Some(entity_schema) =
@@ -146,15 +149,17 @@ impl CedarSchemaJson {
         basename: &str,
     ) -> Option<&EntityType> {
         if let Some(namespace) = self.namespaces.get(namespace)
-            && let Some(entity_type) = namespace.entity_types.get(basename) {
-                return Some(entity_type);
-            }
+            && let Some(entity_type) = namespace.entity_types.get(basename)
+        {
+            return Some(entity_type);
+        }
         None
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct Namespace {
+#[derive(Debug, Deserialize, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+struct Namespace {
     #[serde(rename = "entityTypes", default)]
     entity_types: HashMap<EntityTypeName, EntityType>,
     #[serde(rename = "commonTypes", default)]

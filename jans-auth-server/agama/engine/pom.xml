@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-auth-server-parent</artifactId>
-        <version>1.15.0</version>
+        <version>0.0.0-nightly</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -156,7 +156,7 @@
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
-            <version>1.7.14</version>
+            <version>1.7.14.1</version>
         </dependency>
         
         <!-- Groovy -->

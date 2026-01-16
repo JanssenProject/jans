@@ -735,6 +735,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
     private Boolean disableJdkLogger = true;
 
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
+
     @DocProperty(description = "This list details the allowed custom parameters for authorization requests")
     private Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters;
 
@@ -1641,7 +1644,15 @@ public class AppConfiguration implements Configuration {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-    public Boolean getFrontChannelLogoutSessionSupported() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
     }
 

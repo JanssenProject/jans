@@ -18,7 +18,7 @@ use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
-    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, LogType, Logger, gen_uuid7, log_async,
+    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -54,7 +54,7 @@ pub(crate) struct AuthzConfig {
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
-pub struct Authz {
+pub(super) struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
 }
@@ -63,10 +63,12 @@ impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Result<Self, AuthzServiceInitError> {
         config.log_service.log_any(
-            LogEntry::new_with_data(LogType::System, None)
-                .set_cedar_version()
-                .set_level(LogLevel::INFO)
-                .set_message("Cedarling Authz initialized successfully".to_string()),
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_cedar_version()
+            .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
         Ok(Self {
@@ -76,7 +78,7 @@ impl Authz {
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-    pub(crate) async fn decode_tokens<'a>(
+    pub(super) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
     ) -> Result<HashMap<String, Arc<Token>>, AuthorizeError> {
@@ -91,7 +93,10 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
-    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+    pub(super) async fn authorize(
+        &self,
+        request: Request,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         // We use uuid v7 because it is generated based on the time and sortable.
         // and we need sortable ids to use it in the sparkv database.
@@ -237,14 +242,6 @@ impl Authz {
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
-        // getting entities as json
-        let mut entities_raw_json = Vec::new();
-        let cursor = Cursor::new(&mut entities_raw_json);
-
-        entities.write_to_json(cursor).map_err(Box::new)?;
-        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
-            .map_err(AuthorizeError::EntitiesToJson)?;
-
         let decision_diagnostics =
             collect_diagnostics(&[user_authz_info.as_ref(), workload_authz_info.as_ref()]);
 
@@ -257,54 +254,72 @@ impl Authz {
             self.log_policy_evaluation_errors(&info.diagnostics, "workload principal", request_id);
         }
 
-        let tokens_logging_info = LogTokensInfo::new(
-            &tokens,
-            self.config
-                .authorization
-                .decision_log_default_jwt_id
-                .as_str(),
-        );
-
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
-        let decision_log_entry = DecisionLogEntry {
-            base: BaseLogEntry::new(LogType::Decision, request_id),
-            policystore_id: self.config.policy_store.id.as_str().into(),
-            policystore_version: self.config.policy_store.get_store_version().into(),
-            principal: DecisionLogEntry::principal(
-                result.person.is_some(),
-                result.workload.is_some(),
-            ),
-            user: user_entity_claims,
-            workload: workload_entity_claims,
-            lock_client_id: None,
-            action: request.action.clone(),
-            resource: resource_uid.to_string(),
-            decision: result.decision.into(),
-            tokens: tokens_logging_info,
-            decision_time_micro_sec,
-            diagnostics: DiagnosticsSummary::from_diagnostics(&decision_diagnostics),
-        };
-        log_async(&self.config.log_service, decision_log_entry);
+        let decision_log_fn =
+            BaseLogEntry::new_decision(request_id).with_fn(|base: BaseLogEntry| {
+                let tokens_logging_info = LogTokensInfo::new(
+                    &tokens,
+                    self.config
+                        .authorization
+                        .decision_log_default_jwt_id
+                        .as_str(),
+                );
+
+                DecisionLogEntry {
+                    base,
+                    policystore_id: self.config.policy_store.id.as_str().into(),
+                    policystore_version: self.config.policy_store.get_store_version().into(),
+                    principal: DecisionLogEntry::principal(
+                        result.person.is_some(),
+                        result.workload.is_some(),
+                    ),
+                    user: user_entity_claims.clone(),
+                    workload: workload_entity_claims.clone(),
+                    lock_client_id: None,
+                    action: request.action.clone(),
+                    resource: resource_uid.to_string(),
+                    decision: result.decision.into(),
+                    tokens: tokens_logging_info,
+                    decision_time_micro_sec,
+                    diagnostics: DiagnosticsSummary::from_diagnostics(&decision_diagnostics),
+                }
+            });
+        self.config.log_service.log_fn(decision_log_fn);
 
         // DEBUG LOG
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        let debug_log_entry = LogEntry::new_with_data(LogType::System, Some(request_id))
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                authorize_info: [user_authz_info, workload_authz_info]
-                    .into_iter()
-                    .flatten()
-                    .collect(),
-                authorized: result.decision,
-            })
-            .set_message("Result of authorize.".to_string());
-        log_async(&self.config.log_service, debug_log_entry);
+        let debug_log_fn = BaseLogEntry::new_system(LogLevel::DEBUG, request_id).with_fn(|base| {
+            // usually debug log is disabled, so we build entities_json only when needed
+            // error should newer happen here, because entities were built successfully before
+            let entities_json: serde_json::Value = {
+                // getting entities as json
+                let mut entities_raw_json = Vec::new();
+                let cursor = Cursor::new(&mut entities_raw_json);
+                if let Err(_err) = entities.write_to_json(cursor) {
+                    serde_json::Value::Null
+                } else {
+                    serde_json::from_slice(entities_raw_json.as_slice())
+                        .unwrap_or(serde_json::Value::Null)
+                }
+            };
+
+            LogEntry::new(base)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone(),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    authorize_info: [user_authz_info.clone(), workload_authz_info.clone()]
+                        .into_iter()
+                        .flatten()
+                        .collect(),
+                    authorized: result.decision,
+                })
+                .set_message("Result of authorize.".to_string())
+        });
+        self.config.log_service.log_fn(debug_log_fn);
 
         if !result.decision {
             self.log_failed_diagnostics(&decision_diagnostics, request_id);
@@ -320,7 +335,7 @@ impl Authz {
     ///
     /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
     /// evaluates policies based solely on the context (tokens) without requiring a principal.
-    pub async fn authorize_multi_issuer(
+    pub(super) async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
@@ -394,14 +409,6 @@ impl Authz {
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
-        // getting entities as json
-        let mut entities_raw_json = Vec::new();
-        let cursor = Cursor::new(&mut entities_raw_json);
-
-        entities.write_to_json(cursor)?;
-        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
-            .map_err(AuthorizeError::EntitiesToJson)?;
-
         // Log policy evaluation errors if any exist
         self.log_policy_evaluation_errors(
             &authz_info.diagnostics,
@@ -421,46 +428,64 @@ impl Authz {
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
-        let decision_log_entry = DecisionLogEntry {
-            base: BaseLogEntry::new(LogType::Decision, request_id),
-            policystore_id: self.config.policy_store.id.as_str().into(),
-            policystore_version: self.config.policy_store.get_store_version().into(),
-            principal: DecisionLogEntry::principal(
-                false, // No person principal for multi-issuer
-                false, // No workload principal for multi-issuer
-            ),
-            user: None,     // No user claims for multi-issuer
-            workload: None, // No workload claims for multi-issuer
-            lock_client_id: None,
-            action: request.action.clone(),
-            resource: resource_uid.to_string(),
-            decision: result.decision.into(),
-            tokens: tokens_logging_info,
-            decision_time_micro_sec,
-            diagnostics: DiagnosticsSummary::from_diagnostics(&multi_diagnostics),
-        };
-        log_async(&self.config.log_service, decision_log_entry);
+        let decision_log_fn =
+            BaseLogEntry::new_decision(request_id).with_fn(|base: BaseLogEntry| {
+                DecisionLogEntry {
+                    base,
+                    policystore_id: self.config.policy_store.id.as_str().into(),
+                    policystore_version: self.config.policy_store.get_store_version().into(),
+                    principal: DecisionLogEntry::principal(
+                        false, // No person principal for multi-issuer
+                        false, // No workload principal for multi-issuer
+                    ),
+                    user: None,     // No user claims for multi-issuer
+                    workload: None, // No workload claims for multi-issuer
+                    lock_client_id: None,
+                    action: request.action.clone(),
+                    resource: resource_uid.to_string(),
+                    decision: result.decision.into(),
+                    tokens: tokens_logging_info.clone(),
+                    decision_time_micro_sec,
+                    diagnostics: DiagnosticsSummary::from_diagnostics(&multi_diagnostics),
+                }
+            });
+        self.config.log_service.log_fn(decision_log_fn);
 
         // DEBUG LOG
         // Log all result information about multi-issuer authorization
-        let debug_log_entry = LogEntry::new_with_data(LogType::System, Some(request_id))
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone().unwrap_or(json!({})),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                authorize_info: vec![authz_info],
-                authorized: result.decision,
-            })
-            .set_message("Result of multi-issuer authorize.".to_string());
-        log_async(&self.config.log_service, debug_log_entry);
+        let debug_log_fn = BaseLogEntry::new_system(LogLevel::DEBUG, request_id).with_fn(|base| {
+            // usually debug log is disabled, so we build entities_json only when needed
+            // error should newer happen here, because entities were built successfully before
+            let entities_json: serde_json::Value = {
+                // getting entities as json
+                let mut entities_raw_json = Vec::new();
+                let cursor = Cursor::new(&mut entities_raw_json);
+                if let Err(_err) = entities.write_to_json(cursor) {
+                    serde_json::Value::Null
+                } else {
+                    serde_json::from_slice(entities_raw_json.as_slice())
+                        .unwrap_or(serde_json::Value::Null)
+                }
+            };
+
+            LogEntry::new(base)
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone().unwrap_or(json!({})),
+                    resource: resource_uid.to_string(),
+                    entities: entities_json,
+                    authorize_info: vec![authz_info.clone()],
+                    authorized: result.decision,
+                })
+                .set_message("Result of multi-issuer authorize.".to_string())
+        });
+        self.config.log_service.log_fn(debug_log_fn);
 
         Ok(result)
     }
 
     /// Evaluate Authorization Request with unsigned data.
-    pub async fn authorize_unsigned(
+    pub(super) async fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
@@ -539,14 +564,6 @@ impl Authz {
 
         // FROM THIS POINT WE ONLY MAKE LOGS
 
-        // getting entities as json
-        let mut entities_raw_json = Vec::new();
-        let cursor = Cursor::new(&mut entities_raw_json);
-
-        entities.write_to_json(cursor).map_err(Box::new)?;
-        let entities_json: serde_json::Value = serde_json::from_slice(entities_raw_json.as_slice())
-            .map_err(AuthorizeError::EntitiesToJson)?;
-
         let debug_authorize_info = result
             .principals
             .iter()
@@ -572,38 +589,57 @@ impl Authz {
 
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
-        let unsigned_decision_log = DecisionLogEntry {
-            base: BaseLogEntry::new(LogType::Decision, request_id),
-            policystore_id: self.config.policy_store.id.as_str().into(),
-            policystore_version: self.config.policy_store.get_store_version().into(),
-            principal: DecisionLogEntry::all_principals(principal_uids.as_slice()),
-            user: None,
-            workload: None,
-            lock_client_id: None,
-            action: request.action.clone(),
-            resource: resource_uid.to_string(),
-            decision: result.decision.into(),
-            tokens: LogTokensInfo::empty(),
-            decision_time_micro_sec,
-            diagnostics: DiagnosticsSummary::from_diagnostics(&diagnostics),
-        };
-        log_async(&self.config.log_service, unsigned_decision_log);
+        let unsigned_decision_log_fn =
+            BaseLogEntry::new_decision(request_id).with_fn(|base| DecisionLogEntry {
+                base,
+                policystore_id: self.config.policy_store.id.as_str().into(),
+                policystore_version: self.config.policy_store.get_store_version().into(),
+                principal: DecisionLogEntry::all_principals(principal_uids.as_slice()),
+                user: None,
+                workload: None,
+                lock_client_id: None,
+                action: request.action.clone(),
+                resource: resource_uid.to_string(),
+                decision: result.decision.into(),
+                tokens: LogTokensInfo::empty(),
+                decision_time_micro_sec,
+                diagnostics: DiagnosticsSummary::from_diagnostics(&diagnostics),
+            });
+        self.config.log_service.log_fn(unsigned_decision_log_fn);
 
         // DEBUG LOG
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
-        let unsigned_debug_log = LogEntry::new_with_data(LogType::System, Some(request_id))
-            .set_level(LogLevel::DEBUG)
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context.clone(),
-                resource: resource_uid.to_string(),
-                entities: entities_json,
-                authorize_info: debug_authorize_info,
-                authorized: result.decision,
-            })
-            .set_message("Result of authorize.".to_string());
-        log_async(&self.config.log_service, unsigned_debug_log);
+        let unsigned_debug_log_fn =
+            BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, Some(request_id)).with_fn(
+                |base| {
+                    // usually debug log is disabled, so we build entities_json only when needed
+                    // error should newer happen here, because entities were built successfully before
+                    let entities_json: serde_json::Value = {
+                        // getting entities as json
+                        let mut entities_raw_json = Vec::new();
+                        let cursor = Cursor::new(&mut entities_raw_json);
+                        if let Err(_err) = entities.write_to_json(cursor) {
+                            serde_json::Value::Null
+                        } else {
+                            serde_json::from_slice(entities_raw_json.as_slice())
+                                .unwrap_or(serde_json::Value::Null)
+                        }
+                    };
+
+                    LogEntry::new(base)
+                        .set_auth_info(AuthorizationLogInfo {
+                            action: request.action.clone(),
+                            context: request.context.clone(),
+                            resource: resource_uid.to_string(),
+                            entities: entities_json,
+                            authorize_info: debug_authorize_info.clone(),
+                            authorized: result.decision,
+                        })
+                        .set_message("Result of authorize.".to_string())
+                },
+            );
+        self.config.log_service.log_fn(unsigned_debug_log_fn);
 
         if !result.decision {
             self.log_failed_diagnostics(&diagnostics, request_id);
@@ -640,15 +676,15 @@ impl Authz {
     }
 
     #[cfg(test)]
-    pub fn build_entities(
+    pub(super) fn build_entities(
         &self,
         request: &Request,
         tokens: &HashMap<String, Arc<Token>>,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        Ok(self
-            .config
+    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
+        self.config
             .entity_builder
-            .build_entities(tokens, &request.resource)?)
+            .build_entities(tokens, &request.resource)
+            .map_err(|e| Box::new(AuthorizeError::from(e)))
     }
 
     /// Log policy evaluation errors for diagnostics
@@ -659,11 +695,10 @@ impl Authz {
         request_id: Uuid,
     ) {
         if !diagnostics.errors.is_empty() {
-            let log_entry = LogEntry::new_with_data(LogType::Decision, Some(request_id))
-                .set_level(LogLevel::ERROR)
+            let log_entry = LogEntry::new(BaseLogEntry::new_decision(request_id))
                 .set_message(format!("Policy evaluation errors for {}", principal_name))
                 .set_error(format!("{:?}", diagnostics.errors));
-            log_async(&self.config.log_service, log_entry);
+            self.config.log_service.log_any(log_entry);
         }
     }
 
@@ -682,14 +717,13 @@ impl Authz {
         let serialized_errors = serde_json::to_string(&all_errors)
             .unwrap_or_else(|_| "failed to serialize diagnostics errors".to_string());
 
-        let log_entry = LogEntry::new_with_data(LogType::Decision, Some(request_id))
-            .set_level(LogLevel::ERROR)
+        let log_entry = LogEntry::new(BaseLogEntry::new_decision(request_id))
             .set_message(
                 "Authorization denied: summary of all policy evaluation errors".to_string(),
             )
             .set_error(serialized_errors);
 
-        log_async(&self.config.log_service, log_entry);
+        self.config.log_service.log_any(log_entry);
     }
 }
 
@@ -712,7 +746,7 @@ struct ExecuteAuthorizeParameters<'a> {
 
 /// Structure to hold entites created from tokens
 #[derive(Debug)]
-pub struct AuthorizeEntitiesData {
+pub(super) struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
     pub tokens: HashMap<String, Entity>,
     pub workload: Option<Entity>,

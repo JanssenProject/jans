@@ -5,7 +5,7 @@ tags:
   - script-catalog
 ---
 
-# Discovery Script 
+# Discovery Script
 
 
 
@@ -134,7 +134,7 @@ class Discovery(DiscoveryType):
        return True
 ```
 
-## Script Type: Java 
+## Script Type: Java
 
 ### Add custom values, remove values, and add client's IP request
 

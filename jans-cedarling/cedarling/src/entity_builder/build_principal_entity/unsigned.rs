@@ -8,7 +8,7 @@ use cedar_policy::Entity;
 use std::collections::HashSet;
 
 impl EntityBuilder {
-    pub fn build_principal_unsigned(
+    pub(crate) fn build_principal_unsigned(
         &self,
         principal: &EntityData,
         built_entities: &BuiltEntities,
@@ -111,7 +111,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )

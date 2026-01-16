@@ -5,7 +5,6 @@
 
 use std::collections::HashMap;
 
-use regex;
 use regex::Regex;
 use serde::{Deserialize, de};
 use serde_json::Value;
@@ -136,8 +135,8 @@ pub struct RegexMapping {
 }
 
 impl RegexMapping {
-    // builder function, used in testing
-    #[allow(dead_code)]
+    /// Create a new RegexMapping with the given expression and field mappings.
+    #[cfg(test)]
     fn new(
         regex_expression: String,
         fields: HashMap<String, RegexFieldMapping>,
@@ -259,7 +258,7 @@ impl<'de> Deserialize<'de> for ClaimMapping {
 /// - `attr`: The attribute name associated with the field (e.g., "uid").
 /// - `type`: The type of the attribute (e.g., "string").
 #[derive(Debug, PartialEq, Deserialize, Clone)]
-pub struct RegexFieldMapping {
+struct RegexFieldMapping {
     pub attr: String,
     pub r#type: RegexFieldMappingType,
 }
@@ -271,7 +270,7 @@ pub struct RegexFieldMapping {
 ///
 /// If string is empty or not correct will be used default value for according type.
 #[derive(Debug, PartialEq, Deserialize, Copy, Clone)]
-pub enum RegexFieldMappingType {
+enum RegexFieldMappingType {
     String,
     Number,
     Boolean,
@@ -283,7 +282,7 @@ impl RegexFieldMappingType {
     /// `String` - to string without transformation
     /// `Number` - parse string to float64 if error returns default value
     /// `Boolean` - if string NOT empty map to true else false
-    pub fn apply_mapping(&self, value: &str) -> serde_json::Value {
+    fn apply_mapping(&self, value: &str) -> serde_json::Value {
         match self {
             RegexFieldMappingType::String => serde_json::json!(value),
             RegexFieldMappingType::Number => {
@@ -313,14 +312,20 @@ mod test {
         let re_mapping = RegexMapping::new(
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                ("UID".to_string(), RegexFieldMapping {
-                    attr: "uid".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
-                ("DOMAIN".to_string(), RegexFieldMapping {
-                    attr: "domain".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
+                (
+                    "UID".to_string(),
+                    RegexFieldMapping {
+                        attr: "uid".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexFieldMapping {
+                        attr: "domain".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
             ]),
         )
         .expect("regexp should parse correctly");
@@ -384,15 +389,21 @@ mod test {
         let re_mapping = RegexMapping::new(
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
-                ("UID".to_string(), RegexFieldMapping {
-                    attr: "uid".to_string(),
-                    r#type: RegexFieldMappingType::String,
-                }),
-                ("DOMAIN".to_string(), RegexFieldMapping {
-                    attr: "domain".to_string(),
+                (
+                    "UID".to_string(),
+                    RegexFieldMapping {
+                        attr: "uid".to_string(),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexFieldMapping {
+                        attr: "domain".to_string(),
 
-                    r#type: RegexFieldMappingType::String,
-                }),
+                        r#type: RegexFieldMappingType::String,
+                    },
+                ),
             ]),
         )
         .expect("regexp should parse correctly");

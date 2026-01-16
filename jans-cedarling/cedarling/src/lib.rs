@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 #![deny(missing_docs)]
+#![warn(unreachable_pub)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -33,6 +34,8 @@ mod tests;
 use std::sync::Arc;
 
 pub use crate::common::json_rules::JsonRule;
+pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
+use crate::log::BaseLogEntry;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
@@ -47,9 +50,11 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
+use log::LogEntry;
 use log::interface::LogWriter;
-use log::{LogEntry, LogType};
 pub use log::{LogLevel, LogStorage};
+
+use semver::Version;
 
 #[doc(hidden)]
 pub mod bindings {
@@ -124,21 +129,30 @@ impl Cedarling {
             .await
             .inspect(|_| {
                 log.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::DEBUG)
-                        .set_message("configuration parsed successfully".to_string()),
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::DEBUG,
+                        None,
+                    ))
+                    .set_message("configuration parsed successfully".to_string()),
                 )
             })
             .inspect_err(|err| {
                 log.log_any(
-                    LogEntry::new_with_data(LogType::System, None)
-                        .set_error(err.to_string())
-                        .set_level(LogLevel::ERROR)
-                        .set_message("configuration parsed with error".to_string()),
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::ERROR,
+                        None,
+                    ))
+                    .set_error(err.to_string())
+                    .set_message("configuration parsed with error".to_string()),
                 )
             })?;
 
         let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
+
+        // Log policy store metadata if available (new format only)
+        if let Some(metadata) = service_factory.policy_store_metadata() {
+            log_policy_store_metadata(&log, metadata);
+        }
 
         Ok(Cedarling {
             log,
@@ -173,17 +187,118 @@ impl Cedarling {
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub async fn build_entities(
+    pub(crate) async fn build_entities(
         &self,
         request: &Request,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let tokens = self.authz.decode_tokens(request).await?;
+    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
+        let tokens = self.authz.decode_tokens(request).await.map_err(Box::new)?;
         self.authz.build_entities(request, &tokens)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
         self.log.shut_down().await;
+    }
+}
+
+/// Log detailed information about the loaded policy store metadata, including
+/// ID, version, description, Cedar version, timestamps, and compatibility with
+/// the runtime Cedar version.
+fn log_policy_store_metadata(
+    log: &log::Logger,
+    metadata: &crate::common::policy_store::PolicyStoreMetadata,
+) {
+    // Build detailed log message using accessor methods
+    let mut details = format!(
+        "Policy store '{}' (ID: {}) v{} loaded",
+        metadata.name(),
+        if metadata.id().is_empty() {
+            "<auto>"
+        } else {
+            metadata.id()
+        },
+        metadata.version()
+    );
+
+    // Add description if available
+    if let Some(desc) = metadata.description() {
+        details.push_str(&format!(" - {}", desc));
+    }
+
+    // Add Cedar version info
+    details.push_str(&format!(" [Cedar {}]", metadata.cedar_version()));
+
+    // Add timestamp info if available
+    if let Some(created) = metadata.created_date() {
+        details.push_str(&format!(" (created: {})", created.format("%Y-%m-%d")));
+    }
+    if let Some(updated) = metadata.updated_date() {
+        details.push_str(&format!(" (updated: {})", updated.format("%Y-%m-%d")));
+    }
+
+    log.log_any(
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::DEBUG,
+            None,
+        ))
+        .set_message(details),
+    );
+
+    // Log version compatibility check with current Cedar
+    let current_cedar_version: Version = cedar_policy::get_lang_version();
+    match metadata.is_compatible_with_cedar(&current_cedar_version) {
+        Ok(true) => {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::DEBUG,
+                    None,
+                ))
+                .set_message(format!(
+                    "Policy store Cedar version {} is compatible with runtime version {}",
+                    metadata.cedar_version(),
+                    current_cedar_version
+                )),
+            );
+        },
+        Ok(false) => {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "Policy store Cedar version {} may not be compatible with runtime version {}",
+                    metadata.cedar_version(),
+                    current_cedar_version
+                )),
+            );
+        },
+        Err(e) => {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "Could not check Cedar version compatibility: {}",
+                    e
+                )),
+            );
+        },
+    }
+
+    // Log parsed version for debugging if available
+    if let Some(parsed_version) = metadata.version_parsed() {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::TRACE,
+                None,
+            ))
+            .set_message(format!(
+                "Policy store semantic version: {}.{}.{}",
+                parsed_version.major, parsed_version.minor, parsed_version.patch
+            )),
+        );
     }
 }
 
