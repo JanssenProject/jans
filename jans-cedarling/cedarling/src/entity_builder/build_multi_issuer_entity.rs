@@ -746,13 +746,11 @@ mod tests {
             .expect("iss attribute should exist")
             .expect("should be a valid value");
         // iss should be an entity reference (EntityUid) when token has trusted issuer
-        match iss_value {
-            EvalResult::EntityUid(_) => (),
-            _ => panic!(
-                "iss should be an entity reference (EntityUid), got {:?}",
-                iss_value
-            ),
-        };
+        assert!(
+            matches!(iss_value, EvalResult::EntityUid(_)),
+            "iss should be an entity reference (EntityUid), got {:?}",
+            iss_value
+        );
 
         // Verify schema-defined claims are present as tags
         // (tags exist but values are stored as RestrictedExpression)
@@ -930,12 +928,10 @@ mod tests {
             .expect("iss attribute should exist")
             .expect("should be a valid value");
         // iss should be an entity reference (EntityUid)
-        match iss_value {
-            EvalResult::EntityUid(_) => (),
-            _ => panic!(
-                "iss should be an entity reference (EntityUid), got {:?}",
-                iss_value
-            ),
-        };
+        assert!(
+            matches!(iss_value, EvalResult::EntityUid(_)),
+            "iss should be an entity reference (EntityUid), got {:?}",
+            iss_value
+        );
     }
 }
