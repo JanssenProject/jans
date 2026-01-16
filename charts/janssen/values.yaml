@@ -1206,7 +1206,7 @@ global:
     # -- Boolean flag to enable/disable the cleanup cronjob chart.
     enabled: true
 gatewayApi:
-  # -- Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik') | https://gateway-api.sigs.k8s.io/implementations/#conformant
+  # -- Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant
   gatewayClassName: nginx
   # -- The name of the Gateway resource to be created
   name: jans-gateway

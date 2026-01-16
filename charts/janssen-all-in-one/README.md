@@ -296,7 +296,7 @@ Kubernetes: `>=v1.23.0-0`
 | fullNameOverride | string | `""` |  |
 | gatewayApi.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
 | gatewayApi.gatewayAnnotations | object | `{}` | Specific annotations for the Gateway resource |
-| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik') | https://gateway-api.sigs.k8s.io/implementations/#conformant |
+| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
 | gatewayApi.gatewayLabels | object | `{}` | Specific labels for the Gateway resource |
 | gatewayApi.httpPort | int | `80` | Gateway http port number |
 | gatewayApi.httpsPort | int | `443` | Gateway https port number |
