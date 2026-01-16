@@ -1,3 +1,4 @@
+io.jans.configapi.filters.AdminUICookieFilter
 io.jans.configapi.filters.AuthorizationFilter
 io.jans.configapi.filters.LoggingFilter
 

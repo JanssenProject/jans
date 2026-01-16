@@ -54,7 +54,7 @@ pub(crate) struct AuthzConfig {
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
-pub struct Authz {
+pub(super) struct Authz {
     config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
 }
@@ -78,7 +78,7 @@ impl Authz {
     }
 
     // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-    pub(crate) async fn decode_tokens<'a>(
+    pub(super) async fn decode_tokens<'a>(
         &'a self,
         request: &'a Request,
     ) -> Result<HashMap<String, Arc<Token>>, AuthorizeError> {
@@ -93,7 +93,10 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
-    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+    pub(super) async fn authorize(
+        &self,
+        request: Request,
+    ) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         // We use uuid v7 because it is generated based on the time and sortable.
         // and we need sortable ids to use it in the sparkv database.
@@ -332,7 +335,7 @@ impl Authz {
     ///
     /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
     /// evaluates policies based solely on the context (tokens) without requiring a principal.
-    pub async fn authorize_multi_issuer(
+    pub(super) async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
@@ -482,7 +485,7 @@ impl Authz {
     }
 
     /// Evaluate Authorization Request with unsigned data.
-    pub async fn authorize_unsigned(
+    pub(super) async fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
@@ -673,15 +676,15 @@ impl Authz {
     }
 
     #[cfg(test)]
-    pub fn build_entities(
+    pub(super) fn build_entities(
         &self,
         request: &Request,
         tokens: &HashMap<String, Arc<Token>>,
-    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        Ok(self
-            .config
+    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
+        self.config
             .entity_builder
-            .build_entities(tokens, &request.resource)?)
+            .build_entities(tokens, &request.resource)
+            .map_err(|e| Box::new(AuthorizeError::from(e)))
     }
 
     /// Log policy evaluation errors for diagnostics
@@ -743,7 +746,7 @@ struct ExecuteAuthorizeParameters<'a> {
 
 /// Structure to hold entites created from tokens
 #[derive(Debug)]
-pub struct AuthorizeEntitiesData {
+pub(super) struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
     pub tokens: HashMap<String, Entity>,
     pub workload: Option<Entity>,

@@ -227,6 +227,12 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when the lock server configuration URI is invalid.
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
+
+    /// Error returned when cjar_url is missing or empty.
+    #[error(
+        "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
+    )]
+    MissingCjarUrl,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {
@@ -238,12 +244,6 @@ impl From<url::ParseError> for BootstrapConfigLoadingError {
 impl From<serde_json::Error> for BootstrapConfigLoadingError {
     fn from(err: serde_json::Error) -> Self {
         Self::DecodingJSON(err.to_string())
-    }
-}
-
-impl From<std::convert::Infallible> for BootstrapConfigLoadingError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!("Infallible cannot be instantiated")
     }
 }
 

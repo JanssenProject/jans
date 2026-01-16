@@ -13,8 +13,8 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 
 ### Build with dynamic linking
 
-1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as 
-described above.
+1. Download the appropriate pre-built binary for your platform from the Jans releases page or build it from source as
+   described above.
 
 2. Specify linker flags in your main.go file to link against the Cedarling library.
 
@@ -42,14 +42,14 @@ described above.
     - **Windows**
 
         - Place the Rust artifacts (`cedarling_go.dll` and `cedarling_go.lib`) alongside the Go binary.
-        - Windows searches libraries in directories below in the 
+        - Windows searches libraries in directories below in the
           following order
             1. The directory containing your Go executable (recommended location)
             2. Windows system directories (e.g., `C:\Windows\System32`)
             3. The `PATH` environment variable directories
 
     - **Linux**
-    
+
         Add the library directory that contains `libcedarling_go.so` to the
         `LD_LIBRARY_PATH` environment variable
 
@@ -58,10 +58,10 @@ described above.
         ```
 
     - **MacOS**
-        
+
         Add the library directory that contains `libcedarling_go.dylib` to the
         `LD_LIBRARY_PATH` environment variable
-        
+
         ```sh
         export DYLD_LIBRARY_PATH=$(pwd):$DYLD_LIBRARY_PATH
         ```
@@ -147,13 +147,43 @@ if err != nil {
 }
 ```
 
+### Policy Store Sources
+
+Go bindings support all native policy store source types. See [Cedarling Properties](../reference/cedarling-properties.md) for the full list of configuration options.
+
+**Example configurations:**
+
+```go
+// Load from a directory
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":      "MyApp",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
+    // ... other config
+}
+
+// Load from a local .cjar archive (Cedar Archive)
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":      "MyApp",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+    // ... other config
+}
+
+// Load from a remote .cjar archive (Cedar Archive)
+config := map[string]any{
+    "CEDARLING_APPLICATION_NAME":   "MyApp",
+    "CEDARLING_POLICY_STORE_URI":   "https://example.com/policy-store.cjar",
+    // ... other config
+}
+```
+
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
+
 ### Authorization
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
 - [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
-
 
 #### Token-Based Authorization
 
@@ -318,10 +348,10 @@ if err != nil {
 if result.Decision {
     fmt.Println("Access granted")
     fmt.Printf("Request ID: %s\n", result.RequestID)
-    
+
     // Access detailed Cedar response
     fmt.Printf("Cedar decision: %s\n", result.Response.Decision().ToString())
-    
+
     // Get diagnostic information
     diagnostics := result.Response.Diagnostics()
     if len(diagnostics.Reason()) > 0 {

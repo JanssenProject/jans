@@ -15,6 +15,8 @@ public enum ErrorResponse {
     ERROR_READING_ROLE_PERMISSION_MAP("Error in reading role-permissions mapping from Auth Server."),
     ROLE_PERMISSION_MAP_NOT_FOUND("Role-permissions mapping not found."),
     ROLE_NOT_FOUND("Bad Request: Admin UI Role not found in Auth Server."),
+    UJWT_NOT_FOUND("Bad Request: Admin UI UJWT not found in request body."),
+    SIGNATURE_NOT_VALID("Bad Request: The signature of user-info JWT is not valid."),
     PERMISSION_NOT_FOUND("Bad Request: Admin UI permission not found in Auth Server."),
     ERROR_IN_MAPPING_ROLE_PERMISSION("Error in mapping role-permission."),
     ERROR_IN_DELETING_ROLE_PERMISSION("Error in deleting role-permission."),
@@ -42,7 +44,7 @@ public enum ErrorResponse {
     REWRITING_DEFAULT_POLICY_STORE_ERROR("Error in overwriting default policy-store with remote policy-store."),
     SYNC_ROLE_SCOPES_MAPPING_ERROR("Error in syncing role-to-scope mapping from policy-store."),
     BLANK_JWT("JWT is blank or empty"),
-    ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
+    ISS_CLAIM_NOT_FOUND("ISS claim not found in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
     LICENSE_NOT_PRESENT("Active license not present in configuration."),
     LICENSE_EXPIRY_DATE_NOT_PRESENT("Active license expiry date not present."),
@@ -69,7 +71,10 @@ public enum ErrorResponse {
     WEBHOOK_RECORD_NOT_EXIST("Record does not exist."),
     NO_WEBHOOK_FOUND("No webhook mapped to feature."),
     WEBHOOK_CONTENT_TYPE_REQUIRED("Content-Type required."),
-    FETCH_DATA_ERROR("Error in fetching data.")
+    FETCH_DATA_ERROR("Error in fetching data."),
+    ADMINUI_SESSION_CREATE_ERROR("Error in creating Admin UI session"),
+    ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session"),
+    ORG_ID_CLAIM_NOT_FOUND("org_id claim not found in jwt")
     ;
 
     private final String description;

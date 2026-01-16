@@ -39,9 +39,9 @@ class SqlLock(BaseLock):
             raise_on_error = False
 
             # if error is not about duplicated table, force raising exception
-            if self._dialect in ("pgsql", "postgresql") and exc.orig.pgcode != "42P07":
+            if self.client.dialect in ("pgsql", "postgresql") and exc.orig.pgcode != "42P07":
                 raise_on_error = True
-            elif self._dialect == "mysql" and exc.orig.args[0] != 1050:
+            elif self.client.dialect == "mysql" and exc.orig.args[0] != 1050:
                 raise_on_error = True
 
             if raise_on_error:
@@ -69,14 +69,14 @@ class SqlLock(BaseLock):
         Returns:
             Mapping of lock data.
         """
-        stmt = select([self.table]).where(self.table.c.doc_id == key).limit(1)
+        stmt = select(self.table).where(self.table.c.doc_id == key).limit(1)
 
         with self.client.engine.connect() as conn:
             result = conn.execute(stmt)
             entry = result.fetchone()
 
             if entry:
-                rowset = dict(entry)
+                rowset = dict(entry._mapping)
                 return json.loads(rowset["jansData"]) | {"name": rowset["doc_id"]}
         return {}
 
@@ -98,12 +98,13 @@ class SqlLock(BaseLock):
         )
 
         with self.client.engine.connect() as conn:
-            try:
-                result = conn.execute(stmt)
-                created = bool(result.inserted_primary_key)
-            except IntegrityError:
-                created = False
-            return created
+            with conn.begin():
+                try:
+                    result = conn.execute(stmt)
+                    created = bool(result.inserted_primary_key)
+                except IntegrityError:
+                    created = False
+                return created
 
     def put(self, key: str, owner: str, ttl: float, updated_at: str) -> bool:
         """Update specific lock.
@@ -122,8 +123,9 @@ class SqlLock(BaseLock):
         )
 
         with self.client.engine.connect() as conn:
-            result = conn.execute(stmt)
-            return bool(result.rowcount)
+            with conn.begin():
+                result = conn.execute(stmt)
+                return bool(result.rowcount)
 
     def delete(self, key: str) -> bool:
         """Delete specific lock.
@@ -137,8 +139,9 @@ class SqlLock(BaseLock):
         stmt = self.table.delete().where(self.table.c.doc_id == key)
 
         with self.client.engine.connect() as conn:
-            result = conn.execute(stmt)
-            return bool(result.rowcount)
+            with conn.begin():
+                result = conn.execute(stmt)
+                return bool(result.rowcount)
 
     def connected(self) -> bool:
         """Check if connection is established.

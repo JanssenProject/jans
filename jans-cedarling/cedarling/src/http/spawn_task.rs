@@ -11,7 +11,7 @@ use std::future::Future;
 /// - [`tokio::spawn`]
 /// - [`wasm_bindgen_futures::spawn_local`]
 #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
-pub fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
+pub(crate) fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
 where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
@@ -26,7 +26,7 @@ where
 /// - [`tokio::spawn`]
 /// - [`wasm_bindgen_futures::spawn_local`]
 #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
-pub fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
+pub(crate) fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
 where
     F: Future + 'static,
     F::Output: Send + 'static,
@@ -47,7 +47,7 @@ where
 ///
 /// This is needed because the WASM bindings need special treatment.
 #[derive(Debug)]
-pub struct JoinHandle<T>
+pub(crate) struct JoinHandle<T>
 where
     T: Send + 'static,
 {
@@ -62,7 +62,7 @@ impl<T> JoinHandle<T>
 where
     T: Send + 'static,
 {
-    pub async fn await_result(self) -> T {
+    pub(crate) async fn await_result(self) -> T {
         #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
         {
             self.handle.await.expect("Task panicked")

@@ -9,7 +9,7 @@ use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
 use thiserror::Error;
 
-pub type EntityTypeName = SmolStr;
+type EntityTypeName = SmolStr;
 
 /// Represents different sources for building a Cedar attribute.
 ///
@@ -19,26 +19,26 @@ pub type EntityTypeName = SmolStr;
 ///
 /// [`RestrictedExpression`]: cedar_policy::RestrictedExpression
 #[derive(Debug, PartialEq)]
-pub enum AttrSrc {
+pub(crate) enum AttrSrc {
     JwtClaim(TknClaimAttrSrc),
     EntityRef(EntityRefAttrSrc),
     EntityRefSet(EntityRefSetSrc),
 }
 
 #[derive(Debug, PartialEq, Deref)]
-pub struct EntityRefAttrSrc(pub EntityTypeName);
+pub(crate) struct EntityRefAttrSrc(pub EntityTypeName);
 
 #[derive(Debug, PartialEq, Deref)]
-pub struct EntityRefSetSrc(pub EntityTypeName);
+pub(crate) struct EntityRefSetSrc(pub EntityTypeName);
 
 #[derive(Debug, PartialEq)]
-pub struct TknClaimAttrSrc {
+pub(crate) struct TknClaimAttrSrc {
     pub claim: String,
     pub expected_type: ExpectedClaimType,
 }
 
 #[derive(Debug, PartialEq)]
-pub enum ExpectedClaimType {
+pub(crate) enum ExpectedClaimType {
     Null,
     Bool,
     Number,
@@ -50,7 +50,7 @@ pub enum ExpectedClaimType {
 
 impl AttrSrc {
     /// Resolves [`AttrSrc`] from [`cedar_policy_core::validator::types::Type`]
-    pub fn from_type(attr_name: &str, value: &Type) -> Result<Self, BuildAttrSrcError> {
+    pub(super) fn from_type(attr_name: &str, value: &Type) -> Result<Self, BuildAttrSrcError> {
         let attr_src: Self = match value {
             Type::Never => {
                 return Err(
@@ -153,13 +153,13 @@ impl AttrSrc {
 
 #[derive(Debug, Error)]
 #[error("failed to build attribute source for {attr_name}: {kind}")]
-pub struct BuildAttrSrcError {
+pub(super) struct BuildAttrSrcError {
     attr_name: String,
     kind: BuildAttrSrcErrorKind,
 }
 
 #[derive(Debug, Error)]
-pub enum BuildAttrSrcErrorKind {
+pub(super) enum BuildAttrSrcErrorKind {
     #[error("can't use {0:?} as an attribute source")]
     InvalidType(Type),
     #[error("the type of the elements of a Set was not defined")]
