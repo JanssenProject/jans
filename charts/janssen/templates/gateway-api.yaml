@@ -1,12 +1,18 @@
-{{- if .Values.gatewayApi.enabled -}}
-{{- $fullName := include "janssen-all-in-one.fullname" . -}}
-{{- $svcName := .Values.service.name -}}
-{{- $svcPort := .Values.service.port -}}
+{{- if .Values.global.gatewayApi.enabled -}}
+{{- $fullName := include "cn.fullname" . -}}
+{{- $authSvc := index .Values.global "auth-server" "authServerServiceName" -}}
+{{- $configSvc := index .Values.global "config-api" "configApiServerServiceName" -}}
+{{- $fido2Svc := .Values.global.fido2.fido2ServiceName -}}
+{{- $scimSvc := .Values.global.scim.scimServiceName -}}
+{{- $casaSvc := .Values.global.casa.casaServiceName -}}
+{{- $samlSvc := .Values.global.saml.samlServiceName -}}
+{{- $namespace := .Release.Namespace -}}
+
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: {{ .Values.gatewayApi.name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-gateway
 {{- if .Values.gatewayApi.gatewayLabels }}
@@ -18,10 +24,10 @@ metadata:
 {{- end }}
 spec:
   gatewayClassName: {{ .Values.gatewayApi.gatewayClassName }}
-  {{- if .Values.lbIp }}
+  {{- if .Values.global.lbIp }}
   addresses:
   - type: IPAddress
-    value: {{ .Values.lbIp }}
+    value: {{ .Values.global.lbIp }}
   {{- end }}
   listeners:
   - name: http
@@ -44,7 +50,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}-routes-public
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
 {{- if .Values.gatewayApi.routeLabels }}
@@ -57,13 +63,12 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gatewayApi.name }}
-    # No sectionName: Attaches to ALL listeners (HTTP and HTTPS)
   hostnames:
-  - {{ .Values.fqdn | quote }}
+  - {{ .Values.global.fqdn | quote }}
   rules:
   
   {{- /* 1. OpenID Configuration */}}
-  {{- if index .Values "auth-server" "ingress" "openidConfigEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "openidConfigEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -75,12 +80,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/.well-known/openid-configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 2. Device Code */}}
-  {{- if index .Values "auth-server" "ingress" "deviceCodeEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "deviceCodeEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -92,12 +97,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/device_authorization.htm
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 3. Firebase Messaging */}}
-  {{- if index .Values "auth-server" "ingress" "firebaseMessagingEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "firebaseMessagingEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -109,12 +114,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/firebase-messaging-sw.js
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 4. UMA2 Config */}}
-  {{- if index .Values "auth-server" "ingress" "uma2ConfigEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "uma2ConfigEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -126,12 +131,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/restv1/uma2-configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 5. Webfinger */}}
-  {{- if index .Values "auth-server" "ingress" "webfingerEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "webfingerEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -143,12 +148,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/.well-known/webfinger
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 6. Simple Web Discovery */}}
-  {{- if index .Values "auth-server" "ingress" "webdiscoveryEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "webdiscoveryEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -160,12 +165,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/.well-known/simple-web-discovery
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 7. FIDO Configuration (U2F) */}}
-  {{- if index .Values "auth-server" "ingress" "u2fConfigEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "u2fConfigEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -177,12 +182,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/restv1/fido-configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 8. FIDO2 Configuration */}}
-  {{- if .Values.fido2.ingress.fido2ConfigEnabled }}
+  {{- if .Values.global.fido2.ingress.fido2ConfigEnabled }}
   - matches:
     - path:
         type: Exact
@@ -194,12 +199,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-fido2/restv1/configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $fido2Svc }}
+      port: 8080
   {{- end }}
 
   {{- /* 9. WebAuthn */}}
-  {{- if .Values.fido2.ingress.fido2WebauthnEnabled }}
+  {{- if .Values.global.fido2.ingress.fido2WebauthnEnabled }}
   - matches:
     - path:
         type: Exact
@@ -211,12 +216,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-fido2/restv1/webauthn/configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $fido2Svc }}
+      port: 8080
   {{- end }}
 
   {{- /* 10. SCIM Configuration */}}
-  {{- if .Values.scim.ingress.scimConfigEnabled }}
+  {{- if .Values.global.scim.ingress.scimConfigEnabled }}
   - matches:
     - path:
         type: Exact
@@ -228,12 +233,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-scim/restv1/scim-configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $scimSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 11. Lock Config */}}
-  {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockConfigEnabled") }}
+  {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockConfigEnabled") }}
   - matches:
     - path:
         type: Exact
@@ -245,12 +250,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/api/v1/configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 12. Authzen Config */}}
-  {{- if index .Values "auth-server" "ingress" "authzenConfigEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "authzenConfigEnabled" }}
   - matches:
     - path:
         type: Exact
@@ -262,12 +267,12 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/restv1/authzen-configuration
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
   
   {{- /* 13. Jans Lock */}}
-  {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockEnabled") }}
+  {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockEnabled") }}
   - matches:
     - path:
         type: Exact
@@ -279,8 +284,8 @@ spec:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
 ---
@@ -292,7 +297,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}-routes-secure
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
 {{- if .Values.gatewayApi.routeLabels }}
@@ -305,75 +310,75 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gatewayApi.name }}
-    sectionName: https  # ONLY LISTEN ON HTTPS
+    sectionName: https
   hostnames:
-  - {{ .Values.fqdn | quote }}
+  - {{ .Values.global.fqdn | quote }}
   rules:
 
   {{- /* 1. Auth Server (/jans-auth) */}}
-  {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "authServerEnabled" }}
   - matches:
     - path:
         type: PathPrefix
         value: /jans-auth
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $authSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 2. Casa (/jans-casa) */}}
-  {{- if .Values.casa.ingress.casaEnabled }}
+  {{- if .Values.global.casa.ingress.casaEnabled }}
   - matches:
     - path:
         type: PathPrefix
         value: /jans-casa
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $casaSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 3. Config API (/jans-config-api) */}}
-  {{- if index .Values "config-api" "ingress" "configApiEnabled" }}
+  {{- if index .Values.global "config-api" "ingress" "configApiEnabled" }}
   - matches:
     - path:
         type: PathPrefix
         value: /jans-config-api
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $configSvc }}
+      port: 8074
   {{- end }}
 
   {{- /* 4. FIDO2 (/jans-fido2) */}}
-  {{- if .Values.fido2.ingress.fido2Enabled }}
+  {{- if .Values.global.fido2.ingress.fido2Enabled }}
   - matches:
     - path:
         type: PathPrefix
         value: /jans-fido2
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $fido2Svc }}
+      port: 8080
   {{- end }}
 
   {{- /* 5. SCIM (/jans-scim) */}}
-  {{- if .Values.scim.ingress.scimEnabled }}
+  {{- if .Values.global.scim.ingress.scimEnabled }}
   - matches:
     - path:
         type: PathPrefix
         value: /jans-scim
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $scimSvc }}
+      port: 8080
   {{- end }}
 
   {{- /* 6. SAML (/kc) */}}
-  {{- if .Values.saml.ingress.samlEnabled }}
+  {{- if .Values.global.saml.ingress.samlEnabled }}
   - matches:
     - path:
         type: PathPrefix
         value: /kc
     backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
+    - name: {{ $samlSvc }}
+      port: 8083
   {{- end }}
 
 ---
@@ -385,7 +390,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}-routes-redirect
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
 {{- if .Values.gatewayApi.routeLabels }}
@@ -398,15 +403,13 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gatewayApi.name }}
-    sectionName: http  # ONLY LISTEN ON HTTP
+    sectionName: http
   hostnames:
-  - {{ .Values.fqdn | quote }}
+  - {{ .Values.global.fqdn | quote }}
   rules:
   
-  {{- /* Same 6 Rules, but with Redirect Filter instead of BackendRef */}}
-  
   {{- /* 1. Auth Server Redirect */}}
-  {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
+  {{- if index .Values.global "auth-server" "ingress" "authServerEnabled" }}
   - matches:
     - path:
         type: PathPrefix
@@ -419,7 +422,7 @@ spec:
   {{- end }}
 
   {{- /* 2. Casa Redirect */}}
-  {{- if .Values.casa.ingress.casaEnabled }}
+  {{- if .Values.global.casa.ingress.casaEnabled }}
   - matches:
     - path:
         type: PathPrefix
@@ -432,7 +435,7 @@ spec:
   {{- end }}
 
   {{- /* 3. Config API Redirect */}}
-  {{- if index .Values "config-api" "ingress" "configApiEnabled" }}
+  {{- if index .Values.global "config-api" "ingress" "configApiEnabled" }}
   - matches:
     - path:
         type: PathPrefix
@@ -445,7 +448,7 @@ spec:
   {{- end }}
 
   {{- /* 4. FIDO2 Redirect */}}
-  {{- if .Values.fido2.ingress.fido2Enabled }}
+  {{- if .Values.global.fido2.ingress.fido2Enabled }}
   - matches:
     - path:
         type: PathPrefix
@@ -458,7 +461,7 @@ spec:
   {{- end }}
 
   {{- /* 5. SCIM Redirect */}}
-  {{- if .Values.scim.ingress.scimEnabled }}
+  {{- if .Values.global.scim.ingress.scimEnabled }}
   - matches:
     - path:
         type: PathPrefix
@@ -471,7 +474,7 @@ spec:
   {{- end }}
 
   {{- /* 6. SAML Redirect */}}
-  {{- if .Values.saml.ingress.samlEnabled }}
+  {{- if .Values.global.saml.ingress.samlEnabled }}
   - matches:
     - path:
         type: PathPrefix
@@ -482,5 +485,4 @@ spec:
         scheme: https
         statusCode: 301
   {{- end }}
-
 {{- end }}
