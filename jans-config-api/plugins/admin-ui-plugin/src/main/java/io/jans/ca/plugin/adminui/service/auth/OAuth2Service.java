@@ -17,6 +17,7 @@ import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.EncryptionService;
 import jakarta.inject.Inject;
@@ -213,6 +214,9 @@ public class OAuth2Service extends BaseService {
         try {
             adminUISession = entryManager
                     .find(AdminUISession.class, getDnForSession(sessionId));
+        } catch (EntryPersistenceException e) {
+            //do not throw error is the record is not present in database
+            return adminUISession;
         } catch (Exception ex) {
             log.error(SID_GET_MSG + "{}", sessionId, ex);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), SID_GET_MSG + sessionId);
@@ -227,12 +231,20 @@ public class OAuth2Service extends BaseService {
      * @throws ApplicationException if the session cannot be retrieved or removed
      */
     public void removeSession(String sessionId) throws ApplicationException {
-        AdminUISession configApiSession = getSession(sessionId);
-        if (configApiSession == null) {
-            log.warn("Session not found for removal: {}", sessionId);
-            return;
+        try {
+            AdminUISession configApiSession = getSession(sessionId);
+            if (configApiSession == null) {
+                log.warn("Session not found for removal: {}", sessionId);
+                return;
+            }
+            entryManager.remove(configApiSession);
+        } catch (Exception e) {
+            log.error("Failed to remove Admin UI session: {}", sessionId, e);
+            throw new ApplicationException(
+                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    "Failed to remove Admin UI session"
+            );
         }
-        entryManager.remove(configApiSession);
     }
 
     /**
