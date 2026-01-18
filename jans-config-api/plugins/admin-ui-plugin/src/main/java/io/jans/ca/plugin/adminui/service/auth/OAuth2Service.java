@@ -227,12 +227,17 @@ public class OAuth2Service extends BaseService {
      * @throws ApplicationException if the session cannot be retrieved or removed
      */
     public void removeSession(String sessionId) throws ApplicationException {
-        AdminUISession configApiSession = getSession(sessionId);
-        if (configApiSession == null) {
-            log.warn("Session not found for removal: {}", sessionId);
-            return;
+        try {
+            AdminUISession configApiSession = getSession(sessionId);
+            if (configApiSession == null) {
+                log.warn("Session not found for removal: {}", sessionId);
+                return;
+            }
+            entryManager.remove(configApiSession);
+        } catch(Exception e) {
+            //Keep the error silent, as it is possible that the session_id is not present in the database. We don't want to throw error in that case.
+            log.warn("Error in removing session cookie: {}", e.getMessage());
         }
-        entryManager.remove(configApiSession);
     }
 
     /**
