@@ -73,7 +73,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info("Inside AdminUICookieFilter filter..."+requestContext.getUriInfo().getPath());
+            log.info("Inside AdminUICookieFilter filter...");
             Map<String, Cookie> cookies = requestContext.getCookies();
             initializeCaches();
             removeExpiredSessionsIfNeeded();
