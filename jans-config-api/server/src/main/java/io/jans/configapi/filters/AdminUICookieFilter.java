@@ -54,6 +54,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     private static final String AUTHENTICATION_SCHEME = "Bearer";
     private static final String EXCLUDED_PATH_SESSION = "/app/admin-ui/oauth2/session";
     private static final String EXCLUDED_PATH_CONFIG_API_TOKEN = "/app/admin-ui/oauth2/api-protection-token";
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            EXCLUDED_PATH_SESSION,
+            EXCLUDED_PATH_CONFIG_API_TOKEN
+    );
     private static final long CACHE_TTL_MS = 3600000; // 1 hour
     private static final int CACHE_MAX_SIZE = 100;
     private volatile long lastCleanupTime = 0;
@@ -108,19 +112,13 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
     /**
      * Exclude the endpoints paths from valid session check which are used before authentication.
      */
     private boolean isExcludedPath(ContainerRequestContext requestContext) {
         String path = requestContext.getUriInfo().getPath();
-
-        List<String> excludedPaths = List.of(
-                EXCLUDED_PATH_SESSION,
-                EXCLUDED_PATH_CONFIG_API_TOKEN
-        );
-
-        return excludedPaths.stream()
-                .anyMatch(path::contains);
+        return EXCLUDED_PATHS.stream().anyMatch(excluded -> path.equals(excluded) || path.equals(excluded.substring(1)));
     }
 
     /**

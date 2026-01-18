@@ -234,9 +234,12 @@ public class OAuth2Service extends BaseService {
                 return;
             }
             entryManager.remove(configApiSession);
-        } catch(Exception e) {
-            //Keep the error silent, as it is possible that the session_id is not present in the database. We don't want to throw error in that case.
-            log.warn("Error in removing session cookie: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to remove Admin UI session: {}", sessionId, e);
+            throw new ApplicationException(
+                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    "Failed to remove Admin UI session"
+            );
         }
     }
 
