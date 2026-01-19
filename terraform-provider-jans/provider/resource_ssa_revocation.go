@@ -69,7 +69,7 @@ resource "jans_ssa_revocation" "cert_expiry" {
 
 ## Known Issues
 
-The API may return HTTP 500 "Unprocessable Entity" for non-existent SSAs instead of 404.
+The API may return HTTP 422 "Unprocessable Entity" for non-existent SSAs instead of 404.
 This is a server-side issue and is handled correctly by the provider.
 `,
                 CreateContext: resourceSSARevocationCreate,

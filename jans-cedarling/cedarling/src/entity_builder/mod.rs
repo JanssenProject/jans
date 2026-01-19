@@ -35,7 +35,7 @@ use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
-use cedar_policy::{Entity, EntityUid, RestrictedExpression};
+use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use cedar_policy_core::validator::ValidatorSchema;
 use schema::MappingSchema;
 use serde_json::Value;
@@ -240,11 +240,15 @@ pub(super) struct BuiltEntitiesUnsigned {
 }
 
 fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
-    EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
-        |e: cedar_policy::ParseErrors| {
-            BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
-        },
-    )
+    let entity_type_name = EntityTypeName::from_str(type_name)
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
+    // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
+    let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
+
+    Ok(EntityUid::from_type_name_and_id(
+        entity_type_name,
+        entity_id,
+    ))
 }
 
 pub(super) fn build_cedar_entity(
