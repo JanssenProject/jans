@@ -1,0 +1,27 @@
+operation-01:
+  id: "get-config-health-live"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      status:
+        type: "string"
+    required:
+     - name
+     - status
+
+operation-02:
+  id: "get-config-health-ready"
+  expected-status-code: 200
+  schema:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      status:
+        type: "string"
+    required:
+     - name
+     - status
