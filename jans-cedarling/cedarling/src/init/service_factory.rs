@@ -11,7 +11,9 @@ use super::service_config::ServiceConfig;
 use crate::LogLevel;
 use crate::authz::{Authz, AuthzConfig, AuthzServiceInitError};
 use crate::bootstrap_config::BootstrapConfig;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuersValidationError};
+use crate::common::policy_store::{
+    PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
+};
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
@@ -36,7 +38,7 @@ struct SingletonContainer {
 
 impl<'a> ServiceFactory<'a> {
     /// Create new instance of ServiceFactory.
-    pub fn new(
+    pub(crate) fn new(
         bootstrap_config: &'a BootstrapConfig,
         service_config: ServiceConfig,
         log_service: log::Logger,
@@ -50,7 +52,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get policy store
-    pub fn policy_store(&self) -> Result<&PolicyStoreWithID, ServiceInitError> {
+    fn policy_store(&self) -> Result<&PolicyStoreWithID, ServiceInitError> {
         // it potentyally can be called many times, but it is only during initialization so it shouldn't be a problem
         self.service_config
             .policy_store
@@ -59,13 +61,21 @@ impl<'a> ServiceFactory<'a> {
         Ok(&self.service_config.policy_store)
     }
 
+    /// Get the policy store metadata if available.
+    ///
+    /// Metadata is only available when the policy store is loaded from the new
+    /// directory/archive format. Legacy JSON/YAML formats do not include metadata.
+    pub(crate) fn policy_store_metadata(&self) -> Option<&PolicyStoreMetadata> {
+        self.service_config.policy_store.metadata.as_ref()
+    }
+
     // get log service
-    pub fn log_service(&mut self) -> log::Logger {
+    fn log_service(&mut self) -> log::Logger {
         self.log_service.clone()
     }
 
     // get jwt service
-    pub async fn jwt_service(&mut self) -> Result<Arc<JwtService>, ServiceInitError> {
+    async fn jwt_service(&mut self) -> Result<Arc<JwtService>, ServiceInitError> {
         if let Some(jwt_service) = &self.container.jwt_service {
             Ok(jwt_service.clone())
         } else {
@@ -79,7 +89,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get jwt service
-    pub fn entity_builder(&mut self) -> Result<Arc<EntityBuilder>, ServiceInitError> {
+    fn entity_builder(&mut self) -> Result<Arc<EntityBuilder>, ServiceInitError> {
         if let Some(entity_builder) = &self.container.entity_builder_service {
             return Ok(entity_builder.clone());
         }
@@ -91,8 +101,11 @@ impl<'a> ServiceFactory<'a> {
         // Log warns that some default entities loaded not correctly
         // it will be logged only once.
         for warn in default_entities_with_warn.warns() {
-            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                .set_message(warn.to_string());
+            let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warn.to_string());
 
             logger.log_any(log_entry);
         }
@@ -115,7 +128,7 @@ impl<'a> ServiceFactory<'a> {
     }
 
     // get authz service
-    pub async fn authz_service(&mut self) -> Result<Arc<Authz>, ServiceInitError> {
+    pub(crate) async fn authz_service(&mut self) -> Result<Arc<Authz>, ServiceInitError> {
         if let Some(authz) = &self.container.authz_service {
             Ok(authz.clone())
         } else {

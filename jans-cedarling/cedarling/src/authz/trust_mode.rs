@@ -24,7 +24,7 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// - if a Userinfo token is present:
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
-pub fn validate_id_tkn_trust_mode(
+pub(super) fn validate_id_tkn_trust_mode(
     tokens: &HashMap<String, Arc<Token>>,
 ) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
@@ -114,8 +114,7 @@ mod test {
             serde_json::from_value(json!({"client_id": "some-id-123"}))
                 .expect("valid token claims"),
             None,
-        )
-        .into();
+        );
         let id_token = Token::new(
             "id_token",
             serde_json::from_value(json!({"aud": ["some-id-123"]})).expect("valid token claims"),
@@ -124,8 +123,7 @@ mod test {
         let tokens = HashMap::from([
             ("access_token".to_string(), Arc::new(access_token)),
             ("id_token".to_string(), Arc::new(id_token)),
-        ])
-        .into();
+        ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
 

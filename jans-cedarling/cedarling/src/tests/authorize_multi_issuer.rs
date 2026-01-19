@@ -18,6 +18,10 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
     get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |config| {
+            // for debugging purposes set log level to DEBUG and log to stdout
+            // config.log_config.log_level = crate::LogLevel::DEBUG;
+            // config.log_config.log_type =
+            //     crate::LogTypeConfig::StdOut(crate::log::StdOutLoggerMode::Immediate);
             // Disable workload and user entity building for multi-issuer tests
             // since the policies work with token entities in context, not principal entities
             config.entity_builder_config.build_workload = false;
@@ -27,6 +31,54 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
         },
     )
     .await
+}
+
+/// Test single Dolphin user token authorization with role_mapping claim
+#[tokio::test]
+async fn test_single_dolphin_userinfo_token_role_mapping() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    // Create a dolphin_token for the user entity
+    let dolphin_user_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_123",
+        "jti": "dolphin_user_123",
+        "client_id": "dolphin_client_123",
+        "aud": "dolphin_audience",
+        "exp": 2000000000,
+        "iat": 1516239022,
+        "role": ["admin", "user"]
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![TokenInput::new(
+            "Dolphin::Userinfo_token".to_string(),
+            dolphin_user_token,
+        )],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "ApprovedDolphinFoods"
+                },
+                "name": "Approved Dolphin Foods"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"CheckRoleFoodApprover\"".to_string(),
+        None,
+    );
+
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Dolphin Userinfo_token token authorization should succeed");
+
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for dolphin userinfo token, DENY means role mapping failed"
+    );
 }
 
 /// Test single Dolphin access token authorization with location claim

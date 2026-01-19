@@ -109,14 +109,17 @@ func resourceOidcClient() *schema.Resource {
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
 						enums := []string{
+							"none",
 							"authorization_code",
 							"implicit",
 							"password",
 							"client_credentials",
 							"refresh_token",
 							"urn:ietf:params:oauth:grant-type:uma-ticket",
+							"urn:ietf:params:oauth:grant-type:token-exchange",
 							"urn:openid:params:grant-type:ciba",
 							"urn:ietf:params:oauth:grant-type:device_code",
+							"urn:ietf:params:oauth:grant-type:jwt-bearer",
 						}
 						return validateEnum(v, enums)
 					},

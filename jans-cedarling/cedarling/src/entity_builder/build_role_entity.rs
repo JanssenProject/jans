@@ -10,7 +10,7 @@ use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 impl EntityBuilder {
-    pub fn build_role_entities(
+    pub(super) fn build_role_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<Vec<Entity>, BuildEntityError> {

@@ -1,5 +1,5 @@
 ---
-page_title: "jans_database_configuration Data Source - terraform-provider-jans"
+page_title: "jans_database_configuration Data Source - jans"
 subcategory: ""
 description: |-
   Data source for retrieving database schema configuration
@@ -32,23 +32,23 @@ output "schema_json" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `schema_json` (String) Full database schema as JSON string for advanced processing
-- `tables` (List of Object) List of database tables and their schema (see [below for nested schema](#nestedatt--tables))
+- `schema_json` (String) Full database schema as JSON string for advanced processing.
+- `tables` (List of Object) List of database tables and their schema. (see [below for nested schema](#nestedatt--tables))
 
 <a id="nestedatt--tables"></a>
 ### Nested Schema for `tables`
 
 Read-Only:
 
-- `fields` (List of Object) List of fields in the table (see [below for nested schema](#nestedatt--tables--fields))
-- `name` (String) Table name
+- `fields` (List of Object) (see [below for nested schema](#nestedobjatt--tables--fields))
+- `name` (String)
 
-<a id="nestedatt--tables--fields"></a>
+<a id="nestedobjatt--tables--fields"></a>
 ### Nested Schema for `tables.fields`
 
 Read-Only:
 
-- `def_name` (String) Default/definition name of the field
-- `multi_valued` (Boolean) Whether the field supports multiple values
-- `name` (String) Field name in the database
-- `type` (String) Field data type (varchar, timestamp, jsonb, etc.)
+- `def_name` (String)
+- `multi_valued` (Boolean)
+- `name` (String)
+- `type` (String)

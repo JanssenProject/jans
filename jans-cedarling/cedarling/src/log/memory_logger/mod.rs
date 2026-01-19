@@ -31,7 +31,7 @@ pub(crate) struct MemoryLogger {
 }
 
 impl MemoryLogger {
-    pub fn new(
+    pub(crate) fn new(
         config: MemoryLogConfig,
         log_level: LogLevel,
         pdp_id: PdpID,
@@ -146,7 +146,7 @@ mod fallback {
     /// Panics when:
     /// - A runtime to initialize a new LogStrategy could not be built.
     /// - A fallback logger could not be initialized.
-    pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
+    pub(super) fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
         // level is so that all messages passed here are logged.
         let logger = StdOutLogger::new(LogLevel::TRACE, StdOutLoggerMode::Immediate);
 

@@ -284,10 +284,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         updateRevision(customScript, null);
         customScript.setDn(customScriptService.buildDn(inum));
         customScript.setInum(inum);
-        
-        //custom handling of if ScriptLocationType.FILE - issues#9979
-        updateFileTypeCustomScript(customScript);
-        
+
         customScriptService.add(customScript);
         logger.debug("Custom Script added {}", customScript);
         return Response.status(Response.Status.CREATED).entity(customScript).build();
@@ -325,9 +322,6 @@ public class CustomScriptResource extends ConfigBaseResource {
         updateRevision(customScript, existingScript);
         logger.debug("Custom Script to be updated {}", customScript);
 
-        //custom handling of if ScriptLocationType.FILE - issues#9979
-        updateFileTypeCustomScript(customScript);
-        
         customScriptService.update(customScript);
         
         logger.debug("Check if script is enabled:{}", existingScript.isEnabled());
@@ -594,27 +588,4 @@ public class CustomScriptResource extends ConfigBaseResource {
         gluuConfiguration.setAuthenticationMode(null);
         configurationService.merge(gluuConfiguration);
     }
-
-    private CustomScript updateFileTypeCustomScript(CustomScript customScript) {
-        logger.info("Handling CustomScript if location type is File - customScript:{}", customScript);
-        
-        // Note File type customScript is intended only for dev
-        if (customScript == null) {
-            return customScript;
-        }
-        logger.info("Handling CustomScript if location type is File - customScript.getLocationType():{}, customScript.getLocationPath():{}", customScript.getLocationType(), customScript.getLocationPath());
-        if (customScript.getLocationPath()!=null && ScriptLocationType.FILE.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
-            logger.info("Modifying customScript as getLocationType is File - customScript:{}", customScript);
-            String fileName = CUSTOM_FILE_SCRIPT_DEFAULT_LOCATION;
-            if (StringUtils.isNotBlank(customScript.getLocationPath())) {
-                fileName = fileName + FilenameUtils.getName(customScript.getLocationPath());
-                customScript.setLocationPath(fileName);
-                customScript.setScript(null);
-            }
-        }
-        
-        logger.info("\n\n Handling CustomScript if location type is File - customScript.getLocationType():{}, customScript.getLocationPath():{}", customScript.getLocationType(), customScript.getLocationPath());
-        return customScript;
-    }
-
 }

@@ -18,7 +18,7 @@ static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let reg = Region::new(&GLOBAL);
+    let reg = Region::new(GLOBAL);
 
     println!("=== Cedarling Bulk Authorization Benchmark ===\n");
     println!("Simulating OpenSearch integration with 2000 documents per query\n");
