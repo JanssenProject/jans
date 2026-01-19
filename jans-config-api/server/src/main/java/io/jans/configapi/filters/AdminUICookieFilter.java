@@ -26,6 +26,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,6 +52,12 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
     private static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
     private static final String AUTHENTICATION_SCHEME = "Bearer";
+    private static final String EXCLUDED_PATH_SESSION = "/app/admin-ui/oauth2/session";
+    private static final String EXCLUDED_PATH_CONFIG_API_TOKEN = "/app/admin-ui/oauth2/api-protection-token";
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            EXCLUDED_PATH_SESSION,
+            EXCLUDED_PATH_CONFIG_API_TOKEN
+    );
     private static final long CACHE_TTL_MS = 3600000; // 1 hour
     private static final int CACHE_MAX_SIZE = 100;
     private volatile long lastCleanupTime = 0;
@@ -77,6 +84,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
             //For request from Admin UI, return 403 error if Admin UI session is not present on server
             if (cookies.containsKey(ADMIN_UI_SESSION_ID)
+                    && !isExcludedPath(requestContext)
                     && requestContext.getHeaders().get(HttpHeaders.AUTHORIZATION) == null
                     && ujwtOptional.isEmpty()) {
                 abortWithException(requestContext, Response.Status.FORBIDDEN, "Admin UI session is not present on server.");
@@ -103,6 +111,14 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * Exclude the endpoints paths from valid session check which are used before authentication.
+     */
+    private boolean isExcludedPath(ContainerRequestContext requestContext) {
+        String path = requestContext.getUriInfo().getPath();
+        return EXCLUDED_PATHS.stream().anyMatch(excluded -> path.equals(excluded) || path.equals(excluded.substring(1)));
     }
 
     /**
