@@ -15693,21 +15693,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        selected:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -18482,6 +18482,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18493,8 +18495,6 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         logoutStatusJwt:
-          type: boolean
-        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
