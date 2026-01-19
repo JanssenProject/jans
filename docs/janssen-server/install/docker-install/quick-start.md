@@ -33,7 +33,7 @@ Run this command to start the installation:
 === "PostgreSQL"
 
     ```bash 
-    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io postgres "" main
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io PGSQL "" main
     ```
 
 Console messages like below confirms the successful installation:
