@@ -1,4 +1,3 @@
-# Cedarling
 
 The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -7,15 +6,26 @@ In simple terms, the Cedarling returns the answer: should the application allow 
 For example, why display form fields that a user is not authorized to see?
 The Cedarling is a more productive and flexible way to handle authorization.
 
-## Rust Cedarling
+## Quickstart - Rust Cedarling
 
-Cedarling is written in the Rust programming language (folder `cedarling`). And you can import it into your project as a dependency.
+Cedarling is a Rust-based local authorization service (folder `cedarling`). You can add it to your Rust project as a dependency.
 
-You can install Rust toolchain by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
+### Install Rust Toolchain
 
-## Examples of rust Cedarling
+Follow the official guide: [Rust installation](https://www.rust-lang.org/tools/install)
 
-Rust examples of using Cedarling contains in the folder `cedarling/examples`.
+### Run Examples
+
+All example files are in `cedarling/examples`.
+
+#### Example: Initialize Logger
+
+```bash
+cargo run -p cedarling --example log_init -- off
+cargo run -p cedarling --example log_init -- stdout
+cargo run -p cedarling --example log_init -- memory 60
+cargo run -p cedarling --example log_init -- lock
+
 
 ### Example of initialization logger
 
