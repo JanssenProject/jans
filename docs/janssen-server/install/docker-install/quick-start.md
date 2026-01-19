@@ -48,7 +48,7 @@ Waiting for the Janssen server to come up. Depending on the resources it may tak
 Testing openid-configuration endpoint.. 
 ```
 
-As can be seen, the install script also accesses the well-known endpoints to varify that Janssen Server is responsive.
+As can be seen, the install script also accesses the well-known endpoints to verify that Janssen Server is responsive.
 
 ## Verify Installation By Accessing Standard Endpoints
 
