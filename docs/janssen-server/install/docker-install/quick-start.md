@@ -87,13 +87,13 @@ This docker based installation uses `docker compose` under the hood to create co
 === "MySQL"
 
     ```bash
-    docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf jans-*
+    docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf /tmp/jans
     ```
 
 === "PostgreSQL"
 
     ```bash 
-    docker compose -f /tmp/jans/docker-jans-monolith/jans-postgres-compose.yml down && rm -rf jans-*
+    docker compose -f /tmp/jans/docker-jans-monolith/jans-postgres-compose.yml down && rm -rf /tmp/jans
     ```
 
 Console messages like below confirms the successful removal:
