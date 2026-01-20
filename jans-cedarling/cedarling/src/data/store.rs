@@ -115,33 +115,20 @@ impl DataStore {
             });
         }
 
-        // Determine the effective TTL to use
-        // Priority: explicit ttl > config.default_ttl > infinite (10 years)
-        let requested_ttl = ttl
-            .or(self.config.default_ttl)
-            .unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64));
-
-        // If an explicit TTL was provided, validate it against max_ttl
-        if ttl.is_some() {
+        // Validate explicit TTL against max_ttl before calculating effective TTL
+        if let Some(explicit_ttl) = ttl {
             if let Some(max_ttl) = self.config.max_ttl {
-                if requested_ttl > max_ttl {
+                if explicit_ttl > max_ttl {
                     return Err(DataError::TTLExceeded {
-                        requested: requested_ttl,
+                        requested: explicit_ttl,
                         max: max_ttl,
                     });
                 }
             }
         }
 
-        // Cap the effective TTL at max_ttl if set
-        let effective_ttl = if let Some(max_ttl) = self.config.max_ttl {
-            requested_ttl.min(max_ttl)
-        } else {
-            requested_ttl
-        };
-
-        // Convert to chrono::Duration
-        let chrono_ttl = std_duration_to_chrono_duration(effective_ttl);
+        // Calculate effective TTL using the helper function
+        let chrono_ttl = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
 
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
 
@@ -159,7 +146,7 @@ impl DataStore {
                 SparKVError::TTLTooLong => {
                     // This shouldn't happen since we validated above, but handle it anyway
                     DataError::TTLExceeded {
-                        requested: effective_ttl,
+                        requested: ttl.unwrap_or_default(),
                         max: self
                             .config
                             .max_ttl
@@ -183,49 +170,52 @@ impl DataStore {
     ///
     /// Returns `None` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
+    /// Uses read lock initially for better concurrency, upgrading to write lock only when metrics are enabled.
     pub fn get_entry(&self, key: &str) -> Option<DataEntry> {
-        let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+        // First, try with read lock for better concurrency
+        let entry = {
+            let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+            storage.get(key).cloned()
+        };
 
-        // Get the entry
-        if let Some(entry) = storage.get(key) {
-            let mut entry = entry.clone();
+        let mut entry = entry?;
 
-            if self.config.enable_metrics {
-                entry.increment_access();
-
-                // Calculate remaining TTL to preserve expiration
-                let remaining_ttl = if let Some(expires_at) = entry.expires_at {
-                    let now = chrono::Utc::now();
-                    if expires_at > now {
-                        expires_at
-                            .signed_duration_since(now)
-                            .to_std()
-                            .ok()
-                            .map(std_duration_to_chrono_duration)
-                            .unwrap_or_else(|| {
-                                get_effective_ttl(
-                                    None,
-                                    self.config.default_ttl,
-                                    self.config.max_ttl,
-                                )
-                            })
-                    } else {
-                        // Already expired, use effective TTL
-                        get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
-                    }
-                } else {
-                    // No expiration, use effective TTL
-                    get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
-                };
-
-                // Update the entry in storage with incremented access count
-                let _ = storage.set_with_ttl(key, entry.clone(), remaining_ttl, &[]);
+        // Check if entry has expired
+        if let Some(expires_at) = entry.expires_at {
+            if chrono::Utc::now() > expires_at {
+                // Entry is expired, optionally remove it from storage
+                let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+                storage.pop(key);
+                return None;
             }
-
-            Some(entry)
-        } else {
-            None
         }
+
+        // Only acquire write lock if metrics are enabled
+        if self.config.enable_metrics {
+            entry.increment_access();
+
+            // Calculate remaining TTL to preserve expiration
+            let remaining_ttl = if let Some(expires_at) = entry.expires_at {
+                let now = chrono::Utc::now();
+                expires_at
+                    .signed_duration_since(now)
+                    .to_std()
+                    .ok()
+                    .map(std_duration_to_chrono_duration)
+                    .unwrap_or_else(|| {
+                        get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
+                    })
+            } else {
+                // No expiration, use effective TTL
+                get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
+            };
+
+            // Acquire write lock to update the entry with incremented access count
+            let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+            let _ = storage.set_with_ttl(key, entry.clone(), remaining_ttl, &[]);
+        }
+
+        Some(entry)
     }
 
     /// Remove a value from the store by key.
@@ -711,7 +701,7 @@ mod tests {
         let entry = store.get_entry("key1").expect("entry should exist");
         assert_eq!(entry.key, "key1");
         assert_eq!(entry.value, json!("value1"));
-        assert_eq!(entry.data_type, super::super::entry::CedarType::String);
+        assert_eq!(entry.data_type, crate::CedarType::String);
         assert_eq!(entry.access_count, 1); // Incremented by get_entry
         assert!(entry.expires_at.is_some());
     }
@@ -784,7 +774,7 @@ mod tests {
             .push("entity", json!({"type": "User", "id": "123"}), None)
             .expect("failed to push entity");
 
-        use super::super::entry::CedarType;
+        use crate::CedarType;
         assert_eq!(
             store.get_entry("string").unwrap().data_type,
             CedarType::String

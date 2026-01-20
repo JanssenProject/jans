@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration as ChronoDuration, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration as StdDuration;
@@ -98,8 +98,16 @@ impl CedarType {
             Value::Bool(_) => Self::Bool,
             Value::Array(_) => Self::Set,
             Value::Object(obj) => {
-                // Check if it's an entity reference (has "type" and "id" fields)
-                if obj.contains_key("type") && obj.contains_key("id") && obj.len() == 2 {
+                // Check if it's an entity reference with explicit marker
+                // Entity references must have exactly "type" and "id" fields,
+                // and the "type" value must be a string (to avoid misclassifying
+                // normal records that happen to have these fields)
+                if obj.len() == 2
+                    && obj.contains_key("type")
+                    && obj.contains_key("id")
+                    && obj.get("type").map_or(false, |v| v.is_string())
+                    && obj.get("id").map_or(false, |v| v.is_string())
+                {
                     Self::Entity
                 } else {
                     Self::Record
@@ -111,6 +119,23 @@ impl CedarType {
             },
         }
     }
+}
+
+/// Convert `std::time::Duration` to `chrono::Duration`.
+///
+/// Uses saturating conversion to prevent overflow for very large durations.
+/// Durations exceeding `i64::MAX` seconds will be capped at a safe maximum.
+fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
+    let secs = d.as_secs();
+    let nanos = d.subsec_nanos();
+
+    // Saturating conversion: i64::MAX seconds is ~292 billion years
+    // We cap at a safe maximum to prevent chrono panics
+    // i64::MAX / 1000 (milliseconds per second) is a safe upper bound
+    const MAX_SAFE_SECS: u64 = (i64::MAX / 1000) as u64;
+    let secs_capped = secs.min(MAX_SAFE_SECS);
+
+    ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(nanos as i64)
 }
 
 /// A data entry in the DataStore with value and metadata.
@@ -140,10 +165,14 @@ impl DataEntry {
     ///
     /// The `created_at` timestamp is set to the current time,
     /// and `expires_at` is calculated from the optional TTL.
+    /// Uses saturating conversion for TTL to prevent overflow.
     pub fn new(key: String, value: Value, ttl: Option<StdDuration>) -> Self {
         let created_at = Utc::now();
-        let expires_at = ttl
-            .map(|duration| created_at + chrono::Duration::from_std(duration).unwrap_or_default());
+        let expires_at = ttl.map(|duration| {
+            // Use saturating conversion to prevent overflow
+            let chrono_duration = std_duration_to_chrono_duration(duration);
+            created_at + chrono_duration
+        });
 
         Self {
             key,
@@ -236,7 +265,11 @@ mod tests {
 
     #[test]
     fn test_serialization() {
-        let entry = DataEntry::new("key1".to_string(), json!("value1"), None);
+        let entry = DataEntry::new(
+            "key1".to_string(),
+            json!("value1"),
+            Some(StdDuration::from_secs(3600)),
+        );
         let serialized = serde_json::to_string(&entry).expect("should serialize");
         let deserialized: DataEntry =
             serde_json::from_str(&serialized).expect("should deserialize");
@@ -244,5 +277,17 @@ mod tests {
         assert_eq!(entry.value, deserialized.value);
         assert_eq!(entry.data_type, deserialized.data_type);
         assert_eq!(entry.access_count, deserialized.access_count);
+
+        // Verify datetime fields survive round-trip using RFC3339 representation
+        assert_eq!(
+            entry.created_at.to_rfc3339(),
+            deserialized.created_at.to_rfc3339(),
+            "created_at should survive serde_json round-trip"
+        );
+        assert_eq!(
+            entry.expires_at.map(|dt| dt.to_rfc3339()),
+            deserialized.expires_at.map(|dt| dt.to_rfc3339()),
+            "expires_at should survive serde_json round-trip"
+        );
     }
 }

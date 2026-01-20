@@ -68,7 +68,12 @@ impl Default for DataStoreConfig {
 pub enum ConfigValidationError {
     /// default_ttl exceeds max_ttl
     #[error("default_ttl ({default:?}) exceeds max_ttl ({max:?})")]
-    DefaultTtlExceedsMax { default: Duration, max: Duration },
+    DefaultTtlExceedsMax {
+        /// The default TTL value that exceeds the maximum
+        default: Duration,
+        /// The maximum TTL value
+        max: Duration,
+    },
 }
 
 impl DataStoreConfig {
