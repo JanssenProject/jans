@@ -111,7 +111,10 @@ mod tests {
             max_ttl: Some(Duration::from_secs(3600)),
             ..Default::default()
         };
-        assert!(config.validate().is_ok());
+        assert!(
+            matches!(config.validate(), Ok(_)),
+            "expected DataStoreConfig::validate() to succeed when default_ttl is less than max_ttl"
+        );
     }
 
     #[test]
@@ -121,7 +124,13 @@ mod tests {
             max_ttl: Some(Duration::from_secs(3600)),     // 1 hour
             ..Default::default()
         };
-        assert!(config.validate().is_err());
+        assert!(
+            matches!(
+                config.validate(),
+                Err(ConfigValidationError::DefaultTtlExceedsMax { .. })
+            ),
+            "expected DataStoreConfig::validate() to return ConfigValidationError when default_ttl exceeds max_ttl"
+        );
     }
 
     #[test]
@@ -131,7 +140,10 @@ mod tests {
             max_ttl: None,
             ..Default::default()
         };
-        assert!(config.validate().is_ok());
+        assert!(
+            matches!(config.validate(), Ok(_)),
+            "expected DataStoreConfig::validate() to succeed when both TTL values are None"
+        );
     }
 
     #[test]
@@ -141,7 +153,10 @@ mod tests {
             max_ttl: None,
             ..Default::default()
         };
-        assert!(config.validate().is_ok());
+        assert!(
+            matches!(config.validate(), Ok(_)),
+            "expected DataStoreConfig::validate() to succeed when only default_ttl is set"
+        );
     }
 
     #[test]
@@ -151,6 +166,9 @@ mod tests {
             max_ttl: Some(Duration::from_secs(3600)),
             ..Default::default()
         };
-        assert!(config.validate().is_ok());
+        assert!(
+            matches!(config.validate(), Ok(_)),
+            "expected DataStoreConfig::validate() to succeed when only max_ttl is set"
+        );
     }
 }

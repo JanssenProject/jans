@@ -813,7 +813,10 @@ mod tests {
             max_ttl: Some(StdDuration::from_secs(3600)),
             ..Default::default()
         };
-        assert!(DataStore::new(valid_config).is_ok());
+        assert!(
+            matches!(DataStore::new(valid_config), Ok(_)),
+            "expected DataStore::new() to succeed with valid DataStoreConfig"
+        );
 
         // Invalid config: default_ttl > max_ttl
         let invalid_config = DataStoreConfig {
@@ -821,6 +824,12 @@ mod tests {
             max_ttl: Some(StdDuration::from_secs(3600)),
             ..Default::default()
         };
-        assert!(DataStore::new(invalid_config).is_err());
+        assert!(
+            matches!(
+                DataStore::new(invalid_config),
+                Err(ConfigValidationError::DefaultTtlExceedsMax { .. })
+            ),
+            "expected DataStore::new() to return ConfigValidationError when default_ttl exceeds max_ttl"
+        );
     }
 }

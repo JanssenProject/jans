@@ -142,9 +142,8 @@ impl DataEntry {
     /// and `expires_at` is calculated from the optional TTL.
     pub fn new(key: String, value: Value, ttl: Option<StdDuration>) -> Self {
         let created_at = Utc::now();
-        let expires_at = ttl.map(|duration| {
-            created_at + chrono::Duration::from_std(duration).unwrap_or_default()
-        });
+        let expires_at = ttl
+            .map(|duration| created_at + chrono::Duration::from_std(duration).unwrap_or_default());
 
         Self {
             key,
@@ -182,10 +181,7 @@ mod tests {
         assert_eq!(CedarType::from_value(&json!(42)), CedarType::Long);
         assert_eq!(CedarType::from_value(&json!(true)), CedarType::Bool);
         assert_eq!(CedarType::from_value(&json!([1, 2, 3])), CedarType::Set);
-        assert_eq!(
-            CedarType::from_value(&json!({"a": 1})),
-            CedarType::Record
-        );
+        assert_eq!(CedarType::from_value(&json!({"a": 1})), CedarType::Record);
         assert_eq!(
             CedarType::from_value(&json!({"type": "User", "id": "123"})),
             CedarType::Entity
@@ -250,4 +246,3 @@ mod tests {
         assert_eq!(entry.access_count, deserialized.access_count);
     }
 }
-
