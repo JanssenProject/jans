@@ -79,6 +79,9 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         try {
             log.info("Inside AdminUICookieFilter filter...");
             Map<String, Cookie> cookies = requestContext.getCookies();
+            if(!hasAdminUISessionCookie(cookies)) {
+                return;
+            }
             initializeCaches();
             removeExpiredSessionsIfNeeded();
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
@@ -111,6 +114,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    private boolean hasAdminUISessionCookie(Map<String, Cookie> cookies) {
+        //if no cookies
+        return cookies != null &&  cookies.containsKey(ADMIN_UI_SESSION_ID);
     }
 
     /**
@@ -218,13 +226,6 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * @return an Optional containing the ujwt string from the persisted Admin UI session, or Optional.empty() if the cookie or session is not present
      */
     private Optional<String> fetchUJWTFromAdminUISession(Map<String, Cookie> cookies) {
-        //if no cookies
-        if (cookies == null) {
-            return Optional.empty();
-        }
-        if (!cookies.containsKey(ADMIN_UI_SESSION_ID)) {
-            return Optional.empty();
-        }
         log.debug("Found a Admin UI session cookie in request header.");
         Cookie adminUISessionCookie = cookies.get(ADMIN_UI_SESSION_ID);
         String sessionId = adminUISessionCookie.getValue();
