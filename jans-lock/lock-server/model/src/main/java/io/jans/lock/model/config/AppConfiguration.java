@@ -4,7 +4,6 @@
  * Copyright (c) 2024, Janssen Project
  */
 
-
 package io.jans.lock.model.config;
 
 import java.util.List;
