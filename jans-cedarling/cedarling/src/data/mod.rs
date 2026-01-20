@@ -8,9 +8,11 @@
 //! and thread-safe concurrent access.
 
 mod config;
+mod entry;
 mod error;
 mod store;
 
-pub use config::DataStoreConfig;
+pub use config::{ConfigValidationError, DataStoreConfig};
+pub use entry::{CedarType, DataEntry};
 pub use error::DataError;
 pub use store::DataStore;
