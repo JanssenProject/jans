@@ -1,4 +1,4 @@
-package io.jans.ca.plugin.adminui.model.adminui;
+package io.jans.configapi.core.model.adminui;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

@@ -12,7 +12,7 @@ tags:
 
 At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in a SSL/TLS session.
 
-The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports smart cards as well.
+The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports [smart cards](#is-the-plugin-compatible-with-smart-cards) as well.
 
 ### Requisites
 
@@ -236,6 +236,10 @@ Testing can be extended to the following scenarios where authentication should f
 ### How to customize the browser dialog for not remembering the user choice?
 
 This is not possible - at least from Janssen server.
+
+### Is the plugin compatible with smart cards?
+
+Yes. There is a simple demonstrative [tutorial](./cert-authn-tutorial.md) available.
 
 ### Does the plugin support revocation?
 
