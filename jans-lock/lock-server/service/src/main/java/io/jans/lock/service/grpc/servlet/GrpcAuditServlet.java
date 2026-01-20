@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 
@@ -104,7 +106,8 @@ public class GrpcAuditServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ServletAdapter localAdapter = this.adapter;
         if (localAdapter != null) {
-        	HttpServletRequest wrappedRequest = new HeaderNormalizingRequestWrapper(req);
+        	// Wrap request for header normalization and context path manipulation
+        	HttpServletRequest wrappedRequest = new GrpcRequestWrapper(req);
             localAdapter.doPost(wrappedRequest, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
@@ -115,7 +118,8 @@ public class GrpcAuditServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ServletAdapter localAdapter = this.adapter;
         if (localAdapter != null) {
-        	HttpServletRequest wrappedRequest = new HeaderNormalizingRequestWrapper(req);
+        	// Wrap request for header normalization and context path manipulation
+        	HttpServletRequest wrappedRequest = new GrpcRequestWrapper(req);
             localAdapter.doGet(wrappedRequest, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
@@ -135,54 +139,125 @@ public class GrpcAuditServlet extends HttpServlet {
         }
         super.destroy();
     }
-    /**
-     * Wrapper for headers normalization to lower case
-     */
-    private static class HeaderNormalizingRequestWrapper extends HttpServletRequestWrapper {
-        
-        private final Map<String, String> normalizedHeaders;
-        
-        public HeaderNormalizingRequestWrapper(HttpServletRequest request) {
-            super(request);
-            this.normalizedHeaders = new HashMap<>();
-            
-            // Collect all header names and normalize them
-            Enumeration<String> headerNames = request.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                String originalName = headerNames.nextElement();
-                String normalizedName = originalName.toLowerCase();
-                normalizedHeaders.put(normalizedName, originalName);
-            }
-        }
-        
-        @Override
-        public String getHeader(String name) {
-            String originalName = normalizedHeaders.get(name.toLowerCase());
-            return super.getHeader(originalName != null ? originalName : name);
-        }
-        
-        @Override
-        public Enumeration<String> getHeaders(String name) {
-            String originalName = normalizedHeaders.get(name.toLowerCase());
-            return super.getHeaders(originalName != null ? originalName : name);
-        }
-        
-        @Override
-        public Enumeration<String> getHeaderNames() {
-            // Возвращаем все имена в lowercase
-            return Collections.enumeration(normalizedHeaders.keySet());
-        }
-        
-        @Override
-        public long getDateHeader(String name) {
-            String originalName = normalizedHeaders.get(name.toLowerCase());
-            return super.getDateHeader(originalName != null ? originalName : name);
-        }
-        
-        @Override
-        public int getIntHeader(String name) {
-            String originalName = normalizedHeaders.get(name.toLowerCase());
-            return super.getIntHeader(originalName != null ? originalName : name);
-        }
-    }
+
+	/**
+	 * /** Wrapper for gRPC requests: 1. Normalizes headers to lowercase 2. Removes
+	 * context path from URI for gRPC bridge
+	 */
+	private static class GrpcRequestWrapper extends HttpServletRequestWrapper {
+
+		private final Map<String, List<String>> headers;
+		private final String requestURI;
+		private final String servletPath;
+
+		public GrpcRequestWrapper(HttpServletRequest request) {
+			super(request);
+
+			// 1. Normalize headers
+			this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			Enumeration<String> headerNames = request.getHeaderNames();
+			while (headerNames.hasMoreElements()) {
+				String name = headerNames.nextElement();
+				List<String> values = Collections.list(request.getHeaders(name));
+				headers.put(name.toLowerCase(), values);
+			}
+
+			// 2. Remove context path from URI
+			// Was: /jans-lock/io.jans.lock.audit.AuditService/ProcessLog
+			// Becomes: /io.jans.lock.audit.AuditService/ProcessLog
+			String originalURI = request.getRequestURI();
+			String contextPath = request.getContextPath();
+
+			if (contextPath != null && !contextPath.isEmpty() && originalURI.startsWith(contextPath)) {
+				this.requestURI = originalURI.substring(contextPath.length());
+				this.servletPath = this.requestURI;
+			} else {
+				this.requestURI = originalURI;
+				this.servletPath = request.getServletPath();
+			}
+		}
+
+		// === Override methods for paths ===
+
+		@Override
+		public String getRequestURI() {
+			return requestURI;
+		}
+
+		@Override
+		public String getServletPath() {
+			return servletPath;
+		}
+
+		@Override
+		public String getPathInfo() {
+			// gRPC usually uses requestURI, but just in case
+			return null;
+		}
+
+		@Override
+		public String getContextPath() {
+			// Return empty context path for gRPC
+			return "";
+		}
+
+		@Override
+		public StringBuffer getRequestURL() {
+			StringBuffer url = new StringBuffer();
+			url.append(getScheme()).append("://").append(getServerName());
+
+			int port = getServerPort();
+			if ((getScheme().equals("http") && port != 80) || (getScheme().equals("https") && port != 443)) {
+				url.append(':').append(port);
+			}
+
+			url.append(getRequestURI());
+			return url;
+		}
+
+		// === Override methods for headers ===
+
+		@Override
+		public String getHeader(String name) {
+			List<String> values = headers.get(name.toLowerCase());
+			return values != null && !values.isEmpty() ? values.get(0) : null;
+		}
+
+		@Override
+		public Enumeration<String> getHeaders(String name) {
+			List<String> values = headers.get(name.toLowerCase());
+			return values != null ? Collections.enumeration(values) : Collections.enumeration(Collections.emptyList());
+		}
+
+		@Override
+		public Enumeration<String> getHeaderNames() {
+			return Collections.enumeration(headers.keySet());
+		}
+
+		@Override
+		public long getDateHeader(String name) {
+			String value = getHeader(name);
+			if (value == null) {
+				return -1L;
+			}
+			try {
+				return super.getDateHeader(name);
+			} catch (IllegalArgumentException e) {
+				return -1L;
+			}
+		}
+
+		@Override
+		public int getIntHeader(String name) {
+			String value = getHeader(name);
+			if (value == null) {
+				return -1;
+			}
+			try {
+				return Integer.parseInt(value);
+			} catch (NumberFormatException e) {
+				return -1;
+			}
+		}
+	}
 }
