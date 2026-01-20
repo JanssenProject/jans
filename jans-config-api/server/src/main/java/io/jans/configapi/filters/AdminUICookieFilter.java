@@ -79,6 +79,9 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         try {
             log.info("Inside AdminUICookieFilter filter...");
             Map<String, Cookie> cookies = requestContext.getCookies();
+            if(!hasAdminUISessionCookie(cookies)) {
+                return;
+            }
             initializeCaches();
             removeExpiredSessionsIfNeeded();
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
@@ -111,6 +114,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    private boolean hasAdminUISessionCookie(Map<String, Cookie> cookies) {
+        //if no cookies
+        return cookies != null &&  cookies.containsKey(ADMIN_UI_SESSION_ID);
     }
 
     /**
