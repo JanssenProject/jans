@@ -371,7 +371,7 @@ class SetupUtils(Crypto64):
 
     def un_mako_fn(self, fn):
         if fn.endswith(MAKO_TEMPLATE_SUFFIX):
-            return fn[:-5]
+            return fn[:-len(MAKO_TEMPLATE_SUFFIX)]
         return fn
 
     def renderTemplateInOut(self, file_path, template_folder, output_dir=None, pystring=False, out_file=None):
