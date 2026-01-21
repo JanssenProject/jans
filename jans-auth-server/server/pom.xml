@@ -278,11 +278,6 @@
             <groupId>net.agkn</groupId>
             <artifactId>hll</artifactId>
         </dependency>
-		<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
-		<dependency>
-			<groupId>com.wywy</groupId>
-			<artifactId>log4j-plugin-fluency</artifactId>
-		</dependency>
 		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>

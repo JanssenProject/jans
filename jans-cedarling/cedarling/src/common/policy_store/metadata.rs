@@ -14,7 +14,10 @@ mod datetime_option {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(date: &Option<DateTime<Utc>>, serializer: S) -> Result<S::Ok, S::Error>
+    pub(super) fn serialize<S>(
+        date: &Option<DateTime<Utc>>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -24,7 +27,7 @@ mod datetime_option {
         }
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<DateTime<Utc>>, D::Error>
+    pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<Option<DateTime<Utc>>, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -43,14 +46,14 @@ mod datetime {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+    pub(super) fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         serializer.serialize_str(&date.to_rfc3339())
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+    pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -65,16 +68,16 @@ mod datetime {
 ///
 /// Contains identification, versioning, and descriptive information about a policy store.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PolicyStoreMetadata {
+pub(crate) struct PolicyStoreMetadata {
     /// The version of the Cedar policy language used in this policy store
-    pub cedar_version: String,
+    pub(crate) cedar_version: String,
     /// Policy store configuration
-    pub policy_store: PolicyStoreInfo,
+    pub(crate) policy_store: PolicyStoreInfo,
 }
 
 /// Core information about a policy store.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PolicyStoreInfo {
+pub(crate) struct PolicyStoreInfo {
     /// Unique identifier for the policy store (hex hash)
     #[serde(default)]
     pub id: String,
@@ -106,7 +109,7 @@ pub struct PolicyStoreInfo {
 ///
 /// Contains checksums and metadata for all files in the policy store.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PolicyStoreManifest {
+pub(crate) struct PolicyStoreManifest {
     /// Reference to the policy store ID this manifest belongs to
     pub policy_store_id: String,
     /// ISO 8601 timestamp when the manifest was generated
@@ -118,7 +121,7 @@ pub struct PolicyStoreManifest {
 
 /// Information about a file in the policy store manifest.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FileInfo {
+pub(crate) struct FileInfo {
     /// File size in bytes
     pub size: u64,
     /// SHA-256 checksum of the file content (format: "sha256:<hex>")
@@ -169,10 +172,13 @@ mod tests {
             .with_timezone(&Utc);
 
         let mut files = HashMap::new();
-        files.insert("metadata.json".to_string(), FileInfo {
-            size: 245,
-            checksum: "sha256:abc123".to_string(),
-        });
+        files.insert(
+            "metadata.json".to_string(),
+            FileInfo {
+                size: 245,
+                checksum: "sha256:abc123".to_string(),
+            },
+        );
 
         let manifest = PolicyStoreManifest {
             policy_store_id: "test123".to_string(),

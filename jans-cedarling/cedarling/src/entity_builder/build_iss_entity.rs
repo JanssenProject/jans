@@ -14,7 +14,7 @@ use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
 use url::Origin;
 
-pub fn build_iss_entity(
+pub(super) fn build_iss_entity(
     iss_type_name: &str,
     id: &str,
     iss: &TrustedIssuer,
