@@ -76,6 +76,29 @@ def download_pycontab():
         base.download(base.current_app.app_info['PYCRONTAB'], pylib_dir_zip_file, verbose=True)
         base.extract_file(pylib_dir_zip_file, 'crontab.py', base.pylib_dir)
 
+def download_markupsafe():
+    pylib_dir = os.path.join(base.pylib_dir, 'markupsafe')
+
+    if os.path.exists(pylib_dir) and not base.argsp.force_download:
+        return
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['MARKUPSAFE']))
+        base.download(base.current_app.app_info['MARKUPSAFE'], pylib_dir_zip_file, verbose=True)
+        base.extract_subdir(pylib_dir_zip_file, 'src/markupsafe', pylib_dir)
+
+
+def download_mako():
+    pylib_dir = os.path.join(base.pylib_dir, 'mako')
+
+    if os.path.exists(pylib_dir) and not base.argsp.force_download:
+        return
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['MAKO']))
+        base.download(base.current_app.app_info['MAKO'], pylib_dir_zip_file, verbose=True)
+        base.extract_subdir(pylib_dir_zip_file, 'mako', pylib_dir)
+
 
 def download_all():
     download_files = []
@@ -104,3 +127,5 @@ def download_apps():
     download_pyjwt()
     download_pymysql()
     download_pycontab()
+    download_markupsafe()
+    download_mako()
