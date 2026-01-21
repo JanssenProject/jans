@@ -1,14 +1,13 @@
 package io.jans.ca.plugin.adminui.service;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.DCRResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
@@ -19,10 +18,10 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class BaseService {
@@ -30,30 +29,32 @@ public class BaseService {
     @Inject
     Logger log;
 
+    /**
+     * Obtain an access token from the authorization server using the provided token request.
+     *
+     * @param tokenRequest   the token request parameters (may include grant type, code, verifier, client credentials, etc.)
+     * @param tokenEndpoint  the token endpoint URL to send the request to
+     * @return               a TokenResponse containing the token data on success, or {@code null} on failure
+     */
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
-        return getToken(tokenRequest, tokenEndpoint, null, null);
+        return getToken(tokenRequest, tokenEndpoint, null);
     }
 
 
     /**
-     * This Java function sends a token request to a specified endpoint and returns the token response if successful.
+     * Request an access token from the token endpoint using the provided TokenRequest.
      *
-     * @param tokenRequest The `getToken` method you provided is used to exchange authorization code for an access token.
-     * The `TokenRequest` parameter contains information required for this token exchange process, such as code, scope,
-     * grant type, redirect URI, client ID, etc.
-     * @param tokenEndpoint The `tokenEndpoint` parameter in the `getToken` method is the URL where the token request will
-     * be sent to in order to obtain an access token. This URL typically belongs to the authorization server that issues
-     * the access tokens.
-     * @param userInfoJwt The `userInfoJwt` parameter in the `getToken` method is a JSON Web Token (JWT) that contains user
-     * information. This token is typically used to provide information about the authenticated user to the authorization
-     * server when requesting an access token. The user information in the JWT can include details such as the user
-     * @param permissionTags The `permissionTags` parameter in the `getToken` method is a list of strings that represent
-     * permission tags. These permission tags are used to specify the permissions that the client application is
-     * requesting. The method processes these permission tags and includes them in the request body when making a call to
-     * the token endpoint.
-     * @return The method is returning a `io.jans.as.client.TokenResponse` object.
+     * Builds a form using fields from {@code tokenRequest} (code, scope, code_verifier, grant_type, redirect_uri,
+     * client_id) and includes {@code userInfoJwt} as the {@code ujwt} parameter when present, then POSTs the form to
+     * {@code tokenEndpoint} using the client credentials in {@code tokenRequest}.
+     *
+     * @param tokenRequest contains values used to construct the token request (authorization code, scope, PKCE verifier,
+     *                     grant type, redirect URI, client identifier, and encoded client credentials)
+     * @param tokenEndpoint the URL of the authorization server token endpoint to which the request will be sent
+     * @param userInfoJwt optional JWT to include as the {@code ujwt} form parameter when present
+     * @return a {@code io.jans.as.client.TokenResponse} populated from the server JSON on HTTP 200, {@code null} otherwise
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -69,17 +70,19 @@ public class BaseService {
                 body.putSingle("ujwt", userInfoJwt);
             }
 
-            if (permissionTags != null && !permissionTags.isEmpty()) {
-                body.put("permission_tag", Collections.singletonList(String.join(" ", permissionTags)));
-            }
-
             if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {
                 body.putSingle("code_verifier", tokenRequest.getCodeVerifier());
             }
 
-            body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
-            body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
-            body.putSingle("client_id", tokenRequest.getAuthUsername());
+            if (tokenRequest.getGrantType() != null && !Strings.isNullOrEmpty(tokenRequest.getGrantType().getValue())) {
+                body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
+            }
+            if (!Strings.isNullOrEmpty(tokenRequest.getRedirectUri())) {
+                body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
+            }
+            if (!Strings.isNullOrEmpty(tokenRequest.getAuthUsername())) {
+                body.putSingle("client_id", tokenRequest.getAuthUsername());
+            }
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(tokenEndpoint);
             Response response = request
@@ -99,18 +102,17 @@ public class BaseService {
             log.error("Error in getting access token: {}", response.getEntity());
 
         } catch (Exception e) {
-            log.error("Problems processing token call");
+            log.error("Problems processing token call", e);
             throw e;
-
         }
         return null;
     }
 
     /**
-     * It takes a software statement assertion (SSA) as input, and returns a client ID and client secret
+     * Performs Dynamic Client Registration (DCR) using the provided Software Statement Assertion (SSA).
      *
-     * @param ssaJwt The Software Statement Assertion (SSA) JWT that you received from the Scan server.
-     * @return The client id and client secret of the newly created client.
+     * @param ssaJwt the SSA JWT issued by the Scan server
+     * @return a DCRResponse containing the registered client's ID, secret, issuer (opHost), hardwareId, and scan hostname when registration succeeds; `null` if registration fails
      */
     public DCRResponse executeDCR(String ssaJwt) {
         try {
@@ -120,14 +122,17 @@ public class BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.BLANK_JWT.getDescription());
             }
             final Jwt tokenJwt = Jwt.parse(ssaJwt);
-            Map<String, Object> claims = getClaims(tokenJwt);
+            Map<String, Object> claims = CommonUtils.getClaims(tokenJwt);
 
             if (claims.get("iss") == null) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ISS_CLAIM_NOT_FOUND.getDescription());
             }
+
+            if (claims.get("org_id") == null) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ORG_ID_CLAIM_NOT_FOUND.getDescription());
+            }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
             String hardwareId = claims.get("org_id").toString();
-            //claims.get("iss").toString();
             Map<String, String> body = new HashMap<>();
             body.put("software_statement", ssaJwt);
             body.put("response_types", "token");
@@ -166,39 +171,15 @@ public class BaseService {
     }
 
     /**
-     * It takes a JWT object and returns a Map of the claims
+     * Perform token introspection against the given introspection endpoint.
      *
-     * @param jwtObj The JWT object that you want to get the claims from.
-     * @return A map of claims.
+     * @param accessToken           the access token to be introspected
+     * @param introspectionEndpoint the full URL of the introspection endpoint
+     * @return                      an Optional containing the introspection response as a Map when the server returns HTTP 200, `Optional.empty()` otherwise
+     * @throws NoSuchAlgorithmException if a required cryptographic algorithm is unavailable when building the HTTP client
+     * @throws KeyManagementException   if an error occurs initializing key management for the HTTP client
      */
-    public Map<String, Object> getClaims(Jwt jwtObj) {
-        Map<String, Object> claims = Maps.newHashMap();
-        if (jwtObj == null) {
-            return claims;
-        }
-        JwtClaims jwtClaims = jwtObj.getClaims();
-        Set<String> keys = jwtClaims.keys();
-        keys.forEach(key -> {
-
-            if (jwtClaims.getClaim(key) instanceof String)
-                claims.put(key, jwtClaims.getClaim(key).toString());
-            if (jwtClaims.getClaim(key) instanceof Integer)
-                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Long)
-                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Boolean)
-                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
-
-            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
-                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
-                claims.put(key, sourceArr);
-            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
-                claims.put(key, (jwtClaims.getClaim(key)));
-        });
-        return claims;
-    }
-
-    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) {
+    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) throws NoSuchAlgorithmException, KeyManagementException {
         log.info("Token introspection from auth-server.");
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);
         request.header("Authorization", "Bearer " + accessToken);

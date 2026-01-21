@@ -5,12 +5,12 @@ import io.jans.as.model.config.adminui.LicenseConfig;
 import io.jans.as.model.config.adminui.MainSettings;
 import io.jans.as.model.config.adminui.OIDCClientSettings;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
-import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.model.adminui.AUIConfiguration;
+import io.jans.configapi.core.model.adminui.LicenseConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -106,12 +106,12 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_ValidLicense() throws Exception {
+    public void testCheckLicense_ValidLicense() {
         // Mock the admin config and license config
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
         lenient().when(licenseConfiguration.getHardwareId()).thenReturn("hardware-key-123");
-        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");//License key missing
+        lenient().when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");
         lenient().when(licenseConfiguration.getScanApiHostname()).thenReturn("https://scan.api.hostname");
         lenient().when(licenseConfiguration.getLicenseValidUpto()).thenReturn(LocalDate.now().plusDays(30).toString());
         lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
@@ -127,7 +127,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_MAUIsNull() throws Exception {
+    public void testCheckLicense_MAUIsNull() {
         // Mock the admin config and license config
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);
@@ -149,7 +149,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testCheckLicense_NoLicenseKey() throws Exception {
+    public void testCheckLicense_NoLicenseKey() {
         // Mock missing license key
         lenient().when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
         lenient().when(auiConfiguration.getLicenseConfiguration()).thenReturn(licenseConfiguration);

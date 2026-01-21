@@ -46,7 +46,7 @@ use zip::ZipArchive;
 /// - `Cursor<Vec<u8>>` - For in-memory archives (WASM-compatible)
 /// - `std::fs::File` - For file-based archives (native only)
 #[derive(Debug)]
-pub struct ArchiveVfs<T> {
+pub(super) struct ArchiveVfs<T> {
     /// The ZIP archive reader (wrapped in Mutex for thread safety)
     archive: Mutex<ZipArchive<T>>,
 }
@@ -68,7 +68,7 @@ where
     /// - Reader does not contain a valid ZIP archive
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
-    pub fn from_reader(reader: T) -> Result<Self, ArchiveError> {
+    pub(super) fn from_reader(reader: T) -> Result<Self, ArchiveError> {
         let mut archive = ZipArchive::new(reader).map_err(|e| ArchiveError::InvalidZipFormat {
             details: e.to_string(),
         })?;
@@ -126,7 +126,7 @@ impl ArchiveVfs<std::fs::File> {
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
+    pub(super) fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
         let path = path.as_ref();
 
         // Validate extension
@@ -164,7 +164,7 @@ impl ArchiveVfs<Cursor<Vec<u8>>> {
     /// - Bytes are not a valid ZIP archive
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
-    pub fn from_buffer(buffer: Vec<u8>) -> Result<Self, ArchiveError> {
+    pub(super) fn from_buffer(buffer: Vec<u8>) -> Result<Self, ArchiveError> {
         let cursor = Cursor::new(buffer);
         Self::from_reader(cursor)
     }

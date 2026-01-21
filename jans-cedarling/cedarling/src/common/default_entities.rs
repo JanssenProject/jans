@@ -53,7 +53,7 @@ impl DefaultEntities {
         let mut warns = Vec::new();
 
         for (entry_id, entity_data) in raw_data {
-            match parse_single_entity(&mut warns, &entry_id, &entity_data) {
+            match parse_single_entity(&mut warns, entry_id, entity_data) {
                 Ok(entity) => {
                     default_entities.insert(entity.uid().clone(), entity);
                 },
@@ -138,7 +138,7 @@ impl DefaultEntitiesWithWarns {
 }
 
 /// Parse default entities from raw data, returning entities and warnings
-pub fn parse_default_entities_with_warns(
+pub(super) fn parse_default_entities_with_warns(
     raw_data: Option<HashMap<String, Value>>,
 ) -> Result<DefaultEntitiesWithWarns, ParseDefaultEntityError> {
     let limits = DefaultEntitiesLimits::default();
@@ -202,13 +202,13 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
 
 #[derive(Debug, thiserror::Error)]
 #[error("failed to parse default entity, id: \"{entry_id}\" error: {error}")]
-pub struct ParseDefaultEntityError {
+pub(super) struct ParseDefaultEntityError {
     pub entry_id: String,
     pub error: Box<ParseEntityErrorKind>,
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum ParseEntityErrorKind {
+pub(super) enum ParseEntityErrorKind {
     #[error("unable to decode base64 string: {0}")]
     Base64Decode(#[from] base64::DecodeError),
     #[error("unable to decode base64 string as utf8: {0}")]
@@ -341,7 +341,7 @@ fn validate_entry_id(entry_id: &str) -> Result<(), ParseDefaultEntityError> {
 }
 
 /// Result structure for entity parsing with named parameters
-pub struct EntityParseResultData<'a> {
+struct EntityParseResultData<'a> {
     pub entity_type: &'a str,
     pub entity_id: &'a str,
     pub cedar_attrs: HashMap<String, RestrictedExpression>,
@@ -617,7 +617,7 @@ mod test {
             .expect("should parse with empty attrs and parents");
         let entities = parsed_entities.entities();
 
-        let uid = &EntityUid::from_str("Test::EmptyTest::\"test789\"").unwrap();
+        let uid = EntityUid::from_str("Test::EmptyTest::\"test789\"").unwrap();
         let entity = entities.get(&uid).expect("should have entity");
         assert_eq!(
             entity.uid().type_name().to_string(),
@@ -726,7 +726,7 @@ mod test {
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
             let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-                .expect(&format!("Should parse valid entry ID: {}", valid_id));
+                .unwrap_or_else(|_| panic!("Should parse valid entry ID: {}", valid_id));
 
             assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
         }
@@ -759,7 +759,7 @@ mod test {
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
-        let uid = &EntityUid::from_str("Test::Base64Type::\"base64_test\"").unwrap();
+        let uid = EntityUid::from_str("Test::Base64Type::\"base64_test\"").unwrap();
         let entity = parsed_entities
             .entities()
             .get(&uid)
@@ -875,7 +875,7 @@ mod test {
         );
 
         // Verify entity with explicit namespace
-        let uid1 = &EntityUid::from_str("Custom::Namespace::EntityType::\"test1\"").unwrap();
+        let uid1 = EntityUid::from_str("Custom::Namespace::EntityType::\"test1\"").unwrap();
         let entity1 = parsed_entities
             .entities()
             .get(&uid1)
@@ -886,7 +886,7 @@ mod test {
         );
 
         // Verify entity without namespace
-        let uid2 = &EntityUid::from_str("SimpleType::\"test2\"").unwrap();
+        let uid2 = EntityUid::from_str("SimpleType::\"test2\"").unwrap();
         let entity2 = parsed_entities
             .entities()
             .get(&uid2)
@@ -914,7 +914,7 @@ mod test {
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
-        let uid = &EntityUid::from_str("Legacy::Type::\"legacy_test\"").unwrap();
+        let uid = EntityUid::from_str("Legacy::Type::\"legacy_test\"").unwrap();
         let entity = parsed_entities
             .entities()
             .get(&uid)
@@ -960,7 +960,7 @@ mod test {
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
-        let uid = &EntityUid::from_str("Test::ChildType::\"child_entity\"").unwrap();
+        let uid = EntityUid::from_str("Test::ChildType::\"child_entity\"").unwrap();
         let entity = parsed_entities
             .entities()
             .get(&uid)
@@ -1014,7 +1014,7 @@ mod test {
         assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
 
         // Verify the valid parent was parsed
-        let uid = &EntityUid::from_str("Test::Type::\"test_entity\"").unwrap();
+        let uid = EntityUid::from_str("Test::Type::\"test_entity\"").unwrap();
         let _entity = parsed_entities
             .entities()
             .get(&uid)
@@ -1052,7 +1052,7 @@ mod test {
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
-        let uid = &EntityUid::from_str("Test::AttrType::\"attr_test\"").unwrap();
+        let uid = EntityUid::from_str("Test::AttrType::\"attr_test\"").unwrap();
         let entity = parsed_entities
             .entities()
             .get(&uid)
@@ -1094,7 +1094,7 @@ mod test {
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
         // Entity UID should use the entry_id as fallback
-        let uid = &EntityUid::from_str("Test::FallbackType::\"fallback_entry_id\"").unwrap();
+        let uid = EntityUid::from_str("Test::FallbackType::\"fallback_entry_id\"").unwrap();
         let entity = parsed_entities
             .entities()
             .get(&uid)
@@ -1185,8 +1185,8 @@ mod test {
         );
 
         // Verify both entities were parsed correctly
-        let base64_uid = &EntityUid::from_str("Test::Base64Type::\"base64_entity\"").unwrap();
-        let json_uid = &EntityUid::from_str("Test::JsonType::\"json_entity\"").unwrap();
+        let base64_uid = EntityUid::from_str("Test::Base64Type::\"base64_entity\"").unwrap();
+        let json_uid = EntityUid::from_str("Test::JsonType::\"json_entity\"").unwrap();
 
         assert!(
             parsed_entities.entities().get(&base64_uid).is_some(),

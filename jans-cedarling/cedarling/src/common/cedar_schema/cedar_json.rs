@@ -21,15 +21,15 @@ mod deserialize;
 
 const CEDAR_EMPTY_NAMESPACE: &str = "";
 
-pub type ActionName = String;
-pub type ActionGroupName = String;
-pub type AttributeName = String;
-pub type CommonTypeName = String;
-pub type EntityName = String;
-pub type EntityTypeName = String;
-pub type EntityOrCommonName = String;
-pub type ExtensionName = String;
-pub type NamespaceName = String;
+type ActionName = String;
+type ActionGroupName = String;
+type AttributeName = String;
+type CommonTypeName = String;
+type EntityName = String;
+type EntityTypeName = String;
+type EntityOrCommonName = String;
+type ExtensionName = String;
+type NamespaceName = String;
 
 /// Joins the given type name with the given namespace if it's not an empty string.
 fn join_namespace(namespace: &str, type_name: &str) -> String {
@@ -159,7 +159,7 @@ impl CedarSchemaJson {
 
 #[derive(Debug, Deserialize, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Namespace {
+struct Namespace {
     #[serde(rename = "entityTypes", default)]
     entity_types: HashMap<EntityTypeName, EntityType>,
     #[serde(rename = "commonTypes", default)]

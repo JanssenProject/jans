@@ -15,8 +15,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class CertAuthnHelper {
     
     private static final String RND_KEY = "ref";
-    //Max. time allowed to go from authn flow to cert pickup url and back again
-    private static final int ENTRY_EXP_SECONDS = 25;
     private static final SecureRandom RND = new SecureRandom();
     
     private static CacheService cs = CdiUtil.bean(CacheService.class);
@@ -24,12 +22,17 @@ public class CertAuthnHelper {
     private String certPickupUrl;
     private String key;
     
+    //Max. time allowed to go from authn flow to cert pickup url and back again
+    //(measured in seconds)
+    private int roundTripMaxTime;
+    
     public CertAuthnHelper() {}
 
-    public CertAuthnHelper(String inum, String certPickupUrl) {
+    public CertAuthnHelper(String inum, String certPickupUrl, int roundTripMaxTime) {
         
         this.userId = inum;
-        this.certPickupUrl = certPickupUrl;        
+        this.certPickupUrl = certPickupUrl;
+        this.roundTripMaxTime = roundTripMaxTime;
         this.key = ("" + RND.nextDouble()).substring(2);
 
     }
@@ -43,8 +46,9 @@ public class CertAuthnHelper {
         JSONObject job = new JSONObject();
         job.put("userId", userId);
         job.put("enroll", false);
+        job.put("expiresAt", System.currentTimeMillis() + 1000L*roundTripMaxTime);
 
-        cs.put(ENTRY_EXP_SECONDS, key, job.toString());
+        cs.put(roundTripMaxTime, key, job.toString());
         return certPickupUrl + "?" + RND_KEY + "=" + encKey;
         
     }
