@@ -1,4 +1,4 @@
-package io.jans.configapi.service.auth;
+package io.jans.ca.plugin.adminui.service.adminui;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
