@@ -117,8 +117,8 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
     /**
      * Checks if the request contains Admin UI Session Cookie
-     * @param cookies
-     * @return
+     * `@param` cookies the request cookies map keyed by cookie name
+     * `@return` true if the cookies map is non-null and contains the Admin UI session cookie
      */
     private boolean hasAdminUISessionCookie(Map<String, Cookie> cookies) {
         return cookies != null &&  cookies.containsKey(ADMIN_UI_SESSION_ID);
