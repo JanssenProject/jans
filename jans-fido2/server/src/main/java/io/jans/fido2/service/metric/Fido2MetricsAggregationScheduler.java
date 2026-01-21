@@ -106,14 +106,30 @@ public class Fido2MetricsAggregationScheduler {
                 // In cluster mode, try to start periodic lock updates
                 // If cluster mode fails, fall back to single-node mode and still run aggregation
                 ScheduledFuture<?> updateTask = null;
+                String lockUpdateFailureReason = null;
                 boolean isClusterMode = scheduler.isClusterEnvironment;
                 if (isClusterMode) {
-                    updateTask = scheduler.startPeriodicLockUpdates();
+                    try {
+                        updateTask = scheduler.startPeriodicLockUpdates();
+                        if (updateTask == null) {
+                            // Capture the actual failure reason from the method
+                            // startPeriodicLockUpdates() logs the error internally, so we capture a generic message
+                            lockUpdateFailureReason = "Failed to start periodic lock updates (check logs for details)";
+                        }
+                    } catch (Exception e) {
+                        // Capture exception details if startPeriodicLockUpdates throws
+                        lockUpdateFailureReason = e.getMessage();
+                        log.debug("Exception during lock update initialization: {}", e.getMessage());
+                    }
+                    
                     if (updateTask == null) {
-                        // Cluster mode failed (e.g., cluster config missing), but shouldPerformAggregation 
-                        // already returned true (fallback to single-node), so we can still run aggregation
+                        // Cluster mode failed, but shouldPerformAggregation already returned true 
+                        // (fallback to single-node), so we can still run aggregation
+                        String failureMsg = lockUpdateFailureReason != null 
+                            ? lockUpdateFailureReason 
+                            : "Cluster lock updates unavailable";
                         log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
-                            jobType, "ou=node is not configured in static configuration");
+                            jobType, failureMsg);
                         // Continue to run aggregation in single-node mode
                     }
                 }

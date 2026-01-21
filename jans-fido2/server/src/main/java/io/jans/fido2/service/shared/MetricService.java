@@ -82,6 +82,28 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
     private static final String SUCCESS_STATUS = "SUCCESS";
+    
+    // Cache for username-to-userId mapping to reduce database load
+    // TTL: 1 hour (3600000 ms) - balances performance with data freshness
+    private static final long USER_ID_CACHE_TTL_MS = 3600000L; // 1 hour
+    private final java.util.Map<String, CacheEntry> userIdCache = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    /**
+     * Cache entry for username-to-userId mapping
+     */
+    private static class CacheEntry {
+        final String userId;
+        final long timestamp;
+        
+        CacheEntry(String userId) {
+            this.userId = userId;
+            this.timestamp = System.currentTimeMillis();
+        }
+        
+        boolean isExpired() {
+            return (System.currentTimeMillis() - timestamp) > USER_ID_CACHE_TTL_MS;
+        }
+    }
 
     public void initTimer() {
     	initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
@@ -471,16 +493,30 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * Extract IP address from HTTP request, checking proxy headers first
      * Handles X-Forwarded-For, Proxy-Client-IP, and other common proxy headers
      * 
+     * SECURITY NOTE: This method trusts proxy headers without validation. In production,
+     * ensure the application is behind a trusted reverse proxy (e.g., nginx, Apache, load balancer)
+     * that strips or validates these headers. If the application is directly exposed to the internet,
+     * clients can spoof these headers to mask their real IP address.
+     * 
+     * For enhanced security, consider:
+     * 1. Only trusting proxy headers when behind a known reverse proxy
+     * 2. Validating the source IP is from a trusted proxy before trusting forwarded headers
+     * 3. Making proxy header trust configurable via application configuration
+     * 
      * @param request HTTP servlet request
-     * @return Client IP address
+     * @return Client IP address (may be spoofed if not behind trusted proxy)
      */
     private String extractIpAddress(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
         
-        // List of headers to check (in order of preference)
-        String[] headersToTry = {
+        // Get the direct remote address first (most trustworthy)
+        String directRemoteAddr = request.getRemoteAddr();
+        
+        // List of proxy headers to check (in order of preference)
+        // Only check these if we're behind a trusted proxy (validation should be added in production)
+        String[] proxyHeadersToTry = {
             "X-Forwarded-For",
             "Proxy-Client-IP",
             "WL-Proxy-Client-IP",
@@ -489,13 +525,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
             "HTTP_X_CLUSTER_CLIENT_IP",
             "HTTP_CLIENT_IP",
             "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED",
-            "HTTP_VIA",
-            "REMOTE_ADDR"
+            "HTTP_FORWARDED"
         };
         
-        // Check each header
-        for (String header : headersToTry) {
+        // Check proxy headers (trusted only if behind reverse proxy)
+        // TODO: Add configuration option to enable/disable proxy header trust
+        // TODO: Add validation to ensure request came from trusted proxy IP range
+        for (String header : proxyHeadersToTry) {
             String ip = request.getHeader(header);
             if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
                 // X-Forwarded-For can contain multiple IPs; take the first one
@@ -503,17 +539,40 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 if (commaIndex > 0) {
                     ip = ip.substring(0, commaIndex).trim();
                 }
-                return ip;
+                // Basic validation: check if it looks like a valid IP
+                if (isValidIpAddress(ip)) {
+                    return ip;
+                }
             }
         }
         
-        // Fallback to remote address
-        return request.getRemoteAddr();
+        // Fallback to direct remote address (most secure)
+        return directRemoteAddr;
+    }
+    
+    /**
+     * Basic validation for IP address format
+     * @param ip IP address string to validate
+     * @return true if format appears valid, false otherwise
+     */
+    private boolean isValidIpAddress(String ip) {
+        if (ip == null || ip.trim().isEmpty()) {
+            return false;
+        }
+        // Simple regex for IPv4 and IPv6 basic format validation
+        // IPv4: xxx.xxx.xxx.xxx (0-255 per octet)
+        // IPv6: simplified check for colons
+        return ip.matches("^([0-9]{1,3}\\.){3}[0-9]{1,3}$") || 
+               ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$") ||
+               ip.equals("localhost") || ip.equals("127.0.0.1") || ip.equals("::1");
     }
 
     /**
      * Look up the immutable userId (inum) from username
      * This ensures we use the stable unique identifier for analytics
+     * 
+     * PERFORMANCE: Uses in-memory cache with 1-hour TTL to reduce database load.
+     * In high-throughput scenarios, this prevents a database query on every metric event.
      * 
      * @param username The username to look up
      * @return The user's inum (userId), or the username as fallback if lookup fails
@@ -523,6 +582,29 @@ public class MetricService extends io.jans.service.metric.MetricService {
             return null;
         }
         
+        // Check cache first to avoid database lookup
+        CacheEntry cached = userIdCache.get(username);
+        if (cached != null && !cached.isExpired()) {
+            return cached.userId;
+        }
+        
+        // Cache miss or expired - perform database lookup
+        String userId = performUserIdLookup(username);
+        
+        // Update cache (even if lookup failed, cache the fallback to avoid repeated lookups)
+        if (userId != null) {
+            userIdCache.put(username, new CacheEntry(userId));
+        }
+        
+        return userId;
+    }
+    
+    /**
+     * Perform the actual database lookup for userId from username
+     * @param username The username to look up
+     * @return The user's inum (userId), or the username as fallback if lookup fails
+     */
+    private String performUserIdLookup(String username) {
         try {
             // In Janssen, users are stored with "uid" attribute as username
             // and "inum" as the unique identifier
@@ -594,13 +676,16 @@ public class MetricService extends io.jans.service.metric.MetricService {
             request.setFallbackReason(metricsData.getFallbackReason());
 
             // Call the appropriate user metrics update method based on operation type
+            // PRIVACY: Log userId (inum) instead of username to comply with GDPR/CCPA requirements
             String operationType = metricsData.getOperationType();
+            String logIdentifier = metricsData.getUserId() != null ? metricsData.getUserId() : "[unknown-user]";
+            
             if ("REGISTRATION".equals(operationType)) {
                 userMetricsService.updateUserRegistrationMetrics(request);
-                log.debug("Updated user registration metrics for: {}", metricsData.getUsername());
+                log.debug("Updated user registration metrics for userId: {}", logIdentifier);
             } else if ("AUTHENTICATION".equals(operationType)) {
                 userMetricsService.updateUserAuthenticationMetrics(request);
-                log.debug("Updated user authentication metrics for: {}", metricsData.getUsername());
+                log.debug("Updated user authentication metrics for userId: {}", logIdentifier);
             } else if ("FALLBACK".equals(operationType)) {
                 userMetricsService.updateUserFallbackMetrics(
                     request.getUserId(),
@@ -608,7 +693,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
                     request.getIpAddress(),
                     request.getUserAgent()
                 );
-                log.debug("Updated user fallback metrics for: {}", metricsData.getUsername());
+                log.debug("Updated user fallback metrics for userId: {}", logIdentifier);
             }
         } catch (Exception e) {
             log.error("Failed to update user metrics: {}", e.getMessage(), e);

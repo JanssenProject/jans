@@ -87,6 +87,12 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
     @AttributeName(name = "jansFido2MetricsSessionId")
     private String sessionId;
 
+    /**
+     * Additional data stored as JSON for flexibility
+     * 
+     * Note: 'transient' prevents Java serialization, while '@JsonObject' enables ORM JSON persistence.
+     * This is a valid Janssen ORM pattern for storing complex objects as JSON in the database.
+     */
     @AttributeName(name = "jansFido2MetricsAdditionalData")
     @JsonObject
     private transient Map<String, Object> additionalData;

@@ -204,8 +204,9 @@ public class AppInitializer {
 		}
 		
 		// Initialize FIDO2 metrics aggregation scheduler (optional - might not be available)
+		// Note: CDI Instance<> is never null when injected, so we only check isUnsatisfied()
 		try {
-			if (fido2MetricsAggregationSchedulerInstance != null && !fido2MetricsAggregationSchedulerInstance.isUnsatisfied()) {
+			if (!fido2MetricsAggregationSchedulerInstance.isUnsatisfied()) {
 				fido2MetricsAggregationSchedulerInstance.get().initTimer();
 				log.info("FIDO2 metrics aggregation scheduler initialized");
 			} else {

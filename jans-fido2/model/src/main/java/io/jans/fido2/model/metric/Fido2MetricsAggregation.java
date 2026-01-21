@@ -14,7 +14,8 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,6 +57,9 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
      * All metrics data stored as JSON for flexibility
      * Contains: registrationAttempts, registrationSuccesses, authenticationAttempts, 
      * authenticationSuccesses, deviceTypes, errorCounts, performanceMetrics, etc.
+     * 
+     * Note: 'transient' prevents Java serialization, while '@JsonObject' enables ORM JSON persistence.
+     * This is a valid Janssen ORM pattern for storing complex objects as JSON in the database.
      */
     @AttributeName(name = "jansMetricsData")
     @JsonObject
@@ -72,7 +76,8 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.id = aggregationType + "_" + period;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.lastUpdated = new Date();
+        // Use UTC timezone to align with FIDO2 services
+        this.lastUpdated = Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant());
     }
 
     // Core getters and setters

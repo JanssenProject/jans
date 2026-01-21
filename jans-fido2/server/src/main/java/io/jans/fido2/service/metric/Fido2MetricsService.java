@@ -321,12 +321,12 @@ public class Fido2MetricsService {
         CompletableFuture.runAsync(() -> {
             try {
                 // Use UTC timezone to align with FIDO2 services
-                LocalDateTime cutoffDateTime = ZonedDateTime.now(ZoneId.of("UTC"))
-                    .toLocalDateTime()
-                    .minusDays(retentionDays);
-                
-                // Convert LocalDateTime to Date for SQL persistence filters
-                Date cutoffDate = Date.from(cutoffDateTime.atZone(ZoneId.of("UTC")).toInstant());
+                // Direct conversion from Instant to Date (no intermediate LocalDateTime needed)
+                Date cutoffDate = Date.from(
+                    ZonedDateTime.now(ZoneId.of("UTC"))
+                        .minusDays(retentionDays)
+                        .toInstant()
+                );
                 
                 // Cleanup old metrics entries
                 Filter filter = Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, cutoffDate);
@@ -647,6 +647,13 @@ public class Fido2MetricsService {
     
     /**
      * Convert LocalDateTime to Date for persistence layer compatibility
+     * 
+     * IMPORTANT: This method assumes the input LocalDateTime is already in UTC timezone.
+     * The conversion applies UTC timezone without validation, so callers must ensure
+     * they pass UTC-aligned LocalDateTime values.
+     * 
+     * @param dateTime LocalDateTime value that must be in UTC (not validated)
+     * @return Date object representing the same instant in UTC
      */
     private Date convertToDate(LocalDateTime dateTime) {
         return Date.from(dateTime.atZone(ZoneId.of("UTC")).toInstant());

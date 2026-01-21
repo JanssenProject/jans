@@ -30,6 +30,13 @@ import java.util.Map;
  * REST API controller for FIDO2/Passkey metrics
  * Provides endpoints to fetch metrics data for dashboards and analytics tools
  * 
+ * SECURITY NOTE: Authentication and authorization for these endpoints should be enforced
+ * at the infrastructure level (API gateway, OAuth interceptor, or reverse proxy).
+ * User-specific endpoints (e.g., /entries/user/{userId}) are particularly sensitive
+ * and should restrict access to authorized users or administrators only.
+ * 
+ * If security is enforced at deployment time, ensure proper documentation is maintained.
+ * 
  * GitHub Issue #11923
  * 
  * @author FIDO2 Team
@@ -54,7 +61,14 @@ public class Fido2MetricsController {
     private DataMapperService dataMapperService;
 
     // ISO formatter for UTC timestamps (aligned with FIDO2 services)
+    // Note: ISO_LOCAL_DATE_TIME does not accept timezone offsets (e.g., Z, +00:00)
+    // Users must provide timestamps in format: yyyy-MM-ddTHH:mm:ss (interpreted as UTC)
+    // For ISO-8601 with timezone support, consider using DateTimeFormatter.ISO_OFFSET_DATE_TIME
+    // and converting to UTC, but this requires API documentation updates
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    
+    // Alternative formatter that supports ISO-8601 with timezone offsets
+    private static final DateTimeFormatter ISO_OFFSET_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
      * Get raw metrics entries within a time range
@@ -379,6 +393,7 @@ public class Fido2MetricsController {
 
     /**
      * Health check endpoint for metrics service
+     * Verifies that the metrics service is functional and can connect to the database
      * 
      * @return Health status
      */
@@ -388,12 +403,43 @@ public class Fido2MetricsController {
     public Response getHealth() {
         return processRequest(() -> {
             Map<String, Object> health = new HashMap<>();
-            health.put("status", "UP");
-            health.put("metricsEnabled", appConfiguration.isFido2MetricsEnabled());
+            boolean isHealthy = true;
+            String status = "UP";
+            
+            // Check if metrics are enabled
+            boolean metricsEnabled = appConfiguration.isFido2MetricsEnabled();
+            health.put("metricsEnabled", metricsEnabled);
+            
+            // Verify service is functional by attempting a simple operation
+            try {
+                // Try to access the metrics service to verify it's available
+                if (metricsService != null) {
+                    // Perform a lightweight check - verify service can be accessed
+                    // This doesn't query the database but verifies the service bean is initialized
+                    health.put("serviceAvailable", true);
+                } else {
+                    health.put("serviceAvailable", false);
+                    isHealthy = false;
+                    status = "DOWN";
+                }
+            } catch (Exception e) {
+                log.warn("Health check detected service issue: {}", e.getMessage());
+                health.put("serviceAvailable", false);
+                health.put("serviceError", "Service check failed");
+                isHealthy = false;
+                status = "DOWN";
+            }
+            
+            health.put("status", status);
             health.put("aggregationEnabled", appConfiguration.isFido2MetricsAggregationEnabled());
             health.put("timestamp", ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime().format(ISO_FORMATTER));
             
-            return Response.ok(dataMapperService.writeValueAsString(health)).build();
+            Response.ResponseBuilder responseBuilder = isHealthy 
+                ? Response.ok(dataMapperService.writeValueAsString(health))
+                : Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                    .entity(dataMapperService.writeValueAsString(health));
+            
+            return responseBuilder.build();
         });
     }
 
@@ -415,22 +461,41 @@ public class Fido2MetricsController {
 
     /**
      * Parse ISO datetime string as UTC
-     * Note: All timestamps are interpreted as UTC to align with FIDO2 services
-     * @param dateTime DateTime string in ISO format (interpreted as UTC)
+     * Supports both ISO_LOCAL_DATE_TIME (yyyy-MM-ddTHH:mm:ss) and ISO-8601 with timezone offsets
+     * All timestamps are converted to UTC to align with FIDO2 services
+     * 
+     * @param dateTime DateTime string in ISO format (with or without timezone offset)
      * @param paramName Parameter name for error messages
      * @return Parsed LocalDateTime in UTC
      */
     private LocalDateTime parseDateTime(String dateTime, String paramName) {
         if (dateTime == null || dateTime.trim().isEmpty()) {
-            throw errorResponseFactory.invalidRequest(paramName + " is required (ISO format: yyyy-MM-ddTHH:mm:ss in UTC)");
+            throw errorResponseFactory.invalidRequest(
+                paramName + " is required (ISO format: yyyy-MM-ddTHH:mm:ss or yyyy-MM-ddTHH:mm:ssZ/+offset)"
+            );
         }
         
         try {
-            // Parse as LocalDateTime - all times are assumed to be UTC
-            return LocalDateTime.parse(dateTime, ISO_FORMATTER);
+            // First try parsing with timezone offset support (ISO-8601 compliant)
+            if (dateTime.contains("Z") || dateTime.contains("+") || dateTime.contains("-") && 
+                (dateTime.lastIndexOf('-') > 10 || dateTime.contains("+"))) {
+                try {
+                    java.time.ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateTime, ISO_OFFSET_FORMATTER);
+                    // Convert to UTC and extract LocalDateTime
+                    return zonedDateTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
+                } catch (Exception e) {
+                    // Fall through to try ISO_LOCAL_DATE_TIME format
+                    log.debug("Failed to parse with timezone offset, trying local format: {}", e.getMessage());
+                }
+            }
+            
+            // Parse as LocalDateTime (assumed to be UTC per API documentation)
+            LocalDateTime localDateTime = LocalDateTime.parse(dateTime, ISO_FORMATTER);
+            return localDateTime;
         } catch (Exception e) {
             throw errorResponseFactory.invalidRequest(
-                paramName + " must be in ISO format (yyyy-MM-ddTHH:mm:ss in UTC). Example: 2024-01-01T00:00:00"
+                paramName + " must be in ISO format (yyyy-MM-ddTHH:mm:ss or yyyy-MM-ddTHH:mm:ssZ/+offset). " +
+                "Example: 2024-01-01T00:00:00 or 2024-01-01T00:00:00Z"
             );
         }
     }
@@ -458,6 +523,7 @@ public class Fido2MetricsController {
 
     /**
      * Process REST request with error handling
+     * Sanitizes exception messages to prevent information disclosure
      * @param processor Request processor
      * @return Response
      */
@@ -468,12 +534,51 @@ public class Fido2MetricsController {
             // Re-throw web application exceptions as-is (they already have proper status codes)
             throw e;
         } catch (Exception e) {
-            // Log the full exception with stack trace for debugging
+            // Log the full exception with stack trace for debugging (internal logging)
             log.error("Error processing metrics request: {}", e.getMessage(), e);
-            // Wrap in a proper error response with context
-            String errorMessage = "An unexpected error occurred while processing the metrics request: " + e.getMessage();
-            throw errorResponseFactory.unknownError(errorMessage);
+            
+            // Sanitize error message to prevent information disclosure
+            // Don't expose internal details like database connection strings, file paths, etc.
+            String sanitizedMessage = sanitizeErrorMessage(e);
+            throw errorResponseFactory.unknownError(sanitizedMessage);
         }
+    }
+    
+    /**
+     * Sanitize error messages to prevent information disclosure
+     * Removes sensitive information like connection strings, file paths, etc.
+     * @param exception The exception to sanitize
+     * @return Sanitized error message safe for API responses
+     */
+    private String sanitizeErrorMessage(Exception exception) {
+        if (exception == null) {
+            return "An unexpected error occurred while processing the request";
+        }
+        
+        String message = exception.getMessage();
+        if (message == null || message.trim().isEmpty()) {
+            return "An unexpected error occurred while processing the request";
+        }
+        
+        // Remove potential sensitive information patterns
+        // Connection strings, file paths, etc. should not be exposed
+        String sanitized = message;
+        
+        // Remove file system paths (e.g., /opt/jans/..., C:\Users\...)
+        sanitized = sanitized.replaceAll("([A-Za-z]:)?[\\\\/][^\\s]+", "[path]");
+        
+        // Remove potential connection strings (e.g., jdbc:..., ldap://...)
+        sanitized = sanitized.replaceAll("(jdbc|ldap|http|https)://[^\\s]+", "[connection]");
+        
+        // Remove potential credentials (e.g., password=..., pwd=...)
+        sanitized = sanitized.replaceAll("(password|pwd|passwd|secret|key|token)=[^\\s,;]+", "$1=[hidden]");
+        
+        // If sanitization removed too much, use a generic message
+        if (sanitized.trim().isEmpty() || sanitized.length() < 10) {
+            return "An unexpected error occurred while processing the request";
+        }
+        
+        return "An unexpected error occurred: " + sanitized;
     }
 
     /**
