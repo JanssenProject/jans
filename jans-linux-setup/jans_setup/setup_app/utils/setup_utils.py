@@ -26,6 +26,8 @@ from setup_app.utils import base
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
+MAKO_TEMPLATE_SUFFIX = '.mako'
+
 class SetupUtils(Crypto64):
 
     @classmethod
@@ -368,7 +370,7 @@ class SetupUtils(Crypto64):
         return text % dictionary
 
     def un_mako_fn(self, fn):
-        if fn.endswith('.mako'):
+        if fn.endswith(MAKO_TEMPLATE_SUFFIX):
             return fn[:-5]
         return fn
 
@@ -474,7 +476,7 @@ class SetupUtils(Crypto64):
                 if not full_output_dir.exists():
                     full_output_dir.mkdir(parents=True, exist_ok=True)
 
-                if full_output_file.suffix == '.mako':
+                if full_output_file.suffix == MAKO_TEMPLATE_SUFFIX:
                     full_output_file = full_output_file.with_suffix('')
 
                 rendered_text = self.render_template(te.as_posix())
@@ -490,7 +492,7 @@ class SetupUtils(Crypto64):
             if isinstance(format_dict[k], bool):
                 format_dict[k] = str(format_dict[k]).lower()
 
-        if tmp_fn.endswith('.mako'):
+        if tmp_fn.endswith(MAKO_TEMPLATE_SUFFIX):
             mako_template = MakoTemplate(filename=tmp_fn)
             rendered_text = mako_template.render(**format_dict)
         elif pystring:
