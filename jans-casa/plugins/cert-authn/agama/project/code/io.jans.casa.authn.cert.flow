@@ -3,7 +3,7 @@ Flow io.jans.casa.authn.cert
     Configs conf 
     Inputs userData
     
-cah = Call io.jans.casa.certauthn.CertAuthnHelper#new userData.inum conf.certPickupUrl
+cah = Call io.jans.casa.certauthn.CertAuthnHelper#new userData.inum conf.certPickupUrl conf.roundTripMaxTime
 url = Call cah buildRedirectUrl
 //See template index.zul and class io.jans.casa.plugins.certauthn.vm.CertAuthnVM in casa plugin
 RFAC url

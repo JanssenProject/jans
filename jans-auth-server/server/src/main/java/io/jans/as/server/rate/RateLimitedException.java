@@ -5,14 +5,7 @@ package io.jans.as.server.rate;
  */
 public class RateLimitedException extends Exception {
 
-    private final RateLimitType type;
-
-    public RateLimitedException(RateLimitType type, String message) {
+    public RateLimitedException(String message) {
         super(message);
-        this.type = type;
-    }
-
-    public RateLimitType getType() {
-        return type;
     }
 }

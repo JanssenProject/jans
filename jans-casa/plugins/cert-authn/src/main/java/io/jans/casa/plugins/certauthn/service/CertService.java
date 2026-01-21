@@ -28,13 +28,16 @@ import static io.jans.casa.plugins.certauthn.service.UserCertificateMatch.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class CertService {
-    
-    private static final String CERT_PREFIX = "cert:";
+
     public static final String AGAMA_FLOW = "io.jans.casa.authn.cert";
+
+    private static final String CERT_PREFIX = "cert:";
+    private static final int DEFAULT_ROUND_TRIP_MAX_TIME = 30;
     
     private Logger logger = LoggerFactory.getLogger(getClass());
 	private IPersistenceService persistenceService;
 	private String certPickupUrl;
+	private int roundTripMaxTime;
     private ObjectMapper mapper;
     private boolean hasValidProperties;
     private List<X509Certificate> certChain;
@@ -69,9 +72,21 @@ public class CertService {
 		String pemString = props.optString("certChainPEM", null);
 		certPickupUrl = props.optString("certPickupUrl", null);
 		
-		if (pemString == null || certPickupUrl == null ) {
+		if (pemString == null || certPickupUrl == null) {
 		    logger.error("Unable to read required config properties from flow {}", AGAMA_FLOW);
 		} else {
+		    Integer rtmt = props.optIntegerObject("roundTripMaxTime", null);
+		    
+		    if (rtmt == null || rtmt < 10) {
+		        logger.warn("roundTripMaxTime provided is of no practical use. Setting a default value...");
+		        roundTripMaxTime =  DEFAULT_ROUND_TRIP_MAX_TIME;
+		    } else {
+		        roundTripMaxTime =  rtmt;
+		    }
+
+            logger.info("Cert pickup URL will be: {}", certPickupUrl);
+            logger.info("Round trip max time will be: {}", roundTripMaxTime);
+
 		    try (InputStream is = new ByteArrayInputStream(pemString.getBytes(UTF_8))) {
 
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -89,6 +104,10 @@ public class CertService {
 	
 	public String getCertPickupUrl() {
 	    return certPickupUrl;
+	}
+	
+	public int getRoundTripMaxTime() {
+	    return roundTripMaxTime;
 	}
 
     public List<Certificate> getUserCerts(String userId) {
