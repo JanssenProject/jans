@@ -19,7 +19,7 @@ def download_jans_archive():
             verbose=True
             )
 
-def download_zip_app(target_dir, app_info_key, source, is_file=False, par_dir=None):
+def download_zip_app(target_dir, app_info_key, source, *, is_file=False, par_dir=None):
     pylib_dir = os.path.join(base.pylib_dir, target_dir)
 
     if os.path.exists(pylib_dir) and not base.argsp.force_download:
