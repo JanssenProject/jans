@@ -19,86 +19,19 @@ def download_jans_archive():
             verbose=True
             )
 
-
-def download_sqlalchemy():
-    sqlalchemy_dir = os.path.join(base.pylib_dir, 'sqlalchemy')
-
-    if os.path.exists(sqlalchemy_dir) and not base.argsp.force_download:
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        sqlalchemy_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['SQLALCHEMY']))
-        base.download(base.current_app.app_info['SQLALCHEMY'], sqlalchemy_zip_file, verbose=True)
-        base.extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', sqlalchemy_dir)
-
-
-def download_cryptography():
-    cryptography_dir = os.path.join(base.pylib_dir, 'cryptography')
-
-    if os.path.exists(cryptography_dir) and not base.argsp.force_download:
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        cryptography_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['CRYPTOGRAPHY']))
-        base.download(base.current_app.app_info['CRYPTOGRAPHY'], cryptography_zip_file, verbose=True)
-        base.extract_subdir(cryptography_zip_file, 'cryptography', cryptography_dir, par_dir='')
-
-def download_pyjwt():
-    pyjwt_dir = os.path.join(base.pylib_dir, 'jwt')
-
-    if os.path.exists(pyjwt_dir) and not base.argsp.force_download:
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        pyjwt_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['PYJWT']))
-        base.download(base.current_app.app_info['PYJWT'], pyjwt_dir_zip_file, verbose=True)
-        base.extract_subdir(pyjwt_dir_zip_file, 'jwt', pyjwt_dir)
-
-
-def download_pymysql():
-    pylib_dir = os.path.join(base.pylib_dir, 'pymysql')
+def download_zip_app(target_dir, app_info_key, source, is_file=False, par_dir=None):
+    pylib_dir = os.path.join(base.pylib_dir, target_dir)
 
     if os.path.exists(pylib_dir) and not base.argsp.force_download:
         return
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['PYMYSQL']))
-        base.download(base.current_app.app_info['PYMYSQL'], pylib_dir_zip_file, verbose=True)
-        base.extract_subdir(pylib_dir_zip_file, 'pymysql', pylib_dir)
-
-def download_pycontab():
-
-    if os.path.exists(os.path.join(base.pylib_dir, 'crontab.py')) and not base.argsp.force_download:
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['PYCRONTAB']))
-        base.download(base.current_app.app_info['PYCRONTAB'], pylib_dir_zip_file, verbose=True)
-        base.extract_file(pylib_dir_zip_file, 'crontab.py', base.pylib_dir)
-
-def download_markupsafe():
-    pylib_dir = os.path.join(base.pylib_dir, 'markupsafe')
-
-    if os.path.exists(pylib_dir) and not base.argsp.force_download:
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['MARKUPSAFE']))
-        base.download(base.current_app.app_info['MARKUPSAFE'], pylib_dir_zip_file, verbose=True)
-        base.extract_subdir(pylib_dir_zip_file, 'src/markupsafe', pylib_dir)
-
-
-def download_mako():
-    pylib_dir = os.path.join(base.pylib_dir, 'mako')
-
-    if os.path.exists(pylib_dir) and not base.argsp.force_download:
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['MAKO']))
-        base.download(base.current_app.app_info['MAKO'], pylib_dir_zip_file, verbose=True)
-        base.extract_subdir(pylib_dir_zip_file, 'mako', pylib_dir)
-
+        pylib_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info[app_info_key]))
+        base.download(base.current_app.app_info[app_info_key], pylib_dir_zip_file, verbose=True)
+        if is_file:
+            base.extract_file(pylib_dir_zip_file, source, base.pylib_dir)
+        else:
+            base.extract_subdir(pylib_dir_zip_file, source, pylib_dir, par_dir)
 
 def download_all():
     download_files = []
@@ -122,10 +55,10 @@ def download_all():
 
 def download_apps():
     download_jans_archive()
-    download_sqlalchemy()
-    download_cryptography()
-    download_pyjwt()
-    download_pymysql()
-    download_pycontab()
-    download_markupsafe()
-    download_mako()
+    download_zip_app('sqlalchemy', 'SQLALCHEMY', 'lib/sqlalchemy')
+    download_zip_app('cryptography', 'CRYPTOGRAPHY', 'cryptography', par_dir='')
+    download_zip_app('jwt', 'PYJWT', 'jwt')
+    download_zip_app('pymysql', 'PYMYSQL', 'pymysql')
+    download_zip_app('crontab.py', 'PYCRONTAB', 'crontab.py', True)
+    download_zip_app('markupsafe', 'MARKUPSAFE', 'src/markupsafe')
+    download_zip_app('mako', 'MAKO', 'mako')
