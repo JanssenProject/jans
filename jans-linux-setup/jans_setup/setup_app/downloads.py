@@ -59,6 +59,6 @@ def download_apps():
     download_zip_app('cryptography', 'CRYPTOGRAPHY', 'cryptography', par_dir='')
     download_zip_app('jwt', 'PYJWT', 'jwt')
     download_zip_app('pymysql', 'PYMYSQL', 'pymysql')
-    download_zip_app('crontab.py', 'PYCRONTAB', 'crontab.py', True)
+    download_zip_app('crontab.py', 'PYCRONTAB', 'crontab.py', is_file=True)
     download_zip_app('markupsafe', 'MARKUPSAFE', 'src/markupsafe')
     download_zip_app('mako', 'MAKO', 'mako')
