@@ -11,8 +11,6 @@ tags:
 !!! Warning
     **This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.**
 
-
-
 The quickest way to get a Janssen Server up and running is to install a Docker container-based fully featured Janssen Server.
 
 ## System Requirements
@@ -26,9 +24,17 @@ These environment variables can be set to customize installation as per the need
 
 Run this command to start the installation:
 
-```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL "" main
-```
+=== "MySQL"
+
+    ```bash
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL "" main
+    ```
+
+=== "PostgreSQL"
+
+    ```bash 
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io PGSQL "" main
+    ```
 
 Console messages like below confirms the successful installation:
 
@@ -42,10 +48,9 @@ Waiting for the Janssen server to come up. Depending on the resources it may tak
 Testing openid-configuration endpoint.. 
 ```
 
-As can be seen, the install script also accesses the well-known endpoints to varify that Janssen Server is responsive.
+As can be seen, the install script also accesses the well-known endpoints to verify that Janssen Server is responsive.
 
 ## Verify Installation By Accessing Standard Endpoints
-
 
 To access Janssen Server standard endpoints from outside of the Docker container, systems `/etc/hosts` file needs to be updated. Open the file and add the IP domain record which should be the IP of the instance docker is installed. And the domain used in the env above `CN_HOSTNAME`.
 
@@ -75,14 +80,21 @@ https://demoexample.jans.io/.well-known/openid-configuration
     jans tui
     ```
 
-
 ## Uninstall / Remove the Janssen Server
 
 This docker based installation uses `docker compose` under the hood to create containers. Hence uninstalling Janssen server involves invoking `docker compose` with appropriate yml file. Run command below to stop and remove containers.
 
-```
-docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf jans-*
-```
+=== "MySQL"
+
+    ```bash
+    docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml down && rm -rf /tmp/jans
+    ```
+
+=== "PostgreSQL"
+
+    ```bash 
+    docker compose -f /tmp/jans/docker-jans-monolith/jans-postgres-compose.yml down && rm -rf /tmp/jans
+    ```
 
 Console messages like below confirms the successful removal:
 
