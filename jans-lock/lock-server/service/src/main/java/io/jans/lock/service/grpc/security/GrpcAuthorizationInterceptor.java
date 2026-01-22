@@ -84,7 +84,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             
             authorizationProtection = cedarlingProtectionService;
         } else {
-            // Send error if permission denied is not enabled
+            // Send error if protection mode is not selected
             call.close(Status.PERMISSION_DENIED
                     .withDescription("Authorization error"), new Metadata());
             

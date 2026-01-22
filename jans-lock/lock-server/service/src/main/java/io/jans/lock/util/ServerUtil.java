@@ -50,6 +50,8 @@ public class ServerUtil {
 	public static final String PRAGMA = "Pragma";
 	public static final String NO_CACHE = "no-cache";
 
+	private static final String UNKNOWN = "unknown";
+
     public static final Context.Key<String> CLIENT_IP_CONTEXT_KEY = Context.key("client-ip");
     private static final Metadata.Key<String> X_FORWARDED_FOR = Metadata.Key.of("x-forwarded-for", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> X_REAL_IP = Metadata.Key.of("x-real-ip", Metadata.ASCII_STRING_MARSHALLER);
@@ -124,7 +126,7 @@ public class ServerUtil {
 		String clientIp = CLIENT_IP_CONTEXT_KEY.get(Context.current());
 
 		if (clientIp == null) {
-			return "unknown";
+			return UNKNOWN;
 		}
 
 		return clientIp;
@@ -163,11 +165,10 @@ public class ServerUtil {
             }
 
             log.warn("Could not determine client IP address");
-            return "unknown";
-            
+            return UNKNOWN;
         } catch (Exception e) {
             log.error("Error getting client IP address", e);
-            return "unknown";
+            return UNKNOWN;
         }
     }
 
