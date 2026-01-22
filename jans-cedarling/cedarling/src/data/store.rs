@@ -261,10 +261,14 @@ impl DataStore {
             .collect()
     }
 
-    /// List all entries with their full metadata.
+    /// List all entries with their full metadata, excluding expired entries.
     fn list_entries(&self) -> Vec<DataEntry> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
-        storage.iter().map(|(_, entry)| entry.clone()).collect()
+        storage
+            .iter()
+            .filter(|(_, entry)| !entry.is_expired())
+            .map(|(_, entry)| entry.clone())
+            .collect()
     }
 }
 
