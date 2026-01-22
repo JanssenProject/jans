@@ -61,9 +61,6 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
 
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
-
-    private static final Metadata.Key<String> AUTHORIZATION_METADATA_KEY = 
-            Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
     
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
@@ -209,7 +206,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
         return Optional.ofNullable(elem.getAnnotation(cls));
     }
 
-    class GrpcResourceInfo implements ResourceInfo {
+    static class GrpcResourceInfo implements ResourceInfo {
     	
     	private Class<?> clazz;
     	private Method method;

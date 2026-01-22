@@ -349,3 +349,4 @@ check_grpc_should_fail "grpcurl -insecure --proto audit.proto -H 'authorization:
 echo -e "\n┌──────────────────────────────┐"
 echo   "│         TESTS PASSED         │"
 echo   "└──────────────────────────────┘"
+
