@@ -35,7 +35,10 @@ mod tests;
 use std::sync::Arc;
 
 pub use crate::common::json_rules::JsonRule;
-pub use crate::data::{CedarType, ConfigValidationError, DataEntry, DataStoreConfig};
+pub use crate::data::{
+    CedarType, ConfigValidationError, DataApi, DataEntry, DataError, DataStore, DataStoreConfig,
+    DataStoreStats,
+};
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 use crate::log::BaseLogEntry;
 #[cfg(test)]

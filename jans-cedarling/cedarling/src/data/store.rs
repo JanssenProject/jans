@@ -11,6 +11,7 @@ use chrono::Duration as ChronoDuration;
 use serde_json::Value;
 use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 
+use super::api::{DataApi, DataStoreStats};
 use super::config::{ConfigValidationError, DataStoreConfig};
 use super::entry::DataEntry;
 use super::error::DataError;
@@ -258,6 +259,53 @@ impl DataStore {
             .iter()
             .map(|(k, entry)| (k.clone(), entry.value.clone()))
             .collect()
+    }
+
+    /// List all entries with their full metadata.
+    fn list_entries(&self) -> Vec<DataEntry> {
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+        storage.iter().map(|(_, entry)| entry.clone()).collect()
+    }
+}
+
+impl DataApi for DataStore {
+    fn push_data(
+        &self,
+        key: &str,
+        value: Value,
+        ttl: Option<StdDuration>,
+    ) -> Result<(), DataError> {
+        self.push(key, value, ttl)
+    }
+
+    fn get_data(&self, key: &str) -> Result<Option<Value>, DataError> {
+        Ok(self.get(key))
+    }
+
+    fn get_data_entry(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+        Ok(self.get_entry(key))
+    }
+
+    fn remove_data(&self, key: &str) -> Result<bool, DataError> {
+        Ok(self.remove(key))
+    }
+
+    fn clear_data(&self) -> Result<(), DataError> {
+        self.clear();
+        Ok(())
+    }
+
+    fn list_data(&self) -> Result<Vec<DataEntry>, DataError> {
+        Ok(self.list_entries())
+    }
+
+    fn get_stats(&self) -> Result<DataStoreStats, DataError> {
+        Ok(DataStoreStats {
+            entry_count: self.count(),
+            max_entries: self.config.max_entries,
+            max_entry_size: self.config.max_entry_size,
+            metrics_enabled: self.config.enable_metrics,
+        })
     }
 }
 
@@ -820,6 +868,185 @@ mod tests {
                 Err(ConfigValidationError::DefaultTtlExceedsMax { .. })
             ),
             "expected DataStore::new() to return ConfigValidationError when default_ttl exceeds max_ttl"
+        );
+    }
+
+    // ==========================================================================
+    // DataApi trait tests
+    // ==========================================================================
+
+    #[test]
+    fn test_data_api_push_and_get() {
+        let store = create_test_store();
+
+        // Use trait methods
+        store
+            .push_data("api_key", json!({"role": "admin"}), None)
+            .expect("push_data should succeed");
+
+        let result = store.get_data("api_key").expect("get_data should succeed");
+        assert_eq!(result, Some(json!({"role": "admin"})));
+
+        // Non-existent key
+        let missing = store
+            .get_data("nonexistent")
+            .expect("get_data should succeed for missing key");
+        assert_eq!(missing, None);
+    }
+
+    #[test]
+    fn test_data_api_get_entry() {
+        let store = create_test_store();
+
+        store
+            .push_data(
+                "entry_key",
+                json!("test_value"),
+                Some(StdDuration::from_secs(600)),
+            )
+            .expect("push_data should succeed");
+
+        let entry = store
+            .get_data_entry("entry_key")
+            .expect("get_data_entry should succeed")
+            .expect("entry should exist");
+
+        assert_eq!(entry.key, "entry_key");
+        assert_eq!(entry.value, json!("test_value"));
+        assert!(entry.expires_at.is_some());
+    }
+
+    #[test]
+    fn test_data_api_remove() {
+        let store = create_test_store();
+
+        store
+            .push_data("to_remove", json!(123), None)
+            .expect("push_data should succeed");
+
+        let removed = store
+            .remove_data("to_remove")
+            .expect("remove_data should succeed");
+        assert!(removed, "should return true when key existed");
+
+        let removed_again = store
+            .remove_data("to_remove")
+            .expect("remove_data should succeed");
+        assert!(!removed_again, "should return false when key doesn't exist");
+
+        assert_eq!(
+            store
+                .get_data("to_remove")
+                .expect("get_data should succeed"),
+            None
+        );
+    }
+
+    #[test]
+    fn test_data_api_clear() {
+        let store = create_test_store();
+
+        store
+            .push_data("key1", json!(1), None)
+            .expect("push_data should succeed");
+        store
+            .push_data("key2", json!(2), None)
+            .expect("push_data should succeed");
+        store
+            .push_data("key3", json!(3), None)
+            .expect("push_data should succeed");
+
+        assert_eq!(store.count(), 3);
+
+        store.clear_data().expect("clear_data should succeed");
+
+        assert_eq!(store.count(), 0);
+    }
+
+    #[test]
+    fn test_data_api_list() {
+        let store = create_test_store();
+
+        store
+            .push_data("alpha", json!("a"), None)
+            .expect("push_data should succeed");
+        store
+            .push_data("beta", json!("b"), None)
+            .expect("push_data should succeed");
+
+        let entries = store.list_data().expect("list_data should succeed");
+
+        assert_eq!(entries.len(), 2);
+
+        let keys: Vec<&str> = entries.iter().map(|e| e.key.as_str()).collect();
+        assert!(keys.contains(&"alpha"));
+        assert!(keys.contains(&"beta"));
+    }
+
+    #[test]
+    fn test_data_api_stats() {
+        let config = DataStoreConfig {
+            max_entries: 100,
+            max_entry_size: 512,
+            enable_metrics: true,
+            ..Default::default()
+        };
+        let store = DataStore::new(config).expect("should create store");
+
+        store
+            .push_data("stat_key", json!("value"), None)
+            .expect("push_data should succeed");
+
+        let stats = store.get_stats().expect("get_stats should succeed");
+
+        assert_eq!(stats.entry_count, 1);
+        assert_eq!(stats.max_entries, 100);
+        assert_eq!(stats.max_entry_size, 512);
+        assert!(stats.metrics_enabled);
+    }
+
+    #[test]
+    fn test_data_api_ttl_handling() {
+        let store = create_test_store();
+
+        // Push with explicit TTL
+        store
+            .push_data(
+                "ttl_key",
+                json!("expires_soon"),
+                Some(StdDuration::from_secs(60)),
+            )
+            .expect("push_data with TTL should succeed");
+
+        let entry = store
+            .get_data_entry("ttl_key")
+            .expect("get_data_entry should succeed")
+            .expect("entry should exist");
+
+        assert!(
+            entry.expires_at.is_some(),
+            "entry should have expiration time"
+        );
+    }
+
+    #[test]
+    fn test_data_api_ttl_exceeded_error() {
+        let config = DataStoreConfig {
+            max_ttl: Some(StdDuration::from_secs(60)), // 1 minute max
+            ..Default::default()
+        };
+        let store = DataStore::new(config).expect("should create store");
+
+        // Try to push with TTL exceeding max
+        let result = store.push_data(
+            "long_ttl",
+            json!("value"),
+            Some(StdDuration::from_secs(120)), // 2 minutes
+        );
+
+        assert!(
+            matches!(result, Err(DataError::TTLExceeded { .. })),
+            "expected TTLExceeded error when TTL exceeds max_ttl"
         );
     }
 }
