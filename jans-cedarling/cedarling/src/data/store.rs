@@ -265,7 +265,7 @@ impl DataStore {
 ///
 /// Uses saturating conversion to prevent overflow for very large durations.
 /// Durations exceeding `i64::MAX` seconds will be capped at a safe maximum.
-fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
+pub(super) fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
     let secs = d.as_secs();
     let nanos = d.subsec_nanos();
 

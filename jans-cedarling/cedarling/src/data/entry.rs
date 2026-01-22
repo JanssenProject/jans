@@ -3,7 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use chrono::{DateTime, Duration as ChronoDuration, Utc};
+use super::store::std_duration_to_chrono_duration;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration as StdDuration;
@@ -119,23 +120,6 @@ impl CedarType {
             },
         }
     }
-}
-
-/// Convert `std::time::Duration` to `chrono::Duration`.
-///
-/// Uses saturating conversion to prevent overflow for very large durations.
-/// Durations exceeding `i64::MAX` seconds will be capped at a safe maximum.
-fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
-    let secs = d.as_secs();
-    let nanos = d.subsec_nanos();
-
-    // Saturating conversion: i64::MAX seconds is ~292 billion years
-    // We cap at a safe maximum to prevent chrono panics
-    // i64::MAX / 1000 (milliseconds per second) is a safe upper bound
-    const MAX_SAFE_SECS: u64 = (i64::MAX / 1000) as u64;
-    let secs_capped = secs.min(MAX_SAFE_SECS);
-
-    ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(nanos as i64)
 }
 
 /// A data entry in the DataStore with value and metadata.
