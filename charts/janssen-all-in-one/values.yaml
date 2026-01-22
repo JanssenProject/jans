@@ -306,7 +306,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation job schedule. It accepts any Cron syntax supported by Kubernetes. If empty, the schedule will run based on keysLife value.
@@ -696,7 +696,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 0.0.0-nightly
+  tag: 1.16.0-1
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -778,7 +778,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -841,7 +841,7 @@ cleanup:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
