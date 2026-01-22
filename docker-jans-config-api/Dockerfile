@@ -114,7 +114,7 @@ WORKDIR /
 
 # add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
 # commit hash from GluuFlexAdminUIPolicyStore
-ARG AUI_POLICY_VERSION=f47c0877c5516c281580f190d1a82d04d9d471bf
+ARG AUI_POLICY_VERSION=320707351b6cdd53de986f278da5c91e8f772552
 # policy store filename
 ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
 
