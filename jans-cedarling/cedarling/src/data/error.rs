@@ -13,20 +13,36 @@ pub enum DataError {
     InvalidKey,
 
     /// Key not found in store
-    #[error("key not found: {0}")]
-    KeyNotFound(String),
+    #[error("key not found: {key}")]
+    KeyNotFound {
+        /// The key that was not found
+        key: String,
+    },
 
     /// Storage limit exceeded
     #[error("storage limit exceeded: max {max} entries")]
-    StorageLimitExceeded { max: usize },
+    StorageLimitExceeded {
+        /// Maximum allowed entries
+        max: usize,
+    },
 
     /// TTL exceeds maximum allowed
-    #[error("TTL exceeds maximum: requested {requested:?}, max {max:?}")]
-    TTLExceeded { requested: Duration, max: Duration },
+    #[error("TTL ({requested:?}) exceeds max ({max:?})")]
+    TTLExceeded {
+        /// The requested TTL
+        requested: Duration,
+        /// The maximum allowed TTL
+        max: Duration,
+    },
 
     /// Value too large
-    #[error("value too large: {size} bytes exceeds max {max} bytes")]
-    ValueTooLarge { size: usize, max: usize },
+    #[error("value size {size} bytes exceeds max {max} bytes")]
+    ValueTooLarge {
+        /// Actual size in bytes
+        size: usize,
+        /// Maximum allowed size in bytes
+        max: usize,
+    },
 
     /// Serialization error
     #[error("serialization error: {0}")]

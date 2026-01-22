@@ -11,7 +11,8 @@ use chrono::Duration as ChronoDuration;
 use serde_json::Value;
 use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 
-use super::config::DataStoreConfig;
+use super::config::{ConfigValidationError, DataStoreConfig};
+use super::entry::DataEntry;
 use super::error::DataError;
 
 const RWLOCK_EXPECT_MESSAGE: &str = "DataStore storage lock should not be poisoned";
@@ -32,7 +33,7 @@ const INFINITE_TTL_SECS: i64 = 315_360_000; // 10 years in seconds
 /// - `config.max_ttl = None` means no upper limit on TTL values (10 years max)
 /// - When both `ttl` parameter and `config.default_ttl` are `None`, entries use the infinite TTL
 pub struct DataStore {
-    storage: RwLock<SparKV<Value>>,
+    storage: RwLock<SparKV<DataEntry>>,
     config: DataStoreConfig,
 }
 
@@ -43,33 +44,40 @@ impl DataStore {
     ///
     /// - If `config.max_ttl` is `None`, uses 10 years (effectively infinite)
     /// - If `config.default_ttl` is `None`, uses 10 years (effectively infinite)
-    pub fn new(config: DataStoreConfig) -> Self {
+    ///
+    /// # Errors
+    ///
+    /// Returns `ConfigValidationError` if the configuration is invalid.
+    pub fn new(config: DataStoreConfig) -> Result<Self, ConfigValidationError> {
+        // Validate configuration before creating the store
+        config.validate()?;
+
         let sparkv_config = SparKVConfig {
             max_items: config.max_entries,
             max_item_size: config.max_entry_size,
             max_ttl: config
                 .max_ttl
-                .map(|d| std_duration_to_chrono_duration(d))
+                .map(std_duration_to_chrono_duration)
                 .unwrap_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS)),
             default_ttl: config
                 .default_ttl
-                .map(|d| std_duration_to_chrono_duration(d))
+                .map(std_duration_to_chrono_duration)
                 .unwrap_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS)),
             auto_clear_expired: true,
             earliest_expiration_eviction: false,
         };
 
-        // Use JSON string length as size calculator for accurate size checking
-        let size_calculator: Option<fn(&Value) -> usize> =
-            Some(|v| serde_json::to_string(v).map(|s| s.len()).unwrap_or(0));
+        // Calculate size based on the serialized DataEntry
+        let size_calculator: Option<fn(&DataEntry) -> usize> =
+            Some(|entry| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0));
 
-        Self {
+        Ok(Self {
             storage: RwLock::new(SparKV::with_config_and_sizer(
                 sparkv_config,
                 size_calculator,
             )),
             config,
-        }
+        })
     }
 
     /// Push a value into the store with an optional TTL.
@@ -92,63 +100,53 @@ impl DataStore {
             return Err(DataError::InvalidKey);
         }
 
-        // Check value size before storing
-        let value_size = serde_json::to_string(&value)
+        // Create DataEntry with metadata
+        let entry = DataEntry::new(key.to_string(), value, ttl);
+
+        // Check entry size before storing (including metadata)
+        let entry_size = serde_json::to_string(&entry)
             .map_err(DataError::from)?
             .len();
 
-        if self.config.max_entry_size > 0 && value_size > self.config.max_entry_size {
+        if self.config.max_entry_size > 0 && entry_size > self.config.max_entry_size {
             return Err(DataError::ValueTooLarge {
-                size: value_size,
+                size: entry_size,
                 max: self.config.max_entry_size,
             });
         }
 
-        // Determine the effective TTL to use
-        // Priority: explicit ttl > config.default_ttl > infinite (10 years)
-        let requested_ttl = ttl
-            .or(self.config.default_ttl)
-            .unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64));
-
-        // If an explicit TTL was provided, validate it against max_ttl
-        if ttl.is_some() {
+        // Validate explicit TTL against max_ttl before calculating effective TTL
+        if let Some(explicit_ttl) = ttl {
             if let Some(max_ttl) = self.config.max_ttl {
-                if requested_ttl > max_ttl {
+                if explicit_ttl > max_ttl {
                     return Err(DataError::TTLExceeded {
-                        requested: requested_ttl,
+                        requested: explicit_ttl,
                         max: max_ttl,
                     });
                 }
             }
         }
 
-        // Cap the effective TTL at max_ttl if set
-        let effective_ttl = if let Some(max_ttl) = self.config.max_ttl {
-            requested_ttl.min(max_ttl)
-        } else {
-            requested_ttl
-        };
-
-        // Convert to chrono::Duration
-        let chrono_ttl = std_duration_to_chrono_duration(effective_ttl);
+        // Calculate effective TTL using the helper function
+        let chrono_ttl = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
 
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
 
         // Use empty index keys since we don't need indexing for data store
         storage
-            .set_with_ttl(&key, value, chrono_ttl, &[])
+            .set_with_ttl(key, entry, chrono_ttl, &[])
             .map_err(|e| match e {
                 SparKVError::CapacityExceeded => DataError::StorageLimitExceeded {
                     max: self.config.max_entries,
                 },
                 SparKVError::ItemSizeExceeded => DataError::ValueTooLarge {
-                    size: value_size,
+                    size: entry_size,
                     max: self.config.max_entry_size,
                 },
                 SparKVError::TTLTooLong => {
                     // This shouldn't happen since we validated above, but handle it anyway
                     DataError::TTLExceeded {
-                        requested: effective_ttl,
+                        requested: ttl.unwrap_or_default(),
                         max: self
                             .config
                             .max_ttl
@@ -163,10 +161,61 @@ impl DataStore {
     /// Get a value from the store by key.
     ///
     /// Returns `None` if the key doesn't exist or the entry has expired.
-    /// Uses read lock for concurrent access.
+    /// If metrics are enabled, increments the access count for the entry.
     pub fn get(&self, key: &str) -> Option<Value> {
-        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
-        storage.get(key).cloned()
+        self.get_entry(key).map(|entry| entry.value)
+    }
+
+    /// Get a data entry with full metadata by key.
+    ///
+    /// Returns `None` if the key doesn't exist or the entry has expired.
+    /// If metrics are enabled, increments the access count for the entry.
+    /// Uses read lock initially for better concurrency, upgrading to write lock only when metrics are enabled.
+    pub fn get_entry(&self, key: &str) -> Option<DataEntry> {
+        // First, try with read lock for better concurrency
+        let entry = {
+            let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+            storage.get(key).cloned()
+        };
+
+        let mut entry = entry?;
+
+        // Check if entry has expired
+        if let Some(expires_at) = entry.expires_at {
+            if chrono::Utc::now() > expires_at {
+                // Entry is expired, optionally remove it from storage
+                let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+                storage.pop(key);
+                return None;
+            }
+        }
+
+        // Only acquire write lock if metrics are enabled
+        if self.config.enable_metrics {
+            entry.increment_access();
+
+            // Calculate remaining TTL to preserve expiration
+            let remaining_ttl = if let Some(expires_at) = entry.expires_at {
+                let now = chrono::Utc::now();
+                expires_at
+                    .signed_duration_since(now)
+                    .to_std()
+                    .ok()
+                    .map(std_duration_to_chrono_duration)
+                    .unwrap_or_else(|| {
+                        get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
+                    })
+            } else {
+                // No expiration, use effective TTL
+                get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
+            };
+
+            // Acquire write lock to update the entry with incremented access count
+            let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+            let _ = storage.set_with_ttl(key, entry.clone(), remaining_ttl, &[]);
+        }
+
+        Some(entry)
     }
 
     /// Remove a value from the store by key.
@@ -202,12 +251,12 @@ impl DataStore {
     /// Get all active (non-expired) entries as a HashMap.
     ///
     /// This is used for context injection during authorization.
-    /// Uses read lock for concurrent access.
+    /// Returns only the values, not the metadata.
     pub fn get_all(&self) -> HashMap<String, Value> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage
             .iter()
-            .map(|(k, v)| (k.clone(), v.clone()))
+            .map(|(k, entry)| (k.clone(), entry.value.clone()))
             .collect()
     }
 }
@@ -216,7 +265,7 @@ impl DataStore {
 ///
 /// Uses saturating conversion to prevent overflow for very large durations.
 /// Durations exceeding `i64::MAX` seconds will be capped at a safe maximum.
-fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
+pub(super) fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
     let secs = d.as_secs();
     let nanos = d.subsec_nanos();
 
@@ -229,6 +278,38 @@ fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration {
     ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(nanos as i64)
 }
 
+/// Get the effective TTL to use, respecting max_ttl constraints.
+///
+/// # TTL Resolution Logic
+///
+/// 1. If `ttl` is provided explicitly, use it (subject to `max_ttl` cap)
+/// 2. Otherwise, use `default_ttl` from config (subject to `max_ttl` cap)
+/// 3. If both are None, use effectively infinite duration (10 years)
+/// 4. Always respect `max_ttl` if set, capping the result
+///
+/// This ensures that the effective TTL always respects `max_ttl` constraints,
+/// even when using default or infinite TTLs.
+fn get_effective_ttl(
+    ttl: Option<StdDuration>,
+    default_ttl: Option<StdDuration>,
+    max_ttl: Option<StdDuration>,
+) -> ChronoDuration {
+    // Determine the requested TTL
+    let requested_ttl = ttl.or(default_ttl);
+
+    // If no TTL is specified, use effectively infinite duration (10 years)
+    let effective = requested_ttl.unwrap_or(StdDuration::from_secs(INFINITE_TTL_SECS as u64));
+
+    // Respect max_ttl if set, capping the result
+    let capped = if let Some(max) = max_ttl {
+        effective.min(max)
+    } else {
+        effective
+    };
+
+    std_duration_to_chrono_duration(capped)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -238,7 +319,7 @@ mod tests {
     use std::time::Duration as StdDuration;
 
     fn create_test_store() -> DataStore {
-        DataStore::new(DataStoreConfig::default())
+        DataStore::new(DataStoreConfig::default()).expect("should create store")
     }
 
     #[test]
@@ -409,7 +490,7 @@ mod tests {
             max_entries: 2,
             ..Default::default()
         };
-        let store = DataStore::new(config);
+        let store = DataStore::new(config).expect("should create store");
 
         store
             .push("key1", json!("value1"), None)
@@ -429,10 +510,10 @@ mod tests {
     #[test]
     fn test_max_entry_size() {
         let config = DataStoreConfig {
-            max_entry_size: 10,
+            max_entry_size: 150,
             ..Default::default()
         };
-        let store = DataStore::new(config);
+        let store = DataStore::new(config).expect("should create store");
 
         // Small value should work
         store
@@ -440,7 +521,9 @@ mod tests {
             .expect("failed to push small value for max_entry_size test");
 
         // Large value should fail
-        let large_value = json!("this is a very long string that exceeds the limit");
+        let large_value = json!(
+            "this is a very long string that exceeds the limit and it needs to be even longer to exceed 150 bytes including metadata"
+        );
         let result = store.push("key2", large_value, None);
         assert!(matches!(result, Err(DataError::ValueTooLarge { .. })));
     }
@@ -451,7 +534,7 @@ mod tests {
             max_ttl: Some(StdDuration::from_secs(60)),
             ..Default::default()
         };
-        let store = DataStore::new(config);
+        let store = DataStore::new(config).expect("should create store");
 
         // TTL within limit should work
         store
@@ -470,7 +553,7 @@ mod tests {
             default_ttl: Some(StdDuration::from_millis(100)),
             ..Default::default()
         };
-        let store = DataStore::new(config);
+        let store = DataStore::new(config).expect("should create store");
 
         // Push without explicit TTL should use default
         store
@@ -605,5 +688,138 @@ mod tests {
 
         // Verify some entries were removed
         assert!(store.count() < 20);
+    }
+
+    #[test]
+    fn test_get_entry_with_metadata() {
+        let store = create_test_store();
+
+        store
+            .push("key1", json!("value1"), Some(StdDuration::from_secs(60)))
+            .expect("failed to push value");
+
+        let entry = store.get_entry("key1").expect("entry should exist");
+        assert_eq!(entry.key, "key1");
+        assert_eq!(entry.value, json!("value1"));
+        assert_eq!(entry.data_type, crate::CedarType::String);
+        assert_eq!(entry.access_count, 1); // Incremented by get_entry
+        assert!(entry.expires_at.is_some());
+    }
+
+    #[test]
+    fn test_metrics_tracking() {
+        let config = DataStoreConfig {
+            enable_metrics: true,
+            ..Default::default()
+        };
+        let store = DataStore::new(config).expect("should create store");
+
+        store
+            .push("key1", json!("value1"), None)
+            .expect("failed to push value");
+
+        // First access
+        let entry1 = store.get_entry("key1").expect("entry should exist");
+        assert_eq!(entry1.access_count, 1);
+
+        // Second access
+        let entry2 = store.get_entry("key1").expect("entry should exist");
+        assert_eq!(entry2.access_count, 2);
+
+        // Third access
+        let entry3 = store.get_entry("key1").expect("entry should exist");
+        assert_eq!(entry3.access_count, 3);
+    }
+
+    #[test]
+    fn test_metrics_disabled() {
+        let config = DataStoreConfig {
+            enable_metrics: false,
+            ..Default::default()
+        };
+        let store = DataStore::new(config).expect("should create store");
+
+        store
+            .push("key1", json!("value1"), None)
+            .expect("failed to push value");
+
+        // Access multiple times
+        let entry1 = store.get_entry("key1").expect("entry should exist");
+        assert_eq!(entry1.access_count, 0); // Not incremented
+
+        let entry2 = store.get_entry("key1").expect("entry should exist");
+        assert_eq!(entry2.access_count, 0); // Still not incremented
+    }
+
+    #[test]
+    fn test_cedar_type_inference() {
+        let store = create_test_store();
+
+        store
+            .push("string", json!("test"), None)
+            .expect("failed to push string");
+        store
+            .push("number", json!(42), None)
+            .expect("failed to push number");
+        store
+            .push("bool", json!(true), None)
+            .expect("failed to push bool");
+        store
+            .push("array", json!([1, 2, 3]), None)
+            .expect("failed to push array");
+        store
+            .push("object", json!({"key": "value"}), None)
+            .expect("failed to push object");
+        store
+            .push("entity", json!({"type": "User", "id": "123"}), None)
+            .expect("failed to push entity");
+
+        use crate::CedarType;
+        assert_eq!(
+            store.get_entry("string").unwrap().data_type,
+            CedarType::String
+        );
+        assert_eq!(
+            store.get_entry("number").unwrap().data_type,
+            CedarType::Long
+        );
+        assert_eq!(store.get_entry("bool").unwrap().data_type, CedarType::Bool);
+        assert_eq!(store.get_entry("array").unwrap().data_type, CedarType::Set);
+        assert_eq!(
+            store.get_entry("object").unwrap().data_type,
+            CedarType::Record
+        );
+        assert_eq!(
+            store.get_entry("entity").unwrap().data_type,
+            CedarType::Entity
+        );
+    }
+
+    #[test]
+    fn test_config_validation() {
+        // Valid config
+        let valid_config = DataStoreConfig {
+            default_ttl: Some(StdDuration::from_secs(300)),
+            max_ttl: Some(StdDuration::from_secs(3600)),
+            ..Default::default()
+        };
+        assert!(
+            matches!(DataStore::new(valid_config), Ok(_)),
+            "expected DataStore::new() to succeed with valid DataStoreConfig"
+        );
+
+        // Invalid config: default_ttl > max_ttl
+        let invalid_config = DataStoreConfig {
+            default_ttl: Some(StdDuration::from_secs(7200)),
+            max_ttl: Some(StdDuration::from_secs(3600)),
+            ..Default::default()
+        };
+        assert!(
+            matches!(
+                DataStore::new(invalid_config),
+                Err(ConfigValidationError::DefaultTtlExceedsMax { .. })
+            ),
+            "expected DataStore::new() to return ConfigValidationError when default_ttl exceeds max_ttl"
+        );
     }
 }
