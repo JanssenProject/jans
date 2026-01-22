@@ -83,7 +83,7 @@ public interface AuditRestWebService {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS }, grpcMethodName = "ProcessBulkHealth")
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health/bulk")
 	Response processBulkHealthRequest(List<HealthEntry> healthEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
@@ -119,7 +119,7 @@ public interface AuditRestWebService {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS }, grpcMethodName = "ProcessBulkLog")
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log/bulk")
 	Response processBulkLogRequest(List<LogEntry> logEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
@@ -155,7 +155,7 @@ public interface AuditRestWebService {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS }, grpcMethodName = "ProcessBulkTelemetry")
-	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry/bulk")
 	Response processBulkTelemetryRequest(List<TelemetryEntry> telemetryEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 

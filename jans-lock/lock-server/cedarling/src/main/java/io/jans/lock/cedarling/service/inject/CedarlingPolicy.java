@@ -17,7 +17,9 @@ import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
 
 /**
- * 
+ * Qualifier annotation for CDI injection of Cedarling policy components.
+ * Apply to injection points that require policy-specific bean selection.
+ *
  * @author Yuriy Movchan Date: 10/08/2022
  */
 @Target({ METHOD, FIELD })

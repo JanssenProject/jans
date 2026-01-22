@@ -167,7 +167,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 		id = id > 0 ? id : -id;
 		map.putAll(
 				Map.of("cedar_entity_mapping",
-						Map.of("entity_type", requestedPermission.getResource(), "id", requestedPermission.getId())
+						Map.of("entity_type", requestedPermission.getResource(), "id", id)
 					)
 		);
 		map.putAll(
