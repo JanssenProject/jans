@@ -57,6 +57,7 @@ class JansLockInstaller(JettyInstaller):
 
 
     def install(self):
+
         if Config.get('install_jans_lock_as_server'):
             self.install_as_server()
             self.systemd_units.append('jans-lock')
@@ -67,8 +68,6 @@ class JansLockInstaller(JettyInstaller):
 
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
             Config.lock_message_provider_type = 'POSTGRES'
-
-        self.apache_lock_config()
 
     def create_client(self):
 
@@ -170,31 +169,9 @@ class JansLockInstaller(JettyInstaller):
         message_conf_json = self.readFile(self.message_conf_json)
         self.dbUtils.set_configuration('jansMessageConf', message_conf_json)
 
-    def apache_lock_config(self):
-        apache_config = self.readFile(base.current_app.HttpdInstaller.https_jans_fn).splitlines()
-        if Config.get('install_jans_lock_as_server'):
-            proxy_context = 'jans-lock'
-            proxy_port = Config.jans_lock_port
-        else:
-            proxy_port = Config.jans_auth_port
-            proxy_context = 'jans-auth'
-
-        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/api/v1/configuration'
-        jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
-
-
-        proyx_pass_n = 0
-        for i, l in enumerate(apache_config):
-            if l.strip().startswith('ProxyErrorOverride') and l.strip().endswith('On'):
-                proyx_pass_n = i
-
-        apache_config.insert(proyx_pass_n-1, jans_lock_well_known_proxy_pass)
-        self.writeFile(base.current_app.HttpdInstaller.https_jans_fn, '\n'.join(apache_config), backup=False)
-
 
     def installed(self):
         return os.path.exists(self.jetty_service_webapps) or os.path.exists(os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, os.path.basename(self.source_files[1][0])))
-
 
     def service_post_install_tasks(self):
         base.current_app.ConfigApiInstaller.install_plugin('lock')

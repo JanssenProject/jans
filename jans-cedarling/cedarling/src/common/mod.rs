@@ -13,8 +13,8 @@ pub(crate) mod default_entities;
 pub(crate) mod default_entities_limits;
 pub(crate) mod json_rules;
 
-pub mod issuer_utils;
-pub mod policy_store;
+pub(crate) mod issuer_utils;
+pub(crate) mod policy_store;
 
 /// Used for decoding the policy and schema metadata
 #[derive(Debug, Copy, Clone, PartialEq, serde::Deserialize)]

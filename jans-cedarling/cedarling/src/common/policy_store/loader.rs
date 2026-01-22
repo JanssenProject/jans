@@ -30,7 +30,7 @@ use super::vfs_adapter::VfsFileSystem;
 /// This function uses `PhysicalVfs` to read from the local filesystem.
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
-pub async fn load_policy_store_directory(
+pub(crate) async fn load_policy_store_directory(
     path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     let path_str = path
@@ -73,7 +73,7 @@ pub async fn load_policy_store_directory(
 /// Directory loading is not supported in WASM environments.
 /// Use `load_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub async fn load_policy_store_directory(
+pub(crate) async fn load_policy_store_directory(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
@@ -84,7 +84,9 @@ pub async fn load_policy_store_directory(
 /// This function uses `ArchiveVfs` to read from a zip archive.
 /// It is only available on native platforms (not WASM).
 #[cfg(not(target_arch = "wasm32"))]
-pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore, PolicyStoreError> {
+pub(crate) async fn load_policy_store_archive(
+    path: &Path,
+) -> Result<LoadedPolicyStore, PolicyStoreError> {
     let path = path.to_path_buf();
 
     // Offload blocking I/O operations to a blocking thread pool to avoid blocking the async runtime.
@@ -113,7 +115,7 @@ pub async fn load_policy_store_archive(path: &Path) -> Result<LoadedPolicyStore,
 /// File-based archive loading is not supported in WASM environments.
 /// Use `load_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub async fn load_policy_store_archive(
+pub(crate) async fn load_policy_store_archive(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
@@ -125,7 +127,7 @@ pub async fn load_policy_store_archive(
 /// - WASM environments where file system access is not available
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
-pub fn load_policy_store_archive_bytes(
+pub(crate) fn load_policy_store_archive_bytes(
     bytes: Vec<u8>,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     use super::archive_handler::ArchiveVfs;
@@ -160,7 +162,7 @@ pub fn load_policy_store_archive_bytes(
 
 /// A loaded policy store with all its components.
 #[derive(Debug)]
-pub struct LoadedPolicyStore {
+pub(crate) struct LoadedPolicyStore {
     /// Policy store metadata
     pub metadata: PolicyStoreMetadata,
     /// Optional manifest for integrity checking
@@ -179,7 +181,7 @@ pub struct LoadedPolicyStore {
 
 /// A policy or template file.
 #[derive(Debug, Clone)]
-pub struct PolicyFile {
+pub(crate) struct PolicyFile {
     /// File name
     pub name: String,
     /// File content
@@ -188,7 +190,7 @@ pub struct PolicyFile {
 
 /// An entity definition file.
 #[derive(Debug, Clone)]
-pub struct EntityFile {
+pub(crate) struct EntityFile {
     /// File name
     pub name: String,
     /// JSON content
@@ -197,7 +199,7 @@ pub struct EntityFile {
 
 /// A trusted issuer configuration file.
 #[derive(Debug, Clone)]
-pub struct IssuerFile {
+pub(crate) struct IssuerFile {
     /// File name
     pub name: String,
     /// JSON content
@@ -210,13 +212,13 @@ pub struct IssuerFile {
 /// - Physical filesystem for native platforms
 /// - Memory filesystem for testing and WASM
 /// - Archive filesystem for .cjar files
-pub struct DefaultPolicyStoreLoader<V: VfsFileSystem> {
+pub(super) struct DefaultPolicyStoreLoader<V: VfsFileSystem> {
     vfs: V,
 }
 
 impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// Create a new policy store loader with the given VFS backend.
-    pub fn new(vfs: V) -> Self {
+    pub(super) fn new(vfs: V) -> Self {
         Self { vfs }
     }
 }
@@ -226,7 +228,7 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     /// Create a new policy store loader using the physical filesystem.
     ///
     /// This is a convenience constructor for native platforms.
-    pub fn new_physical() -> Self {
+    pub(super) fn new_physical() -> Self {
         Self::new(super::vfs_adapter::PhysicalVfs::new())
     }
 
@@ -243,7 +245,7 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     /// This method is public so it can be called explicitly when needed, following
     /// the Interface Segregation Principle.
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn validate_manifest(
+    pub(super) fn validate_manifest(
         &self,
         dir: &str,
         metadata: &PolicyStoreMetadata,
@@ -256,7 +258,7 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
     ///
     /// Same as `validate_manifest` but accepts an optional logger for structured logging.
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn validate_manifest_with_logger(
+    fn validate_manifest_with_logger(
         &self,
         dir: &str,
         metadata: &PolicyStoreMetadata,
@@ -630,7 +632,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
     /// (e.g., `PhysicalVfs`), callers should use higher-level helpers such as
     /// `load_policy_store_directory` or call `validate_manifest` explicitly on
     /// `DefaultPolicyStoreLoader<PhysicalVfs>`.
-    pub fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
+    pub(super) fn load_directory(&self, dir: &str) -> Result<LoadedPolicyStore, PolicyStoreError> {
         // Validate structure first
         self.validate_directory_structure(dir)?;
 

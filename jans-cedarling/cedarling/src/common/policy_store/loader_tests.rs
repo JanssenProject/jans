@@ -723,22 +723,21 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     fs::write(
         issuers_dir.join("jans.json"),
         r#"{
-            "jans_server": {
-                "name": "Jans Authorization Server",
-                "description": "Primary Jans OpenID Connect Provider",
-                "openid_configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
-                "token_metadata": {
-                    "access_token": {
-                        "trusted": true,
-                        "entity_type_name": "Jans::access_token",
-                        "user_id": "sub",
-                        "role_mapping": "role"
-                    },
-                    "id_token": {
-                        "trusted": true,
-                        "entity_type_name": "Jans::id_token",
-                        "user_id": "sub"
-                    }
+            "id": "jans_server",
+            "name": "Jans Authorization Server",
+            "description": "Primary Jans OpenID Connect Provider",
+            "configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "trusted": true,
+                    "entity_type_name": "Jans::access_token",
+                    "user_id": "sub",
+                    "role_mapping": "role"
+                },
+                "id_token": {
+                    "trusted": true,
+                    "entity_type_name": "Jans::id_token",
+                    "user_id": "sub"
                 }
             }
         }"#,
@@ -748,16 +747,15 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     fs::write(
         issuers_dir.join("google.json"),
         r#"{
-            "google_oauth": {
-                "name": "Google OAuth",
-                "description": "Google OAuth 2.0 Provider",
-                "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-                "token_metadata": {
-                    "id_token": {
-                        "trusted": false,
-                        "entity_type_name": "Google::id_token",
-                        "user_id": "email"
-                    }
+            "id": "google_oauth",
+            "name": "Google OAuth",
+            "description": "Google OAuth 2.0 Provider",
+            "configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+            "token_metadata": {
+                "id_token": {
+                    "trusted": false,
+                    "entity_type_name": "Google::id_token",
+                    "user_id": "email"
                 }
             }
         }"#,
@@ -820,29 +818,28 @@ fn test_parse_issuer_with_token_metadata() {
     fs::write(
         issuers_dir.join("comprehensive.json"),
         r#"{
-            "full_issuer": {
-                "name": "Full Feature Issuer",
-                "description": "Issuer with all token types",
-                "openid_configuration_endpoint": "https://full.test/.well-known/openid-configuration",
-                "token_metadata": {
-                    "access_token": {
-                        "trusted": true,
-                        "entity_type_name": "App::access_token",
-                        "user_id": "sub",
-                        "role_mapping": "role",
-                        "token_id": "jti"
-                    },
-                    "id_token": {
-                        "trusted": true,
-                        "entity_type_name": "App::id_token",
-                        "user_id": "sub",
-                        "token_id": "jti"
-                    },
-                    "userinfo_token": {
-                        "trusted": true,
-                        "entity_type_name": "App::userinfo_token",
-                        "user_id": "sub"
-                    }
+            "id": "full_issuer",
+            "name": "Full Feature Issuer",
+            "description": "Issuer with all token types",
+            "configuration_endpoint": "https://full.test/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "trusted": true,
+                    "entity_type_name": "App::access_token",
+                    "user_id": "sub",
+                    "role_mapping": "role",
+                    "token_id": "jti"
+                },
+                "id_token": {
+                    "trusted": true,
+                    "entity_type_name": "App::id_token",
+                    "user_id": "sub",
+                    "token_id": "jti"
+                },
+                "userinfo_token": {
+                    "trusted": true,
+                    "entity_type_name": "App::userinfo_token",
+                    "user_id": "sub"
                 }
             }
         }"#,
@@ -924,14 +921,13 @@ action "read" appliesTo {
     vfs.create_file(
         "trusted-issuers/file1.json",
         r#"{
-            "issuer1": {
-                "name": "Issuer One",
-                "description": "First instance",
-                "openid_configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
-                "token_metadata": {
-                    "access_token": {
-                        "entity_type_name": "App::access_token"
-                    }
+            "id": "issuer1",
+            "name": "Issuer One",
+            "description": "First instance",
+            "configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "entity_type_name": "App::access_token"
                 }
             }
         }"#
@@ -942,14 +938,13 @@ action "read" appliesTo {
     vfs.create_file(
         "trusted-issuers/file2.json",
         r#"{
-            "issuer1": {
-                "name": "Issuer One Duplicate",
-                "description": "Duplicate instance",
-                "openid_configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
-                "token_metadata": {
-                    "id_token": {
-                        "entity_type_name": "App::id_token"
-                    }
+            "id": "issuer1",
+            "name": "Issuer One Duplicate",
+            "description": "Duplicate instance",
+            "configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
+            "token_metadata": {
+                "id_token": {
+                    "entity_type_name": "App::id_token"
                 }
             }
         }"#
@@ -1021,10 +1016,8 @@ fn test_issuer_missing_required_field() {
     vfs.create_file(
         "trusted-issuers/invalid.json",
         r#"{
-            "bad_issuer": {
-                "description": "Missing name field",
-                "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration"
-            }
+            "description": "Missing name field",
+            "configuration_endpoint": "https://test.com/.well-known/openid-configuration"
         }"#
         .as_bytes(),
     )
@@ -1079,15 +1072,14 @@ fn test_complete_policy_store_with_issuers() {
     fs::write(
         issuers_dir.join("issuer.json"),
         r#"{
-            "main_issuer": {
-                "name": "Main Issuer",
-                "description": "Primary authentication provider",
-                "openid_configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
-                "token_metadata": {
-                    "access_token": {
-                        "entity_type_name": "Jans::access_token",
-                        "user_id": "sub"
-                    }
+            "id": "main_issuer",
+            "name": "Main Issuer",
+            "description": "Primary authentication provider",
+            "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "entity_type_name": "Jans::access_token",
+                    "user_id": "sub"
                 }
             }
         }"#,

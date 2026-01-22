@@ -43,7 +43,7 @@ pub struct AuthorizeResult {
 }
 
 /// Custom serializer for an Option<cedar_policy::Response> which converts `None` to an empty string and vice versa.
-pub fn serialize_opt_response<S>(
+fn serialize_opt_response<S>(
     value: &Option<cedar_policy::Response>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -57,7 +57,7 @@ where
 }
 
 /// Custom serializer for an Option<cedar_policy::Response> which converts `None` to an empty string and vice versa.
-pub fn serialize_hashmap_response<S>(
+fn serialize_hashmap_response<S>(
     value: &HashMap<SmolStr, cedar_policy::Response>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -110,7 +110,7 @@ pub struct MultiIssuerAuthorizeResult {
     /// Result of authorization from Cedar policy evaluation
     #[serde(serialize_with = "serialize_response")]
     pub response: cedar_policy::Response,
-    
+
     /// Result of authorization
     /// true means `ALLOW`
     /// false means `Deny`
@@ -123,10 +123,7 @@ pub struct MultiIssuerAuthorizeResult {
 }
 
 /// Custom serializer for cedar_policy::Response
-pub fn serialize_response<S>(
-    value: &cedar_policy::Response,
-    serializer: S,
-) -> Result<S::Ok, S::Error>
+fn serialize_response<S>(value: &cedar_policy::Response, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
@@ -135,12 +132,9 @@ where
 
 impl MultiIssuerAuthorizeResult {
     /// Create a new MultiIssuerAuthorizeResult
-    pub(crate) fn new(
-        response: cedar_policy::Response,
-        request_id: Uuid,
-    ) -> Self {
+    pub(crate) fn new(response: cedar_policy::Response, request_id: Uuid) -> Self {
         let decision = response.decision() == Decision::Allow;
-        
+
         Self {
             response,
             decision,
@@ -204,13 +198,15 @@ impl AuthorizeResult {
 
         for (principal_uid, response) in principal_responses.into_iter() {
             if let Some(uid) = &workload_uid
-                && uid == &principal_uid {
-                    workload_result = Some(response.to_owned());
-                }
+                && uid == &principal_uid
+            {
+                workload_result = Some(response.to_owned());
+            }
             if let Some(uid) = &person_uid
-                && uid == &principal_uid {
-                    person_result = Some(response.to_owned());
-                }
+                && uid == &principal_uid
+            {
+                person_result = Some(response.to_owned());
+            }
 
             let principal_typename = principal_uid.type_name().to_smolstr();
             let principal_id = principal_uid.to_smolstr();

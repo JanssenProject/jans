@@ -8,7 +8,7 @@ use cedar_policy::Entity;
 use std::collections::HashSet;
 
 impl EntityBuilder {
-    pub fn build_principal_unsigned(
+    pub(crate) fn build_principal_unsigned(
         &self,
         principal: &EntityData,
         built_entities: &BuiltEntities,

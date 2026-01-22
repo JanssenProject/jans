@@ -5,7 +5,7 @@
 
 mod spawn_task;
 
-pub use spawn_task::*;
+pub(crate) use spawn_task::*;
 
 use http_utils::{Backoff, HttpRequestError, Sender};
 use reqwest::Client;
@@ -19,14 +19,14 @@ use std::time::Duration;
 /// that attempts to fetch the requested resource up to a maximum number of times
 /// if an error occurs, using the `Sender` and `Backoff` utilities from `http_utils`.
 #[derive(Debug)]
-pub struct HttpClient {
+pub(crate) struct HttpClient {
     client: Client,
     base_delay: Duration,
     max_retries: u32,
 }
 
 impl HttpClient {
-    pub fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
+    pub(crate) fn new(max_retries: u32, retry_delay: Duration) -> Result<Self, HttpClientError> {
         let client = Client::builder()
             .build()
             .map_err(HttpRequestError::InitializeHttpClient)?;
@@ -47,7 +47,7 @@ impl HttpClient {
     }
 
     /// Sends a GET request to the specified URI with retry logic.
-    pub async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
+    pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
         let mut sender = self.create_sender();
         let client = &self.client;
         let text = sender.send_text(|| client.get(uri)).await?;
@@ -59,7 +59,7 @@ impl HttpClient {
     /// This method will attempt to fetch the resource up to the configured max_retries,
     /// with exponential backoff between each attempt. Useful for fetching binary content
     /// like archive files.
-    pub async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
+    pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
         let mut sender = self.create_sender();
         let client = &self.client;
         sender.send_bytes(|| client.get(uri)).await
@@ -67,12 +67,12 @@ impl HttpClient {
 }
 
 #[derive(Debug)]
-pub struct Response {
+pub(crate) struct Response {
     text: String,
 }
 
 impl Response {
-    pub fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
+    pub(crate) fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
     where
         T: Deserialize<'a>,
     {
@@ -81,7 +81,7 @@ impl Response {
 }
 
 /// Error type for the HttpClient - re-export from http_utils for compatibility
-pub type HttpClientError = HttpRequestError;
+pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(test)]
 mod test {
