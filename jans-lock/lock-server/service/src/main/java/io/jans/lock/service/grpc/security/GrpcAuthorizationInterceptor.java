@@ -198,11 +198,11 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
     }
 
 	private Optional<ProtectedApi> getProtectedApiAnnotation(AnnotatedElement elem) {
-		Optional<ProtectedApi> protectedApi = optAnnnotation(elem, ProtectedApi.class);
+		Optional<ProtectedApi> protectedApi = optAnnotation(elem, ProtectedApi.class);
 		return protectedApi;
 	}
 
-    private static <T extends Annotation> Optional<T> optAnnnotation(AnnotatedElement elem, Class<T> cls) {
+    private static <T extends Annotation> Optional<T> optAnnotation(AnnotatedElement elem, Class<T> cls) {
         return Optional.ofNullable(elem.getAnnotation(cls));
     }
 
