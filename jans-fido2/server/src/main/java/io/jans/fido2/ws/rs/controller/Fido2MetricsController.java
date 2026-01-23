@@ -37,7 +37,7 @@ import java.util.Map;
  * 
  * If security is enforced at deployment time, ensure proper documentation is maintained.
  * 
- * GitHub Issue #11923
+ * GitHub Issue #11922
  * 
  * @author FIDO2 Team
  */
@@ -61,13 +61,13 @@ public class Fido2MetricsController {
     private DataMapperService dataMapperService;
 
     // ISO formatter for UTC timestamps (aligned with FIDO2 services)
-    // Note: ISO_LOCAL_DATE_TIME does not accept timezone offsets (e.g., Z, +00:00)
-    // Users must provide timestamps in format: yyyy-MM-ddTHH:mm:ss (interpreted as UTC)
-    // For ISO-8601 with timezone support, consider using DateTimeFormatter.ISO_OFFSET_DATE_TIME
-    // and converting to UTC, but this requires API documentation updates
+    // Primary formatter: ISO_LOCAL_DATE_TIME for timestamps without timezone (interpreted as UTC)
+    // Format: yyyy-MM-ddTHH:mm:ss (assumed to be UTC)
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     
     // Alternative formatter that supports ISO-8601 with timezone offsets
+    // Format: yyyy-MM-ddTHH:mm:ssZ or yyyy-MM-ddTHH:mm:ss+/-offset
+    // The parseDateTime method uses this formatter when timezone indicators are detected
     private static final DateTimeFormatter ISO_OFFSET_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
@@ -144,15 +144,14 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            if (operationType == null || operationType.trim().isEmpty()) {
-                throw errorResponseFactory.invalidRequest("operationType is required");
-            }
+            // Normalize and validate operationType against supported values
+            String normalizedOperationType = normalizeOperationType(operationType);
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             validateTimeRange(start, end);
             
-            List<?> entries = metricsService.getMetricsEntriesByOperation(operationType, start, end);
+            List<?> entries = metricsService.getMetricsEntriesByOperation(normalizedOperationType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
         });
     }
@@ -526,6 +525,28 @@ public class Fido2MetricsController {
             !Fido2MetricsConstants.MONTHLY.equals(upperType)) {
             throw errorResponseFactory.invalidRequest(
                 "aggregationType must be one of: HOURLY, DAILY, WEEKLY, MONTHLY"
+            );
+        }
+        return upperType;
+    }
+    
+    /**
+     * Normalize and validate operation type parameter
+     * Converts to uppercase and validates against allowed values
+     * @param operationType Operation type to normalize and validate
+     * @return Normalized (uppercase) operation type
+     * @throws WebApplicationException if invalid
+     */
+    private String normalizeOperationType(String operationType) {
+        if (operationType == null || operationType.trim().isEmpty()) {
+            throw errorResponseFactory.invalidRequest("operationType is required");
+        }
+        
+        String upperType = operationType.toUpperCase();
+        if (!Fido2MetricsConstants.REGISTRATION.equals(upperType) &&
+            !Fido2MetricsConstants.AUTHENTICATION.equals(upperType)) {
+            throw errorResponseFactory.invalidRequest(
+                "operationType must be one of: REGISTRATION, AUTHENTICATION"
             );
         }
         return upperType;
