@@ -354,30 +354,37 @@ impl DataApi for Cedarling {
         value: serde_json::Value,
         ttl: Option<std::time::Duration>,
     ) -> Result<(), DataError> {
-        self.data.push_data(key, value, ttl)
+        self.data.push(key, value, ttl)
     }
 
     fn get_data(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
-        self.data.get_data(key)
+        Ok(self.data.get(key))
     }
 
     fn get_data_entry(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
-        self.data.get_data_entry(key)
+        Ok(self.data.get_entry(key))
     }
 
     fn remove_data(&self, key: &str) -> Result<bool, DataError> {
-        self.data.remove_data(key)
+        Ok(self.data.remove(key))
     }
 
     fn clear_data(&self) -> Result<(), DataError> {
-        self.data.clear_data()
+        self.data.clear();
+        Ok(())
     }
 
     fn list_data(&self) -> Result<Vec<DataEntry>, DataError> {
-        self.data.list_data()
+        Ok(self.data.list_entries())
     }
 
     fn get_stats(&self) -> Result<DataStoreStats, DataError> {
-        self.data.get_stats()
+        let config = self.data.config();
+        Ok(DataStoreStats {
+            entry_count: self.data.count(),
+            max_entries: config.max_entries,
+            max_entry_size: config.max_entry_size,
+            metrics_enabled: config.enable_metrics,
+        })
     }
 }
