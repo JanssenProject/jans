@@ -60,7 +60,7 @@ impl StatusList {
             .get(byte_idx)
             .ok_or(JwtStatusError::StatusListIdxOutOfBounds)?;
 
-        let bit_idx = (index % scale) as u8;
+        let bit_idx = u8::try_from(index % scale)?;
 
         let status = get_status_from_byte(*byte, self.bit_size, bit_idx);
 
@@ -134,7 +134,7 @@ impl TryFrom<ValidatedJwt> for StatusList {
             .as_u64()
             .ok_or(ParseStatusListError::JwtInvalidBitsType(bits.clone()))?;
 
-        Self::parse(&list, bits as u8)
+        Self::parse(&list, u8::try_from(bits)?)
     }
 }
 

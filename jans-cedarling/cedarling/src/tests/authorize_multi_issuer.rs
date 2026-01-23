@@ -33,7 +33,7 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
     .await
 }
 
-/// Test single Dolphin user token authorization with role_mapping claim
+/// Test single Dolphin user token authorization with `role_mapping` claim
 #[tokio::test]
 async fn test_single_dolphin_userinfo_token_role_mapping() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
@@ -45,8 +45,8 @@ async fn test_single_dolphin_userinfo_token_role_mapping() {
         "jti": "dolphin_user_123",
         "client_id": "dolphin_client_123",
         "aud": "dolphin_audience",
-        "exp": 2000000000,
-        "iat": 1516239022,
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
         "role": ["admin", "user"]
     }));
 

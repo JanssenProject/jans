@@ -114,6 +114,11 @@ mod test {
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
+        let expected_value = json!({
+            "uid": {"type": "Jans::Role", "id": "some_role"},
+            "attrs": {},
+            "parents": [],
+        });
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
@@ -135,15 +140,7 @@ mod test {
             .build_role_entities_unsigned(&principal)
             .expect("build role entities");
         assert_eq!(token_entities.len(), 1, "one token entity");
-        assert_entity_eq(
-            &token_entities[0],
-            &json!({
-                "uid": {"type": "Jans::Role", "id": "some_role"},
-                "attrs": {},
-                "parents": [],
-            }),
-            Some(&schema),
-        );
+        assert_entity_eq(&token_entities[0], &expected_value, Some(&schema));
 
         // Case: Array in the `role` attribute
         let principal = EntityData {
@@ -157,15 +154,7 @@ mod test {
             .build_role_entities_unsigned(&principal)
             .expect("build role entities");
         assert_eq!(token_entities.len(), 2, "two token entities");
-        assert_entity_eq(
-            &token_entities[0],
-            &json!({
-                "uid": {"type": "Jans::Role", "id": "some_role"},
-                "attrs": {},
-                "parents": [],
-            }),
-            Some(&schema),
-        );
+        assert_entity_eq(&token_entities[0], &expected_value, Some(&schema));
         assert_entity_eq(
             &token_entities[1],
             &json!({
@@ -187,15 +176,7 @@ mod test {
             .build_role_entities_unsigned(&principal)
             .expect("build role entities");
         assert_eq!(token_entities.len(), 2, "two token entities");
-        assert_entity_eq(
-            &token_entities[0],
-            &json!({
-                "uid": {"type": "Jans::Role", "id": "some_role"},
-                "attrs": {},
-                "parents": [],
-            }),
-            Some(&schema),
-        );
+        assert_entity_eq(&token_entities[0], &expected_value, Some(&schema));
         assert_entity_eq(
             &token_entities[1],
             &json!({

@@ -105,7 +105,7 @@ mod test {
     use super::*;
     use crate::entity_builder::schema::attr_src::TknClaimAttrSrc;
     use cedar_policy_core::validator::ValidatorSchema;
-    use std::{collections::HashSet, str::FromStr};
+    use std::str::FromStr;
     use test_utils::assert_eq;
 
     #[test]
@@ -141,148 +141,67 @@ mod test {
         let entity_reqs = schema
             .get_entity_shape("Jans::TestEntity")
             .expect("should get `TestEntity` requirements");
-        let attr_reqs = entity_reqs
-            .iter()
-            .map(|(attr_name, attr_req)| {
-                let name = attr_name.clone();
-                let src = attr_req.src();
-                let is_required = attr_req.is_required();
-                (name, (src, is_required))
-            })
-            .collect::<HashMap<SmolStr, (&AttrSrc, bool)>>();
 
-        assert_eq!(
-            attr_reqs.keys().cloned().collect::<HashSet<SmolStr>>(),
-            [
-                "bool_attr",
-                "opt_bool_attr",
-                "str_attr",
-                "long_attr",
+        let test_cases = [
+            ("bool_attr", ExpectedClaimType::Bool, true),
+            ("opt_bool_attr", ExpectedClaimType::Bool, false),
+            ("str_attr", ExpectedClaimType::String, true),
+            ("long_attr", ExpectedClaimType::Number, true),
+            (
                 "set_str_attr",
+                ExpectedClaimType::Array(Box::new(ExpectedClaimType::String)),
+                true,
+            ),
+            (
                 "set_set_str_attr",
+                ExpectedClaimType::Array(Box::new(ExpectedClaimType::Array(Box::new(
+                    ExpectedClaimType::String,
+                )))),
+                true,
+            ),
+            (
                 "record_attr",
+                ExpectedClaimType::Object(HashMap::from([(
+                    "inner_record_attr".into(),
+                    ExpectedClaimType::String,
+                )])),
+                true,
+            ),
+            (
                 "decimal_attr",
+                ExpectedClaimType::Extension("decimal".into()),
+                true,
+            ),
+            (
                 "ip_attr",
-            ]
-            .iter()
-            .map(SmolStr::new)
-            .collect(),
-            "the required keys should match the expected"
-        );
-
-        assert_eq!(
-            attr_reqs.get("bool_attr").expect("has bool_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "bool_attr".to_string(),
-                    expected_type: ExpectedClaimType::Bool
-                }),
-                true
+                ExpectedClaimType::Extension("ipaddr".into()),
+                true,
             ),
-            "incorrect Bool attr requirement"
-        );
+        ];
 
-        assert_eq!(
-            attr_reqs.get("opt_bool_attr").expect("has opt_bool_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "opt_bool_attr".to_string(),
-                    expected_type: ExpectedClaimType::Bool
-                }),
-                false
-            ),
-            "incorrect optional Bool attr requirement"
-        );
+        for (attr_name, expected_type, is_required) in test_cases {
+            let attr_req = entity_reqs
+                .get(&SmolStr::new(attr_name))
+                .unwrap_or_else(|| panic!("missing attribute: {attr_name}"));
 
-        assert_eq!(
-            attr_reqs.get("str_attr").expect("has str_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "str_attr".to_string(),
-                    expected_type: ExpectedClaimType::String
-                }),
-                true
-            ),
-            "incorrect String attr requirement"
-        );
+            assert_eq!(
+                attr_req.is_required(),
+                is_required,
+                "{}: incorrect is_required",
+                attr_name
+            );
 
-        assert_eq!(
-            attr_reqs.get("long_attr").expect("has long_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "long_attr".to_string(),
-                    expected_type: ExpectedClaimType::Number
-                }),
-                true
-            ),
-            "incorrect Long attr requirement"
-        );
+            let expected_src = AttrSrc::JwtClaim(TknClaimAttrSrc {
+                claim: attr_name.to_string(),
+                expected_type,
+            });
 
-        assert_eq!(
-            attr_reqs.get("set_str_attr").expect("has set_str_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "set_str_attr".to_string(),
-                    expected_type: ExpectedClaimType::Array(Box::new(ExpectedClaimType::String)),
-                }),
-                true
-            ),
-            "incorrect Set<String> attr requirement"
-        );
-
-        assert_eq!(
-            attr_reqs
-                .get("set_set_str_attr")
-                .expect("has set_set_str_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "set_set_str_attr".to_string(),
-                    expected_type: ExpectedClaimType::Array(Box::new(ExpectedClaimType::Array(
-                        Box::new(ExpectedClaimType::String)
-                    ))),
-                }),
-                true
-            ),
-            "incorrect Set<String> attr requirement"
-        );
-
-        assert_eq!(
-            attr_reqs.get("record_attr").expect("has record_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "record_attr".to_string(),
-                    expected_type: ExpectedClaimType::Object(HashMap::from([(
-                        "inner_record_attr".into(),
-                        ExpectedClaimType::String
-                    )]))
-                }),
-                true
-            ),
-            "incorrect Record attr requirement"
-        );
-
-        assert_eq!(
-            attr_reqs.get("decimal_attr").expect("has decimal_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "decimal_attr".to_string(),
-                    expected_type: ExpectedClaimType::Extension("decimal".into())
-                }),
-                true
-            ),
-            "incorrect decimal_attr requirement"
-        );
-
-        assert_eq!(
-            attr_reqs.get("ip_attr").expect("has ip_attr"),
-            &(
-                &AttrSrc::JwtClaim(TknClaimAttrSrc {
-                    claim: "ip_attr".to_string(),
-                    expected_type: ExpectedClaimType::Extension("ipaddr".into())
-                }),
-                true
-            ),
-            "incorrect ip_attr requirement"
-        );
+            assert_eq!(
+                attr_req.src(),
+                &expected_src,
+                "{}: incorrect AttrSrc",
+                attr_name
+            );
+        }
     }
 }

@@ -3,6 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![allow(clippy::cast_precision_loss)]
+
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
     EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,

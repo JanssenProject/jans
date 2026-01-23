@@ -8,6 +8,7 @@
 
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 use crate::common::json_rules::ApplyRuleError;
 use cedar_policy::{Decision, EntityUid, Response};
@@ -16,6 +17,26 @@ use test_utils::assert_eq;
 use uuid7::uuid4;
 
 use crate::{AuthorizeResult, JsonRule};
+
+static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
+    JsonRule::new(json!({
+        "and" : [
+            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap()
+});
+
+static OPERATOR_OR: LazyLock<JsonRule> = LazyLock::new(|| {
+    JsonRule::new(json!({
+        "or": [
+            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
+            {"===": [{"var": "Jans::User"}, "ALLOW"]}
+        ]
+    }))
+    .unwrap()
+});
 
 fn get_result(
     workload: Option<bool>,
@@ -64,15 +85,7 @@ fn get_result(
 /// Test JSON Rule with `and` operator
 #[test]
 fn test_json_rule_and() {
-    let rule = JsonRule::new(json!({
-        "and" : [
-            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-            {"===": [{"var": "Jans::User"}, "ALLOW"]}
-        ]
-    }))
-    .unwrap();
-
-    let result = get_result(Some(true), Some(true), &rule)
+    let result = get_result(Some(true), Some(true), &OPERATOR_AND)
         .expect("should not fail when both workload and user are ALLOW");
     assert_eq!(
         result.decision, true,
@@ -97,7 +110,7 @@ fn test_json_rule_and() {
         "Jans::User decision should be Allow"
     );
 
-    let result = get_result(Some(false), Some(false), &rule)
+    let result = get_result(Some(false), Some(false), &OPERATOR_AND)
         .expect("should not fail when both workload and user are DENY");
     assert_eq!(
         result.decision, false,
@@ -122,7 +135,7 @@ fn test_json_rule_and() {
         "Jans::User decision should be Deny"
     );
 
-    let result = get_result(Some(true), Some(false), &rule)
+    let result = get_result(Some(true), Some(false), &OPERATOR_AND)
         .expect("should not fail when workload is ALLOW and user is DENY");
     assert_eq!(
         result.decision, false,
@@ -147,7 +160,7 @@ fn test_json_rule_and() {
         "Jans::User decision should be Deny"
     );
 
-    let result = get_result(Some(false), Some(true), &rule)
+    let result = get_result(Some(false), Some(true), &OPERATOR_AND)
         .expect("should not fail when workload is DENY and user is ALLOW");
     assert_eq!(
         result.decision, false,
@@ -176,15 +189,7 @@ fn test_json_rule_and() {
 /// Test JSON Rule with `or` operator
 #[test]
 fn test_json_rule_or() {
-    let rule = JsonRule::new(json!({
-        "or" : [
-            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-            {"===": [{"var": "Jans::User"}, "ALLOW"]}
-        ]
-    }))
-    .unwrap();
-
-    let result = get_result(Some(true), Some(true), &rule)
+    let result = get_result(Some(true), Some(true), &OPERATOR_OR)
         .expect("should not fail when both workload and user are ALLOW");
     assert_eq!(
         result.decision, true,
@@ -209,7 +214,7 @@ fn test_json_rule_or() {
         "Jans::User decision should be Allow"
     );
 
-    let result = get_result(Some(false), Some(false), &rule)
+    let result = get_result(Some(false), Some(false), &OPERATOR_OR)
         .expect("should not fail when both workload and user are DENY");
     assert_eq!(
         result.decision, false,
@@ -234,7 +239,7 @@ fn test_json_rule_or() {
         "Jans::User decision should be Deny"
     );
 
-    let result = get_result(Some(true), Some(false), &rule)
+    let result = get_result(Some(true), Some(false), &OPERATOR_OR)
         .expect("should not fail when workload is ALLOW and user is DENY");
     assert_eq!(
         result.decision, true,
@@ -259,7 +264,7 @@ fn test_json_rule_or() {
         "Jans::User decision should be Deny"
     );
 
-    let result = get_result(Some(false), Some(true), &rule)
+    let result = get_result(Some(false), Some(true), &OPERATOR_OR)
         .expect("should not fail when workload is DENY and user is ALLOW");
     assert_eq!(
         result.decision, true,
@@ -287,15 +292,7 @@ fn test_json_rule_or() {
 
 #[test]
 fn test_json_rule_and_operator_with_empty_principal() {
-    let rule = JsonRule::new(json!({
-        "and" : [
-            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-            {"===": [{"var": "Jans::User"}, "ALLOW"]}
-        ]
-    }))
-    .unwrap();
-
-    let result = get_result(None, Some(true), &rule)
+    let result = get_result(None, Some(true), &OPERATOR_AND)
         .expect("should not fail when workload is None and user is ALLOW");
     assert_eq!(
         result.decision, false,
@@ -319,15 +316,7 @@ fn test_json_rule_and_operator_with_empty_principal() {
 
 #[test]
 fn test_json_rule_or_operator_with_empty_principal() {
-    let rule = JsonRule::new(json!({
-        "or" : [
-            {"===": [{"var": "Jans::Workload"}, "ALLOW"]},
-            {"===": [{"var": "Jans::User"}, "ALLOW"]}
-        ]
-    }))
-    .unwrap();
-
-    let result = get_result(None, Some(true), &rule)
+    let result = get_result(None, Some(true), &OPERATOR_OR)
         .expect("should not fail when workload is None and user is ALLOW");
     assert_eq!(
         result.decision, true,

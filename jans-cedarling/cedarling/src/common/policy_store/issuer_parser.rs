@@ -54,8 +54,8 @@ impl IssuerParser {
         let issuer_id = obj
             .get("id")
             .and_then(|v| v.as_str())
-            .map(|s| s.to_string())
-            .unwrap_or_else(|| {
+            .map(std::string::ToString::to_string)
+            .unwrap_or({
                 // Derive ID from filename (strip .json extension)
                 filename
                     .strip_suffix(".json")

@@ -10,14 +10,8 @@ use super::utils::*;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 
-/// Test loading policy store with mappings JWT payload to custom `cedar-entities` types in schema
-#[test]
-async fn check_mapping_tokens_data() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
-
-    // deserialize `Request` from json
-    // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
-    let request = Request::deserialize(serde_json::json!(
+fn prepare_cedarling_request() -> Result<Request, serde_json::Error> {
+    Request::deserialize(serde_json::json!(
         {
             "tokens": {
                 "access_token": generate_token_using_claims(json!({
@@ -109,7 +103,16 @@ async fn check_mapping_tokens_data() {
             },
         }
     ))
-    .expect("Request should be deserialized from json");
+}
+
+/// Test loading policy store with mappings JWT payload to custom `cedar-entities` types in schema
+#[test]
+async fn check_mapping_tokens_data() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
+
+    // deserialize `Request` from json
+    // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
+    let request = prepare_cedarling_request().expect("Request should be deserialized from json");
 
     let entities = cedarling
         .build_entities(&request)

@@ -34,10 +34,10 @@ use tokio::test;
 use zip::read::ZipArchive;
 
 use super::utils::*;
-use crate::authz::request::EntityData;
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
-use crate::{Cedarling, PolicyStoreSource, RequestUnsigned};
+use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
+use crate::{BootstrapConfig, Cedarling, PolicyStoreConfig, PolicyStoreSource};
 
 // ============================================================================
 // Helper Functions
@@ -178,6 +178,8 @@ async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
 #[cfg(not(target_arch = "wasm32"))]
 async fn test_load_from_directory_and_authorize_success() {
     // Build archive and extract to temp directory
+
+    use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
     let builder = create_authz_policy_store_builder();
     let archive = builder
         .build_archive()
@@ -188,29 +190,23 @@ async fn test_load_from_directory_and_authorize_success() {
     let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
 
     // Create an authorization request
-    let request = RequestUnsigned {
-        action: "TestApp::Action::\"read\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "user1"
-                },
-                "name": "Test User",
-                "user_type": "admin"
-            }))
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
             .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            },
-            "name": "Test Resource"
-        }))
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
         .expect("Failed to create resource"),
-    };
+    );
 
     // Execute authorization
     let result = cedarling
@@ -240,29 +236,23 @@ async fn test_load_from_directory_deny_write_for_guest() {
     let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
 
     // Create an authorization request for write action with guest user_type
-    let request = RequestUnsigned {
-        action: "TestApp::Action::\"write\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "guest_user"
-                },
-                "name": "Guest User",
-                "user_type": "guest"
-            }))
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"write\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "guest_user",
+                json!({"name": "Guest User", "user_type": "guest"}),
+            )
             .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            },
-            "name": "Test Resource"
-        }))
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
         .expect("Failed to create resource"),
-    };
+    );
 
     // Execute authorization
     let result = cedarling
@@ -300,29 +290,23 @@ async fn test_load_from_cjar_file_and_authorize_success() {
     let cedarling = get_cedarling_from_cjar_file(archive_path).await;
 
     // Create an authorization request
-    let request = RequestUnsigned {
-        action: "TestApp::Action::\"read\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "user1"
-                },
-                "name": "Test User",
-                "user_type": "admin"
-            }))
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
             .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            },
-            "name": "Test Resource"
-        }))
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
         .expect("Failed to create resource"),
-    };
+    );
 
     // Execute authorization
     let result = cedarling
@@ -519,30 +503,23 @@ permit(
     let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
 
     // Create an authorization request
-    let request = RequestUnsigned {
-        action: "TestApp::Action::\"access\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "alice"
-                },
-                "name": "Alice",
-                "department": "engineering"
-            }))
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"access\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "alice",
+                json!({"name": "Alice", "department": "engineering"}),
+            )
             .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "doc1"
-            },
-            "name": "Design Document",
-            "owner": "engineering"
-        }))
+        create_test_principal(
+            "TestApp::Resource",
+            "doc1",
+            json!({"name": "Design Document", "owner": "engineering"}),
+        )
         .expect("Failed to create resource"),
-    };
+    );
 
     // Execute authorization
     let result = cedarling
@@ -560,13 +537,8 @@ permit(
 // ============================================================================
 // Multiple Policies Tests
 // ============================================================================
-
-/// Test loading a policy store with multiple policies and verifying correct policy evaluation.
-#[test]
-#[cfg(not(target_arch = "wasm32"))]
-async fn test_load_directory_with_multiple_policies() {
-    // Build a policy store with multiple policies
-    let builder = PolicyStoreTestBuilder::new("f1f2f3f4f5f6f7f8")
+fn create_multiple_policy_store_builder() -> PolicyStoreTestBuilder {
+    PolicyStoreTestBuilder::new("f1f2f3f4f5f6f7f8")
         .with_name("Multi-Policy Test Store")
         .with_schema(
             r#"namespace TestApp {
@@ -618,7 +590,14 @@ forbid(
     action == TestApp::Action::"delete",
     resource
 );"#,
-        );
+        )
+}
+/// Test loading a policy store with multiple policies and verifying correct policy evaluation.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_load_directory_with_multiple_policies() {
+    // Build a policy store with multiple policies
+    let builder = create_multiple_policy_store_builder();
 
     let archive = builder
         .build_archive()
@@ -629,27 +608,15 @@ forbid(
     let cedarling = get_cedarling_from_directory(temp_dir.path().to_path_buf()).await;
 
     // Test 1: Read should be allowed for any user
-    let read_request = RequestUnsigned {
-        action: "TestApp::Action::\"read\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "user1"
-                },
-                "user_role": "viewer"
-            }))
-            .expect("Failed to create principal"),
+    let read_request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        vec![
+            create_test_principal("TestApp::User", "user1", json!({"user_role": "viewer"}))
+                .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            }
-        }))
-        .expect("Failed to create resource"),
-    };
+        create_test_principal("TestApp::Resource", "resource1", json!({}))
+            .expect("Failed to create resource"),
+    );
 
     let read_result = cedarling
         .authorize_unsigned(read_request)
@@ -659,27 +626,15 @@ forbid(
     assert!(read_result.decision, "Read should be allowed for any user");
 
     // Test 2: Write should be allowed only for admin
-    let write_admin_request = RequestUnsigned {
-        action: "TestApp::Action::\"write\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "admin1"
-                },
-                "user_role": "admin"
-            }))
-            .expect("Failed to create principal"),
+    let write_admin_request = create_test_unsigned_request(
+        "TestApp::Action::\"write\"",
+        vec![
+            create_test_principal("TestApp::User", "admin1", json!({"user_role": "admin"}))
+                .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            }
-        }))
-        .expect("Failed to create resource"),
-    };
+        create_test_principal("TestApp::Resource", "resource1", json!({}))
+            .expect("Failed to create resource"),
+    );
 
     let write_admin_result = cedarling
         .authorize_unsigned(write_admin_request)
@@ -692,27 +647,15 @@ forbid(
     );
 
     // Test 3: Write should be denied for non-admin
-    let write_viewer_request = RequestUnsigned {
-        action: "TestApp::Action::\"write\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "user1"
-                },
-                "user_role": "viewer"
-            }))
-            .expect("Failed to create principal"),
+    let write_viewer_request = create_test_unsigned_request(
+        "TestApp::Action::\"write\"",
+        vec![
+            create_test_principal("TestApp::User", "user1", json!({"user_role": "viewer"}))
+                .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            }
-        }))
-        .expect("Failed to create resource"),
-    };
+        create_test_principal("TestApp::Resource", "resource1", json!({}))
+            .expect("Failed to create resource"),
+    );
 
     let write_viewer_result = cedarling
         .authorize_unsigned(write_viewer_request)
@@ -725,27 +668,15 @@ forbid(
     );
 
     // Test 4: Delete should be denied for everyone
-    let delete_request = RequestUnsigned {
-        action: "TestApp::Action::\"delete\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "admin1"
-                },
-                "user_role": "admin"
-            }))
-            .expect("Failed to create principal"),
+    let delete_request = create_test_unsigned_request(
+        "TestApp::Action::\"delete\"",
+        vec![
+            create_test_principal("TestApp::User", "admin1", json!({"user_role": "admin"}))
+                .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            }
-        }))
-        .expect("Failed to create resource"),
-    };
+        create_test_principal("TestApp::Resource", "resource1", json!({}))
+            .expect("Failed to create resource"),
+    );
 
     let delete_result = cedarling
         .authorize_unsigned(delete_request)
@@ -809,29 +740,23 @@ async fn test_load_from_cjar_url_and_authorize_success() {
     mock.assert_async().await;
 
     // Create an authorization request
-    let request = RequestUnsigned {
-        action: "TestApp::Action::\"read\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "TestApp::User",
-                    "id": "user1"
-                },
-                "name": "Test User",
-                "user_type": "admin"
-            }))
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "user1",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
             .expect("Failed to create principal"),
         ],
-        resource: EntityData::deserialize(json!({
-            "cedar_entity_mapping": {
-                "entity_type": "TestApp::Resource",
-                "id": "resource1"
-            },
-            "name": "Test Resource"
-        }))
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
         .expect("Failed to create resource"),
-    };
+    );
 
     // Execute authorization
     let result = cedarling
@@ -960,61 +885,9 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 // JWT Authorization Tests (using MockServer)
 // ============================================================================
 
-/// Test the `authorize` method with signed JWTs loaded from a directory-based policy store.
-///
-/// This test verifies the full flow:
-/// 1. Create a policy store with a trusted issuer pointing to `MockServer`
-/// 2. `MockServer` provides OIDC config and JWKS endpoints
-/// 3. Generate signed JWTs using `MockServer`
-/// 4. Call `authorize` with the signed tokens
-#[test]
-#[cfg(not(target_arch = "wasm32"))]
-async fn test_authorize_with_jwt_from_directory() {
-    use crate::authz::request::Request;
-    use crate::jwt::test_utils::MockServer;
-    use crate::log::StdOutLoggerMode;
-    use crate::{
-        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, JwtConfig, LogConfig,
-        LogTypeConfig, PolicyStoreConfig,
-    };
-
-    // Create mock server for OIDC/JWKS
-    let mut mock_server = MockServer::new_with_defaults()
-        .await
-        .expect("Failed to create mock server");
-
-    let issuer_url = mock_server.issuer();
-    let oidc_endpoint = format!("{issuer_url}/.well-known/openid-configuration");
-
-    // Create trusted issuer JSON that points to mock server
-    // Uses "Jans" as the issuer name to match the default entity builder namespace
-    let trusted_issuer_json = format!(
-        r#"{{
-        "id": "mock_issuer",
-        "name": "Jans",
-        "description": "Test issuer for JWT validation",
-        "configuration_endpoint": "{oidc_endpoint}",
-        "token_metadata": {{
-            "access_token": {{
-                "entity_type_name": "Jans::Access_token",
-                "workload_id": "client_id",
-                "principal_mapping": ["Jans::Workload"]
-            }},
-            "id_token": {{
-                "entity_type_name": "Jans::Id_token"
-            }},
-            "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token",
-                "user_id": "sub",
-                "role_mapping": "role"
-            }}
-        }}
-    }}"#
-    );
-
-    // Schema that works with JWT-based authorization
-    // Uses Jans namespace to match the default entity builder
-    let schema = r#"namespace Jans {
+// Schema that works with JWT-based authorization
+// Uses Jans namespace to match the default entity builder
+const SCHEMA: &str = r#"namespace Jans {
     type Url = {"host": String, "path": String, "protocol": String};
     entity TrustedIssuer = {"issuer_entity_id": Url};
     entity Access_token = {
@@ -1068,10 +941,132 @@ async fn test_authorize_with_jwt_from_directory() {
 }
 "#;
 
+fn prepare_cedarling_request(
+    access_token: &str,
+    id_token: &str,
+    userinfo_token: &str,
+) -> Result<Request, serde_json::Error> {
+    Request::deserialize(json!({
+        "tokens": {
+            "access_token": access_token,
+            "id_token": id_token,
+            "userinfo_token": userinfo_token,
+        },
+        "action": "Jans::Action::\"Read\"",
+        "resource": {
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Resource",
+                "id": "resource1"
+            },
+            "org_id": "test_org",
+            "country": "US"
+        },
+        "context": {},
+    }))
+}
+
+fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
+    format!(
+        r#"{{
+        "id": "mock_issuer",
+        "name": "Jans",
+        "description": "Test issuer for JWT validation",
+        "configuration_endpoint": "{oidc_endpoint}",
+        "token_metadata": {{
+            "access_token": {{
+                "entity_type_name": "Jans::Access_token",
+                "workload_id": "client_id",
+                "principal_mapping": ["Jans::Workload"]
+            }},
+            "id_token": {{
+                "entity_type_name": "Jans::Id_token"
+            }},
+            "userinfo_token": {{
+                "entity_type_name": "Jans::Userinfo_token",
+                "user_id": "sub",
+                "role_mapping": "role"
+            }}
+        }}
+    }}"#
+    )
+}
+
+fn create_jwt_cedarling_config(
+    policy_store_source: PolicyStoreSource,
+    jwt_sig_validation: bool,
+) -> BootstrapConfig {
+    use crate::{
+        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, JwtConfig, LogConfig,
+        LogTypeConfig,
+    };
+
+    BootstrapConfig {
+        application_name: "test_app".to_string(),
+        log_config: LogConfig {
+            log_type: LogTypeConfig::StdOut(crate::log::StdOutLoggerMode::Immediate),
+            log_level: crate::LogLevel::DEBUG,
+        },
+        policy_store_config: PolicyStoreConfig {
+            source: policy_store_source,
+        },
+        jwt_config: JwtConfig {
+            jwks: None,
+            jwt_sig_validation,
+            jwt_status_validation: false,
+            ..Default::default()
+        }
+        .allow_all_algorithms(),
+        authorization_config: AuthorizationConfig {
+            use_user_principal: false,
+            use_workload_principal: true,
+            decision_log_default_jwt_id: "jti".to_string(),
+            decision_log_user_claims: vec![],
+            decision_log_workload_claims: vec!["client_id".to_string()],
+            id_token_trust_mode: crate::IdTokenTrustMode::Never,
+            principal_bool_operator: JsonRule::new(json!({
+                "===": [{"var": "Jans::Workload"}, "ALLOW"]
+            }))
+            .expect("Failed to create principal bool operator"),
+        },
+        entity_builder_config: EntityBuilderConfig {
+            build_user: false,
+            build_workload: true,
+            ..Default::default()
+        },
+        lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+    }
+}
+
+/// Test the `authorize` method with signed JWTs loaded from a directory-based policy store.
+///
+/// This test verifies the full flow:
+/// 1. Create a policy store with a trusted issuer pointing to `MockServer`
+/// 2. `MockServer` provides OIDC config and JWKS endpoints
+/// 3. Generate signed JWTs using `MockServer`
+/// 4. Call `authorize` with the signed tokens
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_authorize_with_jwt_from_directory() {
+    use crate::jwt::test_utils::MockServer;
+
+    // Create mock server for OIDC/JWKS
+    let mut mock_server = MockServer::new_with_defaults()
+        .await
+        .expect("Failed to create mock server");
+
+    let issuer_url = mock_server.issuer();
+    let oidc_endpoint = format!("{issuer_url}/.well-known/openid-configuration");
+
+    // Create trusted issuer JSON that points to mock server
+    // Uses "Jans" as the issuer name to match the default entity builder namespace
+    let trusted_issuer_json = create_jwt_trusted_issuer_json(&oidc_endpoint);
+
     // Build the policy store
     let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
         .with_name("JWT Test Policy Store")
-        .with_schema(schema)
+        .with_schema(SCHEMA)
         .with_policy(
             "allow-workload-read",
             r#"@id("allow-workload-read")
@@ -1131,67 +1126,18 @@ permit(
         .expect("Failed to generate userinfo token");
 
     // Configure Cedarling with JWT validation enabled
-    let config = BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
-            log_level: crate::LogLevel::DEBUG,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
-        },
-        jwt_config: JwtConfig {
-            jwks: None,
-            jwt_sig_validation: true,
-            jwt_status_validation: false,
-            ..Default::default()
-        }
-        .allow_all_algorithms(),
-        authorization_config: AuthorizationConfig {
-            use_user_principal: false,
-            use_workload_principal: true,
-            decision_log_default_jwt_id: "jti".to_string(),
-            decision_log_user_claims: vec![],
-            decision_log_workload_claims: vec!["client_id".to_string()],
-            id_token_trust_mode: crate::IdTokenTrustMode::Never,
-            principal_bool_operator: JsonRule::new(json!({
-                "===": [{"var": "Jans::Workload"}, "ALLOW"]
-            }))
-            .expect("Failed to create principal bool operator"),
-        },
-        entity_builder_config: EntityBuilderConfig {
-            build_user: false,
-            build_workload: true,
-            ..Default::default()
-        },
-        lock_config: None,
-        max_default_entities: None,
-        max_base64_size: None,
-    };
+    let config = create_jwt_cedarling_config(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        true,
+    );
 
     let cedarling = crate::Cedarling::new(&config)
         .await
         .expect("Cedarling should initialize with JWT-enabled config");
 
     // Create authorization request with signed JWTs
-    let request = Request::deserialize(json!({
-        "tokens": {
-            "access_token": access_token,
-            "id_token": id_token,
-            "userinfo_token": userinfo_token,
-        },
-        "action": "Jans::Action::\"Read\"",
-        "resource": {
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::Resource",
-                "id": "resource1"
-            },
-            "org_id": "test_org",
-            "country": "US"
-        },
-        "context": {},
-    }))
-    .expect("Request should be deserialized");
+    let request = prepare_cedarling_request(&access_token, &id_token, &userinfo_token)
+        .expect("Request should be deserialized");
 
     // Execute authorization with valid signed tokens
     let result = cedarling
@@ -1207,24 +1153,8 @@ permit(
     // Prove JWT validation is enforced: tampered token should fail
     // Create a request with an invalid/tampered access token
     let tampered_token = format!("{access_token}.tampered");
-    let invalid_request = Request::deserialize(json!({
-        "tokens": {
-            "access_token": tampered_token,
-            "id_token": id_token,
-            "userinfo_token": userinfo_token,
-        },
-        "action": "Jans::Action::\"Read\"",
-        "resource": {
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::Resource",
-                "id": "resource1"
-            },
-            "org_id": "test_org",
-            "country": "US"
-        },
-        "context": {},
-    }))
-    .expect("Request should be deserialized");
+    let invalid_request = prepare_cedarling_request(&tampered_token, &id_token, &userinfo_token)
+        .expect("Request should be deserialized");
 
     let invalid_result = cedarling.authorize(invalid_request).await;
     let err = invalid_result

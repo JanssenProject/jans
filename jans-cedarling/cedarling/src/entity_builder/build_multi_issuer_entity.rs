@@ -116,9 +116,7 @@ fn add_reserved_claims(
                 let issuer = token
                     .get_claim_val("iss")
                     .and_then(|iss| iss.as_str())
-                    .map(normalize_issuer)
-                    // it should never be None here since token iss exists
-                    .unwrap_or_else(|| UNDEFINED_ISSUER.to_string());
+                    .map_or_else(|| UNDEFINED_ISSUER.to_string(), normalize_issuer);
 
                 attrs.insert(
                     ISS_CLAIM.to_string(),
@@ -134,7 +132,7 @@ fn add_reserved_claims(
                     RestrictedExpression::new_string(
                         token
                             .get_claim(ISS_CLAIM)
-                            .and_then(|v| v.value().as_str().map(|s| s.to_string()))
+                            .and_then(|v| v.value().as_str().map(std::string::ToString::to_string))
                             .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
                     ),
                 );
@@ -143,7 +141,10 @@ fn add_reserved_claims(
 
         // add exp claim
         if let Some(shape) = attrs_shape.get(EXP_CLAIM) {
-            if let Some(exp) = token.get_claim_val(EXP_CLAIM).and_then(|v| v.as_i64()) {
+            if let Some(exp) = token
+                .get_claim_val(EXP_CLAIM)
+                .and_then(serde_json::Value::as_i64)
+            {
                 attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
             } else if shape.is_required() {
                 // exp is required but missing in token
@@ -188,7 +189,10 @@ fn add_reserved_claims(
             );
         }
 
-        if let Some(exp) = token.get_claim_val(EXP_CLAIM).and_then(|v| v.as_i64()) {
+        if let Some(exp) = token
+            .get_claim_val(EXP_CLAIM)
+            .and_then(serde_json::Value::as_i64)
+        {
             attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
         }
 
@@ -836,8 +840,7 @@ mod tests {
         // iss should be an entity reference (EntityUid) when token has trusted issuer
         assert!(
             matches!(iss_value, EvalResult::EntityUid(_)),
-            "iss should be an entity reference (EntityUid), got {:?}",
-            iss_value
+            "iss should be an entity reference (EntityUid), got {iss_value:?}"
         );
 
         // Verify schema-defined claims are present as tags
@@ -1017,8 +1020,7 @@ mod tests {
         // iss should be an entity reference (EntityUid)
         assert!(
             matches!(iss_value, EvalResult::EntityUid(_)),
-            "iss should be an entity reference (EntityUid), got {:?}",
-            iss_value
+            "iss should be an entity reference (EntityUid), got {iss_value:?}"
         );
     }
 }

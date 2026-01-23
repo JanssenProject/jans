@@ -46,7 +46,7 @@ impl TokenCache {
     ) -> Self {
         Self {
             cache: Arc::new(RwLock::new(SparKV::with_config(Config {
-                max_ttl: Duration::seconds(max_ttl as i64),
+                max_ttl: Duration::seconds(i64::try_from(max_ttl).unwrap_or_default()),
                 max_items: capacity,
                 earliest_expiration_eviction,
                 ..Default::default()
@@ -139,11 +139,16 @@ impl TokenCache {
                 let duration = exp - now.timestamp();
                 if duration > 0 {
                     // if duration bigger than configured max ttl, use the max ttl
-                    Some(if self.max_ttl > 0 && duration > self.max_ttl as i64 {
-                        self.max_ttl as i64
+                    if let Ok(max_ttl_i64) = i64::try_from(self.max_ttl) {
+                        Some(if self.max_ttl > 0 && duration > max_ttl_i64 {
+                            max_ttl_i64
+                        } else {
+                            duration
+                        })
                     } else {
-                        duration
-                    })
+                        // fallback to duration if max_ttl conversion fails
+                        Some(duration)
+                    }
                 } else {
                     None
                 }
@@ -151,7 +156,7 @@ impl TokenCache {
             .or({
                 // if no exp claim, use the configured max ttl if set
                 if self.max_ttl > 0 {
-                    Some(self.max_ttl as i64)
+                    i64::try_from(self.max_ttl).ok()
                 } else {
                     None
                 }

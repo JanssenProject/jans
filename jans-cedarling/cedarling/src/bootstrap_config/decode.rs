@@ -59,30 +59,8 @@ impl BootstrapConfig {
         let lock_config = raw.lock.is_enabled().then(|| raw.try_into()).transpose()?;
 
         // Decode LogCofig
-        let log_type = match raw.log_type {
-            LoggerType::Off => LogTypeConfig::Off,
-            LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: raw
-                    .log_ttl
-                    .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
-                max_item_size: raw.log_max_item_size,
-                max_items: raw.log_max_items,
-            }),
-            LoggerType::StdOut => {
-                let std_out_logger_conf = match raw.stdout_mode {
-                    // WASM does not support async
-                    #[cfg(not(target_arch = "wasm32"))]
-                    super::log_config::StdOutMode::Async => StdOutLoggerMode::Async {
-                        timeout_millis: raw.stdout_timeout_millis,
-                        buffer_limit: raw.stdout_buffer_limit,
-                    },
-                    super::log_config::StdOutMode::Immediate => StdOutLoggerMode::Immediate,
-                };
-                LogTypeConfig::StdOut(std_out_logger_conf)
-            },
-        };
         let log_config = LogConfig {
-            log_type,
+            log_type: resolve_log_type(raw)?,
             log_level: raw.log_level,
         };
 
@@ -179,4 +157,33 @@ impl BootstrapConfig {
             max_base64_size: raw.max_base64_size,
         })
     }
+}
+
+/// Helper function to resolve log type from raw config
+fn resolve_log_type(
+    raw_config: &BootstrapConfigRaw,
+) -> Result<LogTypeConfig, BootstrapConfigLoadingError> {
+    let log_type_config = match raw_config.log_type {
+        LoggerType::Off => LogTypeConfig::Off,
+        LoggerType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
+            log_ttl: raw_config
+                .log_ttl
+                .ok_or(BootstrapConfigLoadingError::MissingLogTTL)?,
+            max_item_size: raw_config.log_max_item_size,
+            max_items: raw_config.log_max_items,
+        }),
+        LoggerType::StdOut => {
+            let std_out_logger_conf = match raw_config.stdout_mode {
+                // WASM does not support async
+                #[cfg(not(target_arch = "wasm32"))]
+                super::log_config::StdOutMode::Async => StdOutLoggerMode::Async {
+                    timeout_millis: raw_config.stdout_timeout_millis,
+                    buffer_limit: raw_config.stdout_buffer_limit,
+                },
+                super::log_config::StdOutMode::Immediate => StdOutLoggerMode::Immediate,
+            };
+            LogTypeConfig::StdOut(std_out_logger_conf)
+        },
+    };
+    Ok(log_type_config)
 }
