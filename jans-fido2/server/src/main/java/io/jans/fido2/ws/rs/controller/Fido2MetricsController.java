@@ -647,8 +647,12 @@ public class Fido2MetricsController {
      * @return true if timezone indicator is present
      */
     private boolean hasTimezoneIndicator(String dateTime) {
+        // Check for timezone indicators:
+        // - "Z" indicates UTC
+        // - "+" indicates positive timezone offset
+        // - "-" after position 10 indicates negative timezone offset (not part of date)
         return dateTime.contains("Z") || dateTime.contains("+") || 
-               (dateTime.contains("-") && (dateTime.lastIndexOf('-') > 10 || dateTime.contains("+")));
+               (dateTime.contains("-") && dateTime.lastIndexOf('-') > 10);
     }
     
     /**
