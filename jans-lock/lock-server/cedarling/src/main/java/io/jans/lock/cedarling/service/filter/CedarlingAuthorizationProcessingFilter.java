@@ -97,14 +97,4 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
         return authHeader.replaceFirst("(?i)Bearer\\s+", "");
     }
 
-    private Response unprotectedApiResponse(String name) {
-        return Response.status(Response.Status.UNAUTHORIZED).entity(name + " API not protected")
-                .build();
-    }
-
-    private Response disabledApiResponse(String name) {
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(name + " API is disabled")
-                .build();
-    }
-
 }

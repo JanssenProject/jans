@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 
@@ -61,8 +62,8 @@ public class GrpcAuditServlet extends HttpServlet {
     @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
 
-    // Make it static final and use volatile for safe publication
-    private static volatile ServletAdapter adapter = null;
+    // Use AtomicReference for thread-safe lazy initialization
+    private static final AtomicReference<ServletAdapter> adapterRef = new AtomicReference<>();
 
     public GrpcAuditServlet() {
     }
@@ -77,41 +78,42 @@ public class GrpcAuditServlet extends HttpServlet {
             return;
         }
 
-        // Use double-checked locking for thread-safety
-        if (adapter == null) {
-            synchronized (GrpcAuditServlet.class) {
-                if (adapter == null) {
-                    try {
-                        BindableService rawService = grpcAuditServiceProvider.getService();
-                        if (rawService == null) {
-                            log.error("GrpcAuditServiceProvider returned null service");
-                            return;
-                        }
-
-                        ServerServiceDefinition wrapped = ServerInterceptors.intercept(rawService, authorizationInterceptor);
-
-                        ServletServerBuilder builder = new ServletServerBuilder();
-                        builder.addService(wrapped);
-                        builder.maxInboundMessageSize(10 * 1024 * 1024);
-
-                        adapter = builder.buildServletAdapter();
-
-                        log.info("gRPC adapter initialized successfully with authorization enabled for service: " +
-                                rawService.getClass().getSimpleName());
-                    } catch (Exception e) {
-                        log.error("Failed to initialize gRPC servlet", e);
-                    }
+        // Only initialize if not already set
+        if (adapterRef.get() == null) {
+            try {
+                BindableService rawService = grpcAuditServiceProvider.getService();
+                if (rawService == null) {
+                    log.error("GrpcAuditServiceProvider returned null service");
+                    return;
                 }
+
+                ServerServiceDefinition wrapped = ServerInterceptors.intercept(rawService, authorizationInterceptor);
+
+                ServletServerBuilder builder = new ServletServerBuilder();
+                builder.addService(wrapped);
+                builder.maxInboundMessageSize(10 * 1024 * 1024);
+
+                ServletAdapter newAdapter = builder.buildServletAdapter();
+                
+                // Atomic compare-and-set: only set if still null
+                if (adapterRef.compareAndSet(null, newAdapter)) {
+                    log.info("gRPC adapter initialized successfully with authorization enabled for service: " +
+                            rawService.getClass().getSimpleName());
+                } else {
+                    log.info("gRPC adapter was already initialized by another thread");
+                }
+            } catch (Exception e) {
+                log.error("Failed to initialize gRPC servlet", e);
             }
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ServletAdapter localAdapter = adapter;
-        if (localAdapter != null) {
+        ServletAdapter adapter = adapterRef.get();
+        if (adapter != null) {
             HttpServletRequest wrappedRequest = new GrpcRequestWrapper(req);
-            localAdapter.doPost(wrappedRequest, resp);
+            adapter.doPost(wrappedRequest, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
         }
@@ -119,10 +121,10 @@ public class GrpcAuditServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ServletAdapter localAdapter = adapter;
-        if (localAdapter != null) {
+        ServletAdapter adapter = adapterRef.get();
+        if (adapter != null) {
             HttpServletRequest wrappedRequest = new GrpcRequestWrapper(req);
-            localAdapter.doGet(wrappedRequest, resp);
+            adapter.doGet(wrappedRequest, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
         }
@@ -130,10 +132,10 @@ public class GrpcAuditServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        ServletAdapter localAdapter = adapter;
-        if (localAdapter != null) {
+        ServletAdapter adapter = adapterRef.get();
+        if (adapter != null) {
             try {
-                localAdapter.destroy();
+                adapter.destroy();
                 log.info("gRPC adapter destroyed");
             } catch (Exception e) {
                 log.warn("Error during gRPC adapter destroy", e);
