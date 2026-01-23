@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>0.0.0-nightly</version>
+		<version>1.16.0</version>
 	</parent>
 
 	<prerequisites>
@@ -278,11 +278,6 @@
             <groupId>net.agkn</groupId>
             <artifactId>hll</artifactId>
         </dependency>
-		<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
-		<dependency>
-			<groupId>com.wywy</groupId>
-			<artifactId>log4j-plugin-fluency</artifactId>
-		</dependency>
 		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>

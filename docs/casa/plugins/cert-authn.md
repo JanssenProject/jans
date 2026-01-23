@@ -12,7 +12,7 @@ tags:
 
 At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in a SSL/TLS session.
 
-The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports smart cards as well.
+The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports [smart cards](#is-the-plugin-compatible-with-smart-cards) as well.
 
 ### Requisites
 
@@ -150,7 +150,7 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 
 1. If you did not [Generate testing certificates](#generate-testing-certificates), i.e. already own some certs, create a file named `chain.pem` by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
 
-1. Compute a one liner JSON string for the contents of `certChainPEM` property: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
+1. Compute a one-liner JSON string for the contents of `certChainPEM` property, for example: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
 
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
@@ -237,6 +237,10 @@ Testing can be extended to the following scenarios where authentication should f
 
 This is not possible - at least from Janssen server.
 
+### Is the plugin compatible with smart cards?
+
+Yes. There is a simple demonstrative [tutorial](./cert-authn-tutorial.md) available.
+
 ### Does the plugin support revocation?
 
 It's not implemented but we may add CRL functionality on request. OCSP is another option but it seems to be a [discouraged](https://www.feistyduck.com/newsletter/issue_121_the_slow_death_of_ocsp) practice these days.
@@ -272,3 +276,9 @@ No. Section [4.2.1.12](https://datatracker.ietf.org/doc/html/rfc5280.html#sectio
 > Certificate using applications MAY require that the extended key usage extension be present and that a particular purpose be indicated in order for the certificate to be acceptable to that application.
 
 We chose not to require the presence of the purpose.
+
+### What's the `roundTripMaxTime` property in the Agama project used for?
+
+The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning to the page that originated the task. A default value of 30 seconds is used.
+
+If the process is not completed in this timeframe, it will fail and the log will report errors regarding expired cache entries. In this case, consider using a higher value for `roundTripMaxTime`.

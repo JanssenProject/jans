@@ -1,4 +1,4 @@
-package io.jans.ca.plugin.adminui.model.adminui;
+package io.jans.configapi.core.model.adminui;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -43,10 +43,22 @@ public enum CedarlingLogType {
         return null;
     }
 
+    /**
+     * Lookup the enum constant that corresponds to the given string value.
+     *
+     * @param value the string value associated with a CedarlingLogType constant
+     * @return the matching CedarlingLogType constant, or `null` if no match exists
+     */
     public static CedarlingLogType getByValue(String value) {
         return mapByValues.get(value);
     }
 
+    /**
+     * Provides the enum's associated string value for JSON serialization.
+     *
+     * @return the underlying string value of this enum constant
+     */
+    @Override
     @JsonValue
     public String toString() {
         return value;

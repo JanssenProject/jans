@@ -49,7 +49,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -132,7 +132,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation job schedule. It accepts any Cron syntax supported by Kubernetes. If empty, the schedule will run based on keysLife value.
@@ -220,7 +220,7 @@ config:
     cnSqldbUserPassword: Test1234#
     # -- Enable SSL connection to SQL database.
     cnSqlSslEnabled: false
-  # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
+    # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
     cnSqlSslMode: ""
     # -- Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication.
     cnSqlSslCaCert: ""
@@ -346,7 +346,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Organization name. Used for certificate creation.
@@ -444,7 +444,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -553,7 +553,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -667,7 +667,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -911,7 +911,7 @@ global:
     adminEnabled: true
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
-      # -- Enable casa endpoints /casa
+      # -- Enable casa endpoints /jans-casa
       casaEnabled: false
       # -- Casa ingress resource labels. key app is taken
       casaLabels: { }
@@ -1077,6 +1077,9 @@ global:
     gateways: [ ]
   # -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable.
   lbIp: 22.22.22.22
+  gatewayApi:
+    # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
+    enabled: false
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
     enabled: true
@@ -1202,6 +1205,25 @@ global:
   cleanup:
     # -- Boolean flag to enable/disable the cleanup cronjob chart.
     enabled: true
+gatewayApi:
+  # -- Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant
+  gatewayClassName: nginx
+  # -- The name of the Gateway resource to be created
+  name: jans-gateway
+  # -- Gateway http port number
+  httpPort: 80
+  # -- Gateway https port number
+  httpsPort: 443
+  # -- Secret containing the TLS certificate for the Gateway
+  tlsSecretName: tls-certificate
+  # -- Specific labels for the Gateway resource
+  gatewayLabels: {}
+  # -- Specific annotations for the Gateway resource
+  gatewayAnnotations: {}
+  # -- Specific labels for the HTTPRoute resource
+  routeLabels: {}
+  # -- Specific annotations for the HTTPRoute resource
+  routeAnnotations: {}
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
@@ -1250,7 +1272,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1340,7 +1362,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1454,7 +1476,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1539,7 +1561,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1602,7 +1624,7 @@ cleanup:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/cloudtools
     # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
+    tag: 1.16.0-1
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

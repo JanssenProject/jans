@@ -48,10 +48,6 @@ pub(crate) enum TrustedIssuerErrorType {
     #[error("Trusted issuer file must be a JSON object")]
     NotAnObject,
 
-    /// Issuer configuration is not an object
-    #[error("Issuer '{issuer_id}' must be a JSON object")]
-    IssuerNotAnObject { issuer_id: String },
-
     /// Missing required field in issuer configuration
     #[error("Issuer '{issuer_id}': missing required field '{field}'")]
     MissingRequiredField { issuer_id: String, field: String },

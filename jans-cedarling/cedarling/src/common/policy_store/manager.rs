@@ -535,14 +535,13 @@ mod tests {
         let issuer_files = vec![IssuerFile {
             name: "issuer.json".to_string(),
             content: r#"{
-        "test_issuer": {
-            "name": "Test Issuer",
-            "description": "A test issuer",
-            "openid_configuration_endpoint": "https://test.com/.well-known/openid-configuration",
-            "token_metadata": {
-                "access_token": {
-                    "entity_type_name": "Test::access_token"
-                }
+        "id": "test_issuer",
+        "name": "Test Issuer",
+        "description": "A test issuer",
+        "configuration_endpoint": "https://test.com/.well-known/openid-configuration",
+        "token_metadata": {
+            "access_token": {
+                "entity_type_name": "Test::access_token"
             }
         }
     }"#
@@ -671,14 +670,13 @@ mod tests {
     trusted_issuers: vec![IssuerFile {
         name: "issuer.json".to_string(),
         content: r#"{
-            "main": {
-                "name": "Main Issuer",
-                "description": "Primary issuer",
-                "openid_configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
-                "token_metadata": {
-                    "access_token": {
-                        "entity_type_name": "Test::access_token"
-                    }
+            "id": "main",
+            "name": "Main Issuer",
+            "description": "Primary issuer",
+            "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
+            "token_metadata": {
+                "access_token": {
+                    "entity_type_name": "Test::access_token"
                 }
             }
         }"#
