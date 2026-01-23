@@ -1,9 +1,13 @@
 {
     "projectName": "casa",
-    "version": "0.0.0-nightly",
+    "version": "1.16.0",
     "author": "jgomer2001",
     "description": "2FA flow featuring pluggable authentication methods",
-    "noDirectLaunch": [ "io.jans.casa.authn.fido2", "io.jans.casa.authn.otp", "io.jans.casa.authn.twilio_sms" ],
+    "noDirectLaunch": [
+        "io.jans.casa.authn.fido2",
+        "io.jans.casa.authn.otp",
+        "io.jans.casa.authn.twilio_sms"
+    ],
     "configs": {
         "io.jans.casa.authn.main": {
             "selector": {
@@ -24,12 +28,12 @@
         "io.jans.casa.authn.otp": {
             "issuer": "Gluu Inc",
             "otp_type": "totp",
-            "hotp":{
+            "hotp": {
                 "keyLength": 20,
                 "digits": 6,
                 "lookAheadWindow": 10
             },
-            "totp":{
+            "totp": {
                 "keyLength": 20,
                 "digits": 6,
                 "timeStep": 30,
@@ -44,7 +48,7 @@
         "io.jans.casa.authn.twilio_sms": {
             "twilio_sid": "",
             "twilio_token": "",
-            "from_number": ""            
+            "from_number": ""
         }
     }
 }
