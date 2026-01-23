@@ -5,7 +5,7 @@
 
 #![cfg(test)]
 
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 use super::http_utils::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
@@ -31,8 +31,8 @@ pub(crate) struct KeyPair {
 }
 
 impl KeyPair {
-    pub(crate) fn decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
-        DecodingKey::from_jwk(&self.decoding_key)
+    pub(crate) fn decoding_key(&self) -> Result<Arc<DecodingKey>, jsonwebtoken::errors::Error> {
+        DecodingKey::from_jwk(&self.decoding_key).map(Arc::new)
     }
 }
 
@@ -333,13 +333,13 @@ impl MockServer {
         Some(Url::parse(&(self.server.url() + MOCK_JWKS_URI)).expect("invalid status list url"))
     }
 
-    pub(crate) fn jwt_decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
+    pub(crate) fn jwt_decoding_key(&self) -> Result<Arc<DecodingKey>, jsonwebtoken::errors::Error> {
         self.keys.decoding_key()
     }
 
     pub(crate) fn jwt_decoding_key_and_id(
         &self,
-    ) -> Result<(DecodingKey, Option<String>), jsonwebtoken::errors::Error> {
+    ) -> Result<(Arc<DecodingKey>, Option<String>), jsonwebtoken::errors::Error> {
         Ok((self.keys.decoding_key()?, self.keys.kid.clone()))
     }
 

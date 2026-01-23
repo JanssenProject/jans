@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
 use crate::LogWriter;
 use crate::common::issuer_utils::IssClaim;
@@ -22,7 +23,12 @@ pub(crate) struct DecodingKeyInfo {
     pub algorithm: Algorithm,
 }
 
+const MUTEX_POISONED_ERR: &str =
+    "KeyService RwLock poisoned due to another thread panicking while holding the lock";
+
 /// Manages JSON Web Keys (JWKs) used for decoding JWTs.
+///
+/// This structure is thread-safe.
 ///
 /// ## TODO
 ///
@@ -38,7 +44,7 @@ pub(crate) struct DecodingKeyInfo {
 /// [`RFC 7517 v41`]: https://datatracker.ietf.org/doc/html/draft-ietf-jose-json-web-key-41
 #[derive(Default)]
 pub(super) struct KeyService {
-    keys: HashMap<DecodingKeyInfo, DecodingKey>,
+    keys: RwLock<HashMap<DecodingKeyInfo, Arc<DecodingKey>>>,
 }
 
 impl KeyService {
@@ -65,9 +71,11 @@ impl KeyService {
     /// - and the values contains the JSON Web Keys as defined in [`RFC 7517`].
     ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
-    pub(super) fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), KeyServiceError> {
+    pub(super) fn insert_keys_from_str(&self, key_stores: &str) -> Result<(), KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
+
+        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
 
         for (issuer, keys) in parsed_stores
             .into_iter()
@@ -89,7 +97,7 @@ impl KeyService {
                     kid: jwk.common.key_id,
                     algorithm,
                 };
-                self.keys.insert(key_info, decoding_key);
+                keys_guard.insert(key_info, Arc::new(decoding_key));
             }
         }
 
@@ -97,7 +105,7 @@ impl KeyService {
     }
 
     pub(super) async fn get_keys_using_oidc(
-        &mut self,
+        &self,
         openid_config: &OpenIdConfig,
         logger: &Option<Logger>,
     ) -> Result<(), KeyServiceError> {
@@ -115,6 +123,8 @@ impl KeyService {
             logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
             continue;
         }
+
+        let mut keys_guard = self.keys.write().expect(MUTEX_POISONED_ERR);
 
         for key in keys.into_iter() {
             // We will no support keys with unspecified algorithms
@@ -150,18 +160,22 @@ impl KeyService {
                 kid: key.common.key_id,
                 algorithm,
             };
-            self.keys.insert(key_info, decoding_key);
+            keys_guard.insert(key_info, Arc::new(decoding_key));
         }
 
         Ok(())
     }
 
-    pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<&DecodingKey> {
-        self.keys.get(key_info)
+    pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<Arc<DecodingKey>> {
+        self.keys
+            .read()
+            .expect(MUTEX_POISONED_ERR)
+            .get(key_info)
+            .cloned()
     }
 
     pub(super) fn has_keys(&self) -> bool {
-        !self.keys.is_empty()
+        !self.keys.read().expect(MUTEX_POISONED_ERR).is_empty()
     }
 }
 
@@ -288,7 +302,7 @@ mod test {
                 "kid": "73e25f9789119c7875d58087a78ac23f5ef2eda3"
             }],
         });
-        let mut key_service = KeyService::default();
+        let key_service = KeyService::default();
 
         key_service
             .insert_keys_from_str(&key_stores.to_string())
@@ -347,7 +361,7 @@ mod test {
         let server2 = MockServer::new_with_defaults().await.unwrap();
         let (_key2, kid2) = server2.jwt_decoding_key_and_id().unwrap();
 
-        let mut key_service = KeyService::default();
+        let key_service = KeyService::default();
 
         key_service
             .get_keys_using_oidc(&server1.openid_config(), &None)

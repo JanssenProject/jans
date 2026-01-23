@@ -146,7 +146,7 @@ impl JwtService {
         let mut status_lists = StatusListCache::default();
         let issuer_configs = IssuerIndex::new();
         let validators = JwtValidatorCache::default();
-        let mut key_service = KeyService::new();
+        let key_service = KeyService::new();
 
         let token_cache = TokenCache::new(
             jwt_config.token_cache_max_ttl_secs,
@@ -175,7 +175,7 @@ impl JwtService {
                 iss_claim = update_openid_config(&mut iss_config, &logger).await?;
             }
 
-            insert_keys(&mut key_service, jwt_config, &iss_config, &logger).await?;
+            insert_keys(&key_service, jwt_config, &iss_config, &logger).await?;
 
             validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.clone());
 
@@ -596,7 +596,7 @@ async fn update_openid_config(
 }
 
 async fn insert_keys(
-    key_service: &mut KeyService,
+    key_service: &KeyService,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
     logger: &Option<Logger>,

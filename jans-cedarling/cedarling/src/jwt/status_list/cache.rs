@@ -83,7 +83,7 @@ impl StatusListCache {
             validator
                 .read()
                 .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, decoding_key)?
+                .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
         }
         .try_into()
         .map_err(DecodeJwtError::DeserializeClaims)?;
@@ -97,7 +97,7 @@ impl StatusListCache {
             crate::http::spawn_task(keep_status_list_updated(
                 ttl,
                 status_list_url.clone(),
-                decoding_key.cloned(),
+                decoding_key,
                 validator,
                 self.status_lists.clone(),
                 logger,
@@ -125,7 +125,7 @@ impl StatusListCache {
 async fn keep_status_list_updated<F>(
     mut ttl: u64,
     status_list_url: Url,
-    decoding_key: Option<DecodingKey>,
+    decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<RwLock<JwtValidator>>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
@@ -155,7 +155,7 @@ async fn keep_status_list_updated<F>(
             validator
                 .read()
                 .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, decoding_key.as_ref())
+                .validate_jwt(&status_list_jwt.0, decoding_key.clone())
         };
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
@@ -249,7 +249,7 @@ mod test {
     async fn keep_status_list_updated() {
         // Setup
         let validators = JwtValidatorCache::default();
-        let mut key_service = KeyService::default();
+        let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
             .get_keys_using_oidc(&mock_server.openid_config(), &None)

@@ -219,11 +219,11 @@ impl JwtValidator {
     pub(crate) fn validate_jwt(
         &self,
         jwt: &str,
-        decoding_key: Option<&DecodingKey>,
+        decoding_key: Option<Arc<DecodingKey>>,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
         let validated_jwt = match decoding_key {
             Some(decoding_key) => {
-                jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims
+                jwt::decode::<ValidatedJwt>(jwt, &decoding_key, &self.validation)?.claims
             },
             None => {
                 if self.validate_signature {
@@ -388,7 +388,7 @@ mod test {
         );
 
         let result = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect("should validate JWT");
 
         let expected = ValidatedJwt {
@@ -429,7 +429,7 @@ mod test {
         );
 
         let err = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect_err("should error due to expired JWT");
 
         assert!(matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -465,7 +465,7 @@ mod test {
         );
 
         let result = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect("Should successfully process JWT");
 
         let expected = ValidatedJwt {
@@ -506,7 +506,7 @@ mod test {
         );
 
         let err = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect_err("should error when validating JWT");
 
         assert!(
@@ -547,7 +547,7 @@ mod test {
         );
 
         let err = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect_err("should error when validating JWT");
 
         assert!(
@@ -591,7 +591,7 @@ mod test {
         );
 
         let result = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key.clone()))
             .expect("Should process JWT successfully");
 
         let expected = ValidatedJwt {
@@ -616,7 +616,7 @@ mod test {
         );
 
         let err = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect_err("expected an error while validating the JWT");
 
         assert!(
@@ -670,7 +670,7 @@ mod test {
         );
 
         let err = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect_err("should error because the status of the token is JwtStatus::Invalid");
 
         assert!(
@@ -726,7 +726,7 @@ mod test {
         );
 
         let err = validator
-            .validate_jwt(&token, Some(&decoding_key))
+            .validate_jwt(&token, Some(decoding_key))
             .expect_err("should error because the status of the token is JwtStatus::Suspended");
 
         assert!(
