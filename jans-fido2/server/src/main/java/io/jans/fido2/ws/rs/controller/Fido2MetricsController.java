@@ -116,12 +116,13 @@ public class Fido2MetricsController {
             if (userId == null || userId.trim().isEmpty()) {
                 throw errorResponseFactory.invalidRequest("userId is required");
             }
+            String normalizedUserId = userId.trim();
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             validateTimeRange(start, end);
             
-            List<?> entries = metricsService.getMetricsEntriesByUser(userId, start, end);
+            List<?> entries = metricsService.getMetricsEntriesByUser(normalizedUserId, start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
         });
     }
@@ -517,8 +518,8 @@ public class Fido2MetricsController {
         if (aggregationType == null || aggregationType.trim().isEmpty()) {
             throw errorResponseFactory.invalidRequest("aggregationType is required");
         }
-        
-        String upperType = aggregationType.toUpperCase();
+
+        String upperType = aggregationType.trim().toUpperCase();
         if (!Fido2MetricsConstants.HOURLY.equals(upperType) &&
             !Fido2MetricsConstants.DAILY.equals(upperType) &&
             !Fido2MetricsConstants.WEEKLY.equals(upperType) &&
@@ -541,8 +542,8 @@ public class Fido2MetricsController {
         if (operationType == null || operationType.trim().isEmpty()) {
             throw errorResponseFactory.invalidRequest("operationType is required");
         }
-        
-        String upperType = operationType.toUpperCase();
+
+        String upperType = operationType.trim().toUpperCase();
         if (!Fido2MetricsConstants.REGISTRATION.equals(upperType) &&
             !Fido2MetricsConstants.AUTHENTICATION.equals(upperType)) {
             throw errorResponseFactory.invalidRequest(
