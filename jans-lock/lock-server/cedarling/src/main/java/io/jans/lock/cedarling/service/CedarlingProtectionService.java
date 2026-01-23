@@ -84,7 +84,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 
             List<CedarlingPermission> requestedPermissions = getRequestedOperations(resourceInfo);
             log.info("Check access to requested opearations: {}", requestedPermissions);
-            if (requestedPermissions.size() == 0) {
+            if (requestedPermissions.isEmpty()) {
 	            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
             }
 
@@ -162,7 +162,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	}
 
 	private Map<String, Object> getCedarlingResource(CedarlingPermission requestedPermission) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		int id = requestedPermission.hashCode();
 		id = id > 0 ? id : -id;
 		map.putAll(
@@ -185,7 +185,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	}
 	
 	private Map<String, Object> getCedarlingContext() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		return map;
 	}
 

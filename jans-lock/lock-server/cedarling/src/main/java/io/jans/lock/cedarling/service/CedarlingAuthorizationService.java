@@ -71,11 +71,6 @@ public class CedarlingAuthorizationService {
 		log.info("Cedarling is destroyed");
 	}
 
-	/*
-	 * Subscribe for application initialization event
-	 */
-	public void initEvent(@Observes @ApplicationInitialized(ApplicationScoped.class) ApplicationInitializedEvent event) {}
-
 	private CedarlingAdapter initAdapter(CedarlingConfiguration cedarConf) {
 	    BootstrapConfig config = BootstrapConfig.builder()
 	        .applicationName("Lock Server")
@@ -86,26 +81,26 @@ public class CedarlingAuthorizationService {
 	        .logLevel(cedarConf.getLogLevel())
 	        .build();
 
-	    CedarlingAdapter cedarlingAdapter = null;
+	    CedarlingAdapter initCedarlingAdapter = null;
 	    try {
-	        cedarlingAdapter = new CedarlingAdapter();
+	        initCedarlingAdapter = new CedarlingAdapter();
 	        
 	        String jsonConfig = config.toJsonConfig();
 	        if (log.isTraceEnabled()) {
 	            log.trace("Cedarling JSON configuration: {}", jsonConfig);
 	        }
 
-	        cedarlingAdapter.loadFromJson(jsonConfig);
+	        initCedarlingAdapter.loadFromJson(jsonConfig);
 	        log.info("Cedarling initialized successfully");
-	        return cedarlingAdapter;
+	        return initCedarlingAdapter;
 	    } catch (CedarlingException ex) {
 	        log.error("Failed to initialize Cedarling!", ex);
 	        log.trace("Configuration: {}", config.toJsonConfig());
 	        
 	        // Close adapter if initialization failed
-	        if (cedarlingAdapter != null) {
+	        if (initCedarlingAdapter != null) {
 	            try {
-	                cedarlingAdapter.close();
+	                initCedarlingAdapter.close();
 	            } catch (Exception closeEx) {
 	                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
 	            }
