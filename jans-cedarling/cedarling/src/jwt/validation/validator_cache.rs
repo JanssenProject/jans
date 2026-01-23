@@ -18,6 +18,8 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::{Arc, RwLock};
 
 type CachedValidator = Arc<RwLock<JwtValidator>>;
+const MUTEX_POISONED_ERR: &str =
+    "JwtValidatorCache RwLock poisoned due to another thread panicking while holding the lock";
 
 /// Holds a collection of JWT validators keyed by a hash.
 ///
@@ -28,16 +30,18 @@ type CachedValidator = Arc<RwLock<JwtValidator>>;
 ///
 /// If multiple validators share the same hash (i.e., hash collision),
 /// we perform an additional full comparison via [`OwnedValidatorInfo::is_equal_to`].
+///
+/// This structure is thread-safe via an internal `RwLock`.
 #[derive(Default)]
 pub(crate) struct JwtValidatorCache {
-    validators: HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>,
+    validators: RwLock<HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>>,
 }
 
 impl JwtValidatorCache {
     /// Initializes the validators for the given [`IssuerConfig`] and the global settings
     /// from [`JwtConfig`].
     pub(crate) fn init_for_iss(
-        &mut self,
+        &self,
         iss_config: &IssuerConfig,
         jwt_config: &JwtConfig,
         status_lists: &StatusListCache,
@@ -113,9 +117,11 @@ impl JwtValidatorCache {
     ///
     /// If a validator with the same `ValidatorKeyHash` already exists, it is
     /// appended to the vector. Exact match resolution is deferred to lookup time.
-    fn insert(&mut self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
+    fn insert(&self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
         self.validators
+            .write()
+            .expect(MUTEX_POISONED_ERR)
             .entry(key)
             .or_default()
             .push((validator_info.owned(), Arc::new(RwLock::new(validator))));
@@ -130,7 +136,8 @@ impl JwtValidatorCache {
         &self,
         validator_info: &ValidatorInfo<'_>,
     ) -> Option<Arc<RwLock<JwtValidator>>> {
-        let validators = self.validators.get(&validator_info.key_hash())?;
+        let guard = self.validators.read().expect(MUTEX_POISONED_ERR);
+        let validators = guard.get(&validator_info.key_hash())?;
 
         match validators.len() {
             0 => None,
@@ -293,7 +300,7 @@ mod test {
 
     #[test]
     fn test_insert_and_retrieve() {
-        let mut store = JwtValidatorCache::default();
+        let store = JwtValidatorCache::default();
         let test_iss = IssClaim::new("https://example.com/issuer");
         let (validator, info) = JwtValidator::new_input_tkn_validator(
             Some(&test_iss),

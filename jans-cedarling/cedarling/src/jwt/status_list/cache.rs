@@ -248,7 +248,7 @@ mod test {
     #[tokio::test]
     async fn keep_status_list_updated() {
         // Setup
-        let mut validators = JwtValidatorCache::default();
+        let validators = JwtValidatorCache::default();
         let mut key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service

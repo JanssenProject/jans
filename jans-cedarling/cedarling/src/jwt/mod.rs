@@ -145,7 +145,7 @@ impl JwtService {
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let issuer_configs = IssuerIndex::new();
-        let mut validators = JwtValidatorCache::default();
+        let validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
         let token_cache = TokenCache::new(
