@@ -108,9 +108,6 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 	@AttributeName(name = "policyStats")
 	private Map<String, Long> policyStats;
 
-	public TelemetryEntry() {
-	}
-
 	public String getInum() {
 		return inum;
 	}

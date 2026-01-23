@@ -186,11 +186,9 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
     private Optional<ResourceInfo> getProtectionApiMethod(Class<?> clazz, String grpcMethodName) {
         for (Method method : clazz.getMethods()) {
         	Optional<ProtectedApi> protectedApi = getProtectedApiAnnotation(method);
-        	if (protectedApi.isPresent()) {
-       			if (grpcMethodName.equals(protectedApi.get().grpcMethodName())) {
-       				GrpcResourceInfo grpcResourceInfo = new GrpcResourceInfo(clazz, method);
-    				return Optional.ofNullable(grpcResourceInfo);
-    			}
+        	if (protectedApi.isPresent() && grpcMethodName.equals(protectedApi.get().grpcMethodName())) {
+   				GrpcResourceInfo grpcResourceInfo = new GrpcResourceInfo(clazz, method);
+				return Optional.ofNullable(grpcResourceInfo);
         	}
         }
 

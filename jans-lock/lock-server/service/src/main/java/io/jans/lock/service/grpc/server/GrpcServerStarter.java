@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.SSLException;
+
 import org.slf4j.Logger;
 
 import io.grpc.Server;
@@ -88,7 +90,7 @@ public class GrpcServerStarter {
                 grpcServer = nettyBuilder.build().start();
 
                 log.info("gRPC (Netty) server started on port {} with TLS/ALPN and authorization enabled", grpcConfiguration.getGrpcPort());
-            } catch (Exception e) {
+            } catch (SSLException e) {
                 log.error("Failed to start Netty-based gRPC server with TLS", e);
                 throw new IOException("Failed to start Netty-based gRPC server with TLS", e);
             }
@@ -112,8 +114,9 @@ public class GrpcServerStarter {
     /**
      * Build SslContext for server from PEM cert chain and private key files.
      * Uses gRPC-shaded Netty's SslContextBuilder so ALPN is properly configured for HTTP/2.
+     * @throws SSLException 
      */
-    private io.grpc.netty.shaded.io.netty.handler.ssl.SslContext buildSslContext(String certChainPath, String privateKeyPath) throws Exception {
+    private io.grpc.netty.shaded.io.netty.handler.ssl.SslContext buildSslContext(String certChainPath, String privateKeyPath) throws SSLException {
         if (certChainPath == null || privateKeyPath == null) {
             throw new IllegalArgumentException("TLS is enabled but cert chain or private key path is not set");
         }

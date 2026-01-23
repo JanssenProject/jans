@@ -97,7 +97,7 @@ public class GrpcAuditServlet extends HttpServlet {
                 
                 // Atomic compare-and-set: only set if still null
                 if (adapterRef.compareAndSet(null, newAdapter)) {
-                    log.info("gRPC adapter initialized successfully with authorization enabled for service: " +
+                    log.info("gRPC adapter initialized successfully with authorization enabled for service: {}",
                             rawService.getClass().getSimpleName());
                 } else {
                     log.info("gRPC adapter was already initialized by another thread");

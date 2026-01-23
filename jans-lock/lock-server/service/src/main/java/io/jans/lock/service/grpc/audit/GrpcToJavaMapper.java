@@ -29,12 +29,6 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class GrpcToJavaMapper {
-
-    @Inject
-    private Logger log;
-
-    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-
     /**
      * Convert gRPC HealthEntry to Java HealthEntry bean.
      *

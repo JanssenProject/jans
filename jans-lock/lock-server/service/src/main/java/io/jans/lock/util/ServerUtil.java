@@ -55,6 +55,11 @@ public class ServerUtil {
     public static final Context.Key<String> CLIENT_IP_CONTEXT_KEY = Context.key("client-ip");
     private static final Metadata.Key<String> X_FORWARDED_FOR = Metadata.Key.of("x-forwarded-for", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> X_REAL_IP = Metadata.Key.of("x-real-ip", Metadata.ASCII_STRING_MARSHALLER);
+    
+	/**
+	 * Private constructor to prevent instantiation
+	 */
+    private ServerUtil() {}
 
 	public static CacheControl cacheControl(boolean noStore) {
 		final CacheControl cacheControl = new CacheControl();

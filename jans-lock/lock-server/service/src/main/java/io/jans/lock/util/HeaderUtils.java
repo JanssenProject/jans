@@ -14,6 +14,11 @@ import io.grpc.Metadata;
  * @author Yuriy Movchan Date: 01/20/2026
  */
 public class HeaderUtils {
+
+	/**
+	 * Private constructor to prevent instantiation
+	 */
+	private HeaderUtils() {}
     
     /**
      * Finds the authorization header in gRPC metadata, handling various
