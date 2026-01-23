@@ -11,6 +11,7 @@ import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.exception.ConfigurationException;
 import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
+import io.jans.fido2.service.metric.Fido2MetricsAggregationScheduler;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
@@ -105,7 +106,7 @@ public class AppInitializer {
 	private MDS3UpdateTimer mds3UpdateTimer;
 
 	@Inject
-	private Instance<io.jans.fido2.service.metric.Fido2MetricsAggregationScheduler> fido2MetricsAggregationSchedulerInstance;
+	private Instance<Fido2MetricsAggregationScheduler> fido2MetricsAggregationSchedulerInstance;
 
 	@PostConstruct
 	public void createApplicationComponents() {

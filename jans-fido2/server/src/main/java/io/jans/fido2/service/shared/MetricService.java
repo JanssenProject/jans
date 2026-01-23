@@ -85,7 +85,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
     
     // Cache for username-to-userId mapping to reduce database load
     // TTL: 1 hour (3600000 ms) - balances performance with data freshness
+    // Max size: 10000 entries - prevents unbounded memory growth in high-cardinality scenarios
     private static final long USER_ID_CACHE_TTL_MS = 3600000L; // 1 hour
+    private static final int USER_ID_CACHE_MAX_SIZE = 10000; // Maximum cache entries
     private final java.util.Map<String, CacheEntry> userIdCache = new java.util.concurrent.ConcurrentHashMap<>();
     
     /**
@@ -102,6 +104,29 @@ public class MetricService extends io.jans.service.metric.MetricService {
         
         boolean isExpired() {
             return (System.currentTimeMillis() - timestamp) > USER_ID_CACHE_TTL_MS;
+        }
+    }
+    
+    /**
+     * Clean up expired entries and enforce max cache size
+     * Called periodically to prevent unbounded memory growth
+     */
+    private void cleanupCache() {
+        if (userIdCache.size() < USER_ID_CACHE_MAX_SIZE) {
+            // Only clean expired entries if we're below max size
+            userIdCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        } else {
+            // At max size - remove expired entries first, then oldest if still over limit
+            userIdCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+            
+            // If still over limit after removing expired, remove oldest entries
+            if (userIdCache.size() >= USER_ID_CACHE_MAX_SIZE) {
+                long currentTime = System.currentTimeMillis();
+                userIdCache.entrySet().stream()
+                    .sorted((e1, e2) -> Long.compare(e1.getValue().timestamp, e2.getValue().timestamp))
+                    .limit(userIdCache.size() - USER_ID_CACHE_MAX_SIZE + 1000) // Remove enough to get below limit
+                    .forEach(entry -> userIdCache.remove(entry.getKey()));
+            }
         }
     }
 
@@ -591,10 +616,21 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // Cache miss or expired - perform database lookup
         String userId = performUserIdLookup(username);
         
-        // Update cache (even if lookup failed, cache the fallback to avoid repeated lookups)
-        if (userId != null) {
-            userIdCache.put(username, new CacheEntry(userId));
+        // Cleanup cache if approaching max size (every 100th lookup to avoid overhead)
+        if (userIdCache.size() >= USER_ID_CACHE_MAX_SIZE * 0.9) {
+            cleanupCache();
         }
+        
+        // Update cache (performUserIdLookup always returns non-null - either inum or username as fallback)
+        // If cache is full after cleanup, remove oldest entry before adding new one
+        if (userIdCache.size() >= USER_ID_CACHE_MAX_SIZE) {
+            // Remove oldest entry
+            userIdCache.entrySet().stream()
+                .min((e1, e2) -> Long.compare(e1.getValue().timestamp, e2.getValue().timestamp))
+                .ifPresent(entry -> userIdCache.remove(entry.getKey()));
+        }
+        
+        userIdCache.put(username, new CacheEntry(userId));
         
         return userId;
     }
@@ -627,19 +663,20 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 io.jans.as.common.model.common.User user = users.get(0);
                 String inum = user.getAttribute("inum");
                 if (inum != null && !inum.trim().isEmpty()) {
-                    log.debug("Resolved username '{}' to userId '{}'", username, inum);
+                    // PRIVACY: Log userId (inum) instead of username to comply with GDPR/CCPA requirements
+                    log.debug("Resolved username to userId: {}", inum);
                     return inum;
                 }
             }
             
             // Fallback: if we can't find the inum, use username as identifier
-            log.debug("Could not resolve userId for username '{}', using username as fallback", username);
+            log.debug("Could not resolve userId for username, using username as fallback");
             return username;
             
         } catch (Exception e) {
             // If lookup fails, use username as fallback (better than null)
-            log.debug("Failed to look up userId for username '{}': {}, using username as fallback", 
-                     username, e.getMessage());
+            // PRIVACY: Don't log username in error messages to prevent PII leakage
+            log.debug("Failed to look up userId: {}, using username as fallback", e.getMessage());
             return username;
         }
     }

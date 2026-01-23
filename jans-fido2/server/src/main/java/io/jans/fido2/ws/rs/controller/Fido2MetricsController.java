@@ -88,6 +88,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             List<?> entries = metricsService.getMetricsEntries(start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
@@ -118,6 +119,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             List<?> entries = metricsService.getMetricsEntriesByUser(userId, start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
@@ -148,6 +150,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             List<?> entries = metricsService.getMetricsEntriesByOperation(operationType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(entries)).build();
@@ -172,12 +175,13 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            validateAggregationType(aggregationType);
+            String normalizedType = normalizeAggregationType(aggregationType);
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
-            List<?> aggregations = metricsService.getAggregations(aggregationType, start, end);
+            List<?> aggregations = metricsService.getAggregations(normalizedType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(aggregations)).build();
         });
     }
@@ -200,12 +204,13 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            validateAggregationType(aggregationType);
+            String normalizedType = normalizeAggregationType(aggregationType);
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
-            Map<String, Object> summary = metricsService.getAggregationSummary(aggregationType, start, end);
+            Map<String, Object> summary = metricsService.getAggregationSummary(normalizedType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(summary)).build();
         });
     }
@@ -228,6 +233,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             Map<String, Object> adoption = metricsService.getUserAdoptionMetrics(start, end);
             return Response.ok(dataMapperService.writeValueAsString(adoption)).build();
@@ -252,6 +258,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             Map<String, Object> performance = metricsService.getPerformanceMetrics(start, end);
             return Response.ok(dataMapperService.writeValueAsString(performance)).build();
@@ -276,6 +283,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             Map<String, Object> devices = metricsService.getDeviceAnalytics(start, end);
             return Response.ok(dataMapperService.writeValueAsString(devices)).build();
@@ -300,6 +308,7 @@ public class Fido2MetricsController {
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
             Map<String, Object> errors = metricsService.getErrorAnalysis(start, end);
             return Response.ok(dataMapperService.writeValueAsString(errors)).build();
@@ -324,12 +333,13 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            validateAggregationType(aggregationType);
+            String normalizedType = normalizeAggregationType(aggregationType);
             
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
             
-            Map<String, Object> trends = metricsService.getTrendAnalysis(aggregationType, start, end);
+            Map<String, Object> trends = metricsService.getTrendAnalysis(normalizedType, start, end);
             return Response.ok(dataMapperService.writeValueAsString(trends)).build();
         });
     }
@@ -350,13 +360,13 @@ public class Fido2MetricsController {
         return processRequest(() -> {
             checkMetricsEnabled();
             
-            validateAggregationType(aggregationType);
+            String normalizedType = normalizeAggregationType(aggregationType);
             
             if (periods < 2 || periods > 12) {
                 throw errorResponseFactory.invalidRequest("periods must be between 2 and 12");
             }
             
-            Map<String, Object> comparison = metricsService.getPeriodOverPeriodComparison(aggregationType, periods);
+            Map<String, Object> comparison = metricsService.getPeriodOverPeriodComparison(normalizedType, periods);
             return Response.ok(dataMapperService.writeValueAsString(comparison)).build();
         });
     }
@@ -411,21 +421,9 @@ public class Fido2MetricsController {
             health.put("metricsEnabled", metricsEnabled);
             
             // Verify service is functional by attempting a simple operation
-            try {
-                // Try to access the metrics service to verify it's available
-                if (metricsService != null) {
-                    // Perform a lightweight check - verify service can be accessed
-                    // This doesn't query the database but verifies the service bean is initialized
-                    health.put("serviceAvailable", true);
-                } else {
-                    health.put("serviceAvailable", false);
-                    isHealthy = false;
-                    status = "DOWN";
-                }
-            } catch (Exception e) {
-                log.warn("Health check detected service issue: {}", e.getMessage());
-                health.put("serviceAvailable", false);
-                health.put("serviceError", "Service check failed");
+            boolean serviceAvailable = checkServiceAvailability();
+            health.put(Fido2MetricsConstants.HEALTH_SERVICE_AVAILABLE, serviceAvailable);
+            if (!serviceAvailable) {
                 isHealthy = false;
                 status = "DOWN";
             }
@@ -477,21 +475,15 @@ public class Fido2MetricsController {
         
         try {
             // First try parsing with timezone offset support (ISO-8601 compliant)
-            if (dateTime.contains("Z") || dateTime.contains("+") || dateTime.contains("-") && 
-                (dateTime.lastIndexOf('-') > 10 || dateTime.contains("+"))) {
-                try {
-                    java.time.ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateTime, ISO_OFFSET_FORMATTER);
-                    // Convert to UTC and extract LocalDateTime
-                    return zonedDateTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
-                } catch (Exception e) {
-                    // Fall through to try ISO_LOCAL_DATE_TIME format
-                    log.debug("Failed to parse with timezone offset, trying local format: {}", e.getMessage());
+            if (hasTimezoneIndicator(dateTime)) {
+                LocalDateTime parsedWithTimezone = tryParseWithTimezone(dateTime);
+                if (parsedWithTimezone != null) {
+                    return parsedWithTimezone;
                 }
             }
             
             // Parse as LocalDateTime (assumed to be UTC per API documentation)
-            LocalDateTime localDateTime = LocalDateTime.parse(dateTime, ISO_FORMATTER);
-            return localDateTime;
+            return LocalDateTime.parse(dateTime, ISO_FORMATTER);
         } catch (Exception e) {
             throw errorResponseFactory.invalidRequest(
                 paramName + " must be in ISO format (yyyy-MM-ddTHH:mm:ss or yyyy-MM-ddTHH:mm:ssZ/+offset). " +
@@ -501,11 +493,28 @@ public class Fido2MetricsController {
     }
 
     /**
-     * Validate aggregation type parameter
-     * @param aggregationType Aggregation type to validate
+     * Validate that startTime is before or equal to endTime
+     * @param startTime Start time
+     * @param endTime End time
+     * @throws WebApplicationException if startTime > endTime
+     */
+    private void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime != null && endTime != null && startTime.isAfter(endTime)) {
+            throw errorResponseFactory.invalidRequest(
+                "startTime must be less than or equal to endTime. " +
+                "Received: startTime=" + startTime + ", endTime=" + endTime
+            );
+        }
+    }
+    
+    /**
+     * Normalize and validate aggregation type parameter
+     * Converts to uppercase and validates against allowed values
+     * @param aggregationType Aggregation type to normalize and validate
+     * @return Normalized (uppercase) aggregation type
      * @throws WebApplicationException if invalid
      */
-    private void validateAggregationType(String aggregationType) {
+    private String normalizeAggregationType(String aggregationType) {
         if (aggregationType == null || aggregationType.trim().isEmpty()) {
             throw errorResponseFactory.invalidRequest("aggregationType is required");
         }
@@ -519,6 +528,7 @@ public class Fido2MetricsController {
                 "aggregationType must be one of: HOURLY, DAILY, WEEKLY, MONTHLY"
             );
         }
+        return upperType;
     }
 
     /**
@@ -552,12 +562,12 @@ public class Fido2MetricsController {
      */
     private String sanitizeErrorMessage(Exception exception) {
         if (exception == null) {
-            return "An unexpected error occurred while processing the request";
+            return Fido2MetricsConstants.ERROR_UNEXPECTED;
         }
         
         String message = exception.getMessage();
         if (message == null || message.trim().isEmpty()) {
-            return "An unexpected error occurred while processing the request";
+            return Fido2MetricsConstants.ERROR_UNEXPECTED;
         }
         
         // Remove potential sensitive information patterns
@@ -575,14 +585,66 @@ public class Fido2MetricsController {
         
         // If sanitization removed too much, use a generic message
         if (sanitized.trim().isEmpty() || sanitized.length() < 10) {
-            return "An unexpected error occurred while processing the request";
+            return Fido2MetricsConstants.ERROR_UNEXPECTED;
         }
         
         return "An unexpected error occurred: " + sanitized;
     }
 
     /**
+     * Check if service is available for health check
+     * @return true if service is available, false otherwise
+     */
+    private boolean checkServiceAvailability() {
+        try {
+            // Try to access the metrics service to verify it's available
+            if (metricsService != null) {
+                // Perform a lightweight check - verify service can be accessed
+                // This doesn't query the database but verifies the service bean is initialized
+                return true;
+            }
+            return false;
+        } catch (RuntimeException e) {
+            log.warn("Health check detected service issue: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Check if dateTime string contains timezone indicator
+     * @param dateTime DateTime string to check
+     * @return true if timezone indicator is present
+     */
+    private boolean hasTimezoneIndicator(String dateTime) {
+        return dateTime.contains("Z") || dateTime.contains("+") || 
+               (dateTime.contains("-") && (dateTime.lastIndexOf('-') > 10 || dateTime.contains("+")));
+    }
+    
+    /**
+     * Try to parse dateTime with timezone offset support
+     * Extracted to reduce cognitive complexity
+     * @param dateTime DateTime string to parse
+     * @return Parsed LocalDateTime in UTC, or null if parsing failed
+     */
+    private LocalDateTime tryParseWithTimezone(String dateTime) {
+        try {
+            java.time.ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateTime, ISO_OFFSET_FORMATTER);
+            // Convert to UTC and extract LocalDateTime
+            return zonedDateTime.withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
+        } catch (java.time.format.DateTimeParseException e) {
+            // Fall through to try ISO_LOCAL_DATE_TIME format
+            log.debug("Failed to parse with timezone offset, trying local format: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Functional interface for request processing
+     * 
+     * Note: This interface throws Exception to accommodate various exception types
+     * that may be thrown by implementations (e.g., WebApplicationException, 
+     * RuntimeException, checked exceptions from service calls).
+     * The processRequest() method handles all exceptions appropriately.
      */
     @FunctionalInterface
     private interface RequestProcessor {

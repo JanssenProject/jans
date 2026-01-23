@@ -517,9 +517,9 @@ public class Fido2MetricsService {
                 return null;
             }
 
-            // Convert LocalDateTime to Date for ORM persistence
-            Date startDate = Date.from(startTime.atZone(ZoneId.of("UTC")).toInstant());
-            Date endDate = Date.from(endTime.atZone(ZoneId.of("UTC")).toInstant());
+            // Convert LocalDateTime to Date for ORM persistence (reuse convertToDate for consistency)
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
             
             Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation(aggregationType, period, startDate, endDate);
             Map<String, Object> metricsData = new HashMap<>();

@@ -97,55 +97,67 @@ public class Fido2MetricsAggregationScheduler {
             Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
                 .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
             
-            if (metricsService != null && scheduler != null) {
-                if (!scheduler.shouldPerformAggregation()) {
-                    log.debug("Skipping {} aggregation - another node holds the lock", jobType);
-                    return;
-                }
+            if (metricsService == null || scheduler == null) {
+                return;
+            }
+            
+            if (!scheduler.shouldPerformAggregation()) {
+                log.debug("Skipping {} aggregation - another node holds the lock", jobType);
+                return;
+            }
 
-                // In cluster mode, try to start periodic lock updates
-                // If cluster mode fails, fall back to single-node mode and still run aggregation
-                ScheduledFuture<?> updateTask = null;
-                String lockUpdateFailureReason = null;
-                boolean isClusterMode = scheduler.isClusterEnvironment;
-                if (isClusterMode) {
-                    try {
-                        updateTask = scheduler.startPeriodicLockUpdates();
-                        if (updateTask == null) {
-                            // Capture the actual failure reason from the method
-                            // startPeriodicLockUpdates() logs the error internally, so we capture a generic message
-                            lockUpdateFailureReason = "Failed to start periodic lock updates (check logs for details)";
-                        }
-                    } catch (Exception e) {
-                        // Capture exception details if startPeriodicLockUpdates throws
-                        lockUpdateFailureReason = e.getMessage();
-                        log.debug("Exception during lock update initialization: {}", e.getMessage());
-                    }
-                    
-                    if (updateTask == null) {
-                        // Cluster mode failed, but shouldPerformAggregation already returned true 
-                        // (fallback to single-node), so we can still run aggregation
-                        String failureMsg = lockUpdateFailureReason != null 
-                            ? lockUpdateFailureReason 
-                            : "Cluster lock updates unavailable";
-                        log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
-                            jobType, failureMsg);
-                        // Continue to run aggregation in single-node mode
-                    }
-                }
-                
-                try {
-                    aggregationTask.accept(metricsService);
-                } finally {
-                    if (updateTask != null) {
-                        updateTask.cancel(false);
-                    }
+            // In cluster mode, try to start periodic lock updates
+            // If lock updates fail, we may have lost the lock - return early to prevent duplicate aggregation
+            ScheduledFuture<?> updateTask = initializeClusterLockUpdates(scheduler, jobType, log);
+            
+            // In cluster mode, if we couldn't start lock updates, we likely lost the lock
+            // Return early to prevent duplicate aggregation across nodes
+            if (scheduler.isClusterEnvironment && updateTask == null) {
+                log.warn("Skipping {} aggregation - failed to acquire/maintain cluster lock", jobType);
+                return;
+            }
+            
+            try {
+                aggregationTask.accept(metricsService);
+            } finally {
+                if (updateTask != null) {
+                    updateTask.cancel(false);
                 }
             }
         } catch (Exception e) {
             String errorMsg = String.format("Failed to execute %s aggregation job: %s", jobType, e.getMessage());
             log.error(errorMsg, e);
             throw new JobExecutionException(errorMsg, e);
+        }
+    }
+    
+    /**
+     * Initialize cluster lock updates for aggregation job
+     * Extracted to reduce cognitive complexity
+     * 
+     * @param scheduler The scheduler instance
+     * @param jobType Type of job (for logging)
+     * @param log Logger instance
+     * @return ScheduledFuture for lock updates, or null if not in cluster mode or initialization failed
+     */
+    private static ScheduledFuture<?> initializeClusterLockUpdates(
+            Fido2MetricsAggregationScheduler scheduler, String jobType, Logger log) {
+        if (!scheduler.isClusterEnvironment) {
+            return null;
+        }
+        
+        try {
+            ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+            if (updateTask == null) {
+                log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
+                    jobType, "Failed to start periodic lock updates (check logs for details)");
+            }
+            return updateTask;
+        } catch (Exception e) {
+            log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
+                jobType, e.getMessage());
+            log.debug("Exception during lock update initialization: {}", e.getMessage());
+            return null;
         }
     }
 

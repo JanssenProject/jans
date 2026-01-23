@@ -118,4 +118,10 @@ public final class Fido2MetricsConstants {
     // Error message keywords
     public static final String ERROR_KEYWORD_TIMEOUT = "timeout";
     public static final String ERROR_KEYWORD_EXPIRED = "expired";
+    
+    // Error messages
+    public static final String ERROR_UNEXPECTED = "An unexpected error occurred while processing the request";
+    
+    // Health check keys
+    public static final String HEALTH_SERVICE_AVAILABLE = "serviceAvailable";
 }
