@@ -11,6 +11,10 @@ try {
     readFileSync(resolve(__dirname,'package.json'), 'utf8')
   );
 
+  if (!name) {
+    throw new Error('Missing "name" field in package.json');
+  }
+
   const outdir = 'release';
   const supportedBrowser = ['chrome', 'firefox']
   supportedBrowser.forEach(browser => {
