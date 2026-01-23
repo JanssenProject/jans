@@ -12,7 +12,7 @@
 //! - Reads files on-demand from the archive (no extraction needed)
 //! - Validates archive format and structure during construction
 //! - Prevents path traversal attacks
-//! - Provides full VfsFileSystem trait implementation
+//! - Provides full [`VfsFileSystem`] trait implementation
 //!
 //! # WASM Support
 //!
@@ -55,7 +55,7 @@ impl<T> ArchiveVfs<T>
 where
     T: Read + Seek,
 {
-    /// Create an ArchiveVfs from a reader.
+    /// Create an [`ArchiveVfs`] from a reader.
     ///
     /// This method:
     /// 1. Validates the reader contains a valid ZIP archive
@@ -109,7 +109,7 @@ where
 }
 
 impl ArchiveVfs<std::fs::File> {
-    /// Create an ArchiveVfs from a file path (native only).
+    /// Create an [`ArchiveVfs`] from a file path (native only).
     ///
     /// This method:
     /// 1. Validates the file has .cjar extension
@@ -151,7 +151,7 @@ impl ArchiveVfs<std::fs::File> {
 }
 
 impl ArchiveVfs<Cursor<Vec<u8>>> {
-    /// Create an ArchiveVfs from bytes (works in WASM and native).
+    /// Create an [`ArchiveVfs`] from bytes (works in WASM and native).
     ///
     /// This method:
     /// 1. Validates the bytes form a valid ZIP archive
@@ -182,7 +182,7 @@ where
     /// - Removing leading "./" prefix
     /// - Converting "." to ""
     /// - Normalizing path separators
-    fn normalize_path(&self, path: &str) -> String {
+    fn normalize_path(path: &str) -> String {
         let path = path.trim_start_matches('/');
         let path = path.strip_prefix("./").unwrap_or(path);
         if path == "." || path.is_empty() {
@@ -194,12 +194,12 @@ where
 
     /// Check if a path exists in the archive (file or directory).
     fn path_exists(&self, path: &str) -> Result<bool, std::io::Error> {
-        let normalized = self.normalize_path(path);
+        let normalized = ArchiveVfs::<T>::normalize_path(path);
 
         let mut archive = self
             .archive
             .lock()
-            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {e}")))?;
 
         // Check if it's a file
         if archive.by_name(&normalized).is_ok() {
@@ -210,7 +210,7 @@ where
         let dir_prefix = if normalized.is_empty() {
             String::new()
         } else {
-            format!("{}/", normalized)
+            format!("{normalized}/")
         };
 
         for i in 0..archive.len() {
@@ -227,11 +227,11 @@ where
 
     /// Check if a path is a directory in the archive.
     fn is_directory(&self, path: &str) -> Result<bool, std::io::Error> {
-        let normalized = self.normalize_path(path);
+        let normalized = ArchiveVfs::<T>::normalize_path(path);
         let mut archive = self
             .archive
             .lock()
-            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {e}")))?;
         Ok(Self::is_directory_locked(&mut archive, &normalized))
     }
 
@@ -244,7 +244,7 @@ where
         }
 
         // Check if there's an explicit directory entry
-        let dir_path_with_slash = format!("{}/", normalized);
+        let dir_path_with_slash = format!("{normalized}/");
         if let Ok(file) = archive.by_name(&dir_path_with_slash) {
             return file.is_dir();
         }
@@ -253,7 +253,7 @@ where
         for i in 0..archive.len() {
             if let Ok(file) = archive.by_index(i) {
                 let file_name = file.name();
-                if file_name.starts_with(&format!("{}/", normalized)) {
+                if file_name.starts_with(&format!("{normalized}/")) {
                     return true;
                 }
             }
@@ -268,17 +268,17 @@ where
     T: Read + Seek + Send + Sync + 'static,
 {
     fn read_file(&self, path: &str) -> Result<Vec<u8>, std::io::Error> {
-        let normalized = self.normalize_path(path);
+        let normalized = ArchiveVfs::<T>::normalize_path(path);
 
         let mut archive = self
             .archive
             .lock()
-            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {e}")))?;
 
         let mut file = archive.by_name(&normalized).map_err(|e| {
             std::io::Error::new(
                 std::io::ErrorKind::NotFound,
-                format!("File not found in archive: {}: {}", path, e),
+                format!("File not found in archive: {path}: {e}"),
             )
         })?;
 
@@ -297,10 +297,9 @@ where
     }
 
     fn is_file(&self, path: &str) -> bool {
-        let normalized = self.normalize_path(path);
-        let mut archive = match self.archive.lock() {
-            Ok(archive) => archive,
-            Err(_) => return false, // Return false if mutex is poisoned
+        let normalized = ArchiveVfs::<T>::normalize_path(path);
+        let Ok(mut archive) = self.archive.lock() else {
+            return false;
         };
 
         if let Ok(file) = archive.by_name(&normalized) {
@@ -311,24 +310,24 @@ where
     }
 
     fn read_dir(&self, path: &str) -> Result<Vec<DirEntry>, std::io::Error> {
-        let normalized = self.normalize_path(path);
+        let normalized = ArchiveVfs::<T>::normalize_path(path);
         let prefix = if normalized.is_empty() {
             String::new()
         } else {
-            format!("{}/", normalized)
+            format!("{normalized}/")
         };
 
         let mut archive = self
             .archive
             .lock()
-            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {}", e)))?;
+            .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {e}")))?;
         let mut seen = std::collections::HashSet::new();
         let mut entry_paths = Vec::new();
 
         // First pass: collect all unique entry paths
         for i in 0..archive.len() {
             let file = archive.by_index(i).map_err(|e| {
-                std::io::Error::other(format!("Failed to read archive entry {}: {}", i, e))
+                std::io::Error::other(format!("Failed to read archive entry {i}: {e}"))
             })?;
 
             let file_name = file.name();
@@ -357,7 +356,7 @@ where
                 let entry_path = if prefix.is_empty() {
                     child_name.to_string()
                 } else {
-                    format!("{}{}", prefix, child_name)
+                    format!("{prefix}{child_name}")
                 };
 
                 entry_paths.push((child_name.to_string(), entry_path));
@@ -367,7 +366,7 @@ where
         // Second pass: check if each path is a directory
         let mut entries = Vec::new();
         for (name, entry_path) in entry_paths {
-            let entry_path_normalized = self.normalize_path(&entry_path);
+            let entry_path_normalized = ArchiveVfs::<T>::normalize_path(&entry_path);
             let is_directory = Self::is_directory_locked(&mut archive, &entry_path_normalized);
 
             entries.push(DirEntry {
@@ -426,8 +425,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidZipFormat error for non-ZIP data");
         assert!(
             matches!(err, ArchiveError::InvalidZipFormat { .. }),
-            "Expected InvalidZipFormat error, got: {:?}",
-            err
+            "Expected InvalidZipFormat error, got: {err:?}"
         );
     }
 
@@ -438,8 +436,7 @@ mod tests {
         let err = result.expect_err("Expected PathTraversal error for malicious path");
         assert!(
             matches!(err, ArchiveError::PathTraversal { .. }),
-            "Expected PathTraversal error, got: {:?}",
-            err
+            "Expected PathTraversal error, got: {err:?}"
         );
     }
 

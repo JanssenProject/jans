@@ -55,21 +55,21 @@ pub enum AuthorizeError {
     /// Error encountered while processing JWT token data
     #[error(transparent)]
     ProcessTokens(#[from] JwtProcessingError),
-    /// Error encountered while parsing Action to EntityUid
+    /// Error encountered while parsing Action to `EntityUid`
     #[error("could not parse action: {0}")]
-    Action(ParseErrors),
+    Action(Box<ParseErrors>),
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
-    CreateContext(#[from] ContextJsonError),
+    CreateContext(#[from] Box<ContextJsonError>),
     /// Error encountered while creating [`cedar_policy::Request`] for entity principal
     #[error(transparent)]
-    InvalidPrincipal(#[from] InvalidPrincipalError),
+    InvalidPrincipal(#[from] Box<InvalidPrincipalError>),
     /// Error encountered while validating the Cedar request
     #[error("request validation error: {0}")]
-    RequestValidation(#[from] RequestValidationError),
+    RequestValidation(#[from] Box<RequestValidationError>),
     /// Error encountered while checking if the Entities adhere to the schema
     #[error("failed to validate Cedar entities: {0:?}")]
-    ValidateEntities(#[from] EntitiesError),
+    ValidateEntities(#[from] Box<EntitiesError>),
     /// Error encountered while parsing all entities to json for logging
     #[error("could not convert entities to json: {0}")]
     EntitiesToJson(SerdeJsonError),
@@ -96,15 +96,15 @@ pub enum AuthorizeError {
     MultiIssuerEntity(MultiIssuerEntityError),
 }
 
-impl From<Box<EntitiesError>> for AuthorizeError {
-    fn from(err: Box<EntitiesError>) -> Self {
-        AuthorizeError::ValidateEntities(*err)
+impl From<ParseErrors> for AuthorizeError {
+    fn from(err: ParseErrors) -> Self {
+        Self::Action(Box::new(err))
     }
 }
 
-impl From<Box<RequestValidationError>> for AuthorizeError {
-    fn from(err: Box<RequestValidationError>) -> Self {
-        AuthorizeError::RequestValidation(*err)
+impl From<InvalidPrincipalError> for AuthorizeError {
+    fn from(err: InvalidPrincipalError) -> Self {
+        Self::InvalidPrincipal(Box::new(err))
     }
 }
 

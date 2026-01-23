@@ -3,7 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, IdTokenTrustMode, JsonRule, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+};
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use std::{hint::black_box, sync::LazyLock};
 use tokio::runtime::Runtime;

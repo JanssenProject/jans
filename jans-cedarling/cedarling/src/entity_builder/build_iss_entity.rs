@@ -89,7 +89,7 @@ mod test {
 
         assert_entity_eq(
             &iss_entity,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::TrustedIssuer", "id": "some_iss"},
                 "attrs": {
                     "issuer_entity_id": {
@@ -120,7 +120,7 @@ mod test {
 
         assert_entity_eq(
             &iss_entity,
-            json!({
+            &json!({
                 "uid": {"type": "TrustedIssuer", "id": "some_iss"},
                 "attrs": {
                     "issuer_entity_id": {

@@ -48,7 +48,7 @@ use crate::{Cedarling, PolicyStoreSource, RequestUnsigned};
 /// This builder includes:
 /// - A schema with User, Resource, and Action types
 /// - A simple "allow-read" policy
-/// - A "deny-write-guest" policy based on user_type attribute
+/// - A "deny-write-guest" policy based on `user_type` attribute
 fn create_authz_policy_store_builder() -> PolicyStoreTestBuilder {
     PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
         .with_name("Integration Test Policy Store")
@@ -125,7 +125,7 @@ fn extract_archive_to_temp_dir(archive_bytes: &[u8]) -> TempDir {
 ///
 /// Disables default entity building (user, workload, roles) since we're using
 /// a custom schema that doesn't include the Jans namespace types.
-/// Uses a custom principal_bool_operator that checks for TestApp::User principal.
+/// Uses a custom `principal_bool_operator` that checks for `TestApp::User` principal.
 async fn get_cedarling_from_directory(path: std::path::PathBuf) -> Cedarling {
     use crate::JsonRule;
 
@@ -149,7 +149,7 @@ async fn get_cedarling_from_directory(path: std::path::PathBuf) -> Cedarling {
 ///
 /// Disables default entity building (user, workload, roles) since we're using
 /// a custom schema that doesn't include the Jans namespace types.
-/// Uses a custom principal_bool_operator that checks for TestApp::User principal.
+/// Uses a custom `principal_bool_operator` that checks for `TestApp::User` principal.
 async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
     use crate::JsonRule;
 
@@ -392,8 +392,7 @@ async fn test_manifest_validation_invalid_checksum_format() {
                 )
             ) if msg.contains("Invalid checksum format")
         ),
-        "Expected Directory error with 'Invalid checksum format', got: {:?}",
-        err
+        "Expected Directory error with 'Invalid checksum format', got: {err:?}"
     );
 }
 
@@ -440,8 +439,7 @@ async fn test_manifest_validation_policy_store_id_mismatch() {
                 )
             ) if msg.contains("Policy store ID mismatch")
         ),
-        "Expected Directory error with 'Policy store ID mismatch', got: {:?}",
-        err
+        "Expected Directory error with 'Policy store ID mismatch', got: {err:?}"
     );
 }
 
@@ -848,7 +846,7 @@ async fn test_load_from_cjar_url_and_authorize_success() {
     );
 }
 
-/// Test that CjarUrl handles HTTP errors gracefully.
+/// Test that `CjarUrl` handles HTTP errors gracefully.
 /// The HTTP client retries on HTTP error status codes before failing.
 #[test]
 async fn test_cjar_url_handles_http_error() {
@@ -889,15 +887,14 @@ async fn test_cjar_url_handles_http_error() {
                 )
             )
         ),
-        "Expected Archive error after retries, got: {:?}",
-        err
+        "Expected Archive error after retries, got: {err:?}"
     );
 }
 
 /// Test loading archive from bytes directly using the loader function.
 ///
 /// This tests the `load_policy_store_archive_bytes` function which is the
-/// underlying mechanism used by CjarUrl and is WASM-compatible.
+/// underlying mechanism used by `CjarUrl` and is WASM-compatible.
 #[test]
 async fn test_load_policy_store_archive_bytes_directly() {
     use crate::common::policy_store::loader::load_policy_store_archive_bytes;
@@ -955,8 +952,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
             err,
             crate::common::policy_store::errors::PolicyStoreError::Archive(_)
         ),
-        "Expected Archive error for invalid bytes, got: {:?}",
-        err
+        "Expected Archive error for invalid bytes, got: {err:?}"
     );
 }
 
@@ -967,9 +963,9 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 /// Test the `authorize` method with signed JWTs loaded from a directory-based policy store.
 ///
 /// This test verifies the full flow:
-/// 1. Create a policy store with a trusted issuer pointing to MockServer
-/// 2. MockServer provides OIDC config and JWKS endpoints
-/// 3. Generate signed JWTs using MockServer
+/// 1. Create a policy store with a trusted issuer pointing to `MockServer`
+/// 2. `MockServer` provides OIDC config and JWKS endpoints
+/// 3. Generate signed JWTs using `MockServer`
 /// 4. Call `authorize` with the signed tokens
 #[test]
 #[cfg(not(target_arch = "wasm32"))]
@@ -988,7 +984,7 @@ async fn test_authorize_with_jwt_from_directory() {
         .expect("Failed to create mock server");
 
     let issuer_url = mock_server.issuer();
-    let oidc_endpoint = format!("{}/.well-known/openid-configuration", issuer_url);
+    let oidc_endpoint = format!("{issuer_url}/.well-known/openid-configuration");
 
     // Create trusted issuer JSON that points to mock server
     // Uses "Jans" as the issuer name to match the default entity builder namespace
@@ -997,7 +993,7 @@ async fn test_authorize_with_jwt_from_directory() {
     "mock_issuer": {{
         "name": "Jans",
         "description": "Test issuer for JWT validation",
-        "openid_configuration_endpoint": "{}",
+        "openid_configuration_endpoint": "{oidc_endpoint}",
         "token_metadata": {{
             "access_token": {{
                 "entity_type_name": "Jans::Access_token",
@@ -1014,8 +1010,7 @@ async fn test_authorize_with_jwt_from_directory() {
             }}
         }}
     }}
-}}"#,
-        oidc_endpoint
+}}"#
     );
 
     // Schema that works with JWT-based authorization
@@ -1212,7 +1207,7 @@ permit(
 
     // Prove JWT validation is enforced: tampered token should fail
     // Create a request with an invalid/tampered access token
-    let tampered_token = format!("{}.tampered", access_token);
+    let tampered_token = format!("{access_token}.tampered");
     let invalid_request = Request::deserialize(json!({
         "tokens": {
             "access_token": tampered_token,
@@ -1238,7 +1233,6 @@ permit(
     // Tampered JWT should result in a JWT validation error
     assert!(
         matches!(&err, crate::authz::AuthorizeError::ProcessTokens(_)),
-        "Expected JWT processing error for tampered token, got: {:?}",
-        err
+        "Expected JWT processing error for tampered token, got: {err:?}"
     );
 }

@@ -27,6 +27,12 @@ use serde::{Deserialize, Deserializer, Serialize};
 impl BootstrapConfig {
     /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
     /// Environment variables have bigger priority.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BootstrapConfigLoadingError`] if:
+    /// - Both principals are disabled
+    /// - Failed to parse JWT signature validation
     //
     // Simple implementation that map input structure to JSON map
     // and map environment variables with prefix `CEDARLING_` to JSON map. And merge it.
@@ -38,7 +44,13 @@ impl BootstrapConfig {
         Self::from_raw_config(&config_raw)
     }
 
-    /// Construct an instance from BootstrapConfigRaw
+    /// Construct an instance from [`BootstrapConfigRaw`]
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BootstrapConfigLoadingError`] if:
+    /// - Both principals are disabled
+    /// - Failed to parse JWT signature validation
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
         if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
             return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
@@ -106,11 +118,11 @@ impl BootstrapConfig {
                     let file_ext = path
                         .extension()
                         .and_then(|ext| ext.to_str())
-                        .map(|x| x.to_lowercase());
+                        .map(str::to_lowercase);
 
                     match file_ext.as_deref() {
                         Some("json") => PolicyStoreSource::FileJson(path.into()),
-                        Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
+                        Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
                         Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
                         _ => Err(
                             BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),

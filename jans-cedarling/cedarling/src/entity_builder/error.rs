@@ -94,7 +94,7 @@ impl From<BuildAttrsError> for BuildEntityErrorKind {
 
 impl Display for BuildAttrsErrorVec {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
+        write!(f, "{:?}", self.0.iter().map(ToString::to_string))
     }
 }
 
@@ -138,7 +138,7 @@ impl BuildEntityErrorKind {
 fn collect_errors_to_str<T: Display>(errors: &[T]) -> String {
     errors
         .iter()
-        .map(|e| e.to_string())
+        .map(ToString::to_string)
         .collect::<Vec<_>>()
         .join(", ")
 }

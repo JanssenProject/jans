@@ -22,6 +22,9 @@ tokio = "1.42.0"
 tokio-util = "0.7.15"
 mockito = "1.5.0"
 
+[workspace.lints.clippy]
+pedantic = "warn"
+
 
 [profile.release]
 debug-assertions = false

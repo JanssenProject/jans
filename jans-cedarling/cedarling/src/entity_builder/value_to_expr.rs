@@ -77,22 +77,21 @@ mod test {
 
     #[test]
     fn test_value_to_expr() {
-        let attrs = HashMap::from_iter(
-            [
-                ("test_null", value_to_expr(&json!(Value::Null)).unwrap()),
-                ("test_bool", value_to_expr(&json!(true)).unwrap()),
-                ("test_long", value_to_expr(&json!(521)).unwrap()),
-                ("test_decimal", value_to_expr(&json!(12.5)).unwrap()),
-                ("test_str", value_to_expr(&json!("some str")).unwrap()),
-                ("test_set", value_to_expr(&json!(["a", 1])).unwrap()),
-                (
-                    "test_record",
-                    value_to_expr(&json!({"a": 1, "b": "b"})).unwrap(),
-                ),
-            ]
-            .into_iter()
-            .flat_map(|(key, expr)| expr.map(|expr| (key.to_string(), expr))),
-        );
+        let attrs = [
+            ("test_null", value_to_expr(&json!(Value::Null)).unwrap()),
+            ("test_bool", value_to_expr(&json!(true)).unwrap()),
+            ("test_long", value_to_expr(&json!(521)).unwrap()),
+            ("test_decimal", value_to_expr(&json!(12.5)).unwrap()),
+            ("test_str", value_to_expr(&json!("some str")).unwrap()),
+            ("test_set", value_to_expr(&json!(["a", 1])).unwrap()),
+            (
+                "test_record",
+                value_to_expr(&json!({"a": 1, "b": "b"})).unwrap(),
+            ),
+        ]
+        .into_iter()
+        .filter_map(|(key, expr)| expr.map(|expr| (key.to_string(), expr)))
+        .collect::<HashMap<_, _>>();
 
         let entity = Entity::new(
             EntityUid::from_str("Test::\"test\"").expect("should parse EntityUid"),

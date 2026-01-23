@@ -41,7 +41,7 @@ fn build_entity_attrs_with_shape(
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
 
-    for (attr_name, attr_shape) in attrs_shape.iter() {
+    for (attr_name, attr_shape) in attrs_shape {
         match attr_shape.src() {
             AttrSrc::JwtClaim(claim_src) => {
                 let mut required_missing_claims: Vec<SmolStr> = Vec::new();
@@ -162,7 +162,7 @@ fn build_entity_attrs_without_schema(
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
 
-    for (name, src) in attrs_src.iter() {
+    for (name, src) in attrs_src {
         let Some(mappings) = claim_mappings.and_then(|m| m.mapping(name)) else {
             // without claim mapping
             match value_to_expr(src) {
@@ -211,7 +211,7 @@ mod test {
 
     #[test]
     fn can_build_entity_with_schema() {
-        let schema_src = r#"
+        let schema_src = r"
         namespace SomeNamespace {
             entity AnotherEntity;
             entity SomeEntity {
@@ -234,7 +234,7 @@ mod test {
                 optional_attr?: Bool,
             };
         }
-        "#;
+        ";
         let cedar_schema = Schema::from_str(schema_src).expect("builds cedar Schema");
         let mapping_schema: MappingSchema = (&ValidatorSchema::from_str(schema_src)
             .expect("builds ValidatorSchema"))
@@ -279,7 +279,7 @@ mod test {
 
         assert_entity_eq(
             &dummy_entity,
-            json!({
+            &json!({
                 "uid": {"type": "SomeNamespace::SomeEntity", "id": "some_id"},
                 "attrs": {
                     "bool_attr": true,
@@ -341,7 +341,7 @@ mod test {
             "url_attr": {
                 "parser": "regex",
                 "type": "Jans::Url",
-                "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
+                "regex_expression": r"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$",
                 "SCHEME": {"attr": "scheme", "type": "String"},
                 "DOMAIN": {"attr": "domain", "type": "String"},
                 "PATH": {"attr": "path", "type": "String"}
@@ -384,7 +384,7 @@ mod test {
 
         assert_entity_eq(
             &dummy_entity,
-            json!({
+            &json!({
                 "uid": {"type": "SomeEntity", "id": "some_id"},
                 "attrs": {
                     "email_attr": {
@@ -416,7 +416,7 @@ mod test {
             "url_attr": {
                 "parser": "regex",
                 "type": "Jans::Url",
-                "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
+                "regex_expression": r"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$",
                 "SCHEME": {"attr": "scheme", "type": "String"},
                 "DOMAIN": {"attr": "domain", "type": "String"},
                 "PATH": {"attr": "path", "type": "String"}
@@ -445,7 +445,7 @@ mod test {
 
         assert_entity_eq(
             &dummy_entity,
-            json!({
+            &json!({
                 "uid": {"type": "SomeEntity", "id": "some_id"},
                 "attrs": {
                     "email_attr": {

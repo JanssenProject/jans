@@ -60,7 +60,7 @@ pub struct BootstrapConfig {
     /// If `None` then lock service is disabled.
     pub lock_config: Option<LockServiceConfig>,
     /// Maximum number of default entities allowed in a policy store.
-    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     pub max_default_entities: Option<usize>,
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
@@ -82,6 +82,10 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_from_file("../test_files/bootstrap_props.json").unwrap();
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, BootstrapConfigLoadingError> {
         let config = Config::builder()
@@ -95,7 +99,11 @@ impl BootstrapConfig {
         raw.try_into()
     }
 
-    /// Loads a `BootstrapConfig` from a JSON string
+    /// Loads a [`BootstrapConfig`] from a JSON string
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     pub fn load_from_json(json: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw: BootstrapConfigRaw = serde_json::from_str(json)
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
@@ -104,6 +112,10 @@ impl BootstrapConfig {
 
     /// Load config from environment variables.
     /// If you need with fallback to applied config use [`Self::from_raw_config_and_env`].
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn from_env() -> Result<Self, BootstrapConfigLoadingError> {
         let config = Config::builder()
@@ -128,6 +140,10 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_default().unwrap();
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     pub fn load_default() -> Result<Self, BootstrapConfigLoadingError> {
         const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.yaml");
 
@@ -228,7 +244,7 @@ pub enum BootstrapConfigLoadingError {
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
 
-    /// Error returned when cjar_url is missing or empty.
+    /// Error returned when `cjar_url` is missing or empty.
     #[error(
         "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
     )]

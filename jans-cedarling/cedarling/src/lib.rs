@@ -31,7 +31,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
-use std::sync::Arc;
+use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
@@ -103,6 +103,10 @@ impl Cedarling {
     /// Create a new instance of the Cedarling application.
     /// Initialize instance from enviroment variables and from config.
     /// Configuration structure has lower priority.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`InitCedarlingError`] if initialization fails.
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn new_with_env(
         raw_config: Option<BootstrapConfigRaw>,
@@ -112,6 +116,10 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`InitCedarlingError`] if initialization fails.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
@@ -134,7 +142,7 @@ impl Cedarling {
                         None,
                     ))
                     .set_message("configuration parsed successfully".to_string()),
-                )
+                );
             })
             .inspect_err(|err| {
                 log.log_any(
@@ -144,7 +152,7 @@ impl Cedarling {
                     ))
                     .set_error(err.to_string())
                     .set_message("configuration parsed with error".to_string()),
-                )
+                );
             })?;
 
         let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
@@ -162,36 +170,51 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
+    ///
+    /// # Errors
+    ///
+    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
+    #[allow(clippy::unused_async)]
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(request).await
+        self.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
+    ///
+    /// # Errors
+    ///
+    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
+    #[allow(clippy::unused_async)]
     pub async fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize_unsigned(request).await
+        self.authz.authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
+    ///
+    /// # Errors
+    ///
+    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
+    #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.authz.authorize_multi_issuer(request).await
+        self.authz.authorize_multi_issuer(&request)
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub(crate) async fn build_entities(
+    pub(crate) fn build_entities(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
-        let tokens = self.authz.decode_tokens(request).await.map_err(Box::new)?;
+        let tokens = self.authz.decode_tokens(request)?;
         self.authz.build_entities(request, &tokens)
     }
 
@@ -222,18 +245,18 @@ fn log_policy_store_metadata(
 
     // Add description if available
     if let Some(desc) = metadata.description() {
-        details.push_str(&format!(" - {}", desc));
+        write!(details, " - {desc}").unwrap();
     }
 
     // Add Cedar version info
-    details.push_str(&format!(" [Cedar {}]", metadata.cedar_version()));
+    write!(details, " [Cedar {}]", metadata.cedar_version()).unwrap();
 
     // Add timestamp info if available
     if let Some(created) = metadata.created_date() {
-        details.push_str(&format!(" (created: {})", created.format("%Y-%m-%d")));
+        write!(details, " (created: {})", created.format("%Y-%m-%d")).unwrap();
     }
     if let Some(updated) = metadata.updated_date() {
-        details.push_str(&format!(" (updated: {})", updated.format("%Y-%m-%d")));
+        write!(details, " (updated: {})", updated.format("%Y-%m-%d")).unwrap();
     }
 
     log.log_any(
@@ -279,10 +302,7 @@ fn log_policy_store_metadata(
                     LogLevel::WARN,
                     None,
                 ))
-                .set_message(format!(
-                    "Could not check Cedar version compatibility: {}",
-                    e
-                )),
+                .set_message(format!("Could not check Cedar version compatibility: {e}")),
             );
         },
     }

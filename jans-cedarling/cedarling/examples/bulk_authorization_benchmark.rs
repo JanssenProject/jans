@@ -3,7 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
+};
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use std::time::Instant;
@@ -119,14 +123,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\n  Batch Results:");
     println!("    Total time: {:.2} ms", batch_duration.as_millis());
-    println!("    Documents processed: {}", total_docs);
+    println!("    Documents processed: {total_docs}");
     println!(
         "    Average per document: {} μs ({:.3} ms)",
         avg_per_doc,
         avg_per_doc as f64 / 1000.0
     );
-    println!("    Successful authorizations: {}", successful_auths);
-    println!("    Failed authorizations: {}", failed_auths);
+    println!("    Successful authorizations: {successful_auths}");
+    println!("    Failed authorizations: {failed_auths}");
 
     // Test 3: Simulate OpenSearch-like processing with different batch sizes
     println!("\n3. Simulating Different Batch Sizes:");
@@ -168,8 +172,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .collect::<Result<Vec<_>, _>>()?;
 
     let mem_after = get_memory_usage(&reg);
-    println!("  Memory before: {} MB", mem_before);
-    println!("  Memory after: {} MB", mem_after);
+    println!("  Memory before: {mem_before} MB");
+    println!("  Memory after: {mem_after} MB");
     println!("  Memory increase: {} MB", mem_after - mem_before);
 
     // Test 5: Comparison with OpenSearch benchmark expectations
@@ -202,14 +206,14 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
 
     for i in 0..count {
         // Generate random data similar to the OpenSearch benchmark
-        let name = format!("Student_{}", i);
+        let name = format!("Student_{i}");
         let grad_year = 2020 + (i % 7); // 2020-2026
         let gpa = (i as f64 * 0.001) % 5.0; // 0-5 GPA
 
         let principals = vec![EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::User".to_string(),
-                id: format!("user_{}", i),
+                id: format!("user_{i}"),
             },
             attributes: HashMap::from([
                 ("sub".to_string(), json!(format!("sub_{}", i))),
@@ -232,7 +236,7 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                    id: format!("document_{}", i),
+                    id: format!("document_{i}"),
                 },
                 attributes: HashMap::from_iter([
                     (

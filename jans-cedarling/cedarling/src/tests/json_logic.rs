@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! This module contains tests for JSON logic functionality.  
+//! This module contains tests for JSON logic functionality.\
 //! Specifically, we test the result of `AuthorizeResult::new`, which is based on the evaluation of JSON logic for principals.
 
 use std::collections::{HashMap, HashSet};
@@ -50,10 +50,10 @@ fn get_result(
         rule,
         workload
             .is_some()
-            .then_some(EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap()),
+            .then_some(&EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap()),
         person
             .is_some()
-            .then_some(EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap()),
+            .then_some(&EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap()),
         workload_response,
         person_response,
         // just randomly generated UUID

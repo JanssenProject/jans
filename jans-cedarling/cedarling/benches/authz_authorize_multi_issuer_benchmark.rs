@@ -3,7 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, InitCedarlingError, JsonRule, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, TokenInput,
+};
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
@@ -40,10 +44,10 @@ fn authorize_multi_issuer(c: &mut Criterion) {
                     let result = cedarling.authorize_multi_issuer(req).await;
                     match result {
                         Ok(v) => {
-                            assert!(v.decision, "should be true")
+                            assert!(v.decision, "should be true");
                         },
                         Err(e) => {
-                            panic!("{}, {:?}", e, e)
+                            panic!("{e}, {e:?}")
                         },
                     }
                 }
@@ -74,11 +78,11 @@ async fn prepare_cedarling_with_jwt_validation(
         serde_yml::from_str::<serde_yml::Value>(POLICY_STORE).expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
-        format!("{}/.well-known/openid-configuration", base_idp_url1).into();
+        format!("{base_idp_url1}/.well-known/openid-configuration").into();
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["DolphinIssuer"]
         ["openid_configuration_endpoint"] =
-        format!("{}/.well-known/openid-configuration", base_idp_url2).into();
+        format!("{base_idp_url2}/.well-known/openid-configuration").into();
 
     let bootstrap_config = BootstrapConfig {
         application_name: "test_app".to_string(),
@@ -116,6 +120,9 @@ async fn prepare_cedarling_with_jwt_validation(
     Cedarling::new(&bootstrap_config).await
 }
 
+/// # Panics
+///
+/// Panics if the JSON is not valid.
 pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
     mock1: &MockServer,
     mock2: &MockServer,
@@ -128,10 +135,10 @@ pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
             "client_id": "acme_multi_client_123",
             "aud": "acme_multi_audience",
             "scope": ["read:wiki", "write:profile"],
-            "exp": 2000000000,
-            "iat": 1516239022
+            "exp": 2_000_000_000,
+            "iat": 1_516_239_022
         }),
-        &mock1.keys.to_owned(),
+        &mock1.keys.clone(),
     );
 
     let dolphin_multi_token = generate_token_using_claims_and_keypair(
@@ -142,10 +149,10 @@ pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
             "client_id": "dolphin_multi_client_456",
             "aud": "dolphin_multi_audience",
             "location": ["miami"],
-            "exp": 2000000000,
-            "iat": 1516239022
+            "exp": 2_000_000_000,
+            "iat": 1_516_239_022
         }),
-        &mock2.keys.to_owned(),
+        &mock2.keys.clone(),
     );
 
     AuthorizeMultiIssuerRequest::new_with_fields(

@@ -29,14 +29,14 @@ async fn check_mapping_tokens_data() {
                     "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
                     "acr": "simple_password_auth",
                     "x5t#S256": "",
-                    "nbf": 1730494543,
+                    "nbf": 1_730_494_543,
                     "scope": [
                         "role",
                         "openid"
                     ],
-                    "auth_time": 1730494542,
-                    "exp": 1730574245,
-                    "iat": 1730494543,
+                    "auth_time": 1_730_494_542,
+                    "exp": 1_730_574_245,
+                    "iat": 1_730_494_543,
                     "jti": "qpCu52Z0S8ynfZ7ufCXQow",
                     "username": "John Smith",
                     "status": {
@@ -57,11 +57,11 @@ async fn check_mapping_tokens_data() {
                     "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
                     "acr": "simple_password_auth",
                     "c_hash": "pQi9rYqmSCVc3tK--2AgiA",
-                    "nbf": 1730494543,
-                    "auth_time": 1730494542,
-                    "exp": 1730498143,
+                    "nbf": 1_730_494_543,
+                    "auth_time": 1_730_494_542,
+                    "exp": 1_730_498_143,
                     "grant": "authorization_code",
-                    "iat": 1730494543,
+                    "iat": 1_730_494_543,
                     "jti": "v2SWGfAEQGWZ1mPDSJPvbg",
                     "status": {
                         "status_list": {
@@ -98,7 +98,7 @@ async fn check_mapping_tokens_data() {
                 }
             },
             "context": {
-                "current_time":1731812031,
+                "current_time":1_731_812_031,
                 "device_health": [],
                 "fraud_indicators": [],
                 "geolocation": [],
@@ -113,9 +113,8 @@ async fn check_mapping_tokens_data() {
 
     let entities = cedarling
         .build_entities(&request)
-        .await
         // log err to be human readable
-        .inspect_err(|err| println!("Error: {}", err))
+        .inspect_err(|err| println!("Error: {err}"))
         .expect("request should be parsed without errors");
 
     // check value of resource entity

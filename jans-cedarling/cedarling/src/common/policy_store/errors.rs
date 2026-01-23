@@ -205,7 +205,7 @@ pub(crate) enum PolicyStoreError {
 /// Details about Cedar parsing errors.
 #[derive(Debug, Clone, thiserror::Error)]
 pub(crate) enum CedarParseErrorDetail {
-    /// Missing @id() annotation
+    /// Missing `@id()` annotation
     #[error("No @id() annotation found and could not derive ID from filename")]
     MissingIdAnnotation,
 

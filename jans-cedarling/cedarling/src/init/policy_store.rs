@@ -77,6 +77,14 @@ fn extract_first_policy_store(
 /// Loads the policy store based on the provided configuration.
 ///
 /// This function supports multiple sources for loading policies.
+///
+/// # Errors
+///
+/// Returns [`PolicyStoreLoadError`] if:
+/// - The policy store configuration is invalid
+/// - JSON/YAML parsing fails
+/// - No policy store is found in the configuration
+/// - Policy store validation fails
 pub async fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
@@ -136,9 +144,9 @@ async fn load_policy_store_from_cjar_file(
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::{loader, manager::PolicyStoreManager};
 
-    let loaded = loader::load_policy_store_archive(path).await.map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Failed to load from archive: {}", e))
-    })?;
+    let loaded = loader::load_policy_store_archive(path)
+        .await
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
 
     // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
@@ -186,12 +194,11 @@ async fn load_policy_store_from_cjar_url(
     let bytes = client
         .get_bytes(url)
         .await
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {}", e)))?;
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
 
     // Load from bytes (works in both native and WASM)
-    let loaded = loader::load_policy_store_archive_bytes(bytes).map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Failed to load from archive: {}", e))
-    })?;
+    let loaded = loader::load_policy_store_archive_bytes(bytes)
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
 
     // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
@@ -220,7 +227,7 @@ async fn load_policy_store_from_directory(
     let loaded = loader::load_policy_store_directory(path)
         .await
         .map_err(|e| {
-            PolicyStoreLoadError::Directory(format!("Failed to load from directory: {}", e))
+            PolicyStoreLoadError::Directory(format!("Failed to load from directory: {e}"))
         })?;
 
     // Get the policy store ID and metadata
@@ -270,7 +277,7 @@ fn load_policy_store_from_archive_bytes(
 
     // Load from bytes (works in both native and WASM)
     let loaded = loader::load_policy_store_archive_bytes(bytes.to_vec()).map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {}", e))
+        PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {e}"))
     })?;
 
     // Get the policy store ID and metadata

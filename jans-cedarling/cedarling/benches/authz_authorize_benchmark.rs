@@ -3,7 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
+    InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    Request,
+};
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
@@ -140,12 +144,12 @@ async fn prepare_cedarling_with_jwt_validation(
     // We overwrite the idp endpoint here with out mock server
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
         ["Jans"]["openid_configuration_endpoint"] =
-        format!("{}/.well-known/openid-configuration", base_idp_url_1).into();
+        format!("{base_idp_url_1}/.well-known/openid-configuration").into();
 
     // Also update the AnotherIssuer to use the mock server
     policy_store["policy_stores"]["a1bf93115de86de760ee0bea1d529b521489e5a11747"]["trusted_issuers"]
         ["Jans2"]["openid_configuration_endpoint"] =
-        format!("{}/.well-known/openid-configuration", base_idp_url_2).into();
+        format!("{base_idp_url_2}/.well-known/openid-configuration").into();
 
     let bootstrap_config = BootstrapConfig {
         application_name: "test_app".to_string(),
@@ -181,6 +185,10 @@ async fn prepare_cedarling_with_jwt_validation(
     Cedarling::new(&bootstrap_config).await
 }
 
+/// # Panics
+///
+/// Panics if the JSON is not valid.
+#[must_use]
 pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
     Request::deserialize(serde_json::json!(
         {
@@ -199,9 +207,9 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
                       "profile"
                     ],
                     "org_id": "some_long_id",
-                    "auth_time": 1724830746,
-                    "exp": 1724945978,
-                    "iat": 1724832259,
+                    "auth_time": 1_724_830_746,
+                    "exp": 1_724_945_978,
+                    "iat": 1_724_832_259,
                     "jti": "lxTmCVRFTxOjJgvEEpozMQ",
                     "name": "Default Admin User",
                     "status": {
@@ -215,8 +223,8 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
                     "acr": "basic",
                     "amr": "10",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
-                    "exp": 1724835859,
-                    "iat": 1724832259,
+                    "exp": 1_724_835_859,
+                    "iat": 1_724_832_259,
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "iss": "https://test.jans.org",
                     "jti": "sk3T40NYSYuk5saHZNpkZw",
@@ -224,7 +232,7 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
                     "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
                     "jansOpenIDConnectVersion": "openidconnect-1.0",
                     "c_hash": "pGoK6Y_RKcWHkUecM9uw6Q",
-                    "auth_time": 1724830746,
+                    "auth_time": 1_724_830_746,
                     "grant": "authorization_code",
                     "status": {
                       "status_list": {
@@ -245,7 +253,7 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
                     "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
                     "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
-                    "updated_at": 1724778591,
+                    "updated_at": 1_724_778_591,
                     "name": "Default Admin User",
                     "nickname": "Admin",
                     "family_name": "User",
@@ -253,7 +261,7 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
                     "jansAdminUIRole": [
                         "api-admin"
                     ],
-                    "exp": 1724945978
+                    "exp": 1_724_945_978
                 })),
             },
             "action": "Jans::Action::\"Update\"",
@@ -271,6 +279,10 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
     .expect("should build request")
 }
 
+/// # Panics
+///
+/// Panics if the JSON is not valid.
+#[must_use]
 pub fn prepare_cedarling_request_for_with_jwt_validation(
     keys1: &KeyPair,
     issuer_url: &str,
@@ -292,9 +304,9 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                       "profile"
                     ],
                     "org_id": "some_long_id",
-                    "auth_time": 1724830746,
-                    "exp": 1724945978,
-                    "iat": 1724832259,
+                    "auth_time": 1_724_830_746,
+                    "exp": 1_724_945_978,
+                    "iat": 1_724_832_259,
                     "jti": "lxTmCVRFTxOjJgvEEpozMQ",
                     "name": "Default Admin User",
                     "status": {
@@ -308,8 +320,8 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                     "acr": "basic",
                     "amr": "10",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
-                    "exp": 1724835859,
-                    "iat": 1724832259,
+                    "exp": 1_724_835_859,
+                    "iat": 1_724_832_259,
                     "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
                     "iss": issuer_url,
                     "jti": "sk3T40NYSYuk5saHZNpkZw",
@@ -317,7 +329,7 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                     "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
                     "jansOpenIDConnectVersion": "openidconnect-1.0",
                     "c_hash": "pGoK6Y_RKcWHkUecM9uw6Q",
-                    "auth_time": 1724830746,
+                    "auth_time": 1_724_830_746,
                     "grant": "authorization_code",
                     "status": {
                       "status_list": {
@@ -338,7 +350,7 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                     "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
                     "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
                     "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
-                    "updated_at": 1724778591,
+                    "updated_at": 1_724_778_591,
                     "name": "Default Admin User",
                     "nickname": "Admin",
                     "family_name": "User",
@@ -346,7 +358,7 @@ pub fn prepare_cedarling_request_for_with_jwt_validation(
                     "jansAdminUIRole": [
                         "api-admin"
                     ],
-                    "exp": 1724945978
+                    "exp": 1_724_945_978
                 }), keys1),
             },
             "action": "Jans::Action::\"Update\"",

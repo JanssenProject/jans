@@ -5,11 +5,11 @@
 
 //! The JWT status list validation is implemented as described in this [IETF spec](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html#name-referenced-token).
 //!
-//! Status lists are stored on the [`StatusList`] struct and initialized using the 
+//! Status lists are stored on the [`StatusList`] struct and initialized using the
 //! [`StatusList::parse`] function.
 //!
 //! To retrieve a status of a JWT, use the [`StatusList::get_status`] function and pass
-//! in the JWT's status index (`idx`). 
+//! in the JWT's status index (`idx`).
 
 mod cache;
 mod error;
@@ -161,7 +161,7 @@ fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
     (byte >> offset) & mask
 }
 
-/// See: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types
+/// See: <https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types>
 #[derive(Debug, PartialEq)]
 pub enum JwtStatus {
     Valid,
@@ -256,16 +256,16 @@ mod test {
         let cases = [
             (
                 vec![
-                    0b10111001, // 0xb9
-                    0b10100011, // 0xa3
+                    0b1011_1001, // 0xb9
+                    0b1010_0011, // 0xa3
                 ],
                 "eNrbuRgAAhcBXQ",
             ),
             (
                 vec![
-                    0b11001001, // 0xc9
-                    0b01000100, // 0x44
-                    0b11111001, // 0xf9
+                    0b1100_1001, // 0xc9
+                    0b0100_0100, // 0x44
+                    0b1111_1001, // 0xf9
                 ],
                 "eNo76fITAAPfAgc",
             ),

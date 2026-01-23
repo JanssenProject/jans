@@ -78,7 +78,7 @@ impl TokenCache {
             .read()
             .expect("token cache mutex shouldn't be poisoned")
             .get(&key)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
     }
 
     /// Saves a token to the cache with appropriate TTL.
@@ -88,7 +88,7 @@ impl TokenCache {
     /// 2. The configured maximum TTL (if set)
     /// 3. Default TTL (5 minutes) if neither applies
     pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
-        if self.check_token_expired(&token, now) {
+        if TokenCache::check_token_expired(&token, now) {
             // token is expired, no need to save it
             return;
         }
@@ -114,19 +114,18 @@ impl TokenCache {
                 .set(&key, token, &index_keys)
         };
         if let Err(err) = result {
-            self.log_warn(format!("could not set token to token cache: {}", err));
+            self.log_warn(format!("could not set token to token cache: {err}"));
         }
     }
 
     /// Check if token is expired
     /// true - means is expired
-    fn check_token_expired(&self, token: &Arc<Token>, now: DateTime<Utc>) -> bool {
+    fn check_token_expired(token: &Arc<Token>, now: DateTime<Utc>) -> bool {
         token
             .claims
             .get_claim("exp")
             .and_then(|exp| exp.value().as_i64())
-            .map(|exp| exp <= now.timestamp())
-            .unwrap_or(false)
+            .is_some_and(|exp| exp <= now.timestamp())
     }
 
     /// Extract cache duration, result is optional
@@ -171,7 +170,7 @@ impl TokenCache {
     }
 
     /// Remove tokens from cache by index key
-    pub(crate) fn invalidate_by_index(&self, index_key: IndexKey) {
+    pub(crate) fn invalidate_by_index(&self, index_key: &IndexKey) {
         self.cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
@@ -181,7 +180,7 @@ impl TokenCache {
 
 /// Hash a string using `ahash` and return the hash value as a string
 /// This is used to create a key for caching tokens
-/// The hash value is used instead of the original string to have shorter keys for SparKV which utilizes BTree.
+/// The hash value is used instead of the original string to have shorter keys for [`SparKV`] which utilizes `BTree`.
 fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
     use core::hash::BuildHasher;
     use std::hash::Hasher;
@@ -205,7 +204,7 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
     hasher.finish().to_string()
 }
 
-/// IndexKey is structure that is used for indexing [TokenCache]
+/// [`IndexKey`] is structure that is used for indexing [`TokenCache`]
 //
 // thiserror is used for usefull string conversation
 #[derive(Debug, derive_more::Display)]

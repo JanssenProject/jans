@@ -91,8 +91,7 @@ fn test_base64_decoding_error_in_policy_store() {
     assert!(
         err.to_string()
             .contains(&ParsePolicySetMessage::Base64.to_string()),
-        "Error message should indicate base64 decoding failure, got: {}",
-        err
+        "Error message should indicate base64 decoding failure, got: {err}"
     );
 }
 
@@ -144,8 +143,7 @@ fn test_policy_parsing_error_in_policy_store() {
     assert!(
         err.to_string()
             .contains(&ParsePolicySetMessage::String.to_string()),
-        "Error message should indicate string parsing failure, got: {}",
-        err
+        "Error message should indicate string parsing failure, got: {err}"
     );
 }
 
@@ -163,15 +161,13 @@ fn test_broken_policy_parsing_error_in_policy_store() {
         err_msg.contains(
             "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8"
         ),
-        "Error should identify the policy ID that failed to decode, got: {}",
-        err_msg
+        "Error should identify the policy ID that failed to decode, got: {err_msg}"
     );
     assert!(
         err_msg.contains(
             "unable to decode policy_content from human readable format: this policy is missing the `resource` variable in the scope"
         ),
-        "Error should describe the syntax error, got: {}",
-        err_msg
+        "Error should describe the syntax error, got: {err_msg}"
     );
 }
 
@@ -197,8 +193,7 @@ fn test_invalid_version_format() {
         .expect_err("Expected error for incomplete version format (missing patch)");
     assert!(
         err.to_string().contains("error parsing cedar version"),
-        "Error should mention version parsing, got: {}",
-        err
+        "Error should mention version parsing, got: {err}"
     );
 }
 
@@ -210,8 +205,7 @@ fn test_invalid_version_part() {
         .expect_err("Expected error for non-numeric version part");
     assert!(
         err.to_string().contains("error parsing cedar version"),
-        "Error should mention version parsing, got: {}",
-        err
+        "Error should mention version parsing, got: {err}"
     );
 }
 
@@ -223,8 +217,7 @@ fn test_invalid_version_format_with_v() {
         .expect_err("Expected error for incomplete version format with v prefix");
     assert!(
         err.to_string().contains("error parsing cedar version"),
-        "Error should mention version parsing, got: {}",
-        err
+        "Error should mention version parsing, got: {err}"
     );
 }
 
@@ -281,8 +274,7 @@ fn test_missing_required_fields() {
     assert!(
         err.to_string()
             .contains("missing required field 'cedar_version' in policy store"),
-        "Error should mention missing cedar_version, got: {}",
-        err
+        "Error should mention missing cedar_version, got: {err}"
     );
 
     // Test missing policy_stores
@@ -296,8 +288,7 @@ fn test_missing_required_fields() {
     assert!(
         err.to_string()
             .contains("missing required field 'policy_stores' in policy store"),
-        "Error should mention missing policy_stores, got: {}",
-        err
+        "Error should mention missing policy_stores, got: {err}"
     );
 }
 
@@ -320,8 +311,7 @@ fn test_invalid_policy_store_entry() {
     assert!(
         err.to_string()
             .contains("missing required field 'name' in policy store entry"),
-        "Error should mention missing name field, got: {}",
-        err
+        "Error should mention missing name field, got: {err}"
     );
 
     // Test missing schema in policy store entry
@@ -341,8 +331,7 @@ fn test_invalid_policy_store_entry() {
     assert!(
         err.to_string()
             .contains("missing required field 'schema' or 'cedar_schema' in policy store entry"),
-        "Error should mention missing schema field, got: {}",
-        err
+        "Error should mention missing schema field, got: {err}"
     );
 
     // Test missing policies in policy store entry
@@ -363,8 +352,7 @@ fn test_invalid_policy_store_entry() {
         err.to_string().contains(
             "missing required field 'policies' or 'cedar_policies' in policy store entry"
         ),
-        "Error should mention missing policies field, got: {}",
-        err
+        "Error should mention missing policies field, got: {err}"
     );
 }
 
@@ -385,8 +373,7 @@ fn test_invalid_cedar_version() {
     let err = result.expect_err("Expected error for invalid cedar_version format");
     assert!(
         err.to_string().contains("invalid cedar_version format"),
-        "Error should mention invalid cedar_version format, got: {}",
-        err
+        "Error should mention invalid cedar_version format, got: {err}"
     );
 }
 
@@ -407,8 +394,7 @@ fn test_invalid_schema_format() {
     let err = result.expect_err("Expected error for invalid schema format");
     assert!(
         err.to_string().contains("error parsing schema"),
-        "Error should mention schema parsing error, got: {}",
-        err
+        "Error should mention schema parsing error, got: {err}"
     );
 }
 
@@ -435,8 +421,7 @@ fn test_invalid_policies_format() {
     let err = result.expect_err("Expected error for invalid policy content");
     assert!(
         err.to_string().contains("unable to decode policy with id"),
-        "Error should mention unable to decode policy, got: {}",
-        err
+        "Error should mention unable to decode policy, got: {err}"
     );
 }
 
@@ -466,7 +451,6 @@ fn test_invalid_trusted_issuers_format() {
     assert!(
         err.to_string()
             .contains("the `\"openid_configuration_endpoint\"` is not a valid url"),
-        "Error should mention invalid URL, got: {}",
-        err
+        "Error should mention invalid URL, got: {err}"
     );
 }

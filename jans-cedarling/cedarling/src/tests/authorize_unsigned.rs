@@ -30,7 +30,7 @@ static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
     .unwrap()
 });
 
-/// Check if action executes for next principals: TestPrincipal1, TestPrincipal2, TestPrincipal3
+/// Check if action executes for next principals: `TestPrincipal1`, `TestPrincipal2`, `TestPrincipal3`
 #[test]
 async fn test_authorize_unsigned_for_all_principals_success() {
     let cedarling = get_cedarling_with_callback(
@@ -88,17 +88,17 @@ async fn test_authorize_unsigned_for_all_principals_success() {
     let test_principal_1_result = result
         .principals
         .get("Jans::TestPrincipal1")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_2_result = result
         .principals
         .get("Jans::TestPrincipal2")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
         .get("Jans::TestPrincipal3")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
         test_principal_1_result,
@@ -151,7 +151,7 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
                     {"===": [{"var": "Jans::TestPrincipal1::\"id3\""}, "DENY"]}
                 ]
             }))
-            .unwrap()
+            .unwrap();
         },
     )
     .await;
@@ -205,17 +205,17 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
     let test_principal_1_result = result
         .principals
         .get("Jans::TestPrincipal1::\"id1\"")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_2_result = result
         .principals
         .get("Jans::TestPrincipal1::\"id1\"")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
         .get("Jans::TestPrincipal1::\"id1\"")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
         test_principal_1_result,
@@ -314,17 +314,17 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
     let test_principal_1_result = result
         .principals
         .get("Jans::TestPrincipal1")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_2_result = result
         .principals
         .get("Jans::TestPrincipal2")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
         .get("Jans::TestPrincipal3")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
         test_principal_1_result,
@@ -446,8 +446,7 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         let log_kind = log.get("log_kind").unwrap();
         assert!(
             log_kind == "Decision" || log_kind == "System",
-            "Log kind should be Decision or System, got: {:?}",
-            log_kind
+            "Log kind should be Decision or System, got: {log_kind:?}"
         );
 
         // For Decision logs, verify they have required fields
@@ -579,8 +578,7 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
         .filter(|log| {
             log.get("msg")
                 .and_then(|m| m.as_str())
-                .map(|m| m.contains("signed authorization is unavailable"))
-                .unwrap_or(false)
+                .is_some_and(|m| m.contains("signed authorization is unavailable"))
         })
         .collect();
 

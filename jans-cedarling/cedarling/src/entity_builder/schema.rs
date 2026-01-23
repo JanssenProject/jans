@@ -68,7 +68,7 @@ pub struct BuildMappingSchemaError(Vec<BuildAttrSrcError>);
 
 impl Display for BuildMappingSchemaError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
+        write!(f, "{:?}", self.0.iter().map(ToString::to_string))
     }
 }
 
@@ -110,7 +110,7 @@ mod test {
 
     #[test]
     fn parse_valid_schema() {
-        let schema = r#"
+        let schema = r"
         namespace Jans {
             type TestType = {
                 test_type_attr: String,
@@ -129,7 +129,7 @@ mod test {
                 ip_attr: ipaddr,
             };
         }
-        "#;
+        ";
 
         let schema: MappingSchema = (&ValidatorSchema::from_str(schema)
             // note that unknown types will be handled already by the implementation

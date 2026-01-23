@@ -3,7 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{log_config::StdOutLoggerMode, *};
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, Request, log_config::StdOutLoggerMode,
+};
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
 
@@ -88,7 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Handle authorization result. If there's an error, print it.
     if let Err(e) = &result {
-        eprintln!("Error while authorizing: {:?}\n\n", e)
+        eprintln!("Error while authorizing: {e:?}\n\n");
     }
 
     Ok(())

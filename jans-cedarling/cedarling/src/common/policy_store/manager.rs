@@ -84,7 +84,7 @@ impl PolicyStoreManager {
     /// Use this when a logger is available to get detailed conversion logs.
     fn convert_to_legacy_with_logger(
         loaded: LoadedPolicyStore,
-        logger: Option<Logger>,
+        logger: Option<&Logger>,
     ) -> Result<PolicyStore, ConversionError> {
         // Log manifest info if available
         if let Some(manifest) = &loaded.manifest {
@@ -105,11 +105,11 @@ impl PolicyStoreManager {
         let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
 
         // 4. Convert entities (logs hierarchy warnings if logger provided)
-        let raw_entities = Self::convert_entities(&loaded.entities, &logger)?;
+        let raw_entities = Self::convert_entities(&loaded.entities, logger)?;
 
         // Convert raw entities to DefaultEntitiesWithWarns
         let default_entities = parse_default_entities_with_warns(raw_entities).map_err(|e| {
-            ConversionError::EntityConversion(format!("Failed to parse default entities: {}", e))
+            ConversionError::EntityConversion(format!("Failed to parse default entities: {e}"))
         })?;
 
         // 5. Parse cedar version
@@ -118,7 +118,7 @@ impl PolicyStoreManager {
         logger.log_any(PolicyStoreLogEntry::info(format!(
             "Policy store conversion complete: {} policies, {} issuers, {} entities",
             policies_container.get_set().policies().count(),
-            trusted_issuers.as_ref().map(|i| i.len()).unwrap_or(0),
+            trusted_issuers.as_ref().map_or(0, HashMap::len),
             default_entities.entities().len()
         )));
 
@@ -151,12 +151,12 @@ impl PolicyStoreManager {
         // Parse and validate schema
         let parsed_schema =
             ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
-                ConversionError::SchemaConversion(format!("Failed to parse schema: {}", e))
+                ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
             })?;
 
         // Validate the schema
         parsed_schema.validate().map_err(|e| {
-            ConversionError::SchemaConversion(format!("Schema validation failed: {}", e))
+            ConversionError::SchemaConversion(format!("Schema validation failed: {e}"))
         })?;
 
         // Get the Cedar schema from the parsed result
@@ -168,16 +168,16 @@ impl PolicyStoreManager {
         // ParsedSchema return both the validated schema and the fragment, but
         // this is a performance consideration rather than a correctness issue.
         let fragment = SchemaFragment::from_str(schema_content).map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to parse schema fragment: {}", e))
+            ConversionError::SchemaConversion(format!("Failed to parse schema fragment: {e}"))
         })?;
 
         let json_string = fragment.to_json_string().map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {}", e))
+            ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {e}"))
         })?;
 
         // Parse CedarSchemaJson
         let json: CedarSchemaJson = serde_json::from_str(&json_string).map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to parse CedarSchemaJson: {}", e))
+            ConversionError::SchemaConversion(format!("Failed to parse CedarSchemaJson: {e}"))
         })?;
 
         // Create ValidatorSchema
@@ -186,7 +186,7 @@ impl PolicyStoreManager {
             Extensions::all_available(),
         )
         .map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to create ValidatorSchema: {}", e))
+            ConversionError::SchemaConversion(format!("Failed to create ValidatorSchema: {e}"))
         })?;
 
         Ok(CedarSchema {
@@ -267,15 +267,14 @@ impl PolicyStoreManager {
             // Return validation errors directly, joined into a single string
             let error_details = errors
                 .iter()
-                .map(|e| e.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<_>>()
                 .join("; ");
             return Err(ConversionError::IssuerConversion(error_details));
         }
 
         // Create issuer map
-        let issuer_map = IssuerParser::create_issuer_map(all_issuers)
-            .map_err(|e| ConversionError::IssuerConversion(e.to_string()))?;
+        let issuer_map = IssuerParser::create_issuer_map(all_issuers);
 
         Ok(Some(issuer_map))
     }
@@ -286,7 +285,7 @@ impl PolicyStoreManager {
     /// 1. Parses all entity files
     /// 2. Detects duplicate entity UIDs (returns error if found)
     /// 3. Optionally validates entity hierarchy (parent references - logs warnings if logger provided)
-    /// 4. Converts to the required HashMap format
+    /// 4. Converts to the required `HashMap` format
     ///
     /// # Arguments
     ///
@@ -294,7 +293,7 @@ impl PolicyStoreManager {
     /// * `logger` - Optional logger for hierarchy warnings
     fn convert_entities(
         entity_files: &[super::loader::EntityFile],
-        logger: &Option<Logger>,
+        logger: Option<&Logger>,
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
         if entity_files.is_empty() {
             return Ok(None);
@@ -325,15 +324,14 @@ impl PolicyStoreManager {
         // might be provided at runtime via authorization requests
         if let Err(warnings) = EntityParser::validate_hierarchy(&all_parsed_entities) {
             logger.log_any(PolicyStoreLogEntry::warn(format!(
-                "Entity hierarchy validation warnings (non-fatal): {:?}",
-                warnings
+                "Entity hierarchy validation warnings (non-fatal): {warnings:?}"
             )));
         }
 
         // Step 4: Validate entities can form a valid Cedar entity store
         // This validates entity constraints like types and attribute compatibility
         EntityParser::create_entities_store(all_parsed_entities).map_err(|e| {
-            ConversionError::EntityConversion(format!("Failed to create entity store: {}", e))
+            ConversionError::EntityConversion(format!("Failed to create entity store: {e}"))
         })?;
 
         // Step 5: Convert to HashMap<String, Value>
@@ -413,8 +411,7 @@ mod tests {
         let err = result.expect_err("Expected error for invalid version format");
         assert!(
             matches!(err, ConversionError::VersionParsing { .. }),
-            "Expected VersionParsing error, got: {:?}",
-            err
+            "Expected VersionParsing error, got: {err:?}"
         );
     }
 
@@ -451,8 +448,7 @@ mod tests {
         let err = result.expect_err("Expected error for invalid Cedar schema syntax");
         assert!(
             matches!(err, ConversionError::SchemaConversion(_)),
-            "Expected SchemaConversion error, got: {:?}",
-            err
+            "Expected SchemaConversion error, got: {err:?}"
         );
     }
 
@@ -530,8 +526,7 @@ mod tests {
         let err = result.expect_err("Expected ConversionError for invalid policy syntax");
         assert!(
             matches!(err, ConversionError::PolicyConversion(_)),
-            "Expected PolicyConversion error, got: {:?}",
-            err
+            "Expected PolicyConversion error, got: {err:?}"
         );
     }
 
@@ -590,7 +585,7 @@ mod tests {
             .to_string(),
         }];
 
-        let result = PolicyStoreManager::convert_entities(&entity_files, &None);
+        let result = PolicyStoreManager::convert_entities(&entity_files, None);
         assert!(
             result.is_ok(),
             "Entity conversion failed: {:?}",
@@ -606,7 +601,7 @@ mod tests {
     #[test]
     fn test_convert_entities_empty() {
         let entity_files: Vec<EntityFile> = vec![];
-        let result = PolicyStoreManager::convert_entities(&entity_files, &None);
+        let result = PolicyStoreManager::convert_entities(&entity_files, None);
         assert!(result.is_ok());
         assert!(result.unwrap().is_none());
     }

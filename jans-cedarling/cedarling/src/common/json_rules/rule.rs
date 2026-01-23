@@ -7,7 +7,7 @@ use datalogic_rs::Rule;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-/// JsonLogic rule using [JsonLogic](https://jsonlogic.com/)
+/// `JsonLogic` rule using [JsonLogic](https://jsonlogic.com/)
 /// Default implementation:
 /// ```json
 /// {
@@ -36,7 +36,11 @@ impl From<datalogic_rs::Error> for ParseRuleError {
 }
 
 impl JsonRule {
-    /// Create a new `JsonRule` from a JSON value.
+    /// Create a new [`JsonRule`] from a JSON value.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ParseRuleError`] if the rule cannot be parsed.
     pub fn new(rule_value: Value) -> Result<Self, ParseRuleError> {
         let rule = Rule::from_value(&rule_value)?;
 
@@ -80,7 +84,7 @@ impl<'de> Deserialize<'de> for JsonRule {
         let value = Value::deserialize(deserializer)?;
 
         let rule = JsonRule::new(value).map_err(|e| {
-            serde::de::Error::custom(format!("Failed to deserialize JSON rule: {}", e))
+            serde::de::Error::custom(format!("Failed to deserialize JSON rule: {e}"))
         })?;
         Ok(rule)
     }

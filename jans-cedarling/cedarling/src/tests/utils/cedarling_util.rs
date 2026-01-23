@@ -94,11 +94,11 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
 }
 
 /// util function for convenient conversion Reason ID to string
-pub(crate) fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
+pub(crate) fn get_policy_id(resp: Option<&cedar_policy::Response>) -> Option<Vec<String>> {
     resp.as_ref().map(|v| {
         v.diagnostics()
             .reason()
-            .map(|policy_id| policy_id.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<Vec<_>>()
     })
 }
@@ -123,8 +123,8 @@ pub(crate) fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec
 #[macro_export]
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
-        let policy_ids_resp =
-            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+        let policy_ids_resp = $crate::tests::utils::cedarling_util::get_policy_id($resp.as_ref())
+            .map(|mut v| {
                 v.sort();
                 v
             });
@@ -141,9 +141,10 @@ macro_rules! cmp_policy {
 
 /// util function for convenient conversion Decision
 pub(crate) fn get_decision(
-    resp: &Option<cedar_policy::Response>,
+    resp: Option<&cedar_policy::Response>,
 ) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
+    resp.as_ref()
+        .map(|response| cedar_policy::Response::decision(response))
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
@@ -166,7 +167,7 @@ pub(crate) fn get_decision(
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            $crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision($resp.as_ref()),
             Some($decision),
             $msg
         )
