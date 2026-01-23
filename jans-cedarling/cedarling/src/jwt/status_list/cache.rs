@@ -39,7 +39,7 @@ pub(crate) struct StatusListCache {
 impl StatusListCache {
     /// Initializes the statuslist for the given issuer
     pub(crate) async fn init_for_iss(
-        &mut self,
+        &self,
         iss_config: &IssuerConfig,
         validators: &JwtValidatorCache,
         key_service: &KeyService,
@@ -257,7 +257,7 @@ mod test {
             .unwrap();
         // we initialize the status list with a 1 sec ttl
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
-        let mut status_list = StatusListCache::default();
+        let status_list = StatusListCache::default();
 
         let ti = TrustedIssuer::new(
             "some_iss".into(),
