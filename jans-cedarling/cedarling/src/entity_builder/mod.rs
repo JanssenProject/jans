@@ -26,7 +26,7 @@ use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::issuer_utils::normalize_issuer;
+use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::ClaimMappings;
 #[cfg(test)]
 use crate::common::policy_store::TrustedIssuer;
@@ -70,10 +70,15 @@ impl EntityBuilder {
         let (ok, errs) = issuers_index
             .values()
             .map(|iss| {
-                let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
+                let iss_id = iss.iss_claim();
 
                 let iss_type_name = Self::trusted_issuer_typename(&iss.name);
-                build_iss_entity(&iss_type_name.to_string(), &iss_id, iss, schema.as_ref())
+                build_iss_entity(
+                    &iss_type_name.to_string(),
+                    &iss_id.as_str(),
+                    iss,
+                    schema.as_ref(),
+                )
             })
             .partition_result();
 
@@ -219,10 +224,9 @@ impl EntityBuilder {
 
     pub(super) fn trusted_issuer_cedar_uid(
         namespace: &str,
-        iss_url: &str,
+        iss_url: &IssClaim,
     ) -> Result<EntityUid, BuildEntityError> {
-        let iss_id = normalize_issuer(iss_url);
-        build_cedar_uid(&format!("{namespace}::TrustedIssuer"), &iss_id)
+        build_cedar_uid(&format!("{namespace}::TrustedIssuer"), iss_url.as_str())
     }
 
     #[cfg(test)]
@@ -327,6 +331,7 @@ mod test {
     use std::collections::HashMap;
     use std::sync::LazyLock;
     use test_utils::assert_eq;
+    use url::Url;
 
     pub(super) static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
         ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
@@ -411,8 +416,11 @@ mod test {
         config.entity_names.workload = "Jans::CustomWorkload".into();
 
         // Set the custom token names in the IDP metadata
-        let iss = TrustedIssuer {
-            token_metadata: HashMap::from([
+        let iss = TrustedIssuer::new(
+            "Jans".to_string(),
+            "Test".to_string(),
+            Url::parse("https://example.com/.well-known/openid-configuration").expect("valid url"),
+            HashMap::from([
                 (
                     "access_token".to_string(),
                     TokenEntityMetadata::builder()
@@ -432,8 +440,7 @@ mod test {
                         .build(),
                 ),
             ]),
-            ..Default::default()
-        };
+        );
         let issuers = HashMap::from([("some_iss".into(), iss)]);
         let tokens = HashMap::from([
             (
@@ -542,19 +549,19 @@ mod test {
         ]);
 
         // Create trusted issuer
-        let trusted_issuer = TrustedIssuer {
-            name: "Jans".to_string(),
-            description: "Test".to_string(),
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+        let trusted_issuer = TrustedIssuer::new(
+            "Jans".to_string(),
+            "Test".to_string(),
+            Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
-            token_metadata: HashMap::from([(
+            HashMap::from([(
                 "id_token".into(),
                 TokenEntityMetadata::builder()
                     .entity_type_name("Jans::Id_token".to_string())
                     .principal_mapping(["Jans::User".to_string()].into_iter().collect())
                     .build(),
             )]),
-        };
+        );
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
@@ -741,13 +748,13 @@ mod test {
         )]);
 
         // Create trusted issuer
-        let trusted_issuer = TrustedIssuer {
-            name: "Jans2".to_string(),
-            description: "Test".to_string(),
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+        let trusted_issuer = TrustedIssuer::new(
+            "Jans2".to_string(),
+            "Test".to_string(),
+            Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
-            token_metadata: HashMap::new(),
-        };
+            HashMap::new(),
+        );
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
@@ -890,13 +897,13 @@ mod test {
         ]);
 
         // Create trusted issuer
-        let trusted_issuer = TrustedIssuer {
-            name: "Jans".to_string(),
-            description: "Test".to_string(),
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+        let trusted_issuer = TrustedIssuer::new(
+            "Jans".to_string(),
+            "Test".to_string(),
+            Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
-            token_metadata: HashMap::new(),
-        };
+            HashMap::new(),
+        );
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
@@ -1083,13 +1090,13 @@ mod test {
         ]);
 
         // Create trusted issuer
-        let trusted_issuer = TrustedIssuer {
-            name: "Jans".to_string(),
-            description: "Test".to_string(),
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+        let trusted_issuer = TrustedIssuer::new(
+            "Jans".to_string(),
+            "Test".to_string(),
+            Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
-            token_metadata: HashMap::new(),
-        };
+            HashMap::new(),
+        );
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);

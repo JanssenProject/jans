@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::issuer_utils::normalize_issuer;
+use crate::common::issuer_utils::IssClaim;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::jwt::{IssuerConfig, StatusListCache};
 use crate::log::Logger;
@@ -46,16 +46,8 @@ impl JwtValidatorCache {
         let iss = iss_config
             .openid_config
             .as_ref()
-            .map(|oidc| normalize_issuer(&oidc.issuer))
-            .unwrap_or_else(|| {
-                normalize_issuer(
-                    &iss_config
-                        .policy
-                        .oidc_endpoint
-                        .origin()
-                        .ascii_serialization(),
-                )
-            });
+            .map(|oidc| oidc.issuer.clone())
+            .unwrap_or_else(|| iss_config.policy.iss_claim());
 
         for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
             if !tkn_metadata.trusted {
@@ -157,7 +149,7 @@ impl JwtValidatorCache {
 #[derive(Hash, Clone)]
 pub(crate) struct ValidatorInfo<'a> {
     /// Optional issuer string (typically from a JWT "iss" claim).
-    pub iss: Option<&'a str>,
+    pub iss: Option<&'a IssClaim>,
     /// The token name (e.g., audience or application-specific).
     pub token_kind: TokenKind<'a>,
     /// The algorithm used to sign the token.
@@ -191,7 +183,7 @@ impl Display for TokenKind<'_> {
 /// Owned version of [`ValidatorInfo`] used to store entries inside `ValidatorStore`.
 #[derive(Debug)]
 pub struct OwnedValidatorInfo {
-    iss: Option<String>,
+    iss: Option<IssClaim>,
     token_kind: OwnedTokenKind,
     algorithm: Algorithm,
 }
@@ -252,7 +244,7 @@ impl ValidatorInfo<'_> {
     /// Creates an [`OwnedValidatorInfo`] for storage.
     pub(crate) fn owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
-            iss: self.iss.map(|s| s.to_string()),
+            iss: self.iss.map(|iss| iss.to_owned()),
             token_kind: (&self.token_kind).into(),
             algorithm: self.algorithm,
         }
@@ -273,7 +265,10 @@ impl OwnedValidatorInfo {
     ///
     /// Used to resolve hash collisions in the store.
     fn is_equal_to(&self, other: &ValidatorInfo<'_>) -> bool {
-        if self.iss.as_deref() != other.iss {
+        if let Some(iss1) = &self.iss
+            && let Some(iss2) = other.iss
+            && iss1 != iss2
+        {
             return false;
         }
 
@@ -299,8 +294,9 @@ mod test {
     #[test]
     fn test_insert_and_retrieve() {
         let mut store = JwtValidatorCache::default();
+        let test_iss = IssClaim::new("https://example.com/issuer");
         let (validator, info) = JwtValidator::new_input_tkn_validator(
-            Some("test"),
+            Some(&test_iss),
             "access_tkn",
             &TokenEntityMetadata {
                 trusted: true,

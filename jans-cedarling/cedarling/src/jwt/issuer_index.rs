@@ -1,4 +1,4 @@
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 
 use super::IssuerConfig;
 use ahash::{HashMap, HashMapExt};
@@ -8,7 +8,6 @@ const MUTEX_POISONED_ERR: &str =
     "IssuerIndex RwLock poisoned due to another thread panicking while holding the lock";
 
 /// The value of the `iss` claim from a JWT
-type IssClaim = String;
 
 /// An index mapping `iss` claims to their corresponding `IssuerConfig`s
 /// This structure allows efficient lookup of issuer configurations

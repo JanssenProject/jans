@@ -3,10 +3,73 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use std::fmt;
+
+use serde::Serialize;
+use serde::de::{self, Deserialize, Deserializer, Visitor};
+
+/// Utility structure that holds a normalized issuer string
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
+pub(crate) struct IssClaim(String);
+
+impl IssClaim {
+    /// Create a new Issuer with normalized value
+    pub(crate) fn new(issuer: &str) -> Self {
+        Self(normalize_issuer(issuer))
+    }
+
+    /// Get the issuer as a &str
+    pub(crate) fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl<'de> Deserialize<'de> for IssClaim {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct IssClaimVisitor;
+
+        impl<'de> Visitor<'de> for IssClaimVisitor {
+            type Value = IssClaim;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a string representing an issuer claim")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(IssClaim::new(value))
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(IssClaim::new(&value))
+            }
+        }
+
+        deserializer.deserialize_string(IssClaimVisitor)
+    }
+}
+
+impl Serialize for IssClaim {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.0)
+    }
+}
+
 /// Normalizes an issuer URL by removing trailing slashes
 /// This handles cases where IDPs like Auth0 return issuers with trailing slashes
 /// but the policy store configuration might not have them
-pub(crate) fn normalize_issuer(issuer: &str) -> String {
+fn normalize_issuer(issuer: &str) -> String {
     // Parse the issuer as a URL be consistent after parsing trusted issuers URL by `url` crate.
     if let Ok(url) = url::Url::parse(issuer) {
         url.to_string().trim_end_matches('/').to_string()

@@ -72,7 +72,7 @@ pub(crate) struct JwtValidator {
 impl JwtValidator {
     /// Creates a new validator for the tokens passed through [`crate::Cedarling::authorize`]
     pub(super) fn new_input_tkn_validator<'a>(
-        iss: Option<&'a str>,
+        iss: Option<&'a IssClaim>,
         tkn_name: &'a str,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
@@ -120,7 +120,7 @@ impl JwtValidator {
 
     /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
     pub(super) fn new_multi_issuer_tkn_validator<'a>(
-        iss: Option<&'a str>,
+        iss: Option<&'a IssClaim>,
         tkn_name: &'a String,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
@@ -165,7 +165,7 @@ impl JwtValidator {
 
     /// Creates a new validator for status list tokens
     pub(super) fn new_status_list_tkn_validator(
-        iss: Option<&'_ str>,
+        iss: Option<&'_ IssClaim>,
         status_list_uri: Option<String>,
         algorithm: Algorithm,
         validate_signature: bool,
@@ -273,13 +273,17 @@ impl JwtValidator {
 }
 
 impl DecodedJwt {
-    pub(crate) fn iss(&self) -> Option<&str> {
-        self.claims.inner.get("iss").and_then(|x| x.as_str())
+    pub(crate) fn iss(&self) -> Option<IssClaim> {
+        self.claims
+            .inner
+            .get("iss")
+            .and_then(|x| x.as_str())
+            .map(|iss_str| IssClaim::new(iss_str))
     }
 
     pub(crate) fn decoding_key_info(&self) -> DecodingKeyInfo {
         DecodingKeyInfo {
-            issuer: self.iss().map(|x| x.to_string()),
+            issuer: self.iss(),
             kid: self.header.kid.clone(),
             algorithm: self.header.alg,
         }
@@ -328,6 +332,7 @@ mod test {
     use std::collections::{HashMap, HashSet};
     use std::sync::LazyLock;
 
+    use crate::common::issuer_utils::IssClaim;
     use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
     use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusList};
     use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
@@ -373,7 +378,7 @@ mod test {
         let decoding_key = keys.decoding_key().unwrap();
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
@@ -414,7 +419,7 @@ mod test {
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into()]);
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
@@ -450,7 +455,7 @@ mod test {
         let decoding_key = keys.decoding_key().unwrap();
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
@@ -491,7 +496,7 @@ mod test {
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims = HashSet::from(["exp".into(), "nbf".into()]);
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
@@ -532,7 +537,7 @@ mod test {
         let decoding_key = keys.decoding_key().unwrap();
 
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
@@ -576,7 +581,7 @@ mod test {
         tkn_entity_metadata.required_claims =
             HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
@@ -601,7 +606,7 @@ mod test {
         tkn_entity_metadata.required_claims =
             HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
-            Some(iss),
+            Some(&IssClaim::new(iss)),
             "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,

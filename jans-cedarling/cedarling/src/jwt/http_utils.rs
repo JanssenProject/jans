@@ -5,6 +5,8 @@
 
 use std::sync::LazyLock;
 
+use crate::common::issuer_utils::IssClaim;
+
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
@@ -26,7 +28,7 @@ pub(super) trait GetFromUrl<T> {
 
 #[derive(Deserialize)]
 pub(super) struct OpenIdConfig {
-    pub issuer: String,
+    pub issuer: IssClaim,
     #[serde(deserialize_with = "deserialize_url")]
     pub jwks_uri: Url,
     #[serde(deserialize_with = "deserialize_opt_url", default)]

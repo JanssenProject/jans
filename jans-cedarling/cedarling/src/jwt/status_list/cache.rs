@@ -57,7 +57,7 @@ impl StatusListCache {
         let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
-        let iss = iss_config.policy.normalized_issuer();
+        let iss = iss_config.policy.iss_claim();
 
         let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
 
@@ -65,9 +65,10 @@ impl StatusListCache {
         let decoding_key_info = decoded_jwt.decoding_key_info();
         let decoding_key = key_service.get_key(&decoding_key_info);
 
+        let decoded_jwt_iss = decoded_jwt.iss();
         // get validator
         let validator_key = ValidatorInfo {
-            iss: decoded_jwt.iss(),
+            iss: decoded_jwt_iss.as_ref(),
             token_kind: TokenKind::StatusList,
             algorithm: decoded_jwt.header.alg,
         };
@@ -257,14 +258,17 @@ mod test {
         // we initialize the status list with a 1 sec ttl
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
         let mut status_list = StatusListCache::default();
+
+        let ti = TrustedIssuer::new(
+            "some_iss".into(),
+            "is a trusted issuer".into(),
+            mock_server.openid_config_endpoint().unwrap(),
+            Default::default(),
+        );
+
         let iss_config = IssuerConfig {
             issuer_id: "some_iss_id".into(),
-            policy: Arc::new(TrustedIssuer {
-                name: "some_iss".into(),
-                description: "is a trusted issuer".into(),
-                oidc_endpoint: mock_server.openid_config_endpoint().unwrap(),
-                token_metadata: Default::default(),
-            }),
+            policy: Arc::new(ti),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(

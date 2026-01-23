@@ -90,7 +90,7 @@ use crate::LogLevel;
 use crate::LogWriter;
 use crate::authz::MultiIssuerValidationError;
 use crate::authz::request::TokenInput;
-use crate::common::issuer_utils::normalize_issuer;
+use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
 use chrono::Utc;
@@ -164,7 +164,7 @@ impl JwtService {
 
         for (issuer_id, iss) in trusted_issuers.into_iter() {
             // this is what we expect to find in the JWT `iss` claim
-            let mut iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
+            let mut iss_claim = iss.iss_claim();
 
             let mut iss_config = IssuerConfig {
                 issuer_id,
@@ -192,7 +192,7 @@ impl JwtService {
                     .await?;
             }
 
-            issuer_configs.insert(normalize_issuer(&iss_claim), iss_config);
+            issuer_configs.insert(iss_claim, iss_config);
         }
 
         // Load local JWKS if configured and no trusted issuers were provided
@@ -322,9 +322,9 @@ impl JwtService {
         let decoding_key = self.key_service.get_key(&decoding_key_info);
 
         // get validator
-        let normalized_iss = decoded_jwt.iss().map(normalize_issuer);
+        let normalized_iss = decoded_jwt.iss();
         let validator_key = ValidatorInfo {
-            iss: normalized_iss.as_deref(),
+            iss: normalized_iss.as_ref(),
             token_kind: token_kind.clone(),
             algorithm: decoded_jwt.header.alg,
         };
@@ -350,7 +350,7 @@ impl JwtService {
 
         // Try to find trusted issuer using TrustedIssuerValidator
         let trusted_iss = if let Some(iss) = iss_claim {
-            match self.trusted_issuer_validator.find_trusted_issuer(iss) {
+            match self.trusted_issuer_validator.find_trusted_issuer(&iss) {
                 Ok(issuer) => Some(issuer),
                 Err(TrustedIssuerError::UntrustedIssuer(_)) => {
                     // Fall back to issuer_configs for backward compatibility
@@ -358,7 +358,7 @@ impl JwtService {
                         format!("Untrusted issuer '{}', falling back to issuer_configs", iss),
                         Some(LogLevel::DEBUG),
                     ));
-                    self.get_issuer_ref(iss)
+                    self.get_issuer_ref(&iss)
                 },
                 Err(e) => {
                     self.logger.log_any(JwtLogEntry::new(
@@ -368,7 +368,7 @@ impl JwtService {
                         ),
                         Some(LogLevel::DEBUG),
                     ));
-                    self.get_issuer_ref(iss)
+                    self.get_issuer_ref(&iss)
                 },
             }
         } else {
@@ -555,9 +555,8 @@ impl JwtService {
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
     #[inline]
-    fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
-        self.issuer_configs
-            .get_trusted_issuer(&normalize_issuer(iss_claim))
+    fn get_issuer_ref(&self, iss_claim: &IssClaim) -> Option<Arc<TrustedIssuer>> {
+        self.issuer_configs.get_trusted_issuer(iss_claim)
     }
 
     /// Find the token metadata key for a given entity type name
@@ -578,8 +577,8 @@ impl JwtService {
 async fn update_openid_config(
     iss_config: &mut IssuerConfig,
     logger: &Option<Logger>,
-) -> Result<String, JwtServiceInitError> {
-    let openid_config = OpenIdConfig::get_from_url(&iss_config.policy.oidc_endpoint)
+) -> Result<IssClaim, JwtServiceInitError> {
+    let openid_config = OpenIdConfig::get_from_url(iss_config.policy.get_oidc_endpoint())
         .await
         .inspect_err(|e| {
             logger.log_any(JwtLogEntry::new(
@@ -820,7 +819,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 ..Default::default()
             },
-            Some(HashMap::from([(server.issuer(), iss)])),
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
         )
         .await
@@ -856,7 +855,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 ..Default::default()
             },
-            Some(HashMap::from([(server.issuer(), iss)])),
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
         )
         .await
@@ -882,7 +881,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 ..Default::default()
             },
-            Some(HashMap::from([(server.issuer(), iss)])),
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
         )
         .await
@@ -955,7 +954,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 ..Default::default()
             },
-            Some(HashMap::from([(server.issuer(), iss)])),
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
         )
         .await
@@ -1024,7 +1023,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 ..Default::default()
             },
-            Some(HashMap::from([(server.issuer(), iss)])),
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
         )
         .await
@@ -1066,7 +1065,7 @@ mod test {
                 signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
                 ..Default::default()
             },
-            Some(HashMap::from([(server.issuer(), iss)])),
+            Some(HashMap::from([(server.issuer().to_string(), iss)])),
             None,
         )
         .await

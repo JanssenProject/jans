@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 
 use crate::LogWriter;
+use crate::common::issuer_utils::IssClaim;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
@@ -16,7 +17,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub(crate) struct DecodingKeyInfo {
-    pub issuer: Option<String>,
+    pub issuer: Option<IssClaim>,
     pub kid: Option<String>,
     pub algorithm: Algorithm,
 }
@@ -68,7 +69,10 @@ impl KeyService {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
 
-        for (issuer, keys) in parsed_stores.into_iter() {
+        for (issuer, keys) in parsed_stores
+            .into_iter()
+            .map(|(iss, keys)| (IssClaim::new(&iss), keys))
+        {
             for jwk in keys.into_iter() {
                 let decoding_key =
                     DecodingKey::from_jwk(&jwk).map_err(InsertKeysError::BuildDecodingKey)?;
@@ -105,7 +109,8 @@ impl KeyService {
         for err in errs.into_iter() {
             let err_msg = format!(
                 "failed to deserialize a JWK from '{}': {}",
-                openid_config.issuer, err,
+                openid_config.issuer.as_str(),
+                err,
             );
             logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
             continue;
@@ -116,7 +121,7 @@ impl KeyService {
             let Some(key_algorithm) = key.common.key_algorithm else {
                 let err_msg = format!(
                     "skipping a JWK with a missing algorithm specifier from '{}'",
-                    openid_config.issuer,
+                    openid_config.issuer.as_str(),
                 );
                 logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::ERROR)));
                 continue;
@@ -129,7 +134,8 @@ impl KeyService {
                 Err(alg) => {
                     let err_msg = format!(
                         "skipping building a validation key for unsupported algorithm from '{}': {}",
-                        openid_config.issuer, alg,
+                        openid_config.issuer.as_str(),
+                        alg,
                     );
                     logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
                     continue;
@@ -291,7 +297,7 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: Some(iss1),
+                    issuer: Some(IssClaim::new(&iss1)),
                     kid: Some(kid1.clone()),
                     algorithm: Algorithm::RS256,
                 })
@@ -302,7 +308,7 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: Some(iss2),
+                    issuer: Some(IssClaim::new(&iss2)),
                     kid: Some(kid2.clone()),
                     algorithm: Algorithm::RS256,
                 })
@@ -313,7 +319,7 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: Some("some_unknown_iss".to_string()),
+                    issuer: Some(IssClaim::new("some_unknown_iss")),
                     kid: Some(kid1),
                     algorithm: Algorithm::RS256,
                 })
@@ -388,7 +394,7 @@ mod test {
         assert!(
             key_service
                 .get_key(&DecodingKeyInfo {
-                    issuer: Some("http://some_unknown_issuer.com".into()),
+                    issuer: Some(IssClaim::new("http://some_unknown_issuer.com")),
                     kid: None,
                     algorithm: Algorithm::HS256,
                 })

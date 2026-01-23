@@ -3,11 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![cfg(test)]
+
 use std::sync::LazyLock;
 
 use super::http_utils::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
 use super::validation::RefJwtStatusList;
+use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
@@ -233,11 +236,11 @@ impl MockServer {
 
     /// Generates a [`TrustedIssuer`] for this instance of the [`MockServer`].
     pub(crate) fn trusted_issuer(&self) -> TrustedIssuer {
-        TrustedIssuer {
-            oidc_endpoint: Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT))
-                .expect("should be a valid url"),
-            ..Default::default()
-        }
+        let mut issuer = TrustedIssuer::default();
+        issuer.set_oidc_endpoint(
+            Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT)).expect("should be a valid url"),
+        );
+        issuer
     }
 
     /// Use this to generate the status list JWT
@@ -340,8 +343,8 @@ impl MockServer {
         Ok((self.keys.decoding_key()?, self.keys.kid.clone()))
     }
 
-    pub(crate) fn issuer(&self) -> String {
-        self.server.url()
+    pub(crate) fn issuer(&self) -> IssClaim {
+        IssClaim::new(&self.server.url())
     }
 
     #[track_caller]
