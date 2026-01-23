@@ -303,6 +303,11 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
+    /// Enables asynchronous loading of trusted issuers during bootstrap.
+    /// Zero or None means synchronous loading.
+    /// Positive integer indicates the number of concurrent tasks to use for loading.
+    #[serde(rename = "CEDARLING_TRUSTED_ISSUER_LOADER_ASYNC", default)]
+    pub trusted_issuer_loader_async: Option<u16>,
 }
 
 impl Default for BootstrapConfigRaw {

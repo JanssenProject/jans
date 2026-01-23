@@ -6,7 +6,7 @@
 
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::{collections::HashSet, num::NonZeroU16};
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -52,6 +52,8 @@ pub struct JwtConfig {
     /// When the cache reaches its capacity, the entry with the nearest
     /// expiration timestamp will be removed to make room for a new one.
     pub token_cache_earliest_expiration_eviction: bool,
+    /// Configuration for loading trusted issuers.
+    pub trusted_issuer_loader: TrustedIssuerLoaderConfig,
 }
 
 /// Validation options related to JSON Web Tokens (JWT).
@@ -177,6 +179,7 @@ impl Default for JwtConfig {
             token_cache_capacity: 100,
             token_cache_earliest_expiration_eviction: true,
             token_cache_max_ttl_secs: 60 * 5, // 5min
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
         }
     }
 }
@@ -212,4 +215,20 @@ impl JwtConfig {
         ]);
         self
     }
+}
+
+/// Config structure that define how trusted issuers will be loaded.
+#[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
+pub enum TrustedIssuerLoaderConfig {
+    /// Synchronous loading, on start program.
+    /// The Cedarling will load all entities on start in "blocking mode" (you need to wait).
+    #[default]
+    Sync,
+    /// Asynchronous loading, on start program.
+    /// The Cedarling will load all entities on the background.
+    /// You need specify workers count.
+    Async {
+        /// Workers count
+        workers: NonZeroU16,
+    },
 }
