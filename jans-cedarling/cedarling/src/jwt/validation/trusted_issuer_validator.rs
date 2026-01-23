@@ -63,10 +63,6 @@ type Result<T> = std::result::Result<T, TrustedIssuerError>;
 /// - JWKS fetching and caching with configurable TTL
 /// - JWT signature verification
 pub(crate) struct TrustedIssuerValidator {
-    /// Map of issuer identifiers to their configurations
-    //
-    // Maybe we need to get rid of this index?
-    trusted_issuers: HashMap<String, Arc<TrustedIssuer>>,
     /// Reverse lookup map: OIDC base URL -> issuer
     /// This optimizes issuer lookup when dealing with hundreds of trusted issuers
     url_to_issuer: HashMap<IssClaim, Arc<TrustedIssuer>>,
@@ -75,21 +71,16 @@ pub(crate) struct TrustedIssuerValidator {
 impl TrustedIssuerValidator {
     /// Creates a new trusted issuer validator with a logger.
     pub(crate) fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
-        let mut trusted_issuers_index = HashMap::with_capacity(trusted_issuers.len());
         // Build reverse lookup map: OIDC base URL -> issuer
         let mut url_to_issuer = HashMap::with_capacity(trusted_issuers.len());
-        for (id, issuer) in trusted_issuers
+        for (_id, issuer) in trusted_issuers
             .into_iter()
             .map(|(id, ti)| (id, Arc::new(ti)))
         {
-            trusted_issuers_index.insert(id, issuer.clone());
             url_to_issuer.insert(issuer.iss_claim(), issuer);
         }
 
-        Self {
-            trusted_issuers: trusted_issuers_index,
-            url_to_issuer,
-        }
+        Self { url_to_issuer }
     }
 
     /// Finds a trusted issuer by the issuer claim value.

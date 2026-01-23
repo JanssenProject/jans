@@ -76,7 +76,6 @@ mod token;
 mod token_cache;
 mod validation;
 
-#[cfg(test)]
 pub(crate) mod test_utils;
 
 pub(crate) use decode::*;

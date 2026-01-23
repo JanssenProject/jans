@@ -4,7 +4,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::{HashMap, HashSet};
+#[cfg(test)]
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
@@ -65,6 +67,7 @@ fn default_token_id() -> String {
     DEFAULT_TKN_ID.to_string()
 }
 
+#[cfg(test)]
 impl TokenEntityMetadata {
     /// Default access token Metadata
     pub(crate) fn access_token() -> Self {
