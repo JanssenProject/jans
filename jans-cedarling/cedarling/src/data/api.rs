@@ -33,31 +33,46 @@ pub struct DataStoreStats {
 /// This trait provides a consistent interface for pushing, retrieving,
 /// and managing data in the store. All operations are thread-safe.
 ///
-/// # Examples
+/// The [`Cedarling`](crate::Cedarling) struct implements this trait, providing
+/// access to the data store through the main application instance.
 ///
-/// ```ignore
-/// use cedarling::data::{DataApi, DataStore, DataStoreConfig};
+/// # Example
+///
+/// ```no_run
+/// use cedarling::{Cedarling, DataApi, DataError};
 /// use serde_json::json;
 /// use std::time::Duration;
 ///
-/// let store = DataStore::new(DataStoreConfig::default())?;
+/// fn use_data_api(cedarling: &Cedarling) -> Result<(), DataError> {
+///     // Push data with a 5-minute TTL
+///     cedarling.push_data(
+///         "user_roles",
+///         json!(["admin", "editor"]),
+///         Some(Duration::from_secs(300)),
+///     )?;
 ///
-/// // Push data with TTL
-/// store.push_data("user_roles", json!(["admin", "editor"]), Some(Duration::from_secs(300)))?;
+///     // Retrieve data
+///     if let Some(roles) = cedarling.get_data("user_roles")? {
+///         println!("User roles: {}", roles);
+///     }
 ///
-/// // Retrieve data
-/// if let Some(roles) = store.get_data("user_roles")? {
-///     println!("User roles: {}", roles);
+///     // List all entries with metadata
+///     for entry in cedarling.list_data()? {
+///         println!("Key: {}, Type: {:?}", entry.key, entry.data_type);
+///     }
+///
+///     // Get store statistics
+///     let stats = cedarling.get_stats()?;
+///     println!("Entries: {}/{}", stats.entry_count, stats.max_entries);
+///
+///     // Remove data
+///     cedarling.remove_data("user_roles")?;
+///
+///     // Clear all data
+///     cedarling.clear_data()?;
+///
+///     Ok(())
 /// }
-///
-/// // List all entries with metadata
-/// for entry in store.list_data()? {
-///     println!("Key: {}, Type: {:?}", entry.key, entry.data_type);
-/// }
-///
-/// // Get store statistics
-/// let stats = store.get_stats()?;
-/// println!("Entries: {}/{}", stats.entry_count, stats.max_entries);
 /// ```
 pub trait DataApi {
     /// Push a value into the store with an optional TTL.
