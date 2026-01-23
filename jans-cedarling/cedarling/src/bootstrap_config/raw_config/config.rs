@@ -7,10 +7,9 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
-use super::default_values::{
-    default_jti, default_stdout_buffer_limit, default_stdout_timeout_millis,
-    default_token_cache_capacity, default_true,
-};
+use super::default_values::{default_jti, default_token_cache_capacity, default_true};
+#[cfg(not(target_arch = "wasm32"))]
+use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::UnsignedRoleIdSrc;

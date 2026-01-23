@@ -23,7 +23,9 @@ use std::path::Path;
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::{PolicyStoreManifest, PolicyStoreMetadata};
 use super::validator::MetadataValidator;
-use super::vfs_adapter::{PhysicalVfs, VfsFileSystem};
+#[cfg(not(target_arch = "wasm32"))]
+use super::vfs_adapter::PhysicalVfs;
+use super::vfs_adapter::VfsFileSystem;
 
 /// Load a policy store from a directory path.
 ///
