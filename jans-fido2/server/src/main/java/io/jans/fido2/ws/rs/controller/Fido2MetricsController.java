@@ -626,10 +626,9 @@ public class Fido2MetricsController {
             // Perform a lightweight check: verify service can access configuration
             // This tests that the service bean is properly initialized and can access dependencies
             // We don't query the database to keep the health check fast
-            boolean metricsEnabled = appConfiguration.isFido2MetricsEnabled();
-            
-            // If metrics are enabled, verify the service can handle a simple operation
-            // This is a minimal check that exercises the service without heavy database operations
+            // Touch configuration to ensure it is readable (will throw if misconfigured)
+            appConfiguration.isFido2MetricsEnabled();
+
             return true;
         } catch (RuntimeException e) {
             log.warn("Health check detected service issue: {}", e.getMessage());
