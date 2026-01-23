@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -110,22 +112,30 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Clean up expired entries and enforce max cache size
      * Called periodically to prevent unbounded memory growth
+     * Uses a thread-safe approach: collect keys first, then remove to avoid race conditions
      */
     private void cleanupCache() {
-        if (userIdCache.size() < USER_ID_CACHE_MAX_SIZE) {
-            // Only clean expired entries if we're below max size
-            userIdCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
-        } else {
-            // At max size - remove expired entries first, then oldest if still over limit
-            userIdCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        // First, remove expired entries (thread-safe operation on ConcurrentHashMap)
+        userIdCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        
+        // If still over limit after removing expired, remove oldest entries
+        int currentSize = userIdCache.size();
+        if (currentSize >= USER_ID_CACHE_MAX_SIZE) {
+            // Collect keys to remove first (thread-safe snapshot)
+            // Calculate how many to remove: remove enough to get below 90% of max size
+            int targetSize = (int) (USER_ID_CACHE_MAX_SIZE * 0.9);
+            int toRemove = currentSize - targetSize;
             
-            // If still over limit after removing expired, remove oldest entries
-            if (userIdCache.size() >= USER_ID_CACHE_MAX_SIZE) {
-                long currentTime = System.currentTimeMillis();
-                userIdCache.entrySet().stream()
-                    .sorted((e1, e2) -> Long.compare(e1.getValue().timestamp, e2.getValue().timestamp))
-                    .limit(userIdCache.size() - USER_ID_CACHE_MAX_SIZE + 1000) // Remove enough to get below limit
-                    .forEach(entry -> userIdCache.remove(entry.getKey()));
+            if (toRemove > 0) {
+                // Collect oldest entries by timestamp (create snapshot to avoid concurrent modification)
+                List<java.util.Map.Entry<String, CacheEntry>> entriesToRemove = 
+                    userIdCache.entrySet().stream()
+                        .sorted((e1, e2) -> Long.compare(e1.getValue().timestamp, e2.getValue().timestamp))
+                        .limit(toRemove)
+                        .collect(Collectors.toList());
+                
+                // Remove collected entries (safe to do after stream collection)
+                entriesToRemove.forEach(entry -> userIdCache.remove(entry.getKey()));
             }
         }
     }
@@ -584,12 +594,31 @@ public class MetricService extends io.jans.service.metric.MetricService {
         if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
-        // Simple regex for IPv4 and IPv6 basic format validation
-        // IPv4: xxx.xxx.xxx.xxx (0-255 per octet)
-        // IPv6: simplified check for colons
-        return ip.matches("^([0-9]{1,3}\\.){3}[0-9]{1,3}$") || 
-               ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$") ||
-               ip.equals("localhost") || ip.equals("127.0.0.1") || ip.equals("::1");
+        
+        // Check for loopback addresses first
+        if (ip.equals("localhost") || ip.equals("127.0.0.1") || ip.equals("::1")) {
+            return true;
+        }
+        
+        // Validate IPv4: each octet must be 0-255
+        // More precise regex: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) for each octet
+        if (ip.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
+            return true;
+        }
+        
+        // Validate IPv6: simplified check for colons (full validation would be more complex)
+        // This is a basic check - for production, consider using InetAddress.getByName()
+        if (ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
+            // Additional validation: try parsing with InetAddress for more robust check
+            try {
+                java.net.InetAddress.getByName(ip);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
+        return false;
     }
 
     /**
