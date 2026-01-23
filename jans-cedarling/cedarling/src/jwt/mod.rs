@@ -68,6 +68,7 @@
 mod decode;
 mod error;
 mod http_utils;
+mod issuer_index;
 mod key_service;
 mod log_entry;
 mod status_list;
@@ -94,22 +95,21 @@ use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::*;
+use issuer_index::IssuerIndex;
 use key_service::*;
 use log_entry::*;
 use serde_json::json;
 use status_list::*;
+use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use validation::*;
-
-/// The value of the `iss` claim from a JWT
-type IssClaim = String;
 
 /// Handles JWT validation
 pub(crate) struct JwtService {
     validators: JwtValidatorCache,
     key_service: Arc<KeyService>,
-    issuer_configs: HashMap<IssClaim, IssuerConfig>,
+    issuer_configs: IssuerIndex,
     /// Trusted issuer validator for advanced validation scenarios
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
@@ -145,7 +145,7 @@ impl JwtService {
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
-        let mut issuer_configs = HashMap::default();
+        let issuer_configs = IssuerIndex::new();
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
@@ -272,7 +272,7 @@ impl JwtService {
                 validated_token
             } else {
                 // validate token and save to cache
-                let validated_jwt = match self.validate_single_token(token_kind, jwt) {
+                let validated_jwt = match self.validate_single_token(token_kind.clone(), jwt) {
                     Ok(jwt) => jwt,
                     Err(err) => {
                         if matches!(err, ValidateJwtError::MissingValidator(_)) {
@@ -325,7 +325,7 @@ impl JwtService {
         let normalized_iss = decoded_jwt.iss().map(normalize_issuer);
         let validator_key = ValidatorInfo {
             iss: normalized_iss.as_deref(),
-            token_kind,
+            token_kind: token_kind.clone(),
             algorithm: decoded_jwt.header.alg,
         };
         let validator: Arc<std::sync::RwLock<JwtValidator>> =
@@ -472,7 +472,7 @@ impl JwtService {
                 validated_tokens.insert(token_name, cedar_token);
             } else {
                 // Validate JWT using existing single token validation
-                match self.validate_single_token(token_kind, &token.payload) {
+                match self.validate_single_token(token_kind.clone(), &token.payload) {
                     Ok(validated_jwt) => {
                         // Extract issuer for non-deterministic check
                         let issuer = validated_jwt
@@ -557,24 +557,21 @@ impl JwtService {
     #[inline]
     fn get_issuer_ref(&self, iss_claim: &str) -> Option<Arc<TrustedIssuer>> {
         self.issuer_configs
-            .get(&normalize_issuer(iss_claim))
-            .map(|config| config.policy.clone())
+            .get_trusted_issuer(&normalize_issuer(iss_claim))
     }
 
     /// Find the token metadata key for a given entity type name
     /// e.g., "Dolphin::Access_Token" -> "access_token"
-    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> &'a str {
-        // Look through all trusted issuers to find the matching entity type name
-        for issuer_config in self.issuer_configs.values() {
-            for (token_key, token_metadata) in &issuer_config.policy.token_metadata {
-                if token_metadata.entity_type_name == entity_type_name {
-                    return token_key;
-                }
-            }
+    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a String) -> Cow<'a, String> {
+        if let Some(token_key) = self
+            .issuer_configs
+            .find_token_metadata_key(entity_type_name)
+        {
+            return Cow::Owned(token_key);
         }
 
         // If not found, return the original mapping (fallback)
-        entity_type_name
+        Cow::Borrowed(entity_type_name)
     }
 }
 

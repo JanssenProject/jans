@@ -11,6 +11,7 @@ use crate::{JwtConfig, LogLevel, LogWriter};
 
 use super::*;
 use jsonwebtoken::Algorithm;
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
@@ -153,7 +154,7 @@ impl JwtValidatorCache {
 /// Lightweight view of validator identity used for lookup and insertion.
 ///
 /// Holds borrowed data and can be hashed to a `ValidatorKeyHash`.
-#[derive(Hash, Clone, Copy)]
+#[derive(Hash, Clone)]
 pub(crate) struct ValidatorInfo<'a> {
     /// Optional issuer string (typically from a JWT "iss" claim).
     pub iss: Option<&'a str>,
@@ -163,7 +164,7 @@ pub(crate) struct ValidatorInfo<'a> {
     pub algorithm: Algorithm,
 }
 
-#[derive(Hash, Clone, Copy, PartialEq)]
+#[derive(Hash, Clone, PartialEq)]
 pub(crate) enum TokenKind<'a> {
     /// A token that's provided by the user through the [`authorize`] function.
     ///
@@ -174,7 +175,7 @@ pub(crate) enum TokenKind<'a> {
     /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
     ///
     /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
-    AuthorizeMultiIssuer(&'a str),
+    AuthorizeMultiIssuer(Cow<'a, String>),
 }
 
 impl Display for TokenKind<'_> {
@@ -209,8 +210,8 @@ pub(crate) enum OwnedTokenKind {
     AuthorizeMultiIssuer(String),
 }
 
-impl From<TokenKind<'_>> for OwnedTokenKind {
-    fn from(tkn_kind: TokenKind<'_>) -> Self {
+impl From<&TokenKind<'_>> for OwnedTokenKind {
+    fn from(tkn_kind: &TokenKind<'_>) -> Self {
         match tkn_kind {
             TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput(tkn_name.to_string()),
             TokenKind::StatusList => Self::StatusList,
@@ -235,7 +236,7 @@ impl OwnedTokenKind {
             (
                 OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
                 TokenKind::AuthorizeMultiIssuer(tkn_name_str),
-            ) => tkn_name_string.as_str() == *tkn_name_str,
+            ) => tkn_name_string.as_str() == tkn_name_str.as_str(),
             _ => false,
         }
     }
@@ -252,7 +253,7 @@ impl ValidatorInfo<'_> {
     pub(crate) fn owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
             iss: self.iss.map(|s| s.to_string()),
-            token_kind: self.token_kind.into(),
+            token_kind: (&self.token_kind).into(),
             algorithm: self.algorithm,
         }
     }
@@ -318,7 +319,7 @@ mod test {
             false,
         );
 
-        store.insert(info, validator.clone());
+        store.insert(info.clone(), validator.clone());
 
         assert!(store.get(&info).is_some());
     }

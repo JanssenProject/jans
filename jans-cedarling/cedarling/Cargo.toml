@@ -46,7 +46,10 @@ async-trait = "0.1.88"
 futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }
 config = "0.15.11"
-ahash = { version = "0.8.12", default-features = false, features = ["no-rng"] }
+ahash = { version = "0.8.12", default-features = false, features = [
+    "no-rng",
+    "std",
+] }
 vfs = "0.12"
 hex = "0.4.3"
 sha2 = "0.10.8"

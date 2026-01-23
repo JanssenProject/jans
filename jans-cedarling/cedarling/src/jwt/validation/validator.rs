@@ -121,14 +121,14 @@ impl JwtValidator {
     /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
     pub(super) fn new_multi_issuer_tkn_validator<'a>(
         iss: Option<&'a str>,
-        tkn_name: &'a str,
+        tkn_name: &'a String,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
         status_lists: StatusListCache,
         validate_signature: bool,
         validate_status_list: bool,
     ) -> (Self, ValidatorInfo<'a>) {
-        let token_kind = TokenKind::AuthorizeMultiIssuer(tkn_name);
+        let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(tkn_name));
 
         let mut validation = Validation::new(algorithm);
         if let Some(iss) = iss {
