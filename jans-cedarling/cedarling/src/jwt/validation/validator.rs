@@ -121,7 +121,7 @@ impl JwtValidator {
     /// Creates a new validator for multi-issuer tokens passed through [`crate::Cedarling::authorize_multi_issuer`]
     pub(super) fn new_multi_issuer_tkn_validator<'a>(
         iss: Option<&'a IssClaim>,
-        tkn_name: &'a String,
+        tkn_name: &'a str,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
         status_lists: StatusListCache,
@@ -278,7 +278,7 @@ impl DecodedJwt {
             .inner
             .get("iss")
             .and_then(|x| x.as_str())
-            .map(|iss_str| IssClaim::new(iss_str))
+            .map(IssClaim::new)
     }
 
     pub(crate) fn decoding_key_info(&self) -> DecodingKeyInfo {

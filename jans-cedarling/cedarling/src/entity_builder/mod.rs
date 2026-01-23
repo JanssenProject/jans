@@ -75,7 +75,7 @@ impl EntityBuilder {
                 let iss_type_name = Self::trusted_issuer_typename(&iss.name);
                 build_iss_entity(
                     &iss_type_name.to_string(),
-                    &iss_id.as_str(),
+                    iss_id.as_str(),
                     iss,
                     schema.as_ref(),
                 )

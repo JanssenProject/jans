@@ -167,7 +167,7 @@ pub(crate) enum TokenKind<'a> {
     /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
     ///
     /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
-    AuthorizeMultiIssuer(Cow<'a, String>),
+    AuthorizeMultiIssuer(Cow<'a, str>),
 }
 
 impl Display for TokenKind<'_> {
@@ -228,7 +228,7 @@ impl OwnedTokenKind {
             (
                 OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
                 TokenKind::AuthorizeMultiIssuer(tkn_name_str),
-            ) => tkn_name_string.as_str() == tkn_name_str.as_str(),
+            ) => tkn_name_string.as_str() == tkn_name_str,
             _ => false,
         }
     }

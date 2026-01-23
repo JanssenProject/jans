@@ -561,7 +561,7 @@ impl JwtService {
 
     /// Find the token metadata key for a given entity type name
     /// e.g., "Dolphin::Access_Token" -> "access_token"
-    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a String) -> Cow<'a, String> {
+    fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> Cow<'a, str> {
         if let Some(token_key) = self
             .issuer_configs
             .find_token_metadata_key(entity_type_name)

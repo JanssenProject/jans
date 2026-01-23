@@ -20,7 +20,6 @@ use std::sync::Arc;
 
 use serde_json::Value as JsonValue;
 use thiserror::Error;
-use url::Url;
 
 use crate::common::{
     issuer_utils::IssClaim,
@@ -66,7 +65,7 @@ type Result<T> = std::result::Result<T, TrustedIssuerError>;
 pub(crate) struct TrustedIssuerValidator {
     /// Map of issuer identifiers to their configurations
     //
-    // Maybe we need to get of this index?
+    // Maybe we need to get rid of this index?
     trusted_issuers: HashMap<String, Arc<TrustedIssuer>>,
     /// Reverse lookup map: OIDC base URL -> issuer
     /// This optimizes issuer lookup when dealing with hundreds of trusted issuers
@@ -156,6 +155,8 @@ pub(crate) fn validate_required_claims(
 
 #[cfg(test)]
 mod tests {
+    use url::Url;
+
     use super::*;
     use crate::common::policy_store::TokenEntityMetadata;
     use std::collections::HashSet;

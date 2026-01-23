@@ -63,7 +63,7 @@ impl Token {
         // Method 2: From token claims (fallback)
         self.claims
             .get_claim("iss")
-            .and_then(|claim| claim.value().as_str().map(|iss| IssClaim::new(iss)))
+            .and_then(|claim| claim.value().as_str().map(IssClaim::new))
     }
 }
 

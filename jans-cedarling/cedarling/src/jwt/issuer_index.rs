@@ -8,7 +8,7 @@ const MUTEX_POISONED_ERR: &str =
     "IssuerIndex RwLock poisoned due to another thread panicking while holding the lock";
 
 /// The value of the `iss` claim from a JWT
-
+///
 /// An index mapping `iss` claims to their corresponding `IssuerConfig`s
 /// This structure allows efficient lookup of issuer configurations
 ///

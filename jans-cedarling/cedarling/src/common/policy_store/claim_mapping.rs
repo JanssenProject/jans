@@ -22,10 +22,10 @@ use serde_json::Value;
 // }
 // but for now current approach is OK
 #[derive(Debug, Default, PartialEq, Clone, Deserialize)]
-pub struct ClaimMappings(HashMap<String, ClaimMapping>);
+pub(crate) struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 impl ClaimMappings {
-    pub fn mapping(&self, claim: &str) -> Option<&ClaimMapping> {
+    pub(crate) fn mapping(&self, claim: &str) -> Option<&ClaimMapping> {
         self.0.get(claim)
     }
 
@@ -89,7 +89,7 @@ impl ClaimMappingsBuilder {
 /// - `Regex`: For extracting claims using regular expressions with fields.
 /// - `Json`: For extracting claims using a JSON parser.
 #[derive(Debug, PartialEq, Clone)]
-pub enum ClaimMapping {
+pub(crate) enum ClaimMapping {
     /// Represents a claim mapping using regular expressions.
     Regex(RegexMapping),
     /// Represents a claim mapping using a JSON parser.
@@ -101,7 +101,7 @@ impl ClaimMapping {
     ///
     /// if `Regex` mapping value will be converted to json value, if has error on converting, return default value
     /// if `Json` mapping value convert JSON object to HashMap or return empty HashMap
-    pub fn apply_mapping(&self, value: &serde_json::Value) -> HashMap<String, serde_json::Value> {
+    pub(crate) fn apply_mapping(&self, value: &serde_json::Value) -> HashMap<String, serde_json::Value> {
         match self {
             ClaimMapping::Regex(regexp_mapping) => regexp_mapping.apply_mapping(value),
             ClaimMapping::Json => {
@@ -114,7 +114,7 @@ impl ClaimMapping {
         }
     }
 
-    pub fn apply_mapping_value(&self, value: &serde_json::Value) -> serde_json::Value {
+    pub(crate) fn apply_mapping_value(&self, value: &serde_json::Value) -> serde_json::Value {
         // this should always be a valid JSON since the input is a valid JSON
         serde_json::to_value(self.apply_mapping(value)).expect("a valid JSON")
     }
@@ -126,7 +126,7 @@ impl ClaimMapping {
 /// - `regex_expression`: The regular expression used to extract fields.
 /// - `fields`: A map of field names to `RegexField` values.
 #[derive(Debug, Clone)]
-pub struct RegexMapping {
+pub(crate) struct RegexMapping {
     regex_expression: String,
     regex: Regex,
     // hashmap key is name of regex group
