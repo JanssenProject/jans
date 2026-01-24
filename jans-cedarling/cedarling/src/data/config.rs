@@ -19,7 +19,7 @@ use std::time::Duration;
 ///
 /// ```
 /// use std::time::Duration;
-/// use cedarling::data::DataStoreConfig;
+/// use cedarling::DataStoreConfig;
 ///
 /// // No expiration by default, but cap at 1 hour when explicitly set
 /// let config = DataStoreConfig {

@@ -32,7 +32,7 @@ const INFINITE_TTL_SECS: i64 = 315_360_000; // 10 years in seconds
 /// - `config.default_ttl = None` means entries without explicit TTL will effectively never expire (10 years)
 /// - `config.max_ttl = None` means no upper limit on TTL values (10 years max)
 /// - When both `ttl` parameter and `config.default_ttl` are `None`, entries use the infinite TTL
-pub struct DataStore {
+pub(crate) struct DataStore {
     storage: RwLock<SparKV<DataEntry>>,
     config: DataStoreConfig,
 }
@@ -48,7 +48,7 @@ impl DataStore {
     /// # Errors
     ///
     /// Returns `ConfigValidationError` if the configuration is invalid.
-    pub fn new(config: DataStoreConfig) -> Result<Self, ConfigValidationError> {
+    pub(crate) fn new(config: DataStoreConfig) -> Result<Self, ConfigValidationError> {
         // Validate configuration before creating the store
         config.validate()?;
 
@@ -94,7 +94,12 @@ impl DataStore {
     /// - Value size exceeds `max_entry_size`
     /// - Storage capacity is exceeded
     /// - TTL exceeds `max_ttl`
-    pub fn push(&self, key: &str, value: Value, ttl: Option<StdDuration>) -> Result<(), DataError> {
+    pub(crate) fn push(
+        &self,
+        key: &str,
+        value: Value,
+        ttl: Option<StdDuration>,
+    ) -> Result<(), DataError> {
         // Validate key
         if key.is_empty() {
             return Err(DataError::InvalidKey);
@@ -162,7 +167,7 @@ impl DataStore {
     ///
     /// Returns `None` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
-    pub fn get(&self, key: &str) -> Option<Value> {
+    pub(crate) fn get(&self, key: &str) -> Option<Value> {
         self.get_entry(key).map(|entry| entry.value)
     }
 
@@ -171,7 +176,7 @@ impl DataStore {
     /// Returns `None` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
     /// Uses read lock initially for better concurrency, upgrading to write lock only when metrics are enabled.
-    pub fn get_entry(&self, key: &str) -> Option<DataEntry> {
+    pub(crate) fn get_entry(&self, key: &str) -> Option<DataEntry> {
         // First, try with read lock for better concurrency
         let entry = {
             let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
@@ -222,28 +227,28 @@ impl DataStore {
     ///
     /// Returns `true` if the key existed and was removed, `false` otherwise.
     /// Uses write lock for exclusive access.
-    pub fn remove(&self, key: &str) -> bool {
+    pub(crate) fn remove(&self, key: &str) -> bool {
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
         storage.pop(key).is_some()
     }
 
     /// Clear all entries from the store.
     /// Uses write lock for exclusive access.
-    pub fn clear(&self) {
+    pub(crate) fn clear(&self) {
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
         storage.clear();
     }
 
     /// Get the number of entries currently in the store.
     /// Uses read lock for concurrent access.
-    pub fn count(&self) -> usize {
+    pub(crate) fn count(&self) -> usize {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage.len()
     }
 
     /// List all keys currently in the store.
     /// Uses read lock for concurrent access.
-    pub fn list_keys(&self) -> Vec<String> {
+    pub(crate) fn list_keys(&self) -> Vec<String> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage.get_keys()
     }
@@ -252,12 +257,27 @@ impl DataStore {
     ///
     /// This is used for context injection during authorization.
     /// Returns only the values, not the metadata.
-    pub fn get_all(&self) -> HashMap<String, Value> {
+    pub(crate) fn get_all(&self) -> HashMap<String, Value> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage
             .iter()
             .map(|(k, entry)| (k.clone(), entry.value.clone()))
             .collect()
+    }
+
+    /// List all entries with their full metadata, excluding expired entries.
+    pub(crate) fn list_entries(&self) -> Vec<DataEntry> {
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+        storage
+            .iter()
+            .filter(|(_, entry)| !entry.is_expired())
+            .map(|(_, entry)| entry.clone())
+            .collect()
+    }
+
+    /// Get the configuration for this store.
+    pub(crate) fn config(&self) -> &DataStoreConfig {
+        &self.config
     }
 }
 
@@ -821,5 +841,46 @@ mod tests {
             ),
             "expected DataStore::new() to return ConfigValidationError when default_ttl exceeds max_ttl"
         );
+    }
+
+    // ==========================================================================
+    // Additional store method tests
+    // ==========================================================================
+
+    #[test]
+    fn test_list_entries() {
+        let store = create_test_store();
+
+        store
+            .push("alpha", json!("a"), None)
+            .expect("push should succeed");
+        store
+            .push("beta", json!("b"), None)
+            .expect("push should succeed");
+
+        let entries = store.list_entries();
+
+        assert_eq!(entries.len(), 2);
+
+        let keys: Vec<&str> = entries.iter().map(|e| e.key.as_str()).collect();
+        assert!(keys.contains(&"alpha"));
+        assert!(keys.contains(&"beta"));
+    }
+
+    #[test]
+    fn test_config_accessor() {
+        let config = DataStoreConfig {
+            max_entries: 100,
+            max_entry_size: 512,
+            enable_metrics: true,
+            ..Default::default()
+        };
+        let store = DataStore::new(config).expect("should create store");
+
+        let retrieved_config = store.config();
+
+        assert_eq!(retrieved_config.max_entries, 100);
+        assert_eq!(retrieved_config.max_entry_size, 512);
+        assert!(retrieved_config.enable_metrics);
     }
 }

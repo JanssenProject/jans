@@ -4,15 +4,18 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! # Data Store Module
+//!
 //! Provides key-value storage for pushed data with TTL support, capacity management,
 //! and thread-safe concurrent access.
 
+mod api;
 mod config;
 mod entry;
 mod error;
 mod store;
 
+pub use api::{DataApi, DataStoreStats};
 pub use config::{ConfigValidationError, DataStoreConfig};
 pub use entry::{CedarType, DataEntry};
 pub use error::DataError;
-pub use store::DataStore;
+pub(crate) use store::DataStore;

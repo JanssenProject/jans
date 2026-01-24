@@ -35,7 +35,11 @@ mod tests;
 use std::sync::Arc;
 
 pub use crate::common::json_rules::JsonRule;
-pub use crate::data::{CedarType, ConfigValidationError, DataEntry, DataStoreConfig};
+use crate::data::DataStore;
+pub use crate::data::{
+    CedarType, ConfigValidationError, DataApi, DataEntry, DataError, DataStoreConfig,
+    DataStoreStats,
+};
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 use crate::log::BaseLogEntry;
 #[cfg(test)]
@@ -99,6 +103,7 @@ pub enum InitCedarlingError {
 pub struct Cedarling {
     log: log::Logger,
     authz: Arc<Authz>,
+    data: Arc<DataStore>,
 }
 
 impl Cedarling {
@@ -156,9 +161,17 @@ impl Cedarling {
             log_policy_store_metadata(&log, metadata);
         }
 
+        // Initialize data store with default configuration
+        // TODO: Add DataStoreConfig to BootstrapConfig
+        let data = Arc::new(
+            DataStore::new(DataStoreConfig::default())
+                .expect("default DataStoreConfig should always be valid"),
+        );
+
         Ok(Cedarling {
             log,
             authz: service_factory.authz_service().await?,
+            data,
         })
     }
 
@@ -329,5 +342,49 @@ impl LogStorage for Cedarling {
 
     fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
         self.log.get_logs_by_request_id_and_tag(id, tag)
+    }
+}
+
+// implements DataApi for Cedarling
+// provides public interface for pushing and retrieving data
+impl DataApi for Cedarling {
+    fn push_data(
+        &self,
+        key: &str,
+        value: serde_json::Value,
+        ttl: Option<std::time::Duration>,
+    ) -> Result<(), DataError> {
+        self.data.push(key, value, ttl)
+    }
+
+    fn get_data(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
+        Ok(self.data.get(key))
+    }
+
+    fn get_data_entry(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+        Ok(self.data.get_entry(key))
+    }
+
+    fn remove_data(&self, key: &str) -> Result<bool, DataError> {
+        Ok(self.data.remove(key))
+    }
+
+    fn clear_data(&self) -> Result<(), DataError> {
+        self.data.clear();
+        Ok(())
+    }
+
+    fn list_data(&self) -> Result<Vec<DataEntry>, DataError> {
+        Ok(self.data.list_entries())
+    }
+
+    fn get_stats(&self) -> Result<DataStoreStats, DataError> {
+        let config = self.data.config();
+        Ok(DataStoreStats {
+            entry_count: self.data.count(),
+            max_entries: config.max_entries,
+            max_entry_size: config.max_entry_size,
+            metrics_enabled: config.enable_metrics,
+        })
     }
 }
