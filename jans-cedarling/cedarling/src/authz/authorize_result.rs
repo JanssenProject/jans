@@ -43,6 +43,7 @@ pub struct AuthorizeResult {
 }
 
 /// Custom serializer for an Option<`cedar_policy::Response`> which converts `None` to an empty string and vice versa.
+#[allow(clippy::ref_option)]
 fn serialize_opt_response<S>(
     value: &Option<cedar_policy::Response>,
     serializer: S,

@@ -62,6 +62,7 @@ pub struct JwtConfig {
 /// The default configuration for Access Tokens, ID Tokens, and Userinfo Tokens
 /// can be easily instantiated via the provided methods.
 #[derive(Debug, Default, PartialEq)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct TokenValidationConfig {
     /// Requires the `iss` claim to be present in the JWT and the scheme
     /// must be `https`.

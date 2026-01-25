@@ -503,6 +503,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn can_build_entities_with_default_entities() {
         // Test that default entities are properly included in the authorization flow
         use crate::authz::request::EntityData;
@@ -842,6 +843,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_default_entities_affect_authorization() {
         use url::Url;
 
@@ -1033,6 +1035,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_default_entity_as_principal() {
         use url::Url;
 

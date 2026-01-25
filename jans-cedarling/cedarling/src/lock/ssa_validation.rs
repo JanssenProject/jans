@@ -87,6 +87,7 @@ use thiserror::Error;
 /// This struct allows customization of validation behavior including
 /// required claims, allowed algorithms, and validation behavior.
 #[derive(Debug, Clone)]
+#[allow(clippy::struct_excessive_bools)]
 pub(crate) struct SsaValidationConfig {
     /// Set of required claims that must be present in the SSA JWT.
     /// Default includes: `software_id`, `grant_types`, iss, exp, iat, jti (RFC 7591/RFC 7519)

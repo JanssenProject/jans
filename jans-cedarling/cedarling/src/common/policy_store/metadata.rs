@@ -14,6 +14,7 @@ mod datetime_option {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
+    #[allow(clippy::ref_option)]
     pub(super) fn serialize<S>(
         date: &Option<DateTime<Utc>>,
         serializer: S,
