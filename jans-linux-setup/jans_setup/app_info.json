@@ -1,6 +1,6 @@
 {
-  "JANS_APP_VERSION": "1.16.0",
-  "JANS_BUILD": "",
+  "JANS_APP_VERSION": "0.0.0",
+  "JANS_BUILD": "-nightly",
   "JETTY_VERSION": "12.0.25",
   "AMAZON_CORRETTO_VERSION": "17",
   "JYTHON_VERSION": "2.7.4",
