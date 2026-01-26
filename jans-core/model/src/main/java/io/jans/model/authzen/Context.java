@@ -40,7 +40,7 @@ public class Context implements Serializable {
     public String toString() {
         return "Context{" +
                 "properties=" + properties +
-                "time=" + time +
+                ", time=" + time +
                 '}';
     }
 }
