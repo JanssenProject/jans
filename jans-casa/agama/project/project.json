@@ -1,6 +1,6 @@
 {
     "projectName": "casa",
-    "version": "1.16.0",
+    "version": "0.0.0-nightly",
     "author": "jgomer2001",
     "description": "2FA flow featuring pluggable authentication methods",
     "noDirectLaunch": [
@@ -28,12 +28,12 @@
         "io.jans.casa.authn.otp": {
             "issuer": "Gluu Inc",
             "otp_type": "totp",
-            "hotp": {
+            "hotp":{
                 "keyLength": 20,
                 "digits": 6,
                 "lookAheadWindow": 10
             },
-            "totp": {
+            "totp":{
                 "keyLength": 20,
                 "digits": 6,
                 "timeStep": 30,
