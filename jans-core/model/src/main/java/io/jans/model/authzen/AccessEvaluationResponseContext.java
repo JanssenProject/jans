@@ -1,9 +1,13 @@
 package io.jans.model.authzen;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Yuriy Z
@@ -21,6 +25,9 @@ public class AccessEvaluationResponseContext implements Serializable {
 
     @JsonProperty("metadata")
     private JsonNode metadata;
+
+    // dynamic fields from JSON will be stored here
+    private final Map<String, Object> extra = new LinkedHashMap<>();
 
     public AccessEvaluationResponseContext() {
     }
@@ -67,6 +74,17 @@ public class AccessEvaluationResponseContext implements Serializable {
         return this;
     }
 
+
+    @JsonAnySetter
+    public void putExtra(String key, Object value) {
+        extra.put(key, value);
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getExtra() {
+        return extra;
+    }
+
     @Override
     public String toString() {
         return "AccessEvaluationResponseContext{" +
@@ -74,6 +92,7 @@ public class AccessEvaluationResponseContext implements Serializable {
                 ", reasonAdmin=" + reasonAdmin +
                 ", reasonUser=" + reasonUser +
                 ", metadata=" + metadata +
+                ", extra=" + extra +
                 '}';
     }
 }
