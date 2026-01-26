@@ -78,7 +78,7 @@ pub(crate) async fn load_policy_store_directory(
 /// Directory loading is not supported in WASM environments.
 /// Use `load_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub(crate) async fn load_policy_store_directory(
+pub(crate) fn load_policy_store_directory(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
@@ -119,7 +119,7 @@ pub(crate) async fn load_policy_store_archive(
 /// File-based archive loading is not supported in WASM environments.
 /// Use `load_policy_store_archive_bytes` instead.
 #[cfg(target_arch = "wasm32")]
-pub(crate) async fn load_policy_store_archive(
+pub(crate) fn load_policy_store_archive(
     _path: &Path,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
@@ -132,11 +132,11 @@ pub(crate) async fn load_policy_store_archive(
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
 pub(crate) fn load_policy_store_archive_bytes(
-    bytes: Vec<u8>,
+    bytes: &[u8],
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     use super::archive_handler::ArchiveVfs;
 
-    let archive_vfs = ArchiveVfs::from_buffer(bytes.clone())?;
+    let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned())?;
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader.load_directory(".")?;
 
@@ -147,7 +147,7 @@ pub(crate) fn load_policy_store_archive_bytes(
         use std::path::PathBuf;
 
         // Create a new ArchiveVfs instance for validation (ManifestValidator needs its own VFS)
-        let validator_vfs = ArchiveVfs::from_buffer(bytes)?;
+        let validator_vfs = ArchiveVfs::from_buffer(bytes.to_vec())?;
         let validator = ManifestValidator::new(validator_vfs, PathBuf::from("."));
         let result = validator.validate(Some(&loaded_directory.metadata.policy_store.id));
 

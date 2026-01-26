@@ -114,9 +114,15 @@ pub async fn load_policy_store(
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
+        #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path).await?,
+        #[cfg(target_arch = "wasm32")]
+        PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path)?,
         PolicyStoreSource::CjarUrl(url) => load_policy_store_from_cjar_url(url).await?,
+        #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path).await?,
+        #[cfg(target_arch = "wasm32")]
+        PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path)?,
         PolicyStoreSource::ArchiveBytes(bytes) => load_policy_store_from_archive_bytes(bytes)?,
     };
 
@@ -165,16 +171,15 @@ async fn load_policy_store_from_cjar_file(
 /// Loads the policy store from a Cedar Archive (.cjar) file.
 /// WASM version - file system access is not supported.
 #[cfg(target_arch = "wasm32")]
-async fn load_policy_store_from_cjar_file(
-    _path: &Path,
+fn load_policy_store_from_cjar_file(
+    path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_archive(_path).await {
+    match loader::load_policy_store_archive(path) {
         Err(e) => Err(PolicyStoreLoadError::Archive(format!(
-            "Loading from file path is not supported in WASM. Use CjarUrl instead. Original error: {}",
-            e
+            "Loading from file path is not supported in WASM. Use CjarUrl instead. Original error: {e}",
         ))),
         Ok(_) => unreachable!("WASM stub should always return an error"),
     }
@@ -197,7 +202,7 @@ async fn load_policy_store_from_cjar_url(
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
 
     // Load from bytes (works in both native and WASM)
-    let loaded = loader::load_policy_store_archive_bytes(bytes)
+    let loaded = loader::load_policy_store_archive_bytes(&bytes)
         .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
 
     // Get the policy store ID and metadata
@@ -247,16 +252,15 @@ async fn load_policy_store_from_directory(
 /// Loads the policy store from a directory structure.
 /// WASM version - file system access is not supported.
 #[cfg(target_arch = "wasm32")]
-async fn load_policy_store_from_directory(
-    _path: &Path,
+fn load_policy_store_from_directory(
+    path: &Path,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     use crate::common::policy_store::loader;
 
     // Call the loader stub function to ensure it's used and the error variant is constructed
-    match loader::load_policy_store_directory(_path).await {
+    match loader::load_policy_store_directory(path) {
         Err(e) => Err(PolicyStoreLoadError::Directory(format!(
-            "Loading from directory is not supported in WASM. Original error: {}",
-            e
+            "Loading from directory is not supported in WASM. Original error: {e}",
         ))),
         Ok(_) => unreachable!("WASM stub should always return an error"),
     }
@@ -276,7 +280,7 @@ fn load_policy_store_from_archive_bytes(
     use crate::common::policy_store::loader;
 
     // Load from bytes (works in both native and WASM)
-    let loaded = loader::load_policy_store_archive_bytes(bytes.to_vec()).map_err(|e| {
+    let loaded = loader::load_policy_store_archive_bytes(bytes).map_err(|e| {
         PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {e}"))
     })?;
 

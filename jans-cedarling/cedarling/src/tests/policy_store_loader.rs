@@ -831,7 +831,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(archive_bytes)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes)
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -868,7 +868,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(invalid_bytes)
+    let err = load_policy_store_archive_bytes(&invalid_bytes)
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
