@@ -43,7 +43,7 @@ fn authorize_multi_issuer(c: &mut Criterion) {
                             assert!(v.decision, "should be true")
                         },
                         Err(e) => {
-                            panic!("{}, {:?}", e.to_string(), e)
+                            panic!("{}, {:?}", e, e)
                         },
                     }
                 }
@@ -96,6 +96,7 @@ async fn prepare_cedarling_with_jwt_validation(
             jwt_sig_validation: true,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+            ..Default::default()
         },
         authorization_config: AuthorizationConfig {
             use_user_principal: false,
@@ -110,7 +111,6 @@ async fn prepare_cedarling_with_jwt_validation(
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
-        token_cache_max_ttl_secs: 60,
     };
 
     Cedarling::new(&bootstrap_config).await

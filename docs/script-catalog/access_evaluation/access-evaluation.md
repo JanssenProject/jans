@@ -9,26 +9,26 @@ tags:
 
 
 The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 – draft 05](https://openid.github.io/authzen/).
-The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between 
-Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems. 
-It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests, 
-enhancing interoperability and scalability in authorization processes. 
-The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained, 
+The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
+Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
+It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
+enhancing interoperability and scalability in authorization processes.
+The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
 and dynamic authorization mechanisms.
 
 This script is used to control Access Evaluation Endpoint described in specification.
 
 ## Behavior
 
-The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs) 
-to request access decisions from a Policy Decision Point (PDP) for specific resources and actions. 
-Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine 
-if access should be granted, denied, or if additional information is needed. 
-The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time. 
+The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs)
+to request access decisions from a Policy Decision Point (PDP) for specific resources and actions.
+Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine
+if access should be granted, denied, or if additional information is needed.
+The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.
 
-During Access Evaluation request processing `Access Evaluation` custom script is executed. 
-Name of the script must be specified by `accessEvaluationScriptName` configuration property. 
+During Access Evaluation request processing `Access Evaluation` custom script is executed.
+Name of the script must be specified by `accessEvaluationScriptName` configuration property.
 If AS can't find such script or if configuration property is not specified then server executes first script it finds on database.
 AS comes with sample demo script which shows simple example of custom validation and granting access.
 

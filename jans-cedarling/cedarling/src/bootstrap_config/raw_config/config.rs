@@ -6,6 +6,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
+use super::super::log_config::StdOutMode;
 use super::default_values::*;
 use super::feature_types::*;
 use super::json_util::*;
@@ -20,7 +21,7 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug, Default)]
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
@@ -69,6 +70,32 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_MAX_ITEM_SIZE", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_max_item_size: Option<usize>,
+
+    /// Logging mode for stdout logger: "async" or "immediate (default)".
+    /// Only applicable for native targets (not WASM).
+    #[serde(rename = "CEDARLING_STDOUT_MODE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_mode: StdOutMode,
+
+    /// Flush timeout in milliseconds for async stdout logging.
+    /// Only applicable for native targets (not WASM).
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_STDOUT_TIMEOUT_MILLIS",
+        default = "default_stdout_timeout_millis"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_timeout_millis: u64,
+
+    /// Buffer size limit in bytes for async stdout logging.
+    /// Only applicable for native targets (not WASM).
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_STDOUT_BUFFER_LIMIT",
+        default = "default_stdout_buffer_limit"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_buffer_limit: usize,
 
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
@@ -259,6 +286,30 @@ pub struct BootstrapConfigRaw {
     /// Zero means no token cache TTL limit.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
+    /// Maximum number of tokens the cache can store.
+    /// Default value is 100.
+    /// 0 means no limit.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_CAPACITY",
+        default = "default_token_cache_capacity"
+    )]
+    pub token_cache_capacity: usize,
+    /// Enables eviction policy based on the earliest expiration time.
+    ///
+    /// When the cache reaches its capacity, the entry with the nearest
+    /// expiration timestamp will be removed to make room for a new one.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION",
+        default = "default_true"
+    )]
+    pub token_cache_earliest_expiration_eviction: bool,
+}
+
+impl Default for BootstrapConfigRaw {
+    fn default() -> Self {
+        serde_json::from_value(serde_json::json!({"CEDARLING_APPLICATION_NAME":""}))
+            .expect("BootstrapConfigRaw should be deserialized from empty json object")
+    }
 }
 
 impl BootstrapConfigRaw {
@@ -386,8 +437,8 @@ mod tests {
                 "Decision log workload claims should be empty by default"
             );
             assert_eq!(
-                config.decision_log_default_jwt_id, "",
-                "Default JWT ID for decision logging should be ''"
+                config.decision_log_default_jwt_id, "jti",
+                "Default JWT ID for decision logging should be 'jti'"
             );
             assert_eq!(
                 config.user_authz,

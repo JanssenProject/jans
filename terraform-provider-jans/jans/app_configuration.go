@@ -128,6 +128,12 @@ type AppConfiguration struct {
         IntrospectionEndpoint                                     string                                `schema:"introspection_endpoint" json:"introspectionEndpoint"`
         ParEndpoint                                               string                                `schema:"par_endpoint" json:"parEndpoint"`
         RequirePar                                                bool                                  `schema:"require_par" json:"requirePar"`
+        ParForbidPublicClient                                     bool                                  `schema:"par_forbid_public_client" json:"parForbidPublicClient"`
+        JwtGrantAllowUserByUidInAssertion                         bool                                  `schema:"jwt_grant_allow_user_by_uid_in_assertion" json:"jwtGrantAllowUserByUidInAssertion"`
+        AllowClientAssertionAudWithoutStrictIssuerMatch           bool                                  `schema:"allow_client_assertion_aud_without_strict_issuer_match" json:"allowClientAssertionAudWithoutStrictIssuerMatch"`
+        SkipSessionAuthnTimeCheckDuringPromptLogin                bool                                  `schema:"skip_session_authn_time_check_during_prompt_login" json:"skipSessionAuthnTimeCheckDuringPromptLogin"`
+        SessionAuthnTimeCheckDuringPromptLoginThresholdMs         int                                   `schema:"session_authn_time_check_during_prompt_login_threshold_ms" json:"sessionAuthnTimeCheckDuringPromptLoginThresholdMs"`
+        UppercaseResponseKeysInAccountAccessConsent               bool                                  `schema:"uppercase_response_keys_in_account_access_consent" json:"uppercaseResponseKeysInAccountAccessConsent"`
         DeviceAuthzEndpoint                                       string                                `schema:"device_authz_endpoint" json:"deviceAuthzEndpoint"`
         MtlsAuthorizationEndpoint                                 string                                `schema:"mtls_authorization_endpoint" json:"mtlsAuthorizationEndpoint"`
         MtlsAuthorizationChallengeEndpoint                        string                                `schema:"mtls_authorization_challenge_endpoint" json:"mtlsAuthorizationChallengeEndpoint"`

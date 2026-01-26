@@ -18,7 +18,7 @@ static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let reg = Region::new(&GLOBAL);
+    let reg = Region::new(GLOBAL);
 
     println!("=== Cedarling Bulk Authorization Benchmark ===\n");
     println!("Simulating OpenSearch integration with 2000 documents per query\n");
@@ -38,6 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -50,7 +51,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await?;
 

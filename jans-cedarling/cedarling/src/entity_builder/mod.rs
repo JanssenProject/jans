@@ -19,6 +19,7 @@ mod built_entities;
 mod entity_id_getters;
 mod error;
 mod schema;
+mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
 use crate::authz::AuthorizeEntitiesData;
@@ -26,14 +27,16 @@ use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::normalize_issuer;
-use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+use crate::common::policy_store::ClaimMappings;
+#[cfg(test)]
+use crate::common::policy_store::TrustedIssuer;
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
 use crate::{RequestUnsigned, entity_builder_config::*};
 use build_entity_attrs::*;
 use build_iss_entity::build_iss_entity;
-use cedar_policy::{Entity, EntityUid, RestrictedExpression};
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
+use cedar_policy_core::validator::ValidatorSchema;
 use schema::MappingSchema;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -41,29 +44,30 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
+pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
 pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
 pub(crate) use built_entities::BuiltEntities;
 
-pub use error::*;
+pub(crate) use error::*;
 
-pub struct EntityBuilder {
+pub(crate) struct EntityBuilder {
     config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
     default_entities: DefaultEntities,
-    trusted_issuers: HashMap<String, TrustedIssuer>,
+    issuers_index: TrustedIssuerIndex,
 }
 
 impl EntityBuilder {
-    pub fn new(
+    pub(super) fn new(
         config: EntityBuilderConfig,
-        trusted_issuers: &HashMap<String, TrustedIssuer>,
+        issuers_index: TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
         default_entities: DefaultEntities,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
-        let (ok, errs) = trusted_issuers
+        let (ok, errs) = issuers_index
             .values()
             .map(|iss| {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
@@ -84,11 +88,11 @@ impl EntityBuilder {
             iss_entities,
             schema,
             default_entities,
-            trusted_issuers: trusted_issuers.clone(),
+            issuers_index,
         })
     }
 
-    pub fn build_entities(
+    pub(super) fn build_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
         resource_data: &EntityData,
@@ -157,7 +161,7 @@ impl EntityBuilder {
     }
 
     /// Builds the entities using the unsigned interface
-    pub fn build_entities_unsigned(
+    pub(super) fn build_entities_unsigned(
         &self,
         request: &RequestUnsigned,
     ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
@@ -190,7 +194,7 @@ impl EntityBuilder {
         })
     }
 
-    pub fn build_entity(
+    pub(super) fn build_entity(
         &self,
         type_name: &str,
         id: &str,
@@ -209,11 +213,11 @@ impl EntityBuilder {
         build_cedar_entity(type_name, id, attrs, parents)
     }
 
-    pub fn trusted_issuer_typename(namespace: &str) -> String {
+    pub(super) fn trusted_issuer_typename(namespace: &str) -> String {
         format!("{namespace}::TrustedIssuer")
     }
 
-    pub fn trusted_issuer_cedar_uid(
+    pub(super) fn trusted_issuer_cedar_uid(
         namespace: &str,
         iss_url: &str,
     ) -> Result<EntityUid, BuildEntityError> {
@@ -224,36 +228,30 @@ impl EntityBuilder {
     #[cfg(test)]
     // is used only for testing to get trusted issuer
     fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
-        // First, try to find the issuer in trusted issuer metadata
-        for trusted_issuer in self.trusted_issuers.values() {
-            let trusted_issuer_url = trusted_issuer.oidc_endpoint.origin().ascii_serialization();
-            // Compare both the full URL and just the origin
-            if trusted_issuer_url == issuer || trusted_issuer.oidc_endpoint.as_str() == issuer {
-                // Use the trusted issuer's name field
-                return Some(Arc::new(trusted_issuer.to_owned()));
-            }
-        }
-
-        None
+        self.issuers_index.find(issuer).cloned()
     }
 }
 
-pub struct BuiltEntitiesUnsigned {
+pub(super) struct BuiltEntitiesUnsigned {
     pub principals: Vec<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
     pub built_entities: BuiltEntities,
 }
 
-pub fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
-    EntityUid::from_str(&format!("{}::\"{}\"", type_name, id)).map_err(
-        |e: cedar_policy::ParseErrors| {
-            BuildEntityErrorKind::from(Box::new(e)).while_building(type_name)
-        },
-    )
+fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
+    let entity_type_name = EntityTypeName::from_str(type_name)
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
+    // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
+    let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
+
+    Ok(EntityUid::from_type_name_and_id(
+        entity_type_name,
+        entity_id,
+    ))
 }
 
-pub fn build_cedar_entity(
+pub(super) fn build_cedar_entity(
     type_name: &str,
     id: &str,
     attrs: HashMap<String, RestrictedExpression>,
@@ -276,7 +274,7 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
 }
 
 #[derive(Default)]
-pub struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
+pub(super) struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
 
 impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
     fn from(value: Vec<TokenPrincipalMapping>) -> Self {
@@ -291,7 +289,7 @@ impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
 
 /// Represents a token and it's UID
 #[derive(Clone)]
-pub struct TokenPrincipalMapping {
+pub(super) struct TokenPrincipalMapping {
     /// The principal where token will be inserted
     principal: String,
     /// The name of the attribute of the token
@@ -301,20 +299,16 @@ pub struct TokenPrincipalMapping {
 }
 
 impl TokenPrincipalMappings {
-    pub fn insert(&mut self, value: TokenPrincipalMapping) {
+    fn insert(&mut self, value: TokenPrincipalMapping) {
         let entry = self.0.entry(value.principal).or_default();
         entry.push((value.attr_name, value.expr));
     }
 
-    pub fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
+    fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
         self.0.get(principal)
     }
 
-    pub fn apply(
-        &self,
-        principal_type: &str,
-        attributes: &mut HashMap<String, RestrictedExpression>,
-    ) {
+    fn apply(&self, principal_type: &str, attributes: &mut HashMap<String, RestrictedExpression>) {
         let Some(mappings) = self.get(principal_type) else {
             return;
         };
@@ -334,19 +328,19 @@ mod test {
     use std::sync::LazyLock;
     use test_utils::assert_eq;
 
-    pub static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
+    pub(super) static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
         ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
             .expect("should be a valid Cedar validator schema")
     });
 
-    pub static CEDARLING_API_SCHEMA: LazyLock<Schema> = LazyLock::new(|| {
+    pub(super) static CEDARLING_API_SCHEMA: LazyLock<Schema> = LazyLock::new(|| {
         Schema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
             .expect("should be a valid Cedar schema")
     });
 
     /// Helper function for asserting entities for better error readability
     #[track_caller]
-    pub fn assert_entity_eq(entity: &Entity, expected: Value, schema: Option<&Schema>) {
+    pub(super) fn assert_entity_eq(entity: &Entity, expected: Value, schema: Option<&Schema>) {
         let entity_json = entity
             .clone()
             .to_json_value()
@@ -459,10 +453,11 @@ mod test {
                 )),
             ),
         ]);
+        let issuers_index = TrustedIssuerIndex::new(&issuers, None);
 
         let entity_builder = EntityBuilder::new(
             config,
-            &issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -562,6 +557,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create tokens
         let tokens: HashMap<String, Arc<Token>> = HashMap::from([(
@@ -590,7 +586,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
@@ -754,6 +750,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
         let config = EntityBuilderConfig {
@@ -764,7 +761,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
@@ -902,6 +899,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
         let config = EntityBuilderConfig {
@@ -912,7 +910,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )
@@ -1094,6 +1092,7 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
         let config = EntityBuilderConfig {
@@ -1104,7 +1103,7 @@ mod test {
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
             DefaultEntities::from_hashmap(&default_entities_data),
         )

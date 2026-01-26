@@ -11,7 +11,7 @@ use std::net::IpAddr;
 use std::str::FromStr;
 
 /// Converts a [`Value`] to a [`RestrictedExpression`]
-pub fn value_to_expr(
+pub(crate) fn value_to_expr(
     value: &Value,
 ) -> Result<Option<RestrictedExpression>, Vec<ExpressionConstructionError>> {
     let expr = match value {
@@ -76,7 +76,7 @@ mod test {
     use std::collections::HashSet;
 
     #[test]
-    pub fn test_value_to_expr() {
+    fn test_value_to_expr() {
         let attrs = HashMap::from_iter(
             [
                 ("test_null", value_to_expr(&json!(Value::Null)).unwrap()),

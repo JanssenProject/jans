@@ -17,14 +17,14 @@ pub(crate) struct RuleApplier<'a> {
 }
 
 impl<'a> RuleApplier<'a> {
-    pub fn new(rule: &'a JsonRule, data: HashMap<SmolStr, Decision>) -> Self {
+    pub(crate) fn new(rule: &'a JsonRule, data: HashMap<SmolStr, Decision>) -> Self {
         Self {
             rule,
             data: serde_json::json!(data),
         }
     }
 
-    pub fn apply(&self) -> Result<bool, ApplyRuleError> {
+    pub(crate) fn apply(&self) -> Result<bool, ApplyRuleError> {
         let result = JsonLogic::apply(self.rule.rule(), &self.data)?;
 
         if let serde_json::Value::Bool(b) = result {

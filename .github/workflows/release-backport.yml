@@ -14,8 +14,7 @@ permissions:
 jobs:
   backport:
     permissions:
-      contents: write # so it can comment
-      pull-requests: write # so it can create pull requests
+      pull-requests: write # so it can create pull requests and add comments
     name: Backport Pull Request
     # Run the action if a PR is merged with backport labels
     # OR

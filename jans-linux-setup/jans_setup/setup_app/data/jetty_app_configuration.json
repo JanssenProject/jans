@@ -80,7 +80,7 @@
       "ratio": 0.10
     },
     "jetty": {
-      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
+      "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,http2c"
     },
     "installed": false,
     "name": "jans-lock"

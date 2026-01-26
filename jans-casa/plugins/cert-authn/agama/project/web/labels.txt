@@ -1,0 +1,4 @@
+
+# Casa selector page label
+
+casa.selector.certauthn=A certificate imported into this browser or stored in a smart card

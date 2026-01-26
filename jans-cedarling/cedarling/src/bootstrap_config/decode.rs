@@ -20,7 +20,7 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::log::LogLevel;
+use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -56,7 +56,18 @@ impl BootstrapConfig {
                 max_item_size: raw.log_max_item_size,
                 max_items: raw.log_max_items,
             }),
-            LoggerType::StdOut => LogTypeConfig::StdOut,
+            LoggerType::StdOut => {
+                let std_out_logger_conf = match raw.stdout_mode {
+                    // WASM does not support async
+                    #[cfg(not(target_arch = "wasm32"))]
+                    super::log_config::StdOutMode::Async => StdOutLoggerMode::Async {
+                        timeout_millis: raw.stdout_timeout_millis,
+                        buffer_limit: raw.stdout_buffer_limit,
+                    },
+                    super::log_config::StdOutMode::Immediate => StdOutLoggerMode::Immediate,
+                };
+                LogTypeConfig::StdOut(std_out_logger_conf)
+            },
         };
         let log_config = LogConfig {
             log_type,
@@ -75,24 +86,36 @@ impl BootstrapConfig {
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
             },
-            // Case: get the policy store from the lock server
-            (None, Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockServer(policy_store_uri),
+            // Case: get the policy store from a URI (auto-detect .cjar archives)
+            (None, Some(policy_store_uri), None) => {
+                let source = if policy_store_uri.to_lowercase().ends_with(".cjar") {
+                    PolicyStoreSource::CjarUrl(policy_store_uri)
+                } else {
+                    PolicyStoreSource::LockServer(policy_store_uri)
+                };
+                PolicyStoreConfig { source }
             },
-            // Case: get the policy store from a local JSON file
+            // Case: get the policy store from a local file or directory
             (None, None, Some(raw_path)) => {
                 let path = Path::new(&raw_path);
-                let file_ext = Path::new(&path)
-                    .extension()
-                    .and_then(|ext| ext.to_str())
-                    .map(|x| x.to_lowercase());
 
-                let source = match file_ext.as_deref() {
-                    Some("json") => PolicyStoreSource::FileJson(path.into()),
-                    Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(
-                        BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
-                    )?,
+                // Check if it's a directory first
+                let source = if path.is_dir() {
+                    PolicyStoreSource::Directory(path.into())
+                } else {
+                    let file_ext = path
+                        .extension()
+                        .and_then(|ext| ext.to_str())
+                        .map(|x| x.to_lowercase());
+
+                    match file_ext.as_deref() {
+                        Some("json") => PolicyStoreSource::FileJson(path.into()),
+                        Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
+                        Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
+                        _ => Err(
+                            BootstrapConfigLoadingError::UnsupportedPolicyStoreFileFormat(raw_path),
+                        )?,
+                    }
                 };
                 PolicyStoreConfig { source }
             },
@@ -117,6 +140,9 @@ impl BootstrapConfig {
             jwt_sig_validation: raw.jwt_sig_validation.into(),
             jwt_status_validation: raw.jwt_status_validation.into(),
             signature_algorithms_supported: raw.jwt_signature_algorithms_supported.clone(),
+            token_cache_max_ttl_secs: raw.token_cache_max_ttl,
+            token_cache_capacity: raw.token_cache_capacity,
+            token_cache_earliest_expiration_eviction: raw.token_cache_earliest_expiration_eviction,
         };
 
         let authorization_config = AuthorizationConfig {
@@ -139,7 +165,6 @@ impl BootstrapConfig {
             lock_config,
             max_default_entities: raw.max_default_entities,
             max_base64_size: raw.max_base64_size,
-            token_cache_max_ttl_secs: raw.token_cache_max_ttl,
         })
     }
 }

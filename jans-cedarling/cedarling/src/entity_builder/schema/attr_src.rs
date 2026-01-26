@@ -3,13 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy_validator::types::{EntityRecordKind, Primitive, Type};
+use cedar_policy_core::validator::types::{EntityRecordKind, Primitive, Type};
 use derive_more::derive::Deref;
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
 use thiserror::Error;
 
-pub type EntityTypeName = SmolStr;
+type EntityTypeName = SmolStr;
 
 /// Represents different sources for building a Cedar attribute.
 ///
@@ -19,26 +19,26 @@ pub type EntityTypeName = SmolStr;
 ///
 /// [`RestrictedExpression`]: cedar_policy::RestrictedExpression
 #[derive(Debug, PartialEq)]
-pub enum AttrSrc {
+pub(crate) enum AttrSrc {
     JwtClaim(TknClaimAttrSrc),
     EntityRef(EntityRefAttrSrc),
     EntityRefSet(EntityRefSetSrc),
 }
 
 #[derive(Debug, PartialEq, Deref)]
-pub struct EntityRefAttrSrc(pub EntityTypeName);
+pub(crate) struct EntityRefAttrSrc(pub EntityTypeName);
 
 #[derive(Debug, PartialEq, Deref)]
-pub struct EntityRefSetSrc(pub EntityTypeName);
+pub(crate) struct EntityRefSetSrc(pub EntityTypeName);
 
 #[derive(Debug, PartialEq)]
-pub struct TknClaimAttrSrc {
+pub(crate) struct TknClaimAttrSrc {
     pub claim: String,
     pub expected_type: ExpectedClaimType,
 }
 
 #[derive(Debug, PartialEq)]
-pub enum ExpectedClaimType {
+pub(crate) enum ExpectedClaimType {
     Null,
     Bool,
     Number,
@@ -49,8 +49,8 @@ pub enum ExpectedClaimType {
 }
 
 impl AttrSrc {
-    /// Resolves [`AttrSrc`] from [`cedar_policy_validator::types::Type`]
-    pub fn from_type(attr_name: &str, value: &Type) -> Result<Self, BuildAttrSrcError> {
+    /// Resolves [`AttrSrc`] from [`cedar_policy_core::validator::types::Type`]
+    pub(super) fn from_type(attr_name: &str, value: &Type) -> Result<Self, BuildAttrSrcError> {
         let attr_src: Self = match value {
             Type::Never => {
                 return Err(
@@ -122,7 +122,10 @@ impl AttrSrc {
                 let attrs = attrs
                     .iter()
                     .map(|(name, attr_kind)| {
-                        (name.clone(), ExpectedClaimType::from(&attr_kind.attr_type))
+                        (
+                            name.clone(),
+                            ExpectedClaimType::from(attr_kind.attr_type.as_ref()),
+                        )
                     })
                     .collect::<HashMap<SmolStr, ExpectedClaimType>>();
                 Self::JwtClaim(TknClaimAttrSrc {
@@ -142,9 +145,6 @@ impl AttrSrc {
                 )?;
                 Self::EntityRef(EntityRefAttrSrc(entity.name().to_smolstr()))
             },
-            EntityRecordKind::ActionEntity { .. } => {
-                return Err(BuildAttrSrcErrorKind::ActionAttrNotAllowed.while_building(attr_name));
-            },
         };
 
         Ok(src)
@@ -153,13 +153,13 @@ impl AttrSrc {
 
 #[derive(Debug, Error)]
 #[error("failed to build attribute source for {attr_name}: {kind}")]
-pub struct BuildAttrSrcError {
+pub(super) struct BuildAttrSrcError {
     attr_name: String,
     kind: BuildAttrSrcErrorKind,
 }
 
 #[derive(Debug, Error)]
-pub enum BuildAttrSrcErrorKind {
+pub(super) enum BuildAttrSrcErrorKind {
     #[error("can't use {0:?} as an attribute source")]
     InvalidType(Type),
     #[error("the type of the elements of a Set was not defined")]
@@ -168,8 +168,6 @@ pub enum BuildAttrSrcErrorKind {
     InvalidEntityRecordKind(EntityRecordKind),
     #[error("the entity type name was not defined")]
     MissingEntityTypeName,
-    #[error("action entities cannot become attributes to other entities")]
-    ActionAttrNotAllowed,
 }
 
 impl BuildAttrSrcErrorKind {
@@ -191,8 +189,8 @@ impl From<&Type> for ExpectedClaimType {
             Type::Set { element_type } => element_type
                 .as_ref()
                 .map(|t| Self::from(&**t))
-                // see: https://docs.rs/cedar-policy-validator/4.3.3/cedar_policy_validator/types/enum.Type.html#variant.Set
-                .expect("this should always be `Some`"),
+                // see: https://docs.rs/cedar-policy-core/latest/cedar_policy_core/validator/types/enum.Type.html#variant.Set
+                .expect("cedar-policy-core type `Type::Set` should always be `Some`, according to the documentation"),
             Type::EntityOrRecord(entity_record_kind) => entity_record_kind.into(),
             Type::ExtensionType { name } => Self::Extension(name.to_smolstr()),
         }
@@ -215,7 +213,9 @@ impl From<&EntityRecordKind> for ExpectedClaimType {
             EntityRecordKind::Record { attrs, .. } => {
                 let attrs = attrs
                     .iter()
-                    .map(|(name, attr_kind)| (name.clone(), Self::from(&attr_kind.attr_type)))
+                    .map(|(name, attr_kind)| {
+                        (name.clone(), Self::from(attr_kind.attr_type.as_ref()))
+                    })
                     .collect::<HashMap<SmolStr, Self>>();
                 Self::Object(attrs)
             },
@@ -223,7 +223,6 @@ impl From<&EntityRecordKind> for ExpectedClaimType {
             // ... should we use TryFrom instead of returning null?
             EntityRecordKind::AnyEntity => Self::Null,
             EntityRecordKind::Entity(_entity_lub) => Self::Null,
-            EntityRecordKind::ActionEntity { .. } => Self::Null,
         }
     }
 }

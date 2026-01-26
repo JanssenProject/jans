@@ -8,7 +8,7 @@ tags:
 
 # Janssen Auth Server Configuration Properties
 
-| Property Name | Description |  | 
+| Property Name | Description |  |
 |-----|-----|-----|
 | accessTokenLifetime | The lifetime of the short lived Access Token | [Details](#accesstokenlifetime) |
 | accessTokenSigningAlgValuesSupported | A list of the JWS signing algorithms (alg values) supported by the OP for the access token to encode the Claims in a JWT | [Details](#accesstokensigningalgvaluessupported) |

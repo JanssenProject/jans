@@ -4,7 +4,6 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-#![allow(unexpected_cfgs)]
 
 use cedarling::AuthorizeError as CedarlingAuthorizeError;
 use pyo3::{create_exception, prelude::*};
@@ -15,13 +14,6 @@ create_exception!(
     AuthorizeError,
     pyo3::exceptions::PyException,
     "Exception raised by authorize_errors"
-);
-
-create_exception!(
-    authorize_errors,
-    DecodeTokens,
-    AuthorizeError,
-    "Error encountered while decoding JWT token data"
 );
 
 create_exception!(
@@ -84,7 +76,7 @@ create_exception!(
     authorize_errors,
     BuildEntityError,
     AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
+    "Error encountered while building Cedar entities"
 );
 
 create_exception!(
@@ -149,7 +141,7 @@ macro_rules! errors_functions {
         // is used to register errors in py module
         pub fn register_errors(m: &Bound<'_, PyModule>) -> PyResult<()> {
             $(
-                m.add(stringify!($error_class), m.py().get_type_bound::<$error_class>())?;
+                m.add(stringify!($error_class), m.py().get_type::<$error_class>())?;
             )*
             Ok(())
         }
@@ -177,7 +169,7 @@ errors_functions! {
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("AuthorizeError", m.py().get_type_bound::<AuthorizeError>())?;
+    m.add("AuthorizeError", m.py().get_type::<AuthorizeError>())?;
     register_errors(m)?;
     Ok(())
 }

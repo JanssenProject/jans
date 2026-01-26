@@ -17,7 +17,7 @@ use std::collections::HashSet;
 type TokenClaims = HashMap<String, Value>;
 
 #[derive(Clone, Copy)]
-pub enum AttrSrc<'a> {
+pub(super) enum AttrSrc<'a> {
     Token {
         claims: &'a TokenClaims,
         mappings: Option<&'a ClaimMappings>,
@@ -89,7 +89,7 @@ struct ExtractedAttrsResult {
     errs: Vec<BuildAttrsErrorVec>,
 }
 
-pub struct BuiltPrincipalUnsigned {
+pub(crate) struct BuiltPrincipalUnsigned {
     pub principal: Entity,
     pub parents: Vec<Entity>,
 }
@@ -101,7 +101,7 @@ pub struct BuiltPrincipalUnsigned {
 /// - [`user::UserIdSrcResolver`]     
 /// - [`workload::WorkloadIdSrcResolver`]     
 #[derive(Clone, Copy)]
-pub struct PrincipalIdSrc<'a> {
+pub(super) struct PrincipalIdSrc<'a> {
     token: &'a str,
     claim: &'a str,
 }
@@ -125,7 +125,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )

@@ -1,17 +1,7 @@
 /*
- * Copyright [2024] [Janssen Project]
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2024, Janssen Project
  */
 
 package io.jans.lock.model.config;
@@ -22,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
 import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
+import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
@@ -58,6 +49,10 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "Cedarling configuration")
     private CedarlingConfiguration cedarlingConfiguration;
 
+    @DocProperty(description = "gRPC server configuration")
+    @Schema(description = "gRPC server configuration")
+    private GrpcConfiguration grpcConfiguration;
+
     @DocProperty(description = "Active stat enabled")
     @Schema(description = "Active stat enabled")
     private boolean statEnabled;
@@ -81,6 +76,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
     @Schema(description = "Choose whether to disable JDK loggers")
     private Boolean disableJdkLogger = true;
+
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
 
     @DocProperty(description = "Specify the logging level of loggers")
     @Schema(description = "Specify the logging level of loggers")
@@ -190,6 +188,14 @@ public class AppConfiguration implements Configuration {
 		this.cedarlingConfiguration = cedarlingConfiguration;
 	}
 
+	public GrpcConfiguration getGrpcConfiguration() {
+		return grpcConfiguration;
+	}
+
+	public void setGrpcConfiguration(GrpcConfiguration grpcConfiguration) {
+		this.grpcConfiguration = grpcConfiguration;
+	}
+
 	public boolean isStatEnabled() {
 		return statEnabled;
 	}
@@ -248,7 +254,15 @@ public class AppConfiguration implements Configuration {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-    public String getLoggingLevel() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public String getLoggingLevel() {
         return loggingLevel;
     }
 

@@ -10,7 +10,7 @@ use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 impl EntityBuilder {
-    pub fn build_role_entities(
+    pub(super) fn build_role_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<Vec<Entity>, BuildEntityError> {
@@ -96,7 +96,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -140,7 +140,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )
@@ -194,7 +194,7 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
         )

@@ -51,17 +51,26 @@ public class KcLinkConfigResource extends BaseResource {
     @Inject
     KcLinkConfigService kcLinkConfigService;
 
+    /**
+     * Retrieve the KC Link application configuration.
+     *
+     * @return the current AppConfiguration containing KC Link properties
+     */
     @Operation(summary = "Gets KC Link configuration properties", description = "Gets KC Link configuration properties", operationId = "get-kc-link-properties", tags = {
-            "KC Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.KC_LINK_CONFIG_READ_ACCESS }))
+            "KC Link - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_READ_ACCESS }, groupScopes = {
-            Constants.KC_LINK_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            Constants.KC_LINK_CONFIG_WRITE_ACCESS }, superScopes = { Constants.KC_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getkcLinkConf() {
        
         AppConfiguration kcLinkConfiguration = kcLinkConfigService.find();
@@ -73,16 +82,25 @@ public class KcLinkConfigResource extends BaseResource {
         
     }
 
+    /**
+     * Persist the provided KC Link configuration properties and return the applied configuration.
+     *
+     * @param kcLinkAppConf the KC Link configuration to apply
+     * @return the updated AppConfiguration reflecting the persisted KC Link settings
+     */
     @Operation(summary = "Update KC Link configuration properties", description = "Update KC Link configuration properties", operationId = "put-kc-link-properties", tags = {
-            "KC Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.KC_LINK_CONFIG_WRITE_ACCESS }))
+            "KC Link - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "GluuAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class), examples = @ExampleObject(name = "Request example", value = "example/kc-link/config/kc-link-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @PUT    @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @PUT
+    @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.KC_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updatekcLinkConf(@Valid AppConfiguration kcLinkAppConf) {
         logger.info("Update KC Link conf details kcLinkAppConf():{}", kcLinkAppConf);
         Conf conf = kcLinkConfigService.findKcLinkConf();
@@ -99,9 +117,19 @@ public class KcLinkConfigResource extends BaseResource {
 
     }
 
+    /**
+     * Apply a JSON Patch to the KC Link configuration and persist the changes.
+     *
+     * @param jsonPatchString JSON Patch document (RFC 6902) as a string to apply to the current KC Link dynamic configuration.
+     * @return HTTP 200 response containing the updated AppConfiguration.
+     * @throws JsonPatchException if the patch document cannot be applied to the current configuration.
+     * @throws IOException if processing the patch fails due to I/O or parsing errors.
+     */
     @Operation(summary = "Partially modifies KC Link configuration properties.", description = "Partially modifies KC Link configuration properties.", operationId = "patch-kc-link-properties", tags = {
-            "KC Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.KC_LINK_CONFIG_WRITE_ACCESS }))
+            "KC Link - Configuration" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.KC_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/kc-link/config/kc-link-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
@@ -110,7 +138,7 @@ public class KcLinkConfigResource extends BaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { Constants.KC_LINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            Constants.KC_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchkcLinkConf(@NotNull String jsonPatchString) throws JsonPatchException, IOException {
         logger.info("KC Link Config - jsonPatchString:{} ", jsonPatchString);
         Conf conf = kcLinkConfigService.findKcLinkConf();
