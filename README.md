@@ -82,7 +82,7 @@ for details.
 
 ## Community
 
-A BIG thanks to all the amazing contributors!! 👏 👏
+A BIG thanks to all the amazing Contributors!! 👏 👏
 
 Building a diverse and inclusive community is an important goal. Please let us know what we
 can do to make you feel more welcome, no matter what you want to contribute.
