@@ -4078,10 +4078,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "severetyLevel",
+      "desc": "severityLevel",
       "equality": "caseIgnoreMatch",
       "names": [
-        "severetyLevel"
+        "severityLevel"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -6094,12 +6094,13 @@
         "jansService",
         "jansNodeName",
         "eventType",
-        "severetyLevel",
+        "severityLevel",
         "actionName",
         "decisionResult",
         "requestedResource",
         "principalId",
         "clientId",
+        "jti",
         "contextInformation"
       ],
       "must": [
