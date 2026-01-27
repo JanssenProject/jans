@@ -678,10 +678,10 @@ func resourceOidcClient() *schema.Resource {
                                                         Optional:    true,
                                                         Description: "Specifies whether to allow offline access without consent.",
                                                 },
-                                                "require_pcke": {
+                                                "require_pkce": {
                                                         Type:        schema.TypeBool,
                                                         Optional:    true,
-                                                        Description: "Specifies whether to require PCKE (Proof Key for Code Exchange) for authorization code flow.",
+                                                        Description: "Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.",
                                                 },
                                                 "minimum_acr_level": {
                                                         Type:        schema.TypeInt,

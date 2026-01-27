@@ -235,9 +235,19 @@ func resourceKCSamlTRCreate(ctx context.Context, d *schema.ResourceData, m any) 
         if err != nil {
                 return diag.FromErr(err)
         }
+        if f != nil {
+                if closer, ok := f.(io.Closer); ok {
+                        defer closer.Close()
+                }
+        }
 
         tr, err = c.CreateTR(ctx, tr, f)
         if err != nil {
+                return diag.FromErr(err)
+        }
+
+        d.SetId(tr.Inum)
+        if err := toSchemaResource(d, tr); err != nil {
                 return diag.FromErr(err)
         }
 
@@ -251,6 +261,11 @@ func resourceKCSamlTRUpdate(ctx context.Context, d *schema.ResourceData, meta an
         tr, f, err := handleMetadataFile[jans.TrustRelationship](d)
         if err != nil {
                 return diag.FromErr(err)
+        }
+        if f != nil {
+                if closer, ok := f.(io.Closer); ok {
+                        defer closer.Close()
+                }
         }
 
         tr, err = c.UpdateTR(ctx, tr, f)
@@ -271,7 +286,8 @@ func resourceKCSamlTRDelete(ctx context.Context, d *schema.ResourceData, m any) 
         }
         tflog.Debug(ctx, "Deleted trust relationship: inum=%s", map[string]any{"Inum": inum})
 
-        return resourceKCSamlTRRead(ctx, d, m)
+        d.SetId("")
+        return nil
 }
 
 func handleMetadataFile[T any](d *schema.ResourceData) (*T, io.Reader, error) {

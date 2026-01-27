@@ -2,6 +2,8 @@ package provider
 
 import (
         "context"
+        "errors"
+        "fmt"
         "testing"
 
         "github.com/google/go-cmp/cmp"
@@ -93,7 +95,7 @@ func testAccResourceCheckKCSamlConfigurationImport(states []*terraform.InstanceS
         }
 
         if !found {
-                return nil
+                return errors.New("KCSamlConfiguration resource not found in import state")
         }
 
         return nil
@@ -109,8 +111,11 @@ func testAccResourceCheckKCSamlConfigurationDestroy(s *terraform.State) error {
                 }
 
                 _, err := c.GetKCSAMLConfiguration(ctx)
-                if err != nil {
-                        return nil
+                if err == nil {
+                        return fmt.Errorf("KCSAML configuration still exists")
+                }
+                if !errors.Is(err, jans.ErrorNotFound) {
+                        return fmt.Errorf("unexpected error checking KCSAML configuration: %w", err)
                 }
         }
 

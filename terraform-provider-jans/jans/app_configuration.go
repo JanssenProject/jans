@@ -320,7 +320,6 @@ type AppConfiguration struct {
         DisablePromptCreate                                       bool                                  `schema:"disable_prompt_create" json:"disablePromptCreate"`
         CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
         EnabledOAuthAuditLogging                                  bool                                  `schema:"enabled_oauth_audit_logging" json:"enabledOAuthAuditLogging"`
-        JmsBrokerUriSet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerUriSet"`
         JmsUserName                                               string                                `schema:"jms_user_name" json:"jmsUserName"`
         JmsPassword                                               string                                `schema:"jms_password" json:"jmsPassword"`
         ExternalUriWhiteList                                      []string                              `schema:"external_uri_white_list" json:"externalUriWhiteList"`

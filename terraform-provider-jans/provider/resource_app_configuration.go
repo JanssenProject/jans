@@ -2459,6 +2459,9 @@ func resourceAppConfiguration() *schema.Resource {
                                 Description: "List of logout status JWT signing algorithm values supported.",
                                 Elem: &schema.Schema{
                                         Type: schema.TypeString,
+                                        ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+                                                return validateEnum(v, signingAlgs)
+                                        },
                                 },
                         },
                         "run_all_update_token_scripts": {

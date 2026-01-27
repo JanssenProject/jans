@@ -36,7 +36,7 @@ type OidcClientAttribute struct {
         TxTokenLifetime                         int      `schema:"tx_token_lifetime" json:"txTokenLifetime,omitempty"`
         IdTokenLifetime                         int      `schema:"id_token_lifetime" json:"idTokenLifetime,omitempty"`
         AllowOfflineAccessWithoutConsent        bool     `schema:"allow_offline_access_without_consent" json:"allowOfflineAccessWithoutConsent,omitempty"`
-        RequirePcke                             bool     `schema:"require_pcke" json:"requirePcke,omitempty"`
+        RequirePkce                             bool     `schema:"require_pkce" json:"requirePkce,omitempty"`
         MinimumAcrLevel                         int      `schema:"minimum_acr_level" json:"minimumAcrLevel,omitempty"`
         MinimumAcrLevelAutoresolve              bool     `schema:"minimum_acr_level_autoresolve" json:"minimumAcrLevelAutoresolve,omitempty"`
         AdditionalTokenEndpointAuthMethods      []string `schema:"additional_token_endpoint_auth_methods" json:"additionalTokenEndpointAuthMethods,omitempty"`
