@@ -128,11 +128,7 @@ impl CedarValueMapper {
     }
 
     /// Access a nested value using dot notation.
-    pub fn get_nested<'a>(
-        &self,
-        value: &'a Value,
-        path: &str,
-    ) -> Result<&'a Value, ValueMappingError> {
+    pub fn get_nested<'a>(value: &'a Value, path: &str) -> Result<&'a Value, ValueMappingError> {
         if path.is_empty() {
             return Ok(value);
         }
@@ -178,7 +174,6 @@ impl CedarValueMapper {
 
     /// Set a value at a nested path, creating intermediate objects as needed.
     pub fn set_nested(
-        &self,
         value: &mut Value,
         path: &str,
         new_value: Value,
@@ -884,7 +879,6 @@ mod tests {
 
     #[test]
     fn test_dot_notation_access() {
-        let mapper = CedarValueMapper::new();
         let data = json!({
             "user": {
                 "profile": {
@@ -895,16 +889,16 @@ mod tests {
         });
 
         // Valid paths
-        let name = mapper.get_nested(&data, "user.profile.name");
+        let name = CedarValueMapper::get_nested(&data, "user.profile.name");
         assert!(name.is_ok());
         assert_eq!(name.unwrap(), &json!("Alice"));
 
-        let age = mapper.get_nested(&data, "user.profile.age");
+        let age = CedarValueMapper::get_nested(&data, "user.profile.age");
         assert!(age.is_ok());
         assert_eq!(age.unwrap(), &json!(30));
 
         // Invalid path
-        let missing = mapper.get_nested(&data, "user.missing.field");
+        let missing = CedarValueMapper::get_nested(&data, "user.missing.field");
         assert!(matches!(
             missing,
             Err(ValueMappingError::PathNotFound { .. })
@@ -913,23 +907,20 @@ mod tests {
 
     #[test]
     fn test_dot_notation_array_access() {
-        let mapper = CedarValueMapper::new();
         let data = json!({
             "items": ["a", "b", "c"]
         });
 
-        let item = mapper.get_nested(&data, "items.1");
+        let item = CedarValueMapper::get_nested(&data, "items.1");
         assert!(item.is_ok());
         assert_eq!(item.unwrap(), &json!("b"));
     }
 
     #[test]
     fn test_set_nested() {
-        let mapper = CedarValueMapper::new();
         let mut data = json!({});
 
-        mapper
-            .set_nested(&mut data, "user.profile.name", json!("Alice"))
+        CedarValueMapper::set_nested(&mut data, "user.profile.name", json!("Alice"))
             .expect("should set nested value");
 
         assert_eq!(data, json!({"user": {"profile": {"name": "Alice"}}}));
