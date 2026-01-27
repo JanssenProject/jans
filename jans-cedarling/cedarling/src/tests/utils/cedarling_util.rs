@@ -95,7 +95,7 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
 
 /// util function for convenient conversion Reason ID to string
 pub(crate) fn get_policy_id(resp: Option<&cedar_policy::Response>) -> Option<Vec<String>> {
-    resp.as_ref().map(|v| {
+    resp.map(|v| {
         v.diagnostics()
             .reason()
             .map(std::string::ToString::to_string)
@@ -143,8 +143,7 @@ macro_rules! cmp_policy {
 pub(crate) fn get_decision(
     resp: Option<&cedar_policy::Response>,
 ) -> Option<cedar_policy::Decision> {
-    resp.as_ref()
-        .map(|response| cedar_policy::Response::decision(response))
+    resp.map(cedar_policy::Response::decision)
 }
 
 /// This macro removes code duplication when comparing a decision in tests.

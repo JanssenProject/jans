@@ -117,8 +117,7 @@ async fn check_mapping_tokens_data() {
     let entities = cedarling
         .build_entities(&request)
         // log err to be human readable
-        .inspect_err(|err| println!("Error: {err}"))
-        .expect("request should be parsed without errors");
+        .unwrap_or_else(|err| panic!("request should be parsed without errors: {err}"));
 
     // check value of resource entity
     let expected_resource = json!({"uid":{"type":"Jans::Application","id":"SomeID"},"attrs":{"url":{"host":"test-casa.gluu.info","path":"/","protocol":"https"},"app_id":"1234","name":"some_app"},"parents":[]}).sorted();

@@ -138,7 +138,7 @@ pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
             "exp": 2_000_000_000,
             "iat": 1_516_239_022
         }),
-        &mock1.keys.clone(),
+        &mock1.keys,
     );
 
     let dolphin_multi_token = generate_token_using_claims_and_keypair(
@@ -152,7 +152,7 @@ pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
             "exp": 2_000_000_000,
             "iat": 1_516_239_022
         }),
-        &mock2.keys.clone(),
+        &mock2.keys,
     );
 
     AuthorizeMultiIssuerRequest::new_with_fields(

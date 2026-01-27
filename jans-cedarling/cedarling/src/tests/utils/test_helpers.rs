@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::{EntityData, authz::request::RequestUnsigned};
-use serde::Deserialize;
+use serde::{Deserialize, de};
 use serde_json::json;
 
 /// Creates a test principal entity with the given type, id, and additional attributes
@@ -21,9 +21,10 @@ pub(crate) fn create_test_principal(
     });
 
     if let serde_json::Value::Object(mut attrs) = entity_json {
-        if let serde_json::Value::Object(additional_attrs) = attributes {
-            attrs.extend(additional_attrs);
-        }
+        let serde_json::Value::Object(additional_attrs) = attributes else {
+            return Err(de::Error::custom("attributes must be a JSON object"));
+        };
+        attrs.extend(additional_attrs);
         entity_json = serde_json::Value::Object(attrs);
     }
 

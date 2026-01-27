@@ -6,7 +6,7 @@
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
     InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    Request,
+    PolicyStoreSource, Request,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -115,7 +115,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
             log_level: LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
-            source: cedarling::PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+            source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
@@ -158,7 +158,7 @@ async fn prepare_cedarling_with_jwt_validation(
             log_level: LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
-            source: cedarling::PolicyStoreSource::Yaml(
+            source: PolicyStoreSource::Yaml(
                 serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
         },
@@ -189,7 +189,7 @@ async fn prepare_cedarling_with_jwt_validation(
 ///
 /// Panics if the JSON is not valid.
 #[must_use]
-pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
+fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
     Request::deserialize(serde_json::json!(
         {
             "tokens": {
@@ -283,10 +283,7 @@ pub fn prepare_cedarling_request_for_without_jwt_validation() -> Request {
 ///
 /// Panics if the JSON is not valid.
 #[must_use]
-pub fn prepare_cedarling_request_for_with_jwt_validation(
-    keys1: &KeyPair,
-    issuer_url: &str,
-) -> Request {
+fn prepare_cedarling_request_for_with_jwt_validation(keys1: &KeyPair, issuer_url: &str) -> Request {
     Request::deserialize(serde_json::json!(
         {
             "tokens": {

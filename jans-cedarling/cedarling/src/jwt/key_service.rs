@@ -160,7 +160,7 @@ impl KeyService {
 
 /// An alternative implementation of [`jsonwebtoken::jwk::JwkSet`].
 ///
-/// This struct allows us to iterate over each in in the [`JwkSet`] and handle deserializing
+/// This struct allows us to iterate over each item in the [`JwkSet`] and handle deserializing
 /// each one independently.
 #[derive(Deserialize)]
 pub(super) struct JwkSet {

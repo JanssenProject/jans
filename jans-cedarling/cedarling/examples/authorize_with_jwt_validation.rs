@@ -3,13 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use jsonwebtoken::Algorithm;
+use std::collections::{HashMap, HashSet};
+
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
     EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, Request, log_config::StdOutLoggerMode,
 };
-use jsonwebtoken::Algorithm;
-use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");

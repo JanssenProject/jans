@@ -70,7 +70,6 @@ mod test {
     use cedar_policy::Entity;
     use cedar_policy::EntityUid;
     use cedar_policy::EvalResult;
-    use serde_json::Value;
     use serde_json::json;
     use std::collections::HashMap;
     use std::collections::HashSet;
@@ -78,7 +77,7 @@ mod test {
     #[test]
     fn test_value_to_expr() {
         let attrs = [
-            ("test_null", value_to_expr(&json!(Value::Null)).unwrap()),
+            ("test_null", value_to_expr(&json!(null)).unwrap()),
             ("test_bool", value_to_expr(&json!(true)).unwrap()),
             ("test_long", value_to_expr(&json!(521)).unwrap()),
             ("test_decimal", value_to_expr(&json!(12.5)).unwrap()),

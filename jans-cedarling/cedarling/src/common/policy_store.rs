@@ -377,9 +377,9 @@ enum ParsePolicySetMessage {
 /// `content_type` for the `policy_content` field.
 ///
 /// Only contains a single member, because as of 31-Oct-2024, cedar-policy 4.2.1
-/// `cedar_policy::Policy:from_json` does not work with a single policy.
+/// `cedar_policy::Policy::from_json` does not work with a single policy.
 ///
-/// NOTE if/when `cedar_policy::Policy:from_json` gains this ability, this type
+/// NOTE if/when `cedar_policy::Policy::from_json` gains this ability, this type
 /// can be replaced by `super::ContentType`
 #[derive(Debug, Copy, Clone, PartialEq, serde::Deserialize)]
 enum PolicyContentType {
@@ -402,9 +402,17 @@ struct EncodedPolicy {
 /// Intermediate struct to handler both kinds of `policy_content` values.
 ///
 /// Either
-///   "`policy_content"`: "cGVybWl0KA..."
+/// ```json
+///   "policy_content": "cGVybWl0KA..."
+/// ```
 /// OR
-///   "`policy_content"`: { "encoding": "...", "`content_type"`: "...", "body": "permit(...)"}
+/// ```json
+/// "policy_content": {
+///   "encoding": "...",
+///   "content_type": "...",
+///   "body": "permit(...)"
+/// }
+/// ```
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 #[serde(untagged)]
 enum MaybeEncoded {
@@ -431,9 +439,9 @@ struct RawPolicy {
 /// Contain compiled [`cedar_policy::PolicySet`] and raw policy info to get description or other information.
 #[derive(Debug, Clone)]
 pub struct PoliciesContainer {
-    /// `HasMap` to store raw policy info
+    /// `HashMap` to store raw policy info
     /// Is used to get policy description by ID
-    // In HasMap ID is ID of policy
+    // In HashMap ID is ID of policy
     raw_policy_info: HashMap<String, RawPolicy>,
 
     /// compiled `cedar_policy` Policy set
