@@ -20,7 +20,8 @@ static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 // so we opt out of it for the wasm bindings to compile.
 //
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
-#[async_trait(?Send)]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 pub(super) trait GetFromUrl<T> {
     /// Send a get request to receive the resource from a URL
     async fn get_from_url(url: &Url) -> Result<T, HttpError>;
@@ -60,7 +61,8 @@ where
     Ok(url)
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let openid_config = HTTP_CLIENT
@@ -78,7 +80,8 @@ impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     }
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<JwkSet> for JwkSet {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let jwk_set = HTTP_CLIENT

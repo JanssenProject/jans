@@ -92,6 +92,7 @@ use crate::authz::MultiIssuerValidationError;
 use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
+use crate::jwt_config::TrustedIssuerLoaderConfig;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::*;
@@ -157,7 +158,6 @@ impl JwtService {
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
-        let has_trusted_issuers = !trusted_issuers.is_empty();
 
         let loader = TrustedIssuerLoader {
             jwt_config: jwt_config.clone(),
@@ -169,24 +169,21 @@ impl JwtService {
             logger: logger.clone(),
         };
 
-        // Clone trusted_issuers before consumption - original is iterated and consumed below
-        let trusted_issuers_for_validator = trusted_issuers.clone();
-
-        loader.load_trusted_issuers(trusted_issuers).await?;
+        loader.load_trusted_issuers(trusted_issuers.clone()).await?;
 
         // Load local JWKS if configured and no trusted issuers were provided
         // This ensures local JWKS-only configurations work correctly
-        if !has_trusted_issuers
+        // works only in synchronous mode loading
+        if loader.jwt_config.trusted_issuer_loader == TrustedIssuerLoaderConfig::Sync
+            && !key_service.has_keys()
             && jwt_config.jwt_sig_validation
             && let Some(jwks) = jwt_config.jwks.as_ref()
         {
             key_service.insert_keys_from_str(jwks)?;
         }
 
-        loader.check_keys_loaded();
-
         // Create TrustedIssuerValidator for advanced validation scenarios
-        let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers_for_validator);
+        let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers);
 
         Ok(Self {
             validators,

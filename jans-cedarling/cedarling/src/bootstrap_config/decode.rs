@@ -10,7 +10,7 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fmt::Display;
 use std::fs;
-use std::num::NonZeroU16;
+use std::num::{NonZeroU16, NonZeroUsize};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -141,7 +141,8 @@ impl BootstrapConfig {
         let trusted_issuer_loader: TrustedIssuerLoaderConfig = raw
             .trusted_issuer_loader_async
             .and_then(|workers| {
-                NonZeroU16::new(workers).map(|nz| TrustedIssuerLoaderConfig::Async { workers: nz })
+                NonZeroUsize::new(workers)
+                    .map(|nz| TrustedIssuerLoaderConfig::Async { workers: nz })
             })
             .unwrap_or(TrustedIssuerLoaderConfig::Sync);
 

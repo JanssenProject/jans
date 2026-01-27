@@ -6,7 +6,7 @@
 
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, num::NonZeroU16};
+use std::{collections::HashSet, num::NonZeroUsize};
 
 /// The set of Bootstrap properties related to JWT validation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -229,6 +229,6 @@ pub enum TrustedIssuerLoaderConfig {
     /// You need specify workers count.
     Async {
         /// Workers count
-        workers: NonZeroU16,
+        workers: NonZeroUsize,
     },
 }

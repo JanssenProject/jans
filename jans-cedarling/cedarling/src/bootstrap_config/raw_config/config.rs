@@ -307,7 +307,7 @@ pub struct BootstrapConfigRaw {
     /// Zero or None means synchronous loading.
     /// Positive integer indicates the number of concurrent tasks to use for loading.
     #[serde(rename = "CEDARLING_TRUSTED_ISSUER_LOADER_ASYNC", default)]
-    pub trusted_issuer_loader_async: Option<u16>,
+    pub trusted_issuer_loader_async: Option<usize>,
 }
 
 impl Default for BootstrapConfigRaw {
