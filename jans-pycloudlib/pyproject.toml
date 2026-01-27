@@ -2,8 +2,8 @@
 requires = [
     # The minimum setuptools version is specific to the PEP 517 backend,
     # and may be stricter than the version required in `setup.cfg`
-    "setuptools>=40.6.0,!=60.9.0",
-    "wheel",
+    "setuptools>=78.1.1,!=60.9.0",
+    "wheel>=0.46.2",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -62,7 +62,7 @@ dependencies = [
 
     "boto3",
     "sprig-aes>=0.4.0",
-    "marshmallow>=3.21.2",
+    "marshmallow>=3.26.2",
     "apispec[marshmallow]>=6.6.1",
     "fqdn>=1.5.1",
     "pem>=23.1.0",
