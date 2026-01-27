@@ -120,7 +120,7 @@ class JansLockInstaller(JettyInstaller):
             plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
             self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
-        # extract grpc dependencies to custom libs directors
+        # extract grpc dependencies to custom libs directory
         base.unpack_zip(self.source_files[6][0], base.current_app.JansAuthInstaller.custom_lib_dir)
 
 
