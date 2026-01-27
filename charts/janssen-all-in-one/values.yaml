@@ -424,7 +424,7 @@ config-api:
     # -- ConfigAPI ingress resource additional annotations.
     configApiAdditionalAnnotations: { }
   # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml")
-  plugins: "admin-ui,fido2,scim,user-mgt"
+  plugins: "fido2,scim,user-mgt"
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
   fido2ServiceName: fido2
