@@ -737,12 +737,7 @@ impl DataValidator {
             return false;
         }
 
-        let s = if value.starts_with('-') {
-            &value[1..]
-        } else {
-            value
-        };
-
+        let s = value.strip_prefix('-').unwrap_or(value);
         if s.is_empty() {
             return false;
         }
