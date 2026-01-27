@@ -20,6 +20,8 @@ import jakarta.inject.Named;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -86,9 +88,13 @@ public class Fido2MetricsService {
      */
     public List<Fido2MetricsEntry> getMetricsEntries(LocalDateTime startTime, LocalDateTime endTime) {
         try {
+            // Convert LocalDateTime to Date for SQL persistence filters
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
+            
             Filter filter = Filter.createANDFilter(
-                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
-                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startDate),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endDate)
             );
 
             List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
@@ -107,10 +113,14 @@ public class Fido2MetricsService {
      */
     public List<Fido2MetricsEntry> getMetricsEntriesByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
         try {
+            // Convert LocalDateTime to Date for SQL persistence filters
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
+            
             Filter filter = Filter.createANDFilter(
-                Filter.createEqualityFilter("jansUserId", userId),
-                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
-                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
+                Filter.createEqualityFilter("jansFido2MetricsUserId", userId),
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startDate),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endDate)
             );
 
             return persistenceEntryManager.findEntries(
@@ -127,10 +137,14 @@ public class Fido2MetricsService {
      */
     public List<Fido2MetricsEntry> getMetricsEntriesByOperation(String operationType, LocalDateTime startTime, LocalDateTime endTime) {
         try {
+            // Convert LocalDateTime to Date for SQL persistence filters
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
+            
             Filter filter = Filter.createANDFilter(
-                Filter.createEqualityFilter("jansOperationType", operationType),
-                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
-                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
+                Filter.createEqualityFilter("jansFido2MetricsOperationType", operationType),
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startDate),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endDate)
             );
 
             return persistenceEntryManager.findEntries(
@@ -270,13 +284,21 @@ public class Fido2MetricsService {
 
     /**
      * Get aggregations by time range
+     * Uses interval overlap logic: finds aggregations that overlap with the query range
+     * An aggregation overlaps if: aggregation.startTime <= queryEndTime AND aggregation.endTime >= queryStartTime
      */
     public List<Fido2MetricsAggregation> getAggregations(String aggregationType, LocalDateTime startTime, LocalDateTime endTime) {
         try {
+            // Convert LocalDateTime to Date for SQL persistence filters
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
+            
+            // Interval overlap check: aggregation overlaps query if:
+            // aggregation.startTime <= queryEndTime AND aggregation.endTime >= queryStartTime
             Filter filter = Filter.createANDFilter(
                 Filter.createEqualityFilter("jansAggregationType", aggregationType),
-                Filter.createGreaterOrEqualFilter("jansStartTime", startTime),
-                Filter.createLessOrEqualFilter("jansEndTime", endTime)
+                Filter.createLessOrEqualFilter("jansStartTime", endDate),  // aggregation starts before/at query end
+                Filter.createGreaterOrEqualFilter("jansEndTime", startDate) // aggregation ends after/at query start
             );
 
             return persistenceEntryManager.findEntries(
@@ -298,7 +320,13 @@ public class Fido2MetricsService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                LocalDateTime cutoffDate = LocalDateTime.now().minusDays(retentionDays);
+                // Use UTC timezone to align with FIDO2 services
+                // Direct conversion from Instant to Date (no intermediate LocalDateTime needed)
+                Date cutoffDate = Date.from(
+                    ZonedDateTime.now(ZoneId.of("UTC"))
+                        .minusDays(retentionDays)
+                        .toInstant()
+                );
                 
                 // Cleanup old metrics entries
                 Filter filter = Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, cutoffDate);
@@ -489,7 +517,11 @@ public class Fido2MetricsService {
                 return null;
             }
 
-            Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation(aggregationType, period, startTime, endTime);
+            // Convert LocalDateTime to Date for ORM persistence (reuse convertToDate for consistency)
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
+            
+            Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation(aggregationType, period, startDate, endDate);
             Map<String, Object> metricsData = new HashMap<>();
 
             // Calculate registration metrics
@@ -595,9 +627,13 @@ public class Fido2MetricsService {
 
     private List<Fido2MetricsEntry> getMetricsEntriesByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         try {
+            // Convert LocalDateTime to Date for SQL persistence filters
+            Date startDate = convertToDate(startTime);
+            Date endDate = convertToDate(endTime);
+            
             Filter filter = Filter.createANDFilter(
-                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startTime),
-                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endTime)
+                Filter.createGreaterOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, startDate),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endDate)
             );
 
             return persistenceEntryManager.findEntries(
@@ -607,6 +643,20 @@ public class Fido2MetricsService {
             log.error("Failed to retrieve metrics entries for time range: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
+    }
+    
+    /**
+     * Convert LocalDateTime to Date for persistence layer compatibility
+     * 
+     * IMPORTANT: This method assumes the input LocalDateTime is already in UTC timezone.
+     * The conversion applies UTC timezone without validation, so callers must ensure
+     * they pass UTC-aligned LocalDateTime values.
+     * 
+     * @param dateTime LocalDateTime value that must be in UTC (not validated)
+     * @return Date object representing the same instant in UTC
+     */
+    private Date convertToDate(LocalDateTime dateTime) {
+        return Date.from(dateTime.atZone(ZoneId.of("UTC")).toInstant());
     }
 
     // ========== HELPER METHODS ==========
@@ -626,37 +676,107 @@ public class Fido2MetricsService {
     private Fido2MetricsEntry convertToMetricsEntry(Fido2MetricsData metricsData) {
         Fido2MetricsEntry entry = new Fido2MetricsEntry();
         entry.setId(UUID.randomUUID().toString());
-        entry.setMetricType(metricsData.getMetricType());
-        entry.setTimestamp(metricsData.getTimestamp());
+        
+        // Convert LocalDateTime to Date for ORM compatibility (already in UTC)
+        if (metricsData.getTimestamp() != null) {
+            entry.setTimestamp(convertToDate(metricsData.getTimestamp()));
+        }
+        
+        // Essential fields - always set
+        setEssentialFields(entry, metricsData);
+        
+        // Optional fields - only set if available
+        setOptionalFields(entry, metricsData);
+        
+        // Device info - only set if available and non-empty
+        setDeviceInfo(entry, metricsData);
+        
+        return entry;
+    }
+    
+    /**
+     * Set essential fields that are always present
+     */
+    private void setEssentialFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
         entry.setUserId(metricsData.getUserId());
         entry.setUsername(metricsData.getUsername());
         entry.setOperationType(metricsData.getOperationType());
         entry.setStatus(metricsData.getOperationStatus());
-        entry.setDurationMs(metricsData.getDurationMs());
-        entry.setAuthenticatorType(metricsData.getAuthenticatorType());
-        entry.setErrorReason(metricsData.getErrorReason());
-        entry.setErrorCategory(metricsData.getErrorCategory());
-        entry.setFallbackMethod(metricsData.getFallbackMethod());
-        entry.setFallbackReason(metricsData.getFallbackReason());
-        entry.setSessionId(metricsData.getSessionId());
-        entry.setIpAddress(metricsData.getIpAddress());
-        entry.setUserAgent(metricsData.getUserAgent());
-        entry.setNodeId(metricsData.getNodeId());
-        entry.setApplicationType(metricsData.getApplicationType());
-        
-        // Convert device info
-        if (metricsData.getDeviceInfo() != null) {
-            Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
-            deviceInfo.setBrowser(metricsData.getDeviceInfo().getBrowser());
-            deviceInfo.setBrowserVersion(metricsData.getDeviceInfo().getBrowserVersion());
-            deviceInfo.setOs(metricsData.getDeviceInfo().getOperatingSystem());
-            deviceInfo.setOsVersion(metricsData.getDeviceInfo().getOsVersion());
-            deviceInfo.setDeviceType(metricsData.getDeviceInfo().getDeviceType());
-            deviceInfo.setUserAgent(metricsData.getDeviceInfo().getUserAgent());
-            entry.setDeviceInfo(deviceInfo);
+    }
+    
+    /**
+     * Set optional fields that may be null or empty
+     */
+    private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+        // Performance metrics
+        if (metricsData.getDurationMs() != null) {
+            entry.setDurationMs(metricsData.getDurationMs());
         }
         
-        return entry;
+        // Authenticator info
+        setIfNotEmpty(metricsData.getAuthenticatorType(), entry::setAuthenticatorType);
+        
+        // Error info
+        setIfNotEmpty(metricsData.getErrorReason(), entry::setErrorReason);
+        setIfNotEmpty(metricsData.getErrorCategory(), entry::setErrorCategory);
+        
+        // Fallback info
+        setIfNotEmpty(metricsData.getFallbackMethod(), entry::setFallbackMethod);
+        setIfNotEmpty(metricsData.getFallbackReason(), entry::setFallbackReason);
+        
+        // Network info
+        setIfNotEmpty(metricsData.getIpAddress(), entry::setIpAddress);
+        setIfNotEmpty(metricsData.getUserAgent(), entry::setUserAgent);
+        
+        // Session info
+        setIfNotEmpty(metricsData.getSessionId(), entry::setSessionId);
+        
+        // Cluster info
+        setIfNotEmpty(metricsData.getNodeId(), entry::setNodeId);
+    }
+    
+    /**
+     * Set field value if string is not null and not empty
+     */
+    private void setIfNotEmpty(String value, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(value);
+        }
+    }
+    
+    /**
+     * Set device info if available and non-empty
+     */
+    private void setDeviceInfo(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+        if (metricsData.getDeviceInfo() == null) {
+            return;
+        }
+        
+        Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
+        boolean hasDeviceInfo = false;
+        
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowser(), deviceInfo::setBrowser);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowserVersion(), deviceInfo::setBrowserVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOperatingSystem(), deviceInfo::setOs);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOsVersion(), deviceInfo::setOsVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getDeviceType(), deviceInfo::setDeviceType);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getUserAgent(), deviceInfo::setUserAgent);
+        
+        if (hasDeviceInfo) {
+            entry.setDeviceInfo(deviceInfo);
+        }
+    }
+    
+    /**
+     * Set device field if value is not null and not empty
+     * @return true if field was set, false otherwise
+     */
+    private boolean setDeviceField(String value, java.util.function.Consumer<String> setter) {
+        if (value != null && !value.trim().isEmpty()) {
+            setter.accept(value);
+            return true;
+        }
+        return false;
     }
 
     // ========== TREND ANALYSIS METHODS (GitHub Issue #4) ==========
@@ -712,7 +832,11 @@ public class Fido2MetricsService {
         try {
             java.time.temporal.ChronoUnit chronoUnit = getChronoUnitForAggregationType(aggregationType);
             
-            LocalDateTime endTime = alignEndToBoundary(LocalDateTime.now(), chronoUnit);
+            // Use UTC timezone to align with FIDO2 services
+            LocalDateTime endTime = alignEndToBoundary(
+                ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime(), 
+                chronoUnit
+            );
             LocalDateTime startTime = endTime.minus(periods, chronoUnit);
 
             List<Fido2MetricsAggregation> currentPeriod = getAggregations(aggregationType, startTime, endTime);

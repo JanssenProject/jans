@@ -18,7 +18,10 @@ import jakarta.inject.Named;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -65,10 +68,12 @@ public class Fido2UserMetricsService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                Fido2UserMetrics userMetrics = getUserMetrics(request.getUserId());
+                // Use username for lookup since userId is often null in FIDO2 flows
+                Fido2UserMetrics userMetrics = getUserMetricsByUsername(request.getUsername());
                 if (userMetrics == null) {
                     userMetrics = new Fido2UserMetrics(request.getUserId(), request.getUsername());
-                    userMetrics.setFirstRegistrationDate(LocalDateTime.now());
+                    // Use UTC timezone to align with FIDO2 services
+                    userMetrics.setFirstRegistrationDate(Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant()));
                 }
 
                 userMetrics.incrementRegistrations(request.isSuccess());
@@ -101,7 +106,8 @@ public class Fido2UserMetricsService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                Fido2UserMetrics userMetrics = getUserMetrics(request.getUserId());
+                // Use username for lookup since userId is often null in FIDO2 flows
+                Fido2UserMetrics userMetrics = getUserMetricsByUsername(request.getUsername());
                 if (userMetrics == null) {
                     userMetrics = new Fido2UserMetrics(request.getUserId(), request.getUsername());
                 }
@@ -118,7 +124,7 @@ public class Fido2UserMetricsService {
                 userMetrics.updateEngagementLevel();
                 saveUserMetrics(userMetrics);
 
-                log.debug("Updated user authentication metrics for user: {}", request.getUserId());
+                log.debug("Updated user authentication metrics for username: {}", request.getUsername());
             } catch (Exception e) {
                 log.error("Failed to update user authentication metrics for user {}: {}", request.getUserId(), e.getMessage(), e);
             }
@@ -135,7 +141,8 @@ public class Fido2UserMetricsService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                Fido2UserMetrics userMetrics = getUserMetrics(userId);
+                // Use username for lookup since userId is often null in FIDO2 flows
+                Fido2UserMetrics userMetrics = getUserMetricsByUsername(username);
                 if (userMetrics == null) {
                     userMetrics = new Fido2UserMetrics(userId, username);
                 }
@@ -146,7 +153,7 @@ public class Fido2UserMetricsService {
 
                 saveUserMetrics(userMetrics);
 
-                log.debug("Updated user fallback metrics for user: {}", userId);
+                log.debug("Updated user fallback metrics for username: {}", username);
             } catch (Exception e) {
                 log.error("Failed to update user fallback metrics for user {}: {}", userId, e.getMessage(), e);
             }
@@ -237,7 +244,11 @@ public class Fido2UserMetricsService {
      */
     public List<Fido2UserMetrics> getNewUsers(int days) {
         try {
-            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+            // Use UTC timezone to align with FIDO2 services
+            LocalDateTime cutoffLdt = ZonedDateTime.now(ZoneId.of("UTC"))
+                .toLocalDateTime()
+                .minusDays(days);
+            Date cutoffDate = Date.from(cutoffLdt.atZone(ZoneId.of("UTC")).toInstant());
             Filter filter = Filter.createGreaterOrEqualFilter("jansFirstRegistrationDate", cutoffDate);
             return persistenceEntryManager.findEntries(
                 USER_METRICS_BASE_DN, Fido2UserMetrics.class, filter
@@ -350,10 +361,18 @@ public class Fido2UserMetricsService {
         // Temporal patterns
         patterns.put("isNewUser", userMetrics.isNewUser());
         patterns.put("isActiveUser", userMetrics.isActiveUser());
+        // Use UTC timezone to align with FIDO2 services
+        LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
         patterns.put("daysSinceFirstRegistration", userMetrics.getFirstRegistrationDate() != null ? 
-            java.time.temporal.ChronoUnit.DAYS.between(userMetrics.getFirstRegistrationDate(), LocalDateTime.now()) : 0);
+            java.time.temporal.ChronoUnit.DAYS.between(
+                LocalDateTime.ofInstant(userMetrics.getFirstRegistrationDate().toInstant(), ZoneId.of("UTC")), 
+                utcNow
+            ) : 0);
         patterns.put("daysSinceLastActivity", userMetrics.getLastActivityDate() != null ? 
-            java.time.temporal.ChronoUnit.DAYS.between(userMetrics.getLastActivityDate(), LocalDateTime.now()) : 0);
+            java.time.temporal.ChronoUnit.DAYS.between(
+                LocalDateTime.ofInstant(userMetrics.getLastActivityDate().toInstant(), ZoneId.of("UTC")), 
+                utcNow
+            ) : 0);
         
         return patterns;
     }
@@ -406,9 +425,15 @@ public class Fido2UserMetricsService {
     private void saveUserMetrics(Fido2UserMetrics userMetrics) {
         try {
             if (userMetrics.getDn() == null) {
+                // New entry - set DN and persist
                 userMetrics.setDn(generateUserMetricsDn(userMetrics.getId()));
+                persistenceEntryManager.persist(userMetrics);
+                log.debug("Created new user metrics entry for: {}", userMetrics.getUsername());
+            } else {
+                // Existing entry - merge to update
+                persistenceEntryManager.merge(userMetrics);
+                log.debug("Updated existing user metrics entry for: {}", userMetrics.getUsername());
             }
-            persistenceEntryManager.persist(userMetrics);
         } catch (Exception e) {
             log.error("Failed to save user metrics: {}", e.getMessage(), e);
         }
@@ -442,21 +467,21 @@ public class Fido2UserMetricsService {
         
         if (isRegistration) {
             if (userMetrics.getAvgRegistrationDuration() == null) {
-                userMetrics.setAvgRegistrationDuration(durationMs.doubleValue());
+                userMetrics.setAvgRegistrationDuration(durationMs);
             } else {
                 // Simple moving average - in production, you might want more sophisticated calculation
-                double currentAvg = userMetrics.getAvgRegistrationDuration();
+                long currentAvg = userMetrics.getAvgRegistrationDuration();
                 int count = userMetrics.getSuccessfulRegistrations() != null ? userMetrics.getSuccessfulRegistrations() : 1;
-                double newAvg = (currentAvg * (count - 1) + durationMs) / count;
+                long newAvg = (currentAvg * (count - 1) + durationMs) / count;
                 userMetrics.setAvgRegistrationDuration(newAvg);
             }
         } else {
             if (userMetrics.getAvgAuthenticationDuration() == null) {
-                userMetrics.setAvgAuthenticationDuration(durationMs.doubleValue());
+                userMetrics.setAvgAuthenticationDuration(durationMs);
             } else {
-                double currentAvg = userMetrics.getAvgAuthenticationDuration();
+                long currentAvg = userMetrics.getAvgAuthenticationDuration();
                 int count = userMetrics.getSuccessfulAuthentications() != null ? userMetrics.getSuccessfulAuthentications() : 1;
-                double newAvg = (currentAvg * (count - 1) + durationMs) / count;
+                long newAvg = (currentAvg * (count - 1) + durationMs) / count;
                 userMetrics.setAvgAuthenticationDuration(newAvg);
             }
         }
