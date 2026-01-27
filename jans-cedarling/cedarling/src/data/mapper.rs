@@ -301,7 +301,9 @@ impl CedarValueMapper {
                     // Convert floating point to decimal extension
                     RestrictedExpression::new_decimal(f.to_string())
                 } else {
-                    return Ok(None);
+                    return Err(ValueMappingError::NumberNotRepresentable {
+                        value: n.to_string(),
+                    });
                 }
             },
             Value::String(s) => {
@@ -317,18 +319,12 @@ impl CedarValueMapper {
             },
             Value::Array(arr) => {
                 let mut exprs = Vec::with_capacity(arr.len());
-                let mut errors = Vec::new();
 
                 for item in arr {
-                    match self.convert_value(item) {
-                        Ok(Some(expr)) => exprs.push(expr),
-                        Ok(None) => {},
-                        Err(e) => errors.push(e),
-                    }
-                }
-
-                if !errors.is_empty() {
-                    return Err(ValueMappingError::CollectionErrors(errors));
+                    let expr = self.convert_value(item)?;
+                    // All code paths in convert_value now return Some or Err,
+                    // so unwrap is safe here
+                    exprs.push(expr.expect("convert_value should always return Some"));
                 }
 
                 RestrictedExpression::new_set(exprs)
@@ -348,39 +344,56 @@ impl CedarValueMapper {
 
                 // Check for extension type markers (__extn)
                 if let Some(extn) = obj.get("__extn") {
-                    if let Some(extn_obj) = extn.as_object() {
-                        if let (Some(fn_name), Some(arg)) = (
-                            extn_obj.get("fn").and_then(|v| v.as_str()),
-                            extn_obj.get("arg").and_then(|v| v.as_str()),
-                        ) {
-                            return match fn_name {
-                                "decimal" => Ok(Some(RestrictedExpression::new_decimal(arg))),
-                                "ip" => Ok(Some(RestrictedExpression::new_ip(arg))),
-                                _ => Err(ValueMappingError::InvalidExtensionFormat {
-                                    extension_type: fn_name.to_string(),
-                                    value: arg.to_string(),
-                                }),
-                            };
+                    // __extn is present, so we must validate it strictly
+                    let extn_obj = extn.as_object().ok_or_else(|| {
+                        ValueMappingError::InvalidExtensionFormat {
+                            extension_type: "__extn".to_string(),
+                            value: extn.to_string(),
                         }
-                    }
+                    })?;
+
+                    let fn_name = extn_obj.get("fn").and_then(|v| v.as_str()).ok_or_else(|| {
+                        ValueMappingError::InvalidExtensionFormat {
+                            extension_type: "__extn".to_string(),
+                            value: format!(
+                                "missing or invalid 'fn' field in {}",
+                                serde_json::to_string(extn_obj).unwrap_or_default()
+                            ),
+                        }
+                    })?;
+
+                    let arg = extn_obj
+                        .get("arg")
+                        .and_then(|v| v.as_str())
+                        .ok_or_else(|| ValueMappingError::InvalidExtensionFormat {
+                            extension_type: fn_name.to_string(),
+                            value: format!(
+                                "missing or invalid 'arg' field in {}",
+                                serde_json::to_string(extn_obj).unwrap_or_default()
+                            ),
+                        })?;
+
+                    return match fn_name {
+                        "decimal" => Ok(Some(RestrictedExpression::new_decimal(arg))),
+                        "ip" => Ok(Some(RestrictedExpression::new_ip(arg))),
+                        _ => Err(ValueMappingError::InvalidExtensionFormat {
+                            extension_type: fn_name.to_string(),
+                            value: arg.to_string(),
+                        }),
+                    };
                 }
 
                 // Regular record
                 let mut fields = HashMap::with_capacity(obj.len());
-                let mut errors = Vec::new();
 
                 for (key, val) in obj {
-                    match self.convert_value(val) {
-                        Ok(Some(expr)) => {
-                            fields.insert(key.clone(), expr);
-                        },
-                        Ok(None) => {},
-                        Err(e) => errors.push(e),
-                    }
-                }
-
-                if !errors.is_empty() {
-                    return Err(ValueMappingError::CollectionErrors(errors));
+                    let expr = self.convert_value(val)?;
+                    // All code paths in convert_value now return Some or Err,
+                    // so unwrap is safe here
+                    fields.insert(
+                        key.clone(),
+                        expr.expect("convert_value should always return Some"),
+                    );
                 }
 
                 RestrictedExpression::new_record(fields)?
@@ -427,8 +440,9 @@ impl CedarValueMapper {
                 }
 
                 // Check for __extn marker (extension types)
-                if let Some(extn) = obj.get("__extn") {
-                    return Ok(extn.clone());
+                // Preserve the entire wrapper so json_to_cedar can consume it
+                if obj.contains_key("__extn") {
+                    return Ok(Value::Object(obj.clone()));
                 }
 
                 // Regular object - recursively process
@@ -453,6 +467,7 @@ impl CedarValueMapper {
 mod tests {
     use super::*;
     use serde_json::json;
+    use test_utils::assert_eq;
 
     #[test]
     fn test_json_to_cedar_primitives() {

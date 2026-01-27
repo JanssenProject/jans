@@ -180,9 +180,24 @@ impl DataValidator {
     }
 
     /// Validate a JSON value for Cedar compatibility.
+    ///
+    /// If `collect_all_errors` is set in the config, this will collect all
+    /// errors before returning. Otherwise, it fails fast on the first error.
     pub fn validate(&self, value: &Value) -> Result<(), ValidationError> {
-        self.validate_at_path(value, "$", 0)?;
-        Ok(())
+        if self.config.collect_all_errors {
+            let mut errors = Vec::new();
+            self.validate_collecting(value, "$", 0, &mut errors);
+            if errors.is_empty() {
+                Ok(())
+            } else if errors.len() == 1 {
+                Err(errors.into_iter().next().unwrap())
+            } else {
+                Err(ValidationError::Multiple(errors))
+            }
+        } else {
+            self.validate_at_path(value, "$", 0)?;
+            Ok(())
+        }
     }
 
     /// Validate a value and get a detailed result.
@@ -448,6 +463,32 @@ impl DataValidator {
                         max: self.config.max_string_length,
                     });
                 }
+
+                // If it looks like an extension type, validate its format
+                if self.config.strict_extension_validation {
+                    if let Some(ext) = CedarValueMapper::detect_extension(s) {
+                        match ext {
+                            ExtensionValue::IpAddr(ip) => {
+                                if IpAddr::from_str(&ip).is_err() {
+                                    errors.push(ValidationError::InvalidExtensionFormat {
+                                        path: path.to_string(),
+                                        extension_type: "ipaddr".to_string(),
+                                        value: ip,
+                                    });
+                                }
+                            },
+                            ExtensionValue::Decimal(d) => {
+                                if d.parse::<f64>().is_err() {
+                                    errors.push(ValidationError::InvalidExtensionFormat {
+                                        path: path.to_string(),
+                                        extension_type: "decimal".to_string(),
+                                        value: d,
+                                    });
+                                }
+                            },
+                        }
+                    }
+                }
             },
             Value::Array(arr) => {
                 if arr.len() > self.config.max_array_length {
@@ -470,6 +511,41 @@ impl DataValidator {
                         max: self.config.max_object_keys,
                     });
                 }
+
+                // Check for entity reference
+                if CedarValueMapper::is_entity_reference(value) {
+                    if let Err(e) = self.validate_entity_reference(value, path) {
+                        errors.push(e);
+                    }
+                    return;
+                }
+
+                // Check for extension type marker
+                if let Some(extn) = obj.get("__extn") {
+                    if let Err(e) = self.validate_extension_marker(extn, path) {
+                        errors.push(e);
+                    }
+                    return;
+                }
+
+                // Validate keys
+                for key in obj.keys() {
+                    if key.is_empty() {
+                        errors.push(ValidationError::InvalidKey {
+                            path: path.to_string(),
+                            reason: "empty key".to_string(),
+                        });
+                    }
+                    // Check for control characters in keys
+                    if key.chars().any(|c| c.is_control()) {
+                        errors.push(ValidationError::InvalidKey {
+                            path: path.to_string(),
+                            reason: "key contains control characters".to_string(),
+                        });
+                    }
+                }
+
+                // Recursively validate values
                 for (key, val) in obj {
                     let field_path = format!("{}.{}", path, key);
                     self.validate_collecting(val, &field_path, depth + 1, errors);
@@ -538,6 +614,7 @@ impl DataValidator {
 mod tests {
     use super::*;
     use serde_json::json;
+    use test_utils::assert_eq;
 
     #[test]
     fn test_validate_primitives() {

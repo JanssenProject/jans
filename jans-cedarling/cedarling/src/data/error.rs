@@ -111,6 +111,13 @@ pub enum ValueMappingError {
     /// Nested errors from collections
     #[error("errors in collection: {0:?}")]
     CollectionErrors(Vec<ValueMappingError>),
+
+    /// Number cannot be represented as Cedar Long or Decimal
+    #[error("number cannot be represented in Cedar: {value}")]
+    NumberNotRepresentable {
+        /// The original number string that could not be converted
+        value: String,
+    },
 }
 
 /// Errors that can occur during validation.

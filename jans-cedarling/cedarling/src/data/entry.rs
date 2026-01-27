@@ -7,6 +7,8 @@ use super::store::std_duration_to_chrono_duration;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::net::IpAddr;
+use std::str::FromStr;
 use std::time::Duration as StdDuration;
 
 /// Helper module for serializing DateTime
@@ -80,25 +82,59 @@ pub enum CedarType {
     Record,
     /// Entity reference type
     Entity,
+    /// IP address extension type
+    Ip,
+    /// Decimal extension type
+    Decimal,
 }
 
 impl CedarType {
     /// Infer the Cedar type from a JSON value.
+    ///
+    /// This method detects extension types by recognizing:
+    /// - `__extn` markers with `fn` = "ip" or "decimal"
+    /// - Strings that look like IP addresses or decimals (when auto-detection is appropriate)
     pub fn from_value(value: &Value) -> Self {
         match value {
-            Value::String(_) => Self::String,
+            Value::String(s) => {
+                // Check for IP address format
+                if IpAddr::from_str(s).is_ok() {
+                    return Self::Ip;
+                }
+                // Check for decimal format (contains decimal point and parseable as f64)
+                if s.contains('.')
+                    && s.parse::<f64>().is_ok()
+                    && !s.ends_with('.')
+                    && s.chars().filter(|&c| c == '.').count() == 1
+                {
+                    return Self::Decimal;
+                }
+                Self::String
+            },
             Value::Number(n) => {
                 if n.is_i64() || n.is_u64() {
                     Self::Long
                 } else {
-                    // Decimals are not directly supported in basic Cedar types
-                    // but we'll treat them as Long for now
-                    Self::Long
+                    // Floating point numbers become decimals in Cedar
+                    Self::Decimal
                 }
             },
             Value::Bool(_) => Self::Bool,
             Value::Array(_) => Self::Set,
             Value::Object(obj) => {
+                // Check for extension type marker (__extn)
+                if let Some(extn) = obj.get("__extn") {
+                    if let Some(extn_obj) = extn.as_object() {
+                        if let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str()) {
+                            return match fn_name {
+                                "ip" | "ipaddr" => Self::Ip,
+                                "decimal" => Self::Decimal,
+                                _ => Self::Record,
+                            };
+                        }
+                    }
+                }
+
                 // Check if it's an entity reference with explicit marker
                 // Entity references must have exactly "type" and "id" fields,
                 // and the "type" value must be a string (to avoid misclassifying
