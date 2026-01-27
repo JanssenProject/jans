@@ -5,7 +5,7 @@
 
     <groupId>io.jans.casa.plugins</groupId>
     <artifactId>cert-authn-agama</artifactId>
-    <version>1.16.0</version>
+    <version>0.0.0-nightly</version>
     <distributionManagement>
 	  <repository>
           <id>github</id>
