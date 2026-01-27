@@ -117,12 +117,12 @@ class JansLockInstaller(JettyInstaller):
             plugin_name = os.path.basename(plugin)
             self.logIt(f"Adding plugin {plugin_name} to jans-auth")
             self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
-            plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-            self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
 
         # extract grpc dependencies to custom libs directory
         base.unpack_zip(self.source_files[6][0], base.current_app.JansAuthInstaller.custom_lib_dir)
 
+        # chown all files under custom libs to jetty
+        self.chown(base.current_app.JansAuthInstaller.custom_lib_dir, Config.jetty_user, Config.jetty_group, recursive=True)
 
     def create_policy_template(self):
         Config.templateRenderingDict['local_trusted_issuer_id'] = os.urandom(22).hex()
