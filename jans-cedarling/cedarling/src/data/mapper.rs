@@ -87,7 +87,7 @@ impl CedarValueMapper {
     ) -> Result<Option<RestrictedExpression>, ValueMappingError> {
         // Check size limit
         if self.max_value_size > 0 {
-            let size = self.estimate_value_size(value);
+            let size = Self::estimate_value_size(value);
             if size > self.max_value_size {
                 return Err(ValueMappingError::ValueTooLarge {
                     size,
@@ -583,23 +583,31 @@ impl CedarValueMapper {
         Ok(Some(expr))
     }
 
-    // Estimate the size of a value in bytes
-    fn estimate_value_size(&self, value: &Value) -> usize {
+    /// Estimates the JSON-serialized size of a value in bytes.
+    ///
+    /// This provides a rough estimate for size limiting without actual serialization.
+    fn estimate_value_size(value: &Value) -> usize {
         match value {
+            // "null" = 4 chars
             Value::Null => 4,
+            // "true" or "false" = 4-5 chars, use max
             Value::Bool(_) => 5,
+            // Number as string representation
             Value::Number(n) => n.to_string().len(),
+            // String content + 2 for surrounding quotes
             Value::String(s) => s.len() + 2,
+            // 2 for brackets [] + elements with commas
             Value::Array(arr) => {
                 2 + arr
                     .iter()
-                    .map(|v| self.estimate_value_size(v) + 1)
+                    .map(|v| Self::estimate_value_size(v) + 1) // +1 for comma separator
                     .sum::<usize>()
             },
+            // 2 for braces {} + key-value pairs
             Value::Object(obj) => {
                 2 + obj
                     .iter()
-                    .map(|(k, v)| k.len() + 3 + self.estimate_value_size(v) + 1)
+                    .map(|(k, v)| k.len() + 3 + Self::estimate_value_size(v) + 1) // +3 for quotes and colon, +1 for comma
                     .sum::<usize>()
             },
         }
