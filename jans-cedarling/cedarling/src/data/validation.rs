@@ -638,15 +638,15 @@ impl DataValidator {
     // Validate entity reference format
     fn validate_entity_reference(&self, value: &Value, path: &str) -> Result<(), ValidationError> {
         match CedarValueMapper::parse_entity_reference(value) {
-            Ok((entity_type, entity_id)) => {
+            Ok(entity_ref) => {
                 // Validate entity type format (should be like "Namespace::Type" or just "Type")
-                if entity_type.is_empty() {
+                if entity_ref.entity_type.is_empty() {
                     return Err(ValidationError::InvalidEntityReference {
                         path: path.to_string(),
                         reason: "empty entity type".to_string(),
                     });
                 }
-                if entity_id.is_empty() {
+                if entity_ref.entity_id.is_empty() {
                     return Err(ValidationError::InvalidEntityReference {
                         path: path.to_string(),
                         reason: "empty entity id".to_string(),

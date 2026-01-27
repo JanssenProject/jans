@@ -17,6 +17,15 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
 
+/// Represents a parsed Cedar entity reference.
+#[derive(Debug, Clone, PartialEq)]
+pub(super) struct EntityReference {
+    /// The entity type (e.g., "User", "Namespace::Type")
+    pub entity_type: String,
+    /// The entity identifier
+    pub entity_id: String,
+}
+
 /// Represents a detected extension type with its parsed value.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExtensionValue {
@@ -408,11 +417,9 @@ impl CedarValueMapper {
     }
 
     /// Parse an entity reference from JSON.
-    ///
-    /// # Returns
-    ///
-    /// A tuple of (entity_type, entity_id) if valid.
-    pub fn parse_entity_reference(value: &Value) -> Result<(String, String), ValueMappingError> {
+    pub(super) fn parse_entity_reference(
+        value: &Value,
+    ) -> Result<EntityReference, ValueMappingError> {
         if let Value::Object(obj) = value {
             let entity_type = obj.get("type").and_then(|v| v.as_str()).ok_or_else(|| {
                 ValueMappingError::InvalidEntityReference {
@@ -426,7 +433,10 @@ impl CedarValueMapper {
                 }
             })?;
 
-            Ok((entity_type.to_string(), entity_id.to_string()))
+            Ok(EntityReference {
+                entity_type: entity_type.to_string(),
+                entity_id: entity_id.to_string(),
+            })
         } else {
             Err(ValueMappingError::InvalidEntityReference {
                 reason: "expected object with 'type' and 'id' fields".to_string(),
@@ -498,8 +508,9 @@ impl CedarValueMapper {
             Value::Object(obj) => {
                 // Check for entity reference
                 if Self::is_entity_reference(value) {
-                    let (entity_type, entity_id) = Self::parse_entity_reference(value)?;
-                    let uid_str = format!("{}::\"{}\"", entity_type, entity_id);
+                    let entity_ref = Self::parse_entity_reference(value)?;
+                    let uid_str =
+                        format!("{}::\"{}\"", entity_ref.entity_type, entity_ref.entity_id);
                     let uid = cedar_policy::EntityUid::from_str(&uid_str).map_err(|e| {
                         ValueMappingError::InvalidEntityReference {
                             reason: e.to_string(),
@@ -855,9 +866,9 @@ mod tests {
         let value = json!({"type": "User", "id": "alice"});
         let result = CedarValueMapper::parse_entity_reference(&value);
         assert!(result.is_ok());
-        let (entity_type, entity_id) = result.expect("should parse");
-        assert_eq!(entity_type, "User");
-        assert_eq!(entity_id, "alice");
+        let entity_ref = result.expect("should parse");
+        assert_eq!(entity_ref.entity_type, "User");
+        assert_eq!(entity_ref.entity_id, "alice");
     }
 
     #[test]
