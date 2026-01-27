@@ -1,0 +1,28 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.3.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.3.0 http://maven.apache.org/xsd/assembly-2.3.0.xsd">
+
+    <id>service-deps-pack</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <scope>runtime</scope>
+            <includes>
+                <include>io.grpc:grpc-core</include>
+                <include>io.grpc:grpc-netty-shaded</include>
+                <include>io.grpc:grpc-protobuf</include>
+                <include>io.grpc:grpc-protobuf-lite</include>
+                <include>io.grpc:grpc-servlet-jakarta</include>
+                <include>io.grpc:grpc-stub</include>
+                <include>io.grpc:grpc-util</include>
+                <include>*:grpc-bridge</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>
