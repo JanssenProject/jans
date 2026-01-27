@@ -563,7 +563,7 @@ func resourceOidcClient() *schema.Resource {
 						"post_authn_scripts": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "List of post authentication scripts.",
+							Description: "List of post-authentication scripts.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -612,12 +612,12 @@ func resourceOidcClient() *schema.Resource {
 						"par_lifetime": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Description: "represents the lifetime of Pushed Authorisation Request (PAR).",
+							Description: "Lifetime of Pushed Authorization Request (PAR).",
 						},
 						"require_par": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "boolean value to indicate of Pushed Authorisation Request(PAR)is required.",
+							Description: "Whether Pushed Authorization Request (PAR) is required.",
 						},
 						"dpop_bound_access_token": {
 							Type:        schema.TypeBool,
@@ -647,7 +647,7 @@ func resourceOidcClient() *schema.Resource {
 						"redirect_uris_regex": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "If set, redirectUri must match to this regexp",
+							Description: "Redirect URI must match this regexp.",
 						},
 						"jans_authorized_acr": {
 							Type:        schema.TypeList,
@@ -712,7 +712,7 @@ func resourceOidcClient() *schema.Resource {
 						"requested_lifetime": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Description: "List of requested lifetime.",
+							Description: "Requested lifetime.",
 						},
 						"evidence": {
 							Type:        schema.TypeString,

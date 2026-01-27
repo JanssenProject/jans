@@ -235,12 +235,12 @@ Optional:
 - `minimum_acr_level` (Number) Specifies the minimum Authentication Context Class Reference (ACR) level.
 - `minimum_acr_level_autoresolve` (Boolean) Specifies whether to automatically resolve minimum ACR level.
 - `minimum_acr_priority_list` (List of String) List of minimum ACR priority list.
-- `par_lifetime` (Number) represents the lifetime of Pushed Authorisation Request (PAR).
+- `par_lifetime` (Number) Lifetime of Pushed Authorization Request (PAR).
 - `par_script_dns` (List of String) List of PAR (Pushed Authorization Request) script DNs.
-- `post_authn_scripts` (List of String) List of post authentication scripts.
-- `redirect_uris_regex` (String) If set, redirectUri must match to this regexp
-- `requested_lifetime` (Number) List of requested lifetime.
-- `require_par` (Boolean) boolean value to indicate of Pushed Authorisation Request(PAR)is required.
+- `post_authn_scripts` (List of String) List of post-authentication scripts.
+- `redirect_uris_regex` (String) Redirect URI must match this regexp.
+- `requested_lifetime` (Number) Requested lifetime.
+- `require_par` (Boolean) Whether Pushed Authorization Request (PAR) is required.
 - `require_pkce` (Boolean) Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.
 - `ropc_scripts` (List of String) List of Resource Owner Password Credentials (ROPC) scripts.
 - `rpt_claims_scripts` (List of String) List of Requesting Party Token (RPT) claims scripts.
