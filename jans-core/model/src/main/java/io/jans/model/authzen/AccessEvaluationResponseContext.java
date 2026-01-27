@@ -17,6 +17,15 @@ public class AccessEvaluationResponseContext implements Serializable {
     @JsonProperty("id")
     private String id;
 
+    @JsonProperty("code")
+    private String code;
+
+    @JsonProperty("reason")
+    private String reason;
+
+    @JsonProperty("error")
+    private JsonNode error;
+
     @JsonProperty("reason_admin")
     private JsonNode reasonAdmin;
 
@@ -85,10 +94,37 @@ public class AccessEvaluationResponseContext implements Serializable {
         return extra;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public JsonNode getError() {
+        return error;
+    }
+
+    public void setError(JsonNode error) {
+        this.error = error;
+    }
+
     @Override
     public String toString() {
         return "AccessEvaluationResponseContext{" +
                 "id='" + id + '\'' +
+                ", code=" + code +
+                ", reason=" + reason +
+                ", error=" + error +
                 ", reasonAdmin=" + reasonAdmin +
                 ", reasonUser=" + reasonUser +
                 ", metadata=" + metadata +
