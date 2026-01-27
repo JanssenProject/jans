@@ -11,7 +11,7 @@
 use crate::data::error::ValueMappingError;
 
 use super::CedarType;
-use cedar_policy::RestrictedExpression;
+use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use serde_json::{Map, Value};
 use std::collections::HashMap;
 use std::net::IpAddr;
@@ -509,13 +509,24 @@ impl CedarValueMapper {
                 // Check for entity reference
                 if Self::is_entity_reference(value) {
                     let entity_ref = Self::parse_entity_reference(value)?;
-                    let uid_str =
-                        format!("{}::\"{}\"", entity_ref.entity_type, entity_ref.entity_id);
-                    let uid = cedar_policy::EntityUid::from_str(&uid_str).map_err(|e| {
+
+                    let entity_type =
+                        EntityTypeName::from_str(&entity_ref.entity_type).map_err(|e| {
+                            ValueMappingError::InvalidEntityReference {
+                                reason: format!(
+                                    "invalid entity type '{}': {}",
+                                    entity_ref.entity_type, e
+                                ),
+                            }
+                        })?;
+
+                    let entity_id = EntityId::from_str(&entity_ref.entity_id).map_err(|e| {
                         ValueMappingError::InvalidEntityReference {
-                            reason: e.to_string(),
+                            reason: format!("invalid entity id '{}': {}", entity_ref.entity_id, e),
                         }
                     })?;
+
+                    let uid = EntityUid::from_type_name_and_id(entity_type, entity_id);
                     return Ok(Some(RestrictedExpression::new_entity_uid(uid)));
                 }
 
