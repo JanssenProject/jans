@@ -241,7 +241,7 @@ Optional:
 - `redirect_uris_regex` (String) If set, redirectUri must match to this regexp
 - `requested_lifetime` (Number) List of requested lifetime.
 - `require_par` (Boolean) boolean value to indicate of Pushed Authorisation Request(PAR)is required.
-- `require_pcke` (Boolean) Specifies whether to require PCKE (Proof Key for Code Exchange) for authorization code flow.
+- `require_pkce` (Boolean) Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.
 - `ropc_scripts` (List of String) List of Resource Owner Password Credentials (ROPC) scripts.
 - `rpt_claims_scripts` (List of String) List of Requesting Party Token (RPT) claims scripts.
 - `run_introspection_script_before_jwt_creation` (Boolean) boolean property which indicates whether to run introspection script and then include claims 
