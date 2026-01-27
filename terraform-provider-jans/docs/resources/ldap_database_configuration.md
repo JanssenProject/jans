@@ -39,7 +39,7 @@ resource "jans_ldap_database_configuration" "example" {
 - `bind_dn` (String) This contains the username to connect to the backend server. You need to use full DN here. As for example, cn=jans,dc=company,dc=org.
 - `bind_password` (String) Ldap password for binding.
 - `config_id` (String) Unique identifier - Name Example: auth_ldap_server
-- `local_primary_key` (String) Used to search local user entry in Gluu Server's internal LDAP directory. Example: uid, email
+- `local_primary_key` (String) Used to search local user entry in Gluu Server’s internal LDAP directory. Example: uid, email
 - `max_connections` (Number) This value defines the maximum number of connections that are allowed to read the backend Active Directory/LDAP server.
 - `primary_key` (String) Used to search and bind operations in configured LDAP server. Example: SAMAccountName,uid, email
 - `servers` (List of String) List of LDAP authentication servers.

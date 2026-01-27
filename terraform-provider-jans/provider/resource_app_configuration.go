@@ -2391,6 +2391,89 @@ func resourceAppConfiguration() *schema.Resource {
                                         },
                                 },
                         },
+                        "include_requested_claims_in_id_token": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether to include requested claims in ID Token.",
+                        },
+                        "apply_x_frame_options_header_if_uri_contains_any": {
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                Description: "List of URIs that should have X-Frame-Options header applied.",
+                                Elem: &schema.Schema{
+                                        Type: schema.TypeString,
+                                },
+                        },
+                        "xframe_options_header_value": {
+                                Type:        schema.TypeString,
+                                Optional:    true,
+                                Description: "X-Frame-Options header value. One of 'SAMEORIGIN', 'DENY'.",
+                                ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+                                        enums := []string{"SAMEORIGIN", "DENY"}
+                                        return validateEnum(v, enums)
+                                },
+                        },
+                        "authorization_challenge_session_lifetime_in_seconds": {
+                                Type:        schema.TypeInt,
+                                Optional:    true,
+                                Description: "Lifetime of the authorization challenge session in seconds.",
+                        },
+                        "connection_service_configuration": {
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                MaxItems:    1,
+                                Description: "HTTP connection pool configuration.",
+                                Elem: &schema.Resource{
+                                        Schema: map[string]*schema.Schema{
+                                                "max_total": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Maximum total connections.",
+                                                },
+                                                "max_per_route": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Maximum connections per route.",
+                                                },
+                                                "validate_after_inactivity": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Time in milliseconds to wait before validating an inactive connection.",
+                                                },
+                                        },
+                                },
+                        },
+                        "include_refresh_token_lifetime_in_token_response": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether to include refresh token lifetime in token response.",
+                        },
+                        "logout_status_jwt_lifetime": {
+                                Type:        schema.TypeInt,
+                                Optional:    true,
+                                Description: "Lifetime of the logout status JWT in seconds.",
+                        },
+                        "logout_status_jwt_signing_alg_values_supported": {
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                Description: "List of logout status JWT signing algorithm values supported.",
+                                Elem: &schema.Schema{
+                                        Type: schema.TypeString,
+                                },
+                        },
+                        "run_all_update_token_scripts": {
+                                Type:        schema.TypeBool,
+                                Optional:    true,
+                                Description: "Boolean value specifying whether to run all update token scripts.",
+                        },
+                        "session_id_user_claims_in_attributes": {
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                Description: "List of user claims to include in session ID attributes.",
+                                Elem: &schema.Schema{
+                                        Type: schema.TypeString,
+                                },
+                        },
                 },
                 Importer: &schema.ResourceImporter{
                         StateContext: schema.ImportStatePassthroughContext,

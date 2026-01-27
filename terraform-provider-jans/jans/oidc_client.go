@@ -50,6 +50,10 @@ type OidcClientAttribute struct {
         TxTokenEncryptedResponseAlg             string   `schema:"tx_token_encrypted_response_alg" json:"txTokenEncryptedResponseAlg,omitempty"`
         TxTokenEncryptedResponseEnc             string   `schema:"tx_token_encrypted_response_enc" json:"txTokenEncryptedResponseEnc,omitempty"`
         AuthorizationDetailsTypes               []string `schema:"authorization_details_types" json:"authorizationDetailsTypes,omitempty"`
+        LogoutStatusJwtScriptDns                []string `schema:"logout_status_jwt_script_dns" json:"logoutStatusJwtScriptDns,omitempty"`
+        LogoutStatusJwtSignedResponseAlg        string   `schema:"logout_status_jwt_signed_response_alg" json:"logoutStatusJwtSignedResponseAlg,omitempty"`
+        ParScriptDns                            []string `schema:"par_script_dns" json:"parScriptDns,omitempty"`
+        TxTokenScriptDns                        []string `schema:"tx_token_script_dns" json:"txTokenScriptDns,omitempty"`
 }
 
 // OidcClient is the definition of an OpenId Connect Client.
@@ -130,6 +134,8 @@ type OidcClient struct {
         DisplayName                                string               `schema:"display_name" json:"displayName,omitempty"`
         BaseDn                                     string               `schema:"base_dn" json:"baseDn,omitempty"`
         Inum                                       string               `schema:"inum" json:"inum,omitempty"`
+        ClientName                                 string               `schema:"client_name" json:"clientName,omitempty"`
+        RequirePkce                                bool                 `schema:"require_pkce" json:"requirePkce,omitempty"`
 }
 
 // GetOidcClients returns all currently configured OIDC clients.

@@ -7,7 +7,7 @@ description: |-
 
 # jans_oidc_client (Resource)
 
-Resource for managing OIDC/OAuth2 clients in the Janssen authorization server. 
+Resource for managing OIDC/OAuth2 clients in the Janssen authorization server.
 Clients are applications that request access tokens to access protected resources.
 
 ## Example Usage
@@ -117,6 +117,7 @@ resource "jans_oidc_client" "jwt_bearer_client" {
                                                 requesting party's user agent after completing its interaction.
 - `claims` (List of String) Provide list of claims granted to the client.
 - `client_id_issued_at` (String)
+- `client_name` (String) The client name.
 - `client_name_localized` (Map of String)
 - `client_secret` (String) The client secret.  The client MAY omit the parameter if the client secret is an empty string.
 - `client_secret_expires_at` (String)
@@ -168,6 +169,7 @@ resource "jans_oidc_client" "jwt_bearer_client" {
 - `request_object_encryption_enc` (String) JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
 - `request_object_signing_alg` (String) JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
 - `request_uris` (List of String) Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
+- `require_pkce` (Boolean) Whether PKCE is required for this client.
 - `response_types` (List of String) A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself 
                                                 to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.
 - `rpt_as_jwt` (Boolean) Specifies whether RPT should be return as signed JWT.
@@ -228,10 +230,13 @@ Optional:
                                                                         to force the user to sign in again before it will show the authorization prompt.
 - `jans_sub_attr` (String) custom subject identifier attribute.
 - `keep_client_authorization_after_expiration` (Boolean) boolean property which indicates whether to keep client authorization after expiration.
+- `logout_status_jwt_script_dns` (List of String) List of logout status JWT script DNs.
+- `logout_status_jwt_signed_response_alg` (String) The JWS algorithm used for signing the logout status JWT response.
 - `minimum_acr_level` (Number) Specifies the minimum Authentication Context Class Reference (ACR) level.
 - `minimum_acr_level_autoresolve` (Boolean) Specifies whether to automatically resolve minimum ACR level.
 - `minimum_acr_priority_list` (List of String) List of minimum ACR priority list.
 - `par_lifetime` (Number) represents the lifetime of Pushed Authorisation Request (PAR).
+- `par_script_dns` (List of String) List of PAR (Pushed Authorization Request) script DNs.
 - `post_authn_scripts` (List of String) List of post authentication scripts.
 - `redirect_uris_regex` (String) If set, redirectUri must match to this regexp
 - `requested_lifetime` (Number) List of requested lifetime.
@@ -249,6 +254,7 @@ Optional:
 - `tx_token_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting the TX Token response.
 - `tx_token_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the TX Token response.
 - `tx_token_lifetime` (Number) Specifies the Client-specific TX Token expiration.
+- `tx_token_script_dns` (List of String) List of TX token script DNs.
 - `tx_token_signed_response_alg` (String) JWS alg algorithm (JWA) required for signing the TX Token response.
 - `update_token_script_dns` (List of String) List of update token scripts.
 
