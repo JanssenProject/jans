@@ -82,35 +82,27 @@ pub enum CedarType {
     Record,
     /// Entity reference type
     Entity,
-    /// IP address extension type
+    /// IP address extension type (ipaddr)
     Ip,
     /// Decimal extension type
     Decimal,
+    /// DateTime extension type
+    DateTime,
+    /// Duration extension type
+    Duration,
 }
 
 impl CedarType {
     /// Infer the Cedar type from a JSON value.
     ///
     /// This method detects extension types by recognizing:
-    /// - `__extn` markers with `fn` = "ip" or "decimal"
-    /// - Strings that look like IP addresses or decimals (when auto-detection is appropriate)
+    /// - `__extn` markers with `fn` = "ip", "decimal", "datetime", or "duration"
+    /// - Strings that look like IP addresses, decimals, datetimes, or durations
+    ///
+    /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
     pub fn from_value(value: &Value) -> Self {
         match value {
-            Value::String(s) => {
-                // Check for IP address format
-                if IpAddr::from_str(s).is_ok() {
-                    return Self::Ip;
-                }
-                // Check for decimal format (contains decimal point and parseable as f64)
-                if s.contains('.')
-                    && s.parse::<f64>().is_ok()
-                    && !s.ends_with('.')
-                    && s.chars().filter(|&c| c == '.').count() == 1
-                {
-                    return Self::Decimal;
-                }
-                Self::String
-            },
+            Value::String(s) => Self::from_string_value(s),
             Value::Number(n) => {
                 if n.is_i64() || n.is_u64() {
                     Self::Long
@@ -129,6 +121,8 @@ impl CedarType {
                             return match fn_name {
                                 "ip" | "ipaddr" => Self::Ip,
                                 "decimal" => Self::Decimal,
+                                "datetime" => Self::DateTime,
+                                "duration" => Self::Duration,
                                 _ => Self::Record,
                             };
                         }
@@ -155,6 +149,145 @@ impl CedarType {
                 Self::String
             },
         }
+    }
+
+    /// Infer Cedar type from a string value by detecting extension patterns.
+    fn from_string_value(s: &str) -> Self {
+        // Check for plain IP address (IPv4 or IPv6)
+        if IpAddr::from_str(s).is_ok() {
+            return Self::Ip;
+        }
+
+        // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
+        if let Some((ip_part, prefix_part)) = s.split_once('/') {
+            if let Ok(ip) = IpAddr::from_str(ip_part) {
+                if let Ok(prefix_len) = prefix_part.parse::<u8>() {
+                    let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+                    if prefix_len <= max_prefix {
+                        return Self::Ip;
+                    }
+                }
+            }
+        }
+
+        // Check for datetime (ISO 8601 / RFC 3339 format)
+        if Self::is_datetime_format(s) {
+            return Self::DateTime;
+        }
+
+        // Check for duration format (e.g., "2h30m", "-1d12h", "500ms")
+        if Self::is_duration_format(s) {
+            return Self::Duration;
+        }
+
+        // Check for decimal format (contains decimal point and parseable as f64)
+        if s.contains('.')
+            && s.parse::<f64>().is_ok()
+            && !s.ends_with('.')
+            && s.chars().filter(|&c| c == '.').count() == 1
+        {
+            return Self::Decimal;
+        }
+
+        Self::String
+    }
+
+    /// Check if a string looks like an ISO 8601 / RFC 3339 datetime.
+    fn is_datetime_format(value: &str) -> bool {
+        // Quick length check - datetime strings are typically 10-35 chars
+        if value.len() < 10 || value.len() > 35 {
+            return false;
+        }
+
+        let bytes = value.as_bytes();
+
+        // Check YYYY-MM-DD pattern
+        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
+            || bytes[4] != b'-'
+            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
+            || bytes[7] != b'-'
+            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
+        {
+            return false;
+        }
+
+        // Date only format
+        if value.len() == 10 {
+            return true;
+        }
+
+        // Must have 'T' separator for datetime
+        if bytes.len() > 10 && bytes[10] != b'T' {
+            return false;
+        }
+
+        // Check for time portion (HH:MM:SS)
+        if bytes.len() >= 19
+            && (!bytes[11..13].iter().all(|b| b.is_ascii_digit())
+                || bytes[13] != b':'
+                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
+                || bytes[16] != b':'
+                || !bytes[17..19].iter().all(|b| b.is_ascii_digit()))
+        {
+            return false;
+        }
+
+        true
+    }
+
+    /// Check if a string looks like a Cedar duration format.
+    fn is_duration_format(value: &str) -> bool {
+        if value.is_empty() {
+            return false;
+        }
+
+        let s = if value.starts_with('-') {
+            &value[1..]
+        } else {
+            value
+        };
+
+        if s.is_empty() {
+            return false;
+        }
+
+        // Duration must contain at least one unit suffix
+        let has_unit = s.contains('d')
+            || s.contains('h')
+            || s.ends_with('m')
+            || s.ends_with('s')
+            || s.ends_with("ms");
+
+        if !has_unit {
+            return false;
+        }
+
+        // Check that it follows the pattern: digits followed by units, repeated
+        let mut chars = s.chars().peekable();
+        let mut has_digits = false;
+
+        while let Some(c) = chars.next() {
+            if c.is_ascii_digit() {
+                has_digits = true;
+            } else if c == 'd' || c == 'h' || c == 's' {
+                if !has_digits {
+                    return false;
+                }
+                has_digits = false;
+            } else if c == 'm' {
+                if !has_digits {
+                    return false;
+                }
+                if chars.peek() == Some(&'s') {
+                    chars.next();
+                }
+                has_digits = false;
+            } else {
+                return false;
+            }
+        }
+
+        true
     }
 }
 

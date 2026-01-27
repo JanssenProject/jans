@@ -20,10 +20,14 @@ use std::str::FromStr;
 /// Represents a detected extension type with its parsed value.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExtensionValue {
-    /// An IP address (IPv4 or IPv6)
+    /// An IP address (IPv4 or IPv6) or CIDR range
     IpAddr(String),
-    /// A decimal number
+    /// A fixed-precision decimal number (up to 4 decimal places)
     Decimal(String),
+    /// An instant of time with millisecond precision (RFC 3339 / ISO 8601)
+    DateTime(String),
+    /// A duration of time with millisecond precision
+    Duration(String),
 }
 
 /// Mapper for bidirectional JSON ↔ Cedar value conversion.
@@ -217,23 +221,179 @@ impl CedarValueMapper {
     }
 
     /// Detect if a string value represents a Cedar extension type.
+    ///
+    /// Detects the following extension types:
+    /// - `ipaddr`: IP addresses (IPv4/IPv6) and CIDR ranges (e.g., "192.168.1.1", "10.0.0.0/8")
+    /// - `decimal`: Fixed-precision decimals (e.g., "3.14", "-12.345")
+    /// - `datetime`: ISO 8601 / RFC 3339 timestamps (e.g., "2024-10-15T11:35:00Z")
+    /// - `duration`: Duration strings (e.g., "2h30m", "1d12h", "500ms")
+    ///
+    /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
     pub fn detect_extension(value: &str) -> Option<ExtensionValue> {
-        // Check for IP address
+        // Check for plain IP address (IPv4 or IPv6)
         if IpAddr::from_str(value).is_ok() {
             return Some(ExtensionValue::IpAddr(value.to_string()));
         }
 
-        // Check for decimal (must contain decimal point and be parseable as f64)
-        if value.contains('.') {
-            if let Ok(_) = value.parse::<f64>() {
-                // Additional check: not just a number with trailing zeros
-                if !value.ends_with('.') && value.chars().filter(|&c| c == '.').count() == 1 {
-                    return Some(ExtensionValue::Decimal(value.to_string()));
+        // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
+        if let Some((ip_part, prefix_part)) = value.split_once('/') {
+            if let Ok(ip) = IpAddr::from_str(ip_part) {
+                if let Ok(prefix_len) = prefix_part.parse::<u8>() {
+                    // Validate prefix length: 0-32 for IPv4, 0-128 for IPv6
+                    let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+                    if prefix_len <= max_prefix {
+                        return Some(ExtensionValue::IpAddr(value.to_string()));
+                    }
                 }
             }
         }
 
+        // Check for datetime (ISO 8601 / RFC 3339 format)
+        // Examples: "2024-10-15", "2024-10-15T11:35:00Z", "2024-10-15T11:35:00.000+0100"
+        if Self::is_datetime_format(value) {
+            return Some(ExtensionValue::DateTime(value.to_string()));
+        }
+
+        // Check for duration format (e.g., "2h30m", "-1d12h", "500ms")
+        if Self::is_duration_format(value) {
+            return Some(ExtensionValue::Duration(value.to_string()));
+        }
+
+        // Check for decimal (must contain decimal point and be parseable as f64)
+        // Must have exactly one decimal point and not end with it
+        if value.contains('.') {
+            if value.parse::<f64>().is_ok()
+                && !value.ends_with('.')
+                && value.chars().filter(|&c| c == '.').count() == 1
+            {
+                return Some(ExtensionValue::Decimal(value.to_string()));
+            }
+        }
+
         None
+    }
+
+    /// Check if a string looks like an ISO 8601 / RFC 3339 datetime.
+    ///
+    /// Supported formats:
+    /// - "2024-10-15" (date only)
+    /// - "2024-10-15T11:35:00Z" (UTC)
+    /// - "2024-10-15T11:35:00.000Z" (UTC with milliseconds)
+    /// - "2024-10-15T11:35:00+0100" (with timezone offset)
+    /// - "2024-10-15T11:35:00.000+0100" (with timezone and milliseconds)
+    fn is_datetime_format(value: &str) -> bool {
+        // Quick length check - datetime strings are typically 10-29 chars
+        if value.len() < 10 || value.len() > 35 {
+            return false;
+        }
+
+        // Must start with a 4-digit year
+        let bytes = value.as_bytes();
+        if bytes.len() < 10 {
+            return false;
+        }
+
+        // Check YYYY-MM-DD pattern
+        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
+            || bytes[4] != b'-'
+            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
+            || bytes[7] != b'-'
+            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
+        {
+            return false;
+        }
+
+        // Date only format
+        if value.len() == 10 {
+            return true;
+        }
+
+        // Must have 'T' separator for datetime
+        if bytes.len() > 10 && bytes[10] != b'T' {
+            return false;
+        }
+
+        // Check for time portion (HH:MM:SS)
+        if bytes.len() >= 19 {
+            if !bytes[11..13].iter().all(|b| b.is_ascii_digit())
+                || bytes[13] != b':'
+                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
+                || bytes[16] != b':'
+                || !bytes[17..19].iter().all(|b| b.is_ascii_digit())
+            {
+                return false;
+            }
+        }
+
+        // Accept various valid suffixes (Z, +HHMM, -HHMM, .sss, etc.)
+        true
+    }
+
+    /// Check if a string looks like a Cedar duration format.
+    ///
+    /// Supported formats:
+    /// - "2h30m" (hours and minutes)
+    /// - "-1d12h" (negative, days and hours)
+    /// - "1h30m45s" (hours, minutes, seconds)
+    /// - "500ms" (milliseconds only)
+    /// - "1d" (days only)
+    fn is_duration_format(value: &str) -> bool {
+        if value.is_empty() {
+            return false;
+        }
+
+        let s = if value.starts_with('-') {
+            &value[1..]
+        } else {
+            value
+        };
+
+        if s.is_empty() {
+            return false;
+        }
+
+        // Duration must contain at least one unit suffix (d, h, m, s, ms)
+        // and consist of digits followed by unit suffixes
+        let has_unit = s.contains('d')
+            || s.contains('h')
+            || s.ends_with('m')
+            || s.ends_with('s')
+            || s.ends_with("ms");
+
+        if !has_unit {
+            return false;
+        }
+
+        // Check that it follows the pattern: digits followed by units, repeated
+        // Valid: "1d2h3m4s", "500ms", "2h30m"
+        // Invalid: "abc", "1.5h" (no decimals in duration)
+        let mut chars = s.chars().peekable();
+        let mut has_digits = false;
+
+        while let Some(c) = chars.next() {
+            if c.is_ascii_digit() {
+                has_digits = true;
+            } else if c == 'd' || c == 'h' || c == 's' {
+                if !has_digits {
+                    return false;
+                }
+                has_digits = false;
+            } else if c == 'm' {
+                if !has_digits {
+                    return false;
+                }
+                // Could be 'm' (minutes) or 'ms' (milliseconds)
+                if chars.peek() == Some(&'s') {
+                    chars.next(); // consume 's'
+                }
+                has_digits = false;
+            } else {
+                // Invalid character
+                return false;
+            }
+        }
+
+        true
     }
 
     /// Check if a value represents a Cedar entity reference.
@@ -311,6 +471,12 @@ impl CedarValueMapper {
                     match Self::detect_extension(s) {
                         Some(ExtensionValue::IpAddr(ip)) => RestrictedExpression::new_ip(ip),
                         Some(ExtensionValue::Decimal(d)) => RestrictedExpression::new_decimal(d),
+                        Some(ExtensionValue::DateTime(dt)) => {
+                            RestrictedExpression::new_datetime(dt)
+                        },
+                        Some(ExtensionValue::Duration(dur)) => {
+                            RestrictedExpression::new_duration(dur)
+                        },
                         None => RestrictedExpression::new_string(s.to_string()),
                     }
                 } else {
@@ -375,7 +541,9 @@ impl CedarValueMapper {
 
                     return match fn_name {
                         "decimal" => Ok(Some(RestrictedExpression::new_decimal(arg))),
-                        "ip" => Ok(Some(RestrictedExpression::new_ip(arg))),
+                        "ip" | "ipaddr" => Ok(Some(RestrictedExpression::new_ip(arg))),
+                        "datetime" => Ok(Some(RestrictedExpression::new_datetime(arg))),
+                        "duration" => Ok(Some(RestrictedExpression::new_duration(arg))),
                         _ => Err(ValueMappingError::InvalidExtensionFormat {
                             extension_type: fn_name.to_string(),
                             value: arg.to_string(),
@@ -525,6 +693,29 @@ mod tests {
             Some(ExtensionValue::IpAddr(_))
         ));
 
+        // IPv4 CIDR notation
+        assert!(matches!(
+            CedarValueMapper::detect_extension("10.0.0.0/8"),
+            Some(ExtensionValue::IpAddr(_))
+        ));
+        assert!(matches!(
+            CedarValueMapper::detect_extension("192.168.1.0/24"),
+            Some(ExtensionValue::IpAddr(_))
+        ));
+
+        // IPv6 CIDR notation
+        assert!(matches!(
+            CedarValueMapper::detect_extension("fe80::/10"),
+            Some(ExtensionValue::IpAddr(_))
+        ));
+        assert!(matches!(
+            CedarValueMapper::detect_extension("2001:db8::/32"),
+            Some(ExtensionValue::IpAddr(_))
+        ));
+
+        // Invalid CIDR prefix (too large for IPv4)
+        assert!(CedarValueMapper::detect_extension("192.168.1.0/33").is_none());
+
         // Not an IP
         assert!(CedarValueMapper::detect_extension("hello").is_none());
     }
@@ -539,8 +730,80 @@ mod tests {
         // Integer is not decimal
         assert!(CedarValueMapper::detect_extension("42").is_none());
 
-        // Multiple dots is not decimal
-        assert!(CedarValueMapper::detect_extension("1.2.3").is_none());
+        // Multiple dots is not decimal (would be detected as IP first if valid)
+        assert!(CedarValueMapper::detect_extension("1.2.3.4.5").is_none());
+    }
+
+    #[test]
+    fn test_extension_detection_datetime() {
+        // Date only
+        assert!(matches!(
+            CedarValueMapper::detect_extension("2024-10-15"),
+            Some(ExtensionValue::DateTime(_))
+        ));
+
+        // UTC datetime
+        assert!(matches!(
+            CedarValueMapper::detect_extension("2024-10-15T11:35:00Z"),
+            Some(ExtensionValue::DateTime(_))
+        ));
+
+        // UTC with milliseconds
+        assert!(matches!(
+            CedarValueMapper::detect_extension("2024-10-15T11:35:00.000Z"),
+            Some(ExtensionValue::DateTime(_))
+        ));
+
+        // With timezone offset
+        assert!(matches!(
+            CedarValueMapper::detect_extension("2024-10-15T11:35:00+0100"),
+            Some(ExtensionValue::DateTime(_))
+        ));
+
+        // Invalid datetime
+        assert!(!matches!(
+            CedarValueMapper::detect_extension("not-a-date"),
+            Some(ExtensionValue::DateTime(_))
+        ));
+    }
+
+    #[test]
+    fn test_extension_detection_duration() {
+        // Hours and minutes
+        assert!(matches!(
+            CedarValueMapper::detect_extension("2h30m"),
+            Some(ExtensionValue::Duration(_))
+        ));
+
+        // Negative duration
+        assert!(matches!(
+            CedarValueMapper::detect_extension("-1d12h"),
+            Some(ExtensionValue::Duration(_))
+        ));
+
+        // Hours, minutes, seconds
+        assert!(matches!(
+            CedarValueMapper::detect_extension("1h30m45s"),
+            Some(ExtensionValue::Duration(_))
+        ));
+
+        // Milliseconds only
+        assert!(matches!(
+            CedarValueMapper::detect_extension("500ms"),
+            Some(ExtensionValue::Duration(_))
+        ));
+
+        // Days only
+        assert!(matches!(
+            CedarValueMapper::detect_extension("1d"),
+            Some(ExtensionValue::Duration(_))
+        ));
+
+        // Invalid duration
+        assert!(!matches!(
+            CedarValueMapper::detect_extension("not-a-duration"),
+            Some(ExtensionValue::Duration(_))
+        ));
     }
 
     #[test]
@@ -673,12 +936,27 @@ mod tests {
         // Decimal with explicit marker
         let decimal = json!({"__extn": {"fn": "decimal", "arg": "3.14159"}});
         let result = mapper.json_to_cedar(&decimal);
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "decimal extension should parse");
 
         // IP with explicit marker
         let ip = json!({"__extn": {"fn": "ip", "arg": "10.0.0.1"}});
         let result = mapper.json_to_cedar(&ip);
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "ip extension should parse");
+
+        // IP CIDR with explicit marker
+        let ip_cidr = json!({"__extn": {"fn": "ip", "arg": "192.168.0.0/16"}});
+        let result = mapper.json_to_cedar(&ip_cidr);
+        assert!(result.is_ok(), "ip CIDR extension should parse");
+
+        // Datetime with explicit marker
+        let datetime = json!({"__extn": {"fn": "datetime", "arg": "2024-10-15T11:35:00Z"}});
+        let result = mapper.json_to_cedar(&datetime);
+        assert!(result.is_ok(), "datetime extension should parse");
+
+        // Duration with explicit marker
+        let duration = json!({"__extn": {"fn": "duration", "arg": "2h30m"}});
+        let result = mapper.json_to_cedar(&duration);
+        assert!(result.is_ok(), "duration extension should parse");
     }
 
     #[test]

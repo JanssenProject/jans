@@ -222,6 +222,13 @@ impl DataValidator {
     }
 
     /// Validate an extension value format.
+    /// Validate an extension value format.
+    ///
+    /// Supports all Cedar extension types:
+    /// - `ipaddr` / `ip`: IP addresses and CIDR ranges
+    /// - `decimal`: Fixed-precision decimal numbers
+    /// - `datetime`: ISO 8601 / RFC 3339 timestamps
+    /// - `duration`: Duration strings (e.g., "2h30m")
     pub fn validate_extension(
         &self,
         value: &str,
@@ -229,13 +236,26 @@ impl DataValidator {
     ) -> Result<(), ValidationError> {
         match extension_type {
             "ipaddr" | "ip" => {
-                if IpAddr::from_str(value).is_err() {
-                    return Err(ValidationError::InvalidExtensionFormat {
-                        path: "$".to_string(),
-                        extension_type: extension_type.to_string(),
-                        value: value.to_string(),
-                    });
+                // Check for plain IP address
+                if IpAddr::from_str(value).is_ok() {
+                    return Ok(());
                 }
+                // Check for CIDR notation
+                if let Some((ip_part, prefix_part)) = value.split_once('/') {
+                    if let Ok(ip) = IpAddr::from_str(ip_part) {
+                        if let Ok(prefix_len) = prefix_part.parse::<u8>() {
+                            let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+                            if prefix_len <= max_prefix {
+                                return Ok(());
+                            }
+                        }
+                    }
+                }
+                Err(ValidationError::InvalidExtensionFormat {
+                    path: "$".to_string(),
+                    extension_type: extension_type.to_string(),
+                    value: value.to_string(),
+                })
             },
             "decimal" => {
                 if value.parse::<f64>().is_err() {
@@ -245,6 +265,29 @@ impl DataValidator {
                         value: value.to_string(),
                     });
                 }
+                Ok(())
+            },
+            "datetime" => {
+                // Validate datetime format (ISO 8601 / RFC 3339)
+                if !Self::is_valid_datetime(value) {
+                    return Err(ValidationError::InvalidExtensionFormat {
+                        path: "$".to_string(),
+                        extension_type: extension_type.to_string(),
+                        value: value.to_string(),
+                    });
+                }
+                Ok(())
+            },
+            "duration" => {
+                // Validate duration format
+                if !Self::is_valid_duration(value) {
+                    return Err(ValidationError::InvalidExtensionFormat {
+                        path: "$".to_string(),
+                        extension_type: extension_type.to_string(),
+                        value: value.to_string(),
+                    });
+                }
+                Ok(())
             },
             _ => {
                 // Unknown extension type - allow if not strict
@@ -255,9 +298,9 @@ impl DataValidator {
                         value: value.to_string(),
                     });
                 }
+                Ok(())
             },
         }
-        Ok(())
     }
 
     /// Sanitize a value by removing null fields and invalid characters.
@@ -339,7 +382,8 @@ impl DataValidator {
                     if let Some(ext) = CedarValueMapper::detect_extension(s) {
                         match ext {
                             ExtensionValue::IpAddr(ip) => {
-                                if IpAddr::from_str(&ip).is_err() {
+                                // validate_extension handles both plain IPs and CIDR
+                                if let Err(_) = self.validate_extension(&ip, "ip") {
                                     return Err(ValidationError::InvalidExtensionFormat {
                                         path: path.to_string(),
                                         extension_type: "ipaddr".to_string(),
@@ -353,6 +397,24 @@ impl DataValidator {
                                         path: path.to_string(),
                                         extension_type: "decimal".to_string(),
                                         value: d,
+                                    });
+                                }
+                            },
+                            ExtensionValue::DateTime(dt) => {
+                                if !Self::is_valid_datetime(&dt) {
+                                    return Err(ValidationError::InvalidExtensionFormat {
+                                        path: path.to_string(),
+                                        extension_type: "datetime".to_string(),
+                                        value: dt,
+                                    });
+                                }
+                            },
+                            ExtensionValue::Duration(dur) => {
+                                if !Self::is_valid_duration(&dur) {
+                                    return Err(ValidationError::InvalidExtensionFormat {
+                                        path: path.to_string(),
+                                        extension_type: "duration".to_string(),
+                                        value: dur,
                                     });
                                 }
                             },
@@ -469,7 +531,8 @@ impl DataValidator {
                     if let Some(ext) = CedarValueMapper::detect_extension(s) {
                         match ext {
                             ExtensionValue::IpAddr(ip) => {
-                                if IpAddr::from_str(&ip).is_err() {
+                                // validate_extension handles both plain IPs and CIDR
+                                if self.validate_extension(&ip, "ip").is_err() {
                                     errors.push(ValidationError::InvalidExtensionFormat {
                                         path: path.to_string(),
                                         extension_type: "ipaddr".to_string(),
@@ -483,6 +546,24 @@ impl DataValidator {
                                         path: path.to_string(),
                                         extension_type: "decimal".to_string(),
                                         value: d,
+                                    });
+                                }
+                            },
+                            ExtensionValue::DateTime(dt) => {
+                                if !Self::is_valid_datetime(&dt) {
+                                    errors.push(ValidationError::InvalidExtensionFormat {
+                                        path: path.to_string(),
+                                        extension_type: "datetime".to_string(),
+                                        value: dt,
+                                    });
+                                }
+                            },
+                            ExtensionValue::Duration(dur) => {
+                                if !Self::is_valid_duration(&dur) {
+                                    errors.push(ValidationError::InvalidExtensionFormat {
+                                        path: path.to_string(),
+                                        extension_type: "duration".to_string(),
+                                        value: dur,
                                     });
                                 }
                             },
@@ -607,6 +688,104 @@ impl DataValidator {
                 value: extn.to_string(),
             })
         }
+    }
+
+    /// Check if a string is a valid ISO 8601 / RFC 3339 datetime.
+    fn is_valid_datetime(value: &str) -> bool {
+        // Quick length check - datetime strings are typically 10-35 chars
+        if value.len() < 10 || value.len() > 35 {
+            return false;
+        }
+
+        let bytes = value.as_bytes();
+
+        // Check YYYY-MM-DD pattern
+        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
+            || bytes[4] != b'-'
+            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
+            || bytes[7] != b'-'
+            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
+        {
+            return false;
+        }
+
+        // Date only format
+        if value.len() == 10 {
+            return true;
+        }
+
+        // Must have 'T' separator for datetime
+        if bytes.len() > 10 && bytes[10] != b'T' {
+            return false;
+        }
+
+        // Check for time portion (HH:MM:SS)
+        if bytes.len() >= 19
+            && (!bytes[11..13].iter().all(|b| b.is_ascii_digit())
+                || bytes[13] != b':'
+                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
+                || bytes[16] != b':'
+                || !bytes[17..19].iter().all(|b| b.is_ascii_digit()))
+        {
+            return false;
+        }
+
+        true
+    }
+
+    /// Check if a string is a valid Cedar duration format.
+    fn is_valid_duration(value: &str) -> bool {
+        if value.is_empty() {
+            return false;
+        }
+
+        let s = if value.starts_with('-') {
+            &value[1..]
+        } else {
+            value
+        };
+
+        if s.is_empty() {
+            return false;
+        }
+
+        // Duration must contain at least one unit suffix
+        let has_unit = s.contains('d')
+            || s.contains('h')
+            || s.ends_with('m')
+            || s.ends_with('s')
+            || s.ends_with("ms");
+
+        if !has_unit {
+            return false;
+        }
+
+        // Check that it follows the pattern: digits followed by units, repeated
+        let mut chars = s.chars().peekable();
+        let mut has_digits = false;
+
+        while let Some(c) = chars.next() {
+            if c.is_ascii_digit() {
+                has_digits = true;
+            } else if c == 'd' || c == 'h' || c == 's' {
+                if !has_digits {
+                    return false;
+                }
+                has_digits = false;
+            } else if c == 'm' {
+                if !has_digits {
+                    return false;
+                }
+                if chars.peek() == Some(&'s') {
+                    chars.next();
+                }
+                has_digits = false;
+            } else {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
