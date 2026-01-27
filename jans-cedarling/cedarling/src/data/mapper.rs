@@ -49,7 +49,7 @@ impl CedarValueMapper {
     }
 
     /// Create a mapper with auto-detection of extension types disabled.
-    pub fn without_auto_detect() -> Self {
+    pub fn new_without_auto_detect() -> Self {
         Self {
             auto_detect_extensions: false,
             max_value_size: 0,
@@ -554,7 +554,7 @@ mod tests {
 
     #[test]
     fn test_json_to_cedar_without_auto_detect() {
-        let mapper = CedarValueMapper::without_auto_detect();
+        let mapper = CedarValueMapper::new_without_auto_detect();
 
         // IP address should be treated as string
         let result = mapper.json_to_cedar(&json!("192.168.1.1"));
