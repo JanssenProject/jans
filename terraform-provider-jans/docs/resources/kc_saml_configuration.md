@@ -64,9 +64,9 @@ resource "jans_kc_saml_configuration" "example" {
 - `realm` (String) Realm.
 - `saml_trust_relationship_dn` (String) SAML trust relationship DN.
 - `scope` (String) Scope.
+- `selected_idp` (String) Selected IDP.
 - `server_url` (String) Server URL.
 - `set_config_default_value` (Boolean) Set Config Default Value.
-- `slected_idp` (String) Selected IDP.
 - `sp_metadata_dir` (String) SP Metadata Directory.
 - `sp_metadata_file` (String) SP Metadata File.
 - `sp_metadata_temp_dir` (String) SP Metadata Temporary Directory.
