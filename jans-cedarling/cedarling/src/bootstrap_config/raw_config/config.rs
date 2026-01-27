@@ -317,10 +317,6 @@ impl Default for BootstrapConfigRaw {
 impl BootstrapConfigRaw {
     /// Construct `BootstrapConfig` from environment variables and `BootstrapConfigRaw` config.
     /// Environment variables have bigger priority.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     //
     // Simple implementation that map input structure to JSON map
     // and map environment variables with prefix `CEDARLING_` to JSON map. And merge it.

@@ -77,14 +77,6 @@ fn extract_first_policy_store(
 /// Loads the policy store based on the provided configuration.
 ///
 /// This function supports multiple sources for loading policies.
-///
-/// # Errors
-///
-/// Returns [`PolicyStoreLoadError`] if:
-/// - The policy store configuration is invalid
-/// - JSON/YAML parsing fails
-/// - No policy store is found in the configuration
-/// - Policy store validation fails
 pub async fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {

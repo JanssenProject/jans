@@ -37,10 +37,6 @@ impl From<datalogic_rs::Error> for ParseRuleError {
 
 impl JsonRule {
     /// Create a new [`JsonRule`] from a JSON value.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`ParseRuleError`] if the rule cannot be parsed.
     pub fn new(rule_value: Value) -> Result<Self, ParseRuleError> {
         let rule = Rule::from_value(&rule_value)?;
 

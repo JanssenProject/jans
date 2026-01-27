@@ -105,10 +105,6 @@ pub struct CedarEntityMapping {
 
 impl EntityData {
     /// Deserializes a JSON string into [`EntityData`]
-    ///
-    /// # Errors
-    ///
-    /// Returns [`serde_json::Error`] if the input is not a valid JSON string
     pub fn from_json(entity_data: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str::<Self>(entity_data)
     }
@@ -131,10 +127,6 @@ impl TokenInput {
     }
 
     /// Validate the token input format (mapping and payload presence)
-    ///
-    /// # Errors
-    ///
-    /// Returns [`TokenInputError`] if the input is invalid
     pub fn validate(&self) -> Result<(), TokenInputError> {
         // Validate mapping format
         if self.mapping.trim().is_empty() {
@@ -192,10 +184,6 @@ impl AuthorizeMultiIssuerRequest {
     }
 
     /// Basic validation of JSON fields
-    ///
-    /// # Errors
-    ///
-    /// Returns [`MultiIssuerValidationError`] if the input is invalid
     pub fn validate(&self) -> Result<(), MultiIssuerValidationError> {
         // Basic validation
         if self.tokens.is_empty() {

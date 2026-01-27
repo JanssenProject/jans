@@ -82,10 +82,6 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_from_file("../test_files/bootstrap_props.json").unwrap();
     /// ```
-    ///
-    /// # Errors
-    ///
-    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, BootstrapConfigLoadingError> {
         let config = Config::builder()
@@ -100,10 +96,6 @@ impl BootstrapConfig {
     }
 
     /// Loads a [`BootstrapConfig`] from a JSON string
-    ///
-    /// # Errors
-    ///
-    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     pub fn load_from_json(json: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw: BootstrapConfigRaw = serde_json::from_str(json)
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
@@ -112,10 +104,6 @@ impl BootstrapConfig {
 
     /// Load config from environment variables.
     /// If you need with fallback to applied config use [`Self::from_raw_config_and_env`].
-    ///
-    /// # Errors
-    ///
-    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn from_env() -> Result<Self, BootstrapConfigLoadingError> {
         let config = Config::builder()
@@ -140,10 +128,6 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_default().unwrap();
     /// ```
-    ///
-    /// # Errors
-    ///
-    /// Returns [`BootstrapConfigLoadingError`] if the config cannot be parsed.
     pub fn load_default() -> Result<Self, BootstrapConfigLoadingError> {
         const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.yaml");
 

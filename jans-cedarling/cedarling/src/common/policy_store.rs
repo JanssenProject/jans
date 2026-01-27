@@ -149,10 +149,6 @@ impl PolicyStore {
     }
 
     /// Apply configuration limits to default entities
-    ///
-    /// # Errors
-    ///
-    /// Returns [`DefaultEntitiesLimitsError`] if the limits cannot be applied.
     // TODO: add bootstrap configuration parameters and use it for check
     pub fn apply_default_entities_limits(
         &mut self,

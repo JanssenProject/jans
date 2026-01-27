@@ -5,6 +5,7 @@
 
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
+#![allow(clippy::missing_errors_doc)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -103,10 +104,6 @@ impl Cedarling {
     /// Create a new instance of the Cedarling application.
     /// Initialize instance from enviroment variables and from config.
     /// Configuration structure has lower priority.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`InitCedarlingError`] if initialization fails.
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn new_with_env(
         raw_config: Option<BootstrapConfigRaw>,
@@ -116,10 +113,6 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`InitCedarlingError`] if initialization fails.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
@@ -170,10 +163,6 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    ///
-    /// # Errors
-    ///
-    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
     #[allow(clippy::unused_async)]
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize(&request)
@@ -181,10 +170,6 @@ impl Cedarling {
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
-    ///
-    /// # Errors
-    ///
-    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
     #[allow(clippy::unused_async)]
     pub async fn authorize_unsigned(
         &self,
@@ -195,10 +180,6 @@ impl Cedarling {
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
-    ///
-    /// # Errors
-    ///
-    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
     #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer(
         &self,

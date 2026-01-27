@@ -27,10 +27,6 @@ impl Cedarling {
     /// Create a new instance of the Cedarling application.
     /// Initialize instance from enviroment variables and from config.
     /// Configuration structure has lower priority.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`InitCedarlingError`] if initialization fails.
     pub fn new_with_env(
         raw_config: Option<BootstrapConfigRaw>,
     ) -> Result<Cedarling, InitCedarlingError> {
@@ -39,10 +35,6 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`InitCedarlingError`] if initialization fails.
     pub fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let rt = Runtime::new().map_err(InitCedarlingError::RuntimeInit)?;
 
@@ -55,20 +47,12 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    ///
-    /// # Errors
-    ///
-    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, Box<AuthorizeError>> {
         self.runtime.block_on(self.instance.authorize(request)).map_err(Box::new)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
-    ///
-    /// # Errors
-    ///
-    /// Returns [`AuthorizeError`] if any errors occurs during authorization.
     pub fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
@@ -80,13 +64,6 @@ impl Cedarling {
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
-    ///
-    /// # Errors
-    ///
-    /// Returns [`Box<AuthorizeError>`] if:
-    /// - JWT token validation fails
-    /// - Policy evaluation encounters an error
-    /// - Entity building from tokens fails
     pub fn authorize_multi_issuer(
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,

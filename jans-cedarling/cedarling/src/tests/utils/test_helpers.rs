@@ -3,9 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::{EntityData, authz::request::RequestUnsigned};
 use serde::{Deserialize, de};
 use serde_json::json;
+
+use crate::{EntityData, authz::request::RequestUnsigned};
 
 /// Creates a test principal entity with the given type, id, and additional attributes
 pub(crate) fn create_test_principal(
