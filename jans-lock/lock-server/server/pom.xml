@@ -116,12 +116,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.6.0</version> <!-- Use a recent version -->
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/deps.xml</descriptor>
 					</descriptors>
-					<!-- Binds the assembly goal to the package phase -->
 					<appendAssemblyId>true</appendAssemblyId>
 				</configuration>
 				<executions>
