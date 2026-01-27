@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     JwtConfig, LogLevel,
@@ -28,6 +28,16 @@ pub(super) struct TrustedIssuerLoader {
 }
 
 impl TrustedIssuerLoader {
+    pub(super) async fn load_trusted_issuers(
+        &self,
+        trusted_issuers: HashMap<String, TrustedIssuer>,
+    ) -> Result<(), JwtServiceInitError> {
+        for (issuer_id, iss) in trusted_issuers {
+            self.load_trusted_issuer(issuer_id, iss).await?;
+        }
+        Ok(())
+    }
+
     pub(super) async fn load_trusted_issuer(
         &self,
         issuer_id: String,

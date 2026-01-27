@@ -172,9 +172,7 @@ impl JwtService {
         // Clone trusted_issuers before consumption - original is iterated and consumed below
         let trusted_issuers_for_validator = trusted_issuers.clone();
 
-        for (issuer_id, iss) in trusted_issuers.into_iter() {
-            loader.load_trusted_issuer(issuer_id, iss).await?;
-        }
+        loader.load_trusted_issuers(trusted_issuers).await?;
 
         // Load local JWKS if configured and no trusted issuers were provided
         // This ensures local JWKS-only configurations work correctly
