@@ -53,6 +53,9 @@ def _transform_lock_dynamic_config(conf, manager):
             "externalPolicyStoreUri": ""
         }),
         ("auditPersistenceMode", "internal"),
+        ("grpcConfiguration", {
+            "serverMode": "bridge"
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value

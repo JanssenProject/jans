@@ -66,7 +66,7 @@ spec:
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
-  
+
   {{- /* 1. OpenID Configuration */}}
   {{- if index .Values.global "auth-server" "ingress" "openidConfigEnabled" }}
   - matches:
@@ -270,19 +270,36 @@ spec:
     - name: {{ $authSvc }}
       port: 8080
   {{- end }}
-  
+
   {{- /* 13. Jans Lock */}}
   {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockEnabled") }}
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
         value: /jans-lock
     filters:
     - type: URLRewrite
       urlRewrite:
         path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /jans-auth
+    backendRefs:
+    - name: {{ $authSvc }}
+      port: 8080
+  {{- end }}
+
+  {{- /* 14. Lock Audit */}}
+  {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled") }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /io.jans.lock.audit.AuditService
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /jans-auth/io.jans.lock.audit.AuditService
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -407,7 +424,7 @@ spec:
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
-  
+
   {{- /* 1. Auth Server Redirect */}}
   {{- if index .Values.global "auth-server" "ingress" "authServerEnabled" }}
   - matches:
@@ -485,4 +502,42 @@ spec:
         scheme: https
         statusCode: 301
   {{- end }}
+
+---
+
+{{- /* ======================================================== */}}
+{{- /* ROUTE 4: gRPC APPS                                       */}}
+{{- /* These endpoints use gRPC                                 */}}
+{{- /* ======================================================== */}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GRPCRoute
+metadata:
+  name: {{ $fullName }}-grpc-routes
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if .Values.gatewayApi.routeLabels }}
+{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- end }}
+{{- if .Values.gatewayApi.routeAnnotations }}
+  annotations:
+{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayApi.name }}
+    sectionName: https
+  hostnames:
+  - {{ .Values.global.fqdn | quote }}
+  rules:
+  {{- /* 1. Lock Server Audit */}}
+  {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled") }}
+  - matches:
+    - method:
+        service: io.jans.lock.audit.AuditService
+    backendRefs:
+    - name: {{ $authSvc }}
+      port: 8080
+  {{- end }}
+
 {{- end }}

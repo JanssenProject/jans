@@ -61,7 +61,7 @@ ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VE
 # Install Jans Auth
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
     && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2,http2c --approve-all-licenses
 
 # ===========
 # Custom libs
@@ -91,6 +91,12 @@ RUN set -e \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs" || exit 1; \
     done
+
+# dependencies to run jans-lock as plugin
+RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
+    && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/custom/libs \
+    && rm -f ${JETTY_BASE}/jans-auth/custom/libs/grpc-bridge-runtime-*.jar \
+    && rm -f /tmp/lock-svc-deps.zip
 
 # ===========
 # Assets sync
