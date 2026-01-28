@@ -14,6 +14,7 @@ use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::{
     PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
 };
+use crate::data::DataStore;
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
@@ -25,6 +26,7 @@ pub(crate) struct ServiceFactory<'a> {
     bootstrap_config: &'a BootstrapConfig,
     service_config: ServiceConfig,
     log_service: log::Logger,
+    data_store: Arc<DataStore>,
     container: SingletonContainer,
 }
 
@@ -42,11 +44,13 @@ impl<'a> ServiceFactory<'a> {
         bootstrap_config: &'a BootstrapConfig,
         service_config: ServiceConfig,
         log_service: log::Logger,
+        data_store: Arc<DataStore>,
     ) -> Self {
         Self {
             bootstrap_config,
             service_config,
             log_service,
+            data_store,
             container: Default::default(),
         }
     }
@@ -138,6 +142,7 @@ impl<'a> ServiceFactory<'a> {
                 jwt_service: self.jwt_service().await?,
                 entity_builder: self.entity_builder()?,
                 authorization: self.bootstrap_config.authorization_config.clone(),
+                data_store: self.data_store.clone(),
             };
             let service = Arc::new(Authz::new(config)?);
             self.container.authz_service = Some(service.clone());

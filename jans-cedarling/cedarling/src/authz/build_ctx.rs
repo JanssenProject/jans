@@ -6,6 +6,7 @@
 use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::data::DataStore;
 use crate::entity_builder::BuiltEntities;
 use cedar_policy::Entity;
 use cedar_policy::EntityTypeName;
@@ -15,13 +16,24 @@ use std::collections::HashMap;
 
 use super::errors::BuildContextError;
 
-/// Constructs the authorization context by adding the built entities from the tokens
+/// Constructs the authorization context by adding the built entities from the tokens and pushed data.
+///
+/// ## Context Precedence
+///
+/// Values are merged with the following precedence (highest to lowest):
+/// 1. **Request Context** - Values passed directly in the authorization request
+/// 2. **Entity References** - Built entity references from tokens
+/// 3. **Pushed Data** - Data from the DataStore (injected under `context.data`)
+///
+/// If there's a key conflict between request context and other values, an error is returned.
+/// Pushed data is always placed under the `data` namespace to avoid conflicts.
 pub(super) fn build_context(
     config: &AuthzConfig,
     request_context: Value,
     build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
+    data_store: &DataStore,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
@@ -83,6 +95,13 @@ pub(super) fn build_context(
         }
     }
 
+    // Inject pushed data under context.data namespace
+    let pushed_data = data_store.get_all();
+    if !pushed_data.is_empty() {
+        let data_value = Value::Object(pushed_data.into_iter().collect());
+        ctx_entity_refs["data"] = data_value;
+    }
+
     let context = merge_json_values(request_context, ctx_entity_refs)?;
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
@@ -96,11 +115,19 @@ pub(super) fn build_context(
 /// - Individual token entities are accessible via context.tokens.{issuer}_{token_type}
 /// - All JWT claims are stored as entity tags (Set of String by default)
 /// - Provides ergonomic policy syntax for cross-token validation
+///
+/// ## Context Precedence
+///
+/// Values are merged with the following precedence (highest to lowest):
+/// 1. **Request Context** - Values passed directly in the authorization request
+/// 2. **Token References** - Built token entity references
+/// 3. **Pushed Data** - Data from the DataStore (injected under `context.data`)
 pub(super) fn build_multi_issuer_context(
     request_context: Value,
     token_entities: &HashMap<String, Entity>,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
+    data_store: &DataStore,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     // Start with the request context
     let mut context_json = request_context;
@@ -129,6 +156,15 @@ pub(super) fn build_multi_issuer_context(
         context_json = json!({
             "tokens": Value::Object(tokens_context)
         });
+    }
+
+    // Inject pushed data under context.data namespace
+    let pushed_data = data_store.get_all();
+    if !pushed_data.is_empty() {
+        let data_value = Value::Object(pushed_data.into_iter().collect());
+        if let Some(context_obj) = context_json.as_object_mut() {
+            context_obj.insert("data".to_string(), data_value);
+        }
     }
 
     // Create Cedar context

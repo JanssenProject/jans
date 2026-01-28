@@ -337,6 +337,7 @@ mod tests {
     #[cfg(not(target_arch = "wasm32"))]
     use std::thread;
     use std::time::Duration as StdDuration;
+    use test_utils::assert_eq;
 
     fn create_test_store() -> DataStore {
         DataStore::new(DataStoreConfig::default()).expect("should create store")
@@ -882,5 +883,91 @@ mod tests {
         assert_eq!(retrieved_config.max_entries, 100);
         assert_eq!(retrieved_config.max_entry_size, 512);
         assert!(retrieved_config.enable_metrics);
+    }
+
+    // ==========================================================================
+    // Context injection tests
+    // ==========================================================================
+
+    #[test]
+    fn test_get_all_returns_all_values() {
+        let store = create_test_store();
+
+        store
+            .push("user_role", json!("admin"), None)
+            .expect("push should succeed");
+        store
+            .push(
+                "feature_flags",
+                json!({"dark_mode": true, "beta": false}),
+                None,
+            )
+            .expect("push should succeed");
+        store
+            .push("rate_limit", json!(100), None)
+            .expect("push should succeed");
+
+        let all_data = store.get_all();
+
+        assert_eq!(all_data.len(), 3);
+        assert_eq!(all_data.get("user_role"), Some(&json!("admin")));
+        assert_eq!(
+            all_data.get("feature_flags"),
+            Some(&json!({"dark_mode": true, "beta": false}))
+        );
+        assert_eq!(all_data.get("rate_limit"), Some(&json!(100)));
+    }
+
+    #[test]
+    fn test_get_all_empty_store() {
+        let store = create_test_store();
+        let all_data = store.get_all();
+        assert!(all_data.is_empty());
+    }
+
+    #[test]
+    fn test_get_all_returns_values_not_metadata() {
+        let store = create_test_store();
+
+        store
+            .push("key", json!({"nested": {"value": 42}}), None)
+            .expect("push should succeed");
+
+        let all_data = store.get_all();
+
+        // get_all should return just the value, not the DataEntry wrapper
+        let value = all_data.get("key").expect("key should exist");
+        assert_eq!(value, &json!({"nested": {"value": 42}}));
+    }
+
+    #[test]
+    fn test_get_all_suitable_for_context_injection() {
+        let store = create_test_store();
+
+        // Simulate typical context data
+        store
+            .push("device_type", json!("mobile"), None)
+            .expect("push should succeed");
+        store
+            .push("geo", json!({"country": "US", "region": "CA"}), None)
+            .expect("push should succeed");
+        store
+            .push("permissions", json!(["read", "write"]), None)
+            .expect("push should succeed");
+
+        let all_data = store.get_all();
+
+        // Convert to JSON Value (as would be done in context building)
+        let data_value: Value = Value::Object(all_data.into_iter().collect());
+
+        // Verify structure is suitable for Cedar context
+        assert!(data_value.is_object());
+        let obj = data_value.as_object().unwrap();
+        assert_eq!(obj.get("device_type"), Some(&json!("mobile")));
+        assert_eq!(
+            obj.get("geo"),
+            Some(&json!({"country": "US", "region": "CA"}))
+        );
+        assert_eq!(obj.get("permissions"), Some(&json!(["read", "write"])));
     }
 }

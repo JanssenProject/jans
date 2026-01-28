@@ -155,19 +155,20 @@ impl Cedarling {
                 )
             })?;
 
-        let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
-
-        // Log policy store metadata if available (new format only)
-        if let Some(metadata) = service_factory.policy_store_metadata() {
-            log_policy_store_metadata(&log, metadata);
-        }
-
-        // Initialize data store with default configuration
+        // Initialize data store first so it can be passed to authz service
         // TODO: Add DataStoreConfig to BootstrapConfig
         let data = Arc::new(
             DataStore::new(DataStoreConfig::default())
                 .expect("default DataStoreConfig should always be valid"),
         );
+
+        let mut service_factory =
+            ServiceFactory::new(config, service_config, log.clone(), data.clone());
+
+        // Log policy store metadata if available (new format only)
+        if let Some(metadata) = service_factory.policy_store_metadata() {
+            log_policy_store_metadata(&log, metadata);
+        }
 
         Ok(Cedarling {
             log,

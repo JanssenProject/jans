@@ -12,6 +12,7 @@ use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
+use crate::data::DataStore;
 use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::*;
 use crate::jwt::{self, Token};
@@ -49,6 +50,8 @@ pub(crate) struct AuthzConfig {
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
     pub authorization: AuthorizationConfig,
+    /// Data store for pushed data that gets injected into context
+    pub data_store: Arc<DataStore>,
 }
 
 /// Authorization Service
@@ -132,6 +135,7 @@ impl Authz {
             &entities_data.built_entities(),
             &schema.schema,
             &action,
+            &self.config.data_store,
         )?;
 
         let workload_principal = entities_data.workload.as_ref().map(|e| e.uid()).to_owned();
@@ -373,6 +377,7 @@ impl Authz {
             &entities_data.tokens,
             &schema.schema,
             &action,
+            &self.config.data_store,
         )?;
 
         let resource_uid = entities_data.resource.uid();
@@ -523,6 +528,7 @@ impl Authz {
             &built_entities,
             &schema.schema,
             &action,
+            &self.config.data_store,
         )?;
 
         let entities = Entities::from_entities(
