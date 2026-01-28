@@ -153,6 +153,7 @@ public class GrpcAuditServlet extends HttpServlet {
 		private final Map<String, List<String>> headers;
 		private final String requestURI;
 		private final String servletPath;
+		private final boolean isAsynRequest;
 
 		public GrpcRequestWrapper(HttpServletRequest request) {
 			super(request);
@@ -166,7 +167,17 @@ public class GrpcAuditServlet extends HttpServlet {
 				headers.put(name.toLowerCase(), values);
 			}
 
-			// 2. Remove context path from URI
+			// 2. Check if it's gRPC request
+	        String contentType = request.getContentType();
+	        boolean isGrpcRequest = contentType != null && 
+	                             contentType.startsWith("application/grpc");
+	        if (isGrpcRequest) {
+	        	this.isAsynRequest = true;
+	        } else {
+	        	this.isAsynRequest = request.isAsyncStarted();
+	        }
+
+			// 3. Remove context path from URI
 			// Was: /jans-lock/io.jans.lock.audit.AuditService/ProcessLog
 			// Becomes: /io.jans.lock.audit.AuditService/ProcessLog
 			String originalURI = request.getRequestURI();
@@ -180,6 +191,12 @@ public class GrpcAuditServlet extends HttpServlet {
 				this.servletPath = request.getServletPath();
 			}
 		}
+
+		// === Specify that it supports async ===
+		@Override
+	    public boolean isAsyncSupported() {
+			return isAsynRequest;
+	    }
 
 		// === Override methods for paths ===
 
