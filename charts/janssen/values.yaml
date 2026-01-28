@@ -812,6 +812,8 @@ global:
       lockConfigEnabled: false
       # -- Enable endpoint /jans-lock
       lockEnabled: false
+      # -- Enabled endpoint /io.jans.lock.audit.AuditService
+      lockAuditEnabled: false
       # -- Enable endpoint /.well-known/authzen-configuration
       authzenConfigEnabled: true
       # -- Lock config ingress resource labels. key app is taken
