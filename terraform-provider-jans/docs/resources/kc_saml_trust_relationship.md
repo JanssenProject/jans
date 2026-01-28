@@ -61,6 +61,7 @@ resource "jans_kc_saml_trust_relationship" "example" {
 - `saml_metadata` (Block List, Max: 1) SAML metadata of the trust relationship. (see [below for nested schema](#nestedblock--saml_metadata))
 - `secret` (String) Secret of the trust relationship.
 - `sp_logout_url` (String) SP logout URL of the trust relationship.
+- `sp_meta_data_source_type` (String) SP metadata data source type.
 - `sp_meta_data_url` (String) SP metadata URL of the trust relationship.
 - `status` (String) Status of the trust relationship.
 - `validation_log` (List of String) Validation log of the trust relationship.

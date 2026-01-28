@@ -71,7 +71,7 @@ public final class Fido2MetricsConstants {
     public static final String MATURE = "MATURE";
 
     // Database Attributes
-    public static final String JANS_TIMESTAMP = "jansTimestamp";
+    public static final String JANS_TIMESTAMP = "jansFido2MetricsTimestamp";
     
     // Service Names
     public static final String METRICS_SERVICE = "metricsService";
@@ -108,10 +108,20 @@ public final class Fido2MetricsConstants {
     public static final String PREVIOUS_PERIOD = "previousPeriod";
     public static final String COMPARISON = "comparison";
     
+    // Query parameter names
+    public static final String PARAM_START_TIME = "startTime";
+    public static final String PARAM_END_TIME = "endTime";
+    
     // Fallback method constants
     public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";
     
     // Error message keywords
     public static final String ERROR_KEYWORD_TIMEOUT = "timeout";
     public static final String ERROR_KEYWORD_EXPIRED = "expired";
+    
+    // Error messages
+    public static final String ERROR_UNEXPECTED = "An unexpected error occurred while processing the request";
+    
+    // Health check keys
+    public static final String HEALTH_SERVICE_AVAILABLE = "serviceAvailable";
 }
