@@ -231,18 +231,18 @@ fn log_policy_store_metadata(
 
     // Add description if available
     if let Some(desc) = metadata.description() {
-        write!(details, " - {desc}").unwrap();
+        let _ = write!(details, " - {desc}");
     }
 
     // Add Cedar version info
-    write!(details, " [Cedar {}]", metadata.cedar_version()).unwrap();
+    let _ = write!(details, " [Cedar {}]", metadata.cedar_version());
 
     // Add timestamp info if available
     if let Some(created) = metadata.created_date() {
-        write!(details, " (created: {})", created.format("%Y-%m-%d")).unwrap();
+        let _ = write!(details, " (created: {})", created.format("%Y-%m-%d"));
     }
     if let Some(updated) = metadata.updated_date() {
-        write!(details, " (updated: {})", updated.format("%Y-%m-%d")).unwrap();
+        let _ = write!(details, " (updated: {})", updated.format("%Y-%m-%d"));
     }
 
     log.log_any(
