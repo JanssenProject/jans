@@ -37,8 +37,9 @@ use std::sync::Arc;
 pub use crate::common::json_rules::JsonRule;
 use crate::data::DataStore;
 pub use crate::data::{
-    CedarType, ConfigValidationError, DataApi, DataEntry, DataError, DataStoreConfig,
-    DataStoreStats,
+    CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
+    DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
+    ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 use crate::log::BaseLogEntry;
