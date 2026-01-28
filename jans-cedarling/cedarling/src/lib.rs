@@ -161,6 +161,11 @@ impl Cedarling {
         })
     }
 
+    // The following public methods retain async signatures for API compatibility
+    // to avoid breaking changes. They use #[allow(clippy::unused_async)] since
+    // they no longer await internally. Future maintainers can safely remove
+    // or refactor these methods when compatibility constraints allow.
+
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
     #[allow(clippy::unused_async)]

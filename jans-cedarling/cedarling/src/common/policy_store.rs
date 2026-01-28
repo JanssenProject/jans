@@ -395,7 +395,7 @@ struct EncodedPolicy {
     pub body: String,
 }
 
-/// Intermediate struct to handler both kinds of `policy_content` values.
+/// Intermediate struct to handle both kinds of `policy_content` values.
 ///
 /// Either
 /// ```json
