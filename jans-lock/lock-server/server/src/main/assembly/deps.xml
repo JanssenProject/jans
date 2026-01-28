@@ -22,6 +22,8 @@
                 <include>io.grpc:grpc-stub</include>
                 <include>io.grpc:grpc-util</include>
                 <include>*:grpc-bridge</include>
+                <include>*:grpc-bridge-runtime</include>
+                <include>io.perfmark:perfmark-api</include>
             </includes>
         </dependencySet>
     </dependencySets>
