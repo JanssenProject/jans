@@ -285,7 +285,7 @@ public class Fido2MetricsService {
     /**
      * Get aggregations by time range
      * Uses interval overlap logic: finds aggregations that overlap with the query range
-     * An aggregation overlaps if: aggregation.startTime <= queryEndTime AND aggregation.endTime >= queryStartTime
+     * An aggregation overlaps if: aggregation.startTime &lt;= queryEndTime AND aggregation.endTime &gt;= queryStartTime
      */
     public List<Fido2MetricsAggregation> getAggregations(String aggregationType, LocalDateTime startTime, LocalDateTime endTime) {
         try {
