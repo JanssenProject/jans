@@ -9,11 +9,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// Helper module for serializing Optional DateTime
+/// Helper module for serializing Optional [`DateTime`]
 mod datetime_option {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
+    #[allow(clippy::ref_option)]
     pub(super) fn serialize<S>(
         date: &Option<DateTime<Utc>>,
         serializer: S,
@@ -41,7 +42,7 @@ mod datetime_option {
     }
 }
 
-/// Helper module for serializing DateTime
+/// Helper module for serializing [`DateTime`]
 mod datetime {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};

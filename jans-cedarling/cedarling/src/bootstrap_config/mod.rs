@@ -60,7 +60,7 @@ pub struct BootstrapConfig {
     /// If `None` then lock service is disabled.
     pub lock_config: Option<LockServiceConfig>,
     /// Maximum number of default entities allowed in a policy store.
-    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     pub max_default_entities: Option<usize>,
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
@@ -95,7 +95,7 @@ impl BootstrapConfig {
         raw.try_into()
     }
 
-    /// Loads a `BootstrapConfig` from a JSON string
+    /// Loads a [`BootstrapConfig`] from a JSON string
     pub fn load_from_json(json: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw: BootstrapConfigRaw = serde_json::from_str(json)
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
@@ -228,7 +228,7 @@ pub enum BootstrapConfigLoadingError {
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
 
-    /// Error returned when cjar_url is missing or empty.
+    /// Error returned when `cjar_url` is missing or empty.
     #[error(
         "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
     )]

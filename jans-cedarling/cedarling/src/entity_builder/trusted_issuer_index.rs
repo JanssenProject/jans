@@ -31,7 +31,7 @@ pub(crate) struct TrustedIssuerIndex {
 }
 
 impl TrustedIssuerIndex {
-    pub(crate) fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<Logger>) -> Self {
+    pub(crate) fn new(issuers: &HashMap<String, TrustedIssuer>, logger: Option<&Logger>) -> Self {
         let mut origin_index: HashMap<String, Arc<TrustedIssuer>> = HashMap::new();
         let mut url_index = HashMap::new();
 

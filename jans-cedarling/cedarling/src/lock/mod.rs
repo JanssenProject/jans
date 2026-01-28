@@ -20,14 +20,14 @@
 //!
 //! ### Components
 //!
-//! - **LockService**: Main service that manages communication with the Lock Server
-//! - **LogWorker**: Background worker that sends logs to the Lock Server
+//! - **[`LockService`]**: Main service that manages communication with the Lock Server
+//! - **[`LogWorker`]**: Background worker that sends logs to the Lock Server
 //! - **SSA Validation**: Validates Software Statement Assertion JWTs
 //! - **Client Registration**: Handles Dynamic Client Registration with the IDP
 //!
 //! ### Flow
 //!
-//! 1. **Initialization**: LockService is created with configuration
+//! 1. **Initialization**: [`LockService`] is created with configuration
 //! 2. **SSA Validation**: If SSA JWT is provided, it's validated against the IDP's JWKS
 //! 3. **Client Registration**: DCR request is sent to the IDP (with SSA JWT if available)
 //! 4. **Access Token**: Client credentials are obtained for Lock Server communication
@@ -43,7 +43,7 @@
 //!
 //! The SSA JWT must contain the following claims:
 //! - `software_id`: Unique identifier for the software
-//! - `grant_types`: Array of OAuth2 grant types the software can use
+//! - `grant_types`: Array of `OAuth2` grant types the software can use
 //! - `org_id`: Organization identifier
 //! - `iss`: Issuer of the SSA JWT
 //! - `software_roles`: Array of roles/permissions for the software
@@ -64,17 +64,17 @@
 //!
 //! The module provides comprehensive error handling for various scenarios:
 //!
-//! - **InvalidSsaJwt**: SSA JWT validation failed
-//! - **GetLockConfig**: Failed to retrieve Lock Server configuration
-//! - **ClientRegistration**: Failed to register client with IDP
-//! - **InitHttpClient**: Failed to initialize HTTP client
+//! - **`InvalidSsaJwt`**: SSA JWT validation failed
+//! - **`GetLockConfig`**: Failed to retrieve Lock Server configuration
+//! - **`ClientRegistration`**: Failed to register client with IDP
+//! - **`InitHttpClient`**: Failed to initialize HTTP client
 //!
 //! ## Integration with IDP
 //!
 //! The Lock Server integration works with Identity Providers that support:
 //!
 //! - Dynamic Client Registration (RFC 7591)
-//! - OAuth2 Client Credentials flow
+//! - `OAuth2` Client Credentials flow
 //! - JSON Web Key Set (JWKS) endpoint
 //! - Software Statement Assertion (SSA) validation
 //!
@@ -98,9 +98,9 @@ use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
 use crate::{LockServiceConfig, LogWriter};
 use futures::channel::mpsc;
-use lock_config::*;
+use lock_config::LockConfig;
 use log_entry::LockLogEntry;
-use log_worker::*;
+use log_worker::{LogWorker, SerializedLogEntry};
 use register_client::{ClientRegistrationError, register_client};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -176,7 +176,7 @@ impl LockService {
             validate_ssa_jwt(ssa_jwt, &jwks_uri, bootstrap_conf.accept_invalid_certs)
                 .await
                 .map_err(|e| {
-                    InitLockServiceError::InvalidSsaJwt(format!("SSA JWT validation failed: {}", e))
+                    InitLockServiceError::InvalidSsaJwt(format!("SSA JWT validation failed: {e}"))
                 })?;
         }
 
@@ -203,9 +203,6 @@ impl LockService {
 
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
-            // Case where Cedarling's config enables sending logs but the lock server
-            // does not have a log endpoint
-            (Some(_), None) => None,
             (Some(log_interval), Some(log_endpoint)) => {
                 let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(100);
 
@@ -243,7 +240,7 @@ impl LockService {
     pub(crate) async fn shut_down(&mut self) {
         self.cancel_tkn.cancel();
         if let Some(log_worker) = self.log_worker.take() {
-            _ = log_worker.handle.await_result().await;
+            () = log_worker.handle.await_result().await;
         }
     }
 }
@@ -263,8 +260,7 @@ impl LogWriter for LockService {
             Ok(log_tx) => log_tx,
             Err(err) => {
                 self.logger.log_any(LockLogEntry::error(format!(
-                    "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {}",
-                    err
+                    "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {err}"
                 )));
                 return;
             },
@@ -272,8 +268,7 @@ impl LogWriter for LockService {
 
         if let Err(err) = log_tx.try_send(entry) {
             self.logger.log_any(LockLogEntry::error(format!(
-                "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {}",
-                err
+                "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
             )));
         }
     }
@@ -324,8 +319,8 @@ mod test {
             "org_id": "test_org",
             "iss": "https://test.issuer.com",
             "software_roles": ["cedarling"],
-            "exp": 9999999999u64,
-            "iat": 1111111111u64,
+            "exp": 9_999_999_999_u64,
+            "iat": 1_111_111_111_u64,
             "jti": "test-jti-123"
         });
         encode(&header, &claims, &EncodingKey::from_secret(b"test-key")).unwrap()

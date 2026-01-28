@@ -40,12 +40,12 @@ pub enum TrustedIssuerError {
         token_type: String,
     },
 
-    /// Token metadata has empty entity_type_name
+    /// Token metadata has empty `entity_type_name`
     #[error(
         "Invalid token metadata configuration: entity_type_name is empty for token type '{token_type}'"
     )]
     EmptyEntityTypeName {
-        /// The token type with empty entity_type_name
+        /// The token type with empty `entity_type_name`
         token_type: String,
     },
 }
@@ -142,7 +142,7 @@ impl TrustedIssuerValidator {
 /// # Arguments
 ///
 /// * `claims` - The JWT claims as a JSON value
-/// * `token_type` - The type of token (e.g., "access_token", "id_token")
+/// * `token_type` - The type of token (e.g., "`access_token`", "`id_token`")
 /// * `token_metadata` - The token metadata configuration from the trusted issuer
 ///
 pub(crate) fn validate_required_claims(
@@ -186,7 +186,7 @@ mod tests {
         token_metadata.insert("id_token".to_string(), TokenEntityMetadata::id_token());
 
         TrustedIssuer {
-            name: format!("Test Issuer {}", id),
+            name: format!("Test Issuer {id}"),
             description: "Test issuer for validation".to_string(),
             oidc_endpoint: Url::parse(endpoint).unwrap(),
             token_metadata,

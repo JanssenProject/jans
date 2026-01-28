@@ -18,10 +18,10 @@ where
 pub(crate) mod cedar_json;
 pub(crate) const CEDAR_NAMESPACE_SEPARATOR: &str = "::";
 
-/// cedar_schema value which specifies both encoding and content_type
+/// `cedar_schema` value which specifies both encoding and `content_type`
 ///
 /// encoding is one of none or base64
-/// content_type is one of cedar or cedar-json#[derive(Debug, Clone, serde::Deserialize)]
+/// `content_type` is one of cedar or cedar-json
 #[derive(Debug, Clone, serde::Deserialize)]
 struct EncodedSchema {
     pub encoding: super::Encoding,
@@ -30,12 +30,12 @@ struct EncodedSchema {
     pub body: String,
 }
 
-/// Intermediate struct to handle both kinds of cedar_schema values.
+/// Intermediate struct to handle both kinds of `cedar_schema` values.
 ///
 /// Either
-///   "cedar_schema": "cGVybWl0KA..."
+///   "`cedar_schema"`: "cGVybWl0KA..."
 /// OR
-///   "cedar_schema": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
+///   "`cedar_schema"`: { "encoding": "...", "`content_type"`: "...", "body": "permit(...)"}
 #[derive(Debug, Clone, serde::Deserialize)]
 #[serde(untagged)]
 enum MaybeEncoded {
@@ -242,10 +242,10 @@ mod deserialize {
         fn test_readable_yaml_identical_readable_json() {
             static YAML_POLICY_STORE: &str =
                 include_str!("../../../../test_files/policy-store_readable.yaml");
-            let yaml_policy_result = serde_yml::from_str::<AgamaPolicyStore>(YAML_POLICY_STORE);
-
             static JSON_POLICY_STORE: &str =
                 include_str!("../../../../test_files/policy-store_readable.json");
+
+            let yaml_policy_result = serde_yml::from_str::<AgamaPolicyStore>(YAML_POLICY_STORE);
             let json_policy_result = serde_yml::from_str::<AgamaPolicyStore>(JSON_POLICY_STORE);
 
             assert_eq!(yaml_policy_result.unwrap(), json_policy_result.unwrap());

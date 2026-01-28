@@ -174,7 +174,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
                 .read_file(&file_path)
                 .map_err(|e| ManifestErrorType::FileReadError {
                     file: relative_path.to_string(),
-                    error_message: format!("{}", e),
+                    error_message: format!("{e}"),
                 })?;
 
         // Validate file size
@@ -259,10 +259,10 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             let file_name = &entry.name;
 
             if self.vfs.is_file(path) {
-                let relative_path = format!("{}/{}", relative_base, file_name);
+                let relative_path = format!("{relative_base}/{file_name}");
                 files.insert(relative_path);
             } else if self.vfs.is_dir(path) {
-                let new_relative_base = format!("{}/{}", relative_base, file_name);
+                let new_relative_base = format!("{relative_base}/{file_name}");
                 self.scan_directory(path, &new_relative_base, files)?;
             }
         }
@@ -327,7 +327,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             },
             Err(e) => {
                 result.add_error(
-                    ManifestErrorType::ParseError(format!("Failed to scan files: {}", e)),
+                    ManifestErrorType::ParseError(format!("Failed to scan files: {e}")),
                     None,
                 );
             },
@@ -411,8 +411,7 @@ mod tests {
         let err = result.expect_err("Expected FileMissing error for nonexistent file");
         assert!(
             matches!(err, ManifestErrorType::FileMissing { .. }),
-            "Expected FileMissing error, got: {:?}",
-            err
+            "Expected FileMissing error, got: {err:?}"
         );
     }
 
@@ -428,8 +427,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidChecksumFormat error");
         assert!(
             matches!(err, ManifestErrorType::InvalidChecksumFormat { .. }),
-            "Expected InvalidChecksumFormat error, got: {:?}",
-            err
+            "Expected InvalidChecksumFormat error, got: {err:?}"
         );
     }
 
@@ -445,8 +443,7 @@ mod tests {
         let err = result.expect_err("Expected SizeMismatch error");
         assert!(
             matches!(err, ManifestErrorType::SizeMismatch { .. }),
-            "Expected SizeMismatch error, got: {:?}",
-            err
+            "Expected SizeMismatch error, got: {err:?}"
         );
     }
 
@@ -462,8 +459,7 @@ mod tests {
         let err = result.expect_err("Expected ChecksumMismatch error");
         assert!(
             matches!(err, ManifestErrorType::ChecksumMismatch { .. }),
-            "Expected ChecksumMismatch error, got: {:?}",
-            err
+            "Expected ChecksumMismatch error, got: {err:?}"
         );
     }
 

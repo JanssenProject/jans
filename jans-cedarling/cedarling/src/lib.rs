@@ -5,6 +5,7 @@
 
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
+#![allow(clippy::missing_errors_doc)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -31,7 +32,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
-use std::sync::Arc;
+use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
@@ -134,7 +135,7 @@ impl Cedarling {
                         None,
                     ))
                     .set_message("configuration parsed successfully".to_string()),
-                )
+                );
             })
             .inspect_err(|err| {
                 log.log_any(
@@ -144,7 +145,7 @@ impl Cedarling {
                     ))
                     .set_error(err.to_string())
                     .set_message("configuration parsed with error".to_string()),
-                )
+                );
             })?;
 
         let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
@@ -160,38 +161,46 @@ impl Cedarling {
         })
     }
 
+    // The following public methods retain async signatures for API compatibility
+    // to avoid breaking changes. They use #[allow(clippy::unused_async)] since
+    // they no longer await internally. Future maintainers can safely remove
+    // or refactor these methods when compatibility constraints allow.
+
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
+    #[allow(clippy::unused_async)]
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(request).await
+        self.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
+    #[allow(clippy::unused_async)]
     pub async fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize_unsigned(request).await
+        self.authz.authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
+    #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.authz.authorize_multi_issuer(request).await
+        self.authz.authorize_multi_issuer(&request)
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub(crate) async fn build_entities(
+    pub(crate) fn build_entities(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
-        let tokens = self.authz.decode_tokens(request).await.map_err(Box::new)?;
+        let tokens = self.authz.decode_tokens(request)?;
         self.authz.build_entities(request, &tokens)
     }
 
@@ -222,18 +231,18 @@ fn log_policy_store_metadata(
 
     // Add description if available
     if let Some(desc) = metadata.description() {
-        details.push_str(&format!(" - {}", desc));
+        let _ = write!(details, " - {desc}");
     }
 
     // Add Cedar version info
-    details.push_str(&format!(" [Cedar {}]", metadata.cedar_version()));
+    let _ = write!(details, " [Cedar {}]", metadata.cedar_version());
 
     // Add timestamp info if available
     if let Some(created) = metadata.created_date() {
-        details.push_str(&format!(" (created: {})", created.format("%Y-%m-%d")));
+        let _ = write!(details, " (created: {})", created.format("%Y-%m-%d"));
     }
     if let Some(updated) = metadata.updated_date() {
-        details.push_str(&format!(" (updated: {})", updated.format("%Y-%m-%d")));
+        let _ = write!(details, " (updated: {})", updated.format("%Y-%m-%d"));
     }
 
     log.log_any(
@@ -279,10 +288,7 @@ fn log_policy_store_metadata(
                     LogLevel::WARN,
                     None,
                 ))
-                .set_message(format!(
-                    "Could not check Cedar version compatibility: {}",
-                    e
-                )),
+                .set_message(format!("Could not check Cedar version compatibility: {e}")),
             );
         },
     }

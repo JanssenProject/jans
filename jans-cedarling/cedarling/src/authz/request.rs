@@ -13,14 +13,14 @@ use super::errors::{MultiIssuerValidationError, TokenInputError};
 /// Box to store authorization data
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Request {
-    /// Contains the JWTs that will be used for the AuthZ request
+    /// Contains the JWTs that will be used for the `AuthZ` request
     #[serde(default, deserialize_with = "deserialize_tokens")]
     pub tokens: HashMap<String, String>,
-    /// cedar_policy action
+    /// `cedar_policy` action
     pub action: String,
-    /// cedar_policy resource data
+    /// `cedar_policy` resource data
     pub resource: EntityData,
-    /// context to be used in cedar_policy
+    /// context to be used in `cedar_policy`
     pub context: Value,
 }
 
@@ -46,15 +46,11 @@ where
             .into_iter()
             .map(|e| e.unwrap_err())
             .map(|(tkn_name, got_type)| {
-                format!(
-                    "expected `{}` to be 'string' or 'null' but got '{}'",
-                    tkn_name, got_type
-                )
+                format!("expected `{tkn_name}` to be 'string' or 'null' but got '{got_type}'")
             })
             .collect::<Vec<_>>();
         return Err(de::Error::custom(format!(
-            "failed to deserialize input tokens: {:?}",
-            err_msgs
+            "failed to deserialize input tokens: {err_msgs:?}"
         )));
     };
 
@@ -75,18 +71,18 @@ fn value_to_str(value: &Value) -> &'static str {
 /// Box to store authorization data, with any additional principals
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RequestUnsigned {
-    /// Contains the JWTs that will be used for the AuthZ request
+    /// Contains the JWTs that will be used for the `AuthZ` request
     pub principals: Vec<EntityData>,
-    /// cedar_policy action
+    /// `cedar_policy` action
     pub action: String,
-    /// cedar_policy resource data
+    /// `cedar_policy` resource data
     pub resource: EntityData,
-    /// context to be used in cedar_policy
+    /// context to be used in `cedar_policy`
     pub context: Value,
 }
 
 /// Cedar policy entity data
-/// fields represent EntityUid
+/// fields represent `EntityUid`
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct EntityData {
     /// Cedar entity mapping info
@@ -117,14 +113,15 @@ impl EntityData {
 /// Token input for multi-issuer authorization
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TokenInput {
-    /// Token mapping type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+    /// Token mapping type (e.g., "`Jans::Access_Token`", "`Acme::DolphinToken`")
     pub mapping: String,
     /// JWT token string
     pub payload: String,
 }
 
 impl TokenInput {
-    /// Create a new TokenInput
+    /// Create a new [`TokenInput`]
+    #[must_use]
     pub fn new(mapping: String, payload: String) -> Self {
         Self { mapping, payload }
     }
@@ -159,7 +156,8 @@ pub struct AuthorizeMultiIssuerRequest {
 }
 
 impl AuthorizeMultiIssuerRequest {
-    /// Create a new AuthorizeMultiIssuerRequest
+    /// Create a new [`AuthorizeMultiIssuerRequest`]
+    #[must_use]
     pub fn new(tokens: Vec<TokenInput>, resource: EntityData, action: String) -> Self {
         Self {
             tokens,
@@ -169,7 +167,8 @@ impl AuthorizeMultiIssuerRequest {
         }
     }
 
-    /// Create a new AuthorizeMultiIssuerRequest with all fields
+    /// Create a new [`AuthorizeMultiIssuerRequest`] with all fields
+    #[must_use]
     pub fn new_with_fields(
         tokens: Vec<TokenInput>,
         resource: EntityData,
@@ -192,7 +191,8 @@ impl AuthorizeMultiIssuerRequest {
         }
 
         if let Some(ref context) = self.context
-            && !context.is_object() {
+            && !context.is_object()
+        {
             return Err(MultiIssuerValidationError::InvalidContextJson);
         }
 
@@ -210,7 +210,7 @@ mod tests {
     fn create_test_token(mapping: &str, issuer: &str, sub: &str) -> TokenInput {
         let claims = json!({
             "sub": sub,
-            "iat": 1516239022,
+            "iat": 1_516_239_022,
             "iss": issuer
         });
         let token_string = generate_token_using_claims(&claims);
@@ -222,7 +222,7 @@ mod tests {
         let token = create_test_token("Jans::Access_Token", "https://example.com", "1234567890");
 
         assert_eq!(token.mapping, "Jans::Access_Token");
-        assert!(token.payload.contains(".")); // JWT format check
+        assert!(token.payload.contains('.')); // JWT format check
     }
 
     #[test]
@@ -235,7 +235,7 @@ mod tests {
 
     #[test]
     fn test_token_input_validate_empty_mapping() {
-        let token = TokenInput::new("".to_string(), "valid.jwt.token".to_string());
+        let token = TokenInput::new(String::new(), "valid.jwt.token".to_string());
 
         let result = token.validate();
         assert!(matches!(result, Err(TokenInputError::EmptyMapping)));
@@ -243,7 +243,7 @@ mod tests {
 
     #[test]
     fn test_token_input_validate_empty_payload() {
-        let token = TokenInput::new("Jans::Access_Token".to_string(), "".to_string());
+        let token = TokenInput::new("Jans::Access_Token".to_string(), String::new());
 
         let result = token.validate();
         assert!(matches!(result, Err(TokenInputError::EmptyPayload)));

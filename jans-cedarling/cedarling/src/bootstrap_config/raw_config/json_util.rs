@@ -58,7 +58,7 @@ mod tests {
     use serde::Deserialize;
     use test_utils::assert_eq;
 
-    /// Test structure used to verify fallback_deserialize functionality
+    /// Test structure used to verify `fallback_deserialize` functionality
     /// Contains fields of different types to test various scenarios:
     /// - value: i32 - tests number deserialization
     /// - optional: Option<String> - tests optional string handling
@@ -254,7 +254,7 @@ mod tests {
 
         for (json, error_desc) in test_cases {
             let result: Result<TestStruct, _> = serde_json::from_str(json);
-            result.expect_err(&format!("should fail to parse {}", error_desc));
+            result.expect_err(&format!("should fail to parse {error_desc}"));
         }
     }
 }

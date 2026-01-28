@@ -87,24 +87,28 @@ impl Default for EntityBuilderConfig {
 
 impl EntityBuilderConfig {
     /// Enables building the `Workload` entity
+    #[must_use]
     pub fn with_workload(mut self) -> Self {
         self.build_workload = true;
         self
     }
 
     /// Disables building the `Workload` entity
+    #[must_use]
     pub fn with_no_workload(mut self) -> Self {
         self.build_workload = false;
         self
     }
 
     /// Enables building the `User` entity
+    #[must_use]
     pub fn with_user(mut self) -> Self {
         self.build_user = true;
         self
     }
 
     /// Disables building the `User` entity
+    #[must_use]
     pub fn with_no_user(mut self) -> Self {
         self.build_user = false;
         self

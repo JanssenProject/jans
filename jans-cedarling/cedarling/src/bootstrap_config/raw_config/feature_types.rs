@@ -96,14 +96,13 @@ impl FromStr for FeatureToggle {
 
 impl FeatureToggle {
     /// Parse bool to `FeatureToggle`.
+    #[must_use]
     pub fn from_bool(v: bool) -> Self {
-        match v {
-            true => Self::Enabled,
-            false => Self::Disabled,
-        }
+        if v { Self::Enabled } else { Self::Disabled }
     }
 
     /// Return true if is enabled.
+    #[must_use]
     pub fn is_enabled(&self) -> bool {
         match self {
             Self::Enabled => true,

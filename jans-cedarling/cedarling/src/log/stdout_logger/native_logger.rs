@@ -380,8 +380,7 @@ mod tests {
             let expected_json = json!(log_entry1).to_string() + "\n";
             assert!(
                 buf_contents.starts_with(&expected_json),
-                "If buffer not empty, it should start with first message, got: {}",
-                buf_contents
+                "If buffer not empty, it should start with first message, got: {buf_contents}"
             );
         } // else buffer is empty, which is also valid
 
@@ -395,8 +394,7 @@ mod tests {
         let buf_contents = test_writer.get_buf_contents();
         assert!(
             buf_contents.starts_with(&expected_json),
-            "First message should appear after flush timeout, got: {}",
-            buf_contents
+            "First message should appear after flush timeout, got: {buf_contents}"
         );
 
         // Now continuously send messages at intervals shorter than timeout
@@ -404,7 +402,7 @@ mod tests {
             let log_entry = LogEntry {
                 base: BaseLogEntry::new_decision(gen_uuid7()),
                 auth_info: None,
-                msg: format!("Continuous message {}", i),
+                msg: format!("Continuous message {i}"),
                 error_msg: None,
                 cedar_lang_version: None,
                 cedar_sdk_version: None,
@@ -435,9 +433,8 @@ mod tests {
         );
         for i in 0..5 {
             assert!(
-                final_content.contains(&format!("Continuous message {}", i)),
-                "Continuous message {} should be in final output",
-                i
+                final_content.contains(&format!("Continuous message {i}")),
+                "Continuous message {i} should be in final output"
             );
         }
     }

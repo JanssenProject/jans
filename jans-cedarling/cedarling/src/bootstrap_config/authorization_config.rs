@@ -30,7 +30,7 @@ pub struct AuthorizationConfig {
     /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_user_claims: Vec<String>,
 
-    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
     /// `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub decision_log_workload_claims: Vec<String>,
 
@@ -146,9 +146,9 @@ impl From<HashMap<String, String>> for TokenEntityNames {
     }
 }
 
-impl From<TokenEntityNames> for HashMap<String, String> {
+impl<S: std::hash::BuildHasher + Default> From<TokenEntityNames> for HashMap<String, String, S> {
     fn from(value: TokenEntityNames) -> Self {
-        value.0
+        value.0.into_iter().collect::<HashMap<_, _, S>>()
     }
 }
 

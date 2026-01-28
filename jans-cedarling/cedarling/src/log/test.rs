@@ -4,8 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Log unit test module
-//! Contains unit tests for the main code flow with the `LogStrategy``
-//! `LogStrategy` wraps all other logger implementations.
+//! Contains unit tests for the main code flow with the [`LogStrategy`]
+//! [`LogStrategy`] wraps all other logger implementations.
 
 use std::io::Write;
 
@@ -29,7 +29,7 @@ async fn test_new_log_strategy_off() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None).expect("build log strategy");
+    let strategy = LogStrategy::new(&config, PdpID::new(), None);
 
     // Assert
     assert!(matches!(strategy.logger(), LogStrategyLogger::Off(_)));
@@ -48,7 +48,7 @@ async fn test_new_log_strategy_memory() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None).expect("build log strategy");
+    let strategy = LogStrategy::new(&config, PdpID::new(), None);
 
     // Assert
     assert!(matches!(
@@ -66,7 +66,7 @@ async fn test_new_logstrategy_stdout() {
     };
 
     // Act
-    let strategy = LogStrategy::new(&config, PdpID::new(), None).expect("build log strategy");
+    let strategy = LogStrategy::new(&config, PdpID::new(), None);
 
     // Assert
     assert!(matches!(strategy.logger(), LogStrategyLogger::StdOut(_)));
@@ -85,7 +85,7 @@ async fn test_log_memory_logger() {
         }),
         log_level: crate::LogLevel::TRACE,
     };
-    let strategy = LogStrategy::new(&config, pdp_id, app_name.clone()).expect("build LogStrategy");
+    let strategy = LogStrategy::new(&config, pdp_id, app_name.clone());
     let entry = LogEntry {
         base: BaseLogEntry::new_decision(gen_uuid7()),
         auth_info: None,

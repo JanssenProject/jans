@@ -72,7 +72,7 @@ impl ClaimMappingsBuilder {
             serde_json::from_value(serde_json::json!({
                 "parser": "regex",
                 "type": "Jans::Url",
-                "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
+                "regex_expression": r"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$",
                 "SCHEME": {"attr": "scheme", "type": "String"},
                 "DOMAIN": {"attr": "domain", "type": "String"},
                 "PATH": {"attr": "path", "type": "String"}
@@ -100,7 +100,7 @@ impl ClaimMapping {
     /// Apply mapping to the json value
     ///
     /// if `Regex` mapping value will be converted to json value, if has error on converting, return default value
-    /// if `Json` mapping value convert JSON object to HashMap or return empty HashMap
+    /// if `Json` mapping value convert JSON object to `HashMap` or return empty `HashMap`
     pub fn apply_mapping(&self, value: &serde_json::Value) -> HashMap<String, serde_json::Value> {
         match self {
             ClaimMapping::Regex(regexp_mapping) => regexp_mapping.apply_mapping(value),
@@ -135,7 +135,7 @@ pub struct RegexMapping {
 }
 
 impl RegexMapping {
-    /// Create a new RegexMapping with the given expression and field mappings.
+    /// Create a new [`RegexMapping`] with the given expression and field mappings.
     #[cfg(test)]
     fn new(
         regex_expression: String,
@@ -166,18 +166,17 @@ impl RegexMapping {
             return HashMap::new();
         };
 
-        HashMap::from_iter(
-            self.regex_group_mapping
-                .iter()
-                .map(|(key, regex_field_map_info)| {
-                    let capture_value = &captures[key.as_str()];
+        self.regex_group_mapping
+            .iter()
+            .map(|(key, regex_field_map_info)| {
+                let capture_value = &captures[key.as_str()];
 
-                    (
-                        regex_field_map_info.attr.clone(),
-                        regex_field_map_info.r#type.apply_mapping(capture_value),
-                    )
-                }),
-        )
+                (
+                    regex_field_map_info.attr.clone(),
+                    regex_field_map_info.r#type.apply_mapping(capture_value),
+                )
+            })
+            .collect::<HashMap<_, _>>()
     }
 }
 
@@ -228,7 +227,7 @@ impl<'de> Deserialize<'de> for ClaimMapping {
 
                 let mut fields = HashMap::new();
                 if let Some(obj) = value.as_object() {
-                    for (key, val) in obj.iter() {
+                    for (key, val) in obj {
                         if key != PARSER_KEY && key != TYPE_KEY && key != REGEX_EXPRESSION_KEY {
                             let field = serde_json::from_value::<RegexFieldMapping>(val.to_owned())
                                 .map_err(de::Error::custom)?;
@@ -282,7 +281,7 @@ impl RegexFieldMappingType {
     /// `String` - to string without transformation
     /// `Number` - parse string to float64 if error returns default value
     /// `Boolean` - if string NOT empty map to true else false
-    fn apply_mapping(&self, value: &str) -> serde_json::Value {
+    fn apply_mapping(self, value: &str) -> serde_json::Value {
         match self {
             RegexFieldMappingType::String => serde_json::json!(value),
             RegexFieldMappingType::Number => {
@@ -305,12 +304,12 @@ mod test {
     use super::{ClaimMapping, RegexMapping, *};
     use crate::common::policy_store::claim_mapping::RegexFieldMapping;
 
-    /// Tests if a token entity metadata with a RegEx parser can be parsed
+    /// Tests if a token entity metadata with a `RegEx` parser can be parsed
     /// from a JSON string
     #[test]
     fn can_parse_regex_from_json() {
         let re_mapping = RegexMapping::new(
-            r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
+            r"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$".to_string(),
             HashMap::from([
                 (
                     "UID".to_string(),
@@ -382,12 +381,12 @@ mod test {
         );
     }
 
-    /// Tests if a token entity metadata with a RegEx parser can be parsed
+    /// Tests if a token entity metadata with a `RegEx` parser can be parsed
     /// from a YAML string
     #[test]
     fn can_parse_regex_from_yaml() {
         let re_mapping = RegexMapping::new(
-            r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
+            r"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$".to_string(),
             HashMap::from([
                 (
                     "UID".to_string(),
@@ -477,8 +476,7 @@ mod test {
 
         assert!(
             matches!(parsed, Err(ref e) if e.to_string().contains("unknown parser type")),
-            "Expected an error when encountering an unknown parser: {:?}",
-            parsed
+            "Expected an error when encountering an unknown parser: {parsed:?}"
         );
     }
 }

@@ -93,14 +93,17 @@ use crate::common::issuer_utils::normalize_issuer;
 use crate::common::policy_store::TrustedIssuer;
 use crate::log::Logger;
 use chrono::Utc;
-use http_utils::*;
-use key_service::*;
-use log_entry::*;
+use http_utils::{GetFromUrl, OpenIdConfig};
+use key_service::{KeyService, KeyServiceError};
+use log_entry::JwtLogEntry;
 use serde_json::json;
-use status_list::*;
+use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use validation::*;
+use validation::{
+    JwtValidator, JwtValidatorCache, OwnedValidatorInfo, TokenKind, TrustedIssuerValidator,
+    ValidateJwtError, ValidatedJwt, ValidatorInfo, validate_required_claims,
+};
 
 /// The value of the `iss` claim from a JWT
 type IssClaim = String;
@@ -162,7 +165,7 @@ impl JwtService {
         // Clone trusted_issuers before consumption - original is iterated and consumed below
         let trusted_issuers_for_validator = trusted_issuers.clone();
 
-        for (issuer_id, iss) in trusted_issuers.into_iter() {
+        for (issuer_id, iss) in trusted_issuers {
             // this is what we expect to find in the JWT `iss` claim
             let mut iss_claim = iss.oidc_endpoint.origin().ascii_serialization();
 
@@ -173,12 +176,12 @@ impl JwtService {
             };
 
             if jwt_config.jwt_sig_validation || jwt_config.jwt_status_validation {
-                iss_claim = update_openid_config(&mut iss_config, &logger).await?;
+                iss_claim = update_openid_config(&mut iss_config, logger.as_ref()).await?;
             }
 
-            insert_keys(&mut key_service, jwt_config, &iss_config, &logger).await?;
+            insert_keys(&mut key_service, jwt_config, &iss_config, logger.as_ref()).await?;
 
-            validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.clone());
+            validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.as_ref());
 
             if jwt_config.jwt_status_validation {
                 status_lists
@@ -241,15 +244,17 @@ impl JwtService {
     ///
     /// # Arguments
     ///
-    /// * `tokens` - Map of token names to JWT strings (e.g., "access_token" -> "eyJ...")
+    /// * `tokens` - Map of token names to JWT strings (e.g., "`access_token`" -> "eyJ...")
     ///
     /// # Returns
     ///
     /// Map of token names to validated `Token` objects, or an error if any token fails validation.
-    pub(crate) async fn validate_tokens<'a>(
+    pub(crate) fn validate_tokens<'a>(
         &'a self,
         tokens: &'a HashMap<String, String>,
     ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
+        const ID_TOKEN_NAME: &str = "id_token";
+
         if self.jwt_sig_validation_required && !self.signed_authz_available && !tokens.is_empty() {
             self.logger.log_any(JwtLogEntry::new(
                 "signed authorization was attempted but Cedarling is not configured with trusted issuers or JWKS".to_string(),
@@ -259,14 +264,13 @@ impl JwtService {
         }
 
         let mut validated_tokens = HashMap::new();
-        const ID_TOKEN_NAME: &str = "id_token";
 
         let now = Utc::now();
 
         // clear expired tokens from cache
         self.token_cache.clear_expired();
 
-        for (token_name, jwt) in tokens.iter() {
+        for (token_name, jwt) in tokens {
             let token_kind = TokenKind::AuthzRequestInput(token_name);
             let token = if let Some(validated_token) = self.token_cache.find(&token_kind, jwt) {
                 validated_token
@@ -279,9 +283,8 @@ impl JwtService {
                             self.logger
                                 .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
                             continue;
-                        } else {
-                            return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
                         }
+                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
                     },
                 };
 
@@ -297,7 +300,7 @@ impl JwtService {
 
                 if token_name == ID_TOKEN_NAME {
                     claims = fix_aud_claim_value_to_array(claims);
-                };
+                }
 
                 let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
                 self.token_cache.save(&token_kind, jwt, token.clone(), now);
@@ -355,7 +358,7 @@ impl JwtService {
                 Err(TrustedIssuerError::UntrustedIssuer(_)) => {
                     // Fall back to issuer_configs for backward compatibility
                     self.logger.log_any(JwtLogEntry::new(
-                        format!("Untrusted issuer '{}', falling back to issuer_configs", iss),
+                        format!("Untrusted issuer '{iss}', falling back to issuer_configs"),
                         Some(LogLevel::DEBUG),
                     ));
                     self.get_issuer_ref(iss)
@@ -363,8 +366,7 @@ impl JwtService {
                 Err(e) => {
                     self.logger.log_any(JwtLogEntry::new(
                         format!(
-                            "Error finding trusted issuer '{}': {}, falling back to issuer_configs",
-                            iss, e
+                            "Error finding trusted issuer '{iss}': {e}, falling back to issuer_configs"
                         ),
                         Some(LogLevel::DEBUG),
                     ));
@@ -376,7 +378,7 @@ impl JwtService {
         };
 
         // Set trusted issuer reference on validated JWT
-        validated_jwt.trusted_iss = trusted_iss.clone();
+        validated_jwt.trusted_iss.clone_from(&trusted_iss);
 
         // Validate required claims based on trusted issuer configuration
         // This implements Requirement 5: "WHEN a JWT token is from a trusted issuer
@@ -403,8 +405,7 @@ impl JwtService {
                     {
                         self.logger.log_any(JwtLogEntry::new(
                             format!(
-                                "Token '{}' failed required claims validation: {}",
-                                token_type, err
+                                "Token '{token_type}' failed required claims validation: {err}"
                             ),
                             Some(LogLevel::ERROR),
                         ));
@@ -454,7 +455,7 @@ impl JwtService {
             if let Err(err) = token.validate() {
                 if let Some(logger) = &self.logger {
                     logger.log_any(JwtLogEntry::new(
-                        format!("Token validation failed at index {}: {}", index, err),
+                        format!("Token validation failed at index {index}: {err}"),
                         Some(LogLevel::WARN),
                     ));
                 }
@@ -483,18 +484,7 @@ impl JwtService {
 
                         // Check for non-deterministic tokens (graceful validation)
                         let combination = format!("{}:{}", issuer, token.mapping);
-                        if !seen_combinations.insert(combination.clone()) {
-                            // Log warning but continue processing
-                            if let Some(logger) = &self.logger {
-                                logger.log_any(JwtLogEntry::new(
-                                format!(
-                                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
-                                    token.mapping, issuer
-                                ),
-                                Some(LogLevel::WARN),
-                            ));
-                            }
-                        } else {
+                        if seen_combinations.insert(combination.clone()) {
                             // Convert ValidatedJwt to Token
                             let claims =
                                 serde_json::from_value::<TokenClaims>(validated_jwt.claims)
@@ -524,12 +514,23 @@ impl JwtService {
                             );
 
                             validated_tokens.insert(token_name, cedar_token);
+                        } else {
+                            // Log warning but continue processing
+                            if let Some(logger) = &self.logger {
+                                logger.log_any(JwtLogEntry::new(
+                                format!(
+                                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                                    token.mapping, issuer
+                                ),
+                                Some(LogLevel::WARN),
+                            ));
+                            }
                         }
                     },
                     Err(err) => {
                         if let Some(logger) = &self.logger {
                             logger.log_any(JwtLogEntry::new(
-                                format!("Token validation failed at index {}: {}", index, err),
+                                format!("Token validation failed at index {index}: {err}"),
                                 Some(LogLevel::WARN),
                             ));
                         }
@@ -562,7 +563,7 @@ impl JwtService {
     }
 
     /// Find the token metadata key for a given entity type name
-    /// e.g., "Dolphin::Access_Token" -> "access_token"
+    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
     fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> &'a str {
         // Look through all trusted issuers to find the matching entity type name
         for issuer_config in self.issuer_configs.values() {
@@ -580,7 +581,7 @@ impl JwtService {
 
 async fn update_openid_config(
     iss_config: &mut IssuerConfig,
-    logger: &Option<Logger>,
+    logger: Option<&Logger>,
 ) -> Result<String, JwtServiceInitError> {
     let openid_config = OpenIdConfig::get_from_url(&iss_config.policy.oidc_endpoint)
         .await
@@ -604,7 +605,7 @@ async fn insert_keys(
     key_service: &mut KeyService,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
-    logger: &Option<Logger>,
+    logger: Option<&Logger>,
 ) -> Result<(), KeyServiceError> {
     if !jwt_config.jwt_sig_validation {
         return Ok(());
@@ -625,10 +626,10 @@ async fn insert_keys(
 
 // Fix String `aud` claim value to array
 fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
+    const AUD_KEY: &str = "aud";
+
     // make owned value mutable
     let mut claims = claims;
-
-    const AUD_KEY: &str = "aud";
     let mut aud_value = serde_json::Value::Null;
 
     if let Some(claim) = claims.get_claim(AUD_KEY) {
@@ -636,12 +637,12 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
             // convert String to Array for backward compatibility
             aud_value = json!([claim_str_value]);
         } else {
-            aud_value = claim.value().clone()
+            aud_value = claim.value().clone();
         }
     }
 
     if aud_value != serde_json::Value::Null {
-        claims = claims.with_claim(AUD_KEY.to_string(), aud_value)
+        claims = claims.with_claim(AUD_KEY.to_string(), aud_value);
     }
 
     claims
@@ -669,7 +670,7 @@ mod test {
         let mut access_tkn_claims = json!({
             "iss": server.issuer(),
             "sub": "some_sub",
-            "jti": 1231231231,
+            "jti": 1_231_231_231,
             "exp": u64::MAX,
             "client_id": "test123",
         });
@@ -721,7 +722,6 @@ mod test {
         ]);
         let validated_tokens = jwt_service
             .validate_tokens(&tokens)
-            .await
             .expect("should validate tokens");
 
         // Test access_token
@@ -766,7 +766,7 @@ mod test {
         let mut access_tkn_claims = json!({
             "iss": server.issuer(),
             "sub": "user123",
-            "jti": 1231231231,
+            "jti": 1_231_231_231,
             "exp": u64::MAX,
             "client_id": "test123",
         });
@@ -912,7 +912,7 @@ mod test {
         let mut valid_claims = json!({
             "iss": server.issuer(),
             "sub": "user123",
-            "jti": 1231231231,
+            "jti": 1_231_231_231,
             "exp": u64::MAX,
         });
         let valid_token = server
@@ -985,20 +985,20 @@ mod test {
         let mut claims1 = json!({
             "iss": server.issuer(),
             "sub": "user123",
-            "jti": 1231231231,
+            "jti": 1_231_231_231,
             "exp": u64::MAX,
         });
-        let token1 = server
+        let token_one = server
             .generate_token_with_hs256sig(&mut claims1, None)
             .unwrap();
 
         let mut claims2 = json!({
             "iss": server.issuer(),
             "sub": "user456",
-            "jti": 1231231232,
+            "jti": 1_231_231_232,
             "exp": u64::MAX,
         });
-        let token2 = server
+        let token_two = server
             .generate_token_with_hs256sig(&mut claims2, None)
             .unwrap();
 
@@ -1035,8 +1035,8 @@ mod test {
 
         // Create tokens with duplicate issuer+type combination
         let tokens = vec![
-            TokenInput::new("Jans::Access_Token".to_string(), token1),
-            TokenInput::new("Jans::Access_Token".to_string(), token2), // Duplicate type from same issuer
+            TokenInput::new("Jans::Access_Token".to_string(), token_one),
+            TokenInput::new("Jans::Access_Token".to_string(), token_two), // Duplicate type from same issuer
         ];
 
         let result = jwt_service.validate_multi_issuer_tokens(&tokens);

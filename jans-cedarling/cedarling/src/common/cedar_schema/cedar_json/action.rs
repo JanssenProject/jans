@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::attribute::Attribute;
-use super::*;
+use super::{ActionGroupName, EntityName};
 use serde::Deserialize;
 use std::collections::HashSet;
 

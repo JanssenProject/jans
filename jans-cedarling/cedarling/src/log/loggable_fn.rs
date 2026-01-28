@@ -8,7 +8,7 @@ use crate::log::{
     interface::{Indexed, Loggable, can_log},
 };
 
-/// LoggableFn is a helper struct to create loggable entries using a closure.
+/// [`LoggableFn`] is a helper struct to create loggable entries using a closure.
 #[derive(Clone)]
 pub(crate) struct LoggableFn<F> {
     base: BaseLogEntry,
@@ -37,9 +37,9 @@ where
     }
 }
 
-/// Implementation serde::Serialize for LoggableFn
+/// Implementation [`serde::Serialize`] for [`LoggableFn`]
 ///
-/// Implemented only to satisfy the requirement that Loggable extends serde::Serialize.
+/// Implemented only to satisfy the requirement that Loggable extends [`serde::Serialize`].
 /// But better to use `build` method to get the actual loggable entry and serialize it.
 impl<F, R> serde::Serialize for LoggableFn<F>
 where

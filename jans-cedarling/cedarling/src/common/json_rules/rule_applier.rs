@@ -17,7 +17,7 @@ pub(crate) struct RuleApplier<'a> {
 }
 
 impl<'a> RuleApplier<'a> {
-    pub(crate) fn new(rule: &'a JsonRule, data: HashMap<SmolStr, Decision>) -> Self {
+    pub(crate) fn new(rule: &'a JsonRule, data: &HashMap<SmolStr, Decision>) -> Self {
         Self {
             rule,
             data: serde_json::json!(data),
