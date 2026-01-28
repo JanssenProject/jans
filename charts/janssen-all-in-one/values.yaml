@@ -237,6 +237,8 @@ auth-server:
     lockConfigEnabled: false
     # -- Enable endpoint /jans-lock
     lockEnabled: false
+    # -- Enabled endpoint /io.jans.lock.audit.AuditService
+    lockAuditEnabled: false
     # -- Lock config ingress resource labels. key app is taken
     lockConfigLabels: {}
     # -- Lock config ingress resource additional annotations.
@@ -599,7 +601,7 @@ gatewayApi:
   # -- The name of the Gateway resource to be created
   name: jans-gateway
   # -- Gateway http port number
-  httpPort: 80 
+  httpPort: 80
   # -- Gateway https port number
   httpsPort: 443
   # -- Secret containing the TLS certificate for the Gateway
