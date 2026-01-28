@@ -73,8 +73,7 @@ where
             details: e.to_string(),
         })?;
 
-        // Validate all file names for security using zip crate's enclosed_name()
-        // which properly validates and normalizes paths, preventing path traversal
+        // Validate all file names for security
         for i in 0..archive.len() {
             let file = archive
                 .by_index(i)
@@ -83,21 +82,45 @@ where
                     details: e.to_string(),
                 })?;
 
+            let file_name = file.name();
+
+            // Explicitly reject absolute paths (Unix-style or Windows-style)
+            // Note: enclosed_name() behavior is inconsistent across environments -
+            // it may return Some("etc/passwd") on some systems and None on others.
+            // We explicitly check for absolute paths to ensure consistent behavior.
+            if file_name.starts_with('/') || file_name.starts_with('\\') {
+                return Err(ArchiveError::PathTraversal {
+                    path: file_name.to_string(),
+                });
+            }
+
+            // Check for Windows-style absolute paths (e.g., "C:\", "D:/")
+            if file_name.len() >= 2 {
+                let mut chars = file_name.chars();
+                if let (Some(first), Some(second)) = (chars.next(), chars.next())
+                    && first.is_ascii_alphabetic()
+                    && second == ':'
+                {
+                    return Err(ArchiveError::PathTraversal {
+                        path: file_name.to_string(),
+                    });
+                }
+            }
+
             // Use enclosed_name() to validate and normalize the path
-            // This properly handles path traversal, backslashes, and absolute paths
+            // This handles path traversal patterns like "../"
             let normalized = file.enclosed_name();
             if let Some(normalized_path) = normalized {
                 // Additional check: ensure normalized path doesn't contain .. sequences
-                // enclosed_name() normalizes but may not reject all .. patterns
                 let path_str = normalized_path.to_string_lossy();
                 if path_str.contains("..") {
                     return Err(ArchiveError::PathTraversal {
-                        path: file.name().to_string(),
+                        path: file_name.to_string(),
                     });
                 }
             } else {
                 return Err(ArchiveError::PathTraversal {
-                    path: file.name().to_string(),
+                    path: file_name.to_string(),
                 });
             }
         }
