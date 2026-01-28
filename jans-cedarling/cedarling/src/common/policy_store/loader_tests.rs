@@ -931,7 +931,7 @@ action "read" appliesTo {
                 }
             }
         }"#
-            .as_bytes(),
+        .as_bytes(),
     )
     .unwrap();
 
@@ -948,7 +948,7 @@ action "read" appliesTo {
                 }
             }
         }"#
-            .as_bytes(),
+        .as_bytes(),
     )
     .unwrap();
 

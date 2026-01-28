@@ -645,9 +645,9 @@ mod tests {
     #[test]
     fn test_convert_to_legacy_full() {
         let loaded = LoadedPolicyStore {
-    metadata: create_test_metadata(),
-    manifest: None,
-    schema: r#"
+            metadata: create_test_metadata(),
+            manifest: None,
+            schema: r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -656,20 +656,21 @@ mod tests {
             };
         }
     "#
-    .to_string(),
-    policies: vec![PolicyFile {
-        name: "test.cedar".to_string(),
-        content: "permit(principal, action, resource);".to_string(),
-    }],
-    templates: vec![],
-    entities: vec![EntityFile {
-        name: "users.json".to_string(),
-        content: r#"[{"uid": {"type": "User", "id": "alice"}, "attrs": {}, "parents": []}]"#
             .to_string(),
-    }],
-    trusted_issuers: vec![IssuerFile {
-        name: "issuer.json".to_string(),
-        content: r#"{
+            policies: vec![PolicyFile {
+                name: "test.cedar".to_string(),
+                content: "permit(principal, action, resource);".to_string(),
+            }],
+            templates: vec![],
+            entities: vec![EntityFile {
+                name: "users.json".to_string(),
+                content:
+                    r#"[{"uid": {"type": "User", "id": "alice"}, "attrs": {}, "parents": []}]"#
+                        .to_string(),
+            }],
+            trusted_issuers: vec![IssuerFile {
+                name: "issuer.json".to_string(),
+                content: r#"{
             "id": "main",
             "name": "Main Issuer",
             "description": "Primary issuer",
@@ -680,9 +681,9 @@ mod tests {
                 }
             }
         }"#
-        .to_string(),
-    }],
-};
+                .to_string(),
+            }],
+        };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());

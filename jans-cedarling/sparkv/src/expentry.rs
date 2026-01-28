@@ -6,8 +6,8 @@
  */
 
 use super::kventry::KvEntry;
-use chrono::Duration;
 use chrono::prelude::*;
+use chrono::Duration;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpEntry {

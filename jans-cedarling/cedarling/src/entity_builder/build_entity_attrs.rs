@@ -25,7 +25,12 @@ pub(super) fn build_entity_attrs(
     claim_mappings: Option<&ClaimMappings>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     if let Some(attrs_shape) = attrs_shape {
-        Ok(build_entity_attrs_with_shape(attrs_src, entities, attrs_shape, claim_mappings))
+        Ok(build_entity_attrs_with_shape(
+            attrs_src,
+            entities,
+            attrs_shape,
+            claim_mappings,
+        ))
     } else {
         build_entity_attrs_without_schema(attrs_src, claim_mappings)
     }

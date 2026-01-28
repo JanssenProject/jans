@@ -306,12 +306,14 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
             "Jans::User",
             "user1",
             json!({"country": "US", "role": ["Admin"], "sub": "user1"}),
-        ).unwrap(),
+        )
+        .unwrap(),
         create_test_principal(
             "Jans::User",
             "user2",
             json!({"country": "US", "role": ["Guest"], "sub": "user2"}),
-        ).unwrap(),
+        )
+        .unwrap(),
     ];
     let resource = create_test_principal(
         "Jans::Issue",
