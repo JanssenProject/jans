@@ -1,18 +1,18 @@
 package io.jans.casa.plugins.certauthn.vm;
 
+import io.jans.as.model.util.Base64Util;            
 import io.jans.casa.core.pojo.User;
 import io.jans.casa.misc.*;
-import io.jans.casa.plugins.certauthn.model.*;
+import io.jans.casa.model.ApplicationConfiguration;
+import io.jans.casa.plugins.certauthn.model.Certificate;
 import io.jans.casa.plugins.certauthn.service.CertService;
-import io.jans.casa.service.ISessionContext;
-import io.jans.casa.service.SndFactorAuthenticationUtils;
+import io.jans.casa.service.*;
 import io.jans.casa.ui.UIUtils;
-import io.jans.service.cache.CacheProvider;
+import io.jans.inbound.oauth2.*;
 import io.jans.util.security.StringEncrypter;
 
-import java.util.List;
-import java.net.URLEncoder;
-import java.security.SecureRandom;
+import java.util.*;
+import java.net.URISyntaxException;
 
 import org.json.JSONObject;
 import org.slf4j.*;
@@ -35,16 +35,17 @@ public class CertAuthenticationSummaryVM {
 
     @WireVariable
     private ISessionContext sessionContext;
+    
+    private IPersistenceService ips;
+    private StringEncrypter encrypter;
 
-    private CacheProvider cacheProvider;
-
+    private String serverUrl;
+    private String certDetailUrl;
     private String userId;
     private User user;
     private List<Certificate> certificates;
     private CertService certService;
     private SndFactorAuthenticationUtils sndFactorUtils;
-    private StringEncrypter stringEncrypter;
-    private SecureRandom random;
 
     public List<Certificate> getCertificates() {
         return certificates;
@@ -56,34 +57,38 @@ public class CertAuthenticationSummaryVM {
         user = sessionContext.getLoggedUser();
         userId = user.getId();
         
-        random = new SecureRandom();
         certService = CertService.getInstance();
         certificates = certService.getUserCerts(userId);
-        
-        stringEncrypter = Utils.stringEncrypter();
-        cacheProvider = Utils.managedBean(CacheProvider.class);
+
+        ips = Utils.managedBean(IPersistenceService.class);
         sndFactorUtils = Utils.managedBean(SndFactorAuthenticationUtils.class);
+        encrypter = Utils.stringEncrypter();
+                    
+        serverUrl = ips.getIssuerUrl();
+        certDetailUrl = WebUtils.getServletRequest().getRequestURL().toString();
         logger.debug("CertAuthenticationSummaryVM initialized");
+        
+        if (WebUtils.getQueryParam("code") != null) {   //This is the OpenID code param at the redirect uri
+            logger.debug("Agama flow for enrollment finished. Redirect URI hit");
+            //TODO: verify code is not fake using the state obtained when the authn request was built (see redirect method);
+            sndFactorUtils.notifyEnrollment(user, CertService.AGAMA_FLOW);
+        }
         
     }
     
-    public void redirect() throws StringEncrypter.EncryptionException {
+    public void redirect() throws URISyntaxException, StringEncrypter.EncryptionException {
 
-        String key = ("" + random.nextDouble()).substring(2);
-        String encKey = URLEncoder.encode(stringEncrypter.encrypt(key), UTF_8);
+        String casaClientId = ips.get(ApplicationConfiguration.class, "ou=casa,ou=configuration,o=jans")
+                .getSettings().getOidcSettings().getClient().getClientId();         
         
-        //This is the max. time it can take from here (cert detail page) to the cert  
-        //pickup url until the user effectively selects the cert
-        int time = certService.getRoundTripMaxTime();
+        String inputs = new JSONObject(Map.of("uidRef", encrypter.encrypt(userId))).toString();                    
+        inputs = Base64Util.base64urlencode(inputs.getBytes(UTF_8));
+                    
+        OAuthParams params = makeOAuthParams(casaClientId, certDetailUrl, inputs);
+        CodeGrantUtil cgu = new CodeGrantUtil(params);         
         
-        Reference ref = new Reference(userId, true, System.currentTimeMillis() + 1000L*time);
-
-        //We cannot store a Reference object straight in the cache because the class is not 
-        //in the class loader used by the cache provider, thus a plain string is used
-        cacheProvider.put(time, key, new JSONObject(ref).toString());
-
-        Executions.getCurrent().sendRedirect(
-                certService.getCertPickupUrl() + "?" + CertAuthnVM.RND_KEY + "=" + encKey);
+        io.jans.util.Pair<String, String> pair = cgu.makeAuthzRequest();
+        WebUtils.execRedirect(pair.getFirst(), false);
         
     }
 
@@ -136,6 +141,27 @@ public class CertAuthenticationSummaryVM {
         }
 
         return new Pair<>(null, text.toString());
+
+    }
+
+    private OAuthParams makeOAuthParams(String clientId, String redirectUri, String flowInputs) {
+        
+        OAuthParams p = new OAuthParams();
+        p.setAuthzEndpoint(serverUrl + "/jans-auth/restv1/authorize");
+        p.setTokenEndpoint(serverUrl + "/jans-auth/restv1/token");
+        p.setClientId(clientId);
+        //p.setClientSecret(cl.getClientSecret());
+        p.setScopes(Collections.singletonList("openid"));
+        p.setRedirectUri(redirectUri);
+        
+        p.setCustParamsAuthReq(
+            Map.of(
+                "prompt", "login",
+                "acr_values", "agama_" + CertService.AGAMA_ENROLLMENT_FLOW + "-" + flowInputs
+            )
+        );
+        
+        return p;
 
     }
 

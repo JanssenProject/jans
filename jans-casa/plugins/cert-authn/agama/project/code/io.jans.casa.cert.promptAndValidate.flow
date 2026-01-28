@@ -1,0 +1,22 @@
+Flow io.jans.casa.cert.promptAndValidate
+    Basepath ""
+    Configs conf
+    
+cah = Call io.jans.casa.certauthn.CertAuthnHelper#new conf.certPickupUrl conf.roundTripMaxTime
+url = Call cah buildRedirectUrl
+//See template index.zul and class io.jans.casa.plugins.certauthn.vm.CertAuthnVM in casa plugin
+RFAC url
+
+certUtil = Call io.jans.casa.certauthn.CertUtil#class
+validationResult = Call certUtil validate cah.certPEM conf.certChainPEM
+status = Call validationResult.first toString
+
+When status is "VALID"
+    x509Cert = validationResult.second
+    fp = Call certUtil getFingerPrint x509Cert
+    obj = { success: true, data: { cert: { x509: x509Cert, fingerPrint: fp } } }
+Otherwise
+    obj = { success: false, status: status }
+    RRF "validation-error.ftlh" obj
+    
+Finish obj
