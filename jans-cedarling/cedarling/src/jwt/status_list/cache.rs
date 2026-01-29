@@ -263,7 +263,7 @@ mod test {
             "some_iss".into(),
             "is a trusted issuer".into(),
             mock_server.openid_config_endpoint().unwrap(),
-            Default::default(),
+            HashMap::default(),
         );
 
         let iss_config = IssuerConfig {

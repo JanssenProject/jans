@@ -232,7 +232,7 @@ mod test {
                 sleep(Duration::from_millis(delay_ms)).await;
             }
         }
-        panic!("{} (failed after {} retries)", message, max_retries);
+        panic!("{message} (failed after {max_retries} retries)");
     }
 
     /// Tests synchronous loading of a single trusted issuer.
@@ -292,8 +292,8 @@ mod test {
         let server1 = MockServer::new_with_defaults().await.unwrap();
         let server2 = MockServer::new_with_defaults().await.unwrap();
 
-        let trusted_issuer1 = server1.trusted_issuer();
-        let trusted_issuer2 = server2.trusted_issuer();
+        let trusted_issuer_1 = server1.trusted_issuer();
+        let trusted_issuer_2 = server2.trusted_issuer();
 
         let jwt_config = JwtConfig {
             jwt_sig_validation: false,
@@ -315,8 +315,8 @@ mod test {
         };
 
         let mut trusted_issuers = HashMap::new();
-        trusted_issuers.insert("issuer1".to_string(), trusted_issuer1);
-        trusted_issuers.insert("issuer2".to_string(), trusted_issuer2);
+        trusted_issuers.insert("issuer1".to_string(), trusted_issuer_1);
+        trusted_issuers.insert("issuer2".to_string(), trusted_issuer_2);
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully in async mode");
@@ -346,9 +346,9 @@ mod test {
         );
     }
 
-    /// Tests synchronous loading when OpenID configuration fetch fails.
+    /// Tests synchronous loading when `OpenID` configuration fetch fails.
     ///
-    /// Verifies that sync mode returns an error when the OpenID endpoint
+    /// Verifies that sync mode returns an error when the `OpenID` endpoint
     /// is unreachable and signature validation is enabled.
     #[tokio::test]
     async fn load_trusted_issuer_with_failing_openid_config_sync() {
@@ -387,7 +387,7 @@ mod test {
         );
     }
 
-    /// Tests asynchronous loading when OpenID configuration fetch fails.
+    /// Tests asynchronous loading when `OpenID` configuration fetch fails.
     ///
     /// Verifies that async mode logs errors but does not fail the entire load process
     /// when individual issuers cannot be loaded.
@@ -548,7 +548,7 @@ mod test {
 
     /// Tests loading a trusted issuer with signature validation enabled.
     ///
-    /// Verifies that when `jwt_sig_validation` is true, keys from OpenID configuration
+    /// Verifies that when `jwt_sig_validation` is true, keys from `OpenID` configuration
     /// are properly fetched and stored in the key service.
     #[tokio::test]
     async fn load_trusted_issuer_with_signature_validation() {
@@ -606,15 +606,15 @@ mod test {
     /// Tests asynchronous loading of multiple trusted issuers with signature validation enabled.
     ///
     /// Verifies that when `jwt_sig_validation` is true and async loading is used,
-    /// keys from OpenID configurations are properly fetched and stored in the key service.
+    /// keys from `OpenID` configurations are properly fetched and stored in the key service.
     #[tokio::test]
     async fn load_multiple_trusted_issuers_async_with_signature_validation() {
         // Create two mock servers
         let server1 = MockServer::new_with_defaults().await.unwrap();
         let server2 = MockServer::new_with_defaults().await.unwrap();
 
-        let trusted_issuer1 = server1.trusted_issuer();
-        let trusted_issuer2 = server2.trusted_issuer();
+        let trusted_issuer_1 = server1.trusted_issuer();
+        let trusted_issuer_2 = server2.trusted_issuer();
 
         let jwt_config = JwtConfig {
             jwt_sig_validation: true,
@@ -636,8 +636,8 @@ mod test {
         };
 
         let mut trusted_issuers = HashMap::new();
-        trusted_issuers.insert("issuer1".to_string(), trusted_issuer1);
-        trusted_issuers.insert("issuer2".to_string(), trusted_issuer2);
+        trusted_issuers.insert("issuer1".to_string(), trusted_issuer_1);
+        trusted_issuers.insert("issuer2".to_string(), trusted_issuer_2);
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully in async mode with signature validation");

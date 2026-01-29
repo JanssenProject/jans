@@ -397,6 +397,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn can_build_principals_with_custom_types() {
         let schema_src = r"
             namespace Jans {

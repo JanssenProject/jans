@@ -36,48 +36,6 @@ impl From<HashMap<String, ClaimMapping>> for ClaimMappings {
     }
 }
 
-#[cfg(test)]
-pub struct ClaimMappingsBuilder(HashMap<String, ClaimMapping>);
-
-/// Helper struct for building claim mappings in tests
-#[cfg(test)]
-impl ClaimMappingsBuilder {
-    pub fn build(self) -> ClaimMappings {
-        ClaimMappings(self.0)
-    }
-
-    pub fn email(mut self, claim: &str) -> Self {
-        self.0.insert(
-            claim.to_string(),
-            serde_json::from_value(serde_json::json!({
-                "parser": "regex",
-                "type": "Jans::email_address",
-                "regex_expression" : "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
-                "UID": {"attr": "uid", "type":"String"},
-                "DOMAIN": {"attr": "domain", "type":"String"},
-            }))
-            .expect("failed to deserialize claim mapping"),
-        );
-        self
-    }
-
-    pub fn url(mut self, claim: &str) -> Self {
-        self.0.insert(
-            claim.to_string(),
-            serde_json::from_value(serde_json::json!({
-                "parser": "regex",
-                "type": "Jans::Url",
-                "regex_expression": r"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$",
-                "SCHEME": {"attr": "scheme", "type": "String"},
-                "DOMAIN": {"attr": "domain", "type": "String"},
-                "PATH": {"attr": "path", "type": "String"}
-            }))
-            .expect("failed to deserialize claim mapping"),
-        );
-        self
-    }
-}
-
 /// Represents the mapping of claims based on the parser type.
 ///
 /// This enum can either be:
