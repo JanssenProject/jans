@@ -86,3 +86,7 @@ harness = false
 [[bench]]
 name = "policy_store_benchmark"
 harness = false
+
+[[bench]]
+name = "context_data_store_benchmark"
+harness = false
