@@ -155,10 +155,10 @@ impl Cedarling {
             })?;
 
         // Initialize data store first so it can be passed to authz service
-        // TODO: Add DataStoreConfig to BootstrapConfig
+        let data_store_config = config.data_store_config.clone().unwrap_or_default();
         let data = Arc::new(
-            DataStore::new(DataStoreConfig::default())
-                .expect("default DataStoreConfig should always be valid"),
+            DataStore::new(data_store_config)
+                .expect("DataStoreConfig should be valid after bootstrap config parsing"),
         );
 
         let mut service_factory =

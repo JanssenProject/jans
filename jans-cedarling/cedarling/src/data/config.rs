@@ -35,7 +35,7 @@ use std::time::Duration;
 ///     ..Default::default()
 /// };
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DataStoreConfig {
     /// Maximum number of data entries (0 = unlimited)
     pub max_entries: usize,

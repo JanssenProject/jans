@@ -28,6 +28,8 @@ use std::{io, path::Path};
 
 use config::{Config, File};
 
+use crate::data::DataStoreConfig;
+
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
 pub use entity_builder_config::{
@@ -65,6 +67,9 @@ pub struct BootstrapConfig {
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
     pub max_base64_size: Option<usize>,
+    /// Data store configuration for the pushed data API.
+    /// If `None`, uses default configuration values.
+    pub data_store_config: Option<DataStoreConfig>,
 }
 
 impl BootstrapConfig {
