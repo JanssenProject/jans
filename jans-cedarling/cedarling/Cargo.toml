@@ -73,6 +73,8 @@ tempfile = "3.8"
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]
 pprof = { version = "0.14.0", features = ["flamegraph"] }
 
+[lints]
+workspace = true
 
 [[bench]]
 name = "authz_authorize_benchmark"

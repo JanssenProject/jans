@@ -137,7 +137,7 @@ pub(super) async fn load_trusted_issuer(
         &iss_config,
         &loader.jwt_config,
         &loader.status_lists,
-        loader.logger.clone(),
+        loader.logger.as_ref(),
     );
 
     if loader.jwt_config.jwt_status_validation {
@@ -196,7 +196,7 @@ async fn insert_keys(
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
         key_service
-            .get_keys_using_oidc(openid_config, logger)
+            .get_keys_using_oidc(openid_config, logger.as_ref())
             .await?;
     }
 

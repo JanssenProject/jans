@@ -74,7 +74,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=4317fdfcd2dc458415f173644cdae97120d8bc7c
+ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -114,7 +114,7 @@ WORKDIR /
 
 # add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
 # commit hash from GluuFlexAdminUIPolicyStore
-ARG AUI_POLICY_VERSION=f47c0877c5516c281580f190d1a82d04d9d471bf
+ARG AUI_POLICY_VERSION=320707351b6cdd53de986f278da5c91e8f772552
 # policy store filename
 ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
 

@@ -9,7 +9,7 @@ use crate::jwt::{IssuerConfig, StatusListCache};
 use crate::log::Logger;
 use crate::{JwtConfig, LogLevel, LogWriter};
 
-use super::*;
+use super::JwtValidator;
 use jsonwebtoken::Algorithm;
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -45,7 +45,7 @@ impl JwtValidatorCache {
         iss_config: &IssuerConfig,
         jwt_config: &JwtConfig,
         status_lists: &StatusListCache,
-        logger: Option<Logger>,
+        logger: Option<&Logger>,
     ) {
         let iss = iss_config
             .openid_config
@@ -53,7 +53,7 @@ impl JwtValidatorCache {
             .map(|oidc| oidc.issuer.clone())
             .unwrap_or_else(|| iss_config.policy.iss_claim());
 
-        for (token_name, tkn_metadata) in iss_config.policy.token_metadata.iter() {
+        for (token_name, tkn_metadata) in &iss_config.policy.token_metadata {
             if !tkn_metadata.trusted {
                 logger.log_any(JwtLogEntry::new(
                     format!(
@@ -100,7 +100,7 @@ impl JwtValidatorCache {
                     .openid_config
                     .as_ref()
                     .and_then(|conf| conf.status_list_endpoint.as_ref())
-                    .map(|uri| uri.to_string());
+                    .map(std::string::ToString::to_string);
                 let (validator, key) = JwtValidator::new_status_list_tkn_validator(
                     Some(&iss),
                     status_list_uri,
@@ -180,9 +180,13 @@ pub(crate) enum TokenKind<'a> {
 impl Display for TokenKind<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TokenKind::AuthzRequestInput(tkn_name) => write!(f, "{tkn_name}"),
             TokenKind::StatusList => write!(f, "statuslist+jwt"),
-            TokenKind::AuthorizeMultiIssuer(tkn_name) => write!(f, "{tkn_name}"),
+            TokenKind::AuthorizeMultiIssuer(tkn_name) => {
+                write!(f, "{tkn_name}")
+            },
+            TokenKind::AuthzRequestInput(tkn_name) => {
+                write!(f, "{tkn_name}")
+            },
         }
     }
 }
@@ -227,11 +231,11 @@ impl OwnedTokenKind {
     /// Used to resolve hash collisions in the store.
     fn is_equal_to(&self, other: &TokenKind<'_>) -> bool {
         match (self, other) {
+            (OwnedTokenKind::StatusList, TokenKind::StatusList) => true,
             (
                 OwnedTokenKind::AuthzRequestInput(tkn_name_string),
                 TokenKind::AuthzRequestInput(tkn_name_str),
             ) => tkn_name_string.as_str() == *tkn_name_str,
-            (OwnedTokenKind::StatusList, TokenKind::StatusList) => true,
             (
                 OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
                 TokenKind::AuthorizeMultiIssuer(tkn_name_str),

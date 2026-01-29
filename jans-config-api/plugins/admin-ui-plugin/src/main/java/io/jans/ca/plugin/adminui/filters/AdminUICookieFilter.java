@@ -1,4 +1,4 @@
-package io.jans.configapi.filters;
+package io.jans.ca.plugin.adminui.filters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
@@ -12,7 +12,7 @@ import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
 import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
-import io.jans.configapi.service.auth.AdminUISessionService;
+import io.jans.ca.plugin.adminui.service.adminui.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.TtlCache;
 import jakarta.annotation.Priority;
@@ -77,7 +77,9 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.info("Inside AdminUICookieFilter filter...");
+            log.debug("========================================================================");
+            log.debug("Inside AdminUICookieFilter filter...");
+            log.debug("========================================================================");
             Map<String, Cookie> cookies = requestContext.getCookies();
             initializeCaches();
             removeExpiredSessionsIfNeeded();
@@ -111,6 +113,15 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * Checks if the request contains Admin UI Session Cookie
+     * `@param` cookies the request cookies map keyed by cookie name
+     * `@return` true if the cookies map is non-null and contains the Admin UI session cookie
+     */
+    private boolean hasAdminUISessionCookie(Map<String, Cookie> cookies) {
+        return cookies != null &&  cookies.containsKey(ADMIN_UI_SESSION_ID);
     }
 
     /**
@@ -218,11 +229,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * @return an Optional containing the ujwt string from the persisted Admin UI session, or Optional.empty() if the cookie or session is not present
      */
     private Optional<String> fetchUJWTFromAdminUISession(Map<String, Cookie> cookies) {
-        //if no cookies
-        if (cookies == null) {
-            return Optional.empty();
-        }
-        if (!cookies.containsKey(ADMIN_UI_SESSION_ID)) {
+        if(!hasAdminUISessionCookie(cookies)) {
             return Optional.empty();
         }
         log.debug("Found a Admin UI session cookie in request header.");

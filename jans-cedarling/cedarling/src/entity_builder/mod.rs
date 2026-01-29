@@ -32,8 +32,14 @@ use crate::common::policy_store::ClaimMappings;
 use crate::common::policy_store::TrustedIssuer;
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
-use crate::{RequestUnsigned, entity_builder_config::*};
-use build_entity_attrs::*;
+use crate::{
+    RequestUnsigned,
+    entity_builder_config::{
+        DEFAULT_ACCESS_TKN_ENTITY_NAME, DEFAULT_ENTITY_TYPE_NAME, DEFAULT_ID_TKN_ENTITY_NAME,
+        DEFAULT_USERINFO_TKN_ENTITY_NAME, EntityBuilderConfig,
+    },
+};
+use build_entity_attrs::build_entity_attrs;
 use build_iss_entity::build_iss_entity;
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use cedar_policy_core::validator::ValidatorSchema;
@@ -106,7 +112,7 @@ impl EntityBuilder {
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
         let mut token_entities = HashMap::new();
-        for (tkn_name, tkn) in tokens.iter() {
+        for (tkn_name, tkn) in tokens {
             let entity_name = tkn
                 .iss
                 .as_ref()
@@ -139,7 +145,7 @@ impl EntityBuilder {
 
         let (user, roles) = if self.config.build_user {
             let roles = self.build_role_entities(tokens)?;
-            let role_uids = roles.iter().map(|e| e.uid()).collect();
+            let role_uids = roles.iter().map(Entity::uid).collect();
             let user = self.build_user_entity(
                 tokens,
                 &tkn_principal_mappings,
@@ -174,12 +180,12 @@ impl EntityBuilder {
 
         let mut principals = Vec::with_capacity(request.principals.len());
         let mut roles = Vec::<Entity>::new();
-        for principal in request.principals.iter() {
+        for principal in &request.principals {
             let BuiltPrincipalUnsigned { principal, parents } =
                 self.build_principal_unsigned(principal, &built_entities)?;
 
             built_entities.insert(&principal.uid());
-            for role in roles.iter() {
+            for role in &roles {
                 built_entities.insert(&role.uid());
             }
 
@@ -298,7 +304,7 @@ pub(super) struct TokenPrincipalMapping {
     principal: String,
     /// The name of the attribute of the token
     attr_name: String,
-    /// An EntityUID reference to the token
+    /// An `EntityUID` reference to the token
     expr: RestrictedExpression,
 }
 
@@ -345,7 +351,7 @@ mod test {
 
     /// Helper function for asserting entities for better error readability
     #[track_caller]
-    pub(super) fn assert_entity_eq(entity: &Entity, expected: Value, schema: Option<&Schema>) {
+    pub(super) fn assert_entity_eq(entity: &Entity, expected: &Value, schema: Option<&Schema>) {
         let entity_json = entity
             .clone()
             .to_json_value()
@@ -360,7 +366,7 @@ mod test {
         // Check if the entity has the correct attributes
         let expected_attrs =
             serde_json::from_value::<HashMap<String, Value>>(expected["attrs"].clone()).unwrap();
-        for (name, expected_val) in expected_attrs.iter() {
+        for (name, expected_val) in &expected_attrs {
             assert_eq!(
                 &entity_json["attrs"][name],
                 expected_val,
@@ -392,7 +398,7 @@ mod test {
 
     #[test]
     fn can_build_principals_with_custom_types() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity Resource;
@@ -405,7 +411,7 @@ mod test {
             namespace AnotherNamespace {
                 entity CustomToken;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("parse schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("parse validation schema");
@@ -485,7 +491,7 @@ mod test {
 
         assert_entity_eq(
             &entities.workload.expect("has workload entity"),
-            json!({
+            &json!({
                 "uid": {"type": "Jans::CustomWorkload", "id": "some_aud"},
                 "attrs": {
                     "access_token": {"__entity": {
@@ -504,6 +510,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn can_build_entities_with_default_entities() {
         // Test that default entities are properly included in the authorization flow
         use crate::authz::request::EntityData;
@@ -513,14 +520,14 @@ mod test {
         use url::Url;
 
         // Create a simple schema
-        let schema_src = r#"
+        let schema_src = r"
         namespace Jans {
           entity DefaultEntity;
           entity User;
           entity Issue;
           entity TrustedIssuer;
         }
-        "#;
+        ";
 
         let schema = ValidatorSchema::from_str(schema_src).expect("should parse schema");
 
@@ -707,8 +714,14 @@ mod test {
             .get("products")
             .and_then(|v| v.as_object())
             .expect("should have products");
-        assert_eq!(products.get("15020").and_then(|v| v.as_i64()), Some(995));
-        assert_eq!(products.get("15050").and_then(|v| v.as_i64()), Some(1495));
+        assert_eq!(
+            products.get("15020").and_then(serde_json::Value::as_i64),
+            Some(995)
+        );
+        assert_eq!(
+            products.get("15050").and_then(serde_json::Value::as_i64),
+            Some(1495)
+        );
     }
 
     #[test]
@@ -718,7 +731,7 @@ mod test {
         // Test that request entities override default entities when there are UID conflicts
 
         // Create a schema
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity DefaultEntity;
@@ -731,7 +744,7 @@ mod test {
             namespace Jans2 {
                 entity TrustedIssuer;
             }   
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -837,6 +850,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_default_entities_affect_authorization() {
         use url::Url;
 
@@ -844,7 +858,7 @@ mod test {
         // This demonstrates that default entities are not just merged but actively used
 
         // Create a schema with a policy that references default entities
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity User;
@@ -858,7 +872,7 @@ mod test {
                     is_active: Bool
                 };
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -960,7 +974,9 @@ mod test {
             Some("Organization 1")
         );
         assert_eq!(
-            org_attrs.get("is_active").and_then(|v| v.as_bool()),
+            org_attrs
+                .get("is_active")
+                .and_then(serde_json::Value::as_bool),
             Some(true)
         );
 
@@ -1026,6 +1042,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_default_entity_as_principal() {
         use url::Url;
 
@@ -1033,7 +1050,7 @@ mod test {
         // This demonstrates a key use case where default entities represent system actors
 
         // Create a schema with entities that can act as principals
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity User = {
@@ -1051,7 +1068,7 @@ mod test {
                     access_level: String
                 };
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -1165,7 +1182,9 @@ mod test {
             Some("Backup Service")
         );
         assert_eq!(
-            sa1_attrs.get("is_active").and_then(|v| v.as_bool()),
+            sa1_attrs
+                .get("is_active")
+                .and_then(serde_json::Value::as_bool),
             Some(true)
         );
 

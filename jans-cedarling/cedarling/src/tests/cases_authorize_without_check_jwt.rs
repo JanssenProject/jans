@@ -571,11 +571,7 @@ async fn only_person_permit() {
         "request result should be allowed for person"
     );
 
-    cmp_policy!(
-        result.person,
-        ["2"],
-        "reason of forbid person should '2'"
-    );
+    cmp_policy!(result.person, ["2"], "reason of forbid person should '2'");
 
     assert!(!result.decision, "request result should be not allowed");
 }
@@ -726,11 +722,7 @@ async fn only_workload_and_person_permit() {
         "request result should be allowed for person"
     );
 
-    cmp_policy!(
-        result.person,
-        ["2"],
-        "reason of permit person should '2'"
-    );
+    cmp_policy!(result.person, ["2"], "reason of permit person should '2'");
 
     assert!(result.decision, "request result should be allowed");
 }

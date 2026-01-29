@@ -40,9 +40,8 @@ pub(super) fn validate_id_tkn_trust_mode(
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
 
-    let userinfo_tkn = match tokens.get("userinfo_token") {
-        Some(token) => token,
-        None => return Ok(()),
+    let Some(userinfo_tkn) = tokens.get("userinfo_token") else {
+        return Ok(());
     };
 
     if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
@@ -95,7 +94,7 @@ fn get_tkn_claim_as_str(
         .and_then(|claim| {
             claim
                 .as_str()
-                .map(|s| s.into())
+                .map(std::convert::Into::into)
                 .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.name.clone(), e))
         })
 }
@@ -138,9 +137,8 @@ mod test {
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingAccessToken),
-            "expected error due to missing access token, got: {:?}",
-            err
-        )
+            "expected error due to missing access token, got: {err:?}"
+        );
     }
 
     #[test]
@@ -167,9 +165,8 @@ mod test {
                     if claim_name == "client_id" &&
                         tkn_name == "access_token"
             ),
-            "expected error due to access token missing a required claim, got: {:?}",
-            err
-        )
+            "expected error due to access token missing a required claim, got: {err:?}"
+        );
     }
 
     #[test]
@@ -184,9 +181,8 @@ mod test {
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingIdToken),
-            "expected error due to missing id token, got: {:?}",
-            err
-        )
+            "expected error due to missing id token, got: {err:?}"
+        );
     }
 
     #[test]
@@ -215,9 +211,8 @@ mod test {
                     if claim_name == "aud" &&
                         tkn_name == "id_token"
             ),
-            "expected error due to id token missing a required claim, got: {:?}",
-            err
-        )
+            "expected error due to id token missing a required claim, got: {err:?}"
+        );
     }
 
     #[test]
@@ -240,9 +235,8 @@ mod test {
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::AccessTokenClientIdMismatch),
-            "expected error due to the access_token's `client_id` not matching with the id_token's `aud`, got: {:?}",
-            err
-        )
+            "expected error due to the access_token's `client_id` not matching with the id_token's `aud`, got: {err:?}"
+        );
     }
 
     #[test]
@@ -302,9 +296,8 @@ mod test {
                     if claim_name == "aud" &&
                         tkn_name == "userinfo_token"
             ),
-            "expected error due to id token missing a required claim, got: {:?}",
-            err
-        )
+            "expected error due to id token missing a required claim, got: {err:?}"
+        );
     }
 
     #[test]
@@ -333,8 +326,7 @@ mod test {
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::ClientIdUserinfoAudMismatch),
-            "expected error due to userinfo token aud not containing client_id, got: {:?}",
-            err
-        )
+            "expected error due to userinfo token aud not containing client_id, got: {err:?}"
+        );
     }
 }

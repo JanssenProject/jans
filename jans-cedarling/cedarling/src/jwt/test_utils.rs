@@ -97,7 +97,7 @@ pub(crate) fn generate_token_using_claims(
     Ok(jwt::encode(&header, &claims, &keypair.encoding_key)?)
 }
 
-/// Generates a JwkSet from the given keys
+/// Generates a `JwkSet` from the given keys
 pub(crate) fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
     let keys = keys
         .iter()
@@ -193,8 +193,8 @@ impl MockServer {
         let endpoints = MockEndpoints::new_with_defaults(&mut server, &keys);
 
         Ok(Self {
-            server,
             endpoints,
+            server,
             keys,
         })
     }

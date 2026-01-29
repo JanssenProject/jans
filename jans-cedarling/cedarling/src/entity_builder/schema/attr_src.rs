@@ -57,11 +57,7 @@ impl AttrSrc {
                     BuildAttrSrcErrorKind::InvalidType(value.clone()).while_building(attr_name)
                 );
             },
-            Type::True => Self::JwtClaim(TknClaimAttrSrc {
-                claim: attr_name.to_string(),
-                expected_type: ExpectedClaimType::Bool,
-            }),
-            Type::False => Self::JwtClaim(TknClaimAttrSrc {
+            Type::True | Type::False => Self::JwtClaim(TknClaimAttrSrc {
                 claim: attr_name.to_string(),
                 expected_type: ExpectedClaimType::Bool,
             }),
@@ -183,8 +179,7 @@ impl From<&Type> for ExpectedClaimType {
     fn from(value: &Type) -> Self {
         match value {
             Type::Never => ExpectedClaimType::Null,
-            Type::True => ExpectedClaimType::Bool,
-            Type::False => ExpectedClaimType::Bool,
+            Type::True | Type::False => ExpectedClaimType::Bool,
             Type::Primitive { primitive_type } => primitive_type.into(),
             Type::Set { element_type } => element_type
                 .as_ref()

@@ -30,7 +30,7 @@ use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
 
-/// Contains an Arc<RwLock<_>> internally so clone should be fine
+/// Contains an `Arc<RwLock<_>>` internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub(crate) struct StatusListCache {
     pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusList>>>,
@@ -103,7 +103,7 @@ impl StatusListCache {
                 logger,
                 // callback is called on updated status list
                 move || {
-                    token_cache.invalidate_by_index(IndexKey::Iss(iss.clone()));
+                    token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
                 },
             ));
         }
@@ -211,7 +211,7 @@ async fn keep_status_list_updated<F>(
             if let Some(list) = lists.get_mut(status_list_url.as_str()) {
                 *list = updated_status_list;
                 // call callback on updated status list
-                cb()
+                cb();
             } else {
                 logger.log_any(JwtLogEntry::new(
                     format!(
@@ -221,7 +221,7 @@ async fn keep_status_list_updated<F>(
                     Some(LogLevel::ERROR),
                 ));
                 return;
-            };
+            }
         }
     }
 }
@@ -252,7 +252,7 @@ mod test {
         let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), &None)
+            .get_keys_using_oidc(&mock_server.openid_config(), None)
             .await
             .unwrap();
         // we initialize the status list with a 1 sec ttl

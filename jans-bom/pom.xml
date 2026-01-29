@@ -25,6 +25,8 @@
 		<httpclient.version>4.5.14</httpclient.version>
 
 		<resteasy.version>6.2.12.Final</resteasy.version>
+		<grpc.version>1.78.0</grpc.version>
+		<grpc-bridge.version>1.0.0.Final</grpc-bridge.version>
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		<weld.version>4.0.3.Final</weld.version>
 	
@@ -685,8 +687,26 @@
 			    <groupId>org.jboss.resteasy</groupId>
 			    <artifactId>resteasy-bom</artifactId>
 			    <version>${resteasy.version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- gRPC -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-bom</artifactId>
+				<version>${grpc.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- RESTEasy gRPC Bridge -->
+			<dependency>
+				<groupId>dev.resteasy.grpc</groupId>
+				<artifactId>resteasy-grpc-bom</artifactId>
+				<version>${grpc-bridge.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<!-- JSON -->
@@ -1098,6 +1118,16 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.xolstice.maven.plugins</groupId>
+					<artifactId>protobuf-maven-plugin</artifactId>
+					<version>0.6.1</version>
+				</plugin>
+				<plugin>
+					<groupId>kr.motd.maven</groupId>
+					<artifactId>os-maven-plugin</artifactId>
+					<version>1.7.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

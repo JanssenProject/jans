@@ -32,9 +32,9 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.output_folder = os.path.join(Config.output_dir, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')
-        self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf')
+        self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf.mako')
         self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
-        self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf')
+        self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf.mako')
 
         self.server_root = '/var/www/html'
 
@@ -178,19 +178,19 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         # CentOS 7.* + systemd + apache 2.4
         if self.service_name == 'httpd' and self.apache_version == "2.4":
-            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_jans.conf')
+            self.copyFile(self.un_mako_fn(self.apache2_24_conf), '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.un_mako_fn(self.apache2_ssl_24_conf), '/etc/httpd/conf.d/https_jans.conf')
 
         if base.os_type == 'suse':
-            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
+            self.copyFile(self.un_mako_fn(self.apache2_ssl_conf), self.https_jans_fn)
 
         elif base.clone_type == 'rpm' and base.os_initdaemon == 'init':
-            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
+            self.copyFile(self.un_mako_fn(self.apache2_conf), '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.un_mako_fn(self.apache2_ssl_conf), self.https_jans_fn)
 
         elif base.clone_type == 'deb':
-            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
-            self.run([paths.cmd_ln, '-s', self.https_jans_fn,
+            self.copyFile(self.un_mako_fn(self.apache2_ssl_conf), self.https_jans_fn)
+            self.run([paths.cmd_ln, '-s', self.un_mako_fn(self.https_jans_fn),
                       '/etc/apache2/sites-enabled/https_jans.conf'])
 
     def ob_mtls_config(self):
