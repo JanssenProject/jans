@@ -31,7 +31,7 @@ impl<'de> Deserialize<'de> for IssClaim {
     {
         struct IssClaimVisitor;
 
-        impl<'de> Visitor<'de> for IssClaimVisitor {
+        impl Visitor<'_> for IssClaimVisitor {
             type Value = IssClaim;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

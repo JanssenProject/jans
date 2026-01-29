@@ -31,14 +31,14 @@ impl IssuerIndex {
         index.insert(iss, config);
     }
 
-    /// Get the TrustedIssuer for a given iss claim, if it exists
+    /// Get the `TrustedIssuer` for a given iss claim, if it exists
     pub(super) fn get_trusted_issuer(&self, iss: &IssClaim) -> Option<Arc<TrustedIssuer>> {
         let index = self.index.read().expect(MUTEX_POISONED_ERR);
         index.get(iss).map(|config| config.policy.clone())
     }
 
     /// Find the token metadata key for a given entity type name
-    /// e.g., "Dolphin::Access_Token" -> "access_token"
+    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
     pub(super) fn find_token_metadata_key<'a>(
         &'a self,
         entity_type_name: &'a str,

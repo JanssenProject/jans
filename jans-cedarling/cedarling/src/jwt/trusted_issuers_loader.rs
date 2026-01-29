@@ -46,7 +46,7 @@ impl TrustedIssuerLoader {
             },
             TrustedIssuerLoaderConfig::Async { workers } => {
                 self.load_trusted_issuer_async(trusted_issuers, workers.get())
-                    .await
+                    .await;
             },
         }
 
@@ -77,7 +77,7 @@ impl TrustedIssuerLoader {
                             LogLevel::WARN,
                             None,
                         ))
-                        .set_message(format!("Could not load trusted issuer: {}", issuer_id))
+                        .set_message(format!("Could not load trusted issuer: {issuer_id}"))
                         .set_error(error.to_string()),
                     );
                 }

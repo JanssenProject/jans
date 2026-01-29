@@ -49,9 +49,7 @@ impl JwtValidatorCache {
     ) {
         let iss = iss_config
             .openid_config
-            .as_ref()
-            .map(|oidc| oidc.issuer.clone())
-            .unwrap_or_else(|| iss_config.policy.iss_claim());
+            .as_ref().map_or_else(|| iss_config.policy.iss_claim(), |oidc| oidc.issuer.clone());
 
         for (token_name, tkn_metadata) in &iss_config.policy.token_metadata {
             if !tkn_metadata.trusted {
@@ -216,7 +214,7 @@ pub(crate) enum OwnedTokenKind {
 impl From<&TokenKind<'_>> for OwnedTokenKind {
     fn from(tkn_kind: &TokenKind<'_>) -> Self {
         match tkn_kind {
-            TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput(tkn_name.to_string()),
+            TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput((*tkn_name).to_string()),
             TokenKind::StatusList => Self::StatusList,
             TokenKind::AuthorizeMultiIssuer(tkn_name) => {
                 Self::AuthorizeMultiIssuer(tkn_name.to_string())
@@ -255,7 +253,7 @@ impl ValidatorInfo<'_> {
     /// Creates an [`OwnedValidatorInfo`] for storage.
     pub(crate) fn owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
-            iss: self.iss.map(|iss| iss.to_owned()),
+            iss: self.iss.map(std::borrow::ToOwned::to_owned),
             token_kind: (&self.token_kind).into(),
             algorithm: self.algorithm,
         }
