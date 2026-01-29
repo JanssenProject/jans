@@ -19,7 +19,7 @@ use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
-    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, gen_uuid7,
+    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use build_ctx::*;
 use cedar_policy::{Entities, Entity, EntityUid};
@@ -128,6 +128,17 @@ impl Authz {
 
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
+
+        // Capture pushed data info for logging before context is built
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                count: pushed_data.len(),
+                keys: pushed_data.keys().cloned().collect(),
+            })
+        };
 
         let context = build_context(
             &self.config,
@@ -287,6 +298,7 @@ impl Authz {
                     tokens: tokens_logging_info,
                     decision_time_micro_sec,
                     diagnostics: DiagnosticsSummary::from_diagnostics(&decision_diagnostics),
+                    pushed_data: pushed_data_info.clone(),
                 }
             });
         self.config.log_service.log_fn(decision_log_fn);
@@ -372,6 +384,17 @@ impl Authz {
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
+        // Capture pushed data info for logging before context is built
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                count: pushed_data.len(),
+                keys: pushed_data.keys().cloned().collect(),
+            })
+        };
+
         let context = build_multi_issuer_context(
             request.context.clone().unwrap_or(json!({})),
             &entities_data.tokens,
@@ -452,6 +475,7 @@ impl Authz {
                     tokens: tokens_logging_info.clone(),
                     decision_time_micro_sec,
                     diagnostics: DiagnosticsSummary::from_diagnostics(&multi_diagnostics),
+                    pushed_data: pushed_data_info.clone(),
                 }
             });
         self.config.log_service.log_fn(decision_log_fn);
@@ -521,6 +545,17 @@ impl Authz {
             .map(|p| p.uid())
             .collect::<Vec<EntityUid>>();
         let resource_uid = resource.uid();
+
+        // Capture pushed data info for logging before context is built
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                count: pushed_data.len(),
+                keys: pushed_data.keys().cloned().collect(),
+            })
+        };
 
         let context = build_context(
             &self.config,
@@ -610,6 +645,7 @@ impl Authz {
                 tokens: LogTokensInfo::empty(),
                 decision_time_micro_sec,
                 diagnostics: DiagnosticsSummary::from_diagnostics(&diagnostics),
+                pushed_data: pushed_data_info.clone(),
             });
         self.config.log_service.log_fn(unsigned_decision_log_fn);
 
