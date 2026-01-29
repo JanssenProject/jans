@@ -120,7 +120,7 @@ class Plugin(DialogUtils):
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/AppConfiguration')
-        self.schema_gprc = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/GrpcConfiguration')
+        self.schema_grpc = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/GrpcConfiguration')
         self.schema_cedarling = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/CedarlingConfiguration')
         self.schema_cedarling_policy_sources = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/PolicySource')
 
@@ -134,7 +134,7 @@ class Plugin(DialogUtils):
                         value=self.data.get('grpcConfiguration', {}).get('serverMode', 'bridge'),
                         select_one_option=False
                         ),
-                    jans_help=common_data.app.get_help_from_schema(self.schema_gprc, 'serverMode'),
+                    jans_help=common_data.app.get_help_from_schema(self.schema_grpc, 'serverMode'),
                     style=cli_style.edit_text,
                 ),
 
@@ -144,7 +144,7 @@ class Plugin(DialogUtils):
                     value=self.data.get('grpcConfiguration', {}).get('grpcPort', '50051'),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget,
-                    jans_help=common_data.app.get_help_from_schema(self.schema_gprc, 'grpcPort'),
+                    jans_help=common_data.app.get_help_from_schema(self.schema_grpc, 'grpcPort'),
                     text_type='integer'
                 ),
 
@@ -153,7 +153,7 @@ class Plugin(DialogUtils):
                     name='useTls', 
                     checked=self.data.get('grpcConfiguration', {}).get('useTls', False),
                     style=cli_style.check_box,
-                    jans_help=common_data.app.get_help_from_schema(self.schema_gprc, 'useTls'),
+                    jans_help=common_data.app.get_help_from_schema(self.schema_grpc, 'useTls'),
                     widget_style=cli_style.black_bg_widget
                 )
             ]
@@ -346,6 +346,7 @@ class Plugin(DialogUtils):
                 value=self.data.get('metricReporterKeepDataDays', '15'),
                 style=cli_style.edit_text,
                 widget_style=cli_style.black_bg_widget,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'metricReporterKeepDataDays'),
                 text_type='integer'
             ),
 
@@ -435,7 +436,7 @@ class Plugin(DialogUtils):
 
     def save(self):
 
-        async def lock_config_coroutine():
+        async def lock_config_coroutine() -> None:
 
             lock_config = self.make_data_from_dialog(tabs={'lock_config': self.main_widgets})
             grpc_configuration = self.make_data_from_dialog(tabs={'grpc_configuration': self.grpc_configuration_widgets})
