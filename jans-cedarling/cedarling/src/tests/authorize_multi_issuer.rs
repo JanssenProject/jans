@@ -18,6 +18,10 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
     get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |config| {
+            // for debugging purposes set log level to DEBUG and log to stdout
+            // config.log_config.log_level = crate::LogLevel::DEBUG;
+            // config.log_config.log_type =
+            //     crate::LogTypeConfig::StdOut(crate::log::StdOutLoggerMode::Immediate);
             // Disable workload and user entity building for multi-issuer tests
             // since the policies work with token entities in context, not principal entities
             config.entity_builder_config.build_workload = false;
@@ -27,6 +31,54 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
         },
     )
     .await
+}
+
+/// Test single Dolphin user token authorization with `role_mapping` claim
+#[tokio::test]
+async fn test_single_dolphin_userinfo_token_role_mapping() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    // Create a dolphin_token for the user entity
+    let dolphin_user_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_123",
+        "jti": "dolphin_user_123",
+        "client_id": "dolphin_client_123",
+        "aud": "dolphin_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
+        "role": ["admin", "user"]
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![TokenInput::new(
+            "Dolphin::Userinfo_token".to_string(),
+            dolphin_user_token,
+        )],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Acme::Resource",
+                    "id": "ApprovedDolphinFoods"
+                },
+                "name": "Approved Dolphin Foods"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"CheckRoleFoodApprover\"".to_string(),
+        None,
+    );
+
+    let authz_result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("Dolphin Userinfo_token token authorization should succeed");
+
+    assert!(
+        authz_result.decision,
+        "Authorization should be ALLOW for dolphin userinfo token, DENY means role mapping failed"
+    );
 }
 
 /// Test single Dolphin access token authorization with location claim
@@ -42,8 +94,8 @@ async fn test_single_dolphin_access_token_authorization() {
         "aud": "dolphin_audience",
         "location": ["miami", "orlando"],
         "scope": ["read", "write"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     // Create a dolphin_token for the user entity
@@ -53,8 +105,8 @@ async fn test_single_dolphin_access_token_authorization() {
         "jti": "dolphin_user_123",
         "client_id": "dolphin_client_123",
         "aud": "dolphin_audience",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -88,7 +140,7 @@ async fn test_single_dolphin_access_token_authorization() {
     );
 }
 
-/// Test authorize_multi_issuer single Dolphin access token.
+/// Test `authorize_multi_issuer` single Dolphin access token.
 /// And use resource from default entities.
 #[tokio::test]
 async fn test_authorize_multi_issuer_single_token_with_default_resource() {
@@ -102,8 +154,8 @@ async fn test_authorize_multi_issuer_single_token_with_default_resource() {
         "aud": "dolphin_audience",
         "location": ["miami", "orlando"],
         "scope": ["read", "write"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     // Create a dolphin_token for the user entity
@@ -113,8 +165,8 @@ async fn test_authorize_multi_issuer_single_token_with_default_resource() {
         "jti": "dolphin_user_123",
         "client_id": "dolphin_client_123",
         "aud": "dolphin_audience",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -158,8 +210,8 @@ async fn test_single_acme_access_token_authorization() {
         "client_id": "acme_client_456",
         "scope": ["read:wiki", "write:profile"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -205,8 +257,8 @@ async fn test_single_dolphin_custom_token_authorization() {
         "client_id": "dolphin_custom_client_789",
         "aud": "dolphin_custom_audience",
         "waiver": ["signed", "approved"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -252,8 +304,8 @@ async fn test_multiple_tokens_from_different_issuers() {
         "client_id": "acme_multi_client_123",
         "aud": "acme_multi_audience",
         "scope": ["read:wiki", "write:profile"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_multi_token = generate_token_using_claims(json!({
@@ -263,8 +315,8 @@ async fn test_multiple_tokens_from_different_issuers() {
         "client_id": "dolphin_multi_client_456",
         "aud": "dolphin_multi_audience",
         "location": ["miami"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -309,8 +361,8 @@ async fn test_or_logic_acme_token_has_required_scope() {
         "client_id": "acme_client_1",
         "scope": ["write:documents", "read:profile"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -355,8 +407,8 @@ async fn test_or_logic_dolphin_token_has_required_scope() {
         "client_id": "dolphin_client_2",
         "scope": ["write:documents"],
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -400,8 +452,8 @@ async fn test_or_logic_both_tokens_have_scope() {
         "client_id": "acme_client_3",
         "scope": ["write:documents"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_token = generate_token_using_claims(json!({
@@ -411,8 +463,8 @@ async fn test_or_logic_both_tokens_have_scope() {
         "client_id": "dolphin_client_3",
         "scope": ["write:documents"],
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -457,8 +509,8 @@ async fn test_or_logic_neither_token_has_scope() {
         "client_id": "acme_client_4",
         "scope": ["read:profile"],  // Wrong scope
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_token_no_scope = generate_token_using_claims(json!({
@@ -468,8 +520,8 @@ async fn test_or_logic_neither_token_has_scope() {
         "client_id": "dolphin_client_4",
         "scope": ["read:data"],  // Wrong scope
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -513,8 +565,8 @@ async fn test_and_logic_both_tokens_with_required_attributes() {
         "client_id": "acme_client_5",
         "scope": ["trade:vote"],  // Required scope
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_member_token = generate_token_using_claims(json!({
@@ -524,8 +576,8 @@ async fn test_and_logic_both_tokens_with_required_attributes() {
         "client_id": "dolphin_client_5",
         "member_status": ["verified"],  // Required member status
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -569,8 +621,8 @@ async fn test_and_logic_only_one_token_present() {
         "client_id": "acme_client_6",
         "scope": ["trade:vote"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -614,8 +666,8 @@ async fn test_and_logic_both_tokens_missing_required_attributes() {
         "client_id": "acme_client_7",
         "scope": ["read:profile"],  // Wrong scope
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_wrong_status = generate_token_using_claims(json!({
@@ -625,8 +677,8 @@ async fn test_and_logic_both_tokens_missing_required_attributes() {
         "client_id": "dolphin_client_7",
         "member_status": ["pending"],  // Wrong status
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -659,7 +711,7 @@ async fn test_and_logic_both_tokens_missing_required_attributes() {
     );
 }
 
-/// Test custom DolphinToken with waiver claim
+/// Test custom `DolphinToken` with waiver claim
 #[tokio::test]
 async fn test_custom_dolphin_token_with_waiver() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
@@ -670,8 +722,8 @@ async fn test_custom_dolphin_token_with_waiver() {
         "client_id": "dolphin_client_1",
         "aud": "dolphin-audience",
         "waiver": ["signed", "approved", "notarized"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -716,8 +768,8 @@ async fn test_custom_token_without_required_claim() {
         "client_id": "dolphin_client_2",
         "aud": "dolphin-audience",
         "waiver": ["unsigned"],  // Wrong waiver status
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -762,8 +814,8 @@ async fn test_multiple_custom_token_types_together() {
         "client_id": "acme_client_3",
         "scope": ["read:wiki"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_custom = generate_token_using_claims(json!({
@@ -773,8 +825,8 @@ async fn test_multiple_custom_token_types_together() {
         "client_id": "dolphin_client_3",
         "aud": "dolphin-audience",
         "waiver": ["signed"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -821,8 +873,8 @@ async fn test_custom_token_with_complex_nested_claims() {
         "training_certificates": ["marine_biology", "safety", "first_aid"],
         "clearance_level": ["3"],
         "experience_years": ["5"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -866,8 +918,8 @@ async fn test_mix_of_standard_and_custom_tokens() {
         "client_id": "acme_client_5",
         "scope": ["write:documents"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_custom = generate_token_using_claims(json!({
@@ -879,8 +931,8 @@ async fn test_mix_of_standard_and_custom_tokens() {
         "waiver": ["signed"],
         "marine_certification": ["advanced"],
         "insurance_verified": ["yes"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     // Test with ManageDocuments action which accepts tokens from either issuer
@@ -952,8 +1004,8 @@ async fn test_validation_non_deterministic_tokens() {
         "client_id": "acme_client_1",
         "scope": ["write:documents"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let acme_token_2 = generate_token_using_claims(json!({
@@ -963,8 +1015,8 @@ async fn test_validation_non_deterministic_tokens() {
         "client_id": "acme_client_2",
         "scope": ["read:profile"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -1009,8 +1061,8 @@ async fn test_validation_same_type_different_issuers() {
         "client_id": "acme_client_3",
         "scope": ["write:documents"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_access = generate_token_using_claims(json!({
@@ -1020,8 +1072,8 @@ async fn test_validation_same_type_different_issuers() {
         "client_id": "dolphin_client_3",
         "scope": ["write:documents"],
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -1066,8 +1118,8 @@ async fn test_validation_different_types_same_issuer() {
         "client_id": "dolphin_client_4",
         "scope": ["write:documents"],
         "aud": "dolphin-client",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let dolphin_custom_token = generate_token_using_claims(json!({
@@ -1077,8 +1129,8 @@ async fn test_validation_different_types_same_issuer() {
         "client_id": "dolphin_client_4",
         "aud": "dolphin-client",
         "waiver": ["signed"],
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -1124,8 +1176,8 @@ async fn test_validation_graceful_degradation_invalid_token() {
         "client_id": "acme_client_5",
         "scope": ["write:documents"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request = AuthorizeMultiIssuerRequest::new_with_fields(
@@ -1158,7 +1210,7 @@ async fn test_validation_graceful_degradation_invalid_token() {
     );
 }
 
-/// Test validation - TokenInput with empty mapping string should fail
+/// Test validation - `TokenInput` with empty mapping string should fail
 // Graceful degradation: invalid tokens are ignored, valid tokens are processed
 #[tokio::test]
 async fn test_validation_empty_mapping_string() {
@@ -1170,12 +1222,12 @@ async fn test_validation_empty_mapping_string() {
         "client_id": "acme_client_6",
         "scope": ["write:documents"],
         "aud": "my-client-id",
-        "exp": 2000000000,
-        "iat": 1516239022
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022
     }));
 
     let request_result = AuthorizeMultiIssuerRequest::new_with_fields(
-        vec![TokenInput::new("".to_string(), token_for_validation)], // Empty mapping
+        vec![TokenInput::new(String::new(), token_for_validation)], // Empty mapping
         EntityData::from_json(
             &json!({
                 "cedar_entity_mapping": {
@@ -1199,14 +1251,14 @@ async fn test_validation_empty_mapping_string() {
     );
 }
 
-/// Test validation - TokenInput with empty payload should fail
+/// Test validation - `TokenInput` with empty payload should fail
 #[tokio::test]
 async fn test_validation_empty_payload() {
     let cedarling = get_cedarling_for_multi_issuer_tests().await;
     let request_result = AuthorizeMultiIssuerRequest::new_with_fields(
         vec![TokenInput::new(
             "Acme::Access_Token".to_string(),
-            "".to_string(),
+            String::new(),
         )], // Empty payload
         EntityData::from_json(
             &json!({

@@ -14,7 +14,6 @@ use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::{
     PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
 };
-use crate::data::DataStore;
 use crate::entity_builder::*;
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
@@ -33,13 +32,13 @@ pub(crate) struct ServiceFactory<'a> {
 /// Structure to store singleton of entities.
 #[derive(Clone, Default)]
 struct SingletonContainer {
-    entity_builder_service: Option<Arc<EntityBuilder>>,
+    entity_builder: Option<Arc<EntityBuilder>>,
     jwt_service: Option<Arc<JwtService>>,
     authz_service: Option<Arc<Authz>>,
 }
 
 impl<'a> ServiceFactory<'a> {
-    /// Create new instance of ServiceFactory.
+    /// Create new instance of [`ServiceFactory`].
     pub(crate) fn new(
         bootstrap_config: &'a BootstrapConfig,
         service_config: ServiceConfig,
@@ -51,7 +50,7 @@ impl<'a> ServiceFactory<'a> {
             service_config,
             log_service,
             data_store,
-            container: Default::default(),
+            container: SingletonContainer::default(),
         }
     }
 
@@ -94,7 +93,7 @@ impl<'a> ServiceFactory<'a> {
 
     // get jwt service
     fn entity_builder(&mut self) -> Result<Arc<EntityBuilder>, ServiceInitError> {
-        if let Some(entity_builder) = &self.container.entity_builder_service {
+        if let Some(entity_builder) = &self.container.entity_builder {
             return Ok(entity_builder.clone());
         }
 
@@ -118,7 +117,7 @@ impl<'a> ServiceFactory<'a> {
         let policy_store = self.policy_store()?;
 
         let trusted_issuers = policy_store.trusted_issuers.clone().unwrap_or_default();
-        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(logger));
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, Some(&logger));
         let schema = &policy_store.schema.validator_schema;
         let entity_builder = EntityBuilder::new(
             config.clone(),
@@ -127,7 +126,7 @@ impl<'a> ServiceFactory<'a> {
             default_entities_with_warn.entities().to_owned(),
         )?;
         let service = Arc::new(entity_builder);
-        self.container.entity_builder_service = Some(service.clone());
+        self.container.entity_builder = Some(service.clone());
         Ok(service)
     }
 
@@ -144,7 +143,7 @@ impl<'a> ServiceFactory<'a> {
                 authorization: self.bootstrap_config.authorization_config.clone(),
                 data_store: self.data_store.clone(),
             };
-            let service = Arc::new(Authz::new(config)?);
+            let service = Arc::new(Authz::new(config));
             self.container.authz_service = Some(service.clone());
             Ok(service)
         }

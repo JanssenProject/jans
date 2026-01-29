@@ -6,7 +6,11 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, Request,
+};
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 
@@ -41,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut options = pprof::flamegraph::Options::default();
         options.image_width = Some(3000);
         report.flamegraph_with_options(file, &mut options).unwrap();
-    };
+    }
 
     Ok(())
 }

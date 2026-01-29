@@ -37,7 +37,7 @@ impl MemoryLogger {
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
     ) -> Self {
-        let default_config: ConfigSparKV = Default::default();
+        let default_config: ConfigSparKV = ConfigSparKV::default();
 
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::new(
@@ -61,14 +61,14 @@ impl MemoryLogger {
         }
     }
 
-    fn log_entry<T: Loggable>(&self, entry: T) {
+    fn log_entry<T: Loggable>(&self, entry: &T) {
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
-        let json = to_json_value(&entry);
+        let json = to_json_value(entry);
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
         let set_result = storage.set(&entry_id, json, index_keys.as_slice());
         let err = match set_result {
-            Ok(_) => return,
+            Ok(()) => return,
             Err(Error::CapacityExceeded) => {
                 // remove oldest key and try again
 
@@ -83,7 +83,7 @@ impl MemoryLogger {
                 // It should be rare case, so instead of cloning the whole entry,
                 // in success case we convert raw value to json (here).
                 // Or we should use Rc<LogEntry> and use Rc::clone() instead.
-                let json = to_json_value(&entry);
+                let json = to_json_value(entry);
 
                 // set_again
                 if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
@@ -97,12 +97,12 @@ impl MemoryLogger {
         fallback::log(
             &format!("could not store LogEntry to memory: {err:?}"),
             &self.pdp_id,
-            &self.app_name,
+            self.app_name.as_ref(),
         );
     }
 }
 
-/// In case of failure in MemoryLogger, log to stderr where supported.
+/// In case of failure in [`MemoryLogger`], log to stderr where supported.
 /// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
 mod fallback {
     use crate::LogLevel;
@@ -111,7 +111,7 @@ mod fallback {
     use crate::log::log_strategy::LogStrategyLogger;
     use crate::log::stdout_logger::StdOutLogger;
 
-    /// conform to Loggable requirement imposed by LogStrategy
+    /// conform to Loggable requirement imposed by [`LogStrategy`]
     #[derive(serde::Serialize, Clone)]
     struct StrWrap(String);
 
@@ -144,9 +144,11 @@ mod fallback {
     /// # Panics
     ///
     /// Panics when:
-    /// - A runtime to initialize a new LogStrategy could not be built.
+    /// - A runtime to initialize a new [`LogStrategy`] could not be built.
     /// - A fallback logger could not be initialized.
-    pub(super) fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
+    pub(super) fn log(msg: &str, pdp_id: &PdpID, app_name: Option<&ApplicationName>) {
+        use crate::log::interface::LogWriter;
+
         // level is so that all messages passed here are logged.
         let logger = StdOutLogger::new(LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
@@ -154,13 +156,12 @@ mod fallback {
         let log_strategy = crate::log::LogStrategy::new_with_logger(
             LogStrategyLogger::StdOut(logger),
             *pdp_id,
-            app_name.clone(),
+            app_name.cloned(),
             None,
         );
 
-        use crate::log::interface::LogWriter;
         // a string is always serializable
-        log_strategy.log_any(StrWrap(msg.to_string()))
+        log_strategy.log_any(StrWrap(msg.to_string()));
     }
 }
 
@@ -183,7 +184,7 @@ impl LogWriter for MemoryLogger {
             return;
         }
 
-        self.log_entry(entry)
+        self.log_entry(&entry);
     }
 
     fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
@@ -193,7 +194,7 @@ impl LogWriter for MemoryLogger {
     {
         if log_fn.can_log(self.log_level) {
             let entry = log_fn.build();
-            self.log_entry(entry);
+            self.log_entry(&entry);
         }
     }
 }
@@ -229,7 +230,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_by_index_key(tag)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 
@@ -238,7 +239,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_by_index_key(request_id)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 
@@ -253,7 +254,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_by_index_key(&key)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 }
@@ -289,7 +290,7 @@ mod tests {
                 action: "test_action".to_string(),
                 resource: "test_resource".to_string(),
                 context: serde_json::json!({}),
-                authorize_info: Default::default(),
+                authorize_info: Vec::default(),
                 authorized: true,
                 entities: serde_json::json!({}),
             });
@@ -445,7 +446,7 @@ mod tests {
 
     #[test]
     fn test_max_items_config() {
-        let default_config: ConfigSparKV = Default::default();
+        let default_config: ConfigSparKV = ConfigSparKV::default();
 
         // Test default value when None
         let logger = MemoryLogger::new(
@@ -492,7 +493,7 @@ mod tests {
 
     #[test]
     fn test_max_item_size_config() {
-        let default_config: ConfigSparKV = Default::default();
+        let default_config: ConfigSparKV = ConfigSparKV::default();
 
         // Test default value when None
         let logger = MemoryLogger::new(

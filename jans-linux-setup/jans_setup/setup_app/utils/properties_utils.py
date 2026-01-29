@@ -433,7 +433,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance:
             return
 
-        print('Chose Backend Type:')
+        print('Choose Backend Type:')
 
         backend_types = [
                     BackendStrings.LOCAL_PGSQL,

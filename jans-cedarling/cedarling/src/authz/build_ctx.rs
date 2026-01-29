@@ -51,7 +51,7 @@ pub(super) fn build_context(
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
             Attribute::Record { attrs, .. } => {
-                for (key, attr) in attrs.iter() {
+                for (key, attr) in attrs {
                     if let Some(entity_ref) =
                         build_entity_refs_from_attr(&namespace, attr, build_entities, json_schema)?
                     {
@@ -66,7 +66,7 @@ pub(super) fn build_context(
                 {
                     match attr {
                         Attribute::Record { attrs, .. } => {
-                            for (key, attr) in attrs.iter() {
+                            for (key, attr) in attrs {
                                 if let Some(entity_ref) = build_entity_refs_from_attr(
                                     &namespace,
                                     attr,
@@ -102,7 +102,7 @@ pub(super) fn build_context(
         ctx_entity_refs["data"] = data_value;
     }
 
-    let context = merge_json_values(request_context, ctx_entity_refs)?;
+    let context = merge_json_values(request_context, &ctx_entity_refs)?;
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
@@ -112,7 +112,7 @@ pub(super) fn build_context(
 /// Constructs the authorization context for multi-issuer requests with token collection
 ///
 /// This function implements the design document's token collection context structure:
-/// - Individual token entities are accessible via context.tokens.{issuer}_{token_type}
+/// - Individual token entities are accessible via `context.tokens.{issuer}_{token_type}`
 /// - All JWT claims are stored as entity tags (Set of String by default)
 /// - Provides ergonomic policy syntax for cross-token validation
 ///
@@ -240,7 +240,7 @@ fn map_entity_id(
     }
 }
 
-fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {
+fn merge_json_values(mut base: Value, other: &Value) -> Result<Value, BuildContextError> {
     if let (Some(base_map), Some(additional_map)) = (base.as_object_mut(), other.as_object()) {
         for (key, value) in additional_map {
             if let Entry::Vacant(entry) = base_map.entry(key) {
@@ -264,7 +264,7 @@ mod test {
         let obj2 = json!({ "c": 3, "d": 4 });
         let expected = json!({"a": 1, "b": 2, "c": 3, "d": 4});
 
-        let result = merge_json_values(obj1, obj2).expect("Should merge JSON objects");
+        let result = merge_json_values(obj1, &obj2).expect("Should merge JSON objects");
 
         assert_eq!(result, expected);
     }
@@ -274,7 +274,7 @@ mod test {
         // Test for only two objects
         let obj1 = json!({ "a": 1, "b": 2 });
         let obj2 = json!({ "b": 3, "c": 4 });
-        let result = merge_json_values(obj1, obj2);
+        let result = merge_json_values(obj1, &obj2);
 
         assert!(
             matches!(result, Err(BuildContextError::KeyConflict(key)) if key.as_str() == "b"),

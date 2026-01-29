@@ -18,7 +18,7 @@ well as valid credentials that have access to the Janssen instance.
 terraform {
   required_version = ">= 0.12.0"
   required_providers {
-    jans = {
+    janssen = {
       source = "JanssenProject/jans"
       version = "1.4.0"
     }
@@ -39,7 +39,7 @@ attached to it, or else you might not be able to manage all resources.
 
 Every instance of Janssen comes with a set of configurations, which are valid
 for the whole instance. These resources cannot be created or destroyed, as they
-are always present in a Janssen instance. Instead, they can be imported and
+are always present in a Janssen instance. Instead, they can be imported and 
 updated. The creation of such a resource will result in an error. Deletion on
 the other hand will result in the resource being removed from the state file.
 

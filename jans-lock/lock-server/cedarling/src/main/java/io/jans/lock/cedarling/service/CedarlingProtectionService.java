@@ -1,4 +1,4 @@
-package io.jans.lock.cedarling.service.filter;
+package io.jans.lock.cedarling.service;
 
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -31,7 +31,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.cedarling.model.CedarlingPermission;
-import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.util.StringHelper;
@@ -40,9 +39,7 @@ import io.jans.util.exception.MissingResourceException;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
@@ -71,10 +68,9 @@ public class CedarlingProtectionService implements CedarlingProtection {
         }
     }
 
-    public Response processAuthorization(ContainerRequestContext requestContext, HttpHeaders headers, ResourceInfo resourceInfo) {
+    public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
         try {
-            String token = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
-            boolean authFound = StringUtils.isNotEmpty(token);
+            boolean authFound = StringUtils.isNotEmpty(bearerToken);
             log.info("Authorization header {} found", authFound ? "" : "not");
             
             if (!authFound) {
@@ -83,16 +79,16 @@ public class CedarlingProtectionService implements CedarlingProtection {
                 return simpleResponse(UNAUTHORIZED, "No authorization header found");
             }
             
-            token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
+            log.debug("Validating token {}", bearerToken);
 
             List<CedarlingPermission> requestedPermissions = getRequestedOperations(resourceInfo);
             log.info("Check access to requested opearations: {}", requestedPermissions);
-            if (requestedPermissions.size() == 0) {
+            if (requestedPermissions.isEmpty()) {
 	            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
             }
 
-            Jwt jwt = tokenAsJwt(token);
+            Jwt jwt = tokenAsJwt(bearerToken);
             if (jwt == null) {
                 return simpleResponse(FORBIDDEN, "Provided token isn't JWT encoded");
             }
@@ -124,7 +120,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 
             if (valid) {
 	            boolean authorized = true;
-	            Map<String, String> tokens = getCedarlingTokens(token);
+	            Map<String, String> tokens = getCedarlingTokens(bearerToken);
 	            for (CedarlingPermission requestedPermission : requestedPermissions) {
 	            	authorized &= authorizationService.authorize(tokens, requestedPermission.getAction(),
 	            			getCedarlingResource(requestedPermission), getCedarlingContext());
@@ -166,12 +162,12 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	}
 
 	private Map<String, Object> getCedarlingResource(CedarlingPermission requestedPermission) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		int id = requestedPermission.hashCode();
 		id = id > 0 ? id : -id;
 		map.putAll(
 				Map.of("cedar_entity_mapping",
-						Map.of("entity_type", requestedPermission.getResource(), "id", requestedPermission.getId())
+						Map.of("entity_type", requestedPermission.getResource(), "id", id)
 					)
 		);
 		map.putAll(
@@ -189,7 +185,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	}
 	
 	private Map<String, Object> getCedarlingContext() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		return map;
 	}
 

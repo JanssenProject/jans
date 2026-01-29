@@ -30,8 +30,6 @@ public class CertAuthnVM {
 
     public static final String RND_KEY = "ref";
     
-    //max. number of seconds between display of index.zul and returning to agama flow 
-    private static final int ENTRY_EXP_SECONDS = 20;
     private static final String CERT_HEADER = "X-ClientCert";
     private static final String AGAMA_CB = "/jans-auth/fl/callback";
     
@@ -84,9 +82,9 @@ public class CertAuthnVM {
             }
     
             key = URLDecoder.decode(Utils.stringEncrypter().decrypt(encKey), UTF_8);            
-            Reference ref = getReference(key);            
+            Reference ref = getReference(key);
             if (ref == null) {
-                logger.warn("Expired or missing cache entry");
+                logger.warn("Expired or missing cache entry. Check if roundTripMaxTime property is too low");
                 return;
             }
             
@@ -112,8 +110,16 @@ public class CertAuthnVM {
             }
             
             if (!enroll) {                
+                //number of seconds available for returning to agama flow in a safe manner
+                Long timeLeft = (ref.getExpiresAt() - System.currentTimeMillis()) / 1000;
+                
+                if (timeLeft <= 0) {                    
+                    logger.warn("Expired cache entry");
+                    return;
+                }
+
                 //Rewrite the cache entry with the outcome of the operation
-                cacheProvider.put(ENTRY_EXP_SECONDS, key, outcome);
+                cacheProvider.put(timeLeft.intValue(), key, outcome);
                 
                 if (success) {      //trigger inmmediate redirect. No need to display a success message
                     logger.info("Redirecting for completion of authentication flow");

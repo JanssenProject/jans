@@ -1,0 +1,41 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Resource for managing Keycloak SAML Configuration.
+---
+
+# {{.Name}} ({{.Type}})
+
+Resource for managing Keycloak SAML Configuration.
+
+## Example Usage
+
+```terraform
+resource "jans_kc_saml_configuration" "example" {
+  application_name = "example-saml-app"
+  enabled          = true
+  server_url       = "https://keycloak.example.com"
+  realm            = "master"
+  client_id        = "jans-saml-client"
+  client_secret    = "your-client-secret"
+  grant_type       = "client_credentials"
+  scope            = "openid"
+
+  idp_root_dir          = "/opt/jans/idp"
+  idp_metadata_dir      = "/opt/jans/idp/metadata"
+  idp_metadata_file     = "idp-metadata.xml"
+  idp_metadata_temp_dir = "/opt/jans/idp/temp"
+  idp_url               = "https://idp.example.com"
+
+  sp_metadata_dir  = "/opt/jans/sp/metadata"
+  sp_metadata_file = "sp-metadata.xml"
+  sp_metadata_url  = "https://sp.example.com/metadata"
+
+  lifecycle {
+    ignore_changes = [client_secret, password]
+  }
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

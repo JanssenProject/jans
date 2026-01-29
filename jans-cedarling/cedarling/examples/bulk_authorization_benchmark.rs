@@ -3,7 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
+#![allow(clippy::cast_precision_loss)]
+
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
+};
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use std::time::Instant;
@@ -24,6 +30,50 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Simulating OpenSearch integration with 2000 documents per query\n");
 
     // Initialize Cedarling
+    let cedarling = initialize_cedarling().await?;
+
+    // Generate 2000 test documents (similar to the OpenSearch benchmark)
+    let documents = generate_test_documents(2000);
+    println!("Generated {} test documents", documents.len());
+
+    // Test 1: Single authorization (baseline)
+    run_single_authorization_baseline(&cedarling, &documents).await?;
+
+    // Test 2: Batch authorization (2000 documents)
+    let avg_per_doc = run_batch_authorization_test(&cedarling, &documents).await?;
+
+    // Test 3: Simulate OpenSearch-like processing with different batch sizes
+    run_batch_size_simulation(&cedarling, &documents).await;
+
+    // Test 4: Memory usage simulation
+    run_memory_usage_analysis(&cedarling, &documents, &reg).await?;
+
+    // Test 5: Comparison with OpenSearch benchmark expectations
+    println!("\n5. Comparison with OpenSearch Benchmark:");
+    println!("  OpenSearch benchmark: 2.0ms per document");
+    println!(
+        "  Our batch result: {:.3}ms per document",
+        avg_per_doc as f64 / 1000.0
+    );
+    println!("  Ratio: {:.2}x", (avg_per_doc as f64 / 1000.0) / 2.0);
+
+    if avg_per_doc as f64 / 1000.0 > 2.0 {
+        println!(
+            "  Our result is {:.2}x slower than OpenSearch benchmark",
+            (avg_per_doc as f64 / 1000.0) / 2.0
+        );
+    } else {
+        println!(
+            "  Our result is {:.2}x faster than OpenSearch benchmark",
+            2.0 / (avg_per_doc as f64 / 1000.0)
+        );
+    }
+
+    println!("\n=== Benchmark Complete ===");
+    Ok(())
+}
+
+async fn initialize_cedarling() -> Result<Cedarling, Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -55,11 +105,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     })
     .await?;
 
-    // Generate 2000 test documents (similar to the OpenSearch benchmark)
-    let documents = generate_test_documents(2000);
-    println!("Generated {} test documents", documents.len());
+    Ok(cedarling)
+}
 
-    // Test 1: Single authorization (baseline)
+async fn run_single_authorization_baseline(
+    cedarling: &Cedarling,
+    documents: &[RequestUnsigned],
+) -> Result<(), Box<dyn std::error::Error>> {
     println!("\n1. Single Authorization (Baseline):");
     let single_doc = &documents[0];
     let mut total_time = 0;
@@ -83,7 +135,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         avg_single as f64 / 1000.0
     );
 
-    // Test 2: Batch authorization (2000 documents)
+    Ok(())
+}
+
+async fn run_batch_authorization_test(
+    cedarling: &Cedarling,
+    documents: &[RequestUnsigned],
+) -> Result<u128, Box<dyn std::error::Error>> {
     println!("\n2. Batch Authorization (2000 documents):");
     let batch_start = Instant::now();
     let mut successful_auths = 0;
@@ -120,16 +178,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\n  Batch Results:");
     println!("    Total time: {:.2} ms", batch_duration.as_millis());
-    println!("    Documents processed: {}", total_docs);
+    println!("    Documents processed: {total_docs}");
     println!(
         "    Average per document: {} μs ({:.3} ms)",
         avg_per_doc,
         avg_per_doc as f64 / 1000.0
     );
-    println!("    Successful authorizations: {}", successful_auths);
-    println!("    Failed authorizations: {}", failed_auths);
+    println!("    Successful authorizations: {successful_auths}");
+    println!("    Failed authorizations: {failed_auths}");
 
-    // Test 3: Simulate OpenSearch-like processing with different batch sizes
+    Ok(avg_per_doc)
+}
+
+async fn run_batch_size_simulation(cedarling: &Cedarling, documents: &[RequestUnsigned]) {
     println!("\n3. Simulating Different Batch Sizes:");
     let batch_sizes = vec![10, 50, 100, 500, 1000, 2000];
 
@@ -152,12 +213,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             avg_per_doc as f64 / 1000.0
         );
     }
+}
 
-    // Test 4: Memory usage simulation
+async fn run_memory_usage_analysis(
+    cedarling: &Cedarling,
+    documents: &[RequestUnsigned],
+    reg: &Region<'_, System>,
+) -> Result<(), Box<dyn std::error::Error>> {
     println!("\n4. Memory Usage Analysis:");
-    let mem_before = get_memory_usage(&reg);
+    let mem_before = get_memory_usage(reg);
 
-    // Process a large batch to see memory impact
     let large_batch: Vec<_> = documents.iter().take(1000).collect();
     let _results: Vec<_> = futures::future::join_all(
         large_batch
@@ -168,33 +233,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .into_iter()
     .collect::<Result<Vec<_>, _>>()?;
 
-    let mem_after = get_memory_usage(&reg);
-    println!("  Memory before: {} MB", mem_before);
-    println!("  Memory after: {} MB", mem_after);
+    let mem_after = get_memory_usage(reg);
+    println!("  Memory before: {mem_before} MB");
+    println!("  Memory after: {mem_after} MB");
     println!("  Memory increase: {} MB", mem_after - mem_before);
 
-    // Test 5: Comparison with OpenSearch benchmark expectations
-    println!("\n5. Comparison with OpenSearch Benchmark:");
-    println!("  OpenSearch benchmark: 2.0ms per document");
-    println!(
-        "  Our batch result: {:.3}ms per document",
-        avg_per_doc as f64 / 1000.0
-    );
-    println!("  Ratio: {:.2}x", (avg_per_doc as f64 / 1000.0) / 2.0);
-
-    if avg_per_doc as f64 / 1000.0 > 2.0 {
-        println!(
-            "  Our result is {:.2}x slower than OpenSearch benchmark",
-            (avg_per_doc as f64 / 1000.0) / 2.0
-        );
-    } else {
-        println!(
-            "  Our result is {:.2}x faster than OpenSearch benchmark",
-            2.0 / (avg_per_doc as f64 / 1000.0)
-        );
-    }
-
-    println!("\n=== Benchmark Complete ===");
     Ok(())
 }
 
@@ -203,14 +246,14 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
 
     for i in 0..count {
         // Generate random data similar to the OpenSearch benchmark
-        let name = format!("Student_{}", i);
+        let name = format!("Student_{i}");
         let grad_year = 2020 + (i % 7); // 2020-2026
         let gpa = (i as f64 * 0.001) % 5.0; // 0-5 GPA
 
         let principals = vec![EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::User".to_string(),
-                id: format!("user_{}", i),
+                id: format!("user_{i}"),
             },
             attributes: HashMap::from([
                 ("sub".to_string(), json!(format!("sub_{}", i))),
@@ -233,7 +276,7 @@ fn generate_test_documents(count: usize) -> Vec<RequestUnsigned> {
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                    id: format!("document_{}", i),
+                    id: format!("document_{i}"),
                 },
                 attributes: HashMap::from_iter([
                     (

@@ -1,4 +1,4 @@
-package io.jans.configapi.service.auth;
+package io.jans.ca.plugin.adminui.service.adminui;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,7 @@ import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter;
@@ -81,8 +82,12 @@ public class AdminUISessionService {
         try {
             configApiSession = persistenceEntryManager
                     .find(AdminUISession.class, getDnForSession(sessionId));
+        } catch (EntryPersistenceException e) {
+            //do not throw error if the record is not present in database
+            return configApiSession;
         } catch (Exception ex) {
             logger.error(SID_ERROR + "{}", sessionId, ex);
+            throw ex;
         }
         return configApiSession;
     }

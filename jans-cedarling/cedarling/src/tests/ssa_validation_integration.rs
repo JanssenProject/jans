@@ -157,8 +157,8 @@ async fn test_ssa_validation_structure() {
         "org_id": "test_org",
         "iss": "https://test.issuer.com",
         "software_roles": ["cedarling"],
-        "exp": 1735689600,
-        "iat": 1735603200,
+        "exp": 1_735_689_600,
+        "iat": 1_735_603_200,
         "jti": "test-jti-123"
     });
 
@@ -210,8 +210,8 @@ async fn test_ssa_validation_structure() {
         "org_id": "test_org",
         "iss": "https://test.issuer.com",
         "software_roles": ["cedarling"],
-        "exp": 1735689600,
-        "iat": 1735603200,
+        "exp": 1_735_689_600,
+        "iat": 1_735_603_200,
         "jti": "test-jti-123"
     });
 
