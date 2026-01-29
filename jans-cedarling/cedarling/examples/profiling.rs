@@ -79,6 +79,7 @@ async fn init_cedarling() -> Cedarling {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: None,
     })
     .await
     .expect("should initialize cedarling")

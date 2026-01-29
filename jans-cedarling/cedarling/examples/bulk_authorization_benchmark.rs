@@ -51,6 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: None,
     })
     .await?;
 
