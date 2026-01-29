@@ -49,4 +49,5 @@ static BSCONFIG_LOCAL: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapCon
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
+    data_store_config: None,
 });

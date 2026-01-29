@@ -125,6 +125,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: None,
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -176,6 +177,7 @@ async fn prepare_cedarling_with_jwt_validation(
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: None,
     };
 
     Cedarling::new(&bootstrap_config).await
