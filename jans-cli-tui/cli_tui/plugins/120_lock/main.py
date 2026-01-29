@@ -6,10 +6,12 @@ from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
 
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Frame, Label
+from prompt_toolkit.widgets import Button, Frame, Label, Dialog
 from prompt_toolkit.application import Application
 from wui_components.widget_collections import get_logging_level_widget
 from wui_components.jans_drop_down import DropDownWidget
+from wui_components.jans_vetrical_nav import JansVerticalNav
+from wui_components.jans_cli_dialog import JansGDialog
 
 
 from utils.multi_lang import _
@@ -43,6 +45,80 @@ class Plugin(DialogUtils):
 
         self.app.create_background_task(self.get_configuration())
 
+
+
+    def edit_policy_source(self, *args, **kwargs):
+        if kwargs:
+            title = _("Add Policy Source")
+            source_data = kwargs['data']
+        else:
+            title = _("Add Policy Source")
+            source_data = (False, '', '')
+
+        enabled_widget = common_data.app.getTitledCheckBox(
+                    title=_("Enabled"),
+                    name='enabled',
+                    checked=source_data[0],
+                    style=cli_style.check_box,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'enabled'),
+                    widget_style=cli_style.titled_text
+                )
+
+        authorization_token_widget = common_data.app.getTitledText(
+                    title=_("Authorization Token"),
+                    name='authorizationToken',
+                    value=source_data[1],
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.titled_text,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'authorizationToken'),
+                )
+
+        policy_store_uri_widget = common_data.app.getTitledText(
+                    title=_("Policy Store Uri"),
+                    name='policyStoreUri',
+                    value=source_data[2],
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.titled_text,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'policyStoreUri'),
+                )
+
+        def add_policy_source(dialog: Dialog) -> None:
+
+            cur_widegt_data = (
+                enabled_widget.me.checked,
+                authorization_token_widget.me.text,
+                policy_store_uri_widget.me.text
+                )
+
+            if not kwargs.get('data'):
+                self.policy_sources_container.add_item(cur_widegt_data)
+                self.policy_sources_container.all_data.append(cur_widegt_data)
+            else:
+                self.policy_sources_container.replace_item(kwargs['selected'], cur_widegt_data)
+                self.policy_sources_container.all_data[kwargs['selected']] = cur_widegt_data
+
+        body = HSplit([enabled_widget, authorization_token_widget, policy_store_uri_widget])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_policy_source)]
+        dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=common_data.app.dialog_width-20)
+        common_data.app.show_jans_dialog(dialog)
+
+
+    def delete_policy_source(self, **kwargs):
+
+        dialog = common_data.app.get_confirm_dialog(_("Are you sure want to delete policy source?")+"\n {} ?".format(kwargs['selected'][0]))
+
+        async def coroutine():
+            result = await common_data.app.show_dialog_as_float(dialog)
+            common_data.app.layout.focus(self.policy_sources_container)
+
+            if result.lower() == 'yes':
+                self.policy_sources_container.remove_item(kwargs['selected'])
+
+            common_data.app.stop_progressing()
+
+            return result
+
+        asyncio.ensure_future(coroutine())
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/AppConfiguration')
@@ -86,10 +162,29 @@ class Plugin(DialogUtils):
         )
 
         cedarling_configuration_data = self.data.get('cedarlingConfiguration', {})
-        cedarling_configuration_policiy_sources_data = {}
+        cedarling_configuration_policiy_sources_data = []
         for ccps in cedarling_configuration_data.get('policySources', []):
-            for key_ in ccps:
-                cedarling_configuration_policiy_sources_data[key_] = ccps[key_]
+            cedarling_configuration_policiy_sources_data.append((
+                    ccps['enabled'],
+                    ccps['authorizationToken'],
+                    ccps['policyStoreUri']
+                ))
+
+        self.policy_sources_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['Enabled', 'Auth Token', 'Store Uri'],
+                preferred_size=[10, 30, common_data.app.output.get_size().columns -60],
+                data=cedarling_configuration_policiy_sources_data,
+                on_enter=self.edit_policy_source,
+                on_delete=self.delete_policy_source,
+                on_display=common_data.app.data_display_dialog,
+                selectes=0,
+                all_data=cedarling_configuration_policiy_sources_data,
+                underline_headings=False,
+                max_width=common_data.app.output.get_size().columns - 5,
+                jans_name='policySources',
+                max_height=len(cedarling_configuration_policiy_sources_data)+2
+                )
 
         self.cedarling_configuration_widgets = HSplit(
             children=[
@@ -116,35 +211,14 @@ class Plugin(DialogUtils):
 
                 get_logging_level_widget(cedarling_configuration_data.get('logLevel', 'INFO')),
 
-                Label(_("Policy Sources:")),
 
-                common_data.app.getTitledCheckBox(
-                    title=_("  Enabled"),
-                    name='policySources.enabled', 
-                    checked=cedarling_configuration_policiy_sources_data.get('enabled', False),
-                    style=cli_style.check_box,
-                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'enabled'),
-                    widget_style=cli_style.black_bg_widget
-                ),
-
-                common_data.app.getTitledText(
-                    title=_("  Authorization Token"),
-                    name='policySources.authorizationToken',
-                    value=cedarling_configuration_policiy_sources_data.get('authorizationToken', ''),
-                    style=cli_style.edit_text,
-                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'authorizationToken'),
-                    widget_style=cli_style.black_bg_widget
-                ),
-
-                common_data.app.getTitledText(
-                    title=_("  PolicyStore Uri"),
-                    name='policySources.policyStoreUri',
-                    value=cedarling_configuration_policiy_sources_data.get('policyStoreUri', ''),
-                    style=cli_style.edit_text,
-                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'policyStoreUri'),
-                    widget_style=cli_style.black_bg_widget
-                ),
-
+                Frame(
+                    title=_("Policy Sources"),
+                    body=HSplit([
+                        self.policy_sources_container,
+                        common_data.app.getButtonWithHandler(text=_("Add Source"), handler=self.edit_policy_source, centered=True)
+                    ]),
+                )
             ]
         )
 
@@ -362,8 +436,6 @@ class Plugin(DialogUtils):
 
 
     def save(self):
-        # save lock configuration
-
 
         async def lock_config_coroutine():
 
@@ -373,13 +445,13 @@ class Plugin(DialogUtils):
             lock_config['grpcConfiguration'] = grpc_configuration
             cedarling_configuration['policySources'] = []
 
-            ps_prefix = 'policySources.'
-            for cprop in copy.deepcopy(cedarling_configuration):
-                if cprop.startswith(ps_prefix):
-                    pskey_ = cprop[len(ps_prefix):]
-                    psval_ = cedarling_configuration.pop(cprop)
-                    if isinstance(psval_, bool) or psval_:
-                        cedarling_configuration['policySources'].append({pskey_: psval_})
+            for ps in self.policy_sources_container.data:
+                ps_dict = {
+                    'enabled': ps[0],
+                    'authorizationToken': ps[1],
+                    'policyStoreUri': ps[2]
+                }
+                cedarling_configuration['policySources'].append(ps_dict)
 
             lock_config['cedarlingConfiguration'] = cedarling_configuration
             new_data = copy.deepcopy(self.data)
