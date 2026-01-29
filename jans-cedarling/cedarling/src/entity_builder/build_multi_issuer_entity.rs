@@ -12,7 +12,7 @@ use crate::common::issuer_utils::normalize_issuer;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
-use cedar_policy::{Entity, EntityUid, RestrictedExpression};
+use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
@@ -388,8 +388,12 @@ impl EntityBuilder {
         // Create the Cedar entity using the existing build_cedar_entity function
         // Note: build_cedar_entity doesn't support tags, so we need to use Entity::new_with_tags directly
         // but we can still reuse the UID creation logic
-        let uid = EntityUid::from_str(&format!("{entity_type}::\"{entity_id}\""))
+        let entity_type_name = EntityTypeName::from_str(&entity_type)
             .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?;
+        // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
+        let entity_id = EntityId::from_str(&entity_id).unwrap_or_else(|e| match e {});
+
+        let uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
 
         let entity = Entity::new_with_tags(uid, attrs, HashSet::new(), tags)
             .map_err(|e| MultiIssuerEntityError::EntityCreationFailed(e.to_string()))?;

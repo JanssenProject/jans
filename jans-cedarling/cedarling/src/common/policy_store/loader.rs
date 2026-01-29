@@ -254,7 +254,7 @@ impl DefaultPolicyStoreLoader<super::vfs_adapter::PhysicalVfs> {
         metadata: &PolicyStoreMetadata,
         manifest: &PolicyStoreManifest,
     ) -> Result<(), PolicyStoreError> {
-        DefaultPolicyStoreLoader::<PhysicalVfs>::validate_manifest_with_logger(
+        Self::validate_manifest_with_logger(
             dir, metadata, manifest, None,
         )
     }

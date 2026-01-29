@@ -217,7 +217,7 @@ where
 
     /// Check if a path exists in the archive (file or directory).
     fn path_exists(&self, path: &str) -> Result<bool, std::io::Error> {
-        let normalized = ArchiveVfs::<T>::normalize_path(path);
+        let normalized = Self::normalize_path(path);
 
         let mut archive = self
             .archive
@@ -250,7 +250,7 @@ where
 
     /// Check if a path is a directory in the archive.
     fn is_directory(&self, path: &str) -> Result<bool, std::io::Error> {
-        let normalized = ArchiveVfs::<T>::normalize_path(path);
+        let normalized = Self::normalize_path(path);
         let mut archive = self
             .archive
             .lock()
@@ -291,7 +291,7 @@ where
     T: Read + Seek + Send + Sync + 'static,
 {
     fn read_file(&self, path: &str) -> Result<Vec<u8>, std::io::Error> {
-        let normalized = ArchiveVfs::<T>::normalize_path(path);
+        let normalized = Self::normalize_path(path);
 
         let mut archive = self
             .archive
@@ -320,7 +320,7 @@ where
     }
 
     fn is_file(&self, path: &str) -> bool {
-        let normalized = ArchiveVfs::<T>::normalize_path(path);
+        let normalized = Self::normalize_path(path);
         let Ok(mut archive) = self.archive.lock() else {
             return false;
         };
@@ -333,7 +333,7 @@ where
     }
 
     fn read_dir(&self, path: &str) -> Result<Vec<DirEntry>, std::io::Error> {
-        let normalized = ArchiveVfs::<T>::normalize_path(path);
+        let normalized = Self::normalize_path(path);
         let prefix = if normalized.is_empty() {
             String::new()
         } else {
@@ -389,7 +389,7 @@ where
         // Second pass: check if each path is a directory
         let mut entries = Vec::new();
         for (name, entry_path) in entry_paths {
-            let entry_path_normalized = ArchiveVfs::<T>::normalize_path(&entry_path);
+            let entry_path_normalized = Self::normalize_path(&entry_path);
             let is_directory = Self::is_directory_locked(&mut archive, &entry_path_normalized);
 
             entries.push(DirEntry {
