@@ -32,11 +32,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.grpc.Context;
+import io.grpc.Metadata;
 import io.jans.util.Util;
 import jakarta.ws.rs.core.CacheControl;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.1, 10/07/2024
  */
 
@@ -44,9 +47,19 @@ public class ServerUtil {
 
 	private static final Logger log = LoggerFactory.getLogger(ServerUtil.class);
 
-
 	public static final String PRAGMA = "Pragma";
 	public static final String NO_CACHE = "no-cache";
+
+	private static final String UNKNOWN = "unknown";
+
+    public static final Context.Key<String> CLIENT_IP_CONTEXT_KEY = Context.key("client-ip");
+    private static final Metadata.Key<String> X_FORWARDED_FOR = Metadata.Key.of("x-forwarded-for", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> X_REAL_IP = Metadata.Key.of("x-real-ip", Metadata.ASCII_STRING_MARSHALLER);
+    
+	/**
+	 * Private constructor to prevent instantiation
+	 */
+    private ServerUtil() {}
 
 	public static CacheControl cacheControl(boolean noStore) {
 		final CacheControl cacheControl = new CacheControl();
@@ -108,6 +121,89 @@ public class ServerUtil {
             }
         }
         return str;
+    }
+
+    /**
+     * Get client IP address from current context
+     * @return client IP address or "unknown" if not determined
+     */
+	public static String getClientContextIpAddress() {
+		String clientIp = CLIENT_IP_CONTEXT_KEY.get(Context.current());
+
+		if (clientIp == null) {
+			return UNKNOWN;
+		}
+
+		return clientIp;
+	}
+
+    /**
+     * Set client IP address from current context
+     * @return 
+     */
+    public static Context setClientContextIpAddress(String clientIp) {
+    	return Context.current().withValue(CLIENT_IP_CONTEXT_KEY, clientIp);
+    }
+
+    /**
+     * Get client IP address when ServerCall is available (e.g., in interceptor)
+     */
+    public static String getGrpcClientIpAddress(io.grpc.ServerCall<?, ?> call, Metadata headers) {
+        try {
+            // Method 1: Try to get from metadata headers
+            String ipFromHeaders = getIpFromHeaders(headers);
+            if (ipFromHeaders != null) {
+                log.debug("Client IP from headers: {}", ipFromHeaders);
+                return ipFromHeaders;
+            }
+
+            // Method 2: Get from ServerCall attributes
+            if (call != null) {
+                io.grpc.Attributes attributes = call.getAttributes();
+                java.net.SocketAddress remoteAddr = attributes.get(io.grpc.Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
+                if (remoteAddr instanceof java.net.InetSocketAddress) {
+                    java.net.InetSocketAddress inetAddr = (java.net.InetSocketAddress) remoteAddr;
+                    String ip = inetAddr.getAddress().getHostAddress();
+                    log.debug("Client IP from ServerCall attributes: {}", ip);
+                    return ip;
+                }
+            }
+
+            log.warn("Could not determine client IP address");
+            return UNKNOWN;
+        } catch (Exception e) {
+            log.error("Error getting client IP address", e);
+            return UNKNOWN;
+        }
+    }
+
+    /**
+     * Extract IP directly from headers (for use in interceptor)
+     */
+    public static String getIpFromHeaders(Metadata headers) {
+        if (headers == null) {
+            return null;
+        }
+        
+        try {          
+            // 1. Try X-Forwarded-For
+            String xForwardedFor = headers.get(X_FORWARDED_FOR);
+            if (xForwardedFor != null && !xForwardedFor.trim().isEmpty()) {
+                String[] ips = xForwardedFor.split(",");
+                return ips[0].trim();
+            }
+            
+            // 2. Try X-Real-IP
+            String xRealIp = headers.get(X_REAL_IP);
+            if (xRealIp != null && !xRealIp.trim().isEmpty()) {
+                return xRealIp.trim();
+            }
+            
+            return null;
+        } catch (Exception e) {
+            log.debug("Error extracting IP from headers", e);
+            return null;
+        }
     }
 
 }

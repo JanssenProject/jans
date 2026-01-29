@@ -152,7 +152,7 @@ jobs:
         if: >-
           github.event_name == 'workflow_dispatch'
         run: |
-          poetry run mike deploy --push --force ${{ github.event.inputs.version }}
+          poetry run mike deploy --push --update-aliases ${{ github.event.inputs.version }}
 
       - name: mike deploy head
         if: contains(github.ref, 'refs/heads/main') && github.event_name != 'workflow_dispatch'

@@ -9,6 +9,10 @@
     ServerName ${hostname}:443
 
     LogLevel warn
+    % if context.get('install_jans_lock') in ('true', True):
+    Protocols h2 http/1.1
+    % endif
+
     SSLEngine on
     # If this is using options file from letsencrypt, the below changes should be applied there as well
     # Example is: Include /etc/letsencrypt/options-ssl-apache.conf
@@ -111,6 +115,44 @@
      Allow from all
     </Location>
 
+    % if context.get('install_jans_lock') in ('true', True):
+
+    % if context.get('install_jans_lock_as_server') in ('true', True):
+    <%
+      lock_host_port = jans_lock_port
+      lock_host_suffix = 'jans-lock'
+    %>
+    % else:
+    <%
+    lock_host_port = jans_auth_port
+    lock_host_suffix = 'jans-auth'
+    %>
+    % endif
+
+    <Location /io.jans.lock.audit.AuditService/>
+        # Main proxy configuration
+        ProxyPass http://localhost:${lock_host_port}/${lock_host_suffix}/io.jans.lock.audit.AuditService/ upgrade=h2c
+        ProxyPassReverse http://localhost:${lock_host_port}/${lock_host_suffix}/io.jans.lock.audit.AuditService/
+
+        # Required headers for gRPC
+        RequestHeader set Content-Type "application/grpc"
+
+        # Disable buffering and keep-alive for streaming
+        SetEnv proxy-nokeepalive 1
+        SetEnv proxy-initial-not-pooled 1
+
+        # Disable Request/Response body processing
+        SetEnv proxy-sendcl 1
+
+        # Access control
+        Require all granted
+
+        # Allow HTTP/2 methods
+        Require method GET POST
+    </Location>
+
+    % endif
+
     ProxyPass   /.well-known/openid-configuration http://localhost:${jans_auth_port}/jans-auth/.well-known/openid-configuration
     ProxyPass   /.well-known/webfinger http://localhost:${jans_auth_port}/jans-auth/.well-known/webfinger
     ProxyPass   /.well-known/uma2-configuration http://localhost:${jans_auth_port}/jans-auth/restv1/uma2-configuration
@@ -120,6 +162,16 @@
     ProxyPass   /.well-known/scim-configuration http://localhost:8087/jans-scim/restv1/scim-configuration
     ProxyPass   /firebase-messaging-sw.js http://localhost:${jans_auth_port}/jans-auth/firebase-messaging-sw.js
     ProxyPass   /device-code http://localhost:${jans_auth_port}/jans-auth/device_authorization.htm
+
+    % if context.get('install_jans_lock') in ('true', True):
+    ProxyPass   /.well-known/lock-server-configuration http://localhost:${lock_host_port}/${lock_host_suffix}/api/v1/configuration'
+    <Location /jans-lock>
+        Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly
+        ProxyPass http://localhost:${lock_host_port}/${lock_host_suffix} retry=5 connectiontimeout=60 timeout=60
+        Order deny,allow
+        Allow from all
+    </Location>
+    % endif
 
     ProxyErrorOverride On
 
