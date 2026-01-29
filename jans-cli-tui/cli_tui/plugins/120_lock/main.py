@@ -6,7 +6,7 @@ from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
 
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Frame, Label, Dialog
+from prompt_toolkit.widgets import Button, Frame, Dialog
 from prompt_toolkit.application import Application
 from wui_components.widget_collections import get_logging_level_widget
 from wui_components.jans_drop_down import DropDownWidget
@@ -84,18 +84,18 @@ class Plugin(DialogUtils):
 
         def add_policy_source(dialog: Dialog) -> None:
 
-            cur_widegt_data = (
+            cur_widget_data = (
                 enabled_widget.me.checked,
                 authorization_token_widget.me.text,
                 policy_store_uri_widget.me.text
                 )
 
             if not kwargs.get('data'):
-                self.policy_sources_container.add_item(cur_widegt_data)
-                self.policy_sources_container.all_data.append(cur_widegt_data)
+                self.policy_sources_container.add_item(cur_widget_data)
+                self.policy_sources_container.all_data.append(cur_widget_data)
             else:
-                self.policy_sources_container.replace_item(kwargs['selected'], cur_widegt_data)
-                self.policy_sources_container.all_data[kwargs['selected']] = cur_widegt_data
+                self.policy_sources_container.replace_item(kwargs['selected'], cur_widget_data)
+                self.policy_sources_container.all_data[kwargs['selected']] = cur_widget_data
 
         body = HSplit([enabled_widget, authorization_token_widget, policy_store_uri_widget])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_policy_source)]
@@ -116,7 +116,7 @@ class Plugin(DialogUtils):
 
             return result
 
-        asyncio.ensure_future(coroutine())
+        self.app.create_background_task(coroutine())
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/AppConfiguration')
@@ -163,9 +163,9 @@ class Plugin(DialogUtils):
         cedarling_configuration_policy_sources_data = []
         for ccps in cedarling_configuration_data.get('policySources', []):
             cedarling_configuration_policy_sources_data.append((
-                    ccps['enabled'],
-                    ccps['authorizationToken'],
-                    ccps['policyStoreUri']
+                    ccps.get('enabled', False),
+                    ccps.get('authorizationToken', ''),
+                    ccps.get('policyStoreUri', '')
                 ))
 
         self.policy_sources_container = JansVerticalNav(
@@ -475,7 +475,7 @@ class Plugin(DialogUtils):
                     tobefocused=self.main_container
                     )
 
-        asyncio.ensure_future(lock_config_coroutine())
+        self.app.create_background_task(lock_config_coroutine())
 
     def set_center_frame(self) -> None:
         """center frame content
