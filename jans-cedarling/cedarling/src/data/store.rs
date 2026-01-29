@@ -279,6 +279,17 @@ impl DataStore {
     pub(crate) fn config(&self) -> &DataStoreConfig {
         &self.config
     }
+
+    /// Calculate the total size of all entries in bytes.
+    ///
+    /// Size is computed based on JSON serialization of each entry.
+    pub(crate) fn total_size(&self) -> usize {
+        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+        storage
+            .iter()
+            .map(|(_, entry)| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0))
+            .sum()
+    }
 }
 
 /// Convert `std::time::Duration` to `chrono::Duration`.
@@ -969,5 +980,303 @@ mod tests {
             Some(&json!({"country": "US", "region": "CA"}))
         );
         assert_eq!(obj.get("permissions"), Some(&json!(["read", "write"])));
+    }
+
+    #[test]
+    fn test_total_size_calculation() {
+        let store = create_test_store();
+
+        // Empty store should have 0 size
+        assert_eq!(store.total_size(), 0);
+
+        // Add some entries
+        store
+            .push("key1", json!("short"), None)
+            .expect("push should succeed");
+        let size_after_one = store.total_size();
+        assert!(
+            size_after_one > 0,
+            "size should be positive after adding entry"
+        );
+
+        store
+            .push("key2", json!({"nested": {"data": "value"}}), None)
+            .expect("push should succeed");
+        let size_after_two = store.total_size();
+        assert!(
+            size_after_two > size_after_one,
+            "size should increase after adding more entries"
+        );
+
+        // Remove an entry, size should decrease
+        store.remove("key1");
+        let size_after_remove = store.total_size();
+        assert!(
+            size_after_remove < size_after_two,
+            "size should decrease after removing entry"
+        );
+    }
+
+    #[test]
+    fn test_memory_alert_threshold_validation() {
+        // Valid threshold
+        let config = DataStoreConfig {
+            memory_alert_threshold: 80.0,
+            ..Default::default()
+        };
+        assert!(config.validate().is_ok());
+
+        // Edge case: 0%
+        let config_zero = DataStoreConfig {
+            memory_alert_threshold: 0.0,
+            ..Default::default()
+        };
+        assert!(config_zero.validate().is_ok());
+
+        // Edge case: 100%
+        let config_hundred = DataStoreConfig {
+            memory_alert_threshold: 100.0,
+            ..Default::default()
+        };
+        assert!(config_hundred.validate().is_ok());
+
+        // Invalid: negative
+        let config_negative = DataStoreConfig {
+            memory_alert_threshold: -1.0,
+            ..Default::default()
+        };
+        assert!(config_negative.validate().is_err());
+
+        // Invalid: over 100%
+        let config_over = DataStoreConfig {
+            memory_alert_threshold: 101.0,
+            ..Default::default()
+        };
+        assert!(config_over.validate().is_err());
+    }
+
+    // ============================================================
+    // Concurrent Access and Stress Tests
+    // ============================================================
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_stress_concurrent_read_write() {
+        use std::sync::Arc;
+        use std::thread;
+
+        let store = Arc::new(create_test_store());
+        let mut handles = vec![];
+
+        // 5 writer threads, each writing 100 entries
+        for writer_id in 0..5 {
+            let store_clone = store.clone();
+            let handle = thread::spawn(move || {
+                for i in 0..100 {
+                    let key = format!("writer_{}_key_{}", writer_id, i);
+                    store_clone
+                        .push(&key, json!({"writer": writer_id, "value": i}), None)
+                        .expect("concurrent push should succeed");
+                }
+            });
+            handles.push(handle);
+        }
+
+        // 10 reader threads, each doing 200 reads
+        for reader_id in 0..10 {
+            let store_clone = store.clone();
+            let handle = thread::spawn(move || {
+                for i in 0..200 {
+                    // Try to read various keys (some may exist, some may not)
+                    let key = format!("writer_{}_key_{}", reader_id % 5, i % 100);
+                    let _ = store_clone.get(&key);
+                    // Also read count
+                    let _ = store_clone.count();
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads
+        for handle in handles {
+            handle.join().expect("thread should not panic");
+        }
+
+        // Verify final state
+        let count = store.count();
+        assert_eq!(
+            count, 500,
+            "should have 5 writers * 100 entries = 500 entries"
+        );
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_stress_concurrent_mixed_operations() {
+        use std::sync::Arc;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::thread;
+
+        let store = Arc::new(create_test_store());
+        let successful_pushes = Arc::new(AtomicUsize::new(0));
+        let successful_removes = Arc::new(AtomicUsize::new(0));
+
+        // Pre-populate with some data
+        for i in 0..50 {
+            store
+                .push(&format!("pre_{}", i), json!(i), None)
+                .expect("pre-populate should succeed");
+        }
+
+        let mut handles = vec![];
+
+        // Writers
+        for writer_id in 0..3 {
+            let store_clone = store.clone();
+            let pushes = successful_pushes.clone();
+            let handle = thread::spawn(move || {
+                for i in 0..50 {
+                    let key = format!("writer_{}_item_{}", writer_id, i);
+                    if store_clone.push(&key, json!({"id": i}), None).is_ok() {
+                        pushes.fetch_add(1, Ordering::SeqCst);
+                    }
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Removers
+        for remover_id in 0..2 {
+            let store_clone = store.clone();
+            let removes = successful_removes.clone();
+            let handle = thread::spawn(move || {
+                for i in 0..25 {
+                    // Try to remove pre-populated entries
+                    let key = format!("pre_{}", remover_id * 25 + i);
+                    if store_clone.remove(&key) {
+                        removes.fetch_add(1, Ordering::SeqCst);
+                    }
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Readers
+        for _ in 0..5 {
+            let store_clone = store.clone();
+            let handle = thread::spawn(move || {
+                for i in 0..100 {
+                    let _ = store_clone.get(&format!("pre_{}", i % 50));
+                    let _ = store_clone.get(&format!("writer_0_item_{}", i % 50));
+                    let _ = store_clone.list_entries();
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads
+        for handle in handles {
+            handle.join().expect("thread should not panic");
+        }
+
+        // Log results (not strictly asserting due to race conditions in counts)
+        let final_pushes = successful_pushes.load(Ordering::SeqCst);
+        let final_removes = successful_removes.load(Ordering::SeqCst);
+        let final_count = store.count();
+
+        // Basic sanity check
+        assert!(final_pushes > 0, "should have completed some pushes");
+        assert!(final_removes > 0, "should have completed some removes");
+        assert!(final_count > 0, "store should not be empty");
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_stress_rapid_clear_while_writing() {
+        use std::sync::Arc;
+        use std::thread;
+
+        let store = Arc::new(create_test_store());
+        let mut handles = vec![];
+
+        // Writers continuously adding
+        for writer_id in 0..3 {
+            let store_clone = store.clone();
+            let handle = thread::spawn(move || {
+                for i in 0..200 {
+                    let key = format!("key_{}_{}", writer_id, i);
+                    let _ = store_clone.push(&key, json!(i), None);
+                    // Small yield to allow interleaving
+                    thread::yield_now();
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Clearer periodically clearing
+        let store_clone = store.clone();
+        let clear_handle = thread::spawn(move || {
+            for _ in 0..10 {
+                thread::sleep(StdDuration::from_micros(100));
+                store_clone.clear();
+            }
+        });
+        handles.push(clear_handle);
+
+        // Wait for all threads
+        for handle in handles {
+            handle.join().expect("thread should not panic");
+        }
+
+        // Store may or may not be empty depending on timing - main test is no panics
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_concurrent_get_all_for_context() {
+        use std::sync::Arc;
+        use std::thread;
+
+        let store = Arc::new(create_test_store());
+
+        // Pre-populate
+        for i in 0..10 {
+            store
+                .push(&format!("data_{}", i), json!({"index": i}), None)
+                .expect("pre-populate should succeed");
+        }
+
+        let mut handles = vec![];
+
+        // Multiple threads calling get_all (simulating concurrent authorization requests)
+        for _ in 0..10 {
+            let store_clone = store.clone();
+            let handle = thread::spawn(move || {
+                for _ in 0..100 {
+                    let data = store_clone.get_all();
+                    // Verify data is consistent (has entries)
+                    assert!(
+                        !data.is_empty() || store_clone.count() == 0,
+                        "get_all should return data or store is empty"
+                    );
+                }
+            });
+            handles.push(handle);
+        }
+
+        // One writer thread modifying data
+        let store_clone = store.clone();
+        let write_handle = thread::spawn(move || {
+            for i in 0..50 {
+                let key = format!("new_data_{}", i);
+                let _ = store_clone.push(&key, json!({"new_index": i}), None);
+            }
+        });
+        handles.push(write_handle);
+
+        // Wait for all threads
+        for handle in handles {
+            handle.join().expect("thread should not panic");
+        }
     }
 }

@@ -42,7 +42,6 @@ pub use crate::data::{
     ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
-use crate::log::BaseLogEntry;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
@@ -57,8 +56,8 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
-use log::LogEntry;
 use log::interface::LogWriter;
+use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
@@ -356,7 +355,30 @@ impl DataApi for Cedarling {
         value: serde_json::Value,
         ttl: Option<std::time::Duration>,
     ) -> Result<(), DataError> {
-        self.data.push(key, value, ttl)
+        self.data.push(key, value, ttl)?;
+
+        // Check memory usage and log warning if threshold is exceeded
+        let config = self.data.config();
+        if config.max_entries > 0 {
+            let entry_count = self.data.count();
+            let usage_percent = (entry_count as f64 / config.max_entries as f64) * 100.0;
+            if usage_percent >= config.memory_alert_threshold {
+                let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "DataStore memory usage alert: {:.1}% capacity used ({}/{} entries), threshold: {:.1}%",
+                    usage_percent,
+                    entry_count,
+                    config.max_entries,
+                    config.memory_alert_threshold
+                ));
+                self.log.log_any(log_entry);
+            }
+        }
+
+        Ok(())
     }
 
     fn get_data(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
@@ -382,11 +404,33 @@ impl DataApi for Cedarling {
 
     fn get_stats(&self) -> Result<DataStoreStats, DataError> {
         let config = self.data.config();
+        let entry_count = self.data.count();
+        let total_size_bytes = self.data.total_size();
+        let avg_entry_size_bytes = if entry_count > 0 {
+            total_size_bytes / entry_count
+        } else {
+            0
+        };
+
+        // Calculate capacity usage percentage
+        let capacity_usage_percent = if config.max_entries > 0 {
+            (entry_count as f64 / config.max_entries as f64) * 100.0
+        } else {
+            0.0 // Unlimited capacity, no percentage
+        };
+
+        let memory_alert_triggered = capacity_usage_percent >= config.memory_alert_threshold;
+
         Ok(DataStoreStats {
-            entry_count: self.data.count(),
+            entry_count,
             max_entries: config.max_entries,
             max_entry_size: config.max_entry_size,
             metrics_enabled: config.enable_metrics,
+            total_size_bytes,
+            avg_entry_size_bytes,
+            capacity_usage_percent,
+            memory_alert_threshold: config.memory_alert_threshold,
+            memory_alert_triggered,
         })
     }
 }
