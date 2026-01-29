@@ -125,7 +125,7 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
                 "and" : [
                     {"===": [{"var": "Jans::TestPrincipal1::\"id1\""}, "ALLOW"]},
                     {"===": [{"var": "Jans::TestPrincipal1::\"id2\""}, "ALLOW"]},
-                    {"===": [{"var": "Jans::TestPrincipal1::\"id3\""}, "DENY"]}
+                    {"===": [{"var": "Jans::TestPrincipal1::\"id3\""}, "ALLOW"]}
                 ]
             }))
             .unwrap();
@@ -138,7 +138,7 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
         vec![
             create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true})).unwrap(),
             create_test_principal("Jans::TestPrincipal1", "id2", json!({"is_ok": true})).unwrap(),
-            create_test_principal("Jans::TestPrincipal1", "id3", json!({"is_ok": false})).unwrap(),
+            create_test_principal("Jans::TestPrincipal1", "id3", json!({"is_ok": true})).unwrap(),
         ],
         create_test_principal(
             "Jans::Issue",
@@ -160,12 +160,12 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
 
     let test_principal_2_result = result
         .principals
-        .get("Jans::TestPrincipal1::\"id1\"")
+        .get("Jans::TestPrincipal1::\"id2\"")
         .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
-        .get("Jans::TestPrincipal1::\"id1\"")
+        .get("Jans::TestPrincipal1::\"id3\"")
         .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
