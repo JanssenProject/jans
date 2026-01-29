@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Benchmarks for DataStore operations.
+//! Benchmarks for `DataStore` operations.
 //!
 //! Tests performance of:
 //! - Push operations
@@ -11,7 +11,7 @@
 //! - Mixed read/write workloads
 //! - Authorization with pushed data
 
-use cedarling::*;
+use cedarling::{BootstrapConfig, LogConfig, LogTypeConfig, LogLevel, PolicyStoreConfig, PolicyStoreSource, JwtConfig, AuthorizationConfig, JsonRule, IdTokenTrustMode, EntityBuilderConfig, Cedarling, DataApi, RequestUnsigned, EntityData};
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use serde::Deserialize;
 use serde_json::json;
@@ -156,7 +156,7 @@ fn bench_push_data(c: &mut Criterion) {
     group.bench_function("small_value", |b| {
         let mut counter = 0u64;
         b.iter(|| {
-            let key = format!("key_{}", counter);
+            let key = format!("key_{counter}");
             counter += 1;
             cedarling
                 .push_data(
@@ -164,7 +164,7 @@ fn bench_push_data(c: &mut Criterion) {
                     black_box(json!("small_value")),
                     black_box(Some(Duration::from_secs(60))),
                 )
-                .expect("push should succeed")
+                .expect("push should succeed");
         });
     });
 
@@ -179,7 +179,7 @@ fn bench_push_data(c: &mut Criterion) {
             "settings": {"theme": "dark", "notifications": true, "language": "en"}
         });
         b.iter(|| {
-            let key = format!("key_{}", counter);
+            let key = format!("key_{counter}");
             counter += 1;
             cedarling
                 .push_data(
@@ -187,7 +187,7 @@ fn bench_push_data(c: &mut Criterion) {
                     black_box(medium_value.clone()),
                     black_box(Some(Duration::from_secs(60))),
                 )
-                .expect("push should succeed")
+                .expect("push should succeed");
         });
     });
 
@@ -201,7 +201,7 @@ fn bench_push_data(c: &mut Criterion) {
             .map(|i| json!({"id": i, "data": "x".repeat(50)}))
             .collect();
         b.iter(|| {
-            let key = format!("key_{}", counter);
+            let key = format!("key_{counter}");
             counter += 1;
             cedarling
                 .push_data(
@@ -209,7 +209,7 @@ fn bench_push_data(c: &mut Criterion) {
                     black_box(large_value.clone()),
                     black_box(Some(Duration::from_secs(60))),
                 )
-                .expect("push should succeed")
+                .expect("push should succeed");
         });
     });
 
@@ -227,7 +227,7 @@ fn bench_get_data(c: &mut Criterion) {
     for i in 0..1000 {
         cedarling
             .push_data(
-                &format!("key_{}", i),
+                &format!("key_{i}"),
                 json!({"index": i, "data": "test_data"}),
                 Some(Duration::from_secs(300)),
             )
@@ -276,7 +276,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
     for i in 0..100 {
         cedarling
             .push_data(
-                &format!("key_{}", i),
+                &format!("key_{i}"),
                 json!({"index": i}),
                 Some(Duration::from_secs(300)),
             )
@@ -289,9 +289,9 @@ fn bench_mixed_workload(c: &mut Criterion) {
     group.bench_function("80_read_20_write", |b| {
         let mut counter = 0u64;
         b.iter(|| {
-            if counter % 5 == 0 {
+            if counter.is_multiple_of(5) {
                 // Write (20%)
-                let key = format!("new_key_{}", counter);
+                let key = format!("new_key_{counter}");
                 cedarling
                     .push_data(
                         black_box(&key),
@@ -377,25 +377,19 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("authorization_data_size");
 
-    for data_entries in [0, 10, 50, 100] {
+    // Test authorization comparing with/without pushed data
+    // Note: Cedar schema validates context.data, so we can only test with
+    // the schema-defined "enabled" key. We test with varying numbers of
+    // authorization calls to measure throughput.
+    for call_count in [1, 10, 50, 100] {
         let cedarling = runtime
             .block_on(Cedarling::new(&BSCONFIG_WITH_DATA_POLICY))
             .expect("init cedarling");
 
-        // Push varying amounts of data
+        // Push the schema-defined "enabled" key
         cedarling
             .push_data("enabled", json!(true), Some(Duration::from_secs(300)))
             .expect("push should succeed");
-
-        for i in 0..data_entries {
-            cedarling
-                .push_data(
-                    &format!("extra_data_{}", i),
-                    json!({"index": i, "data": "test_value"}),
-                    Some(Duration::from_secs(300)),
-                )
-                .expect("push should succeed");
-        }
 
         let request = RequestUnsigned {
             action: "Jans::Action::\"DataAccess\"".to_string(),
@@ -419,7 +413,7 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
         };
 
         group.bench_with_input(
-            BenchmarkId::new("entries", data_entries),
+            BenchmarkId::new("calls", call_count),
             &runtime,
             |b, rt| {
                 b.to_async(rt).iter(|| async {

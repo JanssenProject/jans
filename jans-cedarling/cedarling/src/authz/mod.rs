@@ -26,7 +26,6 @@ use cedar_policy::{Context, Entities, Entity, EntityUid};
 use chrono::Utc;
 use request::{AuthorizeMultiIssuerRequest, Request, RequestUnsigned};
 use serde_json::json;
-use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -93,6 +92,10 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
+    // This function orchestrates the full authorization flow including token validation,
+    // entity building, authorization checks, and comprehensive logging. The complexity
+    // is inherent to the authorization workflow and splitting it further would reduce readability.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn authorize(&self, request: &Request) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         // We use uuid v7 because it is generated based on the time and sortable.
@@ -255,6 +258,9 @@ impl Authz {
     ///
     /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
     /// evaluates policies based solely on the context (tokens) without requiring a principal.
+    // This function orchestrates the full multi-issuer authorization flow. The complexity
+    // is inherent to handling multiple token sources and splitting it would reduce readability.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn authorize_multi_issuer(
         &self,
         request: &AuthorizeMultiIssuerRequest,
@@ -398,6 +404,9 @@ impl Authz {
     }
 
     /// Evaluate Authorization Request with unsigned data.
+    // This function handles unsigned authorization flow with entity building,
+    // authorization checks, and logging. The complexity is inherent to the workflow.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn authorize_unsigned(
         &self,
         request: &RequestUnsigned,
@@ -516,10 +525,7 @@ impl Authz {
                 tokens_logging_info: LogTokensInfo::empty(),
                 decision_time: decision_time_micro_sec,
                 decision_diagnostics: &diagnostics,
-                principal: principal_uids
-                    .iter()
-                    .map(|uid| uid.type_name().to_smolstr())
-                    .collect(),
+                principal: DecisionLogEntry::all_principals(&principal_uids),
                 user_claims: None,
                 workload_claims: None,
                 pushed_data: pushed_data_info,

@@ -454,133 +454,152 @@ impl CedarValueMapper {
         let expr = match value {
             Value::Null => return Err(ValueMappingError::NullNotSupported),
             Value::Bool(b) => RestrictedExpression::new_bool(*b),
-            Value::Number(n) => {
-                if let Some(i) = n.as_i64() {
-                    RestrictedExpression::new_long(i)
-                } else if let Some(f) = n.as_f64() {
-                    // Convert floating point to decimal extension
-                    RestrictedExpression::new_decimal(f.to_string())
-                } else {
-                    return Err(ValueMappingError::NumberNotRepresentable {
-                        value: n.to_string(),
-                    });
-                }
-            },
-            Value::String(s) => {
-                if self.auto_detect_extensions {
-                    match Self::detect_extension(s) {
-                        Some(ExtensionValue::IpAddr(ip)) => RestrictedExpression::new_ip(ip),
-                        Some(ExtensionValue::Decimal(d)) => RestrictedExpression::new_decimal(d),
-                        Some(ExtensionValue::DateTime(dt)) => {
-                            RestrictedExpression::new_datetime(dt)
-                        },
-                        Some(ExtensionValue::Duration(dur)) => {
-                            RestrictedExpression::new_duration(dur)
-                        },
-                        None => RestrictedExpression::new_string(s.to_string()),
-                    }
-                } else {
-                    RestrictedExpression::new_string(s.to_string())
-                }
-            },
-            Value::Array(arr) => {
-                let mut exprs = Vec::with_capacity(arr.len());
-
-                for item in arr {
-                    let expr = self.convert_value(item)?;
-                    // All code paths in convert_value now return Some or Err,
-                    // so unwrap is safe here
-                    exprs.push(expr.expect("convert_value should always return Some"));
-                }
-
-                RestrictedExpression::new_set(exprs)
-            },
-            Value::Object(obj) => {
-                // Check for entity reference
-                if Self::is_entity_reference(value) {
-                    let entity_ref = Self::parse_entity_reference(value)?;
-
-                    let entity_type =
-                        EntityTypeName::from_str(&entity_ref.entity_type).map_err(|e| {
-                            ValueMappingError::InvalidEntityReference {
-                                reason: format!(
-                                    "invalid entity type '{}': {}",
-                                    entity_ref.entity_type, e
-                                ),
-                            }
-                        })?;
-
-                    let entity_id = EntityId::from_str(&entity_ref.entity_id).map_err(|e| {
-                        ValueMappingError::InvalidEntityReference {
-                            reason: format!("invalid entity id '{}': {}", entity_ref.entity_id, e),
-                        }
-                    })?;
-
-                    let uid = EntityUid::from_type_name_and_id(entity_type, entity_id);
-                    return Ok(Some(RestrictedExpression::new_entity_uid(uid)));
-                }
-
-                // Check for extension type markers (__extn)
-                if let Some(extn) = obj.get("__extn") {
-                    // __extn is present, so we must validate it strictly
-                    let extn_obj = extn.as_object().ok_or_else(|| {
-                        ValueMappingError::InvalidExtensionFormat {
-                            extension_type: "__extn".to_string(),
-                            value: extn.to_string(),
-                        }
-                    })?;
-
-                    let fn_name = extn_obj.get("fn").and_then(|v| v.as_str()).ok_or_else(|| {
-                        ValueMappingError::InvalidExtensionFormat {
-                            extension_type: "__extn".to_string(),
-                            value: format!(
-                                "missing or invalid 'fn' field in {}",
-                                serde_json::to_string(extn_obj).unwrap_or_default()
-                            ),
-                        }
-                    })?;
-
-                    let arg = extn_obj
-                        .get("arg")
-                        .and_then(|v| v.as_str())
-                        .ok_or_else(|| ValueMappingError::InvalidExtensionFormat {
-                            extension_type: fn_name.to_string(),
-                            value: format!(
-                                "missing or invalid 'arg' field in {}",
-                                serde_json::to_string(extn_obj).unwrap_or_default()
-                            ),
-                        })?;
-
-                    return match fn_name {
-                        "decimal" => Ok(Some(RestrictedExpression::new_decimal(arg))),
-                        "ip" | "ipaddr" => Ok(Some(RestrictedExpression::new_ip(arg))),
-                        "datetime" => Ok(Some(RestrictedExpression::new_datetime(arg))),
-                        "duration" => Ok(Some(RestrictedExpression::new_duration(arg))),
-                        _ => Err(ValueMappingError::InvalidExtensionFormat {
-                            extension_type: fn_name.to_string(),
-                            value: arg.to_string(),
-                        }),
-                    };
-                }
-
-                // Regular record
-                let mut fields = HashMap::with_capacity(obj.len());
-
-                for (key, val) in obj {
-                    let expr = self.convert_value(val)?;
-                    // All code paths in convert_value now return Some or Err,
-                    // so unwrap is safe here
-                    fields.insert(
-                        key.clone(),
-                        expr.expect("convert_value should always return Some"),
-                    );
-                }
-
-                RestrictedExpression::new_record(fields)?
-            },
+            Value::Number(n) => Self::convert_number(n)?,
+            Value::String(s) => self.convert_string(s),
+            Value::Array(arr) => self.convert_array(arr)?,
+            Value::Object(obj) => return self.convert_object(value, obj),
         };
 
         Ok(Some(expr))
+    }
+
+    /// Convert a JSON number to a Cedar expression.
+    fn convert_number(n: &serde_json::Number) -> Result<RestrictedExpression, ValueMappingError> {
+        if let Some(i) = n.as_i64() {
+            Ok(RestrictedExpression::new_long(i))
+        } else if let Some(f) = n.as_f64() {
+            // Convert floating point to decimal extension
+            Ok(RestrictedExpression::new_decimal(f.to_string()))
+        } else {
+            Err(ValueMappingError::NumberNotRepresentable {
+                value: n.to_string(),
+            })
+        }
+    }
+
+    /// Convert a JSON string to a Cedar expression.
+    fn convert_string(&self, s: &str) -> RestrictedExpression {
+        if self.auto_detect_extensions {
+            match Self::detect_extension(s) {
+                Some(ExtensionValue::IpAddr(ip)) => RestrictedExpression::new_ip(ip),
+                Some(ExtensionValue::Decimal(d)) => RestrictedExpression::new_decimal(d),
+                Some(ExtensionValue::DateTime(dt)) => RestrictedExpression::new_datetime(dt),
+                Some(ExtensionValue::Duration(dur)) => RestrictedExpression::new_duration(dur),
+                None => RestrictedExpression::new_string(s.to_string()),
+            }
+        } else {
+            RestrictedExpression::new_string(s.to_string())
+        }
+    }
+
+    /// Convert a JSON array to a Cedar set expression.
+    fn convert_array(&self, arr: &[Value]) -> Result<RestrictedExpression, ValueMappingError> {
+        let mut exprs = Vec::with_capacity(arr.len());
+
+        for item in arr {
+            let expr = self.convert_value(item)?;
+            // All code paths in convert_value now return Some or Err,
+            // so unwrap is safe here
+            exprs.push(expr.expect("convert_value should always return Some"));
+        }
+
+        Ok(RestrictedExpression::new_set(exprs))
+    }
+
+    /// Convert a JSON object to a Cedar expression (entity, extension, or record).
+    fn convert_object(
+        &self,
+        value: &Value,
+        obj: &serde_json::Map<String, Value>,
+    ) -> Result<Option<RestrictedExpression>, ValueMappingError> {
+        // Check for entity reference
+        if Self::is_entity_reference(value) {
+            return Self::convert_entity_reference(value);
+        }
+
+        // Check for extension type markers (__extn)
+        if let Some(extn) = obj.get("__extn") {
+            return Self::convert_extension_marker(extn);
+        }
+
+        // Regular record
+        let mut fields = HashMap::with_capacity(obj.len());
+
+        for (key, val) in obj {
+            let expr = self.convert_value(val)?;
+            fields.insert(
+                key.clone(),
+                expr.expect("convert_value should always return Some"),
+            );
+        }
+
+        Ok(Some(RestrictedExpression::new_record(fields)?))
+    }
+
+    /// Convert an entity reference to a Cedar entity UID expression.
+    fn convert_entity_reference(
+        value: &Value,
+    ) -> Result<Option<RestrictedExpression>, ValueMappingError> {
+        let entity_ref = Self::parse_entity_reference(value)?;
+
+        let entity_type = EntityTypeName::from_str(&entity_ref.entity_type).map_err(|e| {
+            ValueMappingError::InvalidEntityReference {
+                reason: format!("invalid entity type '{}': {}", entity_ref.entity_type, e),
+            }
+        })?;
+
+        let entity_id = EntityId::from_str(&entity_ref.entity_id).map_err(|e| {
+            ValueMappingError::InvalidEntityReference {
+                reason: format!("invalid entity id '{}': {}", entity_ref.entity_id, e),
+            }
+        })?;
+
+        let uid = EntityUid::from_type_name_and_id(entity_type, entity_id);
+        Ok(Some(RestrictedExpression::new_entity_uid(uid)))
+    }
+
+    /// Convert an extension marker (__extn) to a Cedar extension expression.
+    fn convert_extension_marker(
+        extn: &Value,
+    ) -> Result<Option<RestrictedExpression>, ValueMappingError> {
+        let extn_obj = extn.as_object().ok_or_else(|| {
+            ValueMappingError::InvalidExtensionFormat {
+                extension_type: "__extn".to_string(),
+                value: extn.to_string(),
+            }
+        })?;
+
+        let fn_name = extn_obj.get("fn").and_then(|v| v.as_str()).ok_or_else(|| {
+            ValueMappingError::InvalidExtensionFormat {
+                extension_type: "__extn".to_string(),
+                value: format!(
+                    "missing or invalid 'fn' field in {}",
+                    serde_json::to_string(extn_obj).unwrap_or_default()
+                ),
+            }
+        })?;
+
+        let arg = extn_obj
+            .get("arg")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| ValueMappingError::InvalidExtensionFormat {
+                extension_type: fn_name.to_string(),
+                value: format!(
+                    "missing or invalid 'arg' field in {}",
+                    serde_json::to_string(extn_obj).unwrap_or_default()
+                ),
+            })?;
+
+        match fn_name {
+            "decimal" => Ok(Some(RestrictedExpression::new_decimal(arg))),
+            "ip" | "ipaddr" => Ok(Some(RestrictedExpression::new_ip(arg))),
+            "datetime" => Ok(Some(RestrictedExpression::new_datetime(arg))),
+            "duration" => Ok(Some(RestrictedExpression::new_duration(arg))),
+            _ => Err(ValueMappingError::InvalidExtensionFormat {
+                extension_type: fn_name.to_string(),
+                value: arg.to_string(),
+            }),
+        }
     }
 
     /// Estimates the JSON-serialized size of a value in bytes.

@@ -39,6 +39,12 @@ mod datetime_option {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
+    /// Serialize an optional `DateTime` to RFC 3339 format.
+    ///
+    /// Note: This function signature uses `&Option<T>` rather than `Option<&T>`
+    /// because serde's `#[serde(serialize_with)]` attribute passes references
+    /// to field values, and the field type is `Option<DateTime<Utc>>`.
+    #[allow(clippy::ref_option)]
     pub(super) fn serialize<S>(
         date: &Option<DateTime<Utc>>,
         serializer: S,
@@ -100,7 +106,7 @@ impl CedarType {
     /// - Strings that look like IP addresses, decimals, datetimes, or durations
     ///
     /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
-    #[must_use] 
+    #[must_use]
     pub fn from_value(value: &Value) -> Self {
         match value {
             Value::String(s) => Self::from_string_value(s),
@@ -118,15 +124,16 @@ impl CedarType {
                 // Check for extension type marker (__extn)
                 if let Some(extn) = obj.get("__extn")
                     && let Some(extn_obj) = extn.as_object()
-                        && let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str()) {
-                            return match fn_name {
-                                "ip" | "ipaddr" => Self::Ip,
-                                "decimal" => Self::Decimal,
-                                "datetime" => Self::DateTime,
-                                "duration" => Self::Duration,
-                                _ => Self::Record,
-                            };
-                        }
+                    && let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str())
+                {
+                    return match fn_name {
+                        "ip" | "ipaddr" => Self::Ip,
+                        "decimal" => Self::Decimal,
+                        "datetime" => Self::DateTime,
+                        "duration" => Self::Duration,
+                        _ => Self::Record,
+                    };
+                }
 
                 // Check if it's an entity reference with explicit marker
                 // Entity references must have exactly "type" and "id" fields,
@@ -160,12 +167,13 @@ impl CedarType {
         // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
         if let Some((ip_part, prefix_part)) = s.split_once('/')
             && let Ok(ip) = IpAddr::from_str(ip_part)
-                && let Ok(prefix_len) = prefix_part.parse::<u8>() {
-                    let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
-                    if prefix_len <= max_prefix {
-                        return Self::Ip;
-                    }
-                }
+            && let Ok(prefix_len) = prefix_part.parse::<u8>()
+        {
+            let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+            if prefix_len <= max_prefix {
+                return Self::Ip;
+            }
+        }
 
         // Check for datetime (ISO 8601 / RFC 3339 format)
         if Self::is_datetime_format(s) {
@@ -311,7 +319,7 @@ impl DataEntry {
     /// The `created_at` timestamp is set to the current time,
     /// and `expires_at` is calculated from the optional TTL.
     /// Uses saturating conversion for TTL to prevent overflow.
-    #[must_use] 
+    #[must_use]
     pub fn new(key: String, value: Value, ttl: Option<StdDuration>) -> Self {
         let created_at = Utc::now();
         let expires_at = ttl.map(|duration| {
@@ -336,7 +344,7 @@ impl DataEntry {
     }
 
     /// Check if this entry has expired.
-    #[must_use] 
+    #[must_use]
     pub fn is_expired(&self) -> bool {
         if let Some(expires_at) = self.expires_at {
             Utc::now() > expires_at

@@ -22,6 +22,11 @@ const RWLOCK_EXPECT_MESSAGE: &str = "DataStore storage lock should not be poison
 /// We use 10 years instead of `i64::MAX` to avoid chrono Duration overflow issues.
 const INFINITE_TTL_SECS: i64 = 315_360_000; // 10 years in seconds
 
+/// Maximum safe seconds value for duration conversion.
+/// `i64::MAX / 1000` ensures we can safely add nanoseconds without overflow.
+/// This is approximately 9.2 quadrillion seconds (~292 billion years).
+const MAX_SAFE_DURATION_SECS: u64 = (i64::MAX / 1000) as u64;
+
 /// Thread-safe key-value data store with TTL support and capacity management.
 ///
 /// Built on top of `SparKV` in-memory store for consistency with other Cedarling components.
@@ -55,10 +60,14 @@ impl DataStore {
         let sparkv_config = SparKVConfig {
             max_items: config.max_entries,
             max_item_size: config.max_entry_size,
-            max_ttl: config
-                .max_ttl.map_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS), std_duration_to_chrono_duration),
-            default_ttl: config
-                .default_ttl.map_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS), std_duration_to_chrono_duration),
+            max_ttl: config.max_ttl.map_or_else(
+                || ChronoDuration::seconds(INFINITE_TTL_SECS),
+                std_duration_to_chrono_duration,
+            ),
+            default_ttl: config.default_ttl.map_or_else(
+                || ChronoDuration::seconds(INFINITE_TTL_SECS),
+                std_duration_to_chrono_duration,
+            ),
             auto_clear_expired: true,
             earliest_expiration_eviction: false,
         };
@@ -119,12 +128,13 @@ impl DataStore {
         // Validate explicit TTL against max_ttl before calculating effective TTL
         if let Some(explicit_ttl) = ttl
             && let Some(max_ttl) = self.config.max_ttl
-                && explicit_ttl > max_ttl {
-                    return Err(DataError::TTLExceeded {
-                        requested: explicit_ttl,
-                        max: max_ttl,
-                    });
-                }
+            && explicit_ttl > max_ttl
+        {
+            return Err(DataError::TTLExceeded {
+                requested: explicit_ttl,
+                max: max_ttl,
+            });
+        }
 
         // Calculate effective TTL using the helper function
         let chrono_ttl = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
@@ -181,12 +191,13 @@ impl DataStore {
 
         // Check if entry has expired
         if let Some(expires_at) = entry.expires_at
-            && chrono::Utc::now() > expires_at {
-                // Entry is expired, optionally remove it from storage
-                let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
-                storage.pop(key);
-                return None;
-            }
+            && chrono::Utc::now() > expires_at
+        {
+            // Entry is expired, optionally remove it from storage
+            let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+            storage.pop(key);
+            return None;
+        }
 
         // Only acquire write lock if metrics are enabled
         if self.config.enable_metrics {
@@ -199,10 +210,10 @@ impl DataStore {
                     .signed_duration_since(now)
                     .to_std()
                     .ok()
-                    .map(std_duration_to_chrono_duration)
-                    .unwrap_or_else(|| {
-                        get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
-                    })
+                    .map_or_else(
+                        || get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl),
+                        std_duration_to_chrono_duration,
+                    )
             } else {
                 // No expiration, use effective TTL
                 get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
@@ -237,13 +248,6 @@ impl DataStore {
     pub(crate) fn count(&self) -> usize {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         storage.len()
-    }
-
-    /// List all keys currently in the store.
-    /// Uses read lock for concurrent access.
-    pub(crate) fn list_keys(&self) -> Vec<String> {
-        let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
-        storage.get_keys()
     }
 
     /// Get all active (non-expired) entries as a `HashMap`.
@@ -293,13 +297,15 @@ pub(super) fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration 
     let secs = d.as_secs();
     let nanos = d.subsec_nanos();
 
-    // Saturating conversion: i64::MAX seconds is ~292 billion years
-    // We cap at a safe maximum to prevent chrono panics
-    // i64::MAX / 1000 (milliseconds per second) is a safe upper bound
-    const MAX_SAFE_SECS: u64 = (i64::MAX / 1000) as u64;
-    let secs_capped = secs.min(MAX_SAFE_SECS);
+    // Saturating conversion: cap at MAX_SAFE_DURATION_SECS to prevent chrono panics.
+    // After capping, the value is guaranteed to fit in i64.
+    let secs_capped = secs.min(MAX_SAFE_DURATION_SECS);
 
-    ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(i64::from(nanos))
+    // SAFETY: secs_capped <= MAX_SAFE_DURATION_SECS < i64::MAX, so this cast is safe
+    #[allow(clippy::cast_possible_wrap)]
+    let secs_i64 = secs_capped as i64;
+
+    ChronoDuration::seconds(secs_i64) + ChronoDuration::nanoseconds(i64::from(nanos))
 }
 
 /// Get the effective TTL to use, respecting `max_ttl` constraints.
@@ -453,25 +459,6 @@ mod tests {
 
         store.remove("key1");
         assert_eq!(store.count(), 1);
-    }
-
-    #[test]
-    fn test_list_keys() {
-        let store = create_test_store();
-
-        assert!(store.list_keys().is_empty());
-
-        store
-            .push("key1", json!("value1"), None)
-            .expect("failed to push key1 for list_keys test");
-        store
-            .push("key2", json!("value2"), None)
-            .expect("failed to push key2 for list_keys test");
-
-        let keys = store.list_keys();
-        assert_eq!(keys.len(), 2);
-        assert!(keys.contains(&"key1".to_string()));
-        assert!(keys.contains(&"key2".to_string()));
     }
 
     #[test]
@@ -646,7 +633,7 @@ mod tests {
             let store_clone = store.clone();
             let handle = thread::spawn(move || {
                 for j in 0..10 {
-                    let key = format!("key_{}_{}", i, j);
+                    let key = format!("key_{i}_{j}");
                     store_clone
                         .push(&key, json!(format!("value_{}_{}", i, j)), None)
                         .expect("failed to push value in thread");
@@ -669,7 +656,7 @@ mod tests {
             let store_clone = store.clone();
             let handle = thread::spawn(move || {
                 for j in 0..10 {
-                    let key = format!("key_{}_{}", i, j);
+                    let key = format!("key_{i}_{j}");
                     let expected = json!(format!("value_{}_{}", i, j));
                     assert_eq!(store_clone.get(&key), Some(expected));
                 }
@@ -690,7 +677,7 @@ mod tests {
 
         // Populate store
         for i in 0..20 {
-            let key = format!("key_{}", i);
+            let key = format!("key_{i}");
             store
                 .push(&key, json!(i), None)
                 .expect("failed to populate store for concurrent remove test");
@@ -702,7 +689,7 @@ mod tests {
         for i in 0..10 {
             let store_clone = store.clone();
             let handle = thread::spawn(move || {
-                store_clone.remove(&format!("key_{}", i));
+                store_clone.remove(&format!("key_{i}"));
             });
             handles.push(handle);
         }
@@ -778,6 +765,7 @@ mod tests {
 
     #[test]
     fn test_cedar_type_inference() {
+        use crate::CedarType;
         let store = create_test_store();
 
         store
@@ -799,7 +787,6 @@ mod tests {
             .push("entity", json!({"type": "User", "id": "123"}), None)
             .expect("failed to push entity");
 
-        use crate::CedarType;
         assert_eq!(
             store.get_entry("string").unwrap().data_type,
             CedarType::String
@@ -829,7 +816,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(DataStore::new(valid_config), Ok(_)),
+            DataStore::new(valid_config).is_ok(),
             "expected DataStore::new() to succeed with valid DataStoreConfig"
         );
 
@@ -1066,7 +1053,7 @@ mod tests {
             let store_clone = store.clone();
             let handle = thread::spawn(move || {
                 for i in 0..100 {
-                    let key = format!("writer_{}_key_{}", writer_id, i);
+                    let key = format!("writer_{writer_id}_key_{i}");
                     store_clone
                         .push(&key, json!({"writer": writer_id, "value": i}), None)
                         .expect("concurrent push should succeed");
@@ -1117,7 +1104,7 @@ mod tests {
         // Pre-populate with some data
         for i in 0..50 {
             store
-                .push(&format!("pre_{}", i), json!(i), None)
+                .push(&format!("pre_{i}"), json!(i), None)
                 .expect("pre-populate should succeed");
         }
 
@@ -1129,7 +1116,7 @@ mod tests {
             let pushes = successful_pushes.clone();
             let handle = thread::spawn(move || {
                 for i in 0..50 {
-                    let key = format!("writer_{}_item_{}", writer_id, i);
+                    let key = format!("writer_{writer_id}_item_{i}");
                     if store_clone.push(&key, json!({"id": i}), None).is_ok() {
                         pushes.fetch_add(1, Ordering::SeqCst);
                     }
@@ -1197,7 +1184,7 @@ mod tests {
             let store_clone = store.clone();
             let handle = thread::spawn(move || {
                 for i in 0..200 {
-                    let key = format!("key_{}_{}", writer_id, i);
+                    let key = format!("key_{writer_id}_{i}");
                     let _ = store_clone.push(&key, json!(i), None);
                     // Small yield to allow interleaving
                     thread::yield_now();
@@ -1235,7 +1222,7 @@ mod tests {
         // Pre-populate
         for i in 0..10 {
             store
-                .push(&format!("data_{}", i), json!({"index": i}), None)
+                .push(&format!("data_{i}"), json!({"index": i}), None)
                 .expect("pre-populate should succeed");
         }
 
@@ -1261,7 +1248,7 @@ mod tests {
         let store_clone = store.clone();
         let write_handle = thread::spawn(move || {
             for i in 0..50 {
-                let key = format!("new_data_{}", i);
+                let key = format!("new_data_{i}");
                 let _ = store_clone.push(&key, json!({"new_index": i}), None);
             }
         });

@@ -120,6 +120,11 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the `data_store_config` is invalid. This should not happen
+    /// in practice because the config is validated during bootstrap parsing.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
@@ -367,6 +372,8 @@ impl DataApi for Cedarling {
         let config = self.data.config();
         if config.max_entries > 0 {
             let entry_count = self.data.count();
+            // Precision loss is acceptable for percentage calculation
+            #[allow(clippy::cast_precision_loss)]
             let usage_percent = (entry_count as f64 / config.max_entries as f64) * 100.0;
             if usage_percent >= config.memory_alert_threshold {
                 let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
@@ -419,6 +426,8 @@ impl DataApi for Cedarling {
         };
 
         // Calculate capacity usage percentage
+        // Precision loss is acceptable for percentage calculation
+        #[allow(clippy::cast_precision_loss)]
         let capacity_usage_percent = if config.max_entries > 0 {
             (entry_count as f64 / config.max_entries as f64) * 100.0
         } else {

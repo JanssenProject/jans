@@ -77,12 +77,21 @@ impl ValidationResult {
         self
     }
 
-    /// Convert to Result type
-    pub fn into_result(self) -> Result<(), ValidationError> {
+    /// Convert to Result type.
+    ///
+    /// Returns `Ok(())` if validation passed, or an error with validation failures.
+    /// When there's exactly one error, it returns that error directly.
+    /// When there are multiple errors, they are wrapped in `ValidationError::Multiple`.
+    ///
+    /// # Panics
+    ///
+    /// This function will not panic. The `expect` call is guarded by a length check.
+    pub fn into_result(mut self) -> Result<(), ValidationError> {
         if self.is_valid {
             Ok(())
         } else if self.errors.len() == 1 {
-            Err(self.errors.into_iter().next().unwrap())
+            // pop() is safe here since we verified len() == 1
+            Err(self.errors.pop().expect("errors has exactly one element"))
         } else {
             Err(ValidationError::Multiple(self.errors))
         }
@@ -195,6 +204,10 @@ impl DataValidator {
     ///
     /// If `collect_all_errors` is set in the config, this will collect all
     /// errors before returning. Otherwise, it fails fast on the first error.
+    ///
+    /// # Panics
+    ///
+    /// This function will not panic. The `expect` call is guarded by a length check.
     pub fn validate(&self, value: &Value) -> Result<(), ValidationError> {
         if self.config.collect_all_errors {
             let mut errors = Vec::new();
@@ -202,7 +215,8 @@ impl DataValidator {
             if errors.is_empty() {
                 Ok(())
             } else if errors.len() == 1 {
-                Err(errors.into_iter().next().unwrap())
+                // pop() is safe here since we verified len() == 1
+                Err(errors.pop().expect("errors has exactly one element"))
             } else {
                 Err(ValidationError::Multiple(errors))
             }
@@ -320,31 +334,9 @@ impl DataValidator {
     /// - Null values removed from objects
     /// - Null values in arrays replaced with empty strings
     /// - Control characters removed from strings
-    #[must_use] 
+    #[must_use]
     pub fn sanitize(&self, value: &Value) -> Value {
-        match value {
-            Value::Null => Value::String(String::new()),
-            Value::String(s) => {
-                // Remove control characters
-                let sanitized: String = s.chars().filter(|c| !c.is_control()).collect();
-                Value::String(sanitized)
-            },
-            Value::Array(arr) => Value::Array(arr.iter().map(|v| self.sanitize(v)).collect()),
-            Value::Object(obj) => {
-                let sanitized: serde_json::Map<String, Value> = obj
-                    .iter()
-                    .filter(|(_, v)| !v.is_null())
-                    .map(|(k, v)| {
-                        // Sanitize key
-                        let clean_key: String = k.chars().filter(|c| !c.is_control()).collect();
-                        (clean_key, self.sanitize(v))
-                    })
-                    .collect();
-                Value::Object(sanitized)
-            },
-            // Numbers and booleans pass through unchanged
-            _ => value.clone(),
-        }
+        sanitize_value_recursive(value)
     }
 
     /// Validates a JSON value at a specific path and depth.
@@ -388,7 +380,7 @@ impl DataValidator {
         }
 
         if self.config.strict_extension_validation
-            && let Some(ext) = CedarValueMapper::detect_extension(s) {
+            && let Some(ref ext) = CedarValueMapper::detect_extension(s) {
                 self.validate_detected_extension(ext, path)?;
             }
         Ok(())
@@ -398,18 +390,18 @@ impl DataValidator {
     #[inline]
     fn validate_detected_extension(
         &self,
-        ext: ExtensionValue,
+        ext: &ExtensionValue,
         path: &str,
     ) -> Result<(), ValidationError> {
         let (ext_type, value, is_valid) = match ext {
-            ExtensionValue::IpAddr(ref v) => (
+            ExtensionValue::IpAddr(v) => (
                 "ipaddr",
                 v.clone(),
                 self.validate_extension(v, "ip").is_ok(),
             ),
-            ExtensionValue::Decimal(ref v) => ("decimal", v.clone(), v.parse::<f64>().is_ok()),
-            ExtensionValue::DateTime(ref v) => ("datetime", v.clone(), Self::is_valid_datetime(v)),
-            ExtensionValue::Duration(ref v) => ("duration", v.clone(), Self::is_valid_duration(v)),
+            ExtensionValue::Decimal(v) => ("decimal", v.clone(), v.parse::<f64>().is_ok()),
+            ExtensionValue::DateTime(v) => ("datetime", v.clone(), Self::is_valid_datetime(v)),
+            ExtensionValue::Duration(v) => ("duration", v.clone(), Self::is_valid_duration(v)),
         };
 
         if is_valid {
@@ -464,7 +456,7 @@ impl DataValidator {
 
         // Fast path for special object types
         if CedarValueMapper::is_entity_reference(value) {
-            return self.validate_entity_reference(value, path);
+            return Self::validate_entity_reference(value, path);
         }
         if let Some(extn) = obj.get("__extn") {
             return self.validate_extension_marker(extn, path);
@@ -472,7 +464,7 @@ impl DataValidator {
 
         // Validate keys and values
         for (key, val) in obj {
-            self.validate_key(key, path)?;
+            Self::validate_key(key, path)?;
             self.validate_at_path(val, &format!("{path}.{key}"), depth + 1)?;
         }
         Ok(())
@@ -480,7 +472,7 @@ impl DataValidator {
 
     /// Validates an object key.
     #[inline]
-    fn validate_key(&self, key: &str, path: &str) -> Result<(), ValidationError> {
+    fn validate_key(key: &str, path: &str) -> Result<(), ValidationError> {
         if key.is_empty() {
             return Err(ValidationError::InvalidKey {
                 path: path.to_string(),
@@ -526,125 +518,143 @@ impl DataValidator {
                     });
                 }
             },
-            Value::String(s) => {
-                if s.len() > self.config.max_string_length {
-                    errors.push(ValidationError::StringTooLong {
-                        path: path.to_string(),
-                        length: s.len(),
-                        max: self.config.max_string_length,
-                    });
-                }
-
-                // If it looks like an extension type, validate its format
-                if self.config.strict_extension_validation
-                    && let Some(ext) = CedarValueMapper::detect_extension(s) {
-                        match ext {
-                            ExtensionValue::IpAddr(ip) => {
-                                // validate_extension handles both plain IPs and CIDR
-                                if self.validate_extension(&ip, "ip").is_err() {
-                                    errors.push(ValidationError::InvalidExtensionFormat {
-                                        path: path.to_string(),
-                                        extension_type: "ipaddr".to_string(),
-                                        value: ip,
-                                    });
-                                }
-                            },
-                            ExtensionValue::Decimal(d) => {
-                                if d.parse::<f64>().is_err() {
-                                    errors.push(ValidationError::InvalidExtensionFormat {
-                                        path: path.to_string(),
-                                        extension_type: "decimal".to_string(),
-                                        value: d,
-                                    });
-                                }
-                            },
-                            ExtensionValue::DateTime(dt) => {
-                                if !Self::is_valid_datetime(&dt) {
-                                    errors.push(ValidationError::InvalidExtensionFormat {
-                                        path: path.to_string(),
-                                        extension_type: "datetime".to_string(),
-                                        value: dt,
-                                    });
-                                }
-                            },
-                            ExtensionValue::Duration(dur) => {
-                                if !Self::is_valid_duration(&dur) {
-                                    errors.push(ValidationError::InvalidExtensionFormat {
-                                        path: path.to_string(),
-                                        extension_type: "duration".to_string(),
-                                        value: dur,
-                                    });
-                                }
-                            },
-                        }
-                    }
-            },
-            Value::Array(arr) => {
-                if arr.len() > self.config.max_array_length {
-                    errors.push(ValidationError::ArrayTooLong {
-                        path: path.to_string(),
-                        length: arr.len(),
-                        max: self.config.max_array_length,
-                    });
-                }
-                for (i, item) in arr.iter().enumerate() {
-                    let item_path = format!("{path}[{i}]");
-                    self.validate_collecting(item, &item_path, depth + 1, errors);
-                }
-            },
+            Value::String(s) => self.validate_string_collecting(s, path, errors),
+            Value::Array(arr) => self.validate_array_collecting(arr, path, depth, errors),
             Value::Object(obj) => {
-                if obj.len() > self.config.max_object_keys {
-                    errors.push(ValidationError::TooManyKeys {
-                        path: path.to_string(),
-                        count: obj.len(),
-                        max: self.config.max_object_keys,
-                    });
-                }
-
-                // Check for entity reference
-                if CedarValueMapper::is_entity_reference(value) {
-                    if let Err(e) = self.validate_entity_reference(value, path) {
-                        errors.push(e);
-                    }
-                    return;
-                }
-
-                // Check for extension type marker
-                if let Some(extn) = obj.get("__extn") {
-                    if let Err(e) = self.validate_extension_marker(extn, path) {
-                        errors.push(e);
-                    }
-                    return;
-                }
-
-                // Validate keys
-                for key in obj.keys() {
-                    if key.is_empty() {
-                        errors.push(ValidationError::InvalidKey {
-                            path: path.to_string(),
-                            reason: "empty key".to_string(),
-                        });
-                    }
-                    // Check for control characters in keys
-                    if key.chars().any(char::is_control) {
-                        errors.push(ValidationError::InvalidKey {
-                            path: path.to_string(),
-                            reason: "key contains control characters".to_string(),
-                        });
-                    }
-                }
-
-                // Recursively validate values
-                for (key, val) in obj {
-                    let field_path = format!("{path}.{key}");
-                    self.validate_collecting(val, &field_path, depth + 1, errors);
-                }
+                self.validate_object_collecting(value, obj, path, depth, errors);
             },
         }
     }
 
+    /// Validate a string value, collecting all errors.
+    fn validate_string_collecting(&self, s: &str, path: &str, errors: &mut Vec<ValidationError>) {
+        if s.len() > self.config.max_string_length {
+            errors.push(ValidationError::StringTooLong {
+                path: path.to_string(),
+                length: s.len(),
+                max: self.config.max_string_length,
+            });
+        }
+
+        // If it looks like an extension type, validate its format
+        if self.config.strict_extension_validation
+            && let Some(ext) = CedarValueMapper::detect_extension(s)
+            && let Some(err) = self.check_extension_format(&ext, path)
+        {
+            errors.push(err);
+        }
+    }
+
+    /// Check extension format and return an error if invalid.
+    fn check_extension_format(&self, ext: &ExtensionValue, path: &str) -> Option<ValidationError> {
+        match ext {
+            ExtensionValue::IpAddr(ip) if self.validate_extension(ip, "ip").is_err() => {
+                Some(ValidationError::InvalidExtensionFormat {
+                    path: path.to_string(),
+                    extension_type: "ipaddr".to_string(),
+                    value: ip.clone(),
+                })
+            },
+            ExtensionValue::Decimal(d) if d.parse::<f64>().is_err() => {
+                Some(ValidationError::InvalidExtensionFormat {
+                    path: path.to_string(),
+                    extension_type: "decimal".to_string(),
+                    value: d.clone(),
+                })
+            },
+            ExtensionValue::DateTime(dt) if !Self::is_valid_datetime(dt) => {
+                Some(ValidationError::InvalidExtensionFormat {
+                    path: path.to_string(),
+                    extension_type: "datetime".to_string(),
+                    value: dt.clone(),
+                })
+            },
+            ExtensionValue::Duration(dur) if !Self::is_valid_duration(dur) => {
+                Some(ValidationError::InvalidExtensionFormat {
+                    path: path.to_string(),
+                    extension_type: "duration".to_string(),
+                    value: dur.clone(),
+                })
+            },
+            _ => None,
+        }
+    }
+
+    /// Validate an array value, collecting all errors.
+    fn validate_array_collecting(
+        &self,
+        arr: &[Value],
+        path: &str,
+        depth: usize,
+        errors: &mut Vec<ValidationError>,
+    ) {
+        if arr.len() > self.config.max_array_length {
+            errors.push(ValidationError::ArrayTooLong {
+                path: path.to_string(),
+                length: arr.len(),
+                max: self.config.max_array_length,
+            });
+        }
+        for (i, item) in arr.iter().enumerate() {
+            let item_path = format!("{path}[{i}]");
+            self.validate_collecting(item, &item_path, depth + 1, errors);
+        }
+    }
+
+    /// Validate an object value, collecting all errors.
+    fn validate_object_collecting(
+        &self,
+        value: &Value,
+        obj: &serde_json::Map<String, Value>,
+        path: &str,
+        depth: usize,
+        errors: &mut Vec<ValidationError>,
+    ) {
+        if obj.len() > self.config.max_object_keys {
+            errors.push(ValidationError::TooManyKeys {
+                path: path.to_string(),
+                count: obj.len(),
+                max: self.config.max_object_keys,
+            });
+        }
+
+        // Check for entity reference
+        if CedarValueMapper::is_entity_reference(value) {
+            if let Err(e) = Self::validate_entity_reference(value, path) {
+                errors.push(e);
+            }
+            return;
+        }
+
+        // Check for extension type marker
+        if let Some(extn) = obj.get("__extn") {
+            if let Err(e) = self.validate_extension_marker(extn, path) {
+                errors.push(e);
+            }
+            return;
+        }
+
+        // Validate keys and recursively validate values
+        for (key, val) in obj {
+            if key.is_empty() {
+                errors.push(ValidationError::InvalidKey {
+                    path: path.to_string(),
+                    reason: "empty key".to_string(),
+                });
+            }
+            if key.chars().any(char::is_control) {
+                errors.push(ValidationError::InvalidKey {
+                    path: path.to_string(),
+                    reason: "key contains control characters".to_string(),
+                });
+            }
+            let field_path = format!("{path}.{key}");
+            self.validate_collecting(val, &field_path, depth + 1, errors);
+        }
+    }
+
     // Validate entity reference format
-    fn validate_entity_reference(&self, value: &Value, path: &str) -> Result<(), ValidationError> {
+    fn validate_entity_reference(value: &Value, path: &str) -> Result<(), ValidationError> {
         match CedarValueMapper::parse_entity_reference(value) {
             Ok(entity_ref) => {
                 // Validate entity type format (should be like "Namespace::Type" or just "Type")
@@ -792,6 +802,36 @@ impl DataValidator {
     }
 }
 
+/// Recursive helper for sanitizing JSON values.
+///
+/// This is a free function to avoid the `only_used_in_recursion` clippy warning
+/// when `self` is passed only to enable recursion.
+fn sanitize_value_recursive(value: &Value) -> Value {
+    match value {
+        Value::Null => Value::String(String::new()),
+        Value::String(s) => {
+            // Remove control characters
+            let sanitized: String = s.chars().filter(|c| !c.is_control()).collect();
+            Value::String(sanitized)
+        },
+        Value::Array(arr) => Value::Array(arr.iter().map(sanitize_value_recursive).collect()),
+        Value::Object(obj) => {
+            let sanitized: serde_json::Map<String, Value> = obj
+                .iter()
+                .filter(|(_, v)| !v.is_null())
+                .map(|(k, v)| {
+                    // Sanitize key
+                    let clean_key: String = k.chars().filter(|c| !c.is_control()).collect();
+                    (clean_key, sanitize_value_recursive(v))
+                })
+                .collect();
+            Value::Object(sanitized)
+        },
+        // Numbers and booleans pass through unchanged
+        _ => value.clone(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -805,7 +845,7 @@ mod tests {
         assert!(validator.validate(&json!(true)).is_ok());
         assert!(validator.validate(&json!(42)).is_ok());
         assert!(validator.validate(&json!("hello")).is_ok());
-        assert!(validator.validate(&json!(3.14)).is_ok());
+        assert!(validator.validate(&json!(3.5)).is_ok());
     }
 
     #[test]

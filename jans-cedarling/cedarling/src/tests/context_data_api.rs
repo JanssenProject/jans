@@ -131,7 +131,7 @@ policy_stores:
 
 fn create_test_request(action: &str) -> RequestUnsigned {
     RequestUnsigned {
-        action: format!("Jans::Action::\"{}\"", action),
+        action: format!("Jans::Action::\"{action}\""),
         context: json!({}),
         principals: vec![
             EntityData::deserialize(json!({

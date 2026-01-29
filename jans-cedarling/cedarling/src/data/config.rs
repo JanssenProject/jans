@@ -135,7 +135,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when default_ttl is less than max_ttl"
         );
     }
@@ -164,7 +164,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when both TTL values are None"
         );
     }
@@ -177,7 +177,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when only default_ttl is set"
         );
     }
@@ -190,7 +190,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when only max_ttl is set"
         );
     }
