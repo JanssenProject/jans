@@ -49,7 +49,7 @@ class Plugin(DialogUtils):
 
     def edit_policy_source(self, *args, **kwargs):
         if kwargs:
-            title = _("Add Policy Source")
+            title = _("Edit Policy Source")
             source_data = kwargs['data']
         else:
             title = _("Add Policy Source")
@@ -114,8 +114,6 @@ class Plugin(DialogUtils):
             if result.lower() == 'yes':
                 self.policy_sources_container.remove_item(kwargs['selected'])
 
-            common_data.app.stop_progressing()
-
             return result
 
         asyncio.ensure_future(coroutine())
@@ -162,9 +160,9 @@ class Plugin(DialogUtils):
         )
 
         cedarling_configuration_data = self.data.get('cedarlingConfiguration', {})
-        cedarling_configuration_policiy_sources_data = []
+        cedarling_configuration_policy_sources_data = []
         for ccps in cedarling_configuration_data.get('policySources', []):
-            cedarling_configuration_policiy_sources_data.append((
+            cedarling_configuration_policy_sources_data.append((
                     ccps['enabled'],
                     ccps['authorizationToken'],
                     ccps['policyStoreUri']
@@ -174,16 +172,16 @@ class Plugin(DialogUtils):
                 myparent=self.app,
                 headers=['Enabled', 'Auth Token', 'Store Uri'],
                 preferred_size=[10, 30, common_data.app.output.get_size().columns -60],
-                data=cedarling_configuration_policiy_sources_data,
+                data=cedarling_configuration_policy_sources_data,
                 on_enter=self.edit_policy_source,
                 on_delete=self.delete_policy_source,
                 on_display=common_data.app.data_display_dialog,
                 selectes=0,
-                all_data=cedarling_configuration_policiy_sources_data,
+                all_data=cedarling_configuration_policy_sources_data,
                 underline_headings=False,
                 max_width=common_data.app.output.get_size().columns - 5,
                 jans_name='policySources',
-                max_height=len(cedarling_configuration_policiy_sources_data)+2
+                max_height=len(cedarling_configuration_policy_sources_data)+2
                 )
 
         self.cedarling_configuration_widgets = HSplit(
@@ -390,12 +388,12 @@ class Plugin(DialogUtils):
             ),
 
          Frame(
-            title="Grpc Configuration",
+            title=_("Grpc Configuration"),
             body=self.grpc_configuration_widgets,
         ),
 
          Frame(
-            title="Cedarling Configuration",
+            title=_("Cedarling Configuration"),
             body=self.cedarling_configuration_widgets,
         ),
 
