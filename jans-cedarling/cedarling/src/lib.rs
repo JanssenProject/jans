@@ -88,6 +88,9 @@ pub enum InitCedarlingError {
     /// Error while parse [`BootstrapConfigRaw`]
     #[error(transparent)]
     BootstrapConfigLoading(#[from] BootstrapConfigLoadingError),
+    /// Error while initializing the `DataStore` (invalid configuration)
+    #[error(transparent)]
+    DataStoreInit(#[from] ConfigValidationError),
     #[cfg(feature = "blocking")]
     /// Error while init tokio runtime
     #[error(transparent)]
@@ -120,11 +123,6 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the `data_store_config` is invalid. This should not happen
-    /// in practice because the config is validated during bootstrap parsing.
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
@@ -162,10 +160,7 @@ impl Cedarling {
 
         // Initialize data store first so it can be passed to authz service
         let data_store_config = config.data_store_config.clone().unwrap_or_default();
-        let data = Arc::new(
-            DataStore::new(data_store_config)
-                .expect("DataStoreConfig should be valid after bootstrap config parsing"),
-        );
+        let data = Arc::new(DataStore::new(data_store_config)?);
 
         let mut service_factory =
             ServiceFactory::new(config, service_config, log.clone(), data.clone());

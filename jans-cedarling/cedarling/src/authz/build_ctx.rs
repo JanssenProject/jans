@@ -6,10 +6,10 @@
 use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use crate::data::DataStore;
 use crate::entity_builder::BuiltEntities;
 use cedar_policy::Entity;
 use cedar_policy::EntityTypeName;
+use serde_json::Value as JsonValue;
 use serde_json::{Value, json, map::Entry};
 use smol_str::ToSmolStr;
 use std::collections::HashMap;
@@ -33,7 +33,7 @@ pub(super) fn build_context(
     build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
-    data_store: &DataStore,
+    pushed_data: &HashMap<String, JsonValue>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
@@ -95,11 +95,11 @@ pub(super) fn build_context(
         }
     }
 
-    // Inject pushed data under context.data namespace
-    let pushed_data = data_store.get_all();
+    // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
-        let data_value = Value::Object(pushed_data.into_iter().collect());
-        ctx_entity_refs["data"] = data_value;
+        let data_value = Value::Object(pushed_data.clone().into_iter().collect());
+        let pushed_wrapper = json!({ "data": data_value });
+        ctx_entity_refs = merge_json_values(ctx_entity_refs, &pushed_wrapper)?;
     }
 
     let context = merge_json_values(request_context, &ctx_entity_refs)?;
@@ -127,7 +127,7 @@ pub(super) fn build_multi_issuer_context(
     token_entities: &HashMap<String, Entity>,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
-    data_store: &DataStore,
+    pushed_data: &HashMap<String, JsonValue>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     // Start with the request context
     let mut context_json = request_context;
@@ -158,13 +158,11 @@ pub(super) fn build_multi_issuer_context(
         });
     }
 
-    // Inject pushed data under context.data namespace
-    let pushed_data = data_store.get_all();
+    // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
-        let data_value = Value::Object(pushed_data.into_iter().collect());
-        if let Some(context_obj) = context_json.as_object_mut() {
-            context_obj.insert("data".to_string(), data_value);
-        }
+        let data_value = Value::Object(pushed_data.clone().into_iter().collect());
+        let pushed_wrapper = json!({ "data": data_value });
+        context_json = merge_json_values(context_json, &pushed_wrapper)?;
     }
 
     // Create Cedar context

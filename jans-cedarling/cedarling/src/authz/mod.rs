@@ -142,7 +142,7 @@ impl Authz {
             &entities_data.built_entities(),
             &schema.schema,
             &action,
-            &self.config.data_store,
+            &pushed_data,
         )?;
 
         let workload_principal = entities_data.workload.as_ref().map(Entity::uid);
@@ -306,7 +306,7 @@ impl Authz {
             &entities_data.tokens,
             &schema.schema,
             &action,
-            &self.config.data_store,
+            &pushed_data,
         )?;
 
         let resource_uid = entities_data.resource.uid();
@@ -455,7 +455,7 @@ impl Authz {
             &built_entities,
             &schema.schema,
             &action,
-            &self.config.data_store,
+            &pushed_data,
         )?;
 
         let entities = Entities::from_entities(
