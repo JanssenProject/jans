@@ -26,6 +26,7 @@ use cedar_policy::{Context, Entities, Entity, EntityUid};
 use chrono::Utc;
 use request::{AuthorizeMultiIssuerRequest, Request, RequestUnsigned};
 use serde_json::json;
+use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -220,6 +221,7 @@ impl Authz {
                     .decision_log_default_jwt_id
                     .as_str(),
             ),
+            pushed_data: pushed_data_info,
         };
         self.log_decision(request_id, &decision_log_metadata);
 
@@ -365,6 +367,7 @@ impl Authz {
                 ),
                 tokens_logging_info,
                 decision: result.decision,
+                pushed_data: pushed_data_info,
             },
         );
 
@@ -509,13 +512,19 @@ impl Authz {
             &DecisionLogMetadata {
                 action: request.action.clone(),
                 resource: resource_uid.to_string(),
-                decision: result.decision.into(),
-                tokens: LogTokensInfo::empty(),
-                decision_time_micro_sec,
-                diagnostics: DiagnosticsSummary::from_diagnostics(&diagnostics),
+                decision: result.decision,
+                tokens_logging_info: LogTokensInfo::empty(),
+                decision_time: decision_time_micro_sec,
+                decision_diagnostics: &diagnostics,
+                principal: principal_uids
+                    .iter()
+                    .map(|uid| uid.type_name().to_smolstr())
+                    .collect(),
+                user_claims: None,
+                workload_claims: None,
+                pushed_data: pushed_data_info,
             },
         );
-        self.config.log_service.log_fn(unsigned_decision_log_fn);
 
         // DEBUG LOG
         // Log all result information about both authorize checks.
@@ -633,6 +642,7 @@ impl Authz {
             tokens: metadata.tokens_logging_info.clone(),
             decision_time_micro_sec: metadata.decision_time,
             diagnostics: DiagnosticsSummary::from_diagnostics(metadata.decision_diagnostics),
+            pushed_data: metadata.pushed_data.clone(),
         });
         self.config.log_service.log_fn(entry);
     }
@@ -743,6 +753,7 @@ struct DecisionLogMetadata<'a> {
     decision_diagnostics: &'a [Diagnostics],
     decision_time: i64,
     decision: bool,
+    pushed_data: Option<PushedDataInfo>,
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_debug`] method.

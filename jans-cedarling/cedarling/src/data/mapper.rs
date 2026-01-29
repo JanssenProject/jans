@@ -20,7 +20,7 @@ use std::str::FromStr;
 /// Represents a parsed Cedar entity reference.
 #[derive(Debug, Clone, PartialEq)]
 pub(super) struct EntityReference {
-    /// The entity type (e.g., "User", "Namespace::Type")
+    /// The entity type (e.g., "User", "`Namespace::Type`")
     pub entity_type: String,
     /// The entity identifier
     pub entity_id: String,
@@ -54,6 +54,7 @@ pub struct CedarValueMapper {
 
 impl CedarValueMapper {
     /// Create a new mapper with default settings.
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             auto_detect_extensions: true,
@@ -62,6 +63,7 @@ impl CedarValueMapper {
     }
 
     /// Create a mapper with auto-detection of extension types disabled.
+    #[must_use] 
     pub fn new_without_auto_detect() -> Self {
         Self {
             auto_detect_extensions: false,
@@ -72,6 +74,7 @@ impl CedarValueMapper {
     /// Set the maximum allowed value size in bytes.
     ///
     /// A value of 0 means no limit.
+    #[must_use] 
     pub fn with_max_size(mut self, max_size: usize) -> Self {
         self.max_value_size = max_size;
         self
@@ -197,28 +200,26 @@ impl CedarValueMapper {
 
             if is_last {
                 // Set the value
-                if let Value::Object(obj) = current {
-                    obj.insert(component.to_string(), new_value);
-                    return Ok(());
-                } else {
+                let Value::Object(obj) = current else {
                     return Err(ValueMappingError::TypeMismatch {
                         expected: "object".to_string(),
                         actual: Self::value_type_name(current).to_string(),
                     });
-                }
-            } else {
-                // Navigate or create intermediate objects
-                if let Value::Object(obj) = current {
-                    current = obj
-                        .entry(component.to_string())
-                        .or_insert_with(|| Value::Object(Map::new()));
-                } else {
-                    return Err(ValueMappingError::TypeMismatch {
-                        expected: "object".to_string(),
-                        actual: Self::value_type_name(current).to_string(),
-                    });
-                }
+                };
+                obj.insert((*component).to_string(), new_value);
+                return Ok(());
             }
+
+            // Navigate or create intermediate objects
+            let Value::Object(obj) = current else {
+                return Err(ValueMappingError::TypeMismatch {
+                    expected: "object".to_string(),
+                    actual: Self::value_type_name(current).to_string(),
+                });
+            };
+            current = obj
+                .entry((*component).to_string())
+                .or_insert_with(|| Value::Object(Map::new()));
         }
 
         Ok(())
@@ -233,6 +234,7 @@ impl CedarValueMapper {
     /// - `duration`: Duration strings (e.g., "2h30m", "1d12h", "500ms")
     ///
     /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
+    #[must_use] 
     pub fn detect_extension(value: &str) -> Option<ExtensionValue> {
         // Check for plain IP address (IPv4 or IPv6)
         if IpAddr::from_str(value).is_ok() {
@@ -240,17 +242,15 @@ impl CedarValueMapper {
         }
 
         // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
-        if let Some((ip_part, prefix_part)) = value.split_once('/') {
-            if let Ok(ip) = IpAddr::from_str(ip_part) {
-                if let Ok(prefix_len) = prefix_part.parse::<u8>() {
+        if let Some((ip_part, prefix_part)) = value.split_once('/')
+            && let Ok(ip) = IpAddr::from_str(ip_part)
+                && let Ok(prefix_len) = prefix_part.parse::<u8>() {
                     // Validate prefix length: 0-32 for IPv4, 0-128 for IPv6
                     let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
                     if prefix_len <= max_prefix {
                         return Some(ExtensionValue::IpAddr(value.to_string()));
                     }
                 }
-            }
-        }
 
         // Check for datetime (ISO 8601 / RFC 3339 format)
         // Examples: "2024-10-15", "2024-10-15T11:35:00Z", "2024-10-15T11:35:00.000+0100"
@@ -265,14 +265,13 @@ impl CedarValueMapper {
 
         // Check for decimal (must contain decimal point and be parseable as f64)
         // Must have exactly one decimal point and not end with it
-        if value.contains('.') {
-            if value.parse::<f64>().is_ok()
+        if value.contains('.')
+            && value.parse::<f64>().is_ok()
                 && !value.ends_with('.')
                 && value.chars().filter(|&c| c == '.').count() == 1
             {
                 return Some(ExtensionValue::Decimal(value.to_string()));
             }
-        }
 
         None
     }
@@ -298,11 +297,11 @@ impl CedarValueMapper {
         }
 
         // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
+        if !bytes[0..4].iter().all(u8::is_ascii_digit)
             || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
+            || !bytes[5..7].iter().all(u8::is_ascii_digit)
             || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
+            || !bytes[8..10].iter().all(u8::is_ascii_digit)
         {
             return false;
         }
@@ -318,16 +317,15 @@ impl CedarValueMapper {
         }
 
         // Check for time portion (HH:MM:SS)
-        if bytes.len() >= 19 {
-            if !bytes[11..13].iter().all(|b| b.is_ascii_digit())
+        if bytes.len() >= 19
+            && (!bytes[11..13].iter().all(u8::is_ascii_digit)
                 || bytes[13] != b':'
-                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
+                || !bytes[14..16].iter().all(u8::is_ascii_digit)
                 || bytes[16] != b':'
-                || !bytes[17..19].iter().all(|b| b.is_ascii_digit())
+                || !bytes[17..19].iter().all(u8::is_ascii_digit))
             {
                 return false;
             }
-        }
 
         // Accept various valid suffixes (Z, +HHMM, -HHMM, .sss, etc.)
         true
@@ -396,11 +394,12 @@ impl CedarValueMapper {
     }
 
     /// Check if a value represents a Cedar entity reference.
+    #[must_use] 
     pub fn is_entity_reference(value: &Value) -> bool {
         if let Value::Object(obj) = value {
             obj.len() == 2
-                && obj.get("type").map_or(false, |v| v.is_string())
-                && obj.get("id").map_or(false, |v| v.is_string())
+                && obj.get("type").is_some_and(serde_json::Value::is_string)
+                && obj.get("id").is_some_and(serde_json::Value::is_string)
         } else {
             false
         }
@@ -435,6 +434,7 @@ impl CedarValueMapper {
     }
 
     /// Get the JSON type name of a value.
+    #[must_use] 
     pub fn value_type_name(value: &Value) -> &'static str {
         match value {
             Value::Null => "null",
@@ -618,14 +618,13 @@ impl CedarValueMapper {
         match value {
             Value::Object(obj) => {
                 // Check for __entity marker (Cedar format for entity references)
-                if let Some(entity) = obj.get("__entity") {
-                    if let Some(entity_obj) = entity.as_object() {
+                if let Some(entity) = obj.get("__entity")
+                    && let Some(entity_obj) = entity.as_object() {
                         return Ok(serde_json::json!({
                             "type": entity_obj.get("type"),
                             "id": entity_obj.get("id")
                         }));
                     }
-                }
 
                 // Check for __extn marker (extension types)
                 // Preserve the entire wrapper so json_to_cedar can consume it

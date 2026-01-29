@@ -11,7 +11,7 @@ use std::net::IpAddr;
 use std::str::FromStr;
 use std::time::Duration as StdDuration;
 
-/// Helper module for serializing DateTime
+/// Helper module for serializing `DateTime`
 mod datetime {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
@@ -34,7 +34,7 @@ mod datetime {
     }
 }
 
-/// Helper module for serializing Optional DateTime
+/// Helper module for serializing Optional `DateTime`
 mod datetime_option {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
@@ -86,7 +86,7 @@ pub enum CedarType {
     Ip,
     /// Decimal extension type
     Decimal,
-    /// DateTime extension type
+    /// `DateTime` extension type
     DateTime,
     /// Duration extension type
     Duration,
@@ -100,6 +100,7 @@ impl CedarType {
     /// - Strings that look like IP addresses, decimals, datetimes, or durations
     ///
     /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
+    #[must_use] 
     pub fn from_value(value: &Value) -> Self {
         match value {
             Value::String(s) => Self::from_string_value(s),
@@ -115,9 +116,9 @@ impl CedarType {
             Value::Array(_) => Self::Set,
             Value::Object(obj) => {
                 // Check for extension type marker (__extn)
-                if let Some(extn) = obj.get("__extn") {
-                    if let Some(extn_obj) = extn.as_object() {
-                        if let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str()) {
+                if let Some(extn) = obj.get("__extn")
+                    && let Some(extn_obj) = extn.as_object()
+                        && let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str()) {
                             return match fn_name {
                                 "ip" | "ipaddr" => Self::Ip,
                                 "decimal" => Self::Decimal,
@@ -126,8 +127,6 @@ impl CedarType {
                                 _ => Self::Record,
                             };
                         }
-                    }
-                }
 
                 // Check if it's an entity reference with explicit marker
                 // Entity references must have exactly "type" and "id" fields,
@@ -136,8 +135,8 @@ impl CedarType {
                 if obj.len() == 2
                     && obj.contains_key("type")
                     && obj.contains_key("id")
-                    && obj.get("type").map_or(false, |v| v.is_string())
-                    && obj.get("id").map_or(false, |v| v.is_string())
+                    && obj.get("type").is_some_and(serde_json::Value::is_string)
+                    && obj.get("id").is_some_and(serde_json::Value::is_string)
                 {
                     Self::Entity
                 } else {
@@ -159,16 +158,14 @@ impl CedarType {
         }
 
         // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
-        if let Some((ip_part, prefix_part)) = s.split_once('/') {
-            if let Ok(ip) = IpAddr::from_str(ip_part) {
-                if let Ok(prefix_len) = prefix_part.parse::<u8>() {
+        if let Some((ip_part, prefix_part)) = s.split_once('/')
+            && let Ok(ip) = IpAddr::from_str(ip_part)
+                && let Ok(prefix_len) = prefix_part.parse::<u8>() {
                     let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
                     if prefix_len <= max_prefix {
                         return Self::Ip;
                     }
                 }
-            }
-        }
 
         // Check for datetime (ISO 8601 / RFC 3339 format)
         if Self::is_datetime_format(s) {
@@ -202,11 +199,11 @@ impl CedarType {
         let bytes = value.as_bytes();
 
         // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
+        if !bytes[0..4].iter().all(u8::is_ascii_digit)
             || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
+            || !bytes[5..7].iter().all(u8::is_ascii_digit)
             || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
+            || !bytes[8..10].iter().all(u8::is_ascii_digit)
         {
             return false;
         }
@@ -223,11 +220,11 @@ impl CedarType {
 
         // Check for time portion (HH:MM:SS)
         if bytes.len() >= 19
-            && (!bytes[11..13].iter().all(|b| b.is_ascii_digit())
+            && (!bytes[11..13].iter().all(u8::is_ascii_digit)
                 || bytes[13] != b':'
-                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
+                || !bytes[14..16].iter().all(u8::is_ascii_digit)
                 || bytes[16] != b':'
-                || !bytes[17..19].iter().all(|b| b.is_ascii_digit()))
+                || !bytes[17..19].iter().all(u8::is_ascii_digit))
         {
             return false;
         }
@@ -286,7 +283,7 @@ impl CedarType {
     }
 }
 
-/// A data entry in the DataStore with value and metadata.
+/// A data entry in the `DataStore` with value and metadata.
 ///
 /// This structure wraps the actual value with metadata including creation time,
 /// expiration time, access count, and type information.
@@ -309,11 +306,12 @@ pub struct DataEntry {
 }
 
 impl DataEntry {
-    /// Create a new DataEntry with the given key and value.
+    /// Create a new `DataEntry` with the given key and value.
     ///
     /// The `created_at` timestamp is set to the current time,
     /// and `expires_at` is calculated from the optional TTL.
     /// Uses saturating conversion for TTL to prevent overflow.
+    #[must_use] 
     pub fn new(key: String, value: Value, ttl: Option<StdDuration>) -> Self {
         let created_at = Utc::now();
         let expires_at = ttl.map(|duration| {
@@ -338,6 +336,7 @@ impl DataEntry {
     }
 
     /// Check if this entry has expired.
+    #[must_use] 
     pub fn is_expired(&self) -> bool {
         if let Some(expires_at) = self.expires_at {
             Utc::now() > expires_at

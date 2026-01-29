@@ -19,12 +19,12 @@ const RWLOCK_EXPECT_MESSAGE: &str = "DataStore storage lock should not be poison
 
 /// Effectively infinite TTL in seconds (approximately 10 years).
 /// This is used when `None` is specified for TTL to mean "no automatic expiration".
-/// We use 10 years instead of i64::MAX to avoid chrono Duration overflow issues.
+/// We use 10 years instead of `i64::MAX` to avoid chrono Duration overflow issues.
 const INFINITE_TTL_SECS: i64 = 315_360_000; // 10 years in seconds
 
 /// Thread-safe key-value data store with TTL support and capacity management.
 ///
-/// Built on top of SparKV in-memory store for consistency with other Cedarling components.
+/// Built on top of `SparKV` in-memory store for consistency with other Cedarling components.
 /// Provides automatic expiration, capacity limits, and thread-safe concurrent access.
 ///
 /// ## TTL Semantics
@@ -38,7 +38,7 @@ pub(crate) struct DataStore {
 }
 
 impl DataStore {
-    /// Create a new DataStore with the given configuration.
+    /// Create a new `DataStore` with the given configuration.
     ///
     /// ## TTL Defaults
     ///
@@ -56,13 +56,9 @@ impl DataStore {
             max_items: config.max_entries,
             max_item_size: config.max_entry_size,
             max_ttl: config
-                .max_ttl
-                .map(std_duration_to_chrono_duration)
-                .unwrap_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS)),
+                .max_ttl.map_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS), std_duration_to_chrono_duration),
             default_ttl: config
-                .default_ttl
-                .map(std_duration_to_chrono_duration)
-                .unwrap_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS)),
+                .default_ttl.map_or_else(|| ChronoDuration::seconds(INFINITE_TTL_SECS), std_duration_to_chrono_duration),
             auto_clear_expired: true,
             earliest_expiration_eviction: false,
         };
@@ -121,16 +117,14 @@ impl DataStore {
         }
 
         // Validate explicit TTL against max_ttl before calculating effective TTL
-        if let Some(explicit_ttl) = ttl {
-            if let Some(max_ttl) = self.config.max_ttl {
-                if explicit_ttl > max_ttl {
+        if let Some(explicit_ttl) = ttl
+            && let Some(max_ttl) = self.config.max_ttl
+                && explicit_ttl > max_ttl {
                     return Err(DataError::TTLExceeded {
                         requested: explicit_ttl,
                         max: max_ttl,
                     });
                 }
-            }
-        }
 
         // Calculate effective TTL using the helper function
         let chrono_ttl = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
@@ -186,14 +180,13 @@ impl DataStore {
         let mut entry = entry?;
 
         // Check if entry has expired
-        if let Some(expires_at) = entry.expires_at {
-            if chrono::Utc::now() > expires_at {
+        if let Some(expires_at) = entry.expires_at
+            && chrono::Utc::now() > expires_at {
                 // Entry is expired, optionally remove it from storage
                 let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
                 storage.pop(key);
                 return None;
             }
-        }
 
         // Only acquire write lock if metrics are enabled
         if self.config.enable_metrics {
@@ -253,7 +246,7 @@ impl DataStore {
         storage.get_keys()
     }
 
-    /// Get all active (non-expired) entries as a HashMap.
+    /// Get all active (non-expired) entries as a `HashMap`.
     ///
     /// This is used for context injection during authorization.
     /// Returns only the values, not the metadata.
@@ -306,10 +299,10 @@ pub(super) fn std_duration_to_chrono_duration(d: StdDuration) -> ChronoDuration 
     const MAX_SAFE_SECS: u64 = (i64::MAX / 1000) as u64;
     let secs_capped = secs.min(MAX_SAFE_SECS);
 
-    ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(nanos as i64)
+    ChronoDuration::seconds(secs_capped as i64) + ChronoDuration::nanoseconds(i64::from(nanos))
 }
 
-/// Get the effective TTL to use, respecting max_ttl constraints.
+/// Get the effective TTL to use, respecting `max_ttl` constraints.
 ///
 /// # TTL Resolution Logic
 ///

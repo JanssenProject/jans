@@ -134,7 +134,7 @@ impl BootstrapConfig {
             id_token_trust_mode: raw.id_token_trust_mode.clone(),
         };
 
-        // Build DataStoreConfig if any data store fields are set
+        // Build `DataStoreConfig` if any data store fields are set
         let data_store_config = build_data_store_config(raw);
 
         Ok(Self {
@@ -152,7 +152,7 @@ impl BootstrapConfig {
     }
 }
 
-/// Build DataStoreConfig from raw config fields.
+/// Build `DataStoreConfig` from raw config fields.
 /// Returns `Some(DataStoreConfig)` if any data store fields are set,
 /// `None` otherwise (will use default config).
 fn build_data_store_config(raw: &BootstrapConfigRaw) -> Option<DataStoreConfig> {

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Data API trait and supporting types for the DataStore.
+//! Data API trait and supporting types for the `DataStore`.
 
 use std::time::Duration;
 
@@ -13,7 +13,7 @@ use serde_json::Value;
 use super::entry::DataEntry;
 use super::error::DataError;
 
-/// Statistics about the DataStore.
+/// Statistics about the `DataStore`.
 ///
 /// Provides insight into the current state and usage of the data store,
 /// including memory usage metrics and capacity information.

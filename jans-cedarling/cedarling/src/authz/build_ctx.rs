@@ -23,7 +23,7 @@ use super::errors::BuildContextError;
 /// Values are merged with the following precedence (highest to lowest):
 /// 1. **Request Context** - Values passed directly in the authorization request
 /// 2. **Entity References** - Built entity references from tokens
-/// 3. **Pushed Data** - Data from the DataStore (injected under `context.data`)
+/// 3. **Pushed Data** - Data from the `DataStore` (injected under `context.data`)
 ///
 /// If there's a key conflict between request context and other values, an error is returned.
 /// Pushed data is always placed under the `data` namespace to avoid conflicts.
@@ -121,7 +121,7 @@ pub(super) fn build_context(
 /// Values are merged with the following precedence (highest to lowest):
 /// 1. **Request Context** - Values passed directly in the authorization request
 /// 2. **Token References** - Built token entity references
-/// 3. **Pushed Data** - Data from the DataStore (injected under `context.data`)
+/// 3. **Pushed Data** - Data from the `DataStore` (injected under `context.data`)
 pub(super) fn build_multi_issuer_context(
     request_context: Value,
     token_entities: &HashMap<String, Entity>,

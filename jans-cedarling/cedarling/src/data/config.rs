@@ -5,7 +5,7 @@
 
 use std::time::Duration;
 
-/// Configuration for the DataStore component.
+/// Configuration for the `DataStore` component.
 ///
 /// Controls storage limits, TTL behavior, capacity management, and metrics.
 ///
@@ -68,10 +68,10 @@ impl Default for DataStoreConfig {
     }
 }
 
-/// Error returned when DataStoreConfig validation fails.
+/// Error returned when `DataStoreConfig` validation fails.
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigValidationError {
-    /// default_ttl exceeds max_ttl
+    /// `default_ttl` exceeds `max_ttl`
     #[error("default_ttl ({default:?}) exceeds max_ttl ({max:?})")]
     DefaultTtlExceedsMax {
         /// The default TTL value that exceeds the maximum
@@ -79,7 +79,7 @@ pub enum ConfigValidationError {
         /// The maximum TTL value
         max: Duration,
     },
-    /// memory_alert_threshold is outside valid range
+    /// `memory_alert_threshold` is outside valid range
     #[error("memory_alert_threshold ({value}) must be between 0.0 and 100.0")]
     InvalidMemoryAlertThreshold {
         /// The invalid threshold value
@@ -97,11 +97,10 @@ impl DataStoreConfig {
     /// - `memory_alert_threshold` is not between 0.0 and 100.0
     pub fn validate(&self) -> Result<(), ConfigValidationError> {
         // Check if default_ttl exceeds max_ttl
-        if let (Some(default), Some(max)) = (self.default_ttl, self.max_ttl) {
-            if default > max {
+        if let (Some(default), Some(max)) = (self.default_ttl, self.max_ttl)
+            && default > max {
                 return Err(ConfigValidationError::DefaultTtlExceedsMax { default, max });
             }
-        }
 
         // Validate memory_alert_threshold is in valid range
         if !(0.0..=100.0).contains(&self.memory_alert_threshold) {

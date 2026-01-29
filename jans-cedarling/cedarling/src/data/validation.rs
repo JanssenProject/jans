@@ -7,7 +7,7 @@
 //!
 //! Provides validation of JSON data against Cedar schema constraints,
 //! ensuring type safety and data integrity before values are pushed
-//! to the DataStore or used in policy evaluation.
+//! to the `DataStore` or used in policy evaluation.
 
 use crate::ValidationError;
 
@@ -41,6 +41,7 @@ pub struct ValidationResult {
 
 impl ValidationResult {
     /// Create a successful result
+    #[must_use] 
     pub fn ok() -> Self {
         Self {
             is_valid: true,
@@ -50,6 +51,7 @@ impl ValidationResult {
     }
 
     /// Create a failed result with a single error
+    #[must_use] 
     pub fn error(err: ValidationError) -> Self {
         Self {
             is_valid: false,
@@ -59,6 +61,7 @@ impl ValidationResult {
     }
 
     /// Create a failed result with multiple errors
+    #[must_use] 
     pub fn errors(errs: Vec<ValidationError>) -> Self {
         Self {
             is_valid: errs.is_empty(),
@@ -68,6 +71,7 @@ impl ValidationResult {
     }
 
     /// Add a warning
+    #[must_use] 
     pub fn with_warning(mut self, warning: String) -> Self {
         self.warnings.push(warning);
         self
@@ -132,6 +136,7 @@ impl Default for DataValidator {
 
 impl DataValidator {
     /// Create a new validator with default configuration.
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             config: ValidationConfig::default(),
@@ -139,41 +144,48 @@ impl DataValidator {
     }
 
     /// Create a validator with custom configuration.
+    #[must_use] 
     pub fn with_config(config: ValidationConfig) -> Self {
         Self { config }
     }
 
     /// Set maximum nesting depth.
+    #[must_use] 
     pub fn with_max_depth(mut self, max_depth: usize) -> Self {
         self.config.max_depth = max_depth;
         self
     }
 
     /// Set maximum string length.
+    #[must_use] 
     pub fn with_max_string_length(mut self, max_length: usize) -> Self {
         self.config.max_string_length = max_length;
         self
     }
 
     /// Set maximum array length.
+    #[must_use] 
     pub fn with_max_array_length(mut self, max_length: usize) -> Self {
         self.config.max_array_length = max_length;
         self
     }
 
     /// Set maximum object keys.
+    #[must_use] 
     pub fn with_max_object_keys(mut self, max_keys: usize) -> Self {
         self.config.max_object_keys = max_keys;
         self
     }
 
     /// Enable strict extension format validation.
+    #[must_use] 
     pub fn with_strict_extensions(mut self, strict: bool) -> Self {
         self.config.strict_extension_validation = strict;
         self
     }
 
     /// Enable collecting all errors instead of failing fast.
+    #[must_use] 
     pub fn collect_all_errors(mut self, collect: bool) -> Self {
         self.config.collect_all_errors = collect;
         self
@@ -201,6 +213,7 @@ impl DataValidator {
     }
 
     /// Validate a value and get a detailed result.
+    #[must_use] 
     pub fn validate_detailed(&self, value: &Value) -> ValidationResult {
         let mut errors = Vec::new();
         self.validate_collecting(value, "$", 0, &mut errors);
@@ -215,8 +228,8 @@ impl DataValidator {
         } else {
             Err(ValidationError::TypeMismatch {
                 path: "$".to_string(),
-                expected: format!("{:?}", expected),
-                actual: format!("{:?}", actual),
+                expected: format!("{expected:?}"),
+                actual: format!("{actual:?}"),
             })
         }
     }
@@ -241,16 +254,14 @@ impl DataValidator {
                     return Ok(());
                 }
                 // Check for CIDR notation
-                if let Some((ip_part, prefix_part)) = value.split_once('/') {
-                    if let Ok(ip) = IpAddr::from_str(ip_part) {
-                        if let Ok(prefix_len) = prefix_part.parse::<u8>() {
+                if let Some((ip_part, prefix_part)) = value.split_once('/')
+                    && let Ok(ip) = IpAddr::from_str(ip_part)
+                        && let Ok(prefix_len) = prefix_part.parse::<u8>() {
                             let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
                             if prefix_len <= max_prefix {
                                 return Ok(());
                             }
                         }
-                    }
-                }
                 Err(ValidationError::InvalidExtensionFormat {
                     path: "$".to_string(),
                     extension_type: extension_type.to_string(),
@@ -309,6 +320,7 @@ impl DataValidator {
     /// - Null values removed from objects
     /// - Null values in arrays replaced with empty strings
     /// - Control characters removed from strings
+    #[must_use] 
     pub fn sanitize(&self, value: &Value) -> Value {
         match value {
             Value::Null => Value::String(String::new()),
@@ -375,11 +387,10 @@ impl DataValidator {
             });
         }
 
-        if self.config.strict_extension_validation {
-            if let Some(ext) = CedarValueMapper::detect_extension(s) {
+        if self.config.strict_extension_validation
+            && let Some(ext) = CedarValueMapper::detect_extension(s) {
                 self.validate_detected_extension(ext, path)?;
             }
-        }
         Ok(())
     }
 
@@ -429,7 +440,7 @@ impl DataValidator {
         }
 
         for (i, item) in arr.iter().enumerate() {
-            self.validate_at_path(item, &format!("{}[{}]", path, i), depth + 1)?;
+            self.validate_at_path(item, &format!("{path}[{i}]"), depth + 1)?;
         }
         Ok(())
     }
@@ -462,7 +473,7 @@ impl DataValidator {
         // Validate keys and values
         for (key, val) in obj {
             self.validate_key(key, path)?;
-            self.validate_at_path(val, &format!("{}.{}", path, key), depth + 1)?;
+            self.validate_at_path(val, &format!("{path}.{key}"), depth + 1)?;
         }
         Ok(())
     }
@@ -525,8 +536,8 @@ impl DataValidator {
                 }
 
                 // If it looks like an extension type, validate its format
-                if self.config.strict_extension_validation {
-                    if let Some(ext) = CedarValueMapper::detect_extension(s) {
+                if self.config.strict_extension_validation
+                    && let Some(ext) = CedarValueMapper::detect_extension(s) {
                         match ext {
                             ExtensionValue::IpAddr(ip) => {
                                 // validate_extension handles both plain IPs and CIDR
@@ -567,7 +578,6 @@ impl DataValidator {
                             },
                         }
                     }
-                }
             },
             Value::Array(arr) => {
                 if arr.len() > self.config.max_array_length {
@@ -578,7 +588,7 @@ impl DataValidator {
                     });
                 }
                 for (i, item) in arr.iter().enumerate() {
-                    let item_path = format!("{}[{}]", path, i);
+                    let item_path = format!("{path}[{i}]");
                     self.validate_collecting(item, &item_path, depth + 1, errors);
                 }
             },
@@ -616,7 +626,7 @@ impl DataValidator {
                         });
                     }
                     // Check for control characters in keys
-                    if key.chars().any(|c| c.is_control()) {
+                    if key.chars().any(char::is_control) {
                         errors.push(ValidationError::InvalidKey {
                             path: path.to_string(),
                             reason: "key contains control characters".to_string(),
@@ -626,7 +636,7 @@ impl DataValidator {
 
                 // Recursively validate values
                 for (key, val) in obj {
-                    let field_path = format!("{}.{}", path, key);
+                    let field_path = format!("{path}.{key}");
                     self.validate_collecting(val, &field_path, depth + 1, errors);
                 }
             },
@@ -698,11 +708,11 @@ impl DataValidator {
         let bytes = value.as_bytes();
 
         // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
+        if !bytes[0..4].iter().all(u8::is_ascii_digit)
             || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
+            || !bytes[5..7].iter().all(u8::is_ascii_digit)
             || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
+            || !bytes[8..10].iter().all(u8::is_ascii_digit)
         {
             return false;
         }
@@ -719,11 +729,11 @@ impl DataValidator {
 
         // Check for time portion (HH:MM:SS)
         if bytes.len() >= 19
-            && (!bytes[11..13].iter().all(|b| b.is_ascii_digit())
+            && (!bytes[11..13].iter().all(u8::is_ascii_digit)
                 || bytes[13] != b':'
-                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
+                || !bytes[14..16].iter().all(u8::is_ascii_digit)
                 || bytes[16] != b':'
-                || !bytes[17..19].iter().all(|b| b.is_ascii_digit()))
+                || !bytes[17..19].iter().all(u8::is_ascii_digit))
         {
             return false;
         }
