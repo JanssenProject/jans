@@ -44,8 +44,7 @@ mod path_traversal {
         let err = result.expect_err("Expected PathTraversal error");
         assert!(
             matches!(err, ArchiveError::PathTraversal { .. }),
-            "Expected PathTraversal error, got: {:?}",
-            err
+            "Expected PathTraversal error, got: {err:?}"
         );
     }
 
@@ -66,8 +65,7 @@ mod path_traversal {
         let err = result.expect_err("archive with path traversal should be rejected");
         assert!(
             matches!(err, ArchiveError::PathTraversal { .. }),
-            "expected PathTraversal error, got: {:?}",
-            err
+            "expected PathTraversal error, got: {err:?}"
         );
     }
 
@@ -101,8 +99,7 @@ mod path_traversal {
         let err = result.expect_err("Expected PathTraversal error for double-dot sequences");
         assert!(
             matches!(err, ArchiveError::PathTraversal { .. }),
-            "Expected PathTraversal error, got: {:?}",
-            err
+            "Expected PathTraversal error, got: {err:?}"
         );
     }
 
@@ -126,8 +123,7 @@ mod path_traversal {
         let err = result.expect_err("expected PathTraversal error for Windows path separators");
         assert!(
             matches!(err, ArchiveError::PathTraversal { .. }),
-            "Expected PathTraversal error for Windows path separators, got: {:?}",
-            err
+            "Expected PathTraversal error for Windows path separators, got: {err:?}"
         );
     }
 }
@@ -147,8 +143,7 @@ mod malicious_archives {
         let err = result.expect_err("Expected InvalidZipFormat error");
         assert!(
             matches!(err, ArchiveError::InvalidZipFormat { .. }),
-            "Expected InvalidZipFormat error, got: {:?}",
-            err
+            "Expected InvalidZipFormat error, got: {err:?}"
         );
     }
 
@@ -160,8 +155,7 @@ mod malicious_archives {
         let err = result.expect_err("Expected InvalidZipFormat error");
         assert!(
             matches!(err, ArchiveError::InvalidZipFormat { .. }),
-            "Expected InvalidZipFormat error, got: {:?}",
-            err
+            "Expected InvalidZipFormat error, got: {err:?}"
         );
     }
 
@@ -172,8 +166,7 @@ mod malicious_archives {
         let err = result.expect_err("empty buffer should not be a valid archive");
         assert!(
             matches!(err, ArchiveError::InvalidZipFormat { .. }),
-            "Expected InvalidZipFormat error for empty buffer, got: {:?}",
-            err
+            "Expected InvalidZipFormat error for empty buffer, got: {err:?}"
         );
     }
 
@@ -258,8 +251,7 @@ mod input_validation {
                 &err,
                 PolicyStoreError::Validation(ValidationError::MetadataJsonParseFailed { .. })
             ),
-            "Expected MetadataJsonParseFailed validation error for metadata, got: {:?}",
-            err
+            "Expected MetadataJsonParseFailed validation error for metadata, got: {err:?}"
         );
     }
 
@@ -278,8 +270,7 @@ mod input_validation {
                 &err,
                 PolicyStoreError::Validation(ValidationError::InvalidPolicyStoreId { .. })
             ),
-            "Expected InvalidPolicyStoreId validation error for invalid Cedar syntax fixture, got: {:?}",
-            err
+            "Expected InvalidPolicyStoreId validation error for invalid Cedar syntax fixture, got: {err:?}"
         );
     }
 
@@ -290,10 +281,10 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded = loader.load_directory(".").expect("should load directory");
+        let loaded_directory = loader.load_directory(".").expect("should load directory");
 
         // Parse entities to trigger validation
-        let entity_file = loaded
+        let entity_file = loaded_directory
             .entities
             .first()
             .expect("Expected to find invalid entity JSON but none found");
@@ -301,8 +292,7 @@ mod input_validation {
         let err = result.expect_err("expected JSON parsing error for invalid entity JSON");
         assert!(
             matches!(&err, PolicyStoreError::JsonParsing { .. }),
-            "Expected JSON parsing error for invalid entity JSON, got: {:?}",
-            err
+            "Expected JSON parsing error for invalid entity JSON, got: {err:?}"
         );
     }
 
@@ -313,10 +303,10 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded = loader.load_directory(".").expect("should load directory");
+        let loaded_directory = loader.load_directory(".").expect("should load directory");
 
         // Parse issuers to trigger validation
-        let issuer_file = loaded
+        let issuer_file = loaded_directory
             .trusted_issuers
             .first()
             .expect("Expected to find invalid trusted issuer but none found");
@@ -324,8 +314,7 @@ mod input_validation {
         let err = result.expect_err("expected TrustedIssuerError for invalid trusted issuer");
         assert!(
             matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
-            "Expected TrustedIssuerError for invalid trusted issuer, got: {:?}",
-            err
+            "Expected TrustedIssuerError for invalid trusted issuer, got: {err:?}"
         );
     }
 
@@ -336,11 +325,11 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded = loader.load_directory(".").expect("should load directory");
+        let loaded_directory = loader.load_directory(".").expect("should load directory");
 
         // Parse all entities and detect duplicates
         let mut all_parsed_entities: Vec<ParsedEntity> = Vec::new();
-        for entity_file in &loaded.entities {
+        for entity_file in &loaded_directory.entities {
             let parsed =
                 EntityParser::parse_entities(&entity_file.content, &entity_file.name, None)
                     .expect("should parse entities");
@@ -352,7 +341,7 @@ mod input_validation {
 
         // Detect duplicates - this should succeed (duplicates handled gracefully)
         // Using None for logger since we don't need to capture warnings in this test
-        let unique_entities = EntityParser::detect_duplicates(all_parsed_entities, &None);
+        let unique_entities = EntityParser::detect_duplicates(all_parsed_entities, None);
 
         // Should have fewer unique entities than total (duplicates were merged)
         assert!(
@@ -406,13 +395,13 @@ permit(principal, action, resource);"#,
 
         // Cedar allows special characters in @id() annotations within the policy content.
         // The loader is expected to accept such policies successfully.
-        let loaded = loader
+        let loaded_directory = loader
             .load_directory(".")
             .expect("Policy with special-character @id should load successfully");
 
         // Verify policy was loaded with the special character ID
         assert!(
-            !loaded.policies.is_empty(),
+            !loaded_directory.policies.is_empty(),
             "Expected at least one policy to be loaded"
         );
     }
@@ -428,6 +417,8 @@ mod manifest_security {
     #[test]
     #[cfg(not(target_arch = "wasm32"))]
     fn test_detects_checksum_mismatch() {
+        use super::super::loader::DefaultPolicyStoreLoader;
+        use super::super::vfs_adapter::PhysicalVfs;
         use std::fs;
         use std::io::Read;
         use tempfile::TempDir;
@@ -482,14 +473,16 @@ mod manifest_security {
 
         // Attempt to load - should fail with checksum mismatch
         // Use the synchronous load_directory method directly for testing
-        use super::super::loader::DefaultPolicyStoreLoader;
-        use super::super::vfs_adapter::PhysicalVfs;
         let loader = DefaultPolicyStoreLoader::new(PhysicalVfs::new());
         let dir_str = temp_dir.path().to_str().unwrap();
-        let loaded = loader.load_directory(dir_str).unwrap();
+        let loaded_directory = loader.load_directory(dir_str).unwrap();
 
         // Validate manifest - this should detect the checksum mismatch
-        let result = loader.validate_manifest(dir_str, &loaded.metadata, &loaded.manifest.unwrap());
+        let result = DefaultPolicyStoreLoader::<PhysicalVfs>::validate_manifest(
+            dir_str,
+            &loaded_directory.metadata,
+            &loaded_directory.manifest.unwrap(),
+        );
 
         let err = result.expect_err("expected checksum mismatch error");
         assert!(
@@ -499,8 +492,7 @@ mod manifest_security {
                     err: crate::common::policy_store::errors::ManifestErrorType::ChecksumMismatch { .. }
                 }
             ),
-            "Expected ChecksumMismatch error, got: {:?}",
-            err
+            "Expected ChecksumMismatch error, got: {err:?}"
         );
     }
 
@@ -585,8 +577,7 @@ mod manifest_security {
                     err: crate::common::policy_store::errors::ManifestErrorType::InvalidChecksumFormat { .. }
                 }
             ),
-            "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {:?}",
-            err
+            "Expected ManifestError::InvalidChecksumFormat for invalid manifest checksum, got: {err:?}"
         );
     }
 }
@@ -605,8 +596,8 @@ mod resource_exhaustion {
         // Add many policies
         for i in 0..100 {
             builder = builder.with_policy(
-                format!("policy{}", i),
-                format!(r#"@id("policy{}") permit(principal, action, resource);"#, i),
+                format!("policy{i}"),
+                format!(r#"@id("policy{i}") permit(principal, action, resource);"#),
             );
         }
 
@@ -622,15 +613,14 @@ mod resource_exhaustion {
     fn test_handles_large_policy_content() {
         // Create a policy with a very large condition
         let large_condition = (0..1000)
-            .map(|i| format!("principal.attr{} == \"value{}\"", i, i))
+            .map(|i| format!("principal.attr{i} == \"value{i}\""))
             .collect::<Vec<_>>()
             .join(" || ");
 
         let policy = format!(
             r#"@id("large-policy")
 permit(principal, action, resource)
-when {{ {} }};"#,
-            large_condition
+when {{ {large_condition} }};"#
         );
 
         let builder =
@@ -703,8 +693,7 @@ mod file_extension_validation {
         let err = result.expect_err("Expected InvalidExtension error");
         assert!(
             matches!(err, ArchiveError::InvalidExtension { .. }),
-            "Expected InvalidExtension error, got: {:?}",
-            err
+            "Expected InvalidExtension error, got: {err:?}"
         );
     }
 

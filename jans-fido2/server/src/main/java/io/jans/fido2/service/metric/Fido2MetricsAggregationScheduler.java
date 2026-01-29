@@ -10,6 +10,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.cluster.Fido2ClusterNodeService;
 import io.jans.model.cluster.ClusterNode;
+import jakarta.enterprise.inject.spi.CDI;
 import io.jans.service.timer.QuartzSchedulerManager;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ResourceBundle;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -54,16 +57,33 @@ public class Fido2MetricsAggregationScheduler {
     @Inject
     private Fido2MetricsService metricsService;
 
-    @Inject
+    // Cluster node service - optional, only available in multi-node deployments
     private Fido2ClusterNodeService clusterNodeService;
+    
+    // Flag to track if we're in a cluster environment
+    private boolean isClusterEnvironment = false;
 
     @Inject
     private QuartzSchedulerManager quartzSchedulerManager;
 
-    // Scheduled executor for periodic lock updates during aggregation
-    private final ScheduledExecutorService updateExecutor = Executors.newScheduledThreadPool(1);
+    // Scheduled executor for periodic lock updates during aggregation (only used in cluster mode)
+    private ScheduledExecutorService updateExecutor;
 
-    private static final ResourceBundle METRICS_CONFIG = ResourceBundle.getBundle("fido2-metrics");
+    // Load properties file safely - don't fail if missing
+    private static final ResourceBundle METRICS_CONFIG;
+    
+    static {
+        ResourceBundle bundle = null;
+        try {
+            bundle = ResourceBundle.getBundle("fido2-metrics");
+        } catch (Exception e) {
+            // Properties file not found - will use hardcoded defaults
+            // Use logger factory since instance logger not available in static context
+            LoggerFactory.getLogger(Fido2MetricsAggregationScheduler.class)
+                .warn("fido2-metrics.properties not found, using defaults");
+        }
+        METRICS_CONFIG = bundle;
+    }
 
     /**
      * Helper method to execute aggregation job with distributed locking
@@ -77,20 +97,30 @@ public class Fido2MetricsAggregationScheduler {
             Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
                 .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
             
-            if (metricsService != null && scheduler != null) {
-                if (!scheduler.shouldPerformAggregation()) {
-                    log.debug("Skipping {} aggregation - another node holds the lock", jobType);
-                    return;
-                }
+            if (metricsService == null || scheduler == null) {
+                return;
+            }
+            
+            if (!scheduler.shouldPerformAggregation()) {
+                log.debug("Skipping {} aggregation - another node holds the lock", jobType);
+                return;
+            }
 
-                ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
-                if (updateTask == null) {
-                    log.warn("Skipping {} aggregation - failed to start periodic lock updates or lock not held", jobType);
-                    return;
-                }
-                try {
-                    aggregationTask.accept(metricsService);
-                } finally {
+            // In cluster mode, try to start periodic lock updates
+            // If lock updates fail, we may have lost the lock - return early to prevent duplicate aggregation
+            ScheduledFuture<?> updateTask = initializeClusterLockUpdates(scheduler, jobType, log);
+            
+            // In cluster mode, if we couldn't start lock updates, we likely lost the lock
+            // Return early to prevent duplicate aggregation across nodes
+            if (scheduler.isClusterEnvironment && updateTask == null) {
+                log.warn("Skipping {} aggregation - failed to acquire/maintain cluster lock", jobType);
+                return;
+            }
+            
+            try {
+                aggregationTask.accept(metricsService);
+            } finally {
+                if (updateTask != null) {
                     updateTask.cancel(false);
                 }
             }
@@ -98,6 +128,36 @@ public class Fido2MetricsAggregationScheduler {
             String errorMsg = String.format("Failed to execute %s aggregation job: %s", jobType, e.getMessage());
             log.error(errorMsg, e);
             throw new JobExecutionException(errorMsg, e);
+        }
+    }
+    
+    /**
+     * Initialize cluster lock updates for aggregation job
+     * Extracted to reduce cognitive complexity
+     * 
+     * @param scheduler The scheduler instance
+     * @param jobType Type of job (for logging)
+     * @param log Logger instance
+     * @return ScheduledFuture for lock updates, or null if not in cluster mode or initialization failed
+     */
+    private static ScheduledFuture<?> initializeClusterLockUpdates(
+            Fido2MetricsAggregationScheduler scheduler, String jobType, Logger log) {
+        if (!scheduler.isClusterEnvironment) {
+            return null;
+        }
+        
+        try {
+            ScheduledFuture<?> updateTask = scheduler.startPeriodicLockUpdates();
+            if (updateTask == null) {
+                log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
+                    jobType, "Failed to start periodic lock updates (check logs for details)");
+            }
+            return updateTask;
+        } catch (Exception e) {
+            log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
+                jobType, e.getMessage());
+            log.debug("Exception during lock update initialization: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -112,8 +172,11 @@ public class Fido2MetricsAggregationScheduler {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             executeAggregationJob(context, "hourly", metricsService -> {
-                LocalDateTime previousHour = LocalDateTime.now().minusHours(1)
-                    .truncatedTo(ChronoUnit.HOURS);
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime previousHour = ZonedDateTime.now(ZoneId.of("UTC"))
+                    .minusHours(1)
+                    .truncatedTo(ChronoUnit.HOURS)
+                    .toLocalDateTime();
                 metricsService.createHourlyAggregation(previousHour);
                 log.info("Hourly aggregation completed for: {}", previousHour);
             });
@@ -129,8 +192,11 @@ public class Fido2MetricsAggregationScheduler {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             executeAggregationJob(context, "daily", metricsService -> {
-                LocalDateTime previousDay = LocalDateTime.now().minusDays(1)
-                    .truncatedTo(ChronoUnit.DAYS);
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime previousDay = ZonedDateTime.now(ZoneId.of("UTC"))
+                    .minusDays(1)
+                    .truncatedTo(ChronoUnit.DAYS)
+                    .toLocalDateTime();
                 metricsService.createDailyAggregation(previousDay);
                 log.info("Daily aggregation completed for: {}", previousDay);
             });
@@ -146,9 +212,12 @@ public class Fido2MetricsAggregationScheduler {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             executeAggregationJob(context, "weekly", metricsService -> {
-                LocalDateTime previousWeek = LocalDateTime.now().minusWeeks(1)
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime previousWeek = ZonedDateTime.now(ZoneId.of("UTC"))
+                    .minusWeeks(1)
                     .with(java.time.DayOfWeek.MONDAY)
-                    .truncatedTo(ChronoUnit.DAYS);
+                    .truncatedTo(ChronoUnit.DAYS)
+                    .toLocalDateTime();
                 metricsService.createWeeklyAggregation(previousWeek);
                 log.info("Weekly aggregation completed for: {}", previousWeek);
             });
@@ -164,9 +233,12 @@ public class Fido2MetricsAggregationScheduler {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             executeAggregationJob(context, "monthly", metricsService -> {
-                LocalDateTime previousMonth = LocalDateTime.now().minusMonths(1)
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime previousMonth = ZonedDateTime.now(ZoneId.of("UTC"))
+                    .minusMonths(1)
                     .withDayOfMonth(1)
-                    .truncatedTo(ChronoUnit.DAYS);
+                    .truncatedTo(ChronoUnit.DAYS)
+                    .toLocalDateTime();
                 metricsService.createMonthlyAggregation(previousMonth);
                 log.info("Monthly aggregation completed for: {}", previousMonth);
             });
@@ -240,7 +312,19 @@ public class Fido2MetricsAggregationScheduler {
      * Uses distributed locking via ClusterNode with getClusterNodesLive() pattern
      * Synchronized to prevent race conditions between concurrent job threads
      */
+    /**
+     * Check if this node should perform the aggregation
+     * In single-node deployments: always returns true
+     * In multi-node clusters: uses distributed locking to coordinate
+     * Synchronized to prevent race conditions between concurrent job threads
+     */
     public synchronized boolean shouldPerformAggregation() {
+        // Single-node deployment: always perform aggregation
+        if (!isClusterEnvironment) {
+            return true;
+        }
+        
+        // Multi-node cluster: use distributed locking
         try {
             List<ClusterNode> liveList = clusterNodeService.getClusterNodesLive();
             
@@ -250,10 +334,14 @@ public class Fido2MetricsAggregationScheduler {
                 return checkIfWeHoldLock(liveList);
             }
         } catch (Exception e) {
-            log.error("Error checking aggregation lock", e);
-            return false;
+            log.warn("Error checking aggregation lock in cluster environment, falling back to single-node behavior: {}", 
+                e.getMessage());
+            // Fallback to single-node behavior if cluster coordination fails
+            return true;
         }
     }
+    
+    // ========== CLUSTER SUPPORT (OPTIONAL - AUTO-DETECTS ENVIRONMENT) ==========
     
     /**
      * Try to acquire the lock when no live nodes exist
@@ -304,11 +392,16 @@ public class Fido2MetricsAggregationScheduler {
     /**
      * Start periodic updates to keep the lock alive during aggregation work
      * Should be called at the start of aggregation work
+     * Only used in cluster environments
      * 
-     * @return ScheduledFuture that can be used to cancel the updates
+     * @return ScheduledFuture that can be used to cancel the updates, or null if not in cluster
      */
     @SuppressWarnings("java:S1452") // Wildcard type is required as ScheduledExecutorService.scheduleAtFixedRate returns ScheduledFuture<?>
     public ScheduledFuture<?> startPeriodicLockUpdates() {
+        if (!isClusterEnvironment || updateExecutor == null) {
+            return null; // Not in cluster or executor not initialized
+        }
+        
         try {
             // Get the current live node that we hold
             List<ClusterNode> liveList = clusterNodeService.getClusterNodesLive();
@@ -348,27 +441,38 @@ public class Fido2MetricsAggregationScheduler {
 
     /**
      * Initialize cluster node service
-     * Called during application startup
-     * With the new pattern, we don't need to pre-allocate a node
-     * The lock is acquired on-demand when aggregation jobs run
+     * Detects if we're in a cluster environment and initializes accordingly
+     * NOTE: Removed @PostConstruct to avoid blocking during bean creation
      */
-    public void initializeClusterNode() {
-        if (!isAggregationEnabled()) {
-            log.info("FIDO2 metrics aggregation is disabled");
-            return;
+    private void initializeClusterEnvironment() {
+        // Try to detect cluster environment by checking if cluster service exists
+        try {
+            // Attempt to get cluster service via CDI lookup
+            clusterNodeService = CDI.current().select(Fido2ClusterNodeService.class).get();
+            isClusterEnvironment = true;
+            // Initialize update executor for cluster coordination
+            updateExecutor = Executors.newScheduledThreadPool(1);
+            log.info("FIDO2 metrics aggregation enabled in CLUSTER mode - distributed locking will be used");
+        } catch (Exception e) {
+            // Cluster service not available - single node deployment
+            isClusterEnvironment = false;
+            updateExecutor = null;
+            log.info("FIDO2 metrics aggregation enabled in SINGLE-NODE mode - no cluster coordination needed");
         }
-        log.info("FIDO2 metrics aggregation enabled - locks will be acquired on-demand");
     }
 
     /**
      * Initialize and register Quartz jobs for metrics aggregation
-     * Called during application startup
+     * Called during application startup by AppInitializer
      */
     public void initTimer() {
         if (!isAggregationEnabled()) {
             log.info("FIDO2 metrics aggregation is disabled, skipping scheduler initialization");
             return;
         }
+
+        // Initialize cluster environment detection (moved from @PostConstruct to avoid blocking)
+        initializeClusterEnvironment();
 
         try {
             // Prepare JobDataMap with required services
@@ -378,28 +482,28 @@ public class Fido2MetricsAggregationScheduler {
 
             // Register hourly aggregation job
             if (isAggregationTypeEnabled(Fido2MetricsConstants.HOURLY)) {
-                String hourlyCron = getConfigString("fido2.metrics.aggregation.hourly.cron", "0 5 * * * *");
+                String hourlyCron = getConfigString("fido2.metrics.aggregation.hourly.cron", "0 5 * * * ?");
                 registerAggregationJob("HourlyAggregation", HourlyAggregationJob.class, hourlyCron, jobDataMap);
                 log.info("Registered hourly FIDO2 metrics aggregation job with cron: {}", hourlyCron);
             }
 
             // Register daily aggregation job
             if (isAggregationTypeEnabled(Fido2MetricsConstants.DAILY)) {
-                String dailyCron = getConfigString("fido2.metrics.aggregation.daily.cron", "0 10 1 * * *");
+                String dailyCron = getConfigString("fido2.metrics.aggregation.daily.cron", "0 10 1 * * ?");
                 registerAggregationJob("DailyAggregation", DailyAggregationJob.class, dailyCron, jobDataMap);
                 log.info("Registered daily FIDO2 metrics aggregation job with cron: {}", dailyCron);
             }
 
             // Register weekly aggregation job
             if (isAggregationTypeEnabled(Fido2MetricsConstants.WEEKLY)) {
-                String weeklyCron = getConfigString("fido2.metrics.aggregation.weekly.cron", "0 15 1 * * MON");
+                String weeklyCron = getConfigString("fido2.metrics.aggregation.weekly.cron", "0 15 1 ? * MON");
                 registerAggregationJob("WeeklyAggregation", WeeklyAggregationJob.class, weeklyCron, jobDataMap);
                 log.info("Registered weekly FIDO2 metrics aggregation job with cron: {}", weeklyCron);
             }
 
             // Register monthly aggregation job
             if (isAggregationTypeEnabled(Fido2MetricsConstants.MONTHLY)) {
-                String monthlyCron = getConfigString("fido2.metrics.aggregation.monthly.cron", "0 20 1 1 * *");
+                String monthlyCron = getConfigString("fido2.metrics.aggregation.monthly.cron", "0 20 1 1 * ?");
                 registerAggregationJob("MonthlyAggregation", MonthlyAggregationJob.class, monthlyCron, jobDataMap);
                 log.info("Registered monthly FIDO2 metrics aggregation job with cron: {}", monthlyCron);
             }
@@ -465,21 +569,24 @@ public class Fido2MetricsAggregationScheduler {
 
     /**
      * Cleanup resources on shutdown
-     * Shutdown the executor service used for periodic lock updates
+     * Shuts down update executor if in cluster mode
      */
     @PreDestroy
     public void releaseClusterNode() {
-        try {
-            updateExecutor.shutdown();
-            if (!updateExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+        if (updateExecutor != null) {
+            try {
+                updateExecutor.shutdown();
+                if (!updateExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    updateExecutor.shutdownNow();
+                }
+                log.info("Shutdown periodic lock update executor for FIDO2 metrics aggregation");
+            } catch (InterruptedException e) {
                 updateExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+                log.warn("Interrupted while shutting down lock update executor", e);
             }
-            log.info("Shutdown periodic lock update executor for FIDO2 metrics aggregation");
-        } catch (InterruptedException e) {
-            updateExecutor.shutdownNow();
-            Thread.currentThread().interrupt();
-            log.warn("Interrupted while shutting down lock update executor", e);
         }
+        log.info("FIDO2 metrics aggregation scheduler shutdown");
     }
 }
 

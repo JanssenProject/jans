@@ -19,17 +19,17 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
-      <keycloak-admin-client.version>26.0.6</keycloak-admin-client.version>
-      <keycloak-server.version>26.3.3</keycloak-server.version>
+      <keycloak-admin-client.version>26.0.8</keycloak-admin-client.version>
+      <keycloak-server.version>26.5.0</keycloak-server.version>
       <nimbus.oauth2-oidc-sdk.version>11.27.1</nimbus.oauth2-oidc-sdk.version>
       <jans.version>${project.version}</jans.version>
       <jakarta.ws-rs-api.version>4.0.0</jakarta.ws-rs-api.version>
       <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
       <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
       <smallrye-config.version>3.13.4</smallrye-config.version>
-      <log4j.version>2.25.1</log4j.version>
+      <log4j.version>2.25.3</log4j.version>
       <slf4j.version>2.0.17</slf4j.version>
-      <logback.version>1.5.18</logback.version>
+      <logback.version>1.5.19</logback.version>
       <jboss-logging.version>3.6.1.Final</jboss-logging.version>
       <fasterxml-jackson.version>2.19.2</fasterxml-jackson.version>
       <commons-lang.version>3.18.0</commons-lang.version>

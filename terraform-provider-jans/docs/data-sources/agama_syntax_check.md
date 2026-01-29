@@ -1,5 +1,5 @@
 ---
-page_title: "jans_agama_syntax_check Data Source - terraform-provider-jans"
+page_title: "jans_agama_syntax_check Data Source - jans"
 subcategory: ""
 description: |-
   Data source for validating Agama flow code syntax
@@ -42,11 +42,11 @@ output "validation_message" {
 
 ### Required
 
-- `code` (String) The Agama DSL code to validate
-- `flow_name` (String) The name of the Agama flow to check
+- `code` (String) The Agama DSL code to validate.
+- `flow_name` (String) The name of the Agama flow to check.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `message` (String) Syntax check result message. Empty or 'Syntax is OK' for valid code
-- `valid` (Boolean) Whether the Agama code syntax is valid
+- `message` (String) Syntax check result message. Empty or 'Syntax is OK' for valid code.
+- `valid` (Boolean) Whether the Agama code syntax is valid.

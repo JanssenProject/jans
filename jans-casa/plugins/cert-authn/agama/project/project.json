@@ -7,7 +7,8 @@
     "configs": {
         "io.jans.casa.authn.cert": {
             "certPickupUrl": "https://...",
-            "certChainPEM": "-----BEGIN CERTIFICATE-----\n your certificate chain, see the docs. \n-----END CERTIFICATE-----\n"
+            "certChainPEM": "-----BEGIN CERTIFICATE-----\n your certificate chain, see the docs. \n-----END CERTIFICATE-----\n",
+            "roundTripMaxTime": 30
         }
     }
 }

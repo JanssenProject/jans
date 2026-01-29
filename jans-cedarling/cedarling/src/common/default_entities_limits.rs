@@ -25,7 +25,7 @@ pub enum DefaultEntitiesLimitsError {
     },
 }
 
-/// Configuration for limiting default entities to prevent DoS and memory exhaustion attacks
+/// Configuration for limiting default entities to prevent `DoS` and memory exhaustion attacks
 #[derive(Debug, Clone)]
 pub(super) struct DefaultEntitiesLimits {
     /// Maximum number of default entities allowed
@@ -203,7 +203,7 @@ mod tests {
         );
     }
 
-    /// Validate method DefaultEntitiesLimits::validate_default_entities
+    /// Validate method [`DefaultEntitiesLimits::validate_default_entities`]
     #[test]
     fn test_validate_default_entities() {
         let limits = DefaultEntitiesLimits {

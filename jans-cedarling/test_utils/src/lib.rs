@@ -15,7 +15,7 @@ use serde_json::json;
 pub use sort_json::SortedJson;
 
 #[cfg(not(target_arch = "wasm32"))]
-use crate::token_claims::{KeyPair, generate_jwks, generate_keypair_hs256};
+use crate::token_claims::{generate_jwks, generate_keypair_hs256, KeyPair};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub struct MockServer {

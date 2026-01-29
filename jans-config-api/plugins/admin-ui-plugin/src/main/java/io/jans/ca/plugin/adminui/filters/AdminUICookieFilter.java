@@ -1,4 +1,4 @@
-package io.jans.configapi.filters;
+package io.jans.ca.plugin.adminui.filters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
@@ -12,7 +12,7 @@ import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
 import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
-import io.jans.configapi.service.auth.AdminUISessionService;
+import io.jans.ca.plugin.adminui.service.adminui.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.TtlCache;
 import jakarta.annotation.Priority;
@@ -26,6 +26,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,6 +52,12 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
 
     private static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
     private static final String AUTHENTICATION_SCHEME = "Bearer";
+    private static final String EXCLUDED_PATH_SESSION = "/app/admin-ui/oauth2/session";
+    private static final String EXCLUDED_PATH_CONFIG_API_TOKEN = "/app/admin-ui/oauth2/api-protection-token";
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            EXCLUDED_PATH_SESSION,
+            EXCLUDED_PATH_CONFIG_API_TOKEN
+    );
     private static final long CACHE_TTL_MS = 3600000; // 1 hour
     private static final int CACHE_MAX_SIZE = 100;
     private volatile long lastCleanupTime = 0;
@@ -70,12 +77,21 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
+            log.debug("========================================================================");
             log.debug("Inside AdminUICookieFilter filter...");
+            log.debug("========================================================================");
             Map<String, Cookie> cookies = requestContext.getCookies();
             initializeCaches();
             removeExpiredSessionsIfNeeded();
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
-            //return if session record is not present in the database
+            //For request from Admin UI, return 403 error if Admin UI session is not present on server
+            if (cookies.containsKey(ADMIN_UI_SESSION_ID)
+                    && !isExcludedPath(requestContext)
+                    && requestContext.getHeaders().get(HttpHeaders.AUTHORIZATION) == null
+                    && ujwtOptional.isEmpty()) {
+                abortWithException(requestContext, Response.Status.FORBIDDEN, "Admin UI session is not present on server.");
+            }
+            //Return this if the session record is not present in the database, covering non–Admin UI requests.
             if (ujwtOptional.isEmpty()) {
                 return;
             }
@@ -97,6 +113,23 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * Checks if the request contains Admin UI Session Cookie
+     * `@param` cookies the request cookies map keyed by cookie name
+     * `@return` true if the cookies map is non-null and contains the Admin UI session cookie
+     */
+    private boolean hasAdminUISessionCookie(Map<String, Cookie> cookies) {
+        return cookies != null &&  cookies.containsKey(ADMIN_UI_SESSION_ID);
+    }
+
+    /**
+     * Exclude the endpoints paths from valid session check which are used before authentication.
+     */
+    private boolean isExcludedPath(ContainerRequestContext requestContext) {
+        String path = requestContext.getUriInfo().getPath();
+        return EXCLUDED_PATHS.stream().anyMatch(excluded -> path.equals(excluded) || path.equals(excluded.substring(1)));
     }
 
     /**
@@ -196,11 +229,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * @return an Optional containing the ujwt string from the persisted Admin UI session, or Optional.empty() if the cookie or session is not present
      */
     private Optional<String> fetchUJWTFromAdminUISession(Map<String, Cookie> cookies) {
-        //if no cookies
-        if (cookies == null) {
-            return Optional.empty();
-        }
-        if (!cookies.containsKey(ADMIN_UI_SESSION_ID)) {
+        if(!hasAdminUISessionCookie(cookies)) {
             return Optional.empty();
         }
         log.debug("Found a Admin UI session cookie in request header.");

@@ -6,10 +6,12 @@
 use std::collections::HashSet;
 
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
-use crate::jwt::decode::*;
+use crate::jwt::decode::{DecodeJwtError, DecodedJwt, decode_jwt};
 use crate::jwt::key_service::DecodingKeyInfo;
 use crate::jwt::validation::TrustedIssuerError;
-use crate::jwt::*;
+use crate::jwt::{
+    Arc, JwtStatus, JwtStatusError, OwnedValidatorInfo, StatusListCache, TokenKind, ValidatorInfo,
+};
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -84,7 +86,7 @@ impl JwtValidator {
 
         let mut validation = Validation::new(algorithm);
         if let Some(iss) = iss {
-            validation.set_issuer(&[iss])
+            validation.set_issuer(&[iss]);
         }
         validation.validate_exp = token_metadata.required_claims.contains("exp");
         validation.validate_nbf = token_metadata.required_claims.contains("nbf");
@@ -132,7 +134,7 @@ impl JwtValidator {
 
         let mut validation = Validation::new(algorithm);
         if let Some(iss) = iss {
-            validation.set_issuer(&[iss])
+            validation.set_issuer(&[iss]);
         }
         validation.validate_exp = token_metadata.required_claims.contains("exp");
         validation.validate_nbf = token_metadata.required_claims.contains("nbf");
@@ -184,12 +186,12 @@ impl JwtValidator {
         validation.sub = status_list_uri;
 
         if let Some(iss) = iss {
-            validation.set_issuer(&[iss])
-        };
+            validation.set_issuer(&[iss]);
+        }
 
         let required_claims = ["sub", "iat", "status_list"]
             .into_iter()
-            .map(|s| s.into())
+            .map(std::convert::Into::into)
             .collect();
 
         let key = ValidatorInfo {
@@ -221,17 +223,13 @@ impl JwtValidator {
         jwt: &str,
         decoding_key: Option<&DecodingKey>,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
-        let validated_jwt = match decoding_key {
-            Some(decoding_key) => {
-                jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims
-            },
-            None => {
-                if self.validate_signature {
-                    return Err(ValidateJwtError::MissingValidationKey);
-                } else {
-                    decode_jwt(jwt)?.try_into()?
-                }
-            },
+        let validated_jwt = if let Some(decoding_key) = decoding_key {
+            jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims
+        } else {
+            if self.validate_signature {
+                return Err(ValidateJwtError::MissingValidationKey);
+            }
+            decode_jwt(jwt)?.try_into()?
         };
 
         // Custom implementation of requiring custom claims
@@ -242,7 +240,7 @@ impl JwtValidator {
             .cloned()
             .collect::<Vec<String>>();
         if !missing_claims.is_empty() {
-            Err(ValidateJwtError::MissingClaims(missing_claims))?
+            Err(ValidateJwtError::MissingClaims(missing_claims))?;
         }
 
         if self.validate_status_list {
@@ -279,7 +277,7 @@ impl DecodedJwt {
 
     pub(crate) fn decoding_key_info(&self) -> DecodingKeyInfo {
         DecodingKeyInfo {
-            issuer: self.iss().map(|x| x.to_string()),
+            issuer: self.iss().map(std::string::ToString::to_string),
             kid: self.header.kid.clone(),
             algorithm: self.header.alg,
         }
@@ -364,7 +362,7 @@ mod test {
             "iss": iss,
             "sub": "1234567890",
             "name": "John Doe",
-            "iat": 1516239022,
+            "iat": 1_516_239_022,
             "exp": u64::MAX,
             "nbf": u64::MIN,
         });
@@ -404,7 +402,7 @@ mod test {
             "iss": iss,
             "sub": "1234567890",
             "name": "John Doe",
-            "iat": 1516239022,
+            "iat": 1_516_239_022,
             "exp": 0,
         });
         let token =
@@ -481,7 +479,7 @@ mod test {
             "iss": iss,
             "sub": "1234567890",
             "name": "John Doe",
-            "iat": 1516239022,
+            "iat": 1_516_239_022,
             "exp": 0,
         });
         let token =
@@ -524,7 +522,7 @@ mod test {
             "iss": iss,
             "sub": "1234567890",
             "name": "John Doe",
-            "iat": 1516239022,
+            "iat": 1_516_239_022,
             "nbf": u64::MAX,
         });
         let token =
@@ -565,7 +563,7 @@ mod test {
             "iss": iss,
             "sub": "1234567890",
             "name": "John Doe",
-            "iat": 1516239022,
+            "iat": 1_516_239_022,
         });
         let token =
             generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
@@ -574,7 +572,7 @@ mod test {
         // Base case where all required claims are present
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims =
-            HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
+            HashSet::from(["sub", "name", "iat"].map(std::convert::Into::into));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
             "access_token",
@@ -599,7 +597,7 @@ mod test {
         // Error case where `nbf` is missing from the token.
         let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
         tkn_entity_metadata.required_claims =
-            HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
+            HashSet::from(["sub", "name", "iat", "nbf"].map(std::convert::Into::into));
         let (validator, _) = JwtValidator::new_input_tkn_validator(
             Some(iss),
             "access_token",
@@ -674,9 +672,7 @@ mod test {
                 ValidateJwtError::RejectJwtStatus(ref status)
                     if *status == JwtStatus::Invalid
             ),
-            "GOT {:?}: {}",
-            err,
-            err
+            "GOT {err:?}: {err}"
         );
     }
 
@@ -730,9 +726,7 @@ mod test {
                 ValidateJwtError::RejectJwtStatus(ref status)
                     if *status == JwtStatus::Suspended
             ),
-            "GOT {:?}: {}",
-            err,
-            err
+            "GOT {err:?}: {err}"
         );
     }
 }

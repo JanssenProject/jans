@@ -211,7 +211,7 @@ impl PolicyStoreTestBuilder {
         serde_json::to_string_pretty(&manifest).unwrap()
     }
 
-    /// Build all files as a HashMap (path -> content bytes).
+    /// Build all files as a `HashMap` (path -> content bytes).
     fn build_files(&self) -> HashMap<String, Vec<u8>> {
         let mut files: HashMap<String, Vec<u8>> = HashMap::new();
 
@@ -229,25 +229,25 @@ impl PolicyStoreTestBuilder {
 
         // Add policies
         for (name, content) in &self.policies {
-            let path = format!("policies/{}.cedar", name);
+            let path = format!("policies/{name}.cedar");
             files.insert(path, content.as_bytes().to_vec());
         }
 
         // Add templates
         for (name, content) in &self.templates {
-            let path = format!("templates/{}.cedar", name);
+            let path = format!("templates/{name}.cedar");
             files.insert(path, content.as_bytes().to_vec());
         }
 
         // Add entities
         for (name, content) in &self.entities {
-            let path = format!("entities/{}.json", name);
+            let path = format!("entities/{name}.json");
             files.insert(path, content.as_bytes().to_vec());
         }
 
         // Add trusted issuers
         for (name, content) in &self.trusted_issuers {
-            let path = format!("trusted-issuers/{}.json", name);
+            let path = format!("trusted-issuers/{name}.json");
             files.insert(path, content.as_bytes().to_vec());
         }
 
@@ -312,15 +312,14 @@ permit(principal, action, resource);"#,
 
         for i in 0..count {
             builder = builder.with_policy(
-                format!("policy{}", i),
+                format!("policy{i}"),
                 format!(
-                    r#"@id("policy{}")
+                    r#"@id("policy{i}")
 permit(
-    principal == TestApp::User::"user{}",
+    principal == TestApp::User::"user{i}",
     action == TestApp::Action::"read",
-    resource == TestApp::Resource::"res{}"
-);"#,
-                    i, i, i
+    resource == TestApp::Resource::"res{i}"
+);"#
                 ),
             );
         }
@@ -466,7 +465,7 @@ pub(super) fn create_large_policy_store(
     // Generate policies
     for i in 0..policy_count {
         builder = builder.with_policy(
-            format!("policy{:06}", i),
+            format!("policy{i:06}"),
             format!(
                 r#"@id("policy{:06}")
 permit(
@@ -506,7 +505,7 @@ permit(
             .collect();
 
         builder = builder.with_entity(
-            format!("users_batch{:04}", batch),
+            format!("users_batch{batch:04}"),
             serde_json::to_string(&entities).unwrap(),
         );
     }
@@ -526,7 +525,7 @@ permit(
                 }
             }
         });
-        builder = builder.with_trusted_issuer(format!("issuer{}", i), issuer.to_string());
+        builder = builder.with_trusted_issuer(format!("issuer{i}"), issuer.to_string());
     }
 
     builder

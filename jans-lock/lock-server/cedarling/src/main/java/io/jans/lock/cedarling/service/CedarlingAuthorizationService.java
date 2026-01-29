@@ -1,18 +1,7 @@
-
 /*
- * Copyright [2025] [Janssen Project]
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2025, Janssen Project
  */
 
 package io.jans.lock.cedarling.service;
@@ -82,36 +71,43 @@ public class CedarlingAuthorizationService {
 		log.info("Cedarling is destroyed");
 	}
 
-	/*
-	 * Subscribe for application initialization event
-	 */
-	public void initEvent(@Observes @ApplicationInitialized(ApplicationScoped.class) ApplicationInitializedEvent event) {}
-
 	private CedarlingAdapter initAdapter(CedarlingConfiguration cedarConf) {
-		// Prepare Cedarling configuration
-		BootstrapConfig config = BootstrapConfig.builder().applicationName("Lock Server")
-				.policyStoreLocal(policyConfiguration.getPolicy()).userAuthz(false).workloadAuthz(true)
-				.logType(cedarConf.getLogType()).logLevel(cedarConf.getLogLevel()).build();
+	    BootstrapConfig config = BootstrapConfig.builder()
+	        .applicationName("Lock Server")
+	        .policyStoreLocal(policyConfiguration.getPolicy())
+	        .userAuthz(false)
+	        .workloadAuthz(true)
+	        .logType(cedarConf.getLogType())
+	        .logLevel(cedarConf.getLogLevel())
+	        .build();
 
-		try {
-			// Initialize the Cedarling instance
-			CedarlingAdapter cedarlingAdapter = new CedarlingAdapter();
+	    CedarlingAdapter initCedarlingAdapter = null;
+	    try {
+	        initCedarlingAdapter = new CedarlingAdapter();
+	        
+	        String jsonConfig = config.toJsonConfig();
+	        if (log.isTraceEnabled()) {
+	            log.trace("Cedarling JSON configuration: {}", jsonConfig);
+	        }
 
-			String jsonConfig = config.toJsonConfig();
-			if (log.isTraceEnabled()) {
-				log.trace("Cedarling JSON configuration: {}", jsonConfig);
-			}
+	        initCedarlingAdapter.loadFromJson(jsonConfig);
+	        log.info("Cedarling initialized successfully");
+	        return initCedarlingAdapter;
+	    } catch (CedarlingException ex) {
+	        log.error("Failed to initialize Cedarling!", ex);
+	        log.trace("Configuration: {}", config.toJsonConfig());
+	        
+	        // Close adapter if initialization failed
+	        if (initCedarlingAdapter != null) {
+	            try {
+	                initCedarlingAdapter.close();
+	            } catch (Exception closeEx) {
+	                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
+	            }
+	        }
+	    }
 
-			cedarlingAdapter.loadFromJson(jsonConfig);
-
-			log.info("Cedarling initialized successfully");
-			return cedarlingAdapter;
-		} catch (CedarlingException ex) {
-			log.error("Failed to initialize Cedarling!", ex);
-			log.trace("Configuration: {}", config.toJsonConfig());
-		}
-
-		return null;
+	    return null;
 	}
 
 	public boolean authorize(Map<String, String> tokens, String action, Map<String, Object> resource, Map<String, Object> context) {

@@ -24,6 +24,8 @@ pub enum ParseStatusListError {
     JwtMissingBitsClaim,
     #[error("the status list JWT's 'bits' claim is not a valid u64: {0:?}")]
     JwtInvalidBitsType(serde_json::Value),
+    #[error("failed to convert bits value: {0}")]
+    BitsConversion(#[from] std::num::TryFromIntError),
 }
 
 #[derive(Debug, Error)]
@@ -34,6 +36,8 @@ pub enum JwtStatusError {
     InvalidStatusListUri(#[from] url::ParseError),
     #[error("the `idx` of the `status_list` claim is out of bounds")]
     StatusListIdxOutOfBounds,
+    #[error("failed to convert bit index: {0}")]
+    BitIndexConversion(#[from] std::num::TryFromIntError),
     #[error("status list for {0} is missing")]
     MissingStatusList(Url),
     #[error("status list for {0} needs to be updated")]
