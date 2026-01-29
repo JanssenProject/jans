@@ -167,10 +167,10 @@ fn rc_json_items() {
 
     let all_items = sparkv.drain();
     let all_values = all_items.map(|(_, v)| v).collect::<Vec<_>>();
-    assert_eq!(all_values, vec![
-        Rc::new(first_json()),
-        Rc::new(second_json())
-    ]);
+    assert_eq!(
+        all_values,
+        vec![Rc::new(first_json()), Rc::new(second_json())]
+    );
 
     assert!(sparkv.is_empty(), "sparkv not empty");
 }

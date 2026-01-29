@@ -52,7 +52,7 @@ struct RawEntityJson {
 /// Entity UID in JSON format.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 struct EntityUidJson {
-    /// Entity type (e.g., "Jans::User")
+    /// Entity type (e.g., "`Jans::User`")
     #[serde(rename = "type")]
     pub entity_type: String,
     /// Entity ID
@@ -166,8 +166,7 @@ impl EntityParser {
             serde_json::from_value(json_value).map_err(|e| PolicyStoreError::CedarEntityError {
                 file: filename.to_string(),
                 err: CedarEntityErrorType::JsonParseError(format!(
-                    "Entity file must contain a JSON array or object: {}",
-                    e
+                    "Entity file must contain a JSON array or object: {e}"
                 )),
             })?;
 
@@ -185,7 +184,7 @@ impl EntityParser {
         Ok(parsed_entities)
     }
 
-    /// Parse an EntityUid from JSON format.
+    /// Parse an [`EntityUid`] from JSON format.
     fn parse_entity_uid(
         uid_json: &EntityUidJson,
         filename: &str,
@@ -222,7 +221,7 @@ impl EntityParser {
     /// avoiding crashes of dependent applications while still alerting developers.
     pub(super) fn detect_duplicates(
         entities: Vec<ParsedEntity>,
-        logger: &Option<Logger>,
+        logger: Option<&Logger>,
     ) -> HashMap<EntityUid, ParsedEntity> {
         let mut entity_map: HashMap<EntityUid, ParsedEntity> =
             HashMap::with_capacity(entities.len());
@@ -387,8 +386,7 @@ mod tests {
 
         assert!(
             matches!(&err, PolicyStoreError::JsonParsing { file, .. } if file == "invalid.json"),
-            "Expected JsonParsing error, got: {:?}",
-            err
+            "Expected JsonParsing error, got: {err:?}"
         );
     }
 
@@ -407,8 +405,7 @@ mod tests {
         let err = result.expect_err("Should fail on invalid entity type");
         assert!(
             matches!(&err, PolicyStoreError::CedarEntityError { .. }),
-            "Expected CedarEntityError for invalid entity type, got: {:?}",
-            err
+            "Expected CedarEntityError for invalid entity type, got: {err:?}"
         );
     }
 
@@ -480,7 +477,7 @@ mod tests {
         ];
 
         // No logger needed for this test - duplicates are handled gracefully
-        let map = EntityParser::detect_duplicates(entities, &None);
+        let map = EntityParser::detect_duplicates(entities, None);
         assert_eq!(map.len(), 2, "Should have 2 unique entities");
     }
 
@@ -514,7 +511,7 @@ mod tests {
         ];
 
         // Duplicates should be handled gracefully - no error, just warning (no logger here)
-        let map = EntityParser::detect_duplicates(entities, &None);
+        let map = EntityParser::detect_duplicates(entities, None);
 
         // Should have 1 unique entity (the duplicate was handled)
         assert_eq!(
@@ -634,12 +631,12 @@ mod tests {
         use std::str::FromStr;
 
         // Create a schema that defines User entity type
-        let schema_src = r#"
+        let schema_src = r"
             entity User = {
                 name: String,
                 age: Long
             };
-        "#;
+        ";
 
         let fragment = SchemaFragment::from_str(schema_src).expect("Should parse schema");
         let schema = Schema::from_schema_fragments([fragment]).expect("Should create schema");

@@ -6,7 +6,7 @@
 //! Cedar policy and template parsing and validation.
 //!
 //! This module handles parsing Cedar policy files (.cedar) and extracting
-//! policy IDs from @id() annotations. It provides validation and error
+//! policy IDs from `@id()` annotations. It provides validation and error
 //! reporting with file names and line numbers.
 
 use cedar_policy::{Policy, PolicyId, PolicySet, Template};
@@ -38,14 +38,14 @@ pub(super) struct ParsedTemplate {
 /// Cedar policy and template parser.
 ///
 /// Provides methods for parsing Cedar policies and templates from text,
-/// extracting @id() annotations, and validating syntax.
+/// extracting `@id()` annotations, and validating syntax.
 pub(super) struct PolicyParser;
 
 impl PolicyParser {
     /// Parse a single policy from Cedar policy text.
     ///
     /// The policy ID is determined by:
-    /// 1. Extracting from @id() annotation in the policy text, OR
+    /// 1. Extracting from `@id()` annotation in the policy text, OR
     /// 2. Deriving from the filename (without .cedar extension)
     ///
     /// Pass the ID to `Policy::parse()` using the annotation or the filename (without
@@ -91,7 +91,7 @@ impl PolicyParser {
     /// Parse a single template from Cedar policy text.
     ///
     /// Templates support slots (e.g., ?principal) and are parsed similarly to policies.
-    /// The template ID is extracted from @id() annotation or derived from filename.
+    /// The template ID is extracted from `@id()` annotation or derived from filename.
     ///
     /// the ID to `Template::parse()` based on annotation or filename.
     pub(super) fn parse_template(
@@ -152,7 +152,7 @@ impl PolicyParser {
         Ok(policy_map)
     }
 
-    /// Create a PolicySet from parsed policies and templates.
+    /// Create a [`PolicySet`] from parsed policies and templates.
     ///
     /// Validates that all policies and templates can be successfully added
     /// to the policy set, ensuring no ID conflicts or other issues.
@@ -216,7 +216,7 @@ impl PolicyParser {
         Some(sanitized)
     }
 
-    /// Extract @id() annotation from Cedar policy text.
+    /// Extract `@id()` annotation from Cedar policy text.
     ///
     /// Looks for @id("...") or @id('...') pattern in comments.
     fn extract_id_annotation(content: &str) -> Option<String> {
@@ -298,8 +298,7 @@ mod tests {
                 PolicyStoreError::CedarParsing { file, detail: CedarParseErrorDetail::ParseError(_) }
                 if file == "invalid.cedar"
             ),
-            "Expected CedarParsing error with ParseError detail, got: {:?}",
-            err
+            "Expected CedarParsing error with ParseError detail, got: {err:?}"
         );
     }
 
@@ -367,10 +366,10 @@ mod tests {
 
     #[test]
     fn test_extract_id_annotation_single_quotes() {
-        let policy_text = r#"
+        let policy_text = r"
             // @id('another-policy-id')
             permit(principal, action, resource);
-        "#;
+        ";
 
         let id = PolicyParser::extract_id_annotation(policy_text);
         assert_eq!(id, Some("another-policy-id".to_string()));
@@ -378,9 +377,9 @@ mod tests {
 
     #[test]
     fn test_extract_id_annotation_not_found() {
-        let policy_text = r#"
+        let policy_text = r"
             permit(principal, action, resource);
-        "#;
+        ";
 
         let id = PolicyParser::extract_id_annotation(policy_text);
         assert_eq!(id, None);
@@ -398,8 +397,7 @@ mod tests {
         let err = result.expect_err("Expected EmptyPolicyId error for empty policy ID");
         assert!(
             matches!(err, ValidationError::EmptyPolicyId { .. }),
-            "Expected EmptyPolicyId error, got: {:?}",
-            err
+            "Expected EmptyPolicyId error, got: {err:?}"
         );
     }
 
@@ -409,8 +407,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidPolicyIdCharacters error for invalid chars");
         assert!(
             matches!(err, ValidationError::InvalidPolicyIdCharacters { .. }),
-            "Expected InvalidPolicyIdCharacters error, got: {:?}",
-            err
+            "Expected InvalidPolicyIdCharacters error, got: {err:?}"
         );
     }
 
@@ -442,8 +439,8 @@ mod tests {
 
     #[test]
     fn test_create_policy_set_with_template() {
-        let policy_text = r#"permit(principal, action, resource);"#;
-        let template_text = r#"permit(principal == ?principal, action, resource);"#;
+        let policy_text = r"permit(principal, action, resource);";
+        let template_text = r"permit(principal == ?principal, action, resource);";
 
         let parsed_policy = PolicyParser::parse_policy(policy_text, "policy.cedar").unwrap();
         let parsed_template =

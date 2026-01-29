@@ -24,7 +24,7 @@ use uuid7::Uuid;
 /// example: 2024-11-27T10:10:50.654Z
 pub(crate) const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
-/// LogEntry is a struct that encapsulates all relevant data for logging events.
+/// [`LogEntry`] is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct LogEntry {
     /// base information of entry
@@ -259,18 +259,24 @@ impl Diagnostics {
         cedar_diagnostic: &cedar_policy::Diagnostics,
         policies: &PoliciesContainer,
     ) -> Self {
-        let errors = cedar_diagnostic.errors().map(|err| err.into()).collect();
+        let errors = cedar_diagnostic
+            .errors()
+            .map(std::convert::Into::into)
+            .collect();
 
-        let reason = HashSet::from_iter(cedar_diagnostic.reason().map(|policy_id| {
-            let id = policy_id.to_string();
+        let reason = cedar_diagnostic
+            .reason()
+            .map(|policy_id| {
+                let id = policy_id.to_string();
 
-            PolicyInfo {
-                description: policies
-                    .get_policy_description(id.as_str())
-                    .map(|v| v.to_string()),
-                id: policy_id.to_string(),
-            }
-        }));
+                PolicyInfo {
+                    description: policies
+                        .get_policy_description(id.as_str())
+                        .map(std::string::ToString::to_string),
+                    id: policy_id.to_string(),
+                }
+            })
+            .collect::<HashSet<_>>();
 
         Self { reason, errors }
     }
@@ -289,15 +295,15 @@ pub(crate) struct DecisionLogEntry {
     pub policystore_version: SmolStr,
     /// describe what principal was active on authorization request
     pub principal: Vec<SmolStr>,
-    /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
+    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_USER_CLAIMS` property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<HashMap<String, serde_json::Value>>,
-    /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
+    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` property, that must be present in the Cedar Workload entity
     #[serde(rename = "Workload")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workload: Option<HashMap<String, serde_json::Value>>,
-    /// If this Cedarling has registered with a Lock Server, what is the client_id it received
+    /// If this Cedarling has registered with a Lock Server, what is the `client_id` it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
     /// diagnostic info about policy and errors as result of cedarling
@@ -355,7 +361,7 @@ impl Loggable for DecisionLogEntry {
     }
 }
 
-/// Custom uuid generation function to avoid using std::time because it makes panic in WASM
+/// Custom uuid generation function to avoid using [`std::time`] because it makes panic in WASM
 //
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
 // Static variable initialize only once at start of program and available during all program live cycle.
@@ -368,14 +374,16 @@ pub(crate) fn gen_uuid7() -> Uuid {
         Mutex<V7Generator<uuid7::generator::with_rand08::Adapter<rand::rngs::OsRng>>>,
     > = LazyLock::new(|| Mutex::new(V7Generator::with_rand08(rand::rngs::OsRng)));
 
-    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
-
-    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
-
     // from docs
     // The rollback_allowance parameter specifies the amount of unix_ts_ms rollback that is considered significant.
     // A suggested value is 10_000 (milliseconds).
     const ROLLBACK_ALLOWANCE: u64 = 10_000;
+
+    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
+
+    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
+
+    #[allow(clippy::cast_sign_loss)]
     g.generate_or_reset_core(custom_unix_ts_ms as u64, ROLLBACK_ALLOWANCE)
 }
 
@@ -399,34 +407,34 @@ pub struct BaseLogEntry {
 }
 
 impl BaseLogEntry {
-    /// Create new BaseLogEntry for System log with required request_id
+    /// Create new [`BaseLogEntry`] for System log with required `request_id`
     pub(crate) fn new_system(log_level: LogLevel, request_id: Uuid) -> Self {
         Self::new_system_opt_request_id(log_level, Some(request_id))
     }
 
-    /// Create new BaseLogEntry for Decision log with required request_id
+    /// Create new [`BaseLogEntry`] for Decision log with required `request_id`
     pub(crate) fn new_decision(request_id: Uuid) -> Self {
         Self::new_decision_opt_request_id(Some(request_id))
     }
 
     #[allow(dead_code)]
-    /// Create new BaseLogEntry for Metric log with required request_id
+    /// Create new [`BaseLogEntry`] for Metric log with required `request_id`
     pub(crate) fn new_metric(request_id: Uuid) -> Self {
         Self::new_metric_opt_request_id(Some(request_id))
     }
 
-    /// Create new BaseLogEntry for System log with optional request_id
+    /// Create new [`BaseLogEntry`] for System log with optional `request_id`
     /// Only System log can have log level
     pub(crate) fn new_system_opt_request_id(log_level: LogLevel, request_id: Option<Uuid>) -> Self {
         Self::new_opt_request_id(LogType::System, Some(log_level), request_id)
     }
 
-    /// Create new BaseLogEntry for Decision log with optional request_id
+    /// Create new [`BaseLogEntry`] for Decision log with optional `request_id`
     pub(crate) fn new_decision_opt_request_id(request_id: Option<Uuid>) -> Self {
         Self::new_opt_request_id(LogType::Decision, None, request_id)
     }
 
-    /// Create new BaseLogEntry for Metric log with optional request_id
+    /// Create new [`BaseLogEntry`] for Metric log with optional `request_id`
     pub(crate) fn new_metric_opt_request_id(request_id: Option<Uuid>) -> Self {
         Self::new_opt_request_id(LogType::Metric, None, request_id)
     }
@@ -457,7 +465,7 @@ impl BaseLogEntry {
         }
     }
 
-    /// Create LoggableFn from BaseLogEntry
+    /// Create [`LoggableFn`] from [`BaseLogEntry`]
     pub(crate) fn with_fn<F, R>(self, builder: F) -> LoggableFn<F>
     where
         R: Loggable + Indexed,

@@ -50,8 +50,8 @@ const POLICY_STORE_JSON: &str =
     r#"{"cedar_version":"4.4.0","policy_store":{"id":"bench","name":"Bench","version":"1.0.0"}}"#;
 
 /// Helper function to start a policy store archive with common bootstrap setup.
-/// Creates the buffer, cursor, ZipWriter, sets up FileOptions, and writes
-/// metadata.json and schema.cedarschema. Returns the ZipWriter and FileOptions
+/// Creates the buffer, cursor, [`ZipWriter`], sets up [`FileOptions`], and writes
+/// metadata.json and schema.cedarschema. Returns the [`ZipWriter`] and [`FileOptions`]
 /// for the caller to append additional content.
 fn start_policy_store_archive(metadata: &[u8], schema: &[u8]) -> ZipWriter<Cursor<Vec<u8>>> {
     let buffer = Vec::new();
@@ -101,16 +101,15 @@ fn create_archive_with_policies(policy_count: usize) -> Vec<u8> {
 
     // policies
     for i in 0..policy_count {
-        let filename = format!("policies/policy{}.cedar", i);
+        let filename = format!("policies/policy{i}.cedar");
         zip.start_file(&filename, options.clone()).unwrap();
         let policy = format!(
-            r#"@id("policy{}")
+            r#"@id("policy{i}")
 permit(
-    principal == TestApp::User::"user{}",
+    principal == TestApp::User::"user{i}",
     action == TestApp::Action::"read",
-    resource == TestApp::Resource::"res{}"
-);"#,
-            i, i, i
+    resource == TestApp::Resource::"res{i}"
+);"#
         );
         zip.write_all(policy.as_bytes()).unwrap();
     }
@@ -151,7 +150,7 @@ fn create_archive_with_entities(entity_count: usize) -> Vec<u8> {
             ));
         }
 
-        let filename = format!("entities/users_batch{}.json", batch);
+        let filename = format!("entities/users_batch{batch}.json");
         zip.start_file(&filename, options.clone()).unwrap();
         let content = format!("[{}]", entities.join(","));
         zip.write_all(content.as_bytes()).unwrap();
@@ -177,7 +176,7 @@ fn bench_archive_parsing(c: &mut Criterion) {
                 bb(archive.len())
             },
             BatchSize::PerIteration,
-        )
+        );
     });
 }
 
@@ -186,7 +185,7 @@ fn bench_archive_creation(c: &mut Criterion) {
     let mut group = c.benchmark_group("archive_creation");
 
     // Keep policy counts low to stay under 1ms threshold
-    for policy_count in [5, 10].iter() {
+    for policy_count in &[5, 10] {
         group.bench_with_input(
             BenchmarkId::new("policies", policy_count),
             policy_count,
@@ -202,7 +201,7 @@ fn bench_archive_parsing_policies(c: &mut Criterion) {
     let mut group = c.benchmark_group("archive_parse_policies");
 
     // Keep policy counts low to stay under 1ms threshold
-    for policy_count in [10, 50, 100].iter() {
+    for policy_count in &[10, 50, 100] {
         let archive = create_archive_with_policies(*policy_count);
 
         group.bench_with_input(
@@ -212,7 +211,7 @@ fn bench_archive_parsing_policies(c: &mut Criterion) {
                 b.iter(|| {
                     let total_size = parse_archive(archive);
                     bb(total_size)
-                })
+                });
             },
         );
     }
@@ -224,7 +223,7 @@ fn bench_archive_parsing_policies(c: &mut Criterion) {
 fn bench_archive_parsing_entities(c: &mut Criterion) {
     let mut group = c.benchmark_group("archive_parse_entities");
 
-    for entity_count in [100, 500, 1000, 5000].iter() {
+    for entity_count in &[100, 500, 1000, 5000] {
         let archive = create_archive_with_entities(*entity_count);
 
         group.bench_with_input(
@@ -234,7 +233,7 @@ fn bench_archive_parsing_entities(c: &mut Criterion) {
                 b.iter(|| {
                     let total_size = parse_archive(archive);
                     bb(total_size)
-                })
+                });
             },
         );
     }
@@ -250,7 +249,7 @@ fn bench_directory_creation(c: &mut Criterion) {
     let mut group = c.benchmark_group("directory_creation");
 
     // Keep policy counts low to stay under 1ms threshold
-    for policy_count in [5, 10].iter() {
+    for policy_count in &[5, 10] {
         group.bench_with_input(
             BenchmarkId::new("policies", policy_count),
             policy_count,
@@ -274,12 +273,12 @@ fn bench_directory_creation(c: &mut Criterion) {
 
                     for i in 0..count {
                         let policy =
-                            format!(r#"@id("policy{}") permit(principal, action, resource);"#, i);
-                        fs::write(dir.join(format!("policies/policy{}.cedar", i)), policy).unwrap();
+                            format!(r#"@id("policy{i}") permit(principal, action, resource);"#);
+                        fs::write(dir.join(format!("policies/policy{i}.cedar")), policy).unwrap();
                     }
 
                     bb(temp_dir)
-                })
+                });
             },
         );
     }
