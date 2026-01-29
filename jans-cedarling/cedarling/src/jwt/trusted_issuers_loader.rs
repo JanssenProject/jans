@@ -122,14 +122,14 @@ pub(super) async fn load_trusted_issuer(
     };
 
     if loader.jwt_config.jwt_sig_validation || loader.jwt_config.jwt_status_validation {
-        iss_claim = update_openid_config(&mut iss_config, &loader.logger).await?;
+        iss_claim = update_openid_config(&mut iss_config, loader.logger.as_ref()).await?;
     }
 
     insert_keys(
         &loader.key_service,
         &loader.jwt_config,
         &iss_config,
-        &loader.logger,
+        loader.logger.as_ref(),
     )
     .await?;
 
@@ -160,7 +160,7 @@ pub(super) async fn load_trusted_issuer(
 
 async fn update_openid_config(
     iss_config: &mut IssuerConfig,
-    logger: &Option<Logger>,
+    logger: Option<&Logger>,
 ) -> Result<IssClaim, JwtServiceInitError> {
     let openid_config = OpenIdConfig::get_from_url(iss_config.policy.get_oidc_endpoint())
         .await
@@ -184,7 +184,7 @@ async fn insert_keys(
     key_service: &KeyService,
     jwt_config: &JwtConfig,
     iss_config: &IssuerConfig,
-    logger: &Option<Logger>,
+    logger: Option<&Logger>,
 ) -> Result<(), KeyServiceError> {
     if !jwt_config.jwt_sig_validation {
         return Ok(());
@@ -196,7 +196,7 @@ async fn insert_keys(
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
         key_service
-            .get_keys_using_oidc(openid_config, logger.as_ref())
+            .get_keys_using_oidc(openid_config, logger)
             .await?;
     }
 

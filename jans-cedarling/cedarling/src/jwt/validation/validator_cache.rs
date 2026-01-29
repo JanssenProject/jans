@@ -49,7 +49,8 @@ impl JwtValidatorCache {
     ) {
         let iss = iss_config
             .openid_config
-            .as_ref().map_or_else(|| iss_config.policy.iss_claim(), |oidc| oidc.issuer.clone());
+            .as_ref()
+            .map_or_else(|| iss_config.policy.iss_claim(), |oidc| oidc.issuer.clone());
 
         for (token_name, tkn_metadata) in &iss_config.policy.token_metadata {
             if !tkn_metadata.trusted {
@@ -74,7 +75,7 @@ impl JwtValidatorCache {
                     jwt_config.jwt_status_validation,
                 );
 
-                self.insert(key, validator);
+                self.insert(&key, validator);
             }
 
             for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
@@ -88,7 +89,7 @@ impl JwtValidatorCache {
                     jwt_config.jwt_status_validation,
                 );
 
-                self.insert(key, validator);
+                self.insert(&key, validator);
             }
         }
 
@@ -106,7 +107,7 @@ impl JwtValidatorCache {
                     jwt_config.jwt_sig_validation,
                 );
 
-                self.insert(key, validator);
+                self.insert(&key, validator);
             }
         }
     }
@@ -115,7 +116,7 @@ impl JwtValidatorCache {
     ///
     /// If a validator with the same `ValidatorKeyHash` already exists, it is
     /// appended to the vector. Exact match resolution is deferred to lookup time.
-    fn insert(&self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
+    fn insert(&self, validator_info: &ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
         self.validators
             .write()
@@ -214,7 +215,9 @@ pub(crate) enum OwnedTokenKind {
 impl From<&TokenKind<'_>> for OwnedTokenKind {
     fn from(tkn_kind: &TokenKind<'_>) -> Self {
         match tkn_kind {
-            TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput((*tkn_name).to_string()),
+            TokenKind::AuthzRequestInput(tkn_name) => {
+                Self::AuthzRequestInput((*tkn_name).to_string())
+            },
             TokenKind::StatusList => Self::StatusList,
             TokenKind::AuthorizeMultiIssuer(tkn_name) => {
                 Self::AuthorizeMultiIssuer(tkn_name.to_string())
@@ -324,7 +327,7 @@ mod test {
             false,
         );
 
-        store.insert(info.clone(), validator.clone());
+        store.insert(&info, validator.clone());
 
         assert!(store.get(&info).is_some());
     }
