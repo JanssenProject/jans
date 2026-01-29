@@ -36,6 +36,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: None,
     }
 }
 
@@ -88,6 +89,7 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: None,
     })
     .await
     .expect("bootstrap config should initialize correctly")

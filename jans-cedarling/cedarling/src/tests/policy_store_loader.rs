@@ -1173,6 +1173,7 @@ permit(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: None,
     };
 
     let cedarling = crate::Cedarling::new(&config)
