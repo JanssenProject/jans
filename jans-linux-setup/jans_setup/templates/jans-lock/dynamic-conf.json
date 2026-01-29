@@ -1,7 +1,7 @@
 {
 	"baseEndpoint": "https://%(hostname)s/%(base_endpoint)s/api/v1",
 	"openIdIssuer": "https://%(hostname)s",
-	"protectionMode": "cedarling",
+	"protectionMode": "oauth",
 	"auditPersistenceMode": "internal",
 	"cedarlingConfiguration": {
 		"enabled": true,
