@@ -132,7 +132,7 @@ fn add_reserved_claims(
                     RestrictedExpression::new_string(
                         token
                             .get_claim(ISS_CLAIM)
-                            .and_then(|v| v.value().as_str().map(std::string::ToString::to_string))
+                            .and_then(|v| v.value().as_str().map(str::to_string))
                             .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
                     ),
                 );

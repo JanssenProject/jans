@@ -5,9 +5,10 @@
  * Copyright (c) 2024 U-Zyn Chua
  */
 
-use super::kventry::KvEntry;
 use chrono::prelude::*;
 use chrono::Duration;
+
+use super::kventry::KvEntry;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpEntry {

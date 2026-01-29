@@ -300,20 +300,18 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         |config| config.authorization_config.principal_bool_operator = OPERATOR_AND.clone(),
     )
     .await;
+    let create_principal = |id: &str, role: &str| {
+        create_test_principal(
+            "Jans::User",
+            id,
+            json!({"country": "US", "role": [role], "sub": id}),
+        )
+        .unwrap()
+    };
 
     let principals = vec![
-        create_test_principal(
-            "Jans::User",
-            "user1",
-            json!({"country": "US", "role": ["Admin"], "sub": "user1"}),
-        )
-        .unwrap(),
-        create_test_principal(
-            "Jans::User",
-            "user2",
-            json!({"country": "US", "role": ["Guest"], "sub": "user2"}),
-        )
-        .unwrap(),
+        create_principal("user1", "Admin"),
+        create_principal("user1", "Admin"),
     ];
     let resource = create_test_principal(
         "Jans::Issue",
