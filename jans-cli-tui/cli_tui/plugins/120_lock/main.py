@@ -90,7 +90,7 @@ class Plugin(DialogUtils):
                 policy_store_uri_widget.me.text
                 )
 
-            if not kwargs.get('data'):
+            if not kwargs.get('passed'):
                 self.policy_sources_container.add_item(cur_widget_data)
             else:
                 self.policy_sources_container.replace_item(kwargs['selected'], cur_widget_data)
