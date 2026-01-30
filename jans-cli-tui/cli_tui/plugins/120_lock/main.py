@@ -48,9 +48,9 @@ class Plugin(DialogUtils):
 
 
     def edit_policy_source(self, *args, **kwargs):
-        if kwargs:
+        if kwargs.get('passed'):
             title = _("Edit Policy Source")
-            source_data = kwargs['data']
+            source_data = kwargs['passed']
         else:
             title = _("Add Policy Source")
             source_data = (False, '', '')
@@ -92,10 +92,8 @@ class Plugin(DialogUtils):
 
             if not kwargs.get('data'):
                 self.policy_sources_container.add_item(cur_widget_data)
-                self.policy_sources_container.all_data.append(cur_widget_data)
             else:
                 self.policy_sources_container.replace_item(kwargs['selected'], cur_widget_data)
-                self.policy_sources_container.all_data[kwargs['selected']] = cur_widget_data
 
         body = HSplit([enabled_widget, authorization_token_widget, policy_store_uri_widget])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_policy_source)]
@@ -107,14 +105,12 @@ class Plugin(DialogUtils):
 
         dialog = common_data.app.get_confirm_dialog(_("Are you sure want to delete policy source?")+"\n {} ?".format(kwargs['selected'][0]))
 
-        async def coroutine():
+        async def coroutine() -> None:
             result = await common_data.app.show_dialog_as_float(dialog)
             common_data.app.layout.focus(self.policy_sources_container)
 
             if result.lower() == 'yes':
                 self.policy_sources_container.remove_item(kwargs['selected'])
-
-            return result
 
         self.app.create_background_task(coroutine())
 
@@ -177,7 +173,6 @@ class Plugin(DialogUtils):
                 on_delete=self.delete_policy_source,
                 on_display=common_data.app.data_display_dialog,
                 selectes=0,
-                all_data=cedarling_configuration_policy_sources_data,
                 underline_headings=False,
                 max_width=common_data.app.output.get_size().columns - 5,
                 jans_name='policySources',
@@ -442,6 +437,7 @@ class Plugin(DialogUtils):
             grpc_configuration = self.make_data_from_dialog(tabs={'grpc_configuration': self.grpc_configuration_widgets})
             cedarling_configuration = self.make_data_from_dialog(tabs={'cedarling_configuration': self.cedarling_configuration_widgets})
             lock_config['grpcConfiguration'] = grpc_configuration
+
             cedarling_configuration['policySources'] = []
 
             for ps in self.policy_sources_container.data:
@@ -453,6 +449,8 @@ class Plugin(DialogUtils):
                 cedarling_configuration['policySources'].append(ps_dict)
 
             lock_config['cedarlingConfiguration'] = cedarling_configuration
+            
+            
             new_data = copy.deepcopy(self.data)
 
             new_data.update(lock_config)
