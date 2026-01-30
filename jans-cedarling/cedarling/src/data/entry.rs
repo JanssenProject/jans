@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::store::std_duration_to_chrono_duration;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
@@ -96,6 +96,17 @@ pub enum CedarType {
     DateTime,
     /// Duration extension type
     Duration,
+}
+
+// Track which units are seen to prevent repeats and enforce order
+#[derive(PartialEq, PartialOrd)]
+enum UnitRank {
+    Start,
+    Days,
+    Hours,
+    Minutes,
+    Seconds,
+    Millis,
 }
 
 impl CedarType {
@@ -197,94 +208,68 @@ impl CedarType {
         Self::String
     }
 
-    /// Check if a string looks like an ISO 8601 / RFC 3339 datetime.
+    /// Checks whether the value is either:
+    /// - a valid RFC 3339 datetime, or
+    /// - a valid ISO 8601 date-only string (YYYY-MM-DD)
     fn is_datetime_format(value: &str) -> bool {
-        // Quick length check - datetime strings are typically 10-35 chars
-        if value.len() < 10 || value.len() > 35 {
-            return false;
-        }
-
-        let bytes = value.as_bytes();
-
-        // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(u8::is_ascii_digit)
-            || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(u8::is_ascii_digit)
-            || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(u8::is_ascii_digit)
-        {
-            return false;
-        }
-
-        // Date only format
-        if value.len() == 10 {
-            return true;
-        }
-
-        // Must have 'T' separator for datetime
-        if bytes.len() > 10 && bytes[10] != b'T' {
-            return false;
-        }
-
-        // Check for time portion (HH:MM:SS)
-        if bytes.len() >= 19
-            && (!bytes[11..13].iter().all(u8::is_ascii_digit)
-                || bytes[13] != b':'
-                || !bytes[14..16].iter().all(u8::is_ascii_digit)
-                || bytes[16] != b':'
-                || !bytes[17..19].iter().all(u8::is_ascii_digit))
-        {
-            return false;
-        }
-
-        true
+        DateTime::parse_from_rfc3339(value).is_ok()
+            || NaiveDate::parse_from_str(value, "%Y-%m-%d").is_ok()
     }
 
-    /// Check if a string looks like a Cedar duration format.
+    /// Cedar-compliant duration format validator.
+    /// Enforces:
+    /// - Optional leading '-'
+    /// - Units only d > h > m > s > ms (in that order)
+    /// - No repeated units
+    /// - Each segment: digits then unit
     fn is_duration_format(value: &str) -> bool {
         if value.is_empty() {
             return false;
         }
 
-        let s = value.strip_prefix('-').unwrap_or(value);
-        if s.is_empty() {
-            return false;
-        }
+        let bytes = value.as_bytes();
+        let mut i = 0;
 
-        // Duration must contain at least one unit suffix
-        let has_unit = s.contains('d')
-            || s.contains('h')
-            || s.ends_with('m')
-            || s.ends_with('s')
-            || s.ends_with("ms");
-
-        if !has_unit {
-            return false;
-        }
-
-        // Check that it follows the pattern: digits followed by units, repeated
-        let mut chars = s.chars().peekable();
-        let mut has_digits = false;
-
-        while let Some(c) = chars.next() {
-            if c.is_ascii_digit() {
-                has_digits = true;
-            } else if c == 'd' || c == 'h' || c == 's' {
-                if !has_digits {
-                    return false;
-                }
-                has_digits = false;
-            } else if c == 'm' {
-                if !has_digits {
-                    return false;
-                }
-                if chars.peek() == Some(&'s') {
-                    chars.next();
-                }
-                has_digits = false;
-            } else {
+        if bytes[i] == b'-' {
+            i += 1;
+            if i == bytes.len() {
                 return false;
             }
+        }
+
+        let mut last_rank = UnitRank::Start;
+
+        while i < bytes.len() {
+            let start = i;
+            while i < bytes.len() && bytes[i].is_ascii_digit() {
+                i += 1;
+            }
+            if start == i {
+                return false;
+            }
+
+            let (current_rank, consumed) = match bytes.get(i) {
+                Some(b'd') if last_rank < UnitRank::Days => (UnitRank::Days, 1),
+                Some(b'h') if last_rank < UnitRank::Hours => (UnitRank::Hours, 1),
+                Some(b's') if last_rank < UnitRank::Seconds => (UnitRank::Seconds, 1),
+                Some(b'm') => {
+                    if i + 1 < bytes.len() && bytes[i + 1] == b's' {
+                        if last_rank < UnitRank::Millis {
+                            (UnitRank::Millis, 2)
+                        } else {
+                            return false;
+                        }
+                    } else if last_rank < UnitRank::Minutes {
+                        (UnitRank::Minutes, 1)
+                    } else {
+                        return false;
+                    }
+                },
+                _ => return false,
+            };
+
+            last_rank = current_rank;
+            i += consumed;
         }
 
         true
