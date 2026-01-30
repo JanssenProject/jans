@@ -82,7 +82,7 @@ class Plugin(DialogUtils):
                     jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'policyStoreUri'),
                 )
 
-        def add_policy_source(dialog: Dialog) -> None:
+        def add_policy_source(_dialog: Dialog) -> None:
 
             cur_widget_data = (
                 enabled_widget.me.checked,
@@ -103,7 +103,7 @@ class Plugin(DialogUtils):
 
     def delete_policy_source(self, **kwargs):
 
-        dialog = common_data.app.get_confirm_dialog(_("Are you sure want to delete policy source?")+"\n {} ?".format(kwargs['selected'][0]))
+        dialog = common_data.app.get_confirm_dialog(_("Are you sure want to delete policy source?")+"\n {} ?".format(kwargs['selected'][2]))
 
         async def coroutine() -> None:
             result = await common_data.app.show_dialog_as_float(dialog)
