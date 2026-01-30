@@ -30,6 +30,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CommonUtils {
     @Inject
@@ -266,5 +267,22 @@ public class CommonUtils {
             }
         });
         return claims;
+    }
+
+    /**
+     * Builds a UTF-8 URL-encoded query string from the provided parameters.
+     *
+     * @param params a map of parameter names to values; entries with a null value are omitted
+     * @return a URL-encoded string of `key=value` pairs joined with `&`, encoded using UTF-8
+     */
+    public static String toUrlEncodedString(Map<String, String> params) {
+        return params.entrySet()
+                .stream()
+                .filter(e -> e.getValue() !=null)
+                .map(e ->
+                        URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
+                                URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)
+                )
+                .collect(Collectors.joining("&"));
     }
 }

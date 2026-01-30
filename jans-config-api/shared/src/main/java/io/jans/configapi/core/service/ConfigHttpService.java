@@ -149,8 +149,30 @@ public class ConfigHttpService implements Serializable {
                 .setConnectionManager(connectionManager).build();
     }
 
+    public CloseableHttpClient createHttpsClientWithTlsPolicy(String[] enabledProtocols,
+                                                              String[] allowedCipherSuites
+    ) throws NoSuchAlgorithmException, KeyManagementException {
+        log.trace(CON_STATS_STR, connectionManager.getTotalStats());
+        RequestConfig requestConfig = RequestConfig.custom().build();
+
+        // Build SSL context with specific protocols
+        SSLContext sslContext = SSLContexts.custom()
+                .build();
+
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                sslContext,
+                enabledProtocols,
+                allowedCipherSuites,
+                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+
+        return HttpClients.custom()
+                .setSSLSocketFactory(sslsf)
+                .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
+                .setConnectionManager(connectionManager).build();
+    }
+
     public CloseableHttpClient getHttpsClient(String trustStorePath, String trustStorePassword, String keyStorePath,
-            String keyStorePassword) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException,
+                                              String keyStorePassword) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException,
             CertificateException, IOException, UnrecoverableKeyException {
         log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
@@ -166,7 +188,7 @@ public class ConfigHttpService implements Serializable {
     }
 
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
-            Map<String, String> headers, String postData, ContentType contentType, String authType) {
+                                           Map<String, String> headers, String postData, ContentType contentType, String authType) {
 
         HttpPost httpPost = new HttpPost(uri);
 
@@ -199,17 +221,17 @@ public class ConfigHttpService implements Serializable {
     }
 
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
-            Map<String, String> headers, String postData) {
+                                           Map<String, String> headers, String postData) {
         return executePost(httpClient, uri, authCode, headers, postData, null, null);
     }
 
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode, String postData,
-            ContentType contentType) {
+                                           ContentType contentType) {
         return executePost(httpClient, uri, authCode, null, postData, contentType, null);
     }
 
     public HttpServiceResponse executePost(String uri, String authCode, String postData, ContentType contentType,
-            String authType) {
+                                           String authType) {
         return executePost(this.getHttpsClient(), uri, authCode, null, postData, contentType, authType);
     }
 
@@ -222,7 +244,7 @@ public class ConfigHttpService implements Serializable {
     }
 
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
-            Map<String, String> parameters) {
+                                          Map<String, String> parameters) {
 
         log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
 
@@ -280,7 +302,7 @@ public class ConfigHttpService implements Serializable {
     }
 
     public HttpServiceResponse executeDelete(HttpClient httpClient, String requestUri, Map<String, String> headers,
-            Map<String, String> parameters) {
+                                             Map<String, String> parameters) {
 
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
@@ -440,7 +462,7 @@ public class ConfigHttpService implements Serializable {
 
         return getResponseJsonNode(getResponseEntityString(serviceResponse), "response");
     }
-    
+
     public String getResponseEntityString(HttpServiceResponse serviceResponse) {
         String jsonString = null;
 
@@ -508,8 +530,8 @@ public class ConfigHttpService implements Serializable {
             return result;
         }
         try (InputStream inputStream = httpEntity.getContent();
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+             BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
@@ -542,5 +564,5 @@ public class ConfigHttpService implements Serializable {
         }
         return jsonString;
     }
- 
+
 }
