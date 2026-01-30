@@ -11,10 +11,7 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAccessEvaluationService;
 import io.jans.as.server.service.token.TokenService;
-import io.jans.model.authzen.AccessEvaluationRequest;
-import io.jans.model.authzen.AccessEvaluationResponse;
-import io.jans.model.authzen.AccessEvaluationsResponse;
-import io.jans.model.authzen.EvaluationOptions;
+import io.jans.model.authzen.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -102,13 +99,16 @@ public class AccessEvaluationService {
             AccessEvaluationResponse response = externalAccessEvaluationService.externalEvaluate(mergedRequest, executionContext);
             results.add(response);
 
-            // Apply semantic short-circuit logic
+            // Apply semantic short-circuit logic per AuthZEN spec
+            // When short-circuiting, add reason to the last response's context
             if (EvaluationOptions.DENY_ON_FIRST_DENY.equals(semantic) && !response.isDecision()) {
                 log.debug("Batch evaluation short-circuited: deny_on_first_deny triggered");
+                addShortCircuitReason(response, EvaluationOptions.DENY_ON_FIRST_DENY);
                 break;
             }
             if (EvaluationOptions.PERMIT_ON_FIRST_PERMIT.equals(semantic) && response.isDecision()) {
                 log.debug("Batch evaluation short-circuited: permit_on_first_permit triggered");
+                addShortCircuitReason(response, EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
                 break;
             }
         }
@@ -141,6 +141,20 @@ public class AccessEvaluationService {
             return options.getEvaluationsSemantic();
         }
         return EvaluationOptions.EXECUTE_ALL;
+    }
+
+    /**
+     * Add short-circuit reason to response context per AuthZEN spec.
+     * When batch evaluation short-circuits, the last response should include
+     * context with reason indicating why processing stopped.
+     */
+    protected void addShortCircuitReason(AccessEvaluationResponse response, String reason) {
+        AccessEvaluationResponseContext context = response.getContext();
+        if (context == null) {
+            context = new AccessEvaluationResponseContext();
+            response.setContext(context);
+        }
+        context.setReason(reason);
     }
 
     public void validateAuthorization(String authorization) {

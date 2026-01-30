@@ -21,6 +21,19 @@ import static org.testng.Assert.*;
 /**
  * Tests for AccessEvaluationService batch evaluation logic.
  *
+ * Test coverage for evaluation semantics:
+ * +---------------------------+----------------------+---------+
+ * | Semantic                  | Scenario             | Results |
+ * +---------------------------+----------------------+---------+
+ * | permit_on_first_permit    | 1st is permit        | 1       |
+ * | permit_on_first_permit    | deny, deny, permit   | 3       |
+ * | permit_on_first_permit    | all deny             | 3       |
+ * | deny_on_first_deny        | 1st is deny          | 1       |
+ * | deny_on_first_deny        | permit, deny         | 2       |
+ * | deny_on_first_deny        | all permit           | 3       |
+ * | execute_all               | any                  | 3       |
+ * +---------------------------+----------------------+---------+
+ *
  * @author Yuriy Z
  */
 @Listeners(MockitoTestNGListener.class)
@@ -44,6 +57,8 @@ public class AccessEvaluationServiceTest {
     @Mock
     private AppConfiguration appConfiguration;
 
+    // ==================== mergeWithDefaults Tests ====================
+
     @Test
     public void mergeWithDefaults_whenEvalHasSubject_shouldUseEvalSubject() {
         AccessEvaluationRequest batchRequest = new AccessEvaluationRequest();
@@ -56,7 +71,7 @@ public class AccessEvaluationServiceTest {
         AccessEvaluationRequest merged = accessEvaluationService.mergeWithDefaults(evalRequest, batchRequest);
 
         assertEquals(merged.getSubject().getId(), "specific-user");
-        assertEquals(merged.getResource().getId(), "default-resource"); // Uses default
+        assertEquals(merged.getResource().getId(), "default-resource");
     }
 
     @Test
@@ -67,7 +82,6 @@ public class AccessEvaluationServiceTest {
         batchRequest.setAction(new Action().setName("default-action"));
 
         AccessEvaluationRequest evalRequest = new AccessEvaluationRequest();
-        // No subject set
 
         AccessEvaluationRequest merged = accessEvaluationService.mergeWithDefaults(evalRequest, batchRequest);
 
@@ -88,6 +102,8 @@ public class AccessEvaluationServiceTest {
 
         assertEquals(merged.getAction().getName(), "specific-action");
     }
+
+    // ==================== getEvaluationsSemantic Tests ====================
 
     @Test
     public void getEvaluationsSemantic_whenOptionsNull_shouldReturnExecuteAll() {
@@ -113,8 +129,10 @@ public class AccessEvaluationServiceTest {
         assertEquals(semantic, EvaluationOptions.DENY_ON_FIRST_DENY);
     }
 
+    // ==================== EXECUTE_ALL Tests ====================
+
     @Test
-    public void evaluations_withExecuteAll_shouldEvaluateAllRequests() {
+    public void executeAll_mixedResults_returns3Results() {
         AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.EXECUTE_ALL);
 
         when(externalAccessEvaluationService.externalEvaluate(any(), any()))
@@ -129,39 +147,179 @@ public class AccessEvaluationServiceTest {
         assertTrue(response.getEvaluations().get(0).isDecision());
         assertFalse(response.getEvaluations().get(1).isDecision());
         assertTrue(response.getEvaluations().get(2).isDecision());
+
+        // No reason should be added for execute_all
+        for (AccessEvaluationResponse evalResponse : response.getEvaluations()) {
+            if (evalResponse.getContext() != null) {
+                assertNull(evalResponse.getContext().getReason());
+            }
+        }
     }
 
-    @Test
-    public void evaluations_withDenyOnFirstDeny_shouldStopOnFirstDeny() {
-        AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.DENY_ON_FIRST_DENY);
-
-        when(externalAccessEvaluationService.externalEvaluate(any(), any()))
-                .thenReturn(AccessEvaluationResponse.TRUE)
-                .thenReturn(AccessEvaluationResponse.FALSE); // Should stop here
-
-        ExecutionContext context = new ExecutionContext(null, null);
-        AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
-
-        // Should have only 2 results, stopped at first deny
-        assertEquals(response.getEvaluations().size(), 2);
-        assertTrue(response.getEvaluations().get(0).isDecision());
-        assertFalse(response.getEvaluations().get(1).isDecision());
-    }
+    // ==================== PERMIT_ON_FIRST_PERMIT Tests ====================
 
     @Test
-    public void evaluations_withPermitOnFirstPermit_shouldStopOnFirstPermit() {
+    public void permitOnFirstPermit_firstIsPermit_returns1Result() {
         AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
 
         when(externalAccessEvaluationService.externalEvaluate(any(), any()))
-                .thenReturn(AccessEvaluationResponse.TRUE); // Should stop immediately
+                .thenReturn(new AccessEvaluationResponse(true, null))
+                .thenReturn(new AccessEvaluationResponse(true, null))
+                .thenReturn(new AccessEvaluationResponse(true, null));
 
         ExecutionContext context = new ExecutionContext(null, null);
         AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
 
-        // Should have only 1 result, stopped at first permit
         assertEquals(response.getEvaluations().size(), 1);
         assertTrue(response.getEvaluations().get(0).isDecision());
+
+        assertNotNull(response.getEvaluations().get(0).getContext());
+        assertEquals(response.getEvaluations().get(0).getContext().getReason(), EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
     }
+
+    @Test
+    public void permitOnFirstPermit_denyDenyPermit_returns3Results() {
+        AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
+
+        when(externalAccessEvaluationService.externalEvaluate(any(), any()))
+                .thenReturn(new AccessEvaluationResponse(false, null))
+                .thenReturn(new AccessEvaluationResponse(false, null))
+                .thenReturn(new AccessEvaluationResponse(true, null));
+
+        ExecutionContext context = new ExecutionContext(null, null);
+        AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
+
+        assertEquals(response.getEvaluations().size(), 3);
+        assertFalse(response.getEvaluations().get(0).isDecision());
+        assertFalse(response.getEvaluations().get(1).isDecision());
+        assertTrue(response.getEvaluations().get(2).isDecision());
+
+        // Only last response should have reason
+        assertNull(response.getEvaluations().get(0).getContext());
+        assertNull(response.getEvaluations().get(1).getContext());
+        assertNotNull(response.getEvaluations().get(2).getContext());
+        assertEquals(response.getEvaluations().get(2).getContext().getReason(), EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
+    }
+
+    @Test
+    public void permitOnFirstPermit_allDeny_returns3Results() {
+        AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
+
+        when(externalAccessEvaluationService.externalEvaluate(any(), any()))
+                .thenReturn(new AccessEvaluationResponse(false, null))
+                .thenReturn(new AccessEvaluationResponse(false, null))
+                .thenReturn(new AccessEvaluationResponse(false, null));
+
+        ExecutionContext context = new ExecutionContext(null, null);
+        AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
+
+        assertEquals(response.getEvaluations().size(), 3);
+        assertFalse(response.getEvaluations().get(0).isDecision());
+        assertFalse(response.getEvaluations().get(1).isDecision());
+        assertFalse(response.getEvaluations().get(2).isDecision());
+
+        // No reason - no short-circuit happened
+        for (AccessEvaluationResponse evalResponse : response.getEvaluations()) {
+            if (evalResponse.getContext() != null) {
+                assertNull(evalResponse.getContext().getReason());
+            }
+        }
+    }
+
+    // ==================== DENY_ON_FIRST_DENY Tests ====================
+
+    @Test
+    public void denyOnFirstDeny_firstIsDeny_returns1Result() {
+        AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.DENY_ON_FIRST_DENY);
+
+        when(externalAccessEvaluationService.externalEvaluate(any(), any()))
+                .thenReturn(new AccessEvaluationResponse(false, null))
+                .thenReturn(new AccessEvaluationResponse(false, null))
+                .thenReturn(new AccessEvaluationResponse(false, null));
+
+        ExecutionContext context = new ExecutionContext(null, null);
+        AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
+
+        assertEquals(response.getEvaluations().size(), 1);
+        assertFalse(response.getEvaluations().get(0).isDecision());
+
+        assertNotNull(response.getEvaluations().get(0).getContext());
+        assertEquals(response.getEvaluations().get(0).getContext().getReason(), EvaluationOptions.DENY_ON_FIRST_DENY);
+    }
+
+    @Test
+    public void denyOnFirstDeny_permitDeny_returns2Results() {
+        AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.DENY_ON_FIRST_DENY);
+
+        when(externalAccessEvaluationService.externalEvaluate(any(), any()))
+                .thenReturn(new AccessEvaluationResponse(true, null))
+                .thenReturn(new AccessEvaluationResponse(false, null));
+
+        ExecutionContext context = new ExecutionContext(null, null);
+        AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
+
+        assertEquals(response.getEvaluations().size(), 2);
+        assertTrue(response.getEvaluations().get(0).isDecision());
+        assertFalse(response.getEvaluations().get(1).isDecision());
+
+        // Only last response should have reason
+        assertNull(response.getEvaluations().get(0).getContext());
+        assertNotNull(response.getEvaluations().get(1).getContext());
+        assertEquals(response.getEvaluations().get(1).getContext().getReason(), EvaluationOptions.DENY_ON_FIRST_DENY);
+    }
+
+    @Test
+    public void denyOnFirstDeny_allPermit_returns3Results() {
+        AccessEvaluationRequest batchRequest = createBatchRequest(EvaluationOptions.DENY_ON_FIRST_DENY);
+
+        when(externalAccessEvaluationService.externalEvaluate(any(), any()))
+                .thenReturn(new AccessEvaluationResponse(true, null))
+                .thenReturn(new AccessEvaluationResponse(true, null))
+                .thenReturn(new AccessEvaluationResponse(true, null));
+
+        ExecutionContext context = new ExecutionContext(null, null);
+        AccessEvaluationsResponse response = accessEvaluationService.evaluations(batchRequest, context);
+
+        assertEquals(response.getEvaluations().size(), 3);
+        assertTrue(response.getEvaluations().get(0).isDecision());
+        assertTrue(response.getEvaluations().get(1).isDecision());
+        assertTrue(response.getEvaluations().get(2).isDecision());
+
+        // No reason - no short-circuit happened
+        for (AccessEvaluationResponse evalResponse : response.getEvaluations()) {
+            if (evalResponse.getContext() != null) {
+                assertNull(evalResponse.getContext().getReason());
+            }
+        }
+    }
+
+    // ==================== addShortCircuitReason Tests ====================
+
+    @Test
+    public void addShortCircuitReason_contextIsNull_createsContextWithReason() {
+        AccessEvaluationResponse response = new AccessEvaluationResponse(false, null);
+        assertNull(response.getContext());
+
+        accessEvaluationService.addShortCircuitReason(response, EvaluationOptions.DENY_ON_FIRST_DENY);
+
+        assertNotNull(response.getContext());
+        assertEquals(response.getContext().getReason(), EvaluationOptions.DENY_ON_FIRST_DENY);
+    }
+
+    @Test
+    public void addShortCircuitReason_contextExists_preservesExistingDataAndAddsReason() {
+        AccessEvaluationResponseContext existingContext = new AccessEvaluationResponseContext();
+        existingContext.setId("existing-id");
+        AccessEvaluationResponse response = new AccessEvaluationResponse(true, existingContext);
+
+        accessEvaluationService.addShortCircuitReason(response, EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
+
+        assertNotNull(response.getContext());
+        assertEquals(response.getContext().getId(), "existing-id");
+        assertEquals(response.getContext().getReason(), EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
+    }
+
+    // ==================== Helper Methods ====================
 
     private AccessEvaluationRequest createBatchRequest(String semantic) {
         AccessEvaluationRequest request = new AccessEvaluationRequest();
