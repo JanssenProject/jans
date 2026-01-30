@@ -438,9 +438,12 @@ class Plugin(DialogUtils):
             lock_config = self.make_data_from_dialog(tabs={'lock_config': self.main_widgets})
             grpc_configuration = self.make_data_from_dialog(tabs={'grpc_configuration': self.grpc_configuration_widgets})
             cedarling_configuration = self.make_data_from_dialog(tabs={'cedarling_configuration': self.cedarling_configuration_widgets})
-            lock_config['grpcConfiguration'] = grpc_configuration
-
-            cedarling_configuration['policySources'] = []
+            merged_grpc = copy.deepcopy(self.data.get('grpcConfiguration', {}))
+            merged_grpc.update(grpc_configuration)
+            lock_config['grpcConfiguration'] = merged_grpc
+            merged_cedarling = copy.deepcopy(self.data.get('cedarlingConfiguration', {}))
+            merged_cedarling.update(cedarling_configuration)
+            merged_cedarling['policySources'] = []
 
             for ps in self.policy_sources_container.data:
                 ps_dict = {
@@ -448,11 +451,10 @@ class Plugin(DialogUtils):
                     'authorizationToken': ps[1],
                     'policyStoreUri': ps[2]
                 }
-                cedarling_configuration['policySources'].append(ps_dict)
+                merged_cedarling['policySources'].append(ps_dict)
 
-            lock_config['cedarlingConfiguration'] = cedarling_configuration
-            
-            
+            lock_config['cedarlingConfiguration'] = merged_cedarling
+
             new_data = copy.deepcopy(self.data)
 
             new_data.update(lock_config)
