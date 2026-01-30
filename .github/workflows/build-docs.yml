@@ -219,7 +219,7 @@ jobs:
             fi
           done
           sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
-          sed -i -e "s/enable-reo-flag/True" ${STABLE}/overrides/main.html
+          sed -i -e "s/enable-reo-flag/True/g" ${STABLE}/overrides/main.html
           git add ${STABLE}/overrides/main.html && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url"
           echo "${STABLE}" > stable.txt
