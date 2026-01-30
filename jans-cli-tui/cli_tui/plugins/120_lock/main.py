@@ -47,7 +47,7 @@ class Plugin(DialogUtils):
 
 
 
-    def edit_policy_source(self, *args, **kwargs):
+    def edit_policy_source(self, *_args, **kwargs):
         if kwargs.get('passed'):
             title = _("Edit Policy Source")
             source_data = kwargs['passed']
