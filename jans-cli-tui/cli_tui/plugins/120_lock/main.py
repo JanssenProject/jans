@@ -109,7 +109,9 @@ class Plugin(DialogUtils):
             result = await common_data.app.show_dialog_as_float(dialog)
             common_data.app.layout.focus(self.policy_sources_container)
 
-            if result.lower() == 'yes':
+            if not result:
+                return
+            if str(result).lower() == 'yes':
                 self.policy_sources_container.remove_item(kwargs['selected'])
 
         self.app.create_background_task(coroutine())
