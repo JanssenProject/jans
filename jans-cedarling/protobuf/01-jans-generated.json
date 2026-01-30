@@ -1,0 +1,494 @@
+{
+  "Jans": {
+    "commonTypes": {
+      "Context": {
+        "type": "Record",
+        "attributes": {
+          "current_time": {
+            "type": "EntityOrCommon",
+            "name": "Long",
+            "required": false
+          },
+          "device_health": {
+            "type": "Set",
+            "element": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "required": false
+          },
+          "fraud_indicators": {
+            "type": "Set",
+            "element": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "required": false
+          },
+          "geolocation": {
+            "type": "Set",
+            "element": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "required": false
+          },
+          "network": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          },
+          "network_type": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          },
+          "operating_system": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          },
+          "tokens": {
+            "type": "EntityOrCommon",
+            "name": "TokensContext",
+            "required": false
+          },
+          "user_agent": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          }
+        }
+      },
+      "TokensContext": {
+        "type": "Record",
+        "attributes": {
+          "total_token_count": {
+            "type": "EntityOrCommon",
+            "name": "Long"
+          }
+        }
+      },
+      "Url": {
+        "type": "Record",
+        "attributes": {
+          "host": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          },
+          "path": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          },
+          "protocol": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          }
+        }
+      },
+      "EmailAddress": {
+        "type": "Record",
+        "attributes": {
+          "domain": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          },
+          "uid": {
+            "type": "EntityOrCommon",
+            "name": "String",
+            "required": false
+          }
+        }
+      }
+    },
+    "entityTypes": {
+      "AccessToken": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "aud": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "exp": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "iat": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "iss": {
+              "type": "EntityOrCommon",
+              "name": "TrustedIssuer",
+              "required": false
+            },
+            "jti": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "nbf": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "scope": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "token_type": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "validated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            }
+          }
+        },
+        "tags": {
+          "type": "Set",
+          "element": {
+            "type": "EntityOrCommon",
+            "name": "String"
+          }
+        }
+      },
+      "Application": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "app_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "name": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "url": {
+              "type": "EntityOrCommon",
+              "name": "Url"
+            }
+          }
+        }
+      },
+      "HttpRequest": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "header": {
+              "type": "Record",
+              "attributes": {
+                "Accept": {
+                  "type": "EntityOrCommon",
+                  "name": "String",
+                  "required": false
+                }
+              }
+            },
+            "url": {
+              "type": "EntityOrCommon",
+              "name": "Url"
+            }
+          }
+        }
+      },
+      "Role": {},
+      "TrustedIssuer": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "issuer_entity_id": {
+              "type": "EntityOrCommon",
+              "name": "Url"
+            }
+          }
+        }
+      },
+      "User": {
+        "memberOfTypes": [
+          "Role"
+        ],
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "email": {
+              "type": "EntityOrCommon",
+              "name": "EmailAddress",
+              "required": false
+            },
+            "id_token": {
+              "type": "EntityOrCommon",
+              "name": "IdToken",
+              "required": false
+            },
+            "phone_number": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "role": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "sub": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "userinfo_token": {
+              "type": "EntityOrCommon",
+              "name": "UserinfoToken",
+              "required": false
+            },
+            "username": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            }
+          }
+        }
+      },
+      "UserinfoToken": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "aud": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "birthdate": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "email": {
+              "type": "EntityOrCommon",
+              "name": "EmailAddress",
+              "required": false
+            },
+            "exp": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "iat": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "iss": {
+              "type": "EntityOrCommon",
+              "name": "TrustedIssuer",
+              "required": false
+            },
+            "jti": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "name": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "phone_number": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "role": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "sub": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "token_type": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "validated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            }
+          }
+        },
+        "tags": {
+          "type": "Set",
+          "element": {
+            "type": "EntityOrCommon",
+            "name": "String"
+          }
+        }
+      },
+      "Workload": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "access_token": {
+              "type": "EntityOrCommon",
+              "name": "AccessToken",
+              "required": false
+            },
+            "client_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "iss": {
+              "type": "EntityOrCommon",
+              "name": "TrustedIssuer",
+              "required": false
+            },
+            "name": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "rp_id": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "spiffe_id": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            }
+          }
+        }
+      },
+      "IdToken": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "acr": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "amr": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "aud": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "azp": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "birthdate": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "email": {
+              "type": "EntityOrCommon",
+              "name": "EmailAddress",
+              "required": false
+            },
+            "exp": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "iat": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "iss": {
+              "type": "EntityOrCommon",
+              "name": "TrustedIssuer",
+              "required": false
+            },
+            "jti": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "name": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "phone_number": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "role": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "sub": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "token_type": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "validated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            }
+          }
+        },
+        "tags": {
+          "type": "Set",
+          "element": {
+            "type": "EntityOrCommon",
+            "name": "String"
+          }
+        }
+      }
+    },
+    "actions": {}
+  }
+}
