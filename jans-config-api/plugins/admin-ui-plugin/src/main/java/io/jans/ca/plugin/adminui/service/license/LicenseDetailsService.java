@@ -407,6 +407,7 @@ public class LicenseDetailsService extends BaseService {
      * @return The method `retrieveLicense()` returns a `GenericResponse` object.
      */
     public GenericResponse retrieveLicense() {
+        log.info("Inside retrieveLicense method...");
         Integer httpStatus = null;
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -523,7 +524,7 @@ public class LicenseDetailsService extends BaseService {
                     TLS_ALLOWED_CIPHER_SUITES);
 
             Map<String, String> body = new HashMap<>();
-            body.put(LICENSE_KEY, licenseConfiguration.getLicenseKey());
+            body.put(LICENSE_KEY, licenseRequest.getLicenseKey());
             body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             HttpServiceResponse httpServiceResponse = httpService
