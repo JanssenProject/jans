@@ -31,6 +31,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -336,7 +337,8 @@ public class LicenseDetailsService extends BaseService {
 
                         if (httpEntity != null) {
                             jsonString = httpService.getContent(httpEntity);
-                            JsonObject entity = mapper.readValue(jsonString, JsonObject.class);
+                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
+                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
 
                             Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_active", "is_expired");
                             if (genericResOptional.isPresent()) {
@@ -428,59 +430,60 @@ public class LicenseDetailsService extends BaseService {
             String retriveLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/retrieve?org_id=") + licenseConfiguration.getHardwareId();
 
             // Build the HttpClient
-            CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
-                    TLS_ALLOWED_CIPHER_SUITES);
+            try (CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
+                    TLS_ALLOWED_CIPHER_SUITES)) {
 
-            Map<String, String> headers = new HashMap<>();
-            headers.put(AppConstants.AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+                Map<String, String> headers = new HashMap<>();
+                headers.put(AppConstants.AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
 
-            HttpServiceResponse httpServiceResponse = httpService
-                    .executeGet(httpClient,
-                            retriveLicenseUrl,
-                            headers,
-                            null);
-            String jsonString = null;
-            if (httpServiceResponse.getHttpResponse() != null
-                    && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+                HttpServiceResponse httpServiceResponse = httpService
+                        .executeGet(httpClient,
+                                retriveLicenseUrl,
+                                headers,
+                                null);
+                String jsonString = null;
+                if (httpServiceResponse.getHttpResponse() != null
+                        && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
-                log.debug(
-                        "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                        httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                        httpServiceResponse.getHttpResponse().getEntity());
-                ObjectMapper mapper = new ObjectMapper();
-                HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
-                httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                if (httpStatus == 200) {
+                    log.debug(
+                            "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                            httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                            httpServiceResponse.getHttpResponse().getEntity());
+                    ObjectMapper mapper = new ObjectMapper();
+                    HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                    httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
+                    if (httpStatus == 200) {
 
-                    if (httpEntity != null) {
-                        jsonString = httpService.getContent(httpEntity);
-                        JsonObject entity = mapper.readValue(jsonString, JsonObject.class);
+                        if (httpEntity != null) {
+                            jsonString = httpService.getContent(httpEntity);
+                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
+                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
 
-                        Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "licenseKey", "mauThreshold");
-                        if (genericResOptional.isPresent()) {
-                            return genericResOptional.get();
+                            Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "licenseKey", "mauThreshold");
+                            if (genericResOptional.isPresent()) {
+                                return genericResOptional.get();
+                            }
+                            ObjectNode jsonNode = mapper.createObjectNode();
+                            jsonNode.put("licenseKey", entity.getString("licenseKey"));
+                            jsonNode.put("mauThreshold", entity.getInt("mauThreshold"));
+                            return CommonUtils.createGenericResponse(true, 200, "Valid license present.", jsonNode);
                         }
-                        ObjectNode jsonNode = mapper.createObjectNode();
-                        jsonNode.put("licenseKey", entity.getString("licenseKey"));
-                        jsonNode.put("mauThreshold", entity.getInt("mauThreshold"));
-                        return CommonUtils.createGenericResponse(true, 200, "Valid license present.", jsonNode);
                     }
-                }
-                //getting error
-                jsonString = httpService.getContent(httpEntity);
-                JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
-                if (httpStatus == 402) {
-                    log.error("Payment Required: 402");
-                    return CommonUtils.createGenericResponse(false, httpStatus, "Payment Required. Subscribe Admin UI license on Agama Lab.");
-                }
-                if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                    //getting error
+                    jsonString = httpService.getContent(httpEntity);
+                    JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
+                    if (httpStatus == 402) {
+                        log.error("Payment Required: 402");
+                        return CommonUtils.createGenericResponse(false, httpStatus, "Payment Required. Subscribe Admin UI license on Agama Lab.");
+                    }
+                    if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                        log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
+                        return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
+                    }
                     log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
-                    return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
                 }
-                log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
             }
-            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
-
         } catch (Exception e) {
             Optional<GenericResponse> genericResOptional = handleLicenseApiNotAccessible(httpStatus);
             if (genericResOptional.isPresent()) {
@@ -543,7 +546,9 @@ public class LicenseDetailsService extends BaseService {
                     if (httpStatus == 200) {
                         if (httpEntity != null) {
                             jsonString = httpService.getContent(httpEntity);
-                            JsonObject entity = mapper.readValue(jsonString, JsonObject.class);
+                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
+                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+
                             Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_key");
                             if (genericResOptional.isPresent()) {
                                 return genericResOptional.get();
@@ -703,7 +708,8 @@ public class LicenseDetailsService extends BaseService {
                     if (httpStatus == 200) {
                         if (httpEntity != null) {
                             jsonString = httpService.getContent(httpEntity);
-                            JsonObject entity = mapper.readValue(jsonString, JsonObject.class);
+                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
+                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
 
                             Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license");
                             if (genericResOptional.isPresent()) {

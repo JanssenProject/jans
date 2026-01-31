@@ -16,7 +16,6 @@ import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -182,7 +181,9 @@ public class BaseService {
                     if (httpStatus == 201) {
                         if (httpEntity != null) {
                             jsonString = httpService.getContent(httpEntity);
-                            JsonObject entity = mapper.readValue(jsonString, JsonObject.class);
+                            log.info(jsonString);
+                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
+                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
 
                             DCRResponse dcrResponse = new DCRResponse();
                             dcrResponse.setClientId(entity.getString("client_id"));
