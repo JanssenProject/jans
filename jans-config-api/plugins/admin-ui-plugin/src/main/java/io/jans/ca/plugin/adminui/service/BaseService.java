@@ -156,57 +156,59 @@ public class BaseService {
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
             String hardwareId = claims.get("org_id").toString();
 
-            try (CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
-                    TLS_ALLOWED_CIPHER_SUITES)) {
-                Map<String, String> body = new HashMap<>();
-                body.put("software_statement", ssaJwt);
-                body.put("response_types", "token");
-                body.put("redirect_uris", issuer);
-                body.put("client_name", "admin-ui-license-client-" + UUID.randomUUID().toString());
+            CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
+                    TLS_ALLOWED_CIPHER_SUITES);
+            Map<String, String> body = new HashMap<>();
+            body.put("software_statement", ssaJwt);
+            body.put("response_types", "token");
+            body.put("redirect_uris", issuer);
+            body.put("client_name", "admin-ui-license-client-" + UUID.randomUUID().toString());
 
-                HttpServiceResponse httpServiceResponse = httpService
-                        .executePost(issuer + "/jans-auth/restv1/register", null, mapper.writeValueAsString(body), ContentType.APPLICATION_JSON,
-                                null);
-                String jsonString = null;
-                if (httpServiceResponse.getHttpResponse() != null
-                        && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+            HttpServiceResponse httpServiceResponse = httpService
+                    .executePost(httpClient,
+                            issuer + "/jans-auth/restv1/register",
+                            null, null,
+                            mapper.writeValueAsString(body),
+                            ContentType.APPLICATION_JSON,
+                            null);
+            String jsonString = null;
+            if (httpServiceResponse.getHttpResponse() != null
+                    && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
-                    log.debug(
-                            "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                            httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                            httpServiceResponse.getHttpResponse().getEntity());
-                    ObjectMapper mapper = new ObjectMapper();
-                    HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
-                    httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 201) {
-                        if (httpEntity != null) {
-                            jsonString = httpService.getContent(httpEntity);
-                            log.info(jsonString);
-                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
-                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+                log.debug(
+                        "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                        httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                        httpServiceResponse.getHttpResponse().getEntity());
+                ObjectMapper mapper = new ObjectMapper();
+                HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
+                if (httpStatus == 201) {
+                    if (httpEntity != null) {
+                        jsonString = httpService.getContent(httpEntity);
+                        log.info(jsonString);
+                        HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
+                        JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
 
-                            DCRResponse dcrResponse = new DCRResponse();
-                            dcrResponse.setClientId(entity.getString("client_id"));
-                            dcrResponse.setClientSecret(entity.getString("client_secret"));
-                            dcrResponse.setOpHost(issuer);
-                            dcrResponse.setHardwareId(hardwareId);
-                            if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
-                                dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
-                            }
-                            if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
-                                dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
-                            }
-                            return dcrResponse;
+                        DCRResponse dcrResponse = new DCRResponse();
+                        dcrResponse.setClientId(entity.getString("client_id"));
+                        dcrResponse.setClientSecret(entity.getString("client_secret"));
+                        dcrResponse.setOpHost(issuer);
+                        dcrResponse.setHardwareId(hardwareId);
+                        if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
+                            dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
                         }
+                        if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
+                            dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
+                        }
+                        return dcrResponse;
                     }
-                    jsonString = httpService.getContent(httpEntity);
-                    log.error("Error in DCR, Http Staus: {}, Message: {}", httpStatus, jsonString);
-                    return null;
                 }
-                log.error("Error in DCR. HTTP Response is null");
+                jsonString = httpService.getContent(httpEntity);
+                log.error("Error in DCR, Http Staus: {}, Message: {}", httpStatus, jsonString);
                 return null;
             }
-
+            log.error("Error in DCR. HTTP Response is null");
+            return null;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_DCR.getDescription(), e);
             return null;
@@ -223,7 +225,7 @@ public class BaseService {
      * @throws NoSuchAlgorithmException if a required cryptographic algorithm is unavailable when building the HTTP client
      * @throws KeyManagementException   if an error occurs initializing key management for the HTTP client
      */
-    public Optional<Map<String, Object>> introspectToken (String accessToken, String introspectionEndpoint) throws
+    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) throws
             NoSuchAlgorithmException, KeyManagementException {
         log.info("Token introspection from auth-server.");
         Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);

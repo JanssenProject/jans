@@ -168,7 +168,7 @@ public class ConfigHttpService implements Serializable {
         return HttpClients.custom()
                 .setSSLSocketFactory(sslsf)
                 .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
-                //.setConnectionManager(connectionManager)
+                .setConnectionManager(connectionManager)
                 .build();
     }
 
