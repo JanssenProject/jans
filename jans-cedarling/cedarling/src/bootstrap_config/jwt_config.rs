@@ -224,13 +224,40 @@ impl JwtConfig {
     }
 }
 
-/// Config structure that define how trusted issuers will be loaded.
+/// Raw representation of trusted issuer loader type from environment variable.
+/// Is used in [`BootstrapConfigRaw`].
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
+pub enum TrustedIssuerLoaderTypeRaw {
+    /// Synchronous loading
+    #[default]
+    #[serde(rename = "SYNC")]
+    Sync,
+    /// Asynchronous loading
+    #[serde(rename = "ASYNC")]
+    Async,
+}
+
+impl TrustedIssuerLoaderTypeRaw {
+    /// Converts raw representation to `TrustedIssuerLoaderConfig`.
+    pub(crate) fn to_config(&self, workers: NonZeroUsize) -> TrustedIssuerLoaderConfig {
+        match self {
+            TrustedIssuerLoaderTypeRaw::Sync => TrustedIssuerLoaderConfig::Sync { workers },
+            TrustedIssuerLoaderTypeRaw::Async => TrustedIssuerLoaderConfig::Async { workers },
+        }
+    }
+}
+
+/// Config structure that define how trusted issuers will be loaded.
+///
+/// Default is `Sync` with 1 worker.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum TrustedIssuerLoaderConfig {
     /// Synchronous loading, on start program.
     /// The Cedarling will load all entities on start in "blocking mode" (you need to wait).
-    #[default]
-    Sync,
+    Sync {
+        /// Workers count
+        workers: NonZeroUsize,
+    },
     /// Asynchronous loading, on start program.
     /// The Cedarling will load all entities on the background.
     /// You need specify workers count.
@@ -238,4 +265,18 @@ pub enum TrustedIssuerLoaderConfig {
         /// Workers count
         workers: NonZeroUsize,
     },
+}
+
+impl TrustedIssuerLoaderConfig {
+    pub(crate) fn is_sync(&self) -> bool {
+        matches!(self, TrustedIssuerLoaderConfig::Sync { .. })
+    }
+}
+
+impl Default for TrustedIssuerLoaderConfig {
+    fn default() -> Self {
+        Self::Sync {
+            workers: NonZeroUsize::new(1).unwrap(),
+        }
+    }
 }

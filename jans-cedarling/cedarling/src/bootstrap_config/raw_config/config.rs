@@ -14,6 +14,7 @@ use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
+use crate::jwt_config::TrustedIssuerLoaderTypeRaw;
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
@@ -305,11 +306,27 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
-    /// Enables asynchronous loading of trusted issuers during bootstrap.
-    /// Zero or None means synchronous loading.
-    /// Positive integer indicates the number of concurrent tasks to use for loading.
-    #[serde(rename = "CEDARLING_TRUSTED_ISSUER_LOADER_ASYNC", default)]
-    pub trusted_issuer_loader_async: Option<usize>,
+    /// Type of trusted issuer loader.
+    /// If not set, synchronous loader is used.
+    /// Can be `SYNC` or `ASYNC`.
+    ///
+    /// Sync loader means that trusted issuers will be loaded on initialization.
+    /// Async loader means that trusted issuers will be loaded in background.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_type: TrustedIssuerLoaderTypeRaw,
+    /// Number of concurrent workers used to asynchronously load trusted issuers.
+    /// Default value is 1.
+    /// Zero will be treated as default value.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_workers: usize,
 }
 
 impl Default for BootstrapConfigRaw {

@@ -21,7 +21,7 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::jwt_config::TrustedIssuerLoaderConfig;
+use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw};
 use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -116,13 +116,8 @@ impl BootstrapConfig {
 
         // Determine trusted issuer loader configuration
         // if the async worker count is zero or None, use synchronous loading
-        let trusted_issuer_loader: TrustedIssuerLoaderConfig = raw
-            .trusted_issuer_loader_async
-            .and_then(|workers| {
-                NonZeroUsize::new(workers)
-                    .map(|nz| TrustedIssuerLoaderConfig::Async { workers: nz })
-            })
-            .unwrap_or(TrustedIssuerLoaderConfig::Sync);
+        let trusted_issuer_workers = NonZeroUsize::new(raw.trusted_issuer_loader_workers)
+            .unwrap_or_else(|| unsafe { NonZeroUsize::new_unchecked(1) });
 
         // JWT Config
         let jwt_config = JwtConfig {
@@ -133,7 +128,9 @@ impl BootstrapConfig {
             token_cache_max_ttl_secs: raw.token_cache_max_ttl,
             token_cache_capacity: raw.token_cache_capacity,
             token_cache_earliest_expiration_eviction: raw.token_cache_earliest_expiration_eviction,
-            trusted_issuer_loader,
+            trusted_issuer_loader: raw
+                .trusted_issuer_loader_type
+                .to_config(trusted_issuer_workers),
         };
 
         let authorization_config = AuthorizationConfig {

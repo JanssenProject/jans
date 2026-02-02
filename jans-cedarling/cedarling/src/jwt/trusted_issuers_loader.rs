@@ -3,7 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use crate::{
     JwtConfig, LogLevel,
@@ -38,64 +41,22 @@ impl TrustedIssuerLoader {
         trusted_issuers: HashMap<String, TrustedIssuer>,
     ) -> Result<(), JwtServiceInitError> {
         match self.jwt_config.trusted_issuer_loader {
-            TrustedIssuerLoaderConfig::Sync => {
-                for (issuer_id, iss) in trusted_issuers {
-                    load_trusted_issuer(self, issuer_id, iss).await?;
-                }
-                self.check_keys_loaded();
+            TrustedIssuerLoaderConfig::Sync { workers } => {
+                load_trusted_issuers(self, trusted_issuers, workers.get()).await
             },
             TrustedIssuerLoaderConfig::Async { workers } => {
-                self.load_trusted_issuer_async(trusted_issuers, workers.get())
-                    .await;
+                let loader = self.clone();
+                spawn_task(async move {
+                    let _ = load_trusted_issuers(&loader, trusted_issuers, workers.get()).await;
+                });
+                Ok(())
             },
         }
-
-        Ok(())
-    }
-
-    /// Load trusted issuers asynchronously with a limit on concurrent workers.
-    async fn load_trusted_issuer_async(
-        &self,
-        trusted_issuers: HashMap<String, TrustedIssuer>,
-        workers: usize,
-    ) {
-        let semaphore = Arc::new(tokio::sync::Semaphore::new(workers));
-        let mut handles = Vec::new();
-
-        for (issuer_id, iss) in trusted_issuers {
-            let permit = semaphore.clone().acquire_owned().await.unwrap();
-            let loader_clone = self.clone();
-
-            let handle = spawn_task(async move {
-                let result = load_trusted_issuer(&loader_clone, issuer_id.clone(), iss).await;
-                drop(permit); // Release the permit
-
-                if let Err(error) = result {
-                    // log error but without failing the entire load process
-                    loader_clone.logger.log_any(
-                        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                            LogLevel::WARN,
-                            None,
-                        ))
-                        .set_message(format!("Could not load trusted issuer: {issuer_id}"))
-                        .set_error(error.to_string()),
-                    );
-                }
-            });
-            handles.push(handle);
-        }
-
-        // Await all tasks to complete
-        for handle in handles {
-            handle.await_result().await;
-        }
-
-        self.check_keys_loaded();
     }
 
     /// Quick check so we don't get surprised if the program runs but can't validate
     /// if signed authorization is unavailable and signature validation is enabled, log a warning
-    pub(super) fn check_keys_loaded(&self) {
+    pub(crate) fn check_keys_loaded(&self) {
         // anything
         let signed_authz_available = self.key_service.has_keys();
         if !signed_authz_available && self.jwt_config.jwt_sig_validation {
@@ -105,6 +66,55 @@ impl TrustedIssuerLoader {
             ));
         }
     }
+}
+
+async fn load_trusted_issuers(
+    loader: &TrustedIssuerLoader,
+    trusted_issuers: HashMap<String, TrustedIssuer>,
+    workers: usize,
+) -> Result<(), JwtServiceInitError> {
+    let semaphore = Arc::new(tokio::sync::Semaphore::new(workers));
+    let mut handles = Vec::new();
+    let errors = Arc::new(Mutex::new(Vec::new()));
+
+    for (issuer_id, iss) in trusted_issuers {
+        let permit = semaphore.clone().acquire_owned().await.unwrap();
+        let loader_clone = loader.clone();
+        let errors_clone = errors.clone();
+
+        let handle = spawn_task(async move {
+            let result = load_trusted_issuer(&loader_clone, issuer_id.clone(), iss).await;
+            drop(permit); // Release the permit
+
+            if let Err(error) = result {
+                // log error but without failing the entire load process
+                loader_clone.logger.log_any(
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::WARN,
+                        None,
+                    ))
+                    .set_message(format!("Could not load trusted issuer: {issuer_id}"))
+                    .set_error(error.to_string()),
+                );
+                errors_clone.lock().unwrap().push(error);
+            }
+        });
+        handles.push(handle);
+    }
+
+    // Await all tasks to complete
+    for handle in handles {
+        handle.await_result().await;
+    }
+
+    loader.check_keys_loaded();
+
+    let errors = Arc::into_inner(errors).unwrap().into_inner().unwrap();
+    if let Some(first_error) = errors.into_iter().next() {
+        return Err(first_error);
+    }
+
+    Ok(())
 }
 
 pub(super) async fn load_trusted_issuer(
@@ -247,7 +257,7 @@ mod test {
         let jwt_config = JwtConfig {
             jwt_sig_validation: false,
             jwt_status_validation: false,
-            trusted_issuer_loader: TrustedIssuerLoaderConfig::Sync,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             ..Default::default()
         };
 
@@ -321,23 +331,33 @@ mod test {
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully in async mode");
 
-        // Verify both issuers were loaded
+        // Verify both issuers were loaded with retry for async operations
         let issuer_claim1 = server1.issuer();
         let issuer_claim2 = server2.issuer();
-        assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&issuer_claim1)
-                .is_some(),
-            "first trusted issuer should be inserted into issuer index"
-        );
-        assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&issuer_claim2)
-                .is_some(),
-            "second trusted issuer should be inserted into issuer index"
-        );
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&issuer_claim1)
+                    .is_some()
+            },
+            10,
+            10,
+            "first trusted issuer should be inserted into issuer index",
+        )
+        .await;
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&issuer_claim2)
+                    .is_some()
+            },
+            10,
+            10,
+            "second trusted issuer should be inserted into issuer index",
+        )
+        .await;
 
         // Verify no keys are stored when signature validation is disabled
         assert!(
@@ -364,7 +384,7 @@ mod test {
         let jwt_config = JwtConfig {
             jwt_sig_validation: true, // Requires OpenID config
             jwt_status_validation: false,
-            trusted_issuer_loader: TrustedIssuerLoaderConfig::Sync,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             ..Default::default()
         };
 
@@ -495,7 +515,7 @@ mod test {
             jwks: Some(jwks.to_string()),
             jwt_sig_validation: true,
             jwt_status_validation: false,
-            trusted_issuer_loader: TrustedIssuerLoaderConfig::Sync,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             ..Default::default()
         };
 
@@ -558,7 +578,7 @@ mod test {
         let jwt_config = JwtConfig {
             jwt_sig_validation: true,
             jwt_status_validation: false,
-            trusted_issuer_loader: TrustedIssuerLoaderConfig::Sync,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
             ..Default::default()
         };
 
@@ -603,6 +623,59 @@ mod test {
         );
     }
 
+    /// Tests synchronous loading of a single trusted issuer with status validation enabled.
+    ///
+    /// Verifies that when `jwt_status_validation` is true, the status list cache is initialized
+    /// for the issuer and contains the expected status list.
+    #[tokio::test]
+    #[ignore = "Mock server issue with status list endpoint"]
+    async fn load_trusted_issuer_with_status_validation_sync() {
+        let mut server = MockServer::new_with_defaults().await.unwrap();
+        // Generate status list endpoint before creating trusted issuer
+        server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], None);
+        server.update_openid_config_with_status_list_endpoint();
+        let trusted_issuer = server.trusted_issuer();
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: false,
+            jwt_status_validation: true,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            ..Default::default()
+        };
+
+        let loader = TrustedIssuerLoader {
+            jwt_config,
+            status_lists: Arc::new(StatusListCache::default()),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        result.expect("should load trusted issuer successfully with status validation enabled");
+
+        // Verify issuer config was inserted
+        let issuer_claim = server.issuer();
+        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
+        assert!(
+            trusted_issuer_from_index.is_some(),
+            "trusted issuer should be inserted into issuer index"
+        );
+
+        // Verify status list cache contains the endpoint
+        let status_list_uri = server.status_list_endpoint().unwrap().to_string();
+        let status_lists = loader.status_lists.status_lists.read().unwrap();
+        assert!(
+            status_lists.contains_key(&status_list_uri),
+            "status list cache should contain the status list endpoint"
+        );
+    }
+
     /// Tests asynchronous loading of multiple trusted issuers with signature validation enabled.
     ///
     /// Verifies that when `jwt_sig_validation` is true and async loading is used,
@@ -642,23 +715,33 @@ mod test {
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully in async mode with signature validation");
 
-        // Verify both issuers were loaded
+        // Verify both issuers were loaded with retry for async operations
         let issuer_claim1 = server1.issuer();
         let issuer_claim2 = server2.issuer();
-        assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&issuer_claim1)
-                .is_some(),
-            "first trusted issuer should be inserted into issuer index"
-        );
-        assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&issuer_claim2)
-                .is_some(),
-            "second trusted issuer should be inserted into issuer index"
-        );
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&issuer_claim1)
+                    .is_some()
+            },
+            10,
+            10,
+            "first trusted issuer should be inserted into issuer index",
+        )
+        .await;
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&issuer_claim2)
+                    .is_some()
+            },
+            10,
+            10,
+            "second trusted issuer should be inserted into issuer index",
+        )
+        .await;
 
         // Verify keys are stored for both issuers with retry for async operations
         retry_assert(

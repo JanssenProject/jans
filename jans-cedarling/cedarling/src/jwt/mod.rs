@@ -92,7 +92,7 @@ use crate::authz::MultiIssuerValidationError;
 use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt_config::TrustedIssuerLoaderConfig;
+
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
@@ -177,7 +177,7 @@ impl JwtService {
         // Load local JWKS if configured and no trusted issuers were provided
         // This ensures local JWKS-only configurations work correctly
         // works only in synchronous mode loading
-        if loader.jwt_config.trusted_issuer_loader == TrustedIssuerLoaderConfig::Sync
+        if loader.jwt_config.trusted_issuer_loader.is_sync()
             && !key_service.has_keys()
             && jwt_config.jwt_sig_validation
             && let Some(jwks) = jwt_config.jwks.as_ref()
