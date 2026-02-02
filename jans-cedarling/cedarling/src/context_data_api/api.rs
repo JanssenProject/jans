@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Data API trait and supporting types for the DataStore.
+//! Data API trait and supporting types for the `DataStore`.
 
 use std::time::Duration;
 
@@ -13,10 +13,11 @@ use serde_json::Value;
 use super::entry::DataEntry;
 use super::error::DataError;
 
-/// Statistics about the DataStore.
+/// Statistics about the `DataStore`.
 ///
-/// Provides insight into the current state and usage of the data store.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// Provides insight into the current state and usage of the data store,
+/// including memory usage metrics and capacity information.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DataStoreStats {
     /// Number of entries currently stored
     pub entry_count: usize,
@@ -26,6 +27,16 @@ pub struct DataStoreStats {
     pub max_entry_size: usize,
     /// Whether metrics tracking is enabled
     pub metrics_enabled: bool,
+    /// Total size of all entries in bytes (approximate, based on JSON serialization)
+    pub total_size_bytes: usize,
+    /// Average size per entry in bytes (0 if no entries)
+    pub avg_entry_size_bytes: usize,
+    /// Percentage of capacity used (0.0-100.0, based on entry count)
+    pub capacity_usage_percent: f64,
+    /// Memory usage threshold percentage (from config)
+    pub memory_alert_threshold: f64,
+    /// Whether memory usage exceeds the alert threshold
+    pub memory_alert_triggered: bool,
 }
 
 /// Trait defining the public API for data store operations.

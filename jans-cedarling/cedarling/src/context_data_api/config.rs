@@ -5,7 +5,7 @@
 
 use std::time::Duration;
 
-/// Configuration for the DataStore component.
+/// Configuration for the `DataStore` component.
 ///
 /// Controls storage limits, TTL behavior, capacity management, and metrics.
 ///
@@ -35,7 +35,7 @@ use std::time::Duration;
 ///     ..Default::default()
 /// };
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DataStoreConfig {
     /// Maximum number of data entries (0 = unlimited)
     pub max_entries: usize,
@@ -49,6 +49,10 @@ pub struct DataStoreConfig {
     pub max_ttl: Option<Duration>,
     /// Enable metrics tracking (access counts, timestamps)
     pub enable_metrics: bool,
+    /// Memory usage alert threshold as a percentage (0.0-100.0).
+    /// When capacity usage exceeds this threshold, an alert is triggered.
+    /// Default: 80.0 (80%)
+    pub memory_alert_threshold: f64,
 }
 
 impl Default for DataStoreConfig {
@@ -59,20 +63,27 @@ impl Default for DataStoreConfig {
             default_ttl: None,
             max_ttl: Some(Duration::from_secs(3600)), // 1 hour
             enable_metrics: true,
+            memory_alert_threshold: 80.0, // 80%
         }
     }
 }
 
-/// Error returned when DataStoreConfig validation fails.
+/// Error returned when `DataStoreConfig` validation fails.
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigValidationError {
-    /// default_ttl exceeds max_ttl
+    /// `default_ttl` exceeds `max_ttl`
     #[error("default_ttl ({default:?}) exceeds max_ttl ({max:?})")]
     DefaultTtlExceedsMax {
         /// The default TTL value that exceeds the maximum
         default: Duration,
         /// The maximum TTL value
         max: Duration,
+    },
+    /// `memory_alert_threshold` is outside valid range
+    #[error("memory_alert_threshold ({value}) must be between 0.0 and 100.0")]
+    InvalidMemoryAlertThreshold {
+        /// The invalid threshold value
+        value: f64,
     },
 }
 
@@ -83,12 +94,19 @@ impl DataStoreConfig {
     ///
     /// Returns `ConfigValidationError` if:
     /// - `default_ttl` exceeds `max_ttl` (when both are Some)
+    /// - `memory_alert_threshold` is not between 0.0 and 100.0
     pub fn validate(&self) -> Result<(), ConfigValidationError> {
         // Check if default_ttl exceeds max_ttl
-        if let (Some(default), Some(max)) = (self.default_ttl, self.max_ttl) {
-            if default > max {
+        if let (Some(default), Some(max)) = (self.default_ttl, self.max_ttl)
+            && default > max {
                 return Err(ConfigValidationError::DefaultTtlExceedsMax { default, max });
             }
+
+        // Validate memory_alert_threshold is in valid range
+        if !(0.0..=100.0).contains(&self.memory_alert_threshold) {
+            return Err(ConfigValidationError::InvalidMemoryAlertThreshold {
+                value: self.memory_alert_threshold,
+            });
         }
 
         Ok(())
@@ -117,7 +135,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when default_ttl is less than max_ttl"
         );
     }
@@ -146,7 +164,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when both TTL values are None"
         );
     }
@@ -159,7 +177,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when only default_ttl is set"
         );
     }
@@ -172,7 +190,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config.validate(), Ok(_)),
+            matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when only max_ttl is set"
         );
     }

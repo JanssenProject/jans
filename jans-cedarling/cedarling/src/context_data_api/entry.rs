@@ -4,14 +4,14 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::store::std_duration_to_chrono_duration;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
 use std::str::FromStr;
 use std::time::Duration as StdDuration;
 
-/// Helper module for serializing DateTime
+/// Helper module for serializing `DateTime`
 mod datetime {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
@@ -34,11 +34,17 @@ mod datetime {
     }
 }
 
-/// Helper module for serializing Optional DateTime
+/// Helper module for serializing Optional `DateTime`
 mod datetime_option {
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
+    /// Serialize an optional `DateTime` to RFC 3339 format.
+    ///
+    /// Note: This function signature uses `&Option<T>` rather than `Option<&T>`
+    /// because serde's `#[serde(serialize_with)]` attribute passes references
+    /// to field values, and the field type is `Option<DateTime<Utc>>`.
+    #[allow(clippy::ref_option)]
     pub(super) fn serialize<S>(
         date: &Option<DateTime<Utc>>,
         serializer: S,
@@ -86,10 +92,21 @@ pub enum CedarType {
     Ip,
     /// Decimal extension type
     Decimal,
-    /// DateTime extension type
+    /// `DateTime` extension type
     DateTime,
     /// Duration extension type
     Duration,
+}
+
+// Track which units are seen to prevent repeats and enforce order
+#[derive(PartialEq, PartialOrd)]
+enum UnitRank {
+    Start,
+    Days,
+    Hours,
+    Minutes,
+    Seconds,
+    Millis,
 }
 
 impl CedarType {
@@ -100,6 +117,7 @@ impl CedarType {
     /// - Strings that look like IP addresses, decimals, datetimes, or durations
     ///
     /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
+    #[must_use]
     pub fn from_value(value: &Value) -> Self {
         match value {
             Value::String(s) => Self::from_string_value(s),
@@ -115,18 +133,17 @@ impl CedarType {
             Value::Array(_) => Self::Set,
             Value::Object(obj) => {
                 // Check for extension type marker (__extn)
-                if let Some(extn) = obj.get("__extn") {
-                    if let Some(extn_obj) = extn.as_object() {
-                        if let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str()) {
-                            return match fn_name {
-                                "ip" | "ipaddr" => Self::Ip,
-                                "decimal" => Self::Decimal,
-                                "datetime" => Self::DateTime,
-                                "duration" => Self::Duration,
-                                _ => Self::Record,
-                            };
-                        }
-                    }
+                if let Some(extn) = obj.get("__extn")
+                    && let Some(extn_obj) = extn.as_object()
+                    && let Some(fn_name) = extn_obj.get("fn").and_then(|v| v.as_str())
+                {
+                    return match fn_name {
+                        "ip" | "ipaddr" => Self::Ip,
+                        "decimal" => Self::Decimal,
+                        "datetime" => Self::DateTime,
+                        "duration" => Self::Duration,
+                        _ => Self::Record,
+                    };
                 }
 
                 // Check if it's an entity reference with explicit marker
@@ -136,8 +153,8 @@ impl CedarType {
                 if obj.len() == 2
                     && obj.contains_key("type")
                     && obj.contains_key("id")
-                    && obj.get("type").map_or(false, |v| v.is_string())
-                    && obj.get("id").map_or(false, |v| v.is_string())
+                    && obj.get("type").is_some_and(serde_json::Value::is_string)
+                    && obj.get("id").is_some_and(serde_json::Value::is_string)
                 {
                     Self::Entity
                 } else {
@@ -159,14 +176,13 @@ impl CedarType {
         }
 
         // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
-        if let Some((ip_part, prefix_part)) = s.split_once('/') {
-            if let Ok(ip) = IpAddr::from_str(ip_part) {
-                if let Ok(prefix_len) = prefix_part.parse::<u8>() {
-                    let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
-                    if prefix_len <= max_prefix {
-                        return Self::Ip;
-                    }
-                }
+        if let Some((ip_part, prefix_part)) = s.split_once('/')
+            && let Ok(ip) = IpAddr::from_str(ip_part)
+            && let Ok(prefix_len) = prefix_part.parse::<u8>()
+        {
+            let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+            if prefix_len <= max_prefix {
+                return Self::Ip;
             }
         }
 
@@ -192,101 +208,75 @@ impl CedarType {
         Self::String
     }
 
-    /// Check if a string looks like an ISO 8601 / RFC 3339 datetime.
+    /// Checks whether the value is either:
+    /// - a valid RFC 3339 datetime, or
+    /// - a valid ISO 8601 date-only string (YYYY-MM-DD)
     fn is_datetime_format(value: &str) -> bool {
-        // Quick length check - datetime strings are typically 10-35 chars
-        if value.len() < 10 || value.len() > 35 {
-            return false;
-        }
-
-        let bytes = value.as_bytes();
-
-        // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(|b| b.is_ascii_digit())
-            || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(|b| b.is_ascii_digit())
-            || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(|b| b.is_ascii_digit())
-        {
-            return false;
-        }
-
-        // Date only format
-        if value.len() == 10 {
-            return true;
-        }
-
-        // Must have 'T' separator for datetime
-        if bytes.len() > 10 && bytes[10] != b'T' {
-            return false;
-        }
-
-        // Check for time portion (HH:MM:SS)
-        if bytes.len() >= 19
-            && (!bytes[11..13].iter().all(|b| b.is_ascii_digit())
-                || bytes[13] != b':'
-                || !bytes[14..16].iter().all(|b| b.is_ascii_digit())
-                || bytes[16] != b':'
-                || !bytes[17..19].iter().all(|b| b.is_ascii_digit()))
-        {
-            return false;
-        }
-
-        true
+        DateTime::parse_from_rfc3339(value).is_ok()
+            || NaiveDate::parse_from_str(value, "%Y-%m-%d").is_ok()
     }
 
-    /// Check if a string looks like a Cedar duration format.
+    /// Cedar-compliant duration format validator.
+    /// Enforces:
+    /// - Optional leading '-'
+    /// - Units only d > h > m > s > ms (in that order)
+    /// - No repeated units
+    /// - Each segment: digits then unit
     fn is_duration_format(value: &str) -> bool {
         if value.is_empty() {
             return false;
         }
 
-        let s = value.strip_prefix('-').unwrap_or(value);
-        if s.is_empty() {
-            return false;
-        }
+        let bytes = value.as_bytes();
+        let mut i = 0;
 
-        // Duration must contain at least one unit suffix
-        let has_unit = s.contains('d')
-            || s.contains('h')
-            || s.ends_with('m')
-            || s.ends_with('s')
-            || s.ends_with("ms");
-
-        if !has_unit {
-            return false;
-        }
-
-        // Check that it follows the pattern: digits followed by units, repeated
-        let mut chars = s.chars().peekable();
-        let mut has_digits = false;
-
-        while let Some(c) = chars.next() {
-            if c.is_ascii_digit() {
-                has_digits = true;
-            } else if c == 'd' || c == 'h' || c == 's' {
-                if !has_digits {
-                    return false;
-                }
-                has_digits = false;
-            } else if c == 'm' {
-                if !has_digits {
-                    return false;
-                }
-                if chars.peek() == Some(&'s') {
-                    chars.next();
-                }
-                has_digits = false;
-            } else {
+        if bytes[i] == b'-' {
+            i += 1;
+            if i == bytes.len() {
                 return false;
             }
+        }
+
+        let mut last_rank = UnitRank::Start;
+
+        while i < bytes.len() {
+            let start = i;
+            while i < bytes.len() && bytes[i].is_ascii_digit() {
+                i += 1;
+            }
+            if start == i {
+                return false;
+            }
+
+            let (current_rank, consumed) = match bytes.get(i) {
+                Some(b'd') if last_rank < UnitRank::Days => (UnitRank::Days, 1),
+                Some(b'h') if last_rank < UnitRank::Hours => (UnitRank::Hours, 1),
+                Some(b's') if last_rank < UnitRank::Seconds => (UnitRank::Seconds, 1),
+                Some(b'm') => {
+                    if i + 1 < bytes.len() && bytes[i + 1] == b's' {
+                        if last_rank < UnitRank::Millis {
+                            (UnitRank::Millis, 2)
+                        } else {
+                            return false;
+                        }
+                    } else if last_rank < UnitRank::Minutes {
+                        (UnitRank::Minutes, 1)
+                    } else {
+                        return false;
+                    }
+                },
+                _ => return false,
+            };
+
+            last_rank = current_rank;
+            i += consumed;
         }
 
         true
     }
 }
 
-/// A data entry in the DataStore with value and metadata.
+/// A data entry in the `DataStore` with value and metadata.
 ///
 /// This structure wraps the actual value with metadata including creation time,
 /// expiration time, access count, and type information.
@@ -309,11 +299,12 @@ pub struct DataEntry {
 }
 
 impl DataEntry {
-    /// Create a new DataEntry with the given key and value.
+    /// Create a new `DataEntry` with the given key and value.
     ///
     /// The `created_at` timestamp is set to the current time,
     /// and `expires_at` is calculated from the optional TTL.
     /// Uses saturating conversion for TTL to prevent overflow.
+    #[must_use]
     pub fn new(key: String, value: Value, ttl: Option<StdDuration>) -> Self {
         let created_at = Utc::now();
         let expires_at = ttl.map(|duration| {
@@ -338,9 +329,10 @@ impl DataEntry {
     }
 
     /// Check if this entry has expired.
-    pub fn is_expired(&self) -> bool {
+    #[must_use]
+    pub fn is_expired(&self, now: DateTime<Utc>) -> bool {
         if let Some(expires_at) = self.expires_at {
-            Utc::now() > expires_at
+            now > expires_at
         } else {
             false
         }
@@ -404,11 +396,13 @@ mod tests {
             json!("value1"),
             Some(StdDuration::from_millis(100)),
         );
-        assert!(!entry.is_expired());
+        let now = Utc::now();
+        assert!(!entry.is_expired(now));
 
         // Wait for expiration
         std::thread::sleep(StdDuration::from_millis(150));
-        assert!(entry.is_expired());
+        let now_after = Utc::now();
+        assert!(entry.is_expired(now_after));
     }
 
     #[test]

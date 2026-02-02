@@ -17,7 +17,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
-mod data;
+mod context_data_api;
 mod entity_builder;
 mod http;
 mod init;
@@ -36,14 +36,13 @@ mod tests;
 use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
-use crate::data::DataStore;
-pub use crate::data::{
+use crate::context_data_api::DataStore;
+pub use crate::context_data_api::{
     CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
     DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
     ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
-use crate::log::BaseLogEntry;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
@@ -58,8 +57,8 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
-use log::LogEntry;
 use log::interface::LogWriter;
+use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
@@ -89,6 +88,9 @@ pub enum InitCedarlingError {
     /// Error while parse [`BootstrapConfigRaw`]
     #[error(transparent)]
     BootstrapConfigLoading(#[from] BootstrapConfigLoadingError),
+    /// Error while initializing the `DataStore` (invalid configuration)
+    #[error(transparent)]
+    DataStoreInit(#[from] ConfigValidationError),
     #[cfg(feature = "blocking")]
     /// Error while init tokio runtime
     #[error(transparent)]
@@ -156,19 +158,16 @@ impl Cedarling {
                 );
             })?;
 
-        let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
+        // Initialize data store first so it can be passed to authz service
+        let data = Arc::new(DataStore::new(config.data_store_config.clone())?);
+
+        let mut service_factory =
+            ServiceFactory::new(config, service_config, log.clone(), data.clone());
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
         }
-
-        // Initialize data store with default configuration
-        // TODO: Add DataStoreConfig to BootstrapConfig
-        let data = Arc::new(
-            DataStore::new(DataStoreConfig::default())
-                .expect("default DataStoreConfig should always be valid"),
-        );
 
         Ok(Cedarling {
             log,
@@ -361,7 +360,32 @@ impl DataApi for Cedarling {
         value: serde_json::Value,
         ttl: Option<std::time::Duration>,
     ) -> Result<(), DataError> {
-        self.data.push(key, value, ttl)
+        self.data.push(key, value, ttl)?;
+
+        // Check memory usage and log warning if threshold is exceeded
+        let config = self.data.config();
+        if config.max_entries > 0 {
+            let entry_count = self.data.count();
+            // Precision loss is acceptable for percentage calculation
+            #[allow(clippy::cast_precision_loss)]
+            let usage_percent = (entry_count as f64 / config.max_entries as f64) * 100.0;
+            if usage_percent >= config.memory_alert_threshold {
+                let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "DataStore memory usage alert: {:.1}% capacity used ({}/{} entries), threshold: {:.1}%",
+                    usage_percent,
+                    entry_count,
+                    config.max_entries,
+                    config.memory_alert_threshold
+                ));
+                self.log.log_any(log_entry);
+            }
+        }
+
+        Ok(())
     }
 
     fn get_data(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
@@ -387,11 +411,35 @@ impl DataApi for Cedarling {
 
     fn get_stats(&self) -> Result<DataStoreStats, DataError> {
         let config = self.data.config();
+        let entry_count = self.data.count();
+        let total_size_bytes = self.data.total_size();
+        let avg_entry_size_bytes = if entry_count > 0 {
+            total_size_bytes / entry_count
+        } else {
+            0
+        };
+
+        // Calculate capacity usage percentage
+        // Precision loss is acceptable for percentage calculation
+        #[allow(clippy::cast_precision_loss)]
+        let capacity_usage_percent = if config.max_entries > 0 {
+            (entry_count as f64 / config.max_entries as f64) * 100.0
+        } else {
+            0.0 // Unlimited capacity, no percentage
+        };
+
+        let memory_alert_triggered = capacity_usage_percent >= config.memory_alert_threshold;
+
         Ok(DataStoreStats {
-            entry_count: self.data.count(),
+            entry_count,
             max_entries: config.max_entries,
             max_entry_size: config.max_entry_size,
             metrics_enabled: config.enable_metrics,
+            total_size_bytes,
+            avg_entry_size_bytes,
+            capacity_usage_percent,
+            memory_alert_threshold: config.memory_alert_threshold,
+            memory_alert_triggered,
         })
     }
 }

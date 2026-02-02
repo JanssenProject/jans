@@ -319,6 +319,18 @@ pub(crate) struct DecisionLogEntry {
     pub tokens: LogTokensInfo,
     /// time in micro-seconds spent for decision
     pub decision_time_micro_sec: i64,
+    /// Information about pushed data that was injected into the context
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pushed_data: Option<PushedDataInfo>,
+}
+
+/// Information about pushed data injected into the authorization context
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub(crate) struct PushedDataInfo {
+    /// Number of data entries that were injected into context.data
+    pub count: usize,
+    /// Keys of the data entries that were injected
+    pub keys: Vec<String>,
 }
 
 impl DecisionLogEntry {

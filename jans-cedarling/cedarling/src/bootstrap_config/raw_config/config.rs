@@ -305,6 +305,46 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
+
+    // =========================================================================
+    // Data Store Configuration
+    // =========================================================================
+    /// Maximum number of data entries in the data store (0 = unlimited).
+    /// Default: 10,000
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_ENTRIES", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_entries: Option<usize>,
+
+    /// Maximum size per data entry in bytes (0 = unlimited).
+    /// Default: 1MB (1,048,576 bytes)
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_ENTRY_SIZE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_entry_size: Option<usize>,
+
+    /// Default TTL for data entries in seconds.
+    /// If not set, entries effectively never expire (10 years).
+    #[serde(rename = "CEDARLING_DATA_STORE_DEFAULT_TTL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_default_ttl: Option<u64>,
+
+    /// Maximum allowed TTL for data entries in seconds.
+    /// Default: 3600 (1 hour). If not set, no upper limit (10 years max).
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_ttl: Option<u64>,
+
+    /// Enable metrics tracking (access counts, timestamps) for data entries.
+    /// Default: true
+    #[serde(rename = "CEDARLING_DATA_STORE_ENABLE_METRICS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_enable_metrics: Option<bool>,
+
+    /// Memory usage alert threshold as a percentage (0.0-100.0).
+    /// When capacity usage exceeds this threshold, a warning is logged.
+    /// Default: 80.0 (80%)
+    #[serde(rename = "CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_memory_alert_threshold: Option<f64>,
 }
 
 impl Default for BootstrapConfigRaw {

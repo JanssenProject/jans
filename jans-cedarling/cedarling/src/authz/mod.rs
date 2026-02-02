@@ -12,13 +12,14 @@ use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
+use crate::context_data_api::DataStore;
 use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt::{self, Token};
 use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
-    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, gen_uuid7,
+    DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Context, Entities, Entity, EntityUid};
@@ -49,6 +50,8 @@ pub(crate) struct AuthzConfig {
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
     pub authorization: AuthorizationConfig,
+    /// Data store for pushed data that gets injected into context
+    pub data_store: Arc<DataStore>,
 }
 
 /// Authorization Service
@@ -89,6 +92,10 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
+    // This function orchestrates the full authorization flow including token validation,
+    // entity building, authorization checks, and comprehensive logging. The complexity
+    // is inherent to the authorization workflow and splitting it further would reduce readability.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn authorize(&self, request: &Request) -> Result<AuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         // We use uuid v7 because it is generated based on the time and sortable.
@@ -118,12 +125,24 @@ impl Authz {
         // Get entity UIDs what we will be used on authorize check
         let resource_uid = entities_data.resource.uid();
 
+        // Capture pushed data info for logging before context is built
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                count: pushed_data.len(),
+                keys: pushed_data.keys().cloned().collect(),
+            })
+        };
+
         let context = build_context(
             &self.config,
             request.context.clone(),
             &entities_data.built_entities(),
             &schema.schema,
             &action,
+            &pushed_data,
         )?;
 
         let workload_principal = entities_data.workload.as_ref().map(Entity::uid);
@@ -205,6 +224,7 @@ impl Authz {
                     .decision_log_default_jwt_id
                     .as_str(),
             ),
+            pushed_data: pushed_data_info,
         };
         self.log_decision(request_id, &decision_log_metadata);
 
@@ -238,6 +258,9 @@ impl Authz {
     ///
     /// Unlike traditional authorization which uses workload/user principals, multi-issuer authorization
     /// evaluates policies based solely on the context (tokens) without requiring a principal.
+    // This function orchestrates the full multi-issuer authorization flow. The complexity
+    // is inherent to handling multiple token sources and splitting it would reduce readability.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn authorize_multi_issuer(
         &self,
         request: &AuthorizeMultiIssuerRequest,
@@ -267,11 +290,23 @@ impl Authz {
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
 
+        // Capture pushed data info for logging before context is built
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                count: pushed_data.len(),
+                keys: pushed_data.keys().cloned().collect(),
+            })
+        };
+
         let context = build_multi_issuer_context(
             request.context.clone().unwrap_or(json!({})),
             &entities_data.tokens,
             &schema.schema,
             &action,
+            &pushed_data,
         )?;
 
         let resource_uid = entities_data.resource.uid();
@@ -338,6 +373,7 @@ impl Authz {
                 ),
                 tokens_logging_info,
                 decision: result.decision,
+                pushed_data: pushed_data_info,
             },
         );
 
@@ -368,6 +404,9 @@ impl Authz {
     }
 
     /// Evaluate Authorization Request with unsigned data.
+    // This function handles unsigned authorization flow with entity building,
+    // authorization checks, and logging. The complexity is inherent to the workflow.
+    #[allow(clippy::too_many_lines)]
     pub(super) fn authorize_unsigned(
         &self,
         request: &RequestUnsigned,
@@ -399,12 +438,24 @@ impl Authz {
             .collect::<Vec<EntityUid>>();
         let resource_uid = resource.uid();
 
+        // Capture pushed data info for logging before context is built
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                count: pushed_data.len(),
+                keys: pushed_data.keys().cloned().collect(),
+            })
+        };
+
         let context = build_context(
             &self.config,
             request.context.clone(),
             &built_entities,
             &schema.schema,
             &action,
+            &pushed_data,
         )?;
 
         let entities = Entities::from_entities(
@@ -470,13 +521,14 @@ impl Authz {
             &DecisionLogMetadata {
                 action: request.action.clone(),
                 resource: resource_uid.to_string(),
+                decision: result.decision,
+                tokens_logging_info: LogTokensInfo::empty(),
+                decision_time: decision_time_micro_sec,
+                decision_diagnostics: &diagnostics,
+                principal: DecisionLogEntry::all_principals(&principal_uids),
                 user_claims: None,
                 workload_claims: None,
-                decision_diagnostics: &diagnostics,
-                decision_time: decision_time_micro_sec,
-                principal: DecisionLogEntry::all_principals(principal_uids.as_slice()),
-                tokens_logging_info: LogTokensInfo::empty(),
-                decision: result.decision,
+                pushed_data: pushed_data_info,
             },
         );
 
@@ -596,6 +648,7 @@ impl Authz {
             tokens: metadata.tokens_logging_info.clone(),
             decision_time_micro_sec: metadata.decision_time,
             diagnostics: DiagnosticsSummary::from_diagnostics(metadata.decision_diagnostics),
+            pushed_data: metadata.pushed_data.clone(),
         });
         self.config.log_service.log_fn(entry);
     }
@@ -706,6 +759,7 @@ struct DecisionLogMetadata<'a> {
     decision_diagnostics: &'a [Diagnostics],
     decision_time: i64,
     decision: bool,
+    pushed_data: Option<PushedDataInfo>,
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_debug`] method.
