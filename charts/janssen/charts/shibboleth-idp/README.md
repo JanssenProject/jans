@@ -49,21 +49,21 @@ Kubernetes: `>=v1.23.0-0`
 | lifecycle.preStop.exec.command[0] | string | `"/bin/sh"` |  |
 | lifecycle.preStop.exec.command[1] | string | `"-c"` |  |
 | lifecycle.preStop.exec.command[2] | string | `"sleep 20"` |  |
-| livenessProbe.failureThreshold | int | `20` |  |
+| livenessProbe.failureThreshold | int | `3` |  |
 | livenessProbe.httpGet.path | string | `"/idp/status"` |  |
 | livenessProbe.httpGet.port | int | `8080` |  |
 | livenessProbe.initialDelaySeconds | int | `60` |  |
-| livenessProbe.periodSeconds | int | `30` |  |
+| livenessProbe.periodSeconds | int | `10` |  |
 | livenessProbe.timeoutSeconds | int | `5` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext.fsGroup | int | `1000` |  |
-| readinessProbe.failureThreshold | int | `20` |  |
+| readinessProbe.failureThreshold | int | `3` |  |
 | readinessProbe.httpGet.path | string | `"/idp/status"` |  |
 | readinessProbe.httpGet.port | int | `8080` |  |
 | readinessProbe.initialDelaySeconds | int | `30` |  |
-| readinessProbe.periodSeconds | int | `10` |  |
+| readinessProbe.periodSeconds | int | `5` |  |
 | readinessProbe.timeoutSeconds | int | `5` |  |
 | replicaCount | int | `1` |  |
 | resources.limits.cpu | string | `"2000m"` |  |

@@ -12,14 +12,19 @@ The Janssen Shibboleth IDP container provides:
 
 ## Environment Variables
 
-| Name | Description | Default |
-|------|-------------|---------|
-| `CN_CONFIG_ADAPTER` | Configuration adapter type | `kubernetes` |
-| `CN_SECRET_ADAPTER` | Secret adapter type | `kubernetes` |
-| `CN_PERSISTENCE_TYPE` | Persistence backend | `sql` |
-| `CN_WAIT_MAX_TIME` | Maximum wait time for dependencies | `300` |
-| `CN_WAIT_SLEEP_DURATION` | Sleep duration between checks | `10` |
-| `CN_SHIBBOLETH_LOG_LEVEL` | Log level for Shibboleth | `INFO` |
+| Name | Description | Default | Source |
+|------|-------------|---------|--------|
+| `CN_CONFIG_ADAPTER` | Configuration adapter type | `kubernetes` | pycloudlib |
+| `CN_SECRET_ADAPTER` | Secret adapter type | `kubernetes` | pycloudlib |
+| `CN_PERSISTENCE_TYPE` | Persistence backend | `sql` | entrypoint.py |
+| `CN_WAIT_MAX_TIME` | Maximum wait time for dependencies | `300` | entrypoint.py |
+| `CN_WAIT_SLEEP_DURATION` | Sleep duration between checks | `10` | entrypoint.py |
+| `CN_SHIBBOLETH_LOG_LEVEL` | Log level for Shibboleth | `INFO` | settings.py |
+| `CN_PYCLOUDLIB_LOG_LEVEL` | Log level for pycloudlib | `INFO` | settings.py |
+| `CN_JAVA_OPTIONS` | JVM options for Jetty | `-Xms256m -Xmx512m` | entrypoint.py |
+| `CN_MAX_RAM_PERCENTAGE` | Maximum RAM percentage for JVM | `75` | entrypoint.sh |
+| `CN_HEALTH_CHECK_INTERVAL` | Interval in seconds for health checks | `30` | healthcheck.py |
+| `CN_SHIBBOLETH_PORT` | HTTP port for IDP health check | `8080` | healthcheck.py |
 
 ## Volumes
 
@@ -40,6 +45,9 @@ The Janssen Shibboleth IDP container provides:
 
 ```bash
 docker build -t janssenproject/shibboleth:5.1.6_dev .
+
+# Pin pycloudlib to a specific tag/commit for reproducible builds:
+docker build --build-arg JANS_PYCLOUDLIB_REF=v1.0.0 -t janssenproject/shibboleth:5.1.6_dev .
 ```
 
 ## Running
@@ -52,6 +60,10 @@ docker run -d \
   -e CN_SECRET_ADAPTER=vault \
   janssenproject/shibboleth:5.1.6_dev
 ```
+
+## Security
+
+This image runs as a non-root user (`shibboleth`, UID 1000) for improved security. All writable directories are owned by this user.
 
 ## Integration with Janssen
 

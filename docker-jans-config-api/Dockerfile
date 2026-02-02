@@ -58,7 +58,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # =======
 
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
+    && for plugin in scim admin-ui fido2 user-mgt lock jans-link shibboleth; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done

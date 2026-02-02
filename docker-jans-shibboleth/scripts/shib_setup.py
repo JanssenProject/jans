@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import base64
 import logging
 import os
 import shutil
@@ -9,6 +10,7 @@ from string import Template
 logger = logging.getLogger("shibboleth")
 
 SHIBBOLETH_HOME = os.environ.get("SHIBBOLETH_HOME", "/opt/shibboleth-idp")
+SEALER_PASSWORD_FILE = f"{SHIBBOLETH_HOME}/credentials/.sealer_password"
 
 
 class ShibbolethSetup:
@@ -16,7 +18,7 @@ class ShibbolethSetup:
         self.manager = manager
         self.hostname = manager.config.get("hostname")
         self.jans_auth_url = f"https://{self.hostname}"
-        
+
     def configure(self):
         self.setup_directories()
         self.configure_jetty()
@@ -26,10 +28,10 @@ class ShibbolethSetup:
         self.configure_attribute_resolver()
         self.configure_metadata()
         self.configure_jans_authentication()
-        
+
     def setup_directories(self):
         logger.info("Setting up Shibboleth directories")
-        
+
         dirs = [
             f"{SHIBBOLETH_HOME}/conf",
             f"{SHIBBOLETH_HOME}/conf/authn",
@@ -39,16 +41,16 @@ class ShibbolethSetup:
             f"{SHIBBOLETH_HOME}/jetty",
             f"{SHIBBOLETH_HOME}/jetty/webapps",
         ]
-        
+
         for d in dirs:
             Path(d).mkdir(parents=True, exist_ok=True)
-            
+
     def configure_jetty(self):
         logger.info("Configuring Jetty for Shibboleth IDP")
-        
+
         jetty_base = os.environ.get("JETTY_BASE", f"{SHIBBOLETH_HOME}/jetty")
-        
-        start_ini = f"""
+
+        start_ini = """
 --module=server
 --module=http
 --module=deploy
@@ -57,49 +59,70 @@ class ShibbolethSetup:
 jetty.http.port=8080
 jetty.deploy.scanInterval=0
 """
-        
+
         Path(f"{jetty_base}/start.ini").write_text(start_ini.strip())
-        
+
         resources_dir = Path(f"{jetty_base}/resources")
         resources_dir.mkdir(parents=True, exist_ok=True)
-        
+
     def configure_credentials(self):
         logger.info("Configuring Shibboleth credentials")
-        
+
         credentials_dir = f"{SHIBBOLETH_HOME}/credentials"
-        
+
         idp_signing_key = self.manager.secret.get("shibboleth_idp_signing_key")
         idp_signing_cert = self.manager.secret.get("shibboleth_idp_signing_cert")
-        
+
         if idp_signing_key:
-            Path(f"{credentials_dir}/idp-signing.key").write_text(idp_signing_key)
+            key_path = Path(f"{credentials_dir}/idp-signing.key")
+            key_path.write_text(idp_signing_key)
+            os.chmod(key_path, 0o600)
         if idp_signing_cert:
             Path(f"{credentials_dir}/idp-signing.crt").write_text(idp_signing_cert)
-            
+
         idp_encryption_key = self.manager.secret.get("shibboleth_idp_encryption_key")
         idp_encryption_cert = self.manager.secret.get("shibboleth_idp_encryption_cert")
-        
+
         if idp_encryption_key:
-            Path(f"{credentials_dir}/idp-encryption.key").write_text(idp_encryption_key)
+            key_path = Path(f"{credentials_dir}/idp-encryption.key")
+            key_path.write_text(idp_encryption_key)
+            os.chmod(key_path, 0o600)
         if idp_encryption_cert:
             Path(f"{credentials_dir}/idp-encryption.crt").write_text(idp_encryption_cert)
-            
+
         sealer_key = self.manager.secret.get("shibboleth_sealer_key")
         if sealer_key:
-            Path(f"{credentials_dir}/sealer.jks").write_bytes(sealer_key.encode())
-            
+            sealer_path = Path(f"{credentials_dir}/sealer.jks")
+            try:
+                sealer_bytes = base64.b64decode(sealer_key)
+                sealer_path.write_bytes(sealer_bytes)
+            except Exception:
+                sealer_path.write_bytes(sealer_key.encode() if isinstance(sealer_key, str) else sealer_key)
+            os.chmod(sealer_path, 0o600)
+
+    def _get_sealer_password(self):
+        sealer_password = os.environ.get("IDP_SEALER_PASSWORD")
+        if sealer_password:
+            return sealer_password
+        if os.path.exists(SEALER_PASSWORD_FILE):
+            with open(SEALER_PASSWORD_FILE) as f:
+                return f.read().strip()
+        sealer_password = self.manager.secret.get("shibboleth_sealer_password", "changeit")
+        return sealer_password
+
     def configure_idp_properties(self):
         logger.info("Configuring idp.properties")
-        
+
         idp_entity_id = f"https://{self.hostname}/idp/shibboleth"
         idp_scope = self.hostname.split(".", 1)[-1] if "." in self.hostname else self.hostname
-        
+        sealer_password = self._get_sealer_password()
+
         props = f"""
 idp.entityID={idp_entity_id}
 idp.scope={idp_scope}
 idp.home={SHIBBOLETH_HOME}
-idp.sealer.storePassword=changeit
-idp.sealer.keyPassword=changeit
+idp.sealer.storePassword={sealer_password}
+idp.sealer.keyPassword={sealer_password}
 idp.signing.key=%{{idp.home}}/credentials/idp-signing.key
 idp.signing.cert=%{{idp.home}}/credentials/idp-signing.crt
 idp.encryption.key=%{{idp.home}}/credentials/idp-encryption.key
@@ -111,13 +134,15 @@ idp.artifact.StorageService=shibboleth.StorageService
 idp.logout.elaboration=true
 idp.logout.authenticated=true
 """
-        
-        Path(f"{SHIBBOLETH_HOME}/conf/idp.properties").write_text(props.strip())
-        
+
+        props_path = Path(f"{SHIBBOLETH_HOME}/conf/idp.properties")
+        props_path.write_text(props.strip())
+        os.chmod(props_path, 0o600)
+
     def configure_relying_party(self):
         logger.info("Configuring relying-party.xml")
-        
-        relying_party_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+
+        relying_party_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
@@ -143,13 +168,13 @@ idp.logout.authenticated=true
 
 </beans>
 """
-        
+
         Path(f"{SHIBBOLETH_HOME}/conf/relying-party.xml").write_text(relying_party_xml)
-        
+
     def configure_attribute_resolver(self):
         logger.info("Configuring attribute-resolver.xml")
-        
-        attr_resolver_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+
+        attr_resolver_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:resolver="urn:mace:shibboleth:2.0:resolver"
@@ -181,13 +206,13 @@ idp.logout.authenticated=true
 
 </beans>
 """
-        
+
         Path(f"{SHIBBOLETH_HOME}/conf/attribute-resolver.xml").write_text(attr_resolver_xml)
-        
+
     def configure_metadata(self):
         logger.info("Configuring metadata providers")
-        
-        metadata_providers_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+
+        metadata_providers_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
@@ -197,7 +222,7 @@ idp.logout.authenticated=true
             <list>
                 <bean class="org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver">
                     <property name="parserPool" ref="shibboleth.ParserPool" />
-                    <property name="metadataFile" value="%{{idp.home}}/metadata/sp-metadata.xml" />
+                    <property name="metadataFile" value="%{idp.home}/metadata/sp-metadata.xml" />
                 </bean>
             </list>
         </property>
@@ -205,24 +230,24 @@ idp.logout.authenticated=true
 
 </beans>
 """
-        
+
         Path(f"{SHIBBOLETH_HOME}/conf/metadata-providers.xml").write_text(metadata_providers_xml)
-        
-        sp_metadata = f"""<?xml version="1.0" encoding="UTF-8"?>
+
+        sp_metadata = """<?xml version="1.0" encoding="UTF-8"?>
 <EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
                   entityID="https://example.sp.com/shibboleth">
     <!-- SP metadata will be populated by configuration -->
 </EntityDescriptor>
 """
-        
+
         Path(f"{SHIBBOLETH_HOME}/metadata/sp-metadata.xml").write_text(sp_metadata)
-        
+
     def configure_jans_authentication(self):
         logger.info("Configuring Janssen authentication")
-        
+
         client_id = self.manager.config.get("shibboleth_idp_client_id", "")
         client_secret = self.manager.secret.get("shibboleth_idp_client_secret", "")
-        
+
         jans_props = f"""
 jans.auth.server.url={self.jans_auth_url}
 jans.auth.client.id={client_id}
@@ -231,5 +256,7 @@ jans.auth.redirect.uri=https://{self.hostname}/idp/Authn/Jans/callback
 jans.auth.scopes=openid,profile,email
 jans.auth.ssl.validation=true
 """
-        
-        Path(f"{SHIBBOLETH_HOME}/conf/jans.properties").write_text(jans_props.strip())
+
+        props_path = Path(f"{SHIBBOLETH_HOME}/conf/jans.properties")
+        props_path.write_text(jans_props.strip())
+        os.chmod(props_path, 0o600)

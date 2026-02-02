@@ -539,9 +539,9 @@ shibboleth:
     # -- Enable Shibboleth IDP endpoints /idp
     shibbolethEnabled: false
     # -- Shibboleth IDP ingress resource labels. key app is taken
-    shibbolethLabels: { }
+    shibbolethLabels: {}
     # -- Shibboleth IDP ingress resource additional annotations.
-    shibbolethAdditionalAnnotations: { }
+    shibbolethAdditionalAnnotations: {}
 
 # Global properties
 # -- Boolean flag to enable mapping lbIp  to fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.

@@ -53,13 +53,21 @@ ENV CN_VERSION=0.0.0-nightly
 ENV CN_BUILD_DATE='2025-02-02 00:00'
 
 # Download Janssen Shibboleth IDP WAR
+# Set CN_REQUIRE_WAR_DOWNLOAD=false for development builds when WAR is not available
+ARG CN_REQUIRE_WAR_DOWNLOAD=true
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-shibboleth-idp-webapp/${CN_VERSION}/jans-shibboleth-idp-webapp-${CN_VERSION}.war
 
 RUN mkdir -p ${SHIBBOLETH_HOME}/war \
-    && wget -q ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war || echo "WAR not yet available, will be built"
+    && if [ "${CN_REQUIRE_WAR_DOWNLOAD}" = "true" ]; then \
+         wget -q --tries=3 ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war \
+         && test -s ${SHIBBOLETH_HOME}/war/idp.war; \
+       else \
+         wget -q ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war || echo "WAR not available, will be built locally"; \
+       fi
 
-# Download Janssen pycloudlib
-RUN wget -q https://github.com/JanssenProject/jans/archive/refs/heads/main.tar.gz -O /tmp/jans.tar.gz \
+# Download Janssen pycloudlib (pinned to specific ref for reproducibility)
+ARG JANS_PYCLOUDLIB_REF=main
+RUN wget -q https://github.com/JanssenProject/jans/archive/refs/heads/${JANS_PYCLOUDLIB_REF}.tar.gz -O /tmp/jans.tar.gz \
     && mkdir -p /tmp/jans \
     && tar -xf /tmp/jans.tar.gz -C /tmp/jans --strip-components=1 \
     && cd /tmp/jans/jans-pycloudlib \
@@ -88,6 +96,30 @@ COPY templates /app/templates/
 COPY static /app/static/
 RUN chmod +x /app/scripts/*.py
 
+# ==================
+# Non-root user
+# ==================
+
+ARG UID=1000
+ARG GID=1000
+
+RUN addgroup -g ${GID} -S shibboleth \
+    && adduser -S -D -H -u ${UID} -G shibboleth -s /sbin/nologin shibboleth
+
+# Create and set ownership of writable directories
+RUN mkdir -p ${SHIBBOLETH_HOME}/conf \
+    ${SHIBBOLETH_HOME}/credentials \
+    ${SHIBBOLETH_HOME}/metadata \
+    ${SHIBBOLETH_HOME}/logs \
+    ${SHIBBOLETH_HOME}/jetty \
+    ${SHIBBOLETH_HOME}/jetty/webapps \
+    /app \
+    /tmp \
+    && chown -R shibboleth:shibboleth ${SHIBBOLETH_HOME} \
+    && chown -R shibboleth:shibboleth /app \
+    && chown -R shibboleth:shibboleth ${JETTY_HOME} \
+    && chmod -R 755 /app/scripts
+
 # =====
 # Ports
 # =====
@@ -100,6 +132,12 @@ EXPOSE 8080
 
 ENV CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
+    CN_MAX_RAM_PERCENTAGE=75 \
+    CN_JAVA_OPTIONS="-Xms256m -Xmx512m" \
+    CN_SHIBBOLETH_LOG_LEVEL=INFO \
+    CN_PYCLOUDLIB_LOG_LEVEL=INFO \
+    CN_HEALTH_CHECK_INTERVAL=30 \
+    CN_SHIBBOLETH_PORT=8080 \
     SHIBBOLETH_HOME=${SHIBBOLETH_HOME} \
     JETTY_HOME=${JETTY_HOME} \
     JETTY_BASE=${JETTY_BASE}
@@ -126,6 +164,8 @@ LABEL maintainer="Janssen Project <jans@googlegroups.com>" \
       org.opencontainers.image.description="Janssen Shibboleth Identity Provider ${SHIBBOLETH_VERSION}" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.vendor="Janssen Project"
+
+USER shibboleth
 
 ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
 CMD ["python3", "/app/scripts/entrypoint.py"]

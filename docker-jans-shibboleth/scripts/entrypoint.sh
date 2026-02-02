@@ -15,16 +15,19 @@ fi
 
 python3 /app/scripts/healthcheck.py &
 
-cd /opt/jans/jetty/shibboleth-idp
+# Use JETTY_BASE from environment (matches Dockerfile and entrypoint.py)
+JETTY_BASE="${JETTY_BASE:-/opt/shibboleth-idp/jetty}"
+
+cd "${JETTY_BASE}"
 
 exec java \
     -server \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
-    -XX:MaxRAMPercentage=${CN_MAX_RAM_PERCENTAGE} \
+    -XX:MaxRAMPercentage="${CN_MAX_RAM_PERCENTAGE:-75}" \
     -Djava.security.egd=file:/dev/urandom \
-    -Djetty.home=/opt/jetty \
-    -Djetty.base=/opt/jans/jetty/shibboleth-idp \
-    -Didp.home=/opt/shibboleth-idp \
-    -Dlogback.configurationFile=/opt/shibboleth-idp/conf/logback.xml \
-    -jar /opt/jetty/start.jar
+    -Djetty.home="${JETTY_HOME:-/opt/jetty}" \
+    -Djetty.base="${JETTY_BASE}" \
+    -Didp.home="${SHIBBOLETH_HOME:-/opt/shibboleth-idp}" \
+    -Dlogback.configurationFile="${SHIBBOLETH_HOME:-/opt/shibboleth-idp}/conf/logback.xml" \
+    -jar "${JETTY_HOME:-/opt/jetty}/start.jar"

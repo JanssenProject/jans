@@ -506,9 +506,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
 
             self.add_yacron_job(
-                    command = os.path.join(Config.jansOptBinFolder, 'super_gluu_lisence_renewer.py'),
+                    command = os.path.join(Config.jansOptBinFolder, 'super_gluu_lisence_renewer.py'), 
                     schedule = '0 2 * * *', # everyday at 2 am
-                    name='super-gluu-license-renewer',
+                    name='super-gluu-license-renewer', 
                     args={'captureStderr': True}
                     )
 

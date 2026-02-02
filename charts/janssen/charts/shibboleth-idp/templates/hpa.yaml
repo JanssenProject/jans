@@ -13,6 +13,7 @@ spec:
     name: {{ include "shibboleth-idp.fullname" . }}
   minReplicas: {{ .Values.hpa.minReplicas }}
   maxReplicas: {{ .Values.hpa.maxReplicas }}
+  {{- if or .Values.hpa.targetCPUUtilizationPercentage .Values.hpa.metrics }}
   metrics:
     {{- if .Values.hpa.targetCPUUtilizationPercentage }}
     - type: Resource
@@ -25,6 +26,7 @@ spec:
     {{- if .Values.hpa.metrics }}
     {{- toYaml .Values.hpa.metrics | nindent 4 }}
     {{- end }}
+  {{- end }}
   {{- with .Values.hpa.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

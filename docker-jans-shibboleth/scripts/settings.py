@@ -19,7 +19,7 @@ LOGGING_CONFIG = {
         "shibboleth": {
             "handlers": ["console"],
             "level": os.environ.get("CN_SHIBBOLETH_LOG_LEVEL", "INFO"),
-            "propagate": True,
+            "propagate": False,
         },
         "jans.pycloudlib": {
             "handlers": ["console"],

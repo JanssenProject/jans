@@ -60,7 +60,7 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `lock`, `jans-link`). Note that unknown plugin name will be ignored.
+- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `lock`, `jans-link`, `shibboleth`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_BASE_URL`: Base URL of token server (default to empty).
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
