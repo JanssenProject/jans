@@ -23,15 +23,13 @@ import io.jans.model.net.HttpServiceResponse;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -265,11 +263,13 @@ public class LicenseDetailsService extends BaseService {
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.MAU_IS_NULL.getDescription());
             }
             ObjectMapper mapper = new ObjectMapper();
-            JsonArray customAttributes = Json.createArrayBuilder()
-                    .add(Json.createObjectBuilder()
-                            .add("name", "mau_threshold")
-                            .add("value", licenseConfiguration.getLicenseMAUThreshold()))
-                    .build();
+            JSONArray customAttributes = new JSONArray();
+            JSONObject mauDetails = new JSONObject();
+            mauDetails.put("name", "mau_threshold");
+            mauDetails.put("value", licenseConfiguration.getLicenseMAUThreshold());
+
+            customAttributes.put(mauDetails);
+
             return CommonUtils.createGenericResponse(true, 200, "Valid license present.", mapper.readTree(customAttributes.toString()));
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
@@ -337,8 +337,8 @@ public class LicenseDetailsService extends BaseService {
 
                     if (httpEntity != null) {
                         jsonString = httpService.getContent(httpEntity);
-                        HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
-                        JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+                        JsonNode entityNode = mapper.readTree(jsonString);
+                        JSONObject entity = new JSONObject(entityNode.toString());
 
                         Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_active", "is_expired");
                         if (genericResOptional.isPresent()) {
@@ -376,7 +376,7 @@ public class LicenseDetailsService extends BaseService {
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
                         return CommonUtils.createGenericResponse(true, 200, "Valid license present.",
-                                mapper.readTree(entity.getJsonArray("custom_fields").toString()));
+                                mapper.readTree(entity.getJSONArray("custom_fields").toString()));
                     }
                 }
                 //getting error
@@ -456,8 +456,8 @@ public class LicenseDetailsService extends BaseService {
 
                     if (httpEntity != null) {
                         jsonString = httpService.getContent(httpEntity);
-                        HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
-                        JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+                        JsonNode entityNode = mapper.readTree(jsonString);
+                        JSONObject entity = new JSONObject(entityNode.toString());
 
                         Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "licenseKey", "mauThreshold");
                         if (genericResOptional.isPresent()) {
@@ -545,8 +545,8 @@ public class LicenseDetailsService extends BaseService {
                 if (httpStatus == 200) {
                     if (httpEntity != null) {
                         jsonString = httpService.getContent(httpEntity);
-                        HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
-                        JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+                        JsonNode entityNode = mapper.readTree(jsonString);
+                        JSONObject entity = new JSONObject(entityNode.toString());
 
                         Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_key");
                         if (genericResOptional.isPresent()) {
@@ -574,7 +574,7 @@ public class LicenseDetailsService extends BaseService {
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
                         return CommonUtils.createGenericResponse(true, 200, "License have been activated."
-                                , mapper.readTree(entity.getJsonArray("custom_fields").toString()));
+                                , mapper.readTree(entity.getJSONArray("custom_fields").toString()));
                     }
                 }
                 //getting error
@@ -611,16 +611,16 @@ public class LicenseDetailsService extends BaseService {
      * @param licenseConfiguration The `LicenseConfiguration` object to be populated.
      * @throws RuntimeException If an error occurs during the process of setting the license configuration.
      */
-    private void setToLicenseConfiguration(JsonObject entity, LicenseConfiguration licenseConfiguration) throws RuntimeException {
+    private void setToLicenseConfiguration(JSONObject entity, LicenseConfiguration licenseConfiguration) throws RuntimeException {
         try {
             log.info("Inside setToLicenseConfiguration: the method to set licence configuration");
             licenseConfiguration.setLicenseKey(entity.getString("license_key"));
             licenseConfiguration.setLicenseType(entity.getString("license_type"));
             licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDate.now()));
             licenseConfiguration.setLicenseValidUpto(CommonUtils.convertIsoToDateString(entity.getString("validity_period")));
-            licenseConfiguration.setProductName(entity.getJsonObject("product_details").getString("product_name"));
-            licenseConfiguration.setProductCode(entity.getJsonObject("product_details").getString("short_code"));
-            JsonObject customer = entity.getJsonObject("customer");
+            licenseConfiguration.setProductName(entity.getJSONObject("product_details").getString("product_name"));
+            licenseConfiguration.setProductCode(entity.getJSONObject("product_details").getString("short_code"));
+            JSONObject customer = entity.getJSONObject("customer");
             if (customer != null) {
                 if (customer.get("company_name") != null) {
                     licenseConfiguration.setCompanyName(customer.getString("company_name"));
@@ -636,13 +636,17 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDate.now()));
-            JsonArray customFields = entity.getJsonArray("custom_fields");
+            JSONArray customFields = entity.getJSONArray("custom_fields");
+            if(customFields == null) {
+                throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is null");
+            }
             Long mauThresholdValue = null;
-            for (JsonObject obj : customFields.getValuesAs(JsonObject.class)) {
-                if ("mau_threshold".equals(obj.getString("name"))) {
-                    log.info(obj.getString("name"));
-                    log.info(obj.getString("value"));
-                    mauThresholdValue = Long.valueOf(!Strings.isNullOrEmpty(obj.getString("value")) ? obj.getString("value") : "0");
+            for (Object obj : customFields) {
+                JSONObject jsonObject = (JSONObject) obj;
+                if ("mau_threshold".equals(jsonObject.getString("name"))) {
+                    log.debug(jsonObject.getString("name"));
+                    log.debug(jsonObject.getString("value"));
+                    mauThresholdValue = Long.valueOf(!Strings.isNullOrEmpty(jsonObject.getString("value")) ? jsonObject.getString("value") : "0");
                     break; // Exit loop once found
                 }
             }
@@ -705,8 +709,8 @@ public class LicenseDetailsService extends BaseService {
                     if (httpStatus == 200) {
                         if (httpEntity != null) {
                             jsonString = httpService.getContent(httpEntity);
-                            HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
-                            JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+                            JsonNode entityNode = mapper.readTree(jsonString);
+                            JSONObject entity = new JSONObject(entityNode.toString());
 
                             Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license");
                             if (genericResOptional.isPresent()) {
@@ -905,11 +909,11 @@ public class LicenseDetailsService extends BaseService {
         return Optional.empty();
     }
 
-    private Optional<GenericResponse> handleMissingFieldsInResponse(JsonObject entity, String format, String...
+    private Optional<GenericResponse> handleMissingFieldsInResponse(JSONObject entity, String format, String...
             args) {
         StringBuilder missingFields = new StringBuilder();
         for (String arg : args) {
-            if (!entity.containsKey(arg)) {
+            if (!entity.has(arg)) {
                 missingFields.append(missingFields.length() > 0 ? ", " : "");
                 missingFields.append(arg);
             }
