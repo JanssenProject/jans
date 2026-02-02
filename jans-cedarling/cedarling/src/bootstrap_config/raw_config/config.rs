@@ -574,4 +574,91 @@ mod tests {
             },
         );
     }
+
+    /// Tests default values for trusted issuer loader fields when no env vars or JSON.
+    #[test]
+    fn test_trusted_issuer_loader_defaults() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.trusted_issuer_loader_type,
+                TrustedIssuerLoaderTypeRaw::Sync,
+                "Default loader type should be Sync"
+            );
+            assert_eq!(
+                config.trusted_issuer_loader_workers, 0,
+                "Default worker count should be 0 (will be treated as 1 later)"
+            );
+        });
+    }
+
+    /// Tests that environment variables for trusted issuer loader are parsed correctly.
+    #[test]
+    fn test_trusted_issuer_loader_env_vars() {
+        with_env_vars(
+            &[
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_TYPE", "ASYNC"),
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "5"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_type,
+                    TrustedIssuerLoaderTypeRaw::Async,
+                    "Loader type should be Async from env var"
+                );
+                assert_eq!(
+                    config.trusted_issuer_loader_workers, 5,
+                    "Worker count should be 5 from env var"
+                );
+            },
+        );
+    }
+
+    /// Tests JSON deserialization for trusted issuer loader fields.
+    #[test]
+    fn test_trusted_issuer_loader_json_deserialization() {
+        // Valid JSON values
+        let valid_cases = vec![
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "SYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 3}"#,
+                TrustedIssuerLoaderTypeRaw::Sync,
+                3,
+            ),
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "ASYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 1}"#,
+                TrustedIssuerLoaderTypeRaw::Async,
+                1,
+            ),
+        ];
+
+        for (json, expected_type, expected_workers) in valid_cases {
+            let config: BootstrapConfigRaw = serde_json::from_str(json).unwrap();
+            assert_eq!(
+                config.trusted_issuer_loader_type, expected_type,
+                "Loader type mismatch for JSON: {}",
+                json
+            );
+            assert_eq!(
+                config.trusted_issuer_loader_workers, expected_workers,
+                "Worker count mismatch for JSON: {}",
+                json
+            );
+        }
+
+        // Invalid JSON values should produce errors
+        let invalid_cases = vec![
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "INVALID"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": -1}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": "not_a_number"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": 123}"#,
+        ];
+
+        for json in invalid_cases {
+            let result: Result<BootstrapConfigRaw, _> = serde_json::from_str(json);
+            result.expect_err(&format!("Should fail to parse invalid JSON: {}", json));
+        }
+    }
 }
