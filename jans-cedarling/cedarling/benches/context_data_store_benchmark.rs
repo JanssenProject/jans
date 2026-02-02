@@ -11,7 +11,11 @@
 //! - Mixed read/write workloads
 //! - Authorization with pushed data
 
-use cedarling::{BootstrapConfig, LogConfig, LogTypeConfig, LogLevel, PolicyStoreConfig, PolicyStoreSource, JwtConfig, AuthorizationConfig, JsonRule, IdTokenTrustMode, EntityBuilderConfig, Cedarling, DataApi, RequestUnsigned, EntityData};
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, EntityBuilderConfig, EntityData,
+    IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, RequestUnsigned,
+};
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use serde::Deserialize;
 use serde_json::json;
@@ -156,7 +160,8 @@ fn bench_push_data(c: &mut Criterion) {
     group.bench_function("small_value", |b| {
         let mut counter = 0u64;
         b.iter(|| {
-            let key = format!("key_{counter}");
+            // Use modulo to reuse keys and prevent storage limit exhaustion
+            let key = format!("key_{}", counter % 1000);
             counter += 1;
             cedarling
                 .push_data(
@@ -179,7 +184,8 @@ fn bench_push_data(c: &mut Criterion) {
             "settings": {"theme": "dark", "notifications": true, "language": "en"}
         });
         b.iter(|| {
-            let key = format!("key_{counter}");
+            // Use modulo to reuse keys and prevent storage limit exhaustion
+            let key = format!("key_{}", counter % 1000);
             counter += 1;
             cedarling
                 .push_data(
@@ -201,7 +207,8 @@ fn bench_push_data(c: &mut Criterion) {
             .map(|i| json!({"id": i, "data": "x".repeat(50)}))
             .collect();
         b.iter(|| {
-            let key = format!("key_{counter}");
+            // Use modulo to reuse keys and prevent storage limit exhaustion
+            let key = format!("key_{}", counter % 1000);
             counter += 1;
             cedarling
                 .push_data(
@@ -290,8 +297,8 @@ fn bench_mixed_workload(c: &mut Criterion) {
         let mut counter = 0u64;
         b.iter(|| {
             if counter.is_multiple_of(5) {
-                // Write (20%)
-                let key = format!("new_key_{counter}");
+                // Write (20%) - Use modulo to reuse keys and prevent storage limit exhaustion
+                let key = format!("new_key_{}", counter % 1000);
                 cedarling
                     .push_data(
                         black_box(&key),
@@ -351,6 +358,15 @@ fn bench_authorization_with_data(c: &mut Criterion) {
         }))
         .unwrap(),
     };
+
+    // Validate that the authorization request executes correctly before benchmarking
+    let validation_result = runtime
+        .block_on(cedarling.authorize_unsigned(request.clone()))
+        .expect("authorization validation should succeed");
+    assert!(
+        validation_result.decision,
+        "authorization validation should return Allow decision"
+    );
 
     let mut group = c.benchmark_group("authorization_with_data");
 
@@ -412,20 +428,25 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
             .unwrap(),
         };
 
-        group.bench_with_input(
-            BenchmarkId::new("calls", call_count),
-            &runtime,
-            |b, rt| {
-                b.to_async(rt).iter(|| async {
-                    black_box(
-                        cedarling
-                            .authorize_unsigned(black_box(request.clone()))
-                            .await
-                            .expect("authorization should succeed"),
-                    )
-                });
-            },
+        // Validate that the authorization request executes correctly before benchmarking
+        let validation_result = runtime
+            .block_on(cedarling.authorize_unsigned(request.clone()))
+            .expect("authorization validation should succeed");
+        assert!(
+            validation_result.decision,
+            "authorization validation should return Allow decision"
         );
+
+        group.bench_with_input(BenchmarkId::new("calls", call_count), &runtime, |b, rt| {
+            b.to_async(rt).iter(|| async {
+                black_box(
+                    cedarling
+                        .authorize_unsigned(black_box(request.clone()))
+                        .await
+                        .expect("authorization should succeed"),
+                )
+            });
+        });
     }
 
     group.finish();

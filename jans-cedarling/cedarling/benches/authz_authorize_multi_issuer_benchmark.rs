@@ -34,6 +34,15 @@ fn authorize_multi_issuer(c: &mut Criterion) {
 
     let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
 
+    // Validate that the authorization request executes correctly before benchmarking
+    let validation_result = runtime
+        .block_on(cedarling.authorize_multi_issuer(request.clone()))
+        .expect("authorization validation should succeed");
+    assert!(
+        validation_result.decision,
+        "authorization validation should return Allow decision"
+    );
+
     c.bench_with_input(
         BenchmarkId::new("authorize_multi_issuer", "tokio runtime"),
         &runtime,
