@@ -177,41 +177,47 @@ public class BaseService {
                             mapper.writeValueAsString(body),
                             ContentType.APPLICATION_JSON,
                             null);
-            if (httpServiceResponse == null) {
-                log.error("Error in DCR: HTTP request failed, no response received");
-                return null;
-            }
-            String jsonString = null;
-            if (httpServiceResponse.getHttpResponse() != null
-                    && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
-
-                log.debug(
-                        "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                        httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                        httpServiceResponse.getHttpResponse().getEntity());
-                HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
-                httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                if (httpStatus == 201 && httpEntity != null) {
-                    jsonString = httpService.getContent(httpEntity);
-                    JsonNode entityNode = mapper.readTree(jsonString);
-                    JSONObject entity = new JSONObject(entityNode.toString());
-
-                    DCRResponse dcrResponse = new DCRResponse();
-                    dcrResponse.setClientId(entity.getString("client_id"));
-                    dcrResponse.setClientSecret(entity.getString("client_secret"));
-                    dcrResponse.setOpHost(issuer);
-                    dcrResponse.setHardwareId(hardwareId);
-                    if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
-                        dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
-                    }
-                    if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
-                        dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
-                    }
-                    return dcrResponse;
+            try {
+                if (httpServiceResponse == null) {
+                    log.error("Error in DCR: HTTP request failed, no response received");
+                    return null;
                 }
-                jsonString = httpService.getContent(httpEntity);
-                log.error("Error in DCR, Http Staus: {}, Message: {}", httpStatus, jsonString);
-                return null;
+                String jsonString = null;
+                if (httpServiceResponse.getHttpResponse() != null
+                        && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+
+                    log.debug(
+                            "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                            httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                            httpServiceResponse.getHttpResponse().getEntity());
+                    HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                    httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
+                    if (httpStatus == 201 && httpEntity != null) {
+                        jsonString = httpService.getContent(httpEntity);
+                        JsonNode entityNode = mapper.readTree(jsonString);
+                        JSONObject entity = new JSONObject(entityNode.toString());
+
+                        DCRResponse dcrResponse = new DCRResponse();
+                        dcrResponse.setClientId(entity.getString("client_id"));
+                        dcrResponse.setClientSecret(entity.getString("client_secret"));
+                        dcrResponse.setOpHost(issuer);
+                        dcrResponse.setHardwareId(hardwareId);
+                        if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
+                            dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
+                        }
+                        if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
+                            dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
+                        }
+                        return dcrResponse;
+                    }
+                    jsonString = httpService.getContent(httpEntity);
+                    log.error("Error in DCR, Http Staus: {}, Message: {}", httpStatus, jsonString);
+                    return null;
+                }
+            } finally {
+                if (httpServiceResponse != null) {
+                    httpServiceResponse.closeConnection(); // Returns connection to pool
+                }
             }
             log.error("Error in DCR. HTTP Response is null");
             return null;
