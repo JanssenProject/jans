@@ -123,16 +123,6 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker-jans-saml
-    schedule:
-      interval: daily
-
-  - package-ecosystem: pip
-    directory: /docker-jans-saml
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
     directory: /docker-jans-scim
     schedule:
       interval: daily
@@ -194,16 +184,6 @@ updates:
 
   - package-ecosystem: maven
     directory: /jans-fido2
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
-    directory: /jans-keycloak-integration
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
-    directory: /jans-keycloak-link
     schedule:
       interval: daily
 
