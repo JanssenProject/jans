@@ -1,5 +1,6 @@
 package io.jans.ca.plugin.adminui.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.jans.as.client.TokenRequest;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.security.KeyManagementException;
@@ -35,12 +37,17 @@ public class BaseService {
     Logger log;
 
     @Inject
-    ConfigHttpService httpService;
+    public ConfigHttpService httpService;
 
-    ObjectMapper mapper = new ObjectMapper();
+    public ObjectMapper mapper = new ObjectMapper();
 
     public static final String[] TLS_ENABLED_PROTOCOLS = new String[]{"TLSv1.3", "TLSv1.2"};
     public static final String[] TLS_ALLOWED_CIPHER_SUITES = new String[]{
+            // TLS 1.3 cipher suites
+            "TLS_AES_128_GCM_SHA256",
+            "TLS_AES_256_GCM_SHA384",
+            "TLS_CHACHA20_POLY1305_SHA256",
+            // TLS 1.2 cipher suites
             // ECDHE + RSA
             "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
             "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
@@ -171,6 +178,10 @@ public class BaseService {
                             mapper.writeValueAsString(body),
                             ContentType.APPLICATION_JSON,
                             null);
+            if (httpServiceResponse == null) {
+                log.error("Error in DCR: HTTP request failed, no response received");
+                return null;
+            }
             String jsonString = null;
             if (httpServiceResponse.getHttpResponse() != null
                     && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -179,15 +190,13 @@ public class BaseService {
                         "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                         httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                         httpServiceResponse.getHttpResponse().getEntity());
-                ObjectMapper mapper = new ObjectMapper();
                 HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                 httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
                 if (httpStatus == 201) {
                     if (httpEntity != null) {
                         jsonString = httpService.getContent(httpEntity);
-                        log.info(jsonString);
-                        HashMap<String, Object> entityMap = mapper.readValue(jsonString, HashMap.class);
-                        JsonObject entity = CommonUtils.convertMapToJsonObject(entityMap);
+                        JsonNode entityNode = mapper.readTree(jsonString);
+                        JSONObject entity = new JSONObject(entityNode.toString());
 
                         DCRResponse dcrResponse = new DCRResponse();
                         dcrResponse.setClientId(entity.getString("client_id"));

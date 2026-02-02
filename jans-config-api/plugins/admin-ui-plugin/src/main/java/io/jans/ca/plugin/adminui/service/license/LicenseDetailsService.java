@@ -30,6 +30,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -47,11 +48,6 @@ public class LicenseDetailsService extends BaseService {
 
     @Inject
     private PersistenceEntryManager entryManager;
-
-    @Inject
-    ConfigHttpService httpService;
-
-    ObjectMapper mapper = new ObjectMapper();
 
     //constants
     public static final String LICENSE_KEY = "licenseKey";
@@ -323,6 +319,10 @@ public class LicenseDetailsService extends BaseService {
                     .executePost(httpClient, checkLicenseUrl, tokenResponse.getAccessToken(), null, mapper.writeValueAsString(body), ContentType.APPLICATION_JSON,
                             BEARER);
 
+            if (httpServiceResponse == null) {
+                log.error("HTTP request failed, no response received");
+                return CommonUtils.createGenericResponse(false, 500, "HTTP request failed");
+            }
             String jsonString = null;
             if (httpServiceResponse.getHttpResponse() != null
                     && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -636,10 +636,10 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDate.now()));
-            JSONArray customFields = entity.getJSONArray("custom_fields");
-            if(customFields == null) {
-                throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is null");
+            if (!entity.has("custom_fields")) {
+                throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is missing");
             }
+            JSONArray customFields = entity.getJSONArray("custom_fields");
             Long mauThresholdValue = null;
             for (Object obj : customFields) {
                 JSONObject jsonObject = (JSONObject) obj;
@@ -688,60 +688,60 @@ public class LicenseDetailsService extends BaseService {
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
                     TLS_ALLOWED_CIPHER_SUITES);
 
-                Map<String, String> body = new HashMap<>();
-                body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
+            Map<String, String> body = new HashMap<>();
+            body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
-                HttpServiceResponse httpServiceResponse = httpService
-                        .executePost(httpClient, trialLicenseUrl, tokenResponse.getAccessToken(),
-                                null, mapper.writeValueAsString(body),
-                                ContentType.APPLICATION_JSON,
-                                BEARER);
-                String jsonString = null;
-                if (httpServiceResponse.getHttpResponse() != null
-                        && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
-                    log.debug(
-                            "Response on calling {} --- httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                            trialLicenseUrl,
-                            httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                            httpServiceResponse.getHttpResponse().getEntity());
-                    HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
-                    httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 200) {
-                        if (httpEntity != null) {
-                            jsonString = httpService.getContent(httpEntity);
-                            JsonNode entityNode = mapper.readTree(jsonString);
-                            JSONObject entity = new JSONObject(entityNode.toString());
+            HttpServiceResponse httpServiceResponse = httpService
+                    .executePost(httpClient, trialLicenseUrl, tokenResponse.getAccessToken(),
+                            null, mapper.writeValueAsString(body),
+                            ContentType.APPLICATION_JSON,
+                            BEARER);
+            String jsonString = null;
+            if (httpServiceResponse.getHttpResponse() != null
+                    && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+                log.debug(
+                        "Response on calling {} --- httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                        trialLicenseUrl,
+                        httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                        httpServiceResponse.getHttpResponse().getEntity());
+                HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
+                if (httpStatus == 200) {
+                    if (httpEntity != null) {
+                        jsonString = httpService.getContent(httpEntity);
+                        JsonNode entityNode = mapper.readTree(jsonString);
+                        JSONObject entity = new JSONObject(entityNode.toString());
 
-                            Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license");
-                            if (genericResOptional.isPresent()) {
-                                return genericResOptional.get();
-                            }
-                            //save license spring credentials
-                            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                            adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
-                            entryManager.merge(adminConf);
-                            //save in license configuration
-                            licenseConfiguration.setLicenseKey(entity.getString("license"));
-                            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
-                            auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
-                            ObjectNode jsonNode = mapper.createObjectNode();
-                            jsonNode.put("license-key", entity.getString("license"));
-
-                            return CommonUtils.createGenericResponse(true, 200, "Trial license generated.", jsonNode);
+                        Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license");
+                        if (genericResOptional.isPresent()) {
+                            return genericResOptional.get();
                         }
-                    }
-                    //getting error
-                    jsonString = httpService.getContent(httpEntity);
-                    JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
+                        //save license spring credentials
+                        AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+                        adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
+                        entryManager.merge(adminConf);
+                        //save in license configuration
+                        licenseConfiguration.setLicenseKey(entity.getString("license"));
+                        auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+                        auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
-                    if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
-                        log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonString);
-                        return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
+                        ObjectNode jsonNode = mapper.createObjectNode();
+                        jsonNode.put("license-key", entity.getString("license"));
+
+                        return CommonUtils.createGenericResponse(true, 200, "Trial license generated.", jsonNode);
                     }
                 }
-                log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonString);
-                return CommonUtils.createGenericResponse(false, 500, "Error in generating trial license.");
+                //getting error
+                jsonString = httpService.getContent(httpEntity);
+                JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
+
+                if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                    log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonString);
+                    return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
+                }
+            }
+            log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonString);
+            return CommonUtils.createGenericResponse(false, 500, "Error in generating trial license.");
         } catch (Exception e) {
             Optional<GenericResponse> genericResOptional = handleLicenseApiNotAccessible(httpStatus);
             if (genericResOptional.isPresent()) {

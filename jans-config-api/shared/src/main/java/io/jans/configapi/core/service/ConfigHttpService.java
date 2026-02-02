@@ -156,9 +156,13 @@ public class ConfigHttpService implements Serializable {
         RequestConfig requestConfig = RequestConfig.custom().build();
 
         // Build SSL context with specific protocols
-        SSLContext sslContext = SSLContexts.custom()
-                .build();
-
+        SSLContext sslContext = SSLContexts.custom().build();
+        if (enabledProtocols == null || enabledProtocols.length == 0) {
+            return HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
+                    .setConnectionManager(connectionManager)
+                    .build();
+        }
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
                 sslContext,
                 enabledProtocols,
@@ -252,7 +256,7 @@ public class ConfigHttpService implements Serializable {
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
-            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext(); ) {
                 String key = iterator.next();
                 String value = parameters.get(key);
                 if (StringUtils.isNotBlank(value)) {
@@ -308,7 +312,7 @@ public class ConfigHttpService implements Serializable {
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
-            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext(); ) {
                 String key = iterator.next();
                 String value = parameters.get(key);
                 if (StringUtils.isNotBlank(value)) {
@@ -510,7 +514,7 @@ public class ConfigHttpService implements Serializable {
     public Status getResponseStatus(HttpServiceResponse serviceResponse) {
         Status status = Status.INTERNAL_SERVER_ERROR;
 
-        if (serviceResponse == null || serviceResponse.getHttpResponse() == null || serviceResponse.getHttpResponse().getStatusLine()== null) {
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null || serviceResponse.getHttpResponse().getStatusLine() == null) {
             return status;
         }
 

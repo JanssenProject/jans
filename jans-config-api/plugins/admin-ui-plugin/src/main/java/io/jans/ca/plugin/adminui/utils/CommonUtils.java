@@ -289,34 +289,4 @@ public class CommonUtils {
                 )
                 .collect(Collectors.joining("&"));
     }
-
-    public static JsonObject convertMapToJsonObject(Map<String, Object> map) {
-        JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value == null) {
-                builder.addNull(key);
-            } else if (value instanceof String) {
-                builder.add(key, (String) value);
-            } else if (value instanceof Integer) {
-                builder.add(key, (Integer) value);
-            } else if (value instanceof Long) {
-                builder.add(key, (Long) value);
-            } else if (value instanceof Double) {
-                builder.add(key, (Double) value);
-            } else if (value instanceof Boolean) {
-                builder.add(key, (Boolean) value);
-            } else if (value instanceof Map) {
-                // Recursively convert nested Maps to JsonObjects
-                builder.add(key, convertMapToJsonObject((Map<String, Object>) value));
-            } else if (value instanceof JsonValue) {
-                builder.add(key, (JsonValue) value);
-            }
-            // Add other supported types (arrays, etc.) as needed
-            // Note: Complex custom objects will need a specific conversion logic or the use of a library like Jackson/Gson
-        }
-        return builder.build();
-    }
 }
