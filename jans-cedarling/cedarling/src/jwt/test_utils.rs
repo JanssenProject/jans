@@ -297,9 +297,9 @@ impl MockServer {
         self.endpoints.status_list = endpoint;
     }
 
-    /// Updates the OpenID configuration mock to include the status list endpoint.
+    /// Updates the `OpenID` configuration mock to include the status list endpoint.
     /// This should be called after `generate_status_list_endpoint` to ensure the
-    /// OIDC configuration returned via HTTP includes the status_list_endpoint field.
+    /// OIDC configuration returned via HTTP includes the `status_list_endpoint` field.
     pub(crate) fn update_openid_config_with_status_list_endpoint(&mut self) {
         // Remove the existing OIDC mock (drop the Mock)
         let old = self.endpoints.oidc.take();
