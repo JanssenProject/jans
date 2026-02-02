@@ -82,9 +82,6 @@ func Provider() *schema.Provider {
                         "jans_fido2_device":                  resourceFido2Device(),
                         "jans_group":                         resourceGroup(),
                         "jans_json_web_key":                  resourceJsonWebKey(),
-                        "jans_kc_saml_configuration":         resourceKCSamlConfiguration(),
-                        "jans_kc_saml_identity_provider":     resourceKCSamlIDP(),
-                        "jans_kc_saml_trust_relationship":    resourceKCSamlTR(),
                         "jans_ldap_database_configuration":   resourceLDAPDatabaseConfiguration(),
                         "jans_logging_configuration":         resourceLoggingConfiguration(),
                         "jans_message":                       resourceMessage(),
@@ -99,6 +96,8 @@ func Provider() *schema.Provider {
                         "jans_token_revocation":              resourceTokenRevocation(),
                         "jans_uma_resource":                  resourceUMAResource(),
                         "jans_user":                          resourceUser(),
+                        "jans_shibboleth_configuration":      jans.ResourceShibbolethConfiguration(),
+                        "jans_shibboleth_trusted_sp":         jans.ResourceShibbolethTrustedSP(),
                 },
 
                 // DataSourcesMap is the collection of available data sources that

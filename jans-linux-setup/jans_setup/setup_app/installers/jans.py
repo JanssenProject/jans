@@ -69,7 +69,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Scim Server', 'install_scim_server'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
-                        ('Install Jans KC', 'install_jans_saml')):
+                        ('Install Shibboleth IDP', 'install_jans_saml')):
                     txt += get_install_string(prompt_str, install_var)
 
                 if base.argsp.install_link:
@@ -506,9 +506,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
 
             self.add_yacron_job(
-                    command = os.path.join(Config.jansOptBinFolder, 'super_gluu_lisence_renewer.py'), 
+                    command = os.path.join(Config.jansOptBinFolder, 'super_gluu_lisence_renewer.py'),
                     schedule = '0 2 * * *', # everyday at 2 am
-                    name='super-gluu-license-renewer', 
+                    name='super-gluu-license-renewer',
                     args={'captureStderr': True}
                     )
 
@@ -649,8 +649,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
-                        ('saml', 'install_jans_saml'),
-                        ('kc-scheduler', 'install_jans_saml'),
+                        ('jans-shibboleth-idp', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()

@@ -1,0 +1,118 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: janssenproject/shibboleth
+  pullPolicy: IfNotPresent
+  tag: "5.1.6_dev"
+
+replicaCount: 1
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8080
+  name: http-shibboleth
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+ingress:
+  enabled: true
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /idp
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 1024Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  metrics: []
+  behavior: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+lifecycle:
+  preStop:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - sleep 20
+
+volumes: []
+
+volumeMounts: []
+
+livenessProbe:
+  httpGet:
+    path: /idp/status
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 20
+
+readinessProbe:
+  httpGet:
+    path: /idp/status
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 20
+
+usrEnvs:
+  normal: {}
+  secret: {}
+
+additionalLabels: {}
+additionalAnnotations: {}
+
+configmaps:
+  jansProperties:
+    enabled: true
+
+shibboleth:
+  entityId: ""
+  scope: ""
+  signingKeyAlias: "idp-signing"
+  encryptionKeyAlias: "idp-encryption"
+  jansAuth:
+    enabled: true
+    clientId: ""
+    redirectUri: ""
+    scopes: "openid,profile,email"
