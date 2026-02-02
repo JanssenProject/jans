@@ -13,6 +13,7 @@ use crate::ValidationError;
 
 use super::{CedarType, CedarValueMapper, ExtensionValue};
 use serde_json::Value;
+use std::borrow::Cow;
 use std::net::IpAddr;
 use std::str::FromStr;
 
@@ -41,7 +42,7 @@ pub struct ValidationResult {
 
 impl ValidationResult {
     /// Create a successful result
-    #[must_use] 
+    #[must_use]
     pub fn ok() -> Self {
         Self {
             is_valid: true,
@@ -51,7 +52,7 @@ impl ValidationResult {
     }
 
     /// Create a failed result with a single error
-    #[must_use] 
+    #[must_use]
     pub fn error(err: ValidationError) -> Self {
         Self {
             is_valid: false,
@@ -61,7 +62,7 @@ impl ValidationResult {
     }
 
     /// Create a failed result with multiple errors
-    #[must_use] 
+    #[must_use]
     pub fn errors(errs: Vec<ValidationError>) -> Self {
         Self {
             is_valid: errs.is_empty(),
@@ -71,7 +72,7 @@ impl ValidationResult {
     }
 
     /// Add a warning
-    #[must_use] 
+    #[must_use]
     pub fn with_warning(mut self, warning: String) -> Self {
         self.warnings.push(warning);
         self
@@ -145,7 +146,7 @@ impl Default for DataValidator {
 
 impl DataValidator {
     /// Create a new validator with default configuration.
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             config: ValidationConfig::default(),
@@ -153,48 +154,48 @@ impl DataValidator {
     }
 
     /// Create a validator with custom configuration.
-    #[must_use] 
+    #[must_use]
     pub fn with_config(config: ValidationConfig) -> Self {
         Self { config }
     }
 
     /// Set maximum nesting depth.
-    #[must_use] 
+    #[must_use]
     pub fn with_max_depth(mut self, max_depth: usize) -> Self {
         self.config.max_depth = max_depth;
         self
     }
 
     /// Set maximum string length.
-    #[must_use] 
+    #[must_use]
     pub fn with_max_string_length(mut self, max_length: usize) -> Self {
         self.config.max_string_length = max_length;
         self
     }
 
     /// Set maximum array length.
-    #[must_use] 
+    #[must_use]
     pub fn with_max_array_length(mut self, max_length: usize) -> Self {
         self.config.max_array_length = max_length;
         self
     }
 
     /// Set maximum object keys.
-    #[must_use] 
+    #[must_use]
     pub fn with_max_object_keys(mut self, max_keys: usize) -> Self {
         self.config.max_object_keys = max_keys;
         self
     }
 
     /// Enable strict extension format validation.
-    #[must_use] 
+    #[must_use]
     pub fn with_strict_extensions(mut self, strict: bool) -> Self {
         self.config.strict_extension_validation = strict;
         self
     }
 
     /// Enable collecting all errors instead of failing fast.
-    #[must_use] 
+    #[must_use]
     pub fn collect_all_errors(mut self, collect: bool) -> Self {
         self.config.collect_all_errors = collect;
         self
@@ -211,7 +212,7 @@ impl DataValidator {
     pub fn validate(&self, value: &Value) -> Result<(), ValidationError> {
         if self.config.collect_all_errors {
             let mut errors = Vec::new();
-            self.validate_collecting(value, "$", 0, &mut errors);
+            self.validate_collecting(value, Cow::Borrowed("$"), 0, &mut errors);
             if errors.is_empty() {
                 Ok(())
             } else if errors.len() == 1 {
@@ -221,16 +222,16 @@ impl DataValidator {
                 Err(ValidationError::Multiple(errors))
             }
         } else {
-            self.validate_at_path(value, "$", 0)?;
+            self.validate_at_path(value, Cow::Borrowed("$"), 0)?;
             Ok(())
         }
     }
 
     /// Validate a value and get a detailed result.
-    #[must_use] 
+    #[must_use]
     pub fn validate_detailed(&self, value: &Value) -> ValidationResult {
         let mut errors = Vec::new();
-        self.validate_collecting(value, "$", 0, &mut errors);
+        self.validate_collecting(value, Cow::Borrowed("$"), 0, &mut errors);
         ValidationResult::errors(errors)
     }
 
@@ -270,12 +271,13 @@ impl DataValidator {
                 // Check for CIDR notation
                 if let Some((ip_part, prefix_part)) = value.split_once('/')
                     && let Ok(ip) = IpAddr::from_str(ip_part)
-                        && let Ok(prefix_len) = prefix_part.parse::<u8>() {
-                            let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
-                            if prefix_len <= max_prefix {
-                                return Ok(());
-                            }
-                        }
+                    && let Ok(prefix_len) = prefix_part.parse::<u8>()
+                {
+                    let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+                    if prefix_len <= max_prefix {
+                        return Ok(());
+                    }
+                }
                 Err(ValidationError::InvalidExtensionFormat {
                     path: "$".to_string(),
                     extension_type: extension_type.to_string(),
@@ -343,24 +345,24 @@ impl DataValidator {
     fn validate_at_path(
         &self,
         value: &Value,
-        path: &str,
+        path: Cow<'_, str>,
         depth: usize,
     ) -> Result<(), ValidationError> {
         if depth > self.config.max_depth {
             return Err(ValidationError::MaxDepthExceeded {
-                path: path.to_string(),
+                path: path.into_owned(),
                 max: self.config.max_depth,
             });
         }
 
         match value {
             Value::Null => Err(ValidationError::NullNotSupported {
-                path: path.to_string(),
+                path: path.into_owned(),
             }),
             Value::Bool(_) => Ok(()),
             Value::Number(n) if n.is_i64() || n.is_u64() || n.is_f64() => Ok(()),
             Value::Number(_) => Err(ValidationError::NumberOutOfRange {
-                path: path.to_string(),
+                path: path.into_owned(),
             }),
             Value::String(s) => self.validate_string(s, path),
             Value::Array(arr) => self.validate_array(arr, path, depth),
@@ -370,19 +372,20 @@ impl DataValidator {
 
     /// Validates a string value, including extension type detection.
     #[inline]
-    fn validate_string(&self, s: &str, path: &str) -> Result<(), ValidationError> {
+    fn validate_string(&self, s: &str, path: Cow<'_, str>) -> Result<(), ValidationError> {
         if s.len() > self.config.max_string_length {
             return Err(ValidationError::StringTooLong {
-                path: path.to_string(),
+                path: path.into_owned(),
                 length: s.len(),
                 max: self.config.max_string_length,
             });
         }
 
         if self.config.strict_extension_validation
-            && let Some(ref ext) = CedarValueMapper::detect_extension(s) {
-                self.validate_detected_extension(ext, path)?;
-            }
+            && let Some(ref ext) = CedarValueMapper::detect_extension(s)
+        {
+            self.validate_detected_extension(ext, path)?;
+        }
         Ok(())
     }
 
@@ -391,7 +394,7 @@ impl DataValidator {
     fn validate_detected_extension(
         &self,
         ext: &ExtensionValue,
-        path: &str,
+        path: Cow<'_, str>,
     ) -> Result<(), ValidationError> {
         let (ext_type, value, is_valid) = match ext {
             ExtensionValue::IpAddr(v) => (
@@ -408,7 +411,7 @@ impl DataValidator {
             Ok(())
         } else {
             Err(ValidationError::InvalidExtensionFormat {
-                path: path.to_string(),
+                path: path.into_owned(),
                 extension_type: ext_type.to_string(),
                 value,
             })
@@ -420,19 +423,20 @@ impl DataValidator {
     fn validate_array(
         &self,
         arr: &[Value],
-        path: &str,
+        path: Cow<'_, str>,
         depth: usize,
     ) -> Result<(), ValidationError> {
         if arr.len() > self.config.max_array_length {
             return Err(ValidationError::ArrayTooLong {
-                path: path.to_string(),
+                path: path.into_owned(),
                 length: arr.len(),
                 max: self.config.max_array_length,
             });
         }
 
         for (i, item) in arr.iter().enumerate() {
-            self.validate_at_path(item, &format!("{path}[{i}]"), depth + 1)?;
+            let item_path = Cow::Owned(format!("{path}[{i}]"));
+            self.validate_at_path(item, item_path, depth + 1)?;
         }
         Ok(())
     }
@@ -443,12 +447,12 @@ impl DataValidator {
         &self,
         value: &Value,
         obj: &serde_json::Map<String, Value>,
-        path: &str,
+        path: Cow<'_, str>,
         depth: usize,
     ) -> Result<(), ValidationError> {
         if obj.len() > self.config.max_object_keys {
             return Err(ValidationError::TooManyKeys {
-                path: path.to_string(),
+                path: path.into_owned(),
                 count: obj.len(),
                 max: self.config.max_object_keys,
             });
@@ -456,32 +460,33 @@ impl DataValidator {
 
         // Fast path for special object types
         if CedarValueMapper::is_entity_reference(value) {
-            return Self::validate_entity_reference(value, path);
+            return Self::validate_entity_reference(value, &path);
         }
         if let Some(extn) = obj.get("__extn") {
-            return self.validate_extension_marker(extn, path);
+            return self.validate_extension_marker(extn, &path);
         }
 
         // Validate keys and values
         for (key, val) in obj {
-            Self::validate_key(key, path)?;
-            self.validate_at_path(val, &format!("{path}.{key}"), depth + 1)?;
+            Self::validate_key(key, &path)?;
+            let field_path = Cow::Owned(format!("{path}.{key}"));
+            self.validate_at_path(val, field_path, depth + 1)?;
         }
         Ok(())
     }
 
     /// Validates an object key.
     #[inline]
-    fn validate_key(key: &str, path: &str) -> Result<(), ValidationError> {
+    fn validate_key(key: &str, path: &Cow<'_, str>) -> Result<(), ValidationError> {
         if key.is_empty() {
             return Err(ValidationError::InvalidKey {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 reason: "empty key".to_string(),
             });
         }
         if key.chars().any(char::is_control) {
             return Err(ValidationError::InvalidKey {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 reason: "key contains control characters".to_string(),
             });
         }
@@ -492,13 +497,13 @@ impl DataValidator {
     fn validate_collecting(
         &self,
         value: &Value,
-        path: &str,
+        path: Cow<'_, str>,
         depth: usize,
         errors: &mut Vec<ValidationError>,
     ) {
         if depth > self.config.max_depth {
             errors.push(ValidationError::MaxDepthExceeded {
-                path: path.to_string(),
+                path: path.into_owned(),
                 max: self.config.max_depth,
             });
             return;
@@ -507,14 +512,14 @@ impl DataValidator {
         match value {
             Value::Null => {
                 errors.push(ValidationError::NullNotSupported {
-                    path: path.to_string(),
+                    path: path.into_owned(),
                 });
             },
             Value::Bool(_) => {},
             Value::Number(n) => {
                 if !n.is_i64() && !n.is_u64() && !n.is_f64() {
                     errors.push(ValidationError::NumberOutOfRange {
-                        path: path.to_string(),
+                        path: path.into_owned(),
                     });
                 }
             },
@@ -527,10 +532,15 @@ impl DataValidator {
     }
 
     /// Validate a string value, collecting all errors.
-    fn validate_string_collecting(&self, s: &str, path: &str, errors: &mut Vec<ValidationError>) {
+    fn validate_string_collecting(
+        &self,
+        s: &str,
+        path: Cow<'_, str>,
+        errors: &mut Vec<ValidationError>,
+    ) {
         if s.len() > self.config.max_string_length {
             errors.push(ValidationError::StringTooLong {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 length: s.len(),
                 max: self.config.max_string_length,
             });
@@ -539,39 +549,43 @@ impl DataValidator {
         // If it looks like an extension type, validate its format
         if self.config.strict_extension_validation
             && let Some(ext) = CedarValueMapper::detect_extension(s)
-            && let Some(err) = self.check_extension_format(&ext, path)
+            && let Some(err) = self.check_extension_format(&ext, &path)
         {
             errors.push(err);
         }
     }
 
     /// Check extension format and return an error if invalid.
-    fn check_extension_format(&self, ext: &ExtensionValue, path: &str) -> Option<ValidationError> {
+    fn check_extension_format(
+        &self,
+        ext: &ExtensionValue,
+        path: &Cow<'_, str>,
+    ) -> Option<ValidationError> {
         match ext {
             ExtensionValue::IpAddr(ip) if self.validate_extension(ip, "ip").is_err() => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     extension_type: "ipaddr".to_string(),
                     value: ip.clone(),
                 })
             },
             ExtensionValue::Decimal(d) if d.parse::<f64>().is_err() => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     extension_type: "decimal".to_string(),
                     value: d.clone(),
                 })
             },
             ExtensionValue::DateTime(dt) if !Self::is_valid_datetime(dt) => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     extension_type: "datetime".to_string(),
                     value: dt.clone(),
                 })
             },
             ExtensionValue::Duration(dur) if !Self::is_valid_duration(dur) => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     extension_type: "duration".to_string(),
                     value: dur.clone(),
                 })
@@ -584,20 +598,20 @@ impl DataValidator {
     fn validate_array_collecting(
         &self,
         arr: &[Value],
-        path: &str,
+        path: Cow<'_, str>,
         depth: usize,
         errors: &mut Vec<ValidationError>,
     ) {
         if arr.len() > self.config.max_array_length {
             errors.push(ValidationError::ArrayTooLong {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 length: arr.len(),
                 max: self.config.max_array_length,
             });
         }
         for (i, item) in arr.iter().enumerate() {
-            let item_path = format!("{path}[{i}]");
-            self.validate_collecting(item, &item_path, depth + 1, errors);
+            let item_path = Cow::Owned(format!("{path}[{i}]"));
+            self.validate_collecting(item, item_path, depth + 1, errors);
         }
     }
 
@@ -606,13 +620,13 @@ impl DataValidator {
         &self,
         value: &Value,
         obj: &serde_json::Map<String, Value>,
-        path: &str,
+        path: Cow<'_, str>,
         depth: usize,
         errors: &mut Vec<ValidationError>,
     ) {
         if obj.len() > self.config.max_object_keys {
             errors.push(ValidationError::TooManyKeys {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 count: obj.len(),
                 max: self.config.max_object_keys,
             });
@@ -620,7 +634,7 @@ impl DataValidator {
 
         // Check for entity reference
         if CedarValueMapper::is_entity_reference(value) {
-            if let Err(e) = Self::validate_entity_reference(value, path) {
+            if let Err(e) = Self::validate_entity_reference(value, &path) {
                 errors.push(e);
             }
             return;
@@ -628,7 +642,7 @@ impl DataValidator {
 
         // Check for extension type marker
         if let Some(extn) = obj.get("__extn") {
-            if let Err(e) = self.validate_extension_marker(extn, path) {
+            if let Err(e) = self.validate_extension_marker(extn, &path) {
                 errors.push(e);
             }
             return;
@@ -638,49 +652,56 @@ impl DataValidator {
         for (key, val) in obj {
             if key.is_empty() {
                 errors.push(ValidationError::InvalidKey {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     reason: "empty key".to_string(),
                 });
             }
             if key.chars().any(char::is_control) {
                 errors.push(ValidationError::InvalidKey {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     reason: "key contains control characters".to_string(),
                 });
             }
-            let field_path = format!("{path}.{key}");
-            self.validate_collecting(val, &field_path, depth + 1, errors);
+            let field_path = Cow::Owned(format!("{path}.{key}"));
+            self.validate_collecting(val, field_path, depth + 1, errors);
         }
     }
 
     // Validate entity reference format
-    fn validate_entity_reference(value: &Value, path: &str) -> Result<(), ValidationError> {
+    fn validate_entity_reference(
+        value: &Value,
+        path: &Cow<'_, str>,
+    ) -> Result<(), ValidationError> {
         match CedarValueMapper::parse_entity_reference(value) {
             Ok(entity_ref) => {
                 // Validate entity type format (should be like "Namespace::Type" or just "Type")
                 if entity_ref.entity_type.is_empty() {
                     return Err(ValidationError::InvalidEntityReference {
-                        path: path.to_string(),
+                        path: path.clone().into_owned(),
                         reason: "empty entity type".to_string(),
                     });
                 }
                 if entity_ref.entity_id.is_empty() {
                     return Err(ValidationError::InvalidEntityReference {
-                        path: path.to_string(),
+                        path: path.clone().into_owned(),
                         reason: "empty entity id".to_string(),
                     });
                 }
                 Ok(())
             },
             Err(_) => Err(ValidationError::InvalidEntityReference {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 reason: "invalid format".to_string(),
             }),
         }
     }
 
     // Validate extension type marker
-    fn validate_extension_marker(&self, extn: &Value, path: &str) -> Result<(), ValidationError> {
+    fn validate_extension_marker(
+        &self,
+        extn: &Value,
+        path: &Cow<'_, str>,
+    ) -> Result<(), ValidationError> {
         if let Some(obj) = extn.as_object() {
             let fn_name = obj.get("fn").and_then(|v| v.as_str());
             let arg = obj.get("arg").and_then(|v| v.as_str());
@@ -688,20 +709,20 @@ impl DataValidator {
             match (fn_name, arg) {
                 (Some(fn_name), Some(arg)) => self.validate_extension(arg, fn_name).map_err(|_| {
                     ValidationError::InvalidExtensionFormat {
-                        path: path.to_string(),
+                        path: path.clone().into_owned(),
                         extension_type: fn_name.to_string(),
                         value: arg.to_string(),
                     }
                 }),
                 _ => Err(ValidationError::InvalidExtensionFormat {
-                    path: path.to_string(),
+                    path: path.clone().into_owned(),
                     extension_type: "unknown".to_string(),
                     value: extn.to_string(),
                 }),
             }
         } else {
             Err(ValidationError::InvalidExtensionFormat {
-                path: path.to_string(),
+                path: path.clone().into_owned(),
                 extension_type: "unknown".to_string(),
                 value: extn.to_string(),
             })
