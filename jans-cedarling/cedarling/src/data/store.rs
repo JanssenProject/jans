@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::sync::RwLock;
 use std::time::Duration as StdDuration;
 
-use chrono::Duration as ChronoDuration;
+use chrono::{Duration as ChronoDuration, Utc};
 use serde_json::Value;
 use sparkv::{Config as SparKVConfig, Error as SparKVError, SparKV};
 
@@ -265,9 +265,10 @@ impl DataStore {
     /// List all entries with their full metadata, excluding expired entries.
     pub(crate) fn list_entries(&self) -> Vec<DataEntry> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+        let now = Utc::now();
         storage
             .iter()
-            .filter(|(_, entry)| !entry.is_expired())
+            .filter(|(_, entry)| !entry.is_expired(now))
             .map(|(_, entry)| entry.clone())
             .collect()
     }

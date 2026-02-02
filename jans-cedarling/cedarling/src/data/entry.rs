@@ -330,9 +330,9 @@ impl DataEntry {
 
     /// Check if this entry has expired.
     #[must_use]
-    pub fn is_expired(&self) -> bool {
+    pub fn is_expired(&self, now: DateTime<Utc>) -> bool {
         if let Some(expires_at) = self.expires_at {
-            Utc::now() > expires_at
+            now > expires_at
         } else {
             false
         }
@@ -396,11 +396,13 @@ mod tests {
             json!("value1"),
             Some(StdDuration::from_millis(100)),
         );
-        assert!(!entry.is_expired());
+        let now = Utc::now();
+        assert!(!entry.is_expired(now));
 
         // Wait for expiration
         std::thread::sleep(StdDuration::from_millis(150));
-        assert!(entry.is_expired());
+        let now_after = Utc::now();
+        assert!(entry.is_expired(now_after));
     }
 
     #[test]
