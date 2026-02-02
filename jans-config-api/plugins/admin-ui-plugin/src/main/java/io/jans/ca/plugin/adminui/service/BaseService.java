@@ -36,7 +36,7 @@ public class BaseService {
     Logger log;
 
     @Inject
-    public ConfigHttpService httpService;
+    protected ConfigHttpService httpService;
 
     protected ObjectMapper mapper = new ObjectMapper();
 
@@ -210,7 +210,7 @@ public class BaseService {
                         return dcrResponse;
                     }
                     jsonString = httpService.getContent(httpEntity);
-                    log.error("Error in DCR, Http Staus: {}, Message: {}", httpStatus, jsonString);
+                    log.error("Error in DCR, Http Status: {}, Message: {}", httpStatus, jsonString);
                     return null;
                 }
             } finally {
