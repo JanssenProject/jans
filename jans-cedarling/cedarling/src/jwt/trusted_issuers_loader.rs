@@ -78,7 +78,11 @@ async fn load_trusted_issuers(
     let errors = Arc::new(Mutex::new(Vec::new()));
 
     for (issuer_id, iss) in trusted_issuers {
-        let permit = semaphore.clone().acquire_owned().await.unwrap();
+        let permit = semaphore
+            .clone()
+            .acquire_owned()
+             .await
+             .expect("failed to acquire semaphore permit for concurrent issuer loading - this indicates a serious concurrency issue or resource exhaustion");
         let loader_clone = loader.clone();
         let errors_clone = errors.clone();
 
@@ -96,7 +100,10 @@ async fn load_trusted_issuers(
                     .set_message(format!("Could not load trusted issuer: {issuer_id}"))
                     .set_error(error.to_string()),
                 );
-                errors_clone.lock().unwrap().push(error);
+                errors_clone
+                     .lock()
+                     .expect("failed to lock errors mutex while recording issuer loading failure - mutex may be poisoned due to panic in another thread")
+                     .push(error);
             }
         });
         handles.push(handle);
@@ -109,7 +116,10 @@ async fn load_trusted_issuers(
 
     loader.check_keys_loaded();
 
-    let errors = Arc::into_inner(errors).unwrap().into_inner().unwrap();
+    let errors = Arc::into_inner(errors)
+         .expect("failed to extract errors Arc - other references may still exist indicating concurrent access during issuer loading")
+         .into_inner()
+         .expect("failed to extract errors from Mutex - mutex may be poisoned due to panic while holding lock");
     if let Some(first_error) = errors.into_iter().next() {
         return Err(first_error);
     }
