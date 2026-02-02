@@ -1,0 +1,27 @@
+warning: using EntityUid::from_str with format!() is inefficient
+  --> $DIR/main.rs:3:16
+   |
+LL |     let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: use string literals instead
+   = note: `#[warn(bad_string_concatenation)]` on by default
+
+warning: using EntityUid::from_str with format!() is inefficient
+  --> $DIR/main.rs:7:16
+   |
+LL |     let eid2 = EntityUid::from_str(&format!(r#"User::"{}""#, user));
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: use string literals instead
+
+warning: using EntityUid::from_str with format!() is inefficient
+  --> $DIR/main.rs:10:16
+   |
+LL |     let eid3 = EntityUid::from_str(&std::format!(r#"User::"bob""#));
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: use string literals instead
+
+warning: 3 warnings emitted
+

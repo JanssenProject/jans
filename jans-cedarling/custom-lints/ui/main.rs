@@ -1,0 +1,27 @@
+fn main() {
+    // This should trigger the lint
+    let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
+
+    // This should trigger the lint
+    let user = "alice";
+    let eid2 = EntityUid::from_str(&format!(r#"User::"{}""#, user));
+
+    // This should trigger the lint - (even with std::format!)
+    let eid3 = EntityUid::from_str(&std::format!(r#"User::"bob""#));
+
+    // This should NOT trigger
+    let eid4 = EntityUid::from_str(r#"User::"alice""#);
+
+    // This should NOT trigger
+    let literal = String::from(r#"User::"dave""#);
+    let eid5 = EntityUid::from_str(&literal);
+}
+
+// Mock EntityUid for testing (since we don't want to pull in the actual Cedar crate)
+struct EntityUid;
+
+impl EntityUid {
+    fn from_str(s: &str) -> Result<Self, String> {
+        Ok(EntityUid)
+    }
+}
