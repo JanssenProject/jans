@@ -455,9 +455,11 @@ public class LicenseDetailsService extends BaseService {
                         log.error("Payment Required: 402");
                         return CommonUtils.createGenericResponse(false, httpStatus, "Payment Required. Subscribe Admin UI license on Agama Lab.");
                     }
-                    if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                    JsonNode messageNode = jsonNode.get(MESSAGE);
+                    if (messageNode != null && !Strings.isNullOrEmpty(messageNode.textValue())) {
                         log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
-                        return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
+                        int code = jsonNode.path(CODE).asInt(500);
+                        return CommonUtils.createGenericResponse(false, code, messageNode.textValue());
                     }
                     log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
                 }
@@ -559,10 +561,11 @@ public class LicenseDetailsService extends BaseService {
                     jsonString = httpService.getContent(httpEntity);
                     JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
 
-                    if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
-                        log.error("license Activation error response: {}", jsonString);
+                    JsonNode messageNode = jsonNode.get(MESSAGE);
+                    if (messageNode != null && !Strings.isNullOrEmpty(messageNode.textValue())) {
                         log.error("{}: {}", LICENSE_ACTIVATE_ERROR_RESPONSE, jsonString);
-                        return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
+                        int code = jsonNode.path(CODE).asInt(500);
+                        return CommonUtils.createGenericResponse(false, code, messageNode.textValue());
                     }
                 }
             } finally {
@@ -721,9 +724,11 @@ public class LicenseDetailsService extends BaseService {
                     jsonString = httpService.getContent(httpEntity);
                     JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
 
-                    if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                    JsonNode messageNode = jsonNode.get(MESSAGE);
+                    if (messageNode != null && !Strings.isNullOrEmpty(messageNode.textValue())) {
                         log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonString);
-                        return CommonUtils.createGenericResponse(false, jsonNode.get(CODE).intValue(), jsonNode.get(MESSAGE).textValue());
+                        int code = jsonNode.path(CODE).asInt(500);
+                        return CommonUtils.createGenericResponse(false, code, messageNode.textValue());
                     }
                 }
             } finally {
@@ -941,7 +946,7 @@ public class LicenseDetailsService extends BaseService {
      * @param response the HttpServiceResponse containing the underlying HTTP response and metadata
      */
     private void logHttpResponse(String url, HttpServiceResponse response) {
-        if (!log.isDebugEnabled() || response == null) {
+        if (!log.isDebugEnabled() || response == null || response.getHttpResponse() == null) {
             return;
         }
         log.debug(
