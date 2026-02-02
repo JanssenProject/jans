@@ -29,11 +29,7 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
-
 import static io.jans.as.model.util.Util.escapeLog;
 
 @ApplicationScoped

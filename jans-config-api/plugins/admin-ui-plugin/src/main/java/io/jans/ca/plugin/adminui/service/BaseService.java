@@ -14,7 +14,6 @@ import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.service.ConfigHttpService;
 import io.jans.model.net.HttpServiceResponse;
 import jakarta.inject.Inject;
-import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MultivaluedHashMap;
@@ -39,10 +38,10 @@ public class BaseService {
     @Inject
     public ConfigHttpService httpService;
 
-    public ObjectMapper mapper = new ObjectMapper();
+    protected ObjectMapper mapper = new ObjectMapper();
 
-    public static final String[] TLS_ENABLED_PROTOCOLS = new String[]{"TLSv1.3", "TLSv1.2"};
-    public static final String[] TLS_ALLOWED_CIPHER_SUITES = new String[]{
+    protected static final String[] TLS_ENABLED_PROTOCOLS = new String[]{"TLSv1.3", "TLSv1.2"};
+    protected static final String[] TLS_ALLOWED_CIPHER_SUITES = new String[]{
             // TLS 1.3 cipher suites
             "TLS_AES_128_GCM_SHA256",
             "TLS_AES_256_GCM_SHA384",
@@ -192,25 +191,23 @@ public class BaseService {
                         httpServiceResponse.getHttpResponse().getEntity());
                 HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                 httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                if (httpStatus == 201) {
-                    if (httpEntity != null) {
-                        jsonString = httpService.getContent(httpEntity);
-                        JsonNode entityNode = mapper.readTree(jsonString);
-                        JSONObject entity = new JSONObject(entityNode.toString());
+                if (httpStatus == 201 && httpEntity != null) {
+                    jsonString = httpService.getContent(httpEntity);
+                    JsonNode entityNode = mapper.readTree(jsonString);
+                    JSONObject entity = new JSONObject(entityNode.toString());
 
-                        DCRResponse dcrResponse = new DCRResponse();
-                        dcrResponse.setClientId(entity.getString("client_id"));
-                        dcrResponse.setClientSecret(entity.getString("client_secret"));
-                        dcrResponse.setOpHost(issuer);
-                        dcrResponse.setHardwareId(hardwareId);
-                        if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
-                            dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
-                        }
-                        if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
-                            dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
-                        }
-                        return dcrResponse;
+                    DCRResponse dcrResponse = new DCRResponse();
+                    dcrResponse.setClientId(entity.getString("client_id"));
+                    dcrResponse.setClientSecret(entity.getString("client_secret"));
+                    dcrResponse.setOpHost(issuer);
+                    dcrResponse.setHardwareId(hardwareId);
+                    if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
+                        dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
                     }
+                    if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
+                        dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
+                    }
+                    return dcrResponse;
                 }
                 jsonString = httpService.getContent(httpEntity);
                 log.error("Error in DCR, Http Staus: {}, Message: {}", httpStatus, jsonString);
