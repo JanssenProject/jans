@@ -40,7 +40,7 @@ ENV SHIBBOLETH_VERSION=${SHIBBOLETH_VERSION}
 ENV SHIBBOLETH_HOME=${SHIBBOLETH_HOME}
 
 # Download and extract Shibboleth IdP
-RUN wget -q https://shibboleth.net/downloads/identity-provider/${SHIBBOLETH_VERSION}/shibboleth-identity-provider-${SHIBBOLETH_VERSION}.tar.gz -O /tmp/shibboleth-idp.tar.gz \
+RUN wget -q https://shibboleth.net/downloads/identity-provider/archive/${SHIBBOLETH_VERSION}/shibboleth-identity-provider-${SHIBBOLETH_VERSION}.tar.gz -O /tmp/shibboleth-idp.tar.gz \
     && mkdir -p /opt/shibboleth-idp-installer \
     && tar -xzf /tmp/shibboleth-idp.tar.gz -C /opt/shibboleth-idp-installer --strip-components=1 \
     && rm -rf /tmp/shibboleth-idp.tar.gz
@@ -163,7 +163,9 @@ LABEL maintainer="Janssen Project <jans@googlegroups.com>" \
       org.opencontainers.image.source="https://github.com/JanssenProject/jans" \
       org.opencontainers.image.description="Janssen Shibboleth Identity Provider ${SHIBBOLETH_VERSION}" \
       org.opencontainers.image.licenses="Apache-2.0" \
-      org.opencontainers.image.vendor="Janssen Project"
+      org.opencontainers.image.vendor="Janssen Project" \
+      org.opencontainers.image.url="ghcr.io/janssenproject/jans/shibboleth" \
+      org.opencontainers.image.version="0.0.0-nightly"
 
 USER shibboleth
 
