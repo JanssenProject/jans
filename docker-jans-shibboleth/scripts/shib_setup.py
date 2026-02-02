@@ -3,9 +3,7 @@
 import base64
 import logging
 import os
-import shutil
 from pathlib import Path
-from string import Template
 
 logger = logging.getLogger("shibboleth")
 
@@ -14,12 +12,12 @@ SEALER_PASSWORD_FILE = f"{SHIBBOLETH_HOME}/credentials/.sealer_password"
 
 
 class ShibbolethSetup:
-    def __init__(self, manager):
+    def __init__(self, manager) -> None:
         self.manager = manager
         self.hostname = manager.config.get("hostname")
         self.jans_auth_url = f"https://{self.hostname}"
 
-    def configure(self):
+    def configure(self) -> None:
         self.setup_directories()
         self.configure_jetty()
         self.configure_credentials()
@@ -29,7 +27,7 @@ class ShibbolethSetup:
         self.configure_metadata()
         self.configure_jans_authentication()
 
-    def setup_directories(self):
+    def setup_directories(self) -> None:
         logger.info("Setting up Shibboleth directories")
 
         dirs = [
@@ -45,7 +43,7 @@ class ShibbolethSetup:
         for d in dirs:
             Path(d).mkdir(parents=True, exist_ok=True)
 
-    def configure_jetty(self):
+    def configure_jetty(self) -> None:
         logger.info("Configuring Jetty for Shibboleth IDP")
 
         jetty_base = os.environ.get("JETTY_BASE", f"{SHIBBOLETH_HOME}/jetty")
@@ -65,7 +63,7 @@ jetty.deploy.scanInterval=0
         resources_dir = Path(f"{jetty_base}/resources")
         resources_dir.mkdir(parents=True, exist_ok=True)
 
-    def configure_credentials(self):
+    def configure_credentials(self) -> None:
         logger.info("Configuring Shibboleth credentials")
 
         credentials_dir = f"{SHIBBOLETH_HOME}/credentials"
@@ -100,17 +98,40 @@ jetty.deploy.scanInterval=0
                 sealer_path.write_bytes(sealer_key.encode() if isinstance(sealer_key, str) else sealer_key)
             os.chmod(sealer_path, 0o600)
 
-    def _get_sealer_password(self):
+    def _get_sealer_password(self) -> str:
+        """Get sealer password from environment, file, or secret.
+
+        In production (CN_DEV_MODE != 'true'), fails fast if no password is configured.
+        """
         sealer_password = os.environ.get("IDP_SEALER_PASSWORD")
         if sealer_password:
             return sealer_password
+
         if os.path.exists(SEALER_PASSWORD_FILE):
             with open(SEALER_PASSWORD_FILE) as f:
-                return f.read().strip()
-        sealer_password = self.manager.secret.get("shibboleth_sealer_password", "changeit")
-        return sealer_password
+                password = f.read().strip()
+                if password:
+                    return password
 
-    def configure_idp_properties(self):
+        sealer_password = self.manager.secret.get("shibboleth_sealer_password")
+        if sealer_password:
+            return sealer_password
+
+        dev_mode = os.environ.get("CN_DEV_MODE", "false").lower() == "true"
+        if dev_mode:
+            logger.warning(
+                "Using default sealer password in dev mode. "
+                "Set IDP_SEALER_PASSWORD or shibboleth_sealer_password secret for production."
+            )
+            return "changeit"
+
+        raise RuntimeError(
+            "Sealer password not configured. Set IDP_SEALER_PASSWORD environment variable "
+            "or shibboleth_sealer_password secret. For development, set CN_DEV_MODE=true "
+            "to use the default password."
+        )
+
+    def configure_idp_properties(self) -> None:
         logger.info("Configuring idp.properties")
 
         idp_entity_id = f"https://{self.hostname}/idp/shibboleth"
@@ -139,7 +160,7 @@ idp.logout.authenticated=true
         props_path.write_text(props.strip())
         os.chmod(props_path, 0o600)
 
-    def configure_relying_party(self):
+    def configure_relying_party(self) -> None:
         logger.info("Configuring relying-party.xml")
 
         relying_party_xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -171,7 +192,7 @@ idp.logout.authenticated=true
 
         Path(f"{SHIBBOLETH_HOME}/conf/relying-party.xml").write_text(relying_party_xml)
 
-    def configure_attribute_resolver(self):
+    def configure_attribute_resolver(self) -> None:
         logger.info("Configuring attribute-resolver.xml")
 
         attr_resolver_xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -209,7 +230,7 @@ idp.logout.authenticated=true
 
         Path(f"{SHIBBOLETH_HOME}/conf/attribute-resolver.xml").write_text(attr_resolver_xml)
 
-    def configure_metadata(self):
+    def configure_metadata(self) -> None:
         logger.info("Configuring metadata providers")
 
         metadata_providers_xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -242,7 +263,7 @@ idp.logout.authenticated=true
 
         Path(f"{SHIBBOLETH_HOME}/metadata/sp-metadata.xml").write_text(sp_metadata)
 
-    def configure_jans_authentication(self):
+    def configure_jans_authentication(self) -> None:
         logger.info("Configuring Janssen authentication")
 
         client_id = self.manager.config.get("shibboleth_idp_client_id", "")

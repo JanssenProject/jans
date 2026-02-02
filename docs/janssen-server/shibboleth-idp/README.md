@@ -69,9 +69,9 @@ The Shibboleth IDP acts as a SAML Identity Provider while delegating actual user
 
 ## Version Information
 
-- **Shibboleth IDP Version**: 5.1.6 (released January 2025)
+- **Shibboleth IDP Version**: 5.1.6 (released August 26, 2024)
 - **Servlet Container**: Jetty 12.0.25
-- **Java Version**: OpenJDK 17
+- **Java Version**: OpenJDK 11
 
 ## Quick Start
 

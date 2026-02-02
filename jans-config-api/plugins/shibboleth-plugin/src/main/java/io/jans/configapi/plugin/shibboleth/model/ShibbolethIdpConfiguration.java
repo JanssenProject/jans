@@ -7,7 +7,6 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
-import java.util.List;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")

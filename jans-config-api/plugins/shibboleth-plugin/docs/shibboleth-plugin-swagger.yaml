@@ -13,6 +13,9 @@ info:
 servers:
 - url: https://jans.io
   description: The Jans server
+security:
+- oauth2:
+  - https://jans.io/oauth/config/shibboleth.readonly
 tags:
 - name: Shibboleth IDP - Config Management
   description: Manage Shibboleth Identity Provider configuration
@@ -70,17 +73,31 @@ paths:
       tags:
       - Shibboleth IDP - Config Management
       summary: Gets trusted service providers
-      description: Gets list of trusted SAML service providers
+      description: Gets paginated list of trusted SAML service providers
       operationId: get-shibboleth-trust
+      parameters:
+      - name: limit
+        in: query
+        description: Maximum number of results to return
+        required: false
+        schema:
+          type: integer
+          default: 50
+          maximum: 200
+      - name: offset
+        in: query
+        description: Number of results to skip for pagination
+        required: false
+        schema:
+          type: integer
+          default: 0
       responses:
         "200":
           description: Trusted service providers
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TrustedServiceProvider"
+                $ref: "#/components/schemas/TrustedServiceProviderPage"
         "401":
           description: Unauthorized
         "500":
@@ -127,10 +144,13 @@ paths:
       parameters:
       - name: entityId
         in: path
-        description: Entity ID of the service provider
+        description: |
+          Entity ID of the service provider. Must be URL-encoded since SAML entity IDs are URLs.
+          Example: encode https://sp.example.org as https%3A%2F%2Fsp.example.org
         required: true
         schema:
           type: string
+        example: https%3A%2F%2Fsp.example.org
       responses:
         "200":
           description: Trusted service provider
@@ -156,10 +176,13 @@ paths:
       parameters:
       - name: entityId
         in: path
-        description: Entity ID of the service provider
+        description: |
+          Entity ID of the service provider. Must be URL-encoded since SAML entity IDs are URLs.
+          Example: encode https://sp.example.org as https%3A%2F%2Fsp.example.org
         required: true
         schema:
           type: string
+        example: https%3A%2F%2Fsp.example.org
       requestBody:
         description: TrustedServiceProvider object
         content:
@@ -192,10 +215,13 @@ paths:
       parameters:
       - name: entityId
         in: path
-        description: Entity ID of the service provider
+        description: |
+          Entity ID of the service provider. Must be URL-encoded since SAML entity IDs are URLs.
+          Example: encode https://sp.example.org as https%3A%2F%2Fsp.example.org
         required: true
         schema:
           type: string
+        example: https%3A%2F%2Fsp.example.org
       responses:
         "204":
           description: Deleted
@@ -239,64 +265,99 @@ components:
       properties:
         entityId:
           type: string
-          description: IDP Entity ID (SAML EntityDescriptor entityID)
-          example: https://idp.example.com/idp/shibboleth
+          description: IDP Entity ID
+          example: https://idp.example.org/idp/shibboleth
         scope:
           type: string
-          description: IDP scope for scoped attributes
-          example: example.com
-        enabled:
-          type: boolean
-          description: Whether IDP is enabled
-          default: true
-        metadataUrl:
+          description: Scope for released attributes
+          example: example.org
+        organizationName:
           type: string
-          description: URL to IDP metadata
-          example: https://idp.example.com/idp/shibboleth
-        signingKeyAlias:
+          description: Organization name
+        organizationDisplayName:
           type: string
-          description: Alias for signing key in keystore
-          default: idp-signing
-        encryptionKeyAlias:
+          description: Organization display name
+        organizationUrl:
           type: string
-          description: Alias for encryption key in keystore
-          default: idp-encryption
-        jansAuthEnabled:
-          type: boolean
-          description: Whether Janssen Auth integration is enabled
-          default: true
+          description: Organization URL
+        technicalContact:
+          type: string
+          description: Technical contact email
+        signingCertificate:
+          type: string
+          description: IDP signing certificate (PEM format)
+        encryptionCertificate:
+          type: string
+          description: IDP encryption certificate (PEM format)
+        metadataValidUntil:
+          type: integer
+          description: Metadata validity period in hours
+          default: 168
+        sessionTimeout:
+          type: integer
+          description: Session timeout in seconds
+          default: 1800
+        assertionLifetime:
+          type: integer
+          description: SAML assertion lifetime in seconds
+          default: 300
+        jansAuthServerUrl:
+          type: string
+          description: Janssen Auth Server URL for authentication delegation
         jansAuthClientId:
           type: string
-          description: OAuth client ID for Janssen Auth integration
+          description: OAuth client ID for Janssen Auth Server
         jansAuthScopes:
-          type: string
-          description: OAuth scopes for Janssen Auth integration
-          example: openid,profile,email
+          type: array
+          description: OAuth scopes to request from Janssen Auth Server
+          items:
+            type: string
+          default:
+          - openid
+          - profile
+          - email
+    TrustedServiceProviderPage:
+      type: object
+      description: Paginated list of trusted service providers
+      properties:
+        total:
+          type: integer
+          description: Total number of trusted service providers
+        offset:
+          type: integer
+          description: Current offset
+        limit:
+          type: integer
+          description: Page size
+        items:
+          type: array
+          description: List of trusted service providers
+          items:
+            $ref: "#/components/schemas/TrustedServiceProvider"
     TrustedServiceProvider:
       type: object
-      description: Trusted SAML Service Provider configuration
+      description: Trusted SAML service provider
       required:
       - entityId
       - name
       properties:
         entityId:
           type: string
-          description: SP Entity ID
+          description: SP Entity ID (unique identifier)
           example: https://sp.example.org
         name:
           type: string
-          description: Display name
-          example: Example Service Provider
+          description: Human-readable name for the SP
         description:
           type: string
-          description: Description
+          description: Description of the service provider
         enabled:
           type: boolean
-          description: Whether SP is enabled
+          description: Whether this SP is enabled
           default: true
         metadataUrl:
           type: string
-          description: URL to SP metadata
+          description: URL to fetch SP metadata
           example: https://sp.example.org/metadata
         metadataFile:
           type: string

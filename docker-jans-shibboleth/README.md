@@ -25,6 +25,8 @@ The Janssen Shibboleth IDP container provides:
 | `CN_MAX_RAM_PERCENTAGE` | Maximum RAM percentage for JVM | `75` | entrypoint.sh |
 | `CN_HEALTH_CHECK_INTERVAL` | Interval in seconds for health checks | `30` | healthcheck.py |
 | `CN_SHIBBOLETH_PORT` | HTTP port for IDP health check | `8080` | healthcheck.py |
+| `CN_DEV_MODE` | Enable development mode (allows default sealer password) | `false` | shib_setup.py |
+| `IDP_SEALER_PASSWORD` | Sealer keystore password (required in production) | - | shib_setup.py |
 
 ## Volumes
 

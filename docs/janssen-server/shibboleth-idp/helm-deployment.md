@@ -18,6 +18,8 @@ This guide covers deploying the Janssen Shibboleth IDP on Kubernetes using Helm.
 - PersistentVolume provisioner (for configuration storage)
 - Ingress controller (nginx, traefik, etc.)
 
+> **Note**: The ingress-nginx project (kubernetes/ingress-nginx) is in maintenance mode and will not receive new releases after March 2026. For new deployments, consider using Gateway API implementations or maintained controllers such as Traefik, Contour, or service meshes (e.g., Istio).
+
 ## Add Janssen Helm Repository
 
 ```bash
@@ -34,7 +36,7 @@ helm install janssen janssen/janssen \
   --namespace janssen \
   --create-namespace \
   --set global.fqdn=auth.example.com \
-  --set shibboleth-idp.enabled=true
+  --set global.shibboleth-idp.enabled=true
 ```
 
 ### Custom Values File
@@ -255,13 +257,15 @@ helm uninstall janssen --namespace janssen
 ### Pod Not Starting
 
 Check pod events:
+
 ```bash
-kubectl describe pod -n janssen -l app=shibboleth-idp
+kubectl describe pod -n janssen -l app.kubernetes.io/name=shibboleth-idp
 ```
 
 ### Configuration Issues
 
 Check configuration:
+
 ```bash
 kubectl exec -n janssen -it deployment/shibboleth-idp -- cat /opt/shibboleth-idp/conf/idp.properties
 ```
@@ -269,6 +273,7 @@ kubectl exec -n janssen -it deployment/shibboleth-idp -- cat /opt/shibboleth-idp
 ### Authentication Failures
 
 Check logs for authentication errors:
+
 ```bash
-kubectl logs -n janssen -l app=shibboleth-idp | grep -i "authn\|error"
+kubectl logs -n janssen -l app.kubernetes.io/name=shibboleth-idp | grep -i "authn\|error"
 ```

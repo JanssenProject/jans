@@ -41,7 +41,7 @@ docker run -d \
   -e CN_AUTH_SERVER_URL=https://auth.example.com \
   -e CN_CONFIG_ADAPTER=consul \
   -e CN_CONSUL_HOST=consul:8500 \
-  janssenproject/shibboleth:5.1.6_dev
+  janssenproject/shibboleth:<version>
 ```
 
 ### Environment Variables
@@ -59,10 +59,9 @@ docker run -d \
 ### Docker Compose Example
 
 ```yaml
-version: '3.8'
 services:
   shibboleth:
-    image: janssenproject/shibboleth:5.1.6_dev
+    image: janssenproject/shibboleth:<version>
     container_name: jans-shibboleth
     ports:
       - "8080:8080"
@@ -133,15 +132,15 @@ dnf install java-17-openjdk
 
 ```bash
 cd /opt
-wget https://shibboleth.net/downloads/identity-provider/5.1.6/shibboleth-identity-provider-5.1.6.tar.gz
-tar xzf shibboleth-identity-provider-5.1.6.tar.gz
+wget https://shibboleth.net/downloads/identity-provider/5.2.0/shibboleth-identity-provider-5.2.0.tar.gz
+tar xzf shibboleth-identity-provider-5.2.0.tar.gz
 ```
 
 3. **Install Jetty 12**
 
 ```bash
-wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/12.0.25/jetty-home-12.0.25.tar.gz
-tar xzf jetty-home-12.0.25.tar.gz -C /opt
+wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/12.0.31/jetty-home-12.0.31.tar.gz
+tar xzf jetty-home-12.0.31.tar.gz -C /opt
 ```
 
 4. **Deploy Janssen Integration**

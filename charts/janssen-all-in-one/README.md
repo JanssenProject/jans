@@ -187,7 +187,7 @@ Kubernetes: `>=v1.23.0-0`
 | config-api.ingress | object | `{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | config-api.ingress.configApiAdditionalAnnotations | object | `{}` | ConfigAPI ingress resource additional annotations. |
 | config-api.ingress.configApiLabels | object | `{}` | configAPI ingress resource labels. key app is taken |
-| config-api.plugins | string | `"fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt") |
+| config-api.plugins | string | `"fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
 | config.enabled | bool | `true` | Boolean flag to enable/disable the configuration job. This normally should never be false |
 | configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
 | configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes |
@@ -238,6 +238,17 @@ Kubernetes: `>=v1.23.0-0`
 | configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
 | configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
+| configmap.kcAdminPassword | string | `"Test1234#"` | Keycloak  admin UI password |
+| configmap.kcAdminUsername | string | `"admin"` | Keycloak admin UI username |
+| configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
+| configmap.kcDbSchema | string | `"keycloak"` | Keycloak database schema name (note that PostgreSQL may using "public" schema). |
+| configmap.kcDbUrlDatabase | string | `"keycloak"` | Keycloak database name |
+| configmap.kcDbUrlHost | string | `"mysql.kc.svc.cluster.local"` | Keycloak database host |
+| configmap.kcDbUrlPort | int | `3306` | Keycloak database port (default to port 3306 for mysql). |
+| configmap.kcDbUrlProperties | string | `"?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"` | Keycloak database connection properties. If using postgresql, the value can be set to empty string. |
+| configmap.kcDbUsername | string | `"keycloak"` | Keycloak database username |
+| configmap.kcDbVendor | string | `"mysql"` | Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres. |
+| configmap.kcLogLevel | string | `"INFO"` | Keycloak logging level |
 | configmap.lbAddr | string | `""` | Load balancer address for AWS if the FQDN is not registered. |
 | configmap.quarkusTransactionEnableRecovery | bool | `true` | Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details. |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |
@@ -387,23 +398,6 @@ Kubernetes: `>=v1.23.0-0`
 | service.sessionAffinity | string | `"None"` | Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP |
 | service.sessionAffinityConfig | object | `{"clientIP":{"timeoutSeconds":10800}}` | the maximum session sticky time if sessionAffinity is ClientIP |
 | serviceAccountName | string | `"default"` | service account used by Kubernetes resources |
-| shibboleth.appLoggers | object | `{"enableStdoutLogPrefix":"true","shibbolethLogLevel":"INFO","shibbolethLogTarget":"STDOUT"}` | Application loggers settings |
-| shibboleth.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e shibboleth ===> 2022-12-20 17:49:55,744 INFO |
-| shibboleth.appLoggers.shibbolethLogLevel | string | `"INFO"` | shibboleth.log level |
-| shibboleth.appLoggers.shibbolethLogTarget | string | `"STDOUT"` | shibboleth.log target |
-| shibboleth.cnCustomJavaOptions | string | `""` | passing custom java options to Shibboleth IDP. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs. |
-| shibboleth.enabled | bool | `false` | Boolean flag to enable/disable the Shibboleth IDP. |
-| shibboleth.entityId | string | `""` | IDP entity ID (defaults to https://<hostname>/idp/shibboleth) |
-| shibboleth.httpHost | string | `"127.0.0.1"` | Shibboleth IDP HTTP host |
-| shibboleth.httpPort | int | `8086` | Shibboleth IDP HTTP port |
-| shibboleth.ingress | object | `{"shibbolethAdditionalAnnotations":{},"shibbolethEnabled":false,"shibbolethLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
-| shibboleth.ingress.shibbolethAdditionalAnnotations | object | `{}` | Shibboleth IDP ingress resource additional annotations. |
-| shibboleth.ingress.shibbolethEnabled | bool | `false` | Enable Shibboleth IDP endpoints /idp |
-| shibboleth.ingress.shibbolethLabels | object | `{}` | Shibboleth IDP ingress resource labels. key app is taken |
-| shibboleth.jansAuthEnabled | bool | `true` | Enable authentication via Janssen Auth Server |
-| shibboleth.jansAuthScopes | string | `"openid,profile,email"` | OAuth scopes for Janssen Auth Server authentication |
-| shibboleth.scope | string | `""` | IDP scope for attribute release |
-| shibboleth.shibbolethServiceName | string | `"shibboleth-idp"` | Name of the shibboleth service. Please keep it as default. |
 | state | string | `"TX"` | State code. Used for certificate creation. |
 | testEnviroment | bool | `false` | Boolean flag if enabled will strip resources requests and limits from all services. |
 | tolerations | list | `[]` | Add tolerations for the pods |

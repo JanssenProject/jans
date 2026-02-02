@@ -8,6 +8,7 @@ import io.jans.configapi.plugin.shibboleth.util.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -62,7 +65,7 @@ public class ShibbolethResource {
     @PUT
     @Path("/config")
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_WRITE_ACCESS })
-    public Response updateConfiguration(ShibbolethIdpConfiguration configuration) {
+    public Response updateConfiguration(@Valid @NotNull ShibbolethIdpConfiguration configuration) {
         logger.info("PUT /shibboleth/config");
         shibbolethService.updateConfiguration(configuration);
         return Response.ok(configuration).build();
@@ -72,7 +75,7 @@ public class ShibbolethResource {
             "Shibboleth IDP - Config Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SHIBBOLETH_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Trusted service providers", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustedServiceProvider.class))),
+            @ApiResponse(responseCode = "200", description = "Trusted service providers", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustedServiceProvider.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
     @GET
@@ -99,11 +102,11 @@ public class ShibbolethResource {
             @Parameter(description = "Entity ID of the service provider") @PathParam("entityId") String entityId) {
         logger.debug("GET /shibboleth/trust/{}", entityId);
         TrustedServiceProvider provider = shibbolethService.getTrustedServiceProvider(entityId);
-        
+
         if (provider == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         return Response.ok(provider).build();
     }
 
@@ -118,16 +121,22 @@ public class ShibbolethResource {
     @POST
     @Path("/trust")
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_WRITE_ACCESS })
-    public Response addTrustedServiceProvider(TrustedServiceProvider serviceProvider) {
+    public Response addTrustedServiceProvider(@Valid @NotNull TrustedServiceProvider serviceProvider) {
         logger.info("POST /shibboleth/trust");
-        
+
+        if (serviceProvider.getEntityId() == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Entity ID is required")
+                    .build();
+        }
+
         TrustedServiceProvider existing = shibbolethService.getTrustedServiceProvider(serviceProvider.getEntityId());
         if (existing != null) {
             return Response.status(Response.Status.CONFLICT)
                     .entity("Service Provider with this entity ID already exists")
                     .build();
         }
-        
+
         shibbolethService.addTrustedServiceProvider(serviceProvider);
         return Response.status(Response.Status.CREATED).entity(serviceProvider).build();
     }
@@ -145,14 +154,14 @@ public class ShibbolethResource {
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_WRITE_ACCESS })
     public Response updateTrustedServiceProvider(
             @Parameter(description = "Entity ID of the service provider") @PathParam("entityId") String entityId,
-            TrustedServiceProvider serviceProvider) {
+            @Valid @NotNull TrustedServiceProvider serviceProvider) {
         logger.info("PUT /shibboleth/trust/{}", entityId);
-        
+
         TrustedServiceProvider existing = shibbolethService.getTrustedServiceProvider(entityId);
         if (existing == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         serviceProvider.setEntityId(entityId);
         shibbolethService.updateTrustedServiceProvider(serviceProvider);
         return Response.ok(serviceProvider).build();
@@ -172,12 +181,12 @@ public class ShibbolethResource {
     public Response deleteTrustedServiceProvider(
             @Parameter(description = "Entity ID of the service provider") @PathParam("entityId") String entityId) {
         logger.info("DELETE /shibboleth/trust/{}", entityId);
-        
+
         TrustedServiceProvider existing = shibbolethService.getTrustedServiceProvider(entityId);
         if (existing == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         shibbolethService.deleteTrustedServiceProvider(entityId);
         return Response.noContent().build();
     }
@@ -196,8 +205,6 @@ public class ShibbolethResource {
     @ProtectedApi(scopes = { Constants.SHIBBOLETH_READ_ACCESS })
     public Response getIdpMetadata() {
         logger.debug("GET /shibboleth/metadata");
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .entity("IDP metadata retrieval not yet implemented")
-                .build();
+        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
 }

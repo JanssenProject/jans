@@ -152,10 +152,10 @@ helm install janssen charts/janssen \
   --set global.cnPersistenceType=sql
 
 # Wait for pods
-kubectl wait --for=condition=ready pod -l app=shibboleth-idp -n jans-test --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=shibboleth-idp -n jans-test --timeout=300s
 
 # Check status
-kubectl get pods -n jans-test -l app=shibboleth-idp
+kubectl get pods -n jans-test -l app.kubernetes.io/name=shibboleth-idp
 ```
 
 ### Verify IDP Status
