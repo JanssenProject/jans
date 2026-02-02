@@ -318,7 +318,8 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub trusted_issuer_loader_type: TrustedIssuerLoaderTypeRaw,
-    /// Number of concurrent workers used to asynchronously load trusted issuers.
+    /// Number of concurrent workers to use when loading trusted issuers.
+    /// Applies to both SYNC (parallel loading during initialization) and ASYNC (parallel background loading) modes.
     /// Default value is 1.
     /// Zero will be treated as default value.
     #[serde(

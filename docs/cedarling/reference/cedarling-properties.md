@@ -60,7 +60,7 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 
 - **`CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`** : `SYNC` | `ASYNC` -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. Async loader means that trusted issuers will be loaded in background. Default is `SYNC`.
 
-- **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers used to asynchronously load trusted issuers. Default value is 1. Zero will be treated as default value.
+- **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers to use when loading trusted issuers. Applies to both `SYNC` (parallel loading during initialization) and `ASYNC` (parallel background loading) modes. Default value is 1. Zero will be treated as default value.
 
 **Cedar Entity Mapping properties**
 
