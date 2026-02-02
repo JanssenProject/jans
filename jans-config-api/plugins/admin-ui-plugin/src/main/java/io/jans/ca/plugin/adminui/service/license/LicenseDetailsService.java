@@ -60,6 +60,7 @@ public class LicenseDetailsService extends BaseService {
     public static final String LICENSE_APIS_404 = "The requested license apis not found. Response Code: 404";
     public static final String LICENSE_APIS_503 = "The requested license apis not available. Response Code: 503";
     public static final String TRIAL_GENERATE_ERROR_RESPONSE = "Generate Trial license error response";
+    public static final String HTTP_RESPONSE_IS_NULL = "HTTP request failed, no response received";
 
     /**
      * Validates the license configuration by checking for the presence of required parameters.
@@ -299,8 +300,8 @@ public class LicenseDetailsService extends BaseService {
             String jsonString = null;
             try {
                 if (httpServiceResponse == null) {
-                    log.error("HTTP request failed, no response received");
-                    return CommonUtils.createGenericResponse(false, 500, "HTTP request failed");
+                    log.error(HTTP_RESPONSE_IS_NULL);
+                    return CommonUtils.createGenericResponse(false, 500, HTTP_RESPONSE_IS_NULL);
                 }
                 if (httpServiceResponse.getHttpResponse() != null
                         && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -434,6 +435,10 @@ public class LicenseDetailsService extends BaseService {
                             null);
             String jsonString = null;
             try {
+                if (httpServiceResponse == null) {
+                    log.error(HTTP_RESPONSE_IS_NULL);
+                    return CommonUtils.createGenericResponse(false, 500, HTTP_RESPONSE_IS_NULL);
+                }
                 if (httpServiceResponse.getHttpResponse() != null
                         && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
@@ -528,6 +533,10 @@ public class LicenseDetailsService extends BaseService {
 
             String jsonString = null;
             try {
+                if (httpServiceResponse == null) {
+                    log.error(HTTP_RESPONSE_IS_NULL);
+                    return CommonUtils.createGenericResponse(false, 500, HTTP_RESPONSE_IS_NULL);
+                }
                 if (httpServiceResponse.getHttpResponse() != null
                         && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
                     logHttpResponse(activateLicenseUrl, httpServiceResponse);
@@ -705,6 +714,10 @@ public class LicenseDetailsService extends BaseService {
                             BEARER);
             String jsonString = null;
             try {
+                if (httpServiceResponse == null) {
+                    log.error(HTTP_RESPONSE_IS_NULL);
+                    return CommonUtils.createGenericResponse(false, 500, HTTP_RESPONSE_IS_NULL);
+                }
                 if (httpServiceResponse.getHttpResponse() != null
                         && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
                     logHttpResponse(trialLicenseUrl, httpServiceResponse);
