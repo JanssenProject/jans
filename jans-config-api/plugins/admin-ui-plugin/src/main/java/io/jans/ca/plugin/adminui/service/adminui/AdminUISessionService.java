@@ -187,14 +187,14 @@ public class AdminUISessionService {
     }
 
     /**
-     * Exchanges the provided token request parameters with the authorization server and returns the parsed token response.
-     *
-     * @param tokenRequest  the token request details (grant type, client credentials, redirect URI, optional code and PKCE verifier)
-     * @param tokenEndpoint the token endpoint URL to call
-     * @param userInfoJwt   optional user-info JWT to include in the request as `ujwt`
-     * @return              a map of token response parameters (for example `access_token`, `expires_in`), with any `token_type` entry removed; returns an empty map if the exchange fails
-     * @throws ConfigApiApplicationException if the token endpoint response cannot be parsed as JSON
-     */
+         * Exchange token request parameters with the authorization server and return parsed token response parameters.
+         *
+         * @param tokenRequest  token request details (grant type, client credentials, redirect URI; may include authorization code and PKCE verifier)
+         * @param tokenEndpoint the token endpoint URL to call
+         * @param userInfoJwt   optional user-info JWT to include as the `ujwt` parameter
+         * @return              a map of token response parameters (for example `access_token`, `expires_in`) with any `token_type` entry removed
+         * @throws ConfigApiApplicationException if the HTTP exchange fails or the response cannot be parsed as JSON
+         */
     public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws ConfigApiApplicationException {
 
         try {

@@ -131,19 +131,14 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * Synchronizes the OIDC client details used to access the License API on Agama Lab.
-     * <p>
-     * This method attempts to synchronize the OIDC client details required to access the License API.
-     * It first tries to generate an access token using the existing client credentials. If that fails,
-     * it attempts to re-generate the client credentials using the provided SSA (Software Statement Assertion)
-     * and persists the newly generated client details.
-     *
-     * @param licenseConfig The license configuration containing OIDC client details and SSA.
-     * @return A GenericResponse object indicating the success or failure of the synchronization.
-     * - Returns a successful response (true, 200) if the OIDC client details are successfully synchronized.
-     * - Returns an error response (false, 500) if token generation fails, DCR (Dynamic Client Registration) fails,
-     * or saving the client details to persistence fails.
-     */
+         * Ensures the OIDC client credentials used to call the License API are valid and persisted.
+         *
+         * If the current client credentials fail to produce an access token, attempts Dynamic Client Registration
+         * (DCR) using the stored SSA to obtain new client credentials and saves them to persistence.
+         *
+         * @param licenseConfig the license configuration containing the OIDC client details and SSA
+         * @return a GenericResponse: `true` with status 200 when credentials are successfully synchronized; `false` with an error status and message otherwise
+         */
     private GenericResponse syncLicenseOIDCClientDetails(LicenseConfig licenseConfig) {
         log.info("Inside syncLicenseOIDCClientDetails: the method to sync OIDC client details used to access License API on Agama Lab.");
 
@@ -198,22 +193,14 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * Checks if the license details are valid and up-to-date.
-     * <p>
-     * This method retrieves the license configuration from the persistence layer and performs several checks:
-     * 1. It verifies the presence of essential license configuration parameters like hardware key, license key, and scan API hostname.
-     * 2. It checks if the license validity and last update dates are available. If not, it triggers a synchronization with Agama Lab.
-     * 3. It calculates the time elapsed since the last license details update and compares it with the configured synchronization interval.
-     * If the interval has passed, it initiates a synchronization.
-     * 4. It determines if the license has expired by comparing the current date with the license validity date.
-     * If expired, it triggers a synchronization.
-     * 5. If all checks pass, it constructs a JSON response containing custom attributes (specifically, the MAU threshold)
-     * and returns a success response.
+     * Verify that the stored license configuration is present, current, and not expired.
      *
-     * @return A GenericResponse object indicating the validity of the license and containing relevant license details.
-     * - Returns a successful response (true, 200) with license details if the license is valid and up-to-date.
-     * - Returns an error response (false, various error codes) if any configuration is missing, the license is invalid,
-     * or an exception occurs during the process.
+     * If the configuration is missing, incomplete, expired, or due for refresh, the method initiates synchronization
+     * with the license service and returns the corresponding error response. When the license is valid and up-to-date,
+     * the response contains custom attributes (including the `mau_threshold`) describing license limits.
+     *
+     * @return a `GenericResponse` with `true` and HTTP 200 containing license custom attributes (including `mau_threshold`)
+     *         when the license is valid; otherwise `false` with an appropriate HTTP error code and diagnostic message.
      */
     public GenericResponse checkLicense() {
         log.info("Inside checkLicense: the method to check if License details are valid.");
@@ -273,24 +260,16 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * Synchronizes license details from Agama Lab by checking the license status and updating local configurations.
-     * <p>
-     * This method retrieves the license configuration, checks the license status with Agama Lab's API,
-     * and updates the local license configuration with the retrieved details. It performs the following steps:
-     * 1. Retrieves the AUI and license configurations.
-     * 2. Validates the presence of hardware ID, scan API hostname, and license key.
-     * 3. Constructs the URL for checking the license status ("/isActive").
-     * 4. Generates an access token for accessing the Agama Lab API.
-     * 5. Sends a POST request to the Agama Lab API with the license key and hardware ID.
-     * 6. Parses the response, checks for license activity and expiry, and handles errors.
-     * 7. Updates the local license configuration with the details from the response.
-     * 8. Persists the updated license configuration in the persistence layer.
-     * 9. Returns a success response with license details or an error response with error messages.
+     * Synchronizes license details with Agama Lab and updates the local license configuration.
      *
-     * @return A GenericResponse object indicating the success or failure of the synchronization.
-     * - Returns a successful response (true, 200) with license details if the license is valid and synchronization is successful.
-     * - Returns an error response (false, various error codes) if any configuration is missing, the license is invalid,
-     * API access fails, or an exception occurs during the process.
+     * Checks the license status using the Agama Lab "/isActive" endpoint, persists updated license
+     * fields to the persistence layer and in-memory AUI configuration when the license is valid,
+     * and returns a result describing the outcome.
+     *
+     * @param auiConfiguration the current AUI configuration containing the license configuration to check and update
+     * @return a GenericResponse indicating the result; on success contains license details (custom fields) and status 200,
+     *         on failure contains an error code and message describing the problem (e.g., missing configuration, license not present,
+     *         expired, token generation or API access errors)
      */
     private GenericResponse syncLicenseDetailsFromAgamaLab(AUIConfiguration auiConfiguration) {
         log.info("Inside syncLicenseDetailsFromAgamaLab: the method to sync license details from Agama lab");
@@ -400,10 +379,15 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * The function `retrieveLicense()` retrieves a license using the provided configuration and returns a generic
-     * response.
+     * Retrieve license details from the configured License API.
      *
-     * @return The method `retrieveLicense()` returns a `GenericResponse` object.
+     * <p>Validates that the local license configuration contains a hardware ID and scan API hostname, obtains
+     * an access token, and queries the remote retrieve endpoint. On success returns a response containing
+     * `licenseKey` and `mauThreshold` in the response payload.</p>
+     *
+     * @return GenericResponse containing `licenseKey` and `mauThreshold` on success (HTTP 200); otherwise a
+     *         GenericResponse with an appropriate error code and message (for example, 402 for payment required,
+     *         404/503 when the license API is inaccessible, or 500 for other server-side errors).
      */
     public GenericResponse retrieveLicense() {
         log.info("Inside retrieveLicense method...");
@@ -492,11 +476,10 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * The function checks if the license is already active, if not, it creates a header map, creates a body map, and sends
-     * a POST request to the license server
+     * Activate a license with the configured License API and persist updated license details.
      *
-     * @param licenseRequest The license key that you received from the license server.
-     * @return A LicenseApiResponse object.
+     * @param licenseRequest request containing the license key to activate
+     * @return a GenericResponse indicating success or failure; on success (HTTP 200) the response contains a message and the license's updated custom_fields, on failure the response contains an error message and an appropriate HTTP status code
      */
     public GenericResponse activateLicense(LicenseRequest licenseRequest) {
         Integer httpStatus = null;
@@ -599,15 +582,16 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * Sets the license configuration details from a JSON object entity.
-     * <p>
-     * This method populates the `LicenseConfiguration` object with data extracted from the provided `JsonObject`.
-     * It handles various license details, including license key, type, validity, product information, customer details,
-     * MAU threshold, and license status (expired and active).
+     * Populate the given LicenseConfiguration with values extracted from the provided JSON license entity.
      *
-     * @param entity               The `JsonObject` containing license details.
-     * @param licenseConfiguration The `LicenseConfiguration` object to be populated.
-     * @throws RuntimeException If an error occurs during the process of setting the license configuration.
+     * <p>The method reads fields such as license key, license type, validity period, product information,
+     * customer details, and the MAU threshold (extracted from a custom field named "mau_threshold"). It also
+     * sets the configuration's last-updated timestamp to the current date and updates license status flags.
+     *
+     * @param entity               JSONObject containing license data (expected keys include: "license_key",
+     *                             "license_type", "validity_period", "product_details", "customer", and "custom_fields").
+     * @param licenseConfiguration The LicenseConfiguration instance to populate.
+     * @throws RuntimeException if required data (for example, the "custom_fields" array) is missing or any parsing error occurs.
      */
     private void setToLicenseConfiguration(JSONObject entity, LicenseConfiguration licenseConfiguration) throws RuntimeException {
         try {
@@ -665,11 +649,16 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * This function generates a trial license by sending a request to a specified URL and saving the license key in the
-     * configuration.
-     *
-     * @return The method is returning a LicenseApiResponse object.
-     */
+         * Generates a trial license via the configured License API and saves the returned license key to persistence
+         * and the in-memory AUI configuration.
+         *
+         * <p>On success returns a response containing a JSON object with the `license-key`. On failure returns a response
+         * with an appropriate error code and message reflecting token generation failures, HTTP errors from the License API,
+         * missing fields in the API response, or internal server errors.</p>
+         *
+         * @return GenericResponse with status `true` and a JSON payload containing `license-key` on success;
+         *         `false` with an error code and message otherwise.
+         */
     public GenericResponse generateTrialLicense() {
         log.info("Inside generateTrialLicense: the method to generate trial license");
         Integer httpStatus = null;
@@ -863,16 +852,9 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * The function generates a token using client credentials and returns the token response.
+     * Generate an OAuth2 access token using the client credentials grant.
      *
-     * @param opHost       The `opHost` parameter represents the hostname or URL of the authorization server. It is used to
-     *                     construct the URL for the token endpoint.
-     * @param clientId     The `clientId` parameter is the unique identifier assigned to the client application by the
-     *                     authorization server. It is used to identify the client when making requests to the server.
-     * @param clientSecret The `clientSecret` parameter is a secret key that is used to authenticate the client application
-     *                     when requesting an access token from the authorization server. It is typically provided by the authorization server
-     *                     when registering the client application.
-     * @return The method is returning a `io.jans.as.client.TokenResponse` object.
+     * @returns the TokenResponse containing the access token and related metadata, or `null` if token generation failed.
      */
     private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret) {
         try {
@@ -894,6 +876,12 @@ public class LicenseDetailsService extends BaseService {
         }
     }
 
+    /**
+     * Map HTTP status codes indicating license API unavailability to a standardized error response.
+     *
+     * @param httpStatus the HTTP status code returned by the license API; may be {@code null}
+     * @return an {@code Optional} containing a {@link GenericResponse} for status {@code 404} or {@code 503}, {@code Optional.empty()} if {@code httpStatus} is {@code null} or any other code
+     */
     private Optional<GenericResponse> handleLicenseApiNotAccessible(Integer httpStatus) {
         if (httpStatus == null) {
             return Optional.empty();
@@ -909,6 +897,14 @@ public class LicenseDetailsService extends BaseService {
         return Optional.empty();
     }
 
+    /**
+     * Verifies that the given JSON object contains the specified field names and produces an error response if any are missing.
+     *
+     * @param entity the JSON object to inspect for required fields
+     * @param format a printf-style format string used to build the error message when fields are missing; it should contain one placeholder for the comma-separated missing field list
+     * @param args   the names of required fields to check for presence in {@code entity}
+     * @return       an {@code Optional} containing a {@code GenericResponse} with HTTP status 500 and a formatted message listing missing fields if any are absent, or {@code Optional.empty()} if all fields are present
+     */
     private Optional<GenericResponse> handleMissingFieldsInResponse(JSONObject entity, String format, String...
             args) {
         StringBuilder missingFields = new StringBuilder();
@@ -924,12 +920,24 @@ public class LicenseDetailsService extends BaseService {
     }
 
     /**
-     * Handles API URL format
+     * Builds a full License API URL by combining the Scan API hostname with the specified license endpoint.
+     *
+     * @param scanApiHostname the Scan API hostname or base URL (may include or omit a trailing slash)
+     * @param endpoint        the license endpoint path (should begin with a slash, e.g. "/activate")
+     * @return                the normalized full URL for the License API (e.g. "{host}/v1/license{endpoint}")
      */
     private String formatApiUrl(String scanApiHostname, String endpoint) {
         return StringUtils.removeEnd(scanApiHostname, "/") + "/v1/license" + endpoint;
     }
 
+    /**
+     * Logs detailed information about an HTTP response for the given request URL when debug logging is enabled.
+     *
+     * If debug logging is disabled or the provided response is null, this method returns without side effects.
+     *
+     * @param url      the request URL that was called
+     * @param response the HttpServiceResponse containing the underlying HTTP response and metadata
+     */
     private void logHttpResponse(String url, HttpServiceResponse response) {
         if (!log.isDebugEnabled() || response == null) {
             return;
