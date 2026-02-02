@@ -23,14 +23,14 @@ pub(super) struct IssuerIndex {
 }
 
 impl IssuerIndex {
-    /// Create a new, empty IssuerIndex
+    /// Create a new, empty `IssuerIndex`
     pub(super) fn new() -> Self {
         Self {
             index: RwLock::new(HashMap::new()),
         }
     }
 
-    /// Insert or update an IssuerConfig for a given iss claim
+    /// Insert or update an `IssuerConfig` for a given iss claim
     pub(super) fn insert(&self, iss: IssClaim, config: IssuerConfig) {
         let mut index = self.index.write().expect(MUTEX_POISONED_ERR);
         index.insert(iss, config);
