@@ -73,7 +73,7 @@ impl TrustedIssuerValidator {
     pub(crate) fn new(trusted_issuers: HashMap<String, TrustedIssuer>) -> Self {
         // Build reverse lookup map: OIDC base URL -> issuer
         let mut url_to_issuer = HashMap::with_capacity(trusted_issuers.len());
-        for issuer in trusted_issuers.into_iter().map(|(_id, ti)| Arc::new(ti)) {
+        for issuer in trusted_issuers.into_values().map(Arc::new) {
             url_to_issuer.insert(issuer.iss_claim(), issuer);
         }
 
