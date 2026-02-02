@@ -114,8 +114,6 @@ impl BootstrapConfig {
             })
             .transpose()?;
 
-        // Determine trusted issuer loader configuration
-        // if the async worker count is zero or None, use synchronous loading
         let trusted_issuer_workers = NonZeroUsize::new(raw.trusted_issuer_loader_workers)
             .unwrap_or_else(|| unsafe { NonZeroUsize::new_unchecked(1) });
 
