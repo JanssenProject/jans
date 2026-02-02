@@ -207,8 +207,7 @@ public class BaseService {
                         dcrResponse.setHardwareId(hardwareId);
                         if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
                             dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
-                        }
-                        if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
+                        } else if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
                             dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
                         }
                         return dcrResponse;

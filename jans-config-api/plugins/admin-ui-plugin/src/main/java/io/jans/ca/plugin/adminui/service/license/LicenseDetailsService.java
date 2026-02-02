@@ -531,7 +531,6 @@ public class LicenseDetailsService extends BaseService {
                 if (httpServiceResponse.getHttpResponse() != null
                         && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
                     logHttpResponse(activateLicenseUrl, httpServiceResponse);
-                    ObjectMapper mapper = new ObjectMapper();
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                     httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
                     if (httpEntity == null) {
