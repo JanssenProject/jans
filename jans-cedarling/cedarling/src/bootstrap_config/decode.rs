@@ -134,7 +134,7 @@ impl BootstrapConfig {
             id_token_trust_mode: raw.id_token_trust_mode.clone(),
         };
 
-        // Build `DataStoreConfig` if any data store fields are set
+        // Build `DataStoreConfig` from raw config, using defaults if not specified
         let data_store_config = build_data_store_config(raw);
 
         Ok(Self {
@@ -153,24 +153,11 @@ impl BootstrapConfig {
 }
 
 /// Build `DataStoreConfig` from raw config fields.
-/// Returns `Some(DataStoreConfig)` if any data store fields are set,
-/// `None` otherwise (will use default config).
-fn build_data_store_config(raw: &BootstrapConfigRaw) -> Option<DataStoreConfig> {
-    // Check if any data store config fields are set
-    let has_config = raw.data_store_max_entries.is_some()
-        || raw.data_store_max_entry_size.is_some()
-        || raw.data_store_default_ttl.is_some()
-        || raw.data_store_max_ttl.is_some()
-        || raw.data_store_enable_metrics.is_some()
-        || raw.data_store_memory_alert_threshold.is_some();
-
-    if !has_config {
-        return None;
-    }
-
+/// Uses default values for any fields that are not specified.
+fn build_data_store_config(raw: &BootstrapConfigRaw) -> DataStoreConfig {
     let defaults = DataStoreConfig::default();
 
-    Some(DataStoreConfig {
+    DataStoreConfig {
         max_entries: raw.data_store_max_entries.unwrap_or(defaults.max_entries),
         max_entry_size: raw
             .data_store_max_entry_size
@@ -188,7 +175,7 @@ fn build_data_store_config(raw: &BootstrapConfigRaw) -> Option<DataStoreConfig> 
         memory_alert_threshold: raw
             .data_store_memory_alert_threshold
             .unwrap_or(defaults.memory_alert_threshold),
-    })
+    }
 }
 
 /// Helper function to resolve log type from raw config

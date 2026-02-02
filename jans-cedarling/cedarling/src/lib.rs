@@ -159,8 +159,7 @@ impl Cedarling {
             })?;
 
         // Initialize data store first so it can be passed to authz service
-        let data_store_config = config.data_store_config.clone().unwrap_or_default();
-        let data = Arc::new(DataStore::new(data_store_config)?);
+        let data = Arc::new(DataStore::new(config.data_store_config.clone())?);
 
         let mut service_factory =
             ServiceFactory::new(config, service_config, log.clone(), data.clone());

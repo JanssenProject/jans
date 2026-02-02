@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling,
+    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
     EntityBuilderConfig, EntityData, IdTokenTrustMode, InitCedarlingError, JsonRule, JwtConfig,
     LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
@@ -124,7 +124,7 @@ async fn prepare_cedarling_with_jwt_validation(
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
-        data_store_config: None,
+        data_store_config: DataStoreConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

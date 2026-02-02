@@ -68,8 +68,7 @@ pub struct BootstrapConfig {
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
     pub max_base64_size: Option<usize>,
     /// Data store configuration for the pushed data API.
-    /// If `None`, uses default configuration values.
-    pub data_store_config: Option<DataStoreConfig>,
+    pub data_store_config: DataStoreConfig,
 }
 
 impl BootstrapConfig {

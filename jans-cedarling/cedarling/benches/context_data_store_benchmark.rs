@@ -12,9 +12,9 @@
 //! - Authorization with pushed data
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, EntityBuilderConfig, EntityData,
-    IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityBuilderConfig,
+    EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use serde::Deserialize;
@@ -106,7 +106,7 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
-    data_store_config: None,
+    data_store_config: DataStoreConfig::default(),
 });
 
 // Custom principal operator for TestPrincipal
@@ -140,7 +140,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
-    data_store_config: None,
+    data_store_config: DataStoreConfig::default(),
 });
 
 // =============================================================================

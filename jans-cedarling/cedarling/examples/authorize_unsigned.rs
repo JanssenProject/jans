@@ -4,9 +4,10 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
-    EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned, log_config::StdOutLoggerMode,
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    log_config::StdOutLoggerMode,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -49,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
-        data_store_config: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 
