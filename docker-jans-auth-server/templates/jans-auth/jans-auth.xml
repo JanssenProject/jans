@@ -2,7 +2,7 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_10_0.dtd">
 
 <Configure class="org.eclipse.jetty.ee9.webapp.WebAppContext">
-    <Set name="contextPath">/jans-auth</Set>
+    <Set name="contextPath">/</Set>
     <Set name="war">
         <Property name="jetty.webapps" default="." />/jans-auth.war
     </Set>

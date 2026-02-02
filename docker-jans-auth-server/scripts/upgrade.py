@@ -54,7 +54,7 @@ def _transform_lock_dynamic_config(conf, manager):
         }),
         ("auditPersistenceMode", "internal"),
         ("grpcConfiguration", {
-            "serverMode": "bridge"
+            "serverMode": "bridge",
         }),
     ]:
         if missing_key not in conf:

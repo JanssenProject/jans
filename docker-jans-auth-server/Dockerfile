@@ -54,7 +54,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-12-18 08:20'
+ENV CN_BUILD_DATE='2026-01-29 08:22'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -95,8 +95,8 @@ RUN set -e \
 # dependencies to run jans-lock as plugin
 RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
     && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/custom/libs \
-    && rm -f ${JETTY_BASE}/jans-auth/custom/libs/grpc-bridge-runtime-*.jar \
     && rm -f /tmp/lock-svc-deps.zip
+    # && rm -f ${JETTY_BASE}/jans-auth/custom/libs/grpc-bridge-runtime-*.jar \
 
 # ===========
 # Assets sync
@@ -109,7 +109,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
+ENV JANS_SOURCE_VERSION=69e5364246941660916bd41527642340aff4228e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
