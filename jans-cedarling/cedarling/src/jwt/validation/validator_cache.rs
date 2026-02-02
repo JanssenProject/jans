@@ -277,10 +277,7 @@ impl OwnedValidatorInfo {
     ///
     /// Used to resolve hash collisions in the store.
     fn is_equal_to(&self, other: &ValidatorInfo<'_>) -> bool {
-        if let Some(iss1) = &self.iss
-            && let Some(iss2) = other.iss
-            && iss1 != iss2
-        {
+        if self.iss.as_ref() != other.iss {
             return false;
         }
 
