@@ -70,17 +70,16 @@ public class BaseService {
 
 
     /**
-     * Request an access token from the token endpoint using the provided TokenRequest.
-     * <p>
-     * Builds a form using fields from {@code tokenRequest} (code, scope, code_verifier, grant_type, redirect_uri,
-     * client_id) and includes {@code userInfoJwt} as the {@code ujwt} parameter when present, then POSTs the form to
-     * {@code tokenEndpoint} using the client credentials in {@code tokenRequest}.
+     * Sends a token request to the specified token endpoint using values from the provided TokenRequest.
      *
-     * @param tokenRequest  contains values used to construct the token request (authorization code, scope, PKCE verifier,
-     *                      grant type, redirect URI, client identifier, and encoded client credentials)
-     * @param tokenEndpoint the URL of the authorization server token endpoint to which the request will be sent
-     * @param userInfoJwt   optional JWT to include as the {@code ujwt} form parameter when present
-     * @return a {@code io.jans.as.client.TokenResponse} populated from the server JSON on HTTP 200, {@code null} otherwise
+     * Constructs a form from the token request fields (code, scope, code_verifier, grant_type, redirect_uri, client_id)
+     * and includes the optional `ujwt` parameter when `userInfoJwt` is provided, then POSTs the form to `tokenEndpoint`
+     * using the credentials from `tokenRequest`.
+     *
+     * @param tokenRequest  values used to build the token request (authorization code, PKCE verifier, grant type, redirect URI, client id, and encoded credentials)
+     * @param tokenEndpoint URL of the authorization server token endpoint
+     * @param userInfoJwt   optional JWT to include as the `ujwt` form parameter when present
+     * @return a TokenResponse populated from the endpoint JSON on HTTP 200; `null` otherwise
      */
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
 
