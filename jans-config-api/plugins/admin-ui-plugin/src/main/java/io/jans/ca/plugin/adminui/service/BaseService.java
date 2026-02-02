@@ -71,7 +71,7 @@ public class BaseService {
 
     /**
      * Sends a token request to the specified token endpoint using values from the provided TokenRequest.
-     *
+     * <p>
      * Constructs a form from the token request fields (code, scope, code_verifier, grant_type, redirect_uri, client_id)
      * and includes the optional `ujwt` parameter when `userInfoJwt` is provided, then POSTs the form to `tokenEndpoint`
      * using the credentials from `tokenRequest`.
@@ -191,7 +191,11 @@ public class BaseService {
                             httpServiceResponse.getHttpResponse().getEntity());
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                     httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 201 && httpEntity != null) {
+                    if (httpEntity == null) {
+                        log.error("{}: empty response body", "Error in DCR");
+                        return null;
+                    }
+                    if (httpStatus == 201) {
                         jsonString = httpService.getContent(httpEntity);
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());

@@ -308,7 +308,11 @@ public class LicenseDetailsService extends BaseService {
                     logHttpResponse(checkLicenseUrl, httpServiceResponse);
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                     httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 200 && httpEntity != null) {
+                    if (httpEntity == null) {
+                        log.error("{}: empty response body", LICENSE_ISACTIVE_ERROR_RESPONSE);
+                        return CommonUtils.createGenericResponse(false, 500, "Empty response body");
+                    }
+                    if (httpStatus == 200) {
                         jsonString = httpService.getContent(httpEntity);
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());
@@ -412,8 +416,10 @@ public class LicenseDetailsService extends BaseService {
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             }
 
-            String retriveLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/retrieve?org_id=") + licenseConfiguration.getHardwareId();
-
+            Map<String, String> query = new HashMap<>();
+            query.put("org_id", licenseConfiguration.getHardwareId());
+            String retriveLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/retrieve?") +
+                    CommonUtils.toUrlEncodedString(query);
             // Build the HttpClient
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
                     TLS_ALLOWED_CIPHER_SUITES);
@@ -434,7 +440,11 @@ public class LicenseDetailsService extends BaseService {
                     logHttpResponse(retriveLicenseUrl, httpServiceResponse);
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                     httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 200 && httpEntity != null) {
+                    if (httpEntity == null) {
+                        log.error("{}: empty response body", LICENSE_RETRIEVE_ERROR_RESPONSE);
+                        return CommonUtils.createGenericResponse(false, 500, "Empty response body");
+                    }
+                    if (httpStatus == 200) {
                         jsonString = httpService.getContent(httpEntity);
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());
@@ -450,6 +460,7 @@ public class LicenseDetailsService extends BaseService {
                     }
                     //getting error
                     jsonString = httpService.getContent(httpEntity);
+                    log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
                     JsonNode jsonNode = mapper.readValue(jsonString, JsonNode.class);
                     if (httpStatus == 402) {
                         log.error("Payment Required: 402");
@@ -461,7 +472,6 @@ public class LicenseDetailsService extends BaseService {
                         int code = jsonNode.path(CODE).asInt(500);
                         return CommonUtils.createGenericResponse(false, code, messageNode.textValue());
                     }
-                    log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonString);
                 }
             } finally {
                 if (httpServiceResponse != null) {
@@ -524,7 +534,11 @@ public class LicenseDetailsService extends BaseService {
                     ObjectMapper mapper = new ObjectMapper();
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                     httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 200 && httpEntity != null) {
+                    if (httpEntity == null) {
+                        log.error("{}: empty response body", LICENSE_ACTIVATE_ERROR_RESPONSE);
+                        return CommonUtils.createGenericResponse(false, 500, "Empty response body");
+                    }
+                    if (httpStatus == 200) {
                         jsonString = httpService.getContent(httpEntity);
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());
@@ -697,7 +711,11 @@ public class LicenseDetailsService extends BaseService {
                     logHttpResponse(trialLicenseUrl, httpServiceResponse);
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
                     httpStatus = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
-                    if (httpStatus == 200 && httpEntity != null) {
+                    if (httpEntity == null) {
+                        log.error("{}: empty response body", TRIAL_GENERATE_ERROR_RESPONSE);
+                        return CommonUtils.createGenericResponse(false, 500, "Empty response body");
+                    }
+                    if (httpStatus == 200) {
                         jsonString = httpService.getContent(httpEntity);
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());
