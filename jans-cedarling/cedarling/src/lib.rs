@@ -17,7 +17,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
-mod data;
+mod context_data_api;
 mod entity_builder;
 mod http;
 mod init;
@@ -36,8 +36,8 @@ mod tests;
 use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
-use crate::data::DataStore;
-pub use crate::data::{
+use crate::context_data_api::DataStore;
+pub use crate::context_data_api::{
     CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
     DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
     ValidationError, ValidationResult, ValueMappingError,

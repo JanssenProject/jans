@@ -8,7 +8,7 @@
 //! Provides bidirectional conversion between JSON values and Cedar values,
 //! with support for all Cedar data types including extension types.
 
-use crate::data::error::ValueMappingError;
+use crate::context_data_api::error::ValueMappingError;
 
 use super::CedarType;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
@@ -54,7 +54,7 @@ pub struct CedarValueMapper {
 
 impl CedarValueMapper {
     /// Create a new mapper with default settings.
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             auto_detect_extensions: true,
@@ -63,7 +63,7 @@ impl CedarValueMapper {
     }
 
     /// Create a mapper with auto-detection of extension types disabled.
-    #[must_use] 
+    #[must_use]
     pub fn new_without_auto_detect() -> Self {
         Self {
             auto_detect_extensions: false,
@@ -74,7 +74,7 @@ impl CedarValueMapper {
     /// Set the maximum allowed value size in bytes.
     ///
     /// A value of 0 means no limit.
-    #[must_use] 
+    #[must_use]
     pub fn with_max_size(mut self, max_size: usize) -> Self {
         self.max_value_size = max_size;
         self
@@ -234,7 +234,7 @@ impl CedarValueMapper {
     /// - `duration`: Duration strings (e.g., "2h30m", "1d12h", "500ms")
     ///
     /// See: <https://docs.cedarpolicy.com/policies/syntax-datatypes.html#datatype-extension>
-    #[must_use] 
+    #[must_use]
     pub fn detect_extension(value: &str) -> Option<ExtensionValue> {
         // Check for plain IP address (IPv4 or IPv6)
         if IpAddr::from_str(value).is_ok() {
@@ -244,13 +244,14 @@ impl CedarValueMapper {
         // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
         if let Some((ip_part, prefix_part)) = value.split_once('/')
             && let Ok(ip) = IpAddr::from_str(ip_part)
-                && let Ok(prefix_len) = prefix_part.parse::<u8>() {
-                    // Validate prefix length: 0-32 for IPv4, 0-128 for IPv6
-                    let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
-                    if prefix_len <= max_prefix {
-                        return Some(ExtensionValue::IpAddr(value.to_string()));
-                    }
-                }
+            && let Ok(prefix_len) = prefix_part.parse::<u8>()
+        {
+            // Validate prefix length: 0-32 for IPv4, 0-128 for IPv6
+            let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
+            if prefix_len <= max_prefix {
+                return Some(ExtensionValue::IpAddr(value.to_string()));
+            }
+        }
 
         // Check for datetime (ISO 8601 / RFC 3339 format)
         // Examples: "2024-10-15", "2024-10-15T11:35:00Z", "2024-10-15T11:35:00.000+0100"
@@ -267,11 +268,11 @@ impl CedarValueMapper {
         // Must have exactly one decimal point and not end with it
         if value.contains('.')
             && value.parse::<f64>().is_ok()
-                && !value.ends_with('.')
-                && value.chars().filter(|&c| c == '.').count() == 1
-            {
-                return Some(ExtensionValue::Decimal(value.to_string()));
-            }
+            && !value.ends_with('.')
+            && value.chars().filter(|&c| c == '.').count() == 1
+        {
+            return Some(ExtensionValue::Decimal(value.to_string()));
+        }
 
         None
     }
@@ -323,9 +324,9 @@ impl CedarValueMapper {
                 || !bytes[14..16].iter().all(u8::is_ascii_digit)
                 || bytes[16] != b':'
                 || !bytes[17..19].iter().all(u8::is_ascii_digit))
-            {
-                return false;
-            }
+        {
+            return false;
+        }
 
         // Accept various valid suffixes (Z, +HHMM, -HHMM, .sss, etc.)
         true
@@ -394,7 +395,7 @@ impl CedarValueMapper {
     }
 
     /// Check if a value represents a Cedar entity reference.
-    #[must_use] 
+    #[must_use]
     pub fn is_entity_reference(value: &Value) -> bool {
         if let Value::Object(obj) = value {
             obj.len() == 2
@@ -434,7 +435,7 @@ impl CedarValueMapper {
     }
 
     /// Get the JSON type name of a value.
-    #[must_use] 
+    #[must_use]
     pub fn value_type_name(value: &Value) -> &'static str {
         match value {
             Value::Null => "null",
@@ -562,12 +563,12 @@ impl CedarValueMapper {
     fn convert_extension_marker(
         extn: &Value,
     ) -> Result<Option<RestrictedExpression>, ValueMappingError> {
-        let extn_obj = extn.as_object().ok_or_else(|| {
-            ValueMappingError::InvalidExtensionFormat {
-                extension_type: "__extn".to_string(),
-                value: extn.to_string(),
-            }
-        })?;
+        let extn_obj =
+            extn.as_object()
+                .ok_or_else(|| ValueMappingError::InvalidExtensionFormat {
+                    extension_type: "__extn".to_string(),
+                    value: extn.to_string(),
+                })?;
 
         let fn_name = extn_obj.get("fn").and_then(|v| v.as_str()).ok_or_else(|| {
             ValueMappingError::InvalidExtensionFormat {
@@ -638,12 +639,13 @@ impl CedarValueMapper {
             Value::Object(obj) => {
                 // Check for __entity marker (Cedar format for entity references)
                 if let Some(entity) = obj.get("__entity")
-                    && let Some(entity_obj) = entity.as_object() {
-                        return Ok(serde_json::json!({
-                            "type": entity_obj.get("type"),
-                            "id": entity_obj.get("id")
-                        }));
-                    }
+                    && let Some(entity_obj) = entity.as_object()
+                {
+                    return Ok(serde_json::json!({
+                        "type": entity_obj.get("type"),
+                        "id": entity_obj.get("id")
+                    }));
+                }
 
                 // Check for __extn marker (extension types)
                 // Preserve the entire wrapper so json_to_cedar can consume it

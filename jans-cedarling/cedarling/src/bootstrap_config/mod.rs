@@ -28,7 +28,7 @@ use std::{io, path::Path};
 
 use config::{Config, File};
 
-use crate::data::DataStoreConfig;
+use crate::context_data_api::DataStoreConfig;
 
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};

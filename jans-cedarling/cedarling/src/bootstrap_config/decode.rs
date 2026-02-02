@@ -20,7 +20,7 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::data::DataStoreConfig;
+use crate::context_data_api::DataStoreConfig;
 use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};

@@ -12,7 +12,7 @@ use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::data::DataStore;
+use crate::context_data_api::DataStore;
 use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt::{self, Token};

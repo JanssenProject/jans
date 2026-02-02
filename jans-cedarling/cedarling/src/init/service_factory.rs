@@ -14,7 +14,7 @@ use crate::bootstrap_config::BootstrapConfig;
 use crate::common::policy_store::{
     PolicyStoreMetadata, PolicyStoreWithID, TrustedIssuersValidationError,
 };
-use crate::data::DataStore;
+use crate::context_data_api::DataStore;
 use crate::entity_builder::{EntityBuilder, InitEntityBuilderError, TrustedIssuerIndex};
 use crate::jwt::{JwtService, JwtServiceInitError};
 use crate::log::interface::LogWriter;
