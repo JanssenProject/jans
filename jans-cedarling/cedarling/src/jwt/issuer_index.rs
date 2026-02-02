@@ -44,10 +44,7 @@ impl IssuerIndex {
 
     /// Find the token metadata key for a given entity type name
     /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
-    pub(super) fn find_token_metadata_key<'a>(
-        &'a self,
-        entity_type_name: &'a str,
-    ) -> Option<String> {
+    pub(super) fn find_token_metadata_key(&self, entity_type_name: &str) -> Option<String> {
         // Look through all trusted issuers to find the matching entity type name
 
         // TODO: Optimize this lookup to have O(1) complexity, to have index structure
