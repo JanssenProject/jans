@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 public class UmaRptPolicy implements UmaRptPolicyType {
         
-        private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+        private static final Logger log = LoggerFactory.getLogger(UmaRptPolicy.class);
 
         @Override
         public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
@@ -93,24 +93,20 @@ public class UmaRptPolicy implements UmaRptPolicyType {
 
         @Override
         public List<ClaimDefinition> getRequiredClaims(Object authorizationContext) {
-                /*  needs to be a valid JSON string
-             *  Sample: [ { "issuer" : [ "https://example.com" ], "name" :
-             * "country", "claim_token_format" : [
-             * "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
-             * "claim_type" : "string", "friendly_name" : "country" } ]
-             *
-             */
-                String json = "";
                 UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
+                
+                // TODO: Customize this JSON array with your required claim definitions
+                String json = "[{\"issuer\":[\"%s\"],\"name\":\"country\",\"claim_token_format\":[\"http://openid.net/specs/openid-connect-core-1_0.html#IDToken\"],\"claim_type\":\"string\",\"friendly_name\":\"country\"},{\"issuer\":[\"%s\"],\"name\":\"city\",\"claim_token_format\":[\"http://openid.net/specs/openid-connect-core-1_0.html#IDToken\"],\"claim_type\":\"string\",\"friendly_name\":\"city\"}]";
+                
                 authContext.addRedirectUserParam("customUserParam1", "value1");
-                return ClaimDefinitionBuilder.build(String.format(json, authContext.getIssuer()));
+                return ClaimDefinitionBuilder.build(String.format(json, authContext.getIssuer(), authContext.getIssuer()));
         }
 
         @Override
         public boolean authorize(Object authorizationContext) {
                 log.info("UMA RPT Policy Authorization. Authorizing...");
                 UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
-                if (authContext.getClaim("country").equals("US") && authContext.getClaim("city").equals("NY")) {
+                if ("US".equals(authContext.getClaim("country")) && "NY".equals(authContext.getClaim("city"))) {
                         log.info("Authorized successfully!");
                         return true;
                 }

@@ -75,10 +75,6 @@ jobs:
           poetry install --no-root
           cp mkdocs.yml ../
 
-      - name: Sync CHANGELOG to docs
-        run: |
-          cp CHANGELOG.md docs/CHANGELOG.md
-
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
@@ -93,6 +89,12 @@ jobs:
           github.event_name == 'workflow_dispatch'
         run: |
           mv ../mkdocs.yml mkdocs.yml
+          cp ../CHANGELOG.md docs/CHANGELOG.md
+
+      - name: Sync CHANGELOG to docs
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          cp CHANGELOG.md docs/CHANGELOG.md
 
       - name: Copy generated chart from main
         run: |

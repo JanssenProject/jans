@@ -30,11 +30,13 @@ This guide covers the prerequisites and cluster creation specific to Amazon Elas
 eksctl create cluster --name janssen-cluster --nodegroup-name jans-nodes --node-type NODE_TYPE --nodes 2 --managed --region REGION_CODE
 ```
 
-Adjust `node-type` and `nodes` as per your desired cluster size.
+Replace `NODE_TYPE` with an instance type (for example: `t3.xlarge`, `m5.large`) and `REGION_CODE` with your AWS region (for example: `us-east-1`, `eu-west-1`). Adjust `nodes` as per your desired cluster size.
 
 ## Install the EBS CSI Driver
 
-To attach volumes to your pods, install the Amazon [EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html).
+The EBS CSI driver requires an IAM role or ServiceAccount with appropriate permissions for EBS CSI operations. See the [EBS CSI IAM role guide](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html) for setup instructions.
+
+To attach volumes to your pods, install the Amazon [EBS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html).
 
 ## Create the Janssen Namespace
 
