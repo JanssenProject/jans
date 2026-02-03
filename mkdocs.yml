@@ -17,6 +17,7 @@ extra_css:
   - css/tabs.css
   - stylesheets/mermaid-extra.css
   - stylesheets/home.css
+  - stylesheets/navigation.css
 
 extra_javascript:
   - javascripts/skeleton-loader.js
@@ -39,14 +40,334 @@ markdown_extensions:
     emoji_generator: !!python/name:material.extensions.emoji.to_svg
     emoji_index: !!python/name:material.extensions.emoji.twemoji
 - pymdownx.details
+
 nav:
-- Home: index.md
-- 'Janssen Server':
+# ====================
+# 1. GET STARTED
+# ====================
+- Get Started:
+  - Welcome: index.md
   - Introduction: janssen-server/README.md
-  - Deployment and Planning Guide:
+  - Platform Goals: janssen-server/planning/platform-goal.md
+  - Use Cases: janssen-server/planning/use-cases.md
+  - Quick Start Guides:
+    - Docker Quick Start: janssen-server/install/docker-install/quick-start.md
+    - Casa Quick Start: casa/administration/quick-start.md
+    - Cedarling Quick Start: cedarling/quick-start/cedarling-quick-start.md
+  - Terminology:
+    - Cedarling Terms: cedarling/reference/cedarling-terms.md
+    - Learning Reference: janssen-server/reference/learning-reference.md
+
+# ====================
+# 2. INTEGRATE & AUTHENTICATE
+# ====================
+- Integrate & Authenticate:
+  - Overview: janssen-server/auth-server/README.md
+  - OAuth 2.0:
+    - janssen-server/auth-server/oauth-features/README.md
+    - Grants & Flows:
+      - Authorization Code Grant: janssen-server/auth-server/oauth-features/auth-code-grant.md
+      - Client Credential Grant: janssen-server/auth-server/oauth-features/client-credential-grant.md
+      - Device Grant: janssen-server/auth-server/oauth-features/device-grant.md
+      - Implicit Grant: janssen-server/auth-server/oauth-features/implicit-grant.md
+      - JWT Grant: janssen-server/auth-server/oauth-features/jwt-grant.md
+      - Password Grant: janssen-server/auth-server/oauth-features/password-grant.md
+    - Security Extensions:
+      - PKCE: janssen-server/auth-server/oauth-features/pkce.md
+      - DPoP: janssen-server/auth-server/oauth-features/dpop.md
+      - MTLS: janssen-server/auth-server/oauth-features/mtls.md
+      - PAR: janssen-server/auth-server/oauth-features/par.md
+    - Tokens:
+      - janssen-server/auth-server/tokens/README.md
+      - Access Tokens: janssen-server/auth-server/tokens/oauth-access-tokens.md
+      - Refresh Tokens: janssen-server/auth-server/tokens/oauth-refresh-tokens.md
+      - Transaction Tokens: janssen-server/auth-server/tokens/oauth-tx-tokens.md
+    - Rich Authorization Requests: janssen-server/auth-server/authz-details/README.md
+  - OpenID Connect:
+    - janssen-server/auth-server/openid-features/README.md
+    - id_token: janssen-server/auth-server/openid-features/id-token.md
+    - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
+    - Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
+    - Subject Identifiers: janssen-server/auth-server/openid-features/subject-identifiers.md
+    - ACRs: janssen-server/auth-server/openid-features/acrs.md
+    - Request Objects: janssen-server/auth-server/openid-features/request-objects.md
+    - Prompt Parameter: janssen-server/auth-server/openid-features/prompt-parameter.md
+    - CIBA: janssen-server/auth-server/openid-features/ciba.md
+    - JARM: janssen-server/auth-server/openid-features/jarm.md
+    - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
+    - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
+    - Consent:
+      - janssen-server/auth-server/openid-features/consent/README.md
+      - Customize: janssen-server/auth-server/openid-features/consent/customize.md
+      - List/Delete Consent: janssen-server/auth-server/openid-features/consent/list-delete.md
+    - Logout:
+      - janssen-server/auth-server/openid-features/logout/README.md
+      - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
+      - Back Channel: janssen-server/auth-server/openid-features/logout/back-channel.md
+      - Customizing Logout: janssen-server/auth-server/openid-features/logout/customizing-logout.md
+      - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
+  - FIDO2 / Passkeys:
+    - janssen-server/fido/README.md
+    - Configuration: janssen-server/fido/config.md
+    - Vendor Metadata: janssen-server/fido/vendor-metadata.md
+    - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Types of Credentials: janssen-server/fido/types-of-creds.md
+  - SAML:
+    - Shibboleth IDP:
+      - janssen-server/shibboleth-idp/README.md
+      - Installation: janssen-server/shibboleth-idp/installation.md
+      - Configuration: janssen-server/shibboleth-idp/configuration.md
+      - Helm Deployment: janssen-server/shibboleth-idp/helm-deployment.md
+      - Config API: janssen-server/shibboleth-idp/config-api.md
+      - Terraform: janssen-server/shibboleth-idp/terraform.md
+      - Testing: janssen-server/shibboleth-idp/testing.md
+    - SAML Recipes:
+      - janssen-server/recipes/saml/README.md
+      - Federation: janssen-server/recipes/saml/federation.md
+      - IDP-Initiated SSO: janssen-server/recipes/saml/idp-init-authn.md
+      - SP Configuration: janssen-server/recipes/saml/sso-sp.md
+  - Agama (Auth Flows):
+    - Introduction: agama/introduction.md
+    - Language Reference: agama/language-reference.md
+    - Execution Rules: agama/execution-rules.md
+    - Gama Format: agama/gama-format.md
+    - Engine Configuration: janssen-server/developer/agama/engine-bridge-config.md
+    - Project Deployment: janssen-server/developer/agama/projects-deployment.md
+    - Navigation & UI: janssen-server/developer/agama/flows-navigation-ui.md
+    - Native Applications: janssen-server/developer/agama/native-applications.md
+    - Best Practices: janssen-server/developer/agama/agama-best-practices.md
+    - Advanced Usages: janssen-server/developer/agama/advanced-usages.md
+    - FAQ: janssen-server/developer/agama/faq.md
+  - Cedarling (Authorization):
+    - Overview: cedarling/README.md
+    - Tutorials:
+      - Getting Started: cedarling/tutorials/cedarling-getting-started.md
+      - Javascript: cedarling/tutorials/javascript.md
+      - Python: cedarling/tutorials/python.md
+      - Rust: cedarling/tutorials/rust.md
+      - Golang: cedarling/tutorials/go.md
+      - Java: cedarling/tutorials/java.md
+      - Kotlin: cedarling/tutorials/kotlin.md
+      - Swift: cedarling/tutorials/swift.md
+    - Reference:
+      - Authorization: cedarling/reference/cedarling-authz.md
+      - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md
+      - Interfaces: cedarling/reference/cedarling-interfaces.md
+      - Policy Store: cedarling/reference/cedarling-policy-store.md
+      - Properties: cedarling/reference/cedarling-properties.md
+      - Boolean Operations: cedarling/reference/cedarling-principal-boolean-operations.md
+      - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
+      - JWT Mapping: cedarling/reference/cedarling-jwt-mapping.md
+      - Entities: cedarling/reference/cedarling-entities.md
+      - Logs: cedarling/reference/cedarling-logs.md
+      - Lock Server: cedarling/reference/cedarling-lock-server.md
+    - Developer:
+      - Rust: cedarling/developer/cedarling-rust.md
+      - Kotlin/Java: cedarling/uniffi/cedarling-kotlin.md
+      - Mobile Apps:
+        - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
+        - Android: cedarling/developer/mobile-apps/cedarling-android.md
+        - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
+      - Sidecar:
+        - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
+        - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
+    - Integrations:
+      - KrakenD: cedarling/integrations/cedarling-krakend.md
+  - UMA:
+    - janssen-server/auth-server/uma-features/README.md
+    - RPT Endpoint: janssen-server/auth-server/uma-features/rpt-endpoint.md
+    - Claims Gathering: janssen-server/auth-server/uma-features/claims-gathering-endpoint.md
+    - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
+  - Recipes & How-To:
+    - janssen-server/recipes/README.md
+    - Social Login: janssen-server/recipes/social-login.md
+    - Inbound OIDC: janssen-server/recipes/inbound-oidc.md
+    - Registration: janssen-server/recipes/registration.md
+    - Password Expirations: janssen-server/recipes/password-expirations.md
+    - Locking Accounts: janssen-server/recipes/locking-accounts.md
+    - Stepped-up Authentication: janssen-server/recipes/stepped-up-authn.md
+    - User Journeys: janssen-server/recipes/ACRouter.md
+    - Device Flow: janssen-server/recipes/device-flow-config.md
+    - Password Validation: janssen-server/recipes/user-password-validation.md
+    - Benchmark: janssen-server/recipes/benchmark.md
+
+# ====================
+# 3. CONFIGURE IDENTITY & POLICIES
+# ====================
+- Configure Identity & Policies:
+  - Configuration Tools:
+    - TUI (Text-Based UI):
+      - janssen-server/config-guide/config-tools/jans-tui/README.md
+      - Navigation Guide: janssen-server/config-guide/config-tools/jans-tui/navigation-guide.md
+      - Using Logs: janssen-server/config-guide/config-tools/jans-tui/using-command-line-log.md
+    - CLI (Command Line):
+      - janssen-server/config-guide/config-tools/jans-cli/README.md
+    - REST API (Config API):
+      - janssen-server/config-guide/config-tools/config-api/README.md
+      - Settings: janssen-server/config-guide/config-tools/config-api/config.md
+      - Security: janssen-server/config-guide/config-tools/config-api/security.md
+      - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
+      - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
+      - Plugins: janssen-server/config-guide/config-tools/config-api/plugins.md
+    - CURL Guide: janssen-server/config-guide/config-tools/curl-guide.md
+  - Clients & Applications:
+    - Client Management: janssen-server/auth-server/client-management/README.md
+    - Client Schema: janssen-server/auth-server/client-management/client-schema.md
+    - Client Authentication: janssen-server/auth-server/client-management/client-authn.md
+    - Client Configuration: janssen-server/auth-server/client-management/client-configuration.md
+    - OpenID Connect Client: janssen-server/config-guide/auth-server-config/openid-connect-client-configuration.md
+    - Software Statements: janssen-server/auth-server/client-management/software-statements.md
+    - Sector Identifiers: janssen-server/auth-server/client-management/sector-identifiers.md
+    - Client Scripts: janssen-server/auth-server/client-management/client-scripts.md
+  - Scopes & Claims:
+    - Scopes: janssen-server/auth-server/scopes/README.md
+    - OAuth Scope Management: janssen-server/config-guide/auth-server-config/oauth-scopes-config.md
+    - Attributes: janssen-server/config-guide/auth-server-config/attribute-configuration.md
+  - User Management:
+    - janssen-server/usermgmt/README.md
+    - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
+    - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
+    - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
+  - SCIM:
+    - janssen-server/scim/README.md
+    - Configuration: janssen-server/scim/config.md
+    - OAuth Protection: janssen-server/scim/oauth-protection.md
+    - User Resources: janssen-server/config-guide/scim-config/user-config.md
+    - Group Management: janssen-server/config-guide/scim-config/scim-group-config.md
+    - Bulk Adding Users: janssen-server/scim/bulk-users.md
+    - Custom Attributes: janssen-server/scim/custom-attributes.md
+    - Security: janssen-server/scim/security.md
+  - Custom Scripts:
+    - Overview: janssen-server/config-guide/custom-scripts-config.md
+    - Interception Scripts:
+      - janssen-server/developer/scripts/README.md
+      - Application Session: script-catalog/application_session/application-session.md
+      - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
+      - Authorization Detail: script-catalog/authz_detail/authz-detail.md
+      - CIBA End User Notification: script-catalog/ciba/ciba.md
+      - Client Registration: script-catalog/client_registration/client-registration.md
+      - Client Authentication: script-catalog/client_authn/client-authn.md
+      - Config API: script-catalog/config_api/config-api.md
+      - IDP: script-catalog/idp/idp-extension.md
+      - Consent Gathering: script-catalog/consent_gathering/consent-gathering.md
+      - Dynamic Scope: script-catalog/dynamic_scope/dynamic-scope.md
+      - End Session: script-catalog/end_session/end-session.md
+      - ID Generator: script-catalog/id_generator/id-generator.md
+      - Introspection: script-catalog/introspection/README.md
+      - OpenID Configuration: script-catalog/discovery/discovery/README.md
+      - Persistence: script-catalog/persistence_extension/persistence.md
+      - Person Authentication: script-catalog/person_authentication/person-authentication.md
+      - Post Authentication: script-catalog/post_authn/post-authentication.md
+      - ROPC: script-catalog/resource_owner_password_credentials/ropc.md
+      - Revoke Token: script-catalog/revoke_token/revoke-token.md
+      - SCIM: script-catalog/scim/scim.md
+      - Token Exchange: script-catalog/token_exchange/token-exchange.md
+      - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
+      - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
+      - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
+      - PAR: script-catalog/par/par.md
+      - Transaction Token: script-catalog/tx_token/txtoken.md
+      - Cookie: script-catalog/cookie/cookie.md
+      - Discovery: script-catalog/discovery/discovery.md
+      - Select Account: script-catalog/select_account/select-account.md
+      - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
+      - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
+      - Create User: script-catalog/create_user/create-user.md
+      - Health Check: script-catalog/health_check/health-check.md
+      - UMA Claims (JWT): script-catalog/uma_rpt_claims/uma-claims-jwt.md
+      - UMA Claims Gathering: script-catalog/uma_claims_gathering/uma-claims-web.md
+      - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
+      - Update Token: script-catalog/update_token/update-token.md
+      - Link Interception: script-catalog/link_interception/link-interception.md
+      - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
+  - Auth Server Settings:
+    - Server Configuration: janssen-server/auth-server/config.md
+    - Authentication Methods: janssen-server/config-guide/auth-server-config/authentication-method-config.md
+    - Properties: janssen-server/config-guide/auth-server-config/jans-authorization-server-config.md
+    - Logging: janssen-server/config-guide/auth-server-config/logging-configuration.md
+    - SSA Configuration: janssen-server/config-guide/auth-server-config/ssa-config.md
+    - Agama Projects: janssen-server/config-guide/auth-server-config/agama-project-configuration.md
+    - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
+    - Rate Limiting: janssen-server/config-guide/auth-server-config/rate-limit.md
+    - UMA Resources: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
+    - JSON Web Keys: janssen-server/config-guide/auth-server-config/json-web-key-config.md
+  - Casa (Self-Service Portal):
+    - casa/index.md
+    - Administration:
+      - Admin Console: casa/administration/admin-console.md
+      - About 2FA: casa/administration/2fa-basics.md
+      - Custom Branding: casa/administration/custom-branding.md
+      - URL Path Customization: casa/administration/change-context-path.md
+      - Localization: casa/administration/localization.md
+      - FAQ: casa/administration/faq.md
+    - Plugins:
+      - 2FA Settings: casa/plugins/2fa-settings.md
+      - Accounts Linking:
+        - casa/plugins/accts-linking/account-linking-index.md
+        - Agama Project: casa/plugins/accts-linking/accts-linking-agama.md
+      - BioID: casa/plugins/bioid.md
+      - Consent Management: casa/plugins/consent-management.md
+      - Custom Branding: casa/plugins/custom-branding.md
+      - Email OTP: casa/plugins/email-otp.md
+      - Certificate Authentication:
+        - casa/plugins/cert-authn.md
+        - Smart Card Tutorial: casa/plugins/cert-authn-tutorial.md
+    - Developer Guide:
+      - Overview: casa/developer/overview.md
+      - Adding Auth Methods: casa/developer/add-authn-methods.md
+    - User Guide: casa/user-guide.md
+  - Sessions:
+    - Session Management: janssen-server/auth-server/session-management/README.md
+    - IDP vs RP Sessions: janssen-server/auth-server/session-management/idp-v-rp.md
+    - Multiple Sessions: janssen-server/auth-server/session-management/multiple-sessions-one-browser.md
+    - Session Configuration: janssen-server/config-guide/auth-server-config/session-management.md
+    - Session Guide: janssen-server/config-guide/session.md
+  - Additional Settings:
+    - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
+    - Hash Passwords: janssen-server/config-guide/hash-password.md
+    - Link Configuration: janssen-server/config-guide/link-configuration.md
+    - Custom Assets: janssen-server/config-guide/custom-assets-configuration.md
+    - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
+
+# ====================
+# 4. TEST & DEBUG
+# ====================
+- Test & Debug:
+  - Logging:
+    - janssen-server/auth-server/logging/README.md
+    - Standard Logs: janssen-server/auth-server/logging/standard-logs.md
+    - Log Levels: janssen-server/auth-server/logging/log-levels.md
+    - Audit Logs: janssen-server/auth-server/logging/audit-logs.md
+    - Custom Logs: janssen-server/auth-server/logging/custom-logs.md
+    - log4j2 Configuration: janssen-server/auth-server/logging/log4j2.md
+    - FIDO Logs: janssen-server/fido/logs.md
+    - SCIM Logs: janssen-server/scim/logs.md
+    - VM Logs: janssen-server/vm-ops/logs.md
+    - Kubernetes Logs: janssen-server/kubernetes-ops/logs.md
+  - Debugging:
+    - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+    - Remote Debugging: contribute/development/remote-debugging.md
+  - Health Checks:
+    - Kubernetes Health Check: janssen-server/kubernetes-ops/health-check.md
+    - VM Service Status: janssen-server/vm-ops/checking-service-status.md
+  - Monitoring:
+    - Reporting & Metrics: janssen-server/auth-server/reporting-metrics/README.md
+    - SCIM Monitoring: janssen-server/scim/monitoring.md
+  - Testing:
+    - Testing Guide: contribute/testing.md
+    - Integration Tests: contribute/development/run-integration-tests.md
+  - FAQ & Troubleshooting:
+    - Install FAQ: janssen-server/install/install-faq.md
+    - Developer FAQ: contribute/developer-faq.md
+    - Casa FAQ: casa/administration/faq.md
+    - Agama FAQ: janssen-server/developer/agama/faq.md
+
+# ====================
+# 5. DEPLOY & OPERATE
+# ====================
+- Deploy & Operate:
+  - Planning:
     - janssen-server/planning/README.md
-    - Platform Goal: janssen-server/planning/platform-goal.md
-    - Use Cases: janssen-server/planning/use-cases.md
     - Components: janssen-server/planning/components.md
     - Kubernetes: janssen-server/planning/kubernetes.md
     - VM Cluster: janssen-server/planning/vm-cluster.md
@@ -64,14 +385,14 @@ nav:
     - Customization/Localization: janssen-server/planning/customization.md
     - Timeout Management: janssen-server/planning/timeout-management.md
     - Identity Management: janssen-server/planning/identity-management.md
-    - Self-Service Password/2FA Portal: janssen-server/planning/self-service-password-2fa.md
+    - Self-Service Password/2FA: janssen-server/planning/self-service-password-2fa.md
     - Identity Access Governance: janssen-server/planning/identity-access-governance.md
-    - Role Based Access Management: janssen-server/planning/role-based-access-management.md
-    - Central Authorization Service Integration: janssen-server/planning/central-auth-service.md
-    - Stepped-up Authentication: janssen-server/planning/stepped-up-auth.md
-    - Delegated User Administration: janssen-server/planning/delegated-user-admin.md
-    - Passwordless Authentication: janssen-server/planning/passwordless-auth.md
-    - Machine-to-Machine Authentication: janssen-server/planning/machine-to-machine.md
+    - Role Based Access: janssen-server/planning/role-based-access-management.md
+    - Central Auth Service: janssen-server/planning/central-auth-service.md
+    - Stepped-up Auth: janssen-server/planning/stepped-up-auth.md
+    - Delegated User Admin: janssen-server/planning/delegated-user-admin.md
+    - Passwordless Auth: janssen-server/planning/passwordless-auth.md
+    - Machine-to-Machine: janssen-server/planning/machine-to-machine.md
   - Installation:
     - janssen-server/install/README.md
     - VM Installation:
@@ -83,17 +404,21 @@ nav:
       - Dynamic Download: janssen-server/install/vm-install/dynamic-download.md
     - Helm Deployments:
       - janssen-server/install/helm-install/README.md
-      - Local Kubernetes Cluster: janssen-server/install/helm-install/local.md
-      - Amazon EKS: janssen-server/install/helm-install/amazon-eks.md
-      - Google GKE: janssen-server/install/helm-install/google-gke.md
-      - Microsoft Azure AKS: janssen-server/install/helm-install/microsoft-azure.md
-      - Using Rancher Marketplace: janssen-server/install/helm-install/rancher.md
-    - Docker Deployments:
+      - Platform Setup:
+        - Amazon EKS: janssen-server/install/helm-install/prerequisites/amazon-eks.md
+        - Google GKE: janssen-server/install/helm-install/prerequisites/google-gke.md
+        - Microsoft AKS: janssen-server/install/helm-install/prerequisites/microsoft-aks.md
+        - Local (Minikube/MicroK8s): janssen-server/install/helm-install/prerequisites/local.md
+        - Rancher Marketplace: janssen-server/install/helm-install/prerequisites/rancher.md
+      - Ingress Setup: janssen-server/install/helm-install/ingress-setup.md
+      - Database Setup: janssen-server/install/helm-install/database-setup.md
+      - Install Janssen: janssen-server/install/helm-install/install-janssen.md
+      - Post-Installation: janssen-server/install/helm-install/post-install.md
+    - Docker:
       - Quick Start: janssen-server/install/docker-install/quick-start.md
-      - Docker compose: janssen-server/install/docker-install/compose.md
+      - Docker Compose: janssen-server/install/docker-install/compose.md
     - Setup Instructions: janssen-server/install/setup.md
-    - FAQ: janssen-server/install/install-faq.md
-  - Kubernetes Operation Guide:
+  - Kubernetes Operations:
     - janssen-server/kubernetes-ops/README.md
     - Upgrade: janssen-server/kubernetes-ops/upgrade.md
     - Scaling: janssen-server/kubernetes-ops/scaling.md
@@ -101,98 +426,47 @@ nav:
     - Certificate Management: janssen-server/kubernetes-ops/cert-management.md
     - Customization: janssen-server/kubernetes-ops/customization.md
     - Start Order: janssen-server/kubernetes-ops/start-order.md
-    - Logs: janssen-server/kubernetes-ops/logs.md
-    - External Secrets and Configmaps: janssen-server/kubernetes-ops/external-secrets-configmaps.md
-    - Health Check: janssen-server/kubernetes-ops/health-check.md
-    - TUI K8s: janssen-server/kubernetes-ops/tui-k8s.md
+    - External Secrets/Configmaps: janssen-server/kubernetes-ops/external-secrets-configmaps.md
+    - TUI for K8s: janssen-server/kubernetes-ops/tui-k8s.md
     - Custom Attributes: janssen-server/kubernetes-ops/custom-attributes.md
     - Jans SAML/Keycloak: janssen-server/kubernetes-ops/jans-saml.md
     - Memory Dump: janssen-server/kubernetes-ops/memory-dump.md
-  - VM Operation Guide:
+  - VM Operations:
     - janssen-server/vm-ops/README.md
     - Upgrade: janssen-server/vm-ops/upgrade.md
     - Backup: janssen-server/vm-ops/backup.md
-    - Logs: janssen-server/vm-ops/logs.md
-    - Checking Service Status: janssen-server/vm-ops/checking-service-status.md
     - Restarting Services: janssen-server/vm-ops/restarting-services.md
-    - Managing Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
+    - Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
     - Certificates: janssen-server/vm-ops/certificates.md
     - Jans Command: janssen-server/vm-ops/jans-command.md
     - Data Cleaning: janssen-server/vm-ops/data-cleaning.md
-  - Terraform and IaC:
-    - janssen-server/terraform/README.md
-  - Configuration Guide:
-    - Configuration Tools:
-      - TUI - Text-Based UI:
-          - janssen-server/config-guide/config-tools/jans-tui/README.md
-          - Navigation Guide: janssen-server/config-guide/config-tools/jans-tui/navigation-guide.md
-          - Using Logs: janssen-server/config-guide/config-tools/jans-tui/using-command-line-log.md
-      - CLI - Command Line:
-          - janssen-server/config-guide/config-tools/jans-cli/README.md
-      - REST API:
-        - janssen-server/config-guide/config-tools/config-api/README.md
-        - Settings: janssen-server/config-guide/config-tools/config-api/config.md
-        - Security: janssen-server/config-guide/config-tools/config-api/security.md
-        - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
-        - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
-        - Plugins: janssen-server/config-guide/config-tools/config-api/plugins.md
-      - CURL: janssen-server/config-guide/config-tools/curl-guide.md
-    - Auth Server Configuration:
-      - OpenID Connect Client Configuration: janssen-server/config-guide/auth-server-config/openid-connect-client-configuration.md
-      - OAuth Scope Management: janssen-server/config-guide/auth-server-config/oauth-scopes-config.md
-      - JSON Web Key: janssen-server/config-guide/auth-server-config/json-web-key-config.md
-      - Authentication Method Configuration: janssen-server/config-guide/auth-server-config/authentication-method-config.md
-      - Auth Server Property Configuration: janssen-server/config-guide/auth-server-config/jans-authorization-server-config.md
-      #- Messaging Configuration: janssen-server/config-guide/auth-server-config/messaging-config.md
-      - Logging: janssen-server/config-guide/auth-server-config/logging-configuration.md
-      - SSA Configuration: janssen-server/config-guide/auth-server-config/ssa-config.md
-      - Agama Project Configuration: janssen-server/config-guide/auth-server-config/agama-project-configuration.md
-      - Attribute: janssen-server/config-guide/auth-server-config/attribute-configuration.md
-      - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
-      - Rate Limit: janssen-server/config-guide/auth-server-config/rate-limit.md
-      - UMA Management: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
-      - Session Management: janssen-server/config-guide/auth-server-config/session-management.md
-    - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
-    - SCIM Configuration:
-      - SCIM User Resources: janssen-server/config-guide/scim-config/user-config.md
-      - SCIM Group Management: janssen-server/config-guide/scim-config/scim-group-config.md
-    - Custom Scripts: janssen-server/config-guide/custom-scripts-config.md
-    - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
-    - HASH Passwords: janssen-server/config-guide/hash-password.md
-    - Link Configuration: janssen-server/config-guide/link-configuration.md
-    - Custom Assets Configuration: janssen-server/config-guide/custom-assets-configuration.md
-    - Session: janssen-server/config-guide/session.md
-  - Database Guide:
+  - Database:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
-
     - MySQL:
-      - MySQL Schema: janssen-server/reference/database/mysql-schema.md
-      - MySQL Configuration: janssen-server/reference/database/mysql-config.md
-      - MySQL Operation: janssen-server/reference/database/mysql-ops.md
+      - Schema: janssen-server/reference/database/mysql-schema.md
+      - Configuration: janssen-server/reference/database/mysql-config.md
+      - Operations: janssen-server/reference/database/mysql-ops.md
     - PostgreSQL:
-      - PostgreSQL Schema: janssen-server/reference/database/pgsql-schema.md
-      - PostgreSQL Indexes: janssen-server/reference/database/pgsql-schema-indexes.md
-      - PostgreSQL Configuration: janssen-server/reference/database/pgsql-config.md
-      - PostgreSQL Operation: janssen-server/reference/database/pgsql-ops.md
-  - Auth Server Admin Guide:
-    - janssen-server/auth-server/README.md
-    - Auth Server Config: janssen-server/auth-server/config.md
-    - Session Management:
-      - janssen-server/auth-server/session-management/README.md
-      - IDP v RP Sessions: janssen-server/auth-server/session-management/idp-v-rp.md
-      - Multiple Sessions in One Browser: janssen-server/auth-server/session-management/multiple-sessions-one-browser.md
-    - Tokens:
-      - janssen-server/auth-server/tokens/README.md
-      - OAuth Access Tokens: janssen-server/auth-server/tokens/oauth-access-tokens.md
-      - OAuth Refresh Tokens: janssen-server/auth-server/tokens/oauth-refresh-tokens.md
-      - OAuth Transaction Tokens: janssen-server/auth-server/tokens/oauth-tx-tokens.md
-      - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
-      - OpenID Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
-      - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
-      - Logout Status JWT: janssen-server/auth-server/tokens/logout-status-jwt.md
-    - Scopes: janssen-server/auth-server/scopes/README.md
-    - Rich Authorization Requests : janssen-server/auth-server/authz-details/README.md
+      - Schema: janssen-server/reference/database/pgsql-schema.md
+      - Indexes: janssen-server/reference/database/pgsql-schema-indexes.md
+      - Configuration: janssen-server/reference/database/pgsql-config.md
+      - Operations: janssen-server/reference/database/pgsql-ops.md
+  - Terraform & IaC:
+    - janssen-server/terraform/README.md
+  - Link (User Sync):
+    - janssen-server/link/README.md
+    - Jans LDAP Link: janssen-server/link/jans-link.md
+  - Lock:
+    - janssen-server/lock/README.md
+    - Lock Server: janssen-server/lock/lock-server.md
+
+# ====================
+# 6. ARCHITECTURE & CONCEPTS
+# ====================
+- Architecture & Concepts:
+  - Components Overview: janssen-server/planning/components.md
+  - Auth Server Internals:
     - Endpoints:
       - janssen-server/auth-server/endpoints/README.md
       - OpenID Configuration: janssen-server/auth-server/endpoints/configuration.md
@@ -218,284 +492,24 @@ nav:
       - janssen-server/auth-server/crypto/README.md
       - Keys: janssen-server/auth-server/crypto/keys.md
       - Key Storage: janssen-server/auth-server/crypto/key-storage.md
-      - Key Rotation and Generation: janssen-server/auth-server/crypto/key-generation.md
-    - OpenID Features:
-      - janssen-server/auth-server/openid-features/README.md
-      - Pairwise/Public Subject Identifiers: janssen-server/auth-server/openid-features/subject-identifiers.md
-      - id_token: janssen-server/auth-server/openid-features/id-token.md
-      - ACRs: janssen-server/auth-server/openid-features/acrs.md
-      - Request Objects: janssen-server/auth-server/openid-features/request-objects.md
-      - Prompt Parameter: janssen-server/auth-server/openid-features/prompt-parameter.md
-      - Consent:
-        - janssen-server/auth-server/openid-features/consent/README.md
-        - Customize: janssen-server/auth-server/openid-features/consent/customize.md
-        - List/Delete Consent: janssen-server/auth-server/openid-features/consent/list-delete.md
-      - CIBA: janssen-server/auth-server/openid-features/ciba.md
-      - JARM: janssen-server/auth-server/openid-features/jarm.md
-      - Native SSO: janssen-server/auth-server/openid-features/native-sso.md
-      - User Claims: janssen-server/auth-server/openid-features/user-claims/README.md
-      - Logout:
-        - janssen-server/auth-server/openid-features/logout/README.md
-        - Front Channel: janssen-server/auth-server/openid-features/logout/front-channel.md
-        - Back Channel: janssen-server/auth-server/openid-features/logout/back-channel.md
-        - Customizing Logout: janssen-server/auth-server/openid-features/logout/customizing-logout.md
-        - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
-    - OAuth Features:
-      - janssen-server/auth-server/oauth-features/README.md
-      - Authorization Code Grant: janssen-server/auth-server/oauth-features/auth-code-grant.md
-      - Implicit Grant: janssen-server/auth-server/oauth-features/implicit-grant.md
-      - JWT Grant: janssen-server/auth-server/oauth-features/jwt-grant.md
-      - Password Grant: janssen-server/auth-server/oauth-features/password-grant.md
-      - Device Grant: janssen-server/auth-server/oauth-features/device-grant.md
-      - Client Credential Grant: janssen-server/auth-server/oauth-features/client-credential-grant.md
-      - PKCE: janssen-server/auth-server/oauth-features/pkce.md
-      - DPoP: janssen-server/auth-server/oauth-features/dpop.md
-      - MTLS: janssen-server/auth-server/oauth-features/mtls.md
-      - PAR: janssen-server/auth-server/oauth-features/par.md
-    - UMA Features:
-      - janssen-server/auth-server/uma-features/README.md
-      - RPT Endpoint: janssen-server/auth-server/uma-features/rpt-endpoint.md
-      - Claims Gathering Endpoint: janssen-server/auth-server/uma-features/claims-gathering-endpoint.md
-    - Client Management:
-      - janssen-server/auth-server/client-management/README.md
-      - Client Schema: janssen-server/auth-server/client-management/client-schema.md
-      - Client Authentication: janssen-server/auth-server/client-management/client-authn.md
-      - Configuration: janssen-server/auth-server/client-management/client-configuration.md
-      - Software Statements: janssen-server/auth-server/client-management/software-statements.md
-      - Sector Identifiers: janssen-server/auth-server/client-management/sector-identifiers.md
-      - Client Scripts: janssen-server/auth-server/client-management/client-scripts.md
+      - Key Rotation: janssen-server/auth-server/crypto/key-generation.md
     - Internationalization:
       - janssen-server/auth-server/international/README.md
       - Web Pages: janssen-server/auth-server/international/web-pages.md
       - Client Configuration: janssen-server/auth-server/international/client-config.md
       - Scope Descriptions: janssen-server/auth-server/international/scope-descriptions.md
-    - Reporting and Metrics:
-      - janssen-server/auth-server/reporting-metrics/README.md
-    - Logging:
-      - janssen-server/auth-server/logging/README.md
-      - Standard Logs: janssen-server/auth-server/logging/standard-logs.md
-      - Log Levels: janssen-server/auth-server/logging/log-levels.md
-      - Audit Logs: janssen-server/auth-server/logging/audit-logs.md
-      - Custom Logs: janssen-server/auth-server/logging/custom-logs.md
-      - log4j2 Configuration: janssen-server/auth-server/logging/log4j2.md
+  - Agama Engine: janssen-server/developer/agama/jans-agama-engine.md
   - Developer Guide:
     - janssen-server/developer/README.md
-    - Agama:
-      - Agama engine: janssen-server/developer/agama/jans-agama-engine.md
-      - Navigation, UI pages and assets: janssen-server/developer/agama/flows-navigation-ui.md
-      - Projects deployment: janssen-server/developer/agama/projects-deployment.md
-      - Agama Best Practices:  janssen-server/developer/agama/agama-best-practices.md
-      - Advanced usages: janssen-server/developer/agama/advanced-usages.md
-      - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
-      - Agama flows in native applications: janssen-server/developer/agama/native-applications.md
-      - FAQ: janssen-server/developer/agama/faq.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
     - X-Frame-Options: janssen-server/developer/xframe.md
     - Managed Beans: janssen-server/developer/managed-beans.md
     - Customization:
       - janssen-server/developer/customization/README.md
-      - Customize Web pages: janssen-server/developer/customization/customize-web-pages.md
-      - Custom client logs: janssen-server/developer/customization/custom-client-logs.md
-    - Interception Scripts:
-      - janssen-server/developer/scripts/README.md
-      - Application Session: script-catalog/application_session/application-session.md
-      - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
-      - Authorization Detail: script-catalog/authz_detail/authz-detail.md
-      - CIBA End User Notification: script-catalog/ciba/ciba.md
-      - Client Registration: script-catalog/client_registration/client-registration.md
-      - Client Authentication: script-catalog/client_authn/client-authn.md
-      - Config API: script-catalog/config_api/config-api.md
-      - IDP: script-catalog/idp/idp-extension.md
-      - Consent Gathering: script-catalog/consent_gathering/consent-gathering.md
-      - Dynamic Scope: script-catalog/dynamic_scope/dynamic-scope.md
-      - End Session: script-catalog/end_session/end-session.md
-      - ID Generator: script-catalog/id_generator/id-generator.md
-      - Introspection: script-catalog/introspection/README.md
-      - OpenID Configuration: script-catalog/discovery/discovery/README.md
-      - Persistence: script-catalog/persistence_extension/persistence.md
-      - Person Authentication: script-catalog/person_authentication/person-authentication.md
-      - Post Authentication: script-catalog/post_authn/post-authentication.md
-      - Resource Owner Password Credentials: script-catalog/resource_owner_password_credentials/ropc.md
-      - Revoke Token: script-catalog/revoke_token/revoke-token.md
-      - SCIM: script-catalog/scim/scim.md
-      - Token Exchange: script-catalog/token_exchange/token-exchange.md
-      - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
-      - Access Evaluation: script-catalog/access_evaluation/access-evaluation.md
-      - Access Evaluation Discovery: script-catalog/access_evaluation/access-evaluation-discovery.md
-      - Logout Status JWT: script-catalog/logout_status_jwt/logout-status-jwt.md
-      - PAR: script-catalog/par/par.md
-      - Transaction Token (tx_token): script-catalog/tx_token/txtoken.md
-      - Cookie: script-catalog/cookie/cookie.md
-      - Discovery: script-catalog/discovery/discovery.md
-      - Select Account: script-catalog/select_account/select-account.md
-      - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
-      - Fido2 Extension: script-catalog/fido2_extension/fido2-extension.md
-      - Create User: script-catalog/create_user/create-user.md
-      - Healtch Check: script-catalog/health_check/health-check.md
-      - UMA Claims (JWT Transformation): script-catalog/uma_rpt_claims/uma-claims-jwt.md
-      - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
-      - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
-      - Update Token: script-catalog/update_token/update-token.md
-      - Link interception: script-catalog/link_interception/link-interception.md
-      - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
-  - Reference Guide:
-    - janssen-server/reference/README.md
-    - Cedarling Development Docs:
-        - Rust : https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
-        - Python:  https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
-    - Javadocs / OpenAPI:
-      - janssen-server/reference/openapi.md
-      - agama: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
-      - jans-auth-server: https://janssenproject.github.io/developer-docs/jans-auth-server/server/index.html
-      - jans-casa: https://janssenproject.github.io/developer-docs/jans-casa/config/index.html
-      - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
-      - jans-core: https://janssenproject.github.io/developer-docs/jans-core/server/io/jans/server/filters/package-summary.html
-      - jans-fido2: https://janssenproject.github.io/developer-docs/jans-fido2/server/index.html
-      - jans-link: https://janssenproject.github.io/developer-docs/jans-link/server/index.html
-      - jans-lock: https://janssenproject.github.io/developer-docs/jans-lock/server/index.html
-      - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
-      - jans-scim: https://janssenproject.github.io/developer-docs/jans-scim/server/index.html
-    - JSON Configuration/Properties:
-      - janssen-server/reference/json/README.md
-      - Properties:
-        - janssen-server/reference/json/properties/README.md
-        - Auth Server: janssen-server/reference/json/properties/janssenauthserver-properties.md
-        - FIDO: janssen-server/reference/json/properties/fido2-properties.md
-        - SCIM: janssen-server/reference/json/properties/scim-properties.md
-        - Config API: janssen-server/reference/json/properties/config-api-properties.md
-      - Feature Flags:
-        - janssen-server/reference/json/feature-flags/README.md
-        - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
-    - Kubernetes:
-      - janssen-server/reference/kubernetes/README.md
-      - Configuration Keys: janssen-server/reference/kubernetes/config-secret-keys.md
-    - Learning Reference: janssen-server/reference/learning-reference.md
-  - FIDO Admin Guide:
-    - janssen-server/fido/README.md
-    - Configuration: janssen-server/fido/config.md
-    - Vendor Metadata Management: janssen-server/fido/vendor-metadata.md
-    - Logs: janssen-server/fido/logs.md
-    - Passwordless / Usernameless Login: janssen-server/fido/passwordlessLoginExperience.md
-    - Types of credentials: janssen-server/fido/types-of-creds.md
-  - SCIM Admin Guide:
-    - janssen-server/scim/README.md
-    - Configuration: janssen-server/scim/config.md
-    - Logs: janssen-server/scim/logs.md
-    - Monitoring: janssen-server/scim/monitoring.md
-    - OAuth Protection: janssen-server/scim/oauth-protection.md
-    - Security Considerations: janssen-server/scim/security.md
-    - Bulk Adding Users: janssen-server/scim/bulk-users.md
-    - Adding Custom Attributes: janssen-server/scim/custom-attributes.md
-  - Link Guide:
-    - janssen-server/link/README.md
-    - Jans LDAP Link: janssen-server/link/jans-link.md
-  - Lock Guide:
-      - janssen-server/lock/README.md
-      - Lock Server: janssen-server/lock/lock-server.md
-  - Shibboleth Identity Provider:
-    - janssen-server/shibboleth-idp/README.md
-    - Installation: janssen-server/shibboleth-idp/installation.md
-    - Configuration: janssen-server/shibboleth-idp/configuration.md
-    - Helm Deployment: janssen-server/shibboleth-idp/helm-deployment.md
-    - Config API: janssen-server/shibboleth-idp/config-api.md
-    - Terraform: janssen-server/shibboleth-idp/terraform.md
-    - Testing: janssen-server/shibboleth-idp/testing.md
-  - Janssen Recipes:
-    - janssen-server/recipes/README.md
-    - Benchmark: janssen-server/recipes/benchmark.md
-    - Social Login: janssen-server/recipes/social-login.md
-    - Inbound OIDC: janssen-server/recipes/inbound-oidc.md
-    - Registration: janssen-server/recipes/registration.md
-    - Password Expirations: janssen-server/recipes/password-expirations.md
-    - Locking or Disabling Accounts: janssen-server/recipes/locking-accounts.md
-    - Stepped-up Authentication: janssen-server/recipes/stepped-up-authn.md
-    - User Journeys: janssen-server/recipes/ACRouter.md
-    - Authentication via Device Flow: janssen-server/recipes/device-flow-config.md
-    - Password Validation: janssen-server/recipes/user-password-validation.md
-    - SAML:
-      - janssen-server/recipes/saml/README.md
-      - Federation: janssen-server/recipes/saml/federation.md
-      - IDP-Initiated SSO: janssen-server/recipes/saml/idp-init-authn.md
-      - SP Configuration: janssen-server/recipes/saml/sso-sp.md
-  - User Management:
-      - janssen-server/usermgmt/README.md
-      - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
-      - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
-      - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
-- 'Cedarling':
-  - Overview: 'cedarling/README.md'
-  - Quick Start:
-    - Authorization Using Cedarling: 'cedarling/quick-start/cedarling-quick-start.md'
-  - Tutorials:
-    - 'cedarling/tutorials/cedarling-getting-started.md'
-    - Javascript: 'cedarling/tutorials/javascript.md'
-    - Python: 'cedarling/tutorials/python.md'
-    - Rust: 'cedarling/tutorials/rust.md'
-    - Golang: 'cedarling/tutorials/go.md'
-    - Java: 'cedarling/tutorials/java.md'
-    - Kotlin: 'cedarling/tutorials/kotlin.md'
-    - Swift: 'cedarling/tutorials/swift.md'
-  - Reference:
-    - Terminology: 'cedarling/reference/cedarling-terms.md'
-    - Authorization: 'cedarling/reference/cedarling-authz.md'
-    - Multi-Issuer Authorization: 'cedarling/reference/cedarling-multi-issuer.md'
-    - Interfaces: 'cedarling/reference/cedarling-interfaces.md'
-    - Policy Store: 'cedarling/reference/cedarling-policy-store.md'
-    - Properties: 'cedarling/reference/cedarling-properties.md'
-    - Boolean Operations: 'cedarling/reference/cedarling-principal-boolean-operations.md'
-    - Logs: 'cedarling/reference/cedarling-logs.md'
-    - JWT Validation: 'cedarling/reference/cedarling-jwt-validation.md'
-    - JWT Mapping: 'cedarling/reference/cedarling-jwt-mapping.md'
-    - Lock Configuration: 'cedarling/reference/cedarling-lock-server.md'
-    - Cedarling Entities: 'cedarling/reference/cedarling-entities.md'
-  - Developer:
-    - Rust: 'cedarling/developer/cedarling-rust.md'
-    - Kotlin and Java: 'cedarling/uniffi/cedarling-kotlin.md'
-    - Mobile Apps:
-      - UniFFI interface: 'cedarling/developer/mobile-apps/cedarling-uniffi.md'
-      - Android Apps: 'cedarling/developer/mobile-apps/cedarling-android.md'
-      - iOS Apps: 'cedarling/developer/mobile-apps/cedarling-ios.md'
-    - Sidecar:
-      - Sidecar: 'cedarling/developer/sidecar/cedarling-sidecar-overview.md'
-      - Tutorial: 'cedarling/developer/sidecar/cedarling-sidecar-tutorial.md'
-  - Integrations:
-    - Krakend: 'cedarling/integrations/cedarling-krakend.md'
-- Agama:
-  - Introduction: agama/introduction.md
-  - Language reference: agama/language-reference.md
-  - Execution rules: agama/execution-rules.md
-  - gama format: agama/gama-format.md
-- 'Jans Casa':
-    - 'casa/index.md'
-    - Administration Guide:
-        - 'Quick Start': 'casa/administration/quick-start.md'
-        - 'Admin console': 'casa/administration/admin-console.md'
-        - 'About 2FA': 'casa/administration/2fa-basics.md'
-        - 'Custom branding': 'casa/administration/custom-branding.md'
-        - 'URL path customization': 'casa/administration/change-context-path.md'
-        - 'Localization': 'casa/administration/localization.md'
-        - 'Plugins':
-            - '2FA Settings': 'casa/plugins/2fa-settings.md'
-            - 'Accounts Linking':
-              - 'casa/plugins/accts-linking/account-linking-index.md'
-              - 'Configuring Agama Project': 'casa/plugins/accts-linking/accts-linking-agama.md'
-            - 'BioID': 'casa/plugins/bioid.md'
-            - 'Consent Management': 'casa/plugins/consent-management.md'
-            - 'Custom Branding': 'casa/plugins/custom-branding.md'
-            - 'Email OTP': 'casa/plugins/email-otp.md'
-            - 'Certificate authentication':
-              - 'Certificate authentication': 'casa/plugins/cert-authn.md'
-              - 'Smart card tutorial': 'casa/plugins/cert-authn-tutorial.md'
-        - 'FAQ': 'casa/administration/faq.md'
-    - Developer Guide:
-        - 'Overview': 'casa/developer/overview.md'
-        - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
-    - User Guide: 'casa/user-guide.md'
-- Contribute:
-  - Contribution Guidelines: CONTRIBUTING.md
-  - Code of Conduct: CODE_OF_CONDUCT.md
-  - Design and Implementation:
+      - Customize Web Pages: janssen-server/developer/customization/customize-web-pages.md
+      - Custom Client Logs: janssen-server/developer/customization/custom-client-logs.md
+  - Implementation Design:
     - contribute/implementation-design/README.md
     - Agama:
       - contribute/implementation-design/agama-design/README.md
@@ -504,18 +518,18 @@ nav:
       - contribute/implementation-design/jans-auth-server-design/README.md
       - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
     - jans-cli:
-       - contribute/implementation-design/jans-cli-design/README.md
-       - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
+      - contribute/implementation-design/jans-cli-design/README.md
+      - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
     - jans-config-api:
-       - contribute/implementation-design/jans-config-api-design/README.md
-       - OpenAPI Spec generation: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
-       - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
+      - contribute/implementation-design/jans-config-api-design/README.md
+      - OpenAPI Spec: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
+      - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
     - jans-core:
-       - contribute/implementation-design/jans-core-design/README.md
-       - ADR: contribute/implementation-design/jans-core-design/adr/README.md
+      - contribute/implementation-design/jans-core-design/README.md
+      - ADR: contribute/implementation-design/jans-core-design/adr/README.md
     - jans-fido2:
-       - contribute/implementation-design/jans-fido2-design/README.md
-       - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
+      - contribute/implementation-design/jans-fido2-design/README.md
+      - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
     - jans-orm:
       - contribute/implementation-design/jans-orm-design/README.md
       - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
@@ -528,22 +542,59 @@ nav:
     - jans-cedarling:
       - contribute/implementation-design/jans-cedarling-design/README.md
       - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
-      - Cedarling Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
-  - CI-CD:
-    #- GitHub CI: contribute/ci-cd/github-ci.md
-    - Release Process: contribute/ci-cd/release-process.md
-  - Development:
+      - Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
+  - Reference:
+    - janssen-server/reference/README.md
+    - Cedarling Dev Docs:
+      - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
+      - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
+    - Javadocs / OpenAPI:
+      - janssen-server/reference/openapi.md
+      - agama: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
+      - jans-auth-server: https://janssenproject.github.io/developer-docs/jans-auth-server/server/index.html
+      - jans-casa: https://janssenproject.github.io/developer-docs/jans-casa/config/index.html
+      - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
+      - jans-core: https://janssenproject.github.io/developer-docs/jans-core/server/io/jans/server/filters/package-summary.html
+      - jans-fido2: https://janssenproject.github.io/developer-docs/jans-fido2/server/index.html
+      - jans-link: https://janssenproject.github.io/developer-docs/jans-link/server/index.html
+      - jans-lock: https://janssenproject.github.io/developer-docs/jans-lock/server/index.html
+      - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
+      - jans-scim: https://janssenproject.github.io/developer-docs/jans-scim/server/index.html
+    - JSON Configuration:
+      - janssen-server/reference/json/README.md
+      - Properties:
+        - janssen-server/reference/json/properties/README.md
+        - Auth Server: janssen-server/reference/json/properties/janssenauthserver-properties.md
+        - FIDO: janssen-server/reference/json/properties/fido2-properties.md
+        - SCIM: janssen-server/reference/json/properties/scim-properties.md
+        - Config API: janssen-server/reference/json/properties/config-api-properties.md
+      - Feature Flags:
+        - janssen-server/reference/json/feature-flags/README.md
+        - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
+    - Kubernetes Reference:
+      - janssen-server/reference/kubernetes/README.md
+      - Configuration Keys: janssen-server/reference/kubernetes/config-secret-keys.md
+    - Logout Status JWT: janssen-server/auth-server/tokens/logout-status-jwt.md
+
+# ====================
+# 7. PRODUCT, RELEASES & SUPPORT
+# ====================
+- Product & Releases:
+  - Changelog: CHANGELOG.md
+  - Cedar Introduction: cedar-intro.md
+  - Contributing:
+    - Contribution Guidelines: CONTRIBUTING.md
+    - Code of Conduct: CODE_OF_CONDUCT.md
+  - Governance:
+    - Charter: governance/charter.md
+    - Copyright Notices: governance/copyright-notices.md
+    - Triage: governance/triage.md
+  - Development Setup:
     - contribute/development/development.md
-    - Remote Debugging: contribute/development/remote-debugging.md
-    - Run Integration Tests with a Janssen Server VM : contribute/development/run-integration-tests.md
     - Local Run Under Eclipse: contribute/development/local-run-under-eclipse.md
     - Useful Tools: contribute/development/useful-tools.md
-  - Testing: contribute/testing.md
-  - Developer FAQ: contribute/developer-faq.md
-- Governance:
-  - Charter: governance/charter.md
-  - Copyright-notice: governance/copyright-notices.md
-  - Triage: governance/triage.md
+  - CI/CD:
+    - Release Process: contribute/ci-cd/release-process.md
 
 plugins:
 - include-markdown
@@ -562,15 +613,23 @@ theme:
   custom_dir: docs/overrides
   favicon: assets/janssen_project_favicon_transparent_50px_50px.ico
   features:
-  - toc.autohide - search.suggest - search.highlight
   - navigation.tracking
   - navigation.tabs
   - navigation.tabs.sticky
   - navigation.indexes
+  - navigation.prune
+  - navigation.path
+  - navigation.top
+  - navigation.instant
+  - navigation.instant.progress
+  - search.suggest
+  - search.highlight
+  - search.share
   - content.tabs.link
   - content.code.copy
   - content.code.select
   - content.code.annotate
+  - toc.follow
   font:
     code: Roboto Mono
     text: Roboto

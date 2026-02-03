@@ -98,7 +98,12 @@ class EndUserNotification(EndUserNotificationType):
 
 
 ## Sample Scripts
-- [EndUserNotification](../../../script-catalog/ciba/end-user-notification/end_user_notification.py)
+
+### End User Notification Script
+
+```python
+--8<-- "script-catalog/ciba/end-user-notification/end_user_notification.py"
+```
 
 
 ## Want to contribute?

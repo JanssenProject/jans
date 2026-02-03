@@ -119,7 +119,7 @@ hide:
 
     **Policy Engine**
     
-    ![Cedarling Architecture](assets/cedarling/lock-cedarling-diagram-1.jpg){ .component-image }
+    ![Cedarling Architecture](assets/lock-cedarling-diagram-2.jpg){ .component-image }
     
     Cedar-based authorization engine for fine-grained access control decisions.
     

@@ -43,31 +43,7 @@ This was adapted from [Gluu Post Authentication script example](https://github.c
 ### Script Type: Python
 
 ```python
-from io.jans.model.custom.script.type.postauthn import PostAuthnType
-
-class PostAuthn(PostAuthnType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "Post Authn script. Initializing ..."
-        print "Post Authn script. Initialized successfully"
-
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "Post Authn script. Destroying ..."
-        print "Post Authn script. Destroyed successfully"
-        return True
-
-    def getApiVersion(self):
-        return 11
-
-    def forceReAuthentication(self, context):
-        return False
-
-    def forceAuthorization(self, context):
-        return False
+--8<-- "script-catalog/post_authn/post-authn/post_authn.py"
 ```
 
 ### Script Type: Java
@@ -84,44 +60,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PostAuthn implements PostAuthnType {
-	
-	private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+        
+        private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("Post Authentication. Initializing...");
         log.info("Post Authentication. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("Post Authentication. Initializing...");
         log.info("Post Authentication. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("Post Authentication. Destroying...");
         log.info("Post Authentication. Destroyed.");
         return true;
-	}
+        }
 
-	@Override
-	public int getApiVersion() {
-		return 11;
-	}
+        @Override
+        public int getApiVersion() {
+                return 11;
+        }
 
-	@Override
-	public boolean forceReAuthentication(Object context) {
-		return false;
-	}
+        @Override
+        public boolean forceReAuthentication(Object context) {
+                return false;
+        }
 
-	@Override
-	public boolean forceAuthorization(Object context) {
-		return false;
-	}
+        @Override
+        public boolean forceAuthorization(Object context) {
+                return false;
+        }
 
 }
 

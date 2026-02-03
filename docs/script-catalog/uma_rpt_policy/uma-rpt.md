@@ -40,67 +40,7 @@ This script was adapted from the Gluu Server [UMA RPT Authorization Script](http
 
 ### Script Type: Python
 ```python
-from io.jans.model.custom.script.type.uma import UmaRptPolicyType
-from io.jans.model.uma import ClaimDefinitionBuilder
-from java.lang import String
-
-class UmaRptPolicy(UmaRptPolicyType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, configurationAttributes):
-        print "RPT Policy. Initializing ..."
-        print "RPT Policy. Initialized successfully"
-
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "RPT Policy. Destroying ..."
-        print "RPT Policy. Destroyed successfully"
-        return True
-
-    def getApiVersion(self):
-        return 1
-
-    # Returns required claims definitions.
-    # This method must provide definition of all claims that is used in 'authorize' method.
-    # Return empty array `[]` if no claims should be gathered.
-    # Note : name in both places must match.
-    # %1$s - placeholder for issuer. It uses standard Java Formatter, docs : https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html
-    def getRequiredClaims(self, context): 
-        json = """[
-        {
-            "issuer" : [ "%1$s" ],
-            "name" : "country",
-            "claim_token_format" : [ "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
-            "claim_type" : "string",
-            "friendly_name" : "country"
-        },
-        {
-            "issuer" : [ "%1$s" ],
-            "name" : "city",
-            "claim_token_format" : [ "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
-            "claim_type" : "string",
-            "friendly_name" : "city"
-        }
-        ]"""
-        context.addRedirectUserParam("customUserParam1", "value1") # pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
-        return ClaimDefinitionBuilder.build(String.format(json, context.getIssuer()))
-
-    # Main authorization method. Must return True or False.
-    def authorize(self, context): 
-        print "RPT Policy. Authorizing ..."
-
-        if context.getClaim("country") == 'US' and context.getClaim("city") == 'NY':
-            print "Authorized successfully!"
-            return True
-
-        return False
-
-    # Returns name of the Claims-Gathering script which will be invoked if need_info error is returned. Return blank/empty string if claims gathering flow is not involved.
-    def getClaimsGatheringScriptName(self, context): 
-        context.addRedirectUserParam("customUserParam2", "value2") # pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
-        return "sampleClaimsGathering"
+--8<-- "script-catalog/uma_rpt_policy/uma-rpt-policy/uma_rpt_policy.py"
 ```
 
 ### Script Type: Java
@@ -122,68 +62,68 @@ import org.slf4j.LoggerFactory;
 
 
 public class UmaRptPolicy implements UmaRptPolicyType {
-	
-	private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+        
+        private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("UMA RPT Policy Authorization. Initializing...");
         log.info("UMA RPT Policy Authorization. Initialized");
-		return true;
-	}
+                return true;
+        }
 
-	@Override
-	public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("UMA RPT Policy Authorization. Initializing...");
         log.info("UMA RPT Policy Authorization. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("UMA RPT Policy Authorization. Destroying...");
         log.info("UMA RPT Policy Authorization. Destroyed.");
         return true;
-	}
+        }
 
-	@Override
-	public int getApiVersion() {
-		return 11;
-	}
+        @Override
+        public int getApiVersion() {
+                return 11;
+        }
 
-	@Override
-	public List<ClaimDefinition> getRequiredClaims(Object authorizationContext) {
-		/*  needs to be a valid JSON string
-	     *  Sample: [ { "issuer" : [ "https://example.com" ], "name" :
-	     * "country", "claim_token_format" : [
-	     * "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
-	     * "claim_type" : "string", "friendly_name" : "country" } ]
-	     *
-	     */
-		String json = "";
-		UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
-		authContext.addRedirectUserParam("customUserParam1", "value1");
-		return ClaimDefinitionBuilder.build(String.format(json, authContext.getIssuer()));
-	}
+        @Override
+        public List<ClaimDefinition> getRequiredClaims(Object authorizationContext) {
+                /*  needs to be a valid JSON string
+             *  Sample: [ { "issuer" : [ "https://example.com" ], "name" :
+             * "country", "claim_token_format" : [
+             * "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
+             * "claim_type" : "string", "friendly_name" : "country" } ]
+             *
+             */
+                String json = "";
+                UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
+                authContext.addRedirectUserParam("customUserParam1", "value1");
+                return ClaimDefinitionBuilder.build(String.format(json, authContext.getIssuer()));
+        }
 
-	@Override
-	public boolean authorize(Object authorizationContext) {
-		log.info("UMA RPT Policy Authorization. Authorizing...");
-		UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
-		if (authContext.getClaim("country").equals("US") && authContext.getClaim("city").equals("NY")) {
-			log.info("Authorized successfully!");
-			return true;
-		}
-		return false;
-	}
+        @Override
+        public boolean authorize(Object authorizationContext) {
+                log.info("UMA RPT Policy Authorization. Authorizing...");
+                UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
+                if (authContext.getClaim("country").equals("US") && authContext.getClaim("city").equals("NY")) {
+                        log.info("Authorized successfully!");
+                        return true;
+                }
+                return false;
+        }
 
-	@Override
-	public String getClaimsGatheringScriptName(Object authorizationContext) {
-		UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
-		// pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
-		authContext.addRedirectUserParam("customUserParam2", "value2"); 
-		return "sampleClaimsGathering";
-	}
+        @Override
+        public String getClaimsGatheringScriptName(Object authorizationContext) {
+                UmaAuthorizationContext authContext = (UmaAuthorizationContext) authorizationContext;
+                // pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
+                authContext.addRedirectUserParam("customUserParam2", "value2"); 
+                return "sampleClaimsGathering";
+        }
 
 }
 
