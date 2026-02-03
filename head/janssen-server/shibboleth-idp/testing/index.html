@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/keycloak/keycloak-saml-inbound/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/shibboleth-idp/testing/">
       
       
-        <link rel="prev" href="../keycloak-saml-sso/">
+        <link rel="prev" href="../terraform/">
       
       
-        <link rel="next" href="../../developer/">
+        <link rel="next" href="../../recipes/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Inbound SAML - Janssen Documentation</title>
+        <title>Testing - Janssen Documentation</title>
       
     
     
@@ -89,7 +89,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#inbound-saml" class="md-skip">
+        <a href="#shibboleth-idp-testing-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -140,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Inbound SAML
+              Testing
             
           </span>
         </div>
@@ -2577,7 +2577,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../kubernetes-ops/jans-saml/" class="md-nav__link">
+      <a href="../../kubernetes-ops/jans-saml.md" class="md-nav__link">
         
   
   
@@ -8148,232 +8148,6 @@
                 
   
   
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Keycloak
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_10">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Keycloak
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../keycloak-saml-sso/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SAML SSO
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Inbound SAML
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Inbound SAML
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#enable-inbound-saml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Enable inbound SAML
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inbound-saml-authentication-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Inbound SAML Authentication Flow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configure-saml-idp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configure SAML IDP
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configure-idp-for-inbound-saml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configure IDP for inbound SAML
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
   
   
     
@@ -8408,7 +8182,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -8430,14 +8204,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8485,10 +8259,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_11_2" id="__nav_2_11_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_10_2" id="__nav_2_10_2_label" tabindex="0">
             
   
   
@@ -8506,8 +8280,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8889,7 +8663,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -8911,14 +8685,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11_7" id="__nav_2_11_7_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10_7" id="__nav_2_10_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_7">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -9098,7 +8872,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_8" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -9120,14 +8894,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11_8" id="__nav_2_11_8_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10_8" id="__nav_2_10_8_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_8">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10309,7 +10083,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -10331,14 +10105,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12" id="__nav_2_12_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10374,10 +10148,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_12_2" id="__nav_2_12_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_11_2" id="__nav_2_11_2_label" tabindex="0">
             
   
   
@@ -10395,8 +10169,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10501,10 +10275,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -10516,10 +10286,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_12_3" id="__nav_2_12_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_11_3" id="__nav_2_11_3_label" tabindex="0">
             
   
   
@@ -10537,8 +10307,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10751,62 +10521,6 @@
   
   
     <li class="md-nav__item">
-      <a href="https://janssenproject.github.io/developer-docs/jans-keycloak-integration/server/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    jans-keycloak-integration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="https://janssenproject.github.io/developer-docs/jans-keycloak-link/server/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    jans-keycloak-link
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://janssenproject.github.io/developer-docs/jans-link/server/index.html" class="md-nav__link">
         
   
@@ -10948,7 +10662,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -10970,14 +10684,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4" id="__nav_2_12_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4" id="__nav_2_11_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11021,7 +10735,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11043,14 +10757,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4_2" id="__nav_2_12_4_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4_2" id="__nav_2_11_4_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_12_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4_2">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_11_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11208,7 +10922,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4_3" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11230,14 +10944,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4_3" id="__nav_2_12_4_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4_3" id="__nav_2_11_4_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_12_4_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4_3">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_11_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11319,7 +11033,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_5" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11341,14 +11055,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_5" id="__nav_2_12_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_5" id="__nav_2_11_5_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_5">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11466,7 +11180,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11488,14 +11202,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_13" id="__nav_2_13_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_12" id="__nav_2_12_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_13">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11693,7 +11407,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_14" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_13" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11715,14 +11429,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_14" id="__nav_2_14_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_13" id="__nav_2_13_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_14">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_13">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11953,8 +11667,6 @@
       
         
       
-        
-      
     
     
     
@@ -11966,7 +11678,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_15" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_14" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11988,14 +11700,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_15" id="__nav_2_15_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_14" id="__nav_2_14_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_15">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_14">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -12022,34 +11734,6 @@
     
   
     Jans LDAP Link
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../link/jans-keycloak-link/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Jans Keycloak Link
   
 
     
@@ -12097,7 +11781,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_16" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_15" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -12119,14 +11803,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_16" id="__nav_2_16_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_15" id="__nav_2_15_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_16_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_16">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_15">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -12178,6 +11862,8 @@
                 
   
   
+    
+  
   
   
     
@@ -12185,6 +11871,547 @@
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_16" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shibboleth Identity Provider
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_16" id="__nav_2_16_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_16_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Shibboleth Identity Provider
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#test-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Unit Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Unit Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-api-plugin-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config API Plugin Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#helm-chart-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helm Chart Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Helm Chart Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-rendering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template Rendering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lint Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-End Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="End-to-End Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scenario-1-sp-initiated-sso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scenario 1: SP-Initiated SSO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scenario-2-config-api-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scenario 2: Config API Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scenario-3-add-trusted-sp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scenario 3: Add Trusted SP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kubernetes-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Kubernetes Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deploy-test-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy Test Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-idp-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify IDP Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
         
       
         
@@ -12534,6 +12761,169 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_17_12" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../recipes/saml/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_17_12" id="__nav_2_17_12_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_17_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_17_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SAML
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/federation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Federation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/idp-init-authn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDP-Initiated SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/sso-sp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SP Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -17068,10 +17458,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enable-inbound-saml" class="md-nav__link">
+  <a href="#test-types" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable inbound SAML
+        Test Types
       
     </span>
   </a>
@@ -17079,32 +17469,227 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inbound-saml-authentication-flow" class="md-nav__link">
+  <a href="#running-unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inbound SAML Authentication Flow
+        Running Unit Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Unit Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-api-plugin-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config API Plugin Tests
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#configure-saml-idp" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#test-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configure SAML IDP
+        Test Configuration
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#configure-idp-for-inbound-saml" class="md-nav__link">
+  <a href="#helm-chart-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configure IDP for inbound SAML
+        Helm Chart Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Helm Chart Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-rendering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template Rendering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lint Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-End Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="End-to-End Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scenario-1-sp-initiated-sso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scenario 1: SP-Initiated SSO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scenario-2-config-api-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scenario 2: Config API Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scenario-3-add-trusted-sp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scenario 3: Add Trusted SP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kubernetes-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Kubernetes Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deploy-test-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy Test Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-idp-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify IDP Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Coverage
       
     </span>
   </a>
@@ -17133,13 +17718,6 @@
       
       
       
-        <span class="md-tag">SAML</span>
-      
-    
-      
-      
-      
-      
         <span class="md-tag">administration</span>
       
     
@@ -17147,14 +17725,14 @@
       
       
       
-        <span class="md-tag">inbound</span>
+        <span class="md-tag">shibboleth</span>
       
     
       
       
       
       
-        <span class="md-tag">keycloak</span>
+        <span class="md-tag">testing</span>
       
     
   </nav>
@@ -17164,60 +17742,237 @@
   
 
 
-<h1 id="inbound-saml">Inbound SAML<a class="headerlink" href="#inbound-saml" title="Permanent link">#</a></h1>
-<p>Janssen supports authentication against external SAML identity provider (IDP) namely inbound SAML/inbound identity.
-This document provides instructions for configuring Janssen server</p>
-<h2 id="enable-inbound-saml">Enable inbound SAML<a class="headerlink" href="#enable-inbound-saml" title="Permanent link">#</a></h2>
-<p>Make sure you have Janssen server with SAML plugin installed and enabled. SAML plugin can be enabled using TUI (Jans Saml -&gt; Contribution)</p>
-<h2 id="inbound-saml-authentication-flow">Inbound SAML Authentication Flow<a class="headerlink" href="#inbound-saml-authentication-flow" title="Permanent link">#</a></h2>
-<p>The following is a high-level diagram depicting a typical inbound identity user authentication and provisioning workflow.
-<img alt="" src="../../../assets/inbound-saml-flow.png" /></p>
-<h2 id="configure-saml-idp">Configure SAML IDP<a class="headerlink" href="#configure-saml-idp" title="Permanent link">#</a></h2>
-<p>Use <a href="../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to create new IDP Keycloak Server.
-1. Navigate to <code>Jans SAML</code> &gt; <code>Identity Providers</code></p>
+<h1 id="shibboleth-idp-testing-guide">Shibboleth IDP Testing Guide<a class="headerlink" href="#shibboleth-idp-testing-guide" title="Permanent link">#</a></h1>
+<p>This guide covers testing procedures for the Janssen Shibboleth IDP integration.</p>
+<h2 id="test-types">Test Types<a class="headerlink" href="#test-types" title="Permanent link">#</a></h2>
 <ol>
-<li>
-<p>Go to <code>Add Identity Provider</code> and press <strong>Enter</strong></p>
-</li>
-<li>
-<p>Enter a name (unique identifier) for this provider (letters, digits, and underscore characters allowed).</p>
-</li>
-<li>
-<p>Enter a display name for the <code>Add Identity Provider</code></p>
-</li>
-<li>
-<p>Upload IDP Metadata by selecting <strong>file</strong> for <code>Metadata Source Type</code> and press <strong>Enter</strong> after you navigated on <strong>Browse</strong> of <code>Metadata File</code></p>
-</li>
-<li>
-<p>Or you can, optionally provide individual metadata elements by selecting <strong>manual</strong> for <code>Metadata Source Type</code>.
-   See adding a sample idp in the following figure
-   <img alt="Add Isentitiy Provider" src="../../../assets/tui-admin-keycloack-add-idp.png" /></p>
-</li>
-<li>
-<p>Save details</p>
-</li>
+<li><strong>Unit Tests</strong> - Java unit tests for Config API plugin</li>
+<li><strong>Integration Tests</strong> - API endpoint testing with REST Assured</li>
+<li><strong>Helm Chart Tests</strong> - Template rendering validation</li>
+<li><strong>End-to-End Tests</strong> - Full authentication flow testing</li>
 </ol>
-<p>SAML IDP is created in Keycloak server under realm <strong>jans</strong>. IDP details are also persisted in Jans DB.</p>
-<p>To edit IDP details later, you can navigate to the idp in the list and press <strong>Enter</strong>, you will get a popup screen as shown in the
-figure below:</p>
-<p><img alt="Edit Isentitiy Provider" src="../../../assets/tui-admin-keycloack-edit-idp.png" /></p>
-<h2 id="configure-idp-for-inbound-saml">Configure IDP for inbound SAML<a class="headerlink" href="#configure-idp-for-inbound-saml" title="Permanent link">#</a></h2>
+<h2 id="running-unit-tests">Running Unit Tests<a class="headerlink" href="#running-unit-tests" title="Permanent link">#</a></h2>
+<h3 id="config-api-plugin-tests">Config API Plugin Tests<a class="headerlink" href="#config-api-plugin-tests" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>jans-config-api/plugins/shibboleth-plugin
+mvn<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<h3 id="test-configuration">Test Configuration<a class="headerlink" href="#test-configuration" title="Permanent link">#</a></h3>
+<p>Configure test properties in <code>src/test/resources/test.properties</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="na">shibbolethUrl</span><span class="o">=</span><span class="s">http://localhost:8080/jans-config-api</span>
+<span class="na">tokenEndpoint</span><span class="o">=</span><span class="s">https://your-server/jans-auth/restv1/token</span>
+<span class="na">clientId</span><span class="o">=</span><span class="s">your-test-client</span>
+<span class="na">clientSecret</span><span class="o">=</span><span class="s">your-test-secret</span>
+<span class="na">scopes</span><span class="o">=</span><span class="s">https://jans.io/oauth/config/shibboleth.readonly https://jans.io/oauth/config/shibboleth.write</span>
+</code></pre></div>
+<h2 id="helm-chart-validation">Helm Chart Validation<a class="headerlink" href="#helm-chart-validation" title="Permanent link">#</a></h2>
+<h3 id="template-rendering">Template Rendering<a class="headerlink" href="#template-rendering" title="Permanent link">#</a></h3>
+<p>Validate the Shibboleth IDP chart renders correctly:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Standalone subchart</span>
+helm<span class="w"> </span>template<span class="w"> </span><span class="nb">test</span><span class="w"> </span>charts/janssen/charts/shibboleth-idp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span><span class="nv">replicaCount</span><span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>hpa.enabled<span class="o">=</span><span class="nb">true</span>
+
+<span class="c1"># With parent chart</span>
+helm<span class="w"> </span>template<span class="w"> </span>janssen<span class="w"> </span>charts/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.shibboleth-idp.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.cnPersistenceType<span class="o">=</span>sql<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.fqdn<span class="o">=</span>test.example.com
+</code></pre></div>
+<h3 id="lint-chart">Lint Chart<a class="headerlink" href="#lint-chart" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>lint<span class="w"> </span>charts/janssen/charts/shibboleth-idp
+helm<span class="w"> </span>lint<span class="w"> </span>charts/janssen<span class="w"> </span>--set<span class="w"> </span>global.shibboleth-idp.enabled<span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+<h2 id="end-to-end-testing">End-to-End Testing<a class="headerlink" href="#end-to-end-testing" title="Permanent link">#</a></h2>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
 <ol>
-<li>SAML IDP should have been configured as stated in above</li>
-<li>Agama Lab is an online visual editor to build authentication flows. Learn more about <a href="../../janssen-server/developer/agama/quick-start-using-agama-lab.md">Agama Lab</a></li>
-<li>Fork existing agama-inbound-saml project from <a href="https://agama-lab.gluu.org/landing-page/">Agama Lab Projects</a></li>
-<li>In Agama orchestrator create a new flow by adding a RFAC (Redirect and fetch a callback) node for SAML IDP.</li>
-<li>Deploying .gama package on Janssen Server </li>
-<li>Testing the authentication flow using Jans Tarp.</li>
-<li>Install Tarp, check details <a href="https://github.com/JanssenProject/jans/blob/main/demos/jans-tarp/README.md">here</a>.</li>
-<li>Open Tarp extension.</li>
-<li>Enter URL of Keycloak OpenID configuration. Example http:///realms/keycloak-external-broker/.well-known/openid-configuration.</li>
-<li>Click Register.</li>
-<li>Registered Client details are displayed, enter Additional Params to hint Keycloak about IDP to be trigger. Example {"kc_idp_hint":"gluu-saml-idp-1"}</li>
-<li>Click "Trigger Auth Code Flow.</li>
-<li>This should redirect to IDP login page.</li>
-<li>Enter user details and login.</li>
+<li>Running Janssen Auth Server</li>
+<li>Configured OAuth client for Shibboleth IDP</li>
+<li>Test Service Provider with SAML support</li>
 </ol>
+<h3 id="test-scenario-1-sp-initiated-sso">Test Scenario 1: SP-Initiated SSO<a class="headerlink" href="#test-scenario-1-sp-initiated-sso" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Access SP Application</strong></li>
+<li>Navigate to a protected resource on the SP</li>
+<li>
+<p>SP generates SAML AuthnRequest</p>
+</li>
+<li>
+<p><strong>Redirect to IDP</strong></p>
+</li>
+<li>SP redirects to Shibboleth IDP SSO endpoint</li>
+<li>
+<p>IDP receives SAML request</p>
+</li>
+<li>
+<p><strong>Janssen Auth Authentication</strong></p>
+</li>
+<li>IDP redirects to Janssen Auth Server</li>
+<li>User authenticates (password, MFA, etc.)</li>
+<li>
+<p>Auth Server returns OAuth tokens</p>
+</li>
+<li>
+<p><strong>SAML Response</strong></p>
+</li>
+<li>IDP creates SAML assertion with user attributes</li>
+<li>
+<p>IDP POSTs SAML response to SP ACS</p>
+</li>
+<li>
+<p><strong>Verify Access</strong></p>
+</li>
+<li>SP validates SAML response</li>
+<li>User gains access to protected resource</li>
+</ol>
+<h3 id="test-scenario-2-config-api-operations">Test Scenario 2: Config API Operations<a class="headerlink" href="#test-scenario-2-config-api-operations" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get access token</span>
+<span class="nv">ACCESS_TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;https://your-server/jans-auth/restv1/token&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=client_credentials&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_id=test-client&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_secret=test-secret&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;scope=https://jans.io/oauth/config/shibboleth.readonly&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.access_token&#39;</span><span class="k">)</span>
+
+<span class="c1"># Get IDP configuration</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://your-server/jans-config-api/shibboleth/config
+
+<span class="c1"># List trusted SPs</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://your-server/jans-config-api/shibboleth/trust
+</code></pre></div>
+<h3 id="test-scenario-3-add-trusted-sp">Test Scenario 3: Add Trusted SP<a class="headerlink" href="#test-scenario-3-add-trusted-sp" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create trusted SP</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">    &quot;entityId&quot;: &quot;https://sp.example.org&quot;,</span>
+<span class="s1">    &quot;name&quot;: &quot;Test SP&quot;,</span>
+<span class="s1">    &quot;enabled&quot;: true,</span>
+<span class="s1">    &quot;metadataUrl&quot;: &quot;https://sp.example.org/metadata&quot;,</span>
+<span class="s1">    &quot;releasedAttributes&quot;: [&quot;uid&quot;, &quot;mail&quot;, &quot;displayName&quot;]</span>
+<span class="s1">  }&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://your-server/jans-config-api/shibboleth/trust
+
+<span class="c1"># Verify SP was added</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://your-server/jans-config-api/shibboleth/trust/https%3A%2F%2Fsp.example.org
+</code></pre></div>
+<h2 id="kubernetes-testing">Kubernetes Testing<a class="headerlink" href="#kubernetes-testing" title="Permanent link">#</a></h2>
+<h3 id="deploy-test-environment">Deploy Test Environment<a class="headerlink" href="#deploy-test-environment" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create namespace</span>
+kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>jans-test
+
+<span class="c1"># Deploy with Shibboleth enabled</span>
+helm<span class="w"> </span>install<span class="w"> </span>janssen<span class="w"> </span>charts/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--namespace<span class="w"> </span>jans-test<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.shibboleth-idp.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.fqdn<span class="o">=</span>test.example.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.cnPersistenceType<span class="o">=</span>sql
+
+<span class="c1"># Wait for pods</span>
+kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--for<span class="o">=</span><span class="nv">condition</span><span class="o">=</span>ready<span class="w"> </span>pod<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>shibboleth-idp<span class="w"> </span>-n<span class="w"> </span>jans-test<span class="w"> </span>--timeout<span class="o">=</span>300s
+
+<span class="c1"># Check status</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>jans-test<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>shibboleth-idp
+</code></pre></div>
+<h3 id="verify-idp-status">Verify IDP Status<a class="headerlink" href="#verify-idp-status" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Port forward</span>
+kubectl<span class="w"> </span>port-forward<span class="w"> </span>-n<span class="w"> </span>jans-test<span class="w"> </span>svc/shibboleth-idp<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="p">&amp;</span>
+
+<span class="c1"># Check IDP status</span>
+curl<span class="w"> </span>http://localhost:8080/idp/status
+
+<span class="c1"># Get IDP metadata</span>
+curl<span class="w"> </span>http://localhost:8080/idp/shibboleth
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>IDP Status Returns 503</strong></li>
+<li>Check pod logs: <code>kubectl logs -l app=shibboleth-idp</code></li>
+<li>Verify Janssen Auth Server is accessible</li>
+<li>
+<p>Check OAuth client configuration</p>
+</li>
+<li>
+<p><strong>SAML Response Invalid</strong></p>
+</li>
+<li>Verify IDP signing certificate</li>
+<li>Check attribute release policies</li>
+<li>
+<p>Validate SP metadata registration</p>
+</li>
+<li>
+<p><strong>Authentication Fails</strong></p>
+</li>
+<li>Check Janssen Auth Server logs</li>
+<li>Verify OAuth redirect URI configuration</li>
+<li>Confirm OAuth client scopes</li>
+</ol>
+<h3 id="debug-logging">Debug Logging<a class="headerlink" href="#debug-logging" title="Permanent link">#</a></h3>
+<p>Enable debug logging in Shibboleth:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Kubernetes</span>
+kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </span>env<span class="w"> </span>deployment/shibboleth-idp<span class="w"> </span>-n<span class="w"> </span>jans-test<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="nv">IDP_LOG_LEVEL</span><span class="o">=</span>DEBUG
+
+<span class="c1"># Docker</span>
+docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">IDP_LOG_LEVEL</span><span class="o">=</span>DEBUG<span class="w"> </span>janssenproject/shibboleth:5.1.6_dev
+</code></pre></div>
+<h2 id="test-coverage">Test Coverage<a class="headerlink" href="#test-coverage" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Test Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Config API - GET /config</td>
+<td>Integration</td>
+<td>Ready</td>
+</tr>
+<tr>
+<td>Config API - PUT /config</td>
+<td>Integration</td>
+<td>Ready</td>
+</tr>
+<tr>
+<td>Config API - GET /trust</td>
+<td>Integration</td>
+<td>Ready</td>
+</tr>
+<tr>
+<td>Config API - POST /trust</td>
+<td>Integration</td>
+<td>Ready</td>
+</tr>
+<tr>
+<td>Config API - DELETE /trust</td>
+<td>Integration</td>
+<td>Ready</td>
+</tr>
+<tr>
+<td>Helm Chart Rendering</td>
+<td>Unit</td>
+<td>Ready</td>
+</tr>
+<tr>
+<td>SAML SSO Flow</td>
+<td>E2E</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>Janssen Auth Integration</td>
+<td>E2E</td>
+<td>Manual</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -17240,7 +17995,7 @@ figure below:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 06:31:18 UTC"><span class="timeago" datetime="2026-02-03T06:31:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 06:31:18 UTC">2026-02-03</span>
   </span>
 
     
@@ -17250,7 +18005,7 @@ figure below:</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 06:31:18 UTC"><span class="timeago" datetime="2026-02-03T06:31:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 06:31:18 UTC">2026-02-03</span>
   </span>
 
     

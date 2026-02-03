@@ -13,31 +13,31 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/keycloak/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/shibboleth-idp/helm-deployment/">
       
       
-        <link rel="prev" href="../auth-server/logging/log4j2/">
+        <link rel="prev" href="../configuration/">
       
       
-        <link rel="next" href="keycloak-saml-sso/">
+        <link rel="next" href="../config-api/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>Keycloak - Janssen Documentation</title>
+        <title>Helm Deployment - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -56,15 +56,15 @@
       
     
     
-      <link rel="stylesheet" href="../../css/timeago.css">
+      <link rel="stylesheet" href="../../../css/timeago.css">
     
-      <link rel="stylesheet" href="../../css/tabs.css">
+      <link rel="stylesheet" href="../../../css/tabs.css">
     
-      <link rel="stylesheet" href="../../stylesheets/mermaid-extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
     
-      <link rel="stylesheet" href="../../stylesheets/home.css">
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -89,7 +89,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#keycloak" class="md-skip">
+        <a href="#shibboleth-idp-helm-deployment" class="md-skip">
           Skip to content
         </a>
       
@@ -104,12 +104,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../../..">
+  <a href="../../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -121,9 +121,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -140,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Keycloak
+              Helm Deployment
             
           </span>
         </div>
@@ -255,7 +255,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -278,7 +278,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+        <a href="../../" class="md-tabs__link">
           
   
   
@@ -300,7 +300,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../cedarling/" class="md-tabs__link">
+        <a href="../../../cedarling/" class="md-tabs__link">
           
   
   
@@ -322,7 +322,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../agama/introduction/" class="md-tabs__link">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
           
   
   
@@ -344,7 +344,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../casa/" class="md-tabs__link">
+        <a href="../../../casa/" class="md-tabs__link">
           
   
   
@@ -366,7 +366,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../CONTRIBUTING/" class="md-tabs__link">
+        <a href="../../../CONTRIBUTING/" class="md-tabs__link">
           
   
   
@@ -388,7 +388,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../governance/charter/" class="md-tabs__link">
+        <a href="../../../governance/charter/" class="md-tabs__link">
           
   
   
@@ -430,9 +430,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     Janssen Documentation
@@ -459,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -546,7 +546,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../" class="md-nav__link ">
               
   
   
@@ -665,7 +665,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../planning/" class="md-nav__link ">
+            <a href="../../planning/" class="md-nav__link ">
               
   
   
@@ -709,7 +709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/platform-goal/" class="md-nav__link">
+      <a href="../../planning/platform-goal/" class="md-nav__link">
         
   
   
@@ -737,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/use-cases/" class="md-nav__link">
+      <a href="../../planning/use-cases/" class="md-nav__link">
         
   
   
@@ -765,7 +765,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/components/" class="md-nav__link">
+      <a href="../../planning/components/" class="md-nav__link">
         
   
   
@@ -793,7 +793,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/kubernetes/" class="md-nav__link">
+      <a href="../../planning/kubernetes/" class="md-nav__link">
         
   
   
@@ -821,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/vm-cluster/" class="md-nav__link">
+      <a href="../../planning/vm-cluster/" class="md-nav__link">
         
   
   
@@ -849,7 +849,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/vm-single-instance/" class="md-nav__link">
+      <a href="../../planning/vm-single-instance/" class="md-nav__link">
         
   
   
@@ -877,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/persistence/" class="md-nav__link">
+      <a href="../../planning/persistence/" class="md-nav__link">
         
   
   
@@ -905,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/caching/" class="md-nav__link">
+      <a href="../../planning/caching/" class="md-nav__link">
         
   
   
@@ -933,7 +933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/security-best-practices/" class="md-nav__link">
+      <a href="../../planning/security-best-practices/" class="md-nav__link">
         
   
   
@@ -961,7 +961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/load-balancers/" class="md-nav__link">
+      <a href="../../planning/load-balancers/" class="md-nav__link">
         
   
   
@@ -989,7 +989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/certificates-keys/" class="md-nav__link">
+      <a href="../../planning/certificates-keys/" class="md-nav__link">
         
   
   
@@ -1017,7 +1017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/dns/" class="md-nav__link">
+      <a href="../../planning/dns/" class="md-nav__link">
         
   
   
@@ -1045,7 +1045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/multi-tenancy/" class="md-nav__link">
+      <a href="../../planning/multi-tenancy/" class="md-nav__link">
         
   
   
@@ -1073,7 +1073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/benchmarking/" class="md-nav__link">
+      <a href="../../planning/benchmarking/" class="md-nav__link">
         
   
   
@@ -1101,7 +1101,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/application-portal/" class="md-nav__link">
+      <a href="../../planning/application-portal/" class="md-nav__link">
         
   
   
@@ -1129,7 +1129,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/discovery/" class="md-nav__link">
+      <a href="../../planning/discovery/" class="md-nav__link">
         
   
   
@@ -1157,7 +1157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/customization/" class="md-nav__link">
+      <a href="../../planning/customization/" class="md-nav__link">
         
   
   
@@ -1185,7 +1185,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/timeout-management/" class="md-nav__link">
+      <a href="../../planning/timeout-management/" class="md-nav__link">
         
   
   
@@ -1213,7 +1213,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/identity-management/" class="md-nav__link">
+      <a href="../../planning/identity-management/" class="md-nav__link">
         
   
   
@@ -1241,7 +1241,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/self-service-password-2fa/" class="md-nav__link">
+      <a href="../../planning/self-service-password-2fa/" class="md-nav__link">
         
   
   
@@ -1269,7 +1269,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/identity-access-governance/" class="md-nav__link">
+      <a href="../../planning/identity-access-governance/" class="md-nav__link">
         
   
   
@@ -1297,7 +1297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/role-based-access-management/" class="md-nav__link">
+      <a href="../../planning/role-based-access-management/" class="md-nav__link">
         
   
   
@@ -1325,7 +1325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/central-auth-service/" class="md-nav__link">
+      <a href="../../planning/central-auth-service/" class="md-nav__link">
         
   
   
@@ -1353,7 +1353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/stepped-up-auth/" class="md-nav__link">
+      <a href="../../planning/stepped-up-auth/" class="md-nav__link">
         
   
   
@@ -1381,7 +1381,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/delegated-user-admin/" class="md-nav__link">
+      <a href="../../planning/delegated-user-admin/" class="md-nav__link">
         
   
   
@@ -1409,7 +1409,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/passwordless-auth/" class="md-nav__link">
+      <a href="../../planning/passwordless-auth/" class="md-nav__link">
         
   
   
@@ -1437,7 +1437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../planning/machine-to-machine/" class="md-nav__link">
+      <a href="../../planning/machine-to-machine/" class="md-nav__link">
         
   
   
@@ -1504,7 +1504,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../install/" class="md-nav__link ">
+            <a href="../../install/" class="md-nav__link ">
               
   
   
@@ -1579,7 +1579,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../install/vm-install/" class="md-nav__link ">
+            <a href="../../install/vm-install/" class="md-nav__link ">
               
   
   
@@ -1623,7 +1623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/vm-install/vm-requirements/" class="md-nav__link">
+      <a href="../../install/vm-install/vm-requirements/" class="md-nav__link">
         
   
   
@@ -1651,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/vm-install/ubuntu/" class="md-nav__link">
+      <a href="../../install/vm-install/ubuntu/" class="md-nav__link">
         
   
   
@@ -1679,7 +1679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/vm-install/rhel/" class="md-nav__link">
+      <a href="../../install/vm-install/rhel/" class="md-nav__link">
         
   
   
@@ -1707,7 +1707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/vm-install/suse/" class="md-nav__link">
+      <a href="../../install/vm-install/suse/" class="md-nav__link">
         
   
   
@@ -1735,7 +1735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/vm-install/dynamic-download/" class="md-nav__link">
+      <a href="../../install/vm-install/dynamic-download/" class="md-nav__link">
         
   
   
@@ -1802,7 +1802,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../install/helm-install/" class="md-nav__link ">
+            <a href="../../install/helm-install/" class="md-nav__link ">
               
   
   
@@ -1846,7 +1846,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/helm-install/local/" class="md-nav__link">
+      <a href="../../install/helm-install/local/" class="md-nav__link">
         
   
   
@@ -1874,7 +1874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/helm-install/amazon-eks/" class="md-nav__link">
+      <a href="../../install/helm-install/amazon-eks/" class="md-nav__link">
         
   
   
@@ -1902,7 +1902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/helm-install/google-gke/" class="md-nav__link">
+      <a href="../../install/helm-install/google-gke/" class="md-nav__link">
         
   
   
@@ -1930,7 +1930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/helm-install/microsoft-azure/" class="md-nav__link">
+      <a href="../../install/helm-install/microsoft-azure/" class="md-nav__link">
         
   
   
@@ -1958,7 +1958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/helm-install/rancher/" class="md-nav__link">
+      <a href="../../install/helm-install/rancher/" class="md-nav__link">
         
   
   
@@ -2050,7 +2050,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/docker-install/quick-start/" class="md-nav__link">
+      <a href="../../install/docker-install/quick-start/" class="md-nav__link">
         
   
   
@@ -2078,7 +2078,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/docker-install/compose/" class="md-nav__link">
+      <a href="../../install/docker-install/compose/" class="md-nav__link">
         
   
   
@@ -2114,7 +2114,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/setup/" class="md-nav__link">
+      <a href="../../install/setup/" class="md-nav__link">
         
   
   
@@ -2142,7 +2142,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/install-faq/" class="md-nav__link">
+      <a href="../../install/install-faq/" class="md-nav__link">
         
   
   
@@ -2225,7 +2225,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../kubernetes-ops/" class="md-nav__link ">
+            <a href="../../kubernetes-ops/" class="md-nav__link ">
               
   
   
@@ -2269,7 +2269,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/upgrade/" class="md-nav__link">
+      <a href="../../kubernetes-ops/upgrade/" class="md-nav__link">
         
   
   
@@ -2297,7 +2297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/scaling/" class="md-nav__link">
+      <a href="../../kubernetes-ops/scaling/" class="md-nav__link">
         
   
   
@@ -2325,7 +2325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/backup-restore/" class="md-nav__link">
+      <a href="../../kubernetes-ops/backup-restore/" class="md-nav__link">
         
   
   
@@ -2353,7 +2353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/cert-management/" class="md-nav__link">
+      <a href="../../kubernetes-ops/cert-management/" class="md-nav__link">
         
   
   
@@ -2381,7 +2381,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/customization/" class="md-nav__link">
+      <a href="../../kubernetes-ops/customization/" class="md-nav__link">
         
   
   
@@ -2409,7 +2409,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/start-order/" class="md-nav__link">
+      <a href="../../kubernetes-ops/start-order/" class="md-nav__link">
         
   
   
@@ -2437,7 +2437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/logs/" class="md-nav__link">
+      <a href="../../kubernetes-ops/logs/" class="md-nav__link">
         
   
   
@@ -2465,7 +2465,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/external-secrets-configmaps/" class="md-nav__link">
+      <a href="../../kubernetes-ops/external-secrets-configmaps/" class="md-nav__link">
         
   
   
@@ -2493,7 +2493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/health-check/" class="md-nav__link">
+      <a href="../../kubernetes-ops/health-check/" class="md-nav__link">
         
   
   
@@ -2521,7 +2521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/tui-k8s/" class="md-nav__link">
+      <a href="../../kubernetes-ops/tui-k8s/" class="md-nav__link">
         
   
   
@@ -2549,7 +2549,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/custom-attributes/" class="md-nav__link">
+      <a href="../../kubernetes-ops/custom-attributes/" class="md-nav__link">
         
   
   
@@ -2577,7 +2577,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/jans-saml/" class="md-nav__link">
+      <a href="../../kubernetes-ops/jans-saml.md" class="md-nav__link">
         
   
   
@@ -2605,7 +2605,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../kubernetes-ops/memory-dump/" class="md-nav__link">
+      <a href="../../kubernetes-ops/memory-dump/" class="md-nav__link">
         
   
   
@@ -2680,7 +2680,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../vm-ops/" class="md-nav__link ">
+            <a href="../../vm-ops/" class="md-nav__link ">
               
   
   
@@ -2724,7 +2724,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/upgrade/" class="md-nav__link">
+      <a href="../../vm-ops/upgrade/" class="md-nav__link">
         
   
   
@@ -2752,7 +2752,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/backup/" class="md-nav__link">
+      <a href="../../vm-ops/backup/" class="md-nav__link">
         
   
   
@@ -2780,7 +2780,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/logs/" class="md-nav__link">
+      <a href="../../vm-ops/logs/" class="md-nav__link">
         
   
   
@@ -2808,7 +2808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/checking-service-status/" class="md-nav__link">
+      <a href="../../vm-ops/checking-service-status/" class="md-nav__link">
         
   
   
@@ -2836,7 +2836,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/restarting-services/" class="md-nav__link">
+      <a href="../../vm-ops/restarting-services/" class="md-nav__link">
         
   
   
@@ -2864,7 +2864,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/managing-key-rotation/" class="md-nav__link">
+      <a href="../../vm-ops/managing-key-rotation/" class="md-nav__link">
         
   
   
@@ -2892,7 +2892,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/certificates/" class="md-nav__link">
+      <a href="../../vm-ops/certificates/" class="md-nav__link">
         
   
   
@@ -2920,7 +2920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/jans-command/" class="md-nav__link">
+      <a href="../../vm-ops/jans-command/" class="md-nav__link">
         
   
   
@@ -2948,7 +2948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../vm-ops/data-cleaning/" class="md-nav__link">
+      <a href="../../vm-ops/data-cleaning/" class="md-nav__link">
         
   
   
@@ -3005,7 +3005,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../terraform/" class="md-nav__link ">
+            <a href="../../terraform/" class="md-nav__link ">
               
   
   
@@ -3209,7 +3209,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../config-guide/config-tools/jans-tui/" class="md-nav__link ">
+            <a href="../../config-guide/config-tools/jans-tui/" class="md-nav__link ">
               
   
   
@@ -3253,7 +3253,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/jans-tui/navigation-guide/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/jans-tui/navigation-guide/" class="md-nav__link">
         
   
   
@@ -3281,7 +3281,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/jans-tui/using-command-line-log/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/jans-tui/using-command-line-log/" class="md-nav__link">
         
   
   
@@ -3338,7 +3338,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../config-guide/config-tools/jans-cli/" class="md-nav__link ">
+            <a href="../../config-guide/config-tools/jans-cli/" class="md-nav__link ">
               
   
   
@@ -3416,7 +3416,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../config-guide/config-tools/config-api/" class="md-nav__link ">
+            <a href="../../config-guide/config-tools/config-api/" class="md-nav__link ">
               
   
   
@@ -3460,7 +3460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/config-api/config/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/config-api/config/" class="md-nav__link">
         
   
   
@@ -3488,7 +3488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/config-api/security/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/config-api/security/" class="md-nav__link">
         
   
   
@@ -3516,7 +3516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/config-api/logs/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/config-api/logs/" class="md-nav__link">
         
   
   
@@ -3544,7 +3544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/config-api/monitoring/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/config-api/monitoring/" class="md-nav__link">
         
   
   
@@ -3572,7 +3572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/config-api/plugins/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/config-api/plugins/" class="md-nav__link">
         
   
   
@@ -3608,7 +3608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/config-tools/curl-guide/" class="md-nav__link">
+      <a href="../../config-guide/config-tools/curl-guide/" class="md-nav__link">
         
   
   
@@ -3722,7 +3722,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/openid-connect-client-configuration/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/openid-connect-client-configuration/" class="md-nav__link">
         
   
   
@@ -3750,7 +3750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/oauth-scopes-config/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/oauth-scopes-config/" class="md-nav__link">
         
   
   
@@ -3778,7 +3778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/json-web-key-config/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/json-web-key-config/" class="md-nav__link">
         
   
   
@@ -3806,7 +3806,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/authentication-method-config/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/authentication-method-config/" class="md-nav__link">
         
   
   
@@ -3834,7 +3834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/jans-authorization-server-config/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/jans-authorization-server-config/" class="md-nav__link">
         
   
   
@@ -3862,7 +3862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/logging-configuration/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/logging-configuration/" class="md-nav__link">
         
   
   
@@ -3890,7 +3890,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/ssa-config/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/ssa-config/" class="md-nav__link">
         
   
   
@@ -3918,7 +3918,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/agama-project-configuration/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/agama-project-configuration/" class="md-nav__link">
         
   
   
@@ -3949,7 +3949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/attribute-configuration/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/attribute-configuration/" class="md-nav__link">
         
   
   
@@ -3977,7 +3977,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/cache-configuration/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/cache-configuration/" class="md-nav__link">
         
   
   
@@ -4005,7 +4005,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/rate-limit/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/rate-limit/" class="md-nav__link">
         
   
   
@@ -4033,7 +4033,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/oauth-umaresources-config/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/oauth-umaresources-config/" class="md-nav__link">
         
   
   
@@ -4061,7 +4061,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/session-management/" class="md-nav__link">
+      <a href="../../config-guide/auth-server-config/session-management/" class="md-nav__link">
         
   
   
@@ -4097,7 +4097,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/fido2-config/janssen-fido2-configuration/" class="md-nav__link">
+      <a href="../../config-guide/fido2-config/janssen-fido2-configuration/" class="md-nav__link">
         
   
   
@@ -4181,7 +4181,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/scim-config/user-config/" class="md-nav__link">
+      <a href="../../config-guide/scim-config/user-config/" class="md-nav__link">
         
   
   
@@ -4209,7 +4209,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/scim-config/scim-group-config/" class="md-nav__link">
+      <a href="../../config-guide/scim-config/scim-group-config/" class="md-nav__link">
         
   
   
@@ -4245,7 +4245,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/custom-scripts-config/" class="md-nav__link">
+      <a href="../../config-guide/custom-scripts-config/" class="md-nav__link">
         
   
   
@@ -4273,7 +4273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/smtp-configuration/" class="md-nav__link">
+      <a href="../../config-guide/smtp-configuration/" class="md-nav__link">
         
   
   
@@ -4301,7 +4301,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/hash-password/" class="md-nav__link">
+      <a href="../../config-guide/hash-password/" class="md-nav__link">
         
   
   
@@ -4329,7 +4329,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/link-configuration/" class="md-nav__link">
+      <a href="../../config-guide/link-configuration/" class="md-nav__link">
         
   
   
@@ -4357,7 +4357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/custom-assets-configuration/" class="md-nav__link">
+      <a href="../../config-guide/custom-assets-configuration/" class="md-nav__link">
         
   
   
@@ -4385,7 +4385,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../config-guide/session/" class="md-nav__link">
+      <a href="../../config-guide/session/" class="md-nav__link">
         
   
   
@@ -4448,7 +4448,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/database/" class="md-nav__link ">
+            <a href="../../reference/database/" class="md-nav__link ">
               
   
   
@@ -4492,7 +4492,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/rdbms-erwin/" class="md-nav__link">
+      <a href="../../reference/database/rdbms-erwin/" class="md-nav__link">
         
   
   
@@ -4578,7 +4578,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/mysql-schema/" class="md-nav__link">
+      <a href="../../reference/database/mysql-schema/" class="md-nav__link">
         
   
   
@@ -4606,7 +4606,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/mysql-config/" class="md-nav__link">
+      <a href="../../reference/database/mysql-config/" class="md-nav__link">
         
   
   
@@ -4634,7 +4634,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/mysql-ops/" class="md-nav__link">
+      <a href="../../reference/database/mysql-ops/" class="md-nav__link">
         
   
   
@@ -4730,7 +4730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/pgsql-schema/" class="md-nav__link">
+      <a href="../../reference/database/pgsql-schema/" class="md-nav__link">
         
   
   
@@ -4758,7 +4758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/pgsql-schema-indexes/" class="md-nav__link">
+      <a href="../../reference/database/pgsql-schema-indexes/" class="md-nav__link">
         
   
   
@@ -4786,7 +4786,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/pgsql-config/" class="md-nav__link">
+      <a href="../../reference/database/pgsql-config/" class="md-nav__link">
         
   
   
@@ -4814,7 +4814,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/database/pgsql-ops/" class="md-nav__link">
+      <a href="../../reference/database/pgsql-ops/" class="md-nav__link">
         
   
   
@@ -4907,7 +4907,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/" class="md-nav__link ">
+            <a href="../../auth-server/" class="md-nav__link ">
               
   
   
@@ -4951,7 +4951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/config/" class="md-nav__link">
+      <a href="../../auth-server/config/" class="md-nav__link">
         
   
   
@@ -5004,7 +5004,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/session-management/" class="md-nav__link ">
+            <a href="../../auth-server/session-management/" class="md-nav__link ">
               
   
   
@@ -5048,7 +5048,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/session-management/idp-v-rp/" class="md-nav__link">
+      <a href="../../auth-server/session-management/idp-v-rp/" class="md-nav__link">
         
   
   
@@ -5076,7 +5076,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/session-management/multiple-sessions-one-browser/" class="md-nav__link">
+      <a href="../../auth-server/session-management/multiple-sessions-one-browser/" class="md-nav__link">
         
   
   
@@ -5147,7 +5147,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/tokens/" class="md-nav__link ">
+            <a href="../../auth-server/tokens/" class="md-nav__link ">
               
   
   
@@ -5191,7 +5191,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/oauth-access-tokens/" class="md-nav__link">
+      <a href="../../auth-server/tokens/oauth-access-tokens/" class="md-nav__link">
         
   
   
@@ -5219,7 +5219,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/oauth-refresh-tokens/" class="md-nav__link">
+      <a href="../../auth-server/tokens/oauth-refresh-tokens/" class="md-nav__link">
         
   
   
@@ -5247,7 +5247,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/oauth-tx-tokens/" class="md-nav__link">
+      <a href="../../auth-server/tokens/oauth-tx-tokens/" class="md-nav__link">
         
   
   
@@ -5275,7 +5275,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/openid-id-token/" class="md-nav__link">
+      <a href="../../auth-server/tokens/openid-id-token/" class="md-nav__link">
         
   
   
@@ -5303,7 +5303,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/openid-userinfo-token/" class="md-nav__link">
+      <a href="../../auth-server/tokens/openid-userinfo-token/" class="md-nav__link">
         
   
   
@@ -5331,7 +5331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/uma-rpt-token/" class="md-nav__link">
+      <a href="../../auth-server/tokens/uma-rpt-token/" class="md-nav__link">
         
   
   
@@ -5359,7 +5359,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/tokens/logout-status-jwt/" class="md-nav__link">
+      <a href="../../auth-server/tokens/logout-status-jwt/" class="md-nav__link">
         
   
   
@@ -5395,7 +5395,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/scopes/" class="md-nav__link">
+      <a href="../../auth-server/scopes/" class="md-nav__link">
         
   
   
@@ -5423,7 +5423,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/authz-details/" class="md-nav__link">
+      <a href="../../auth-server/authz-details/" class="md-nav__link">
         
   
   
@@ -5510,7 +5510,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/endpoints/" class="md-nav__link ">
+            <a href="../../auth-server/endpoints/" class="md-nav__link ">
               
   
   
@@ -5554,7 +5554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/configuration/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/configuration/" class="md-nav__link">
         
   
   
@@ -5582,7 +5582,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/client-registration/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/client-registration/" class="md-nav__link">
         
   
   
@@ -5610,7 +5610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/authorization/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/authorization/" class="md-nav__link">
         
   
   
@@ -5638,7 +5638,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/authorization-challenge/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/authorization-challenge/" class="md-nav__link">
         
   
   
@@ -5666,7 +5666,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/access-evaluation/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/access-evaluation/" class="md-nav__link">
         
   
   
@@ -5694,7 +5694,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/token/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/token/" class="md-nav__link">
         
   
   
@@ -5722,7 +5722,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/ssa/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/ssa/" class="md-nav__link">
         
   
   
@@ -5750,7 +5750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/userinfo/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/userinfo/" class="md-nav__link">
         
   
   
@@ -5778,7 +5778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/token-revocation/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/token-revocation/" class="md-nav__link">
         
   
   
@@ -5806,7 +5806,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/global-token-revocation/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/global-token-revocation/" class="md-nav__link">
         
   
   
@@ -5834,7 +5834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/session-revocation/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/session-revocation/" class="md-nav__link">
         
   
   
@@ -5862,7 +5862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/end-session/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/end-session/" class="md-nav__link">
         
   
   
@@ -5890,7 +5890,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/clientinfo/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/clientinfo/" class="md-nav__link">
         
   
   
@@ -5918,7 +5918,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/jwks-uri/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/jwks-uri/" class="md-nav__link">
         
   
   
@@ -5946,7 +5946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/archived-jwks-uri/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/archived-jwks-uri/" class="md-nav__link">
         
   
   
@@ -5974,7 +5974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/introspection/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/introspection/" class="md-nav__link">
         
   
   
@@ -6002,7 +6002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/device-authorization/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/device-authorization/" class="md-nav__link">
         
   
   
@@ -6030,7 +6030,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/par/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/par/" class="md-nav__link">
         
   
   
@@ -6058,7 +6058,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/endpoints/backchannel-authentication/" class="md-nav__link">
+      <a href="../../auth-server/endpoints/backchannel-authentication/" class="md-nav__link">
         
   
   
@@ -6121,7 +6121,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/crypto/" class="md-nav__link ">
+            <a href="../../auth-server/crypto/" class="md-nav__link ">
               
   
   
@@ -6165,7 +6165,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/crypto/keys/" class="md-nav__link">
+      <a href="../../auth-server/crypto/keys/" class="md-nav__link">
         
   
   
@@ -6193,7 +6193,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/crypto/key-storage/" class="md-nav__link">
+      <a href="../../auth-server/crypto/key-storage/" class="md-nav__link">
         
   
   
@@ -6221,7 +6221,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/crypto/key-generation/" class="md-nav__link">
+      <a href="../../auth-server/crypto/key-generation/" class="md-nav__link">
         
   
   
@@ -6300,7 +6300,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/openid-features/" class="md-nav__link ">
+            <a href="../../auth-server/openid-features/" class="md-nav__link ">
               
   
   
@@ -6344,7 +6344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/subject-identifiers/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/subject-identifiers/" class="md-nav__link">
         
   
   
@@ -6372,7 +6372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/id-token/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/id-token/" class="md-nav__link">
         
   
   
@@ -6400,7 +6400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/acrs/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/acrs/" class="md-nav__link">
         
   
   
@@ -6428,7 +6428,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/request-objects/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/request-objects/" class="md-nav__link">
         
   
   
@@ -6456,7 +6456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/prompt-parameter/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/prompt-parameter/" class="md-nav__link">
         
   
   
@@ -6509,7 +6509,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/openid-features/consent/" class="md-nav__link ">
+            <a href="../../auth-server/openid-features/consent/" class="md-nav__link ">
               
   
   
@@ -6553,7 +6553,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/consent/customize/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/consent/customize/" class="md-nav__link">
         
   
   
@@ -6581,7 +6581,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/consent/list-delete/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/consent/list-delete/" class="md-nav__link">
         
   
   
@@ -6617,7 +6617,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/ciba/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/ciba/" class="md-nav__link">
         
   
   
@@ -6645,7 +6645,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/jarm/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/jarm/" class="md-nav__link">
         
   
   
@@ -6673,7 +6673,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/native-sso/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/native-sso/" class="md-nav__link">
         
   
   
@@ -6701,7 +6701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/user-claims/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/user-claims/" class="md-nav__link">
         
   
   
@@ -6758,7 +6758,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/openid-features/logout/" class="md-nav__link ">
+            <a href="../../auth-server/openid-features/logout/" class="md-nav__link ">
               
   
   
@@ -6802,7 +6802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/logout/front-channel/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/logout/front-channel/" class="md-nav__link">
         
   
   
@@ -6830,7 +6830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/logout/back-channel/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/logout/back-channel/" class="md-nav__link">
         
   
   
@@ -6858,7 +6858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/logout/customizing-logout/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/logout/customizing-logout/" class="md-nav__link">
         
   
   
@@ -6886,7 +6886,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/openid-features/logout/forcing-logout/" class="md-nav__link">
+      <a href="../../auth-server/openid-features/logout/forcing-logout/" class="md-nav__link">
         
   
   
@@ -6971,7 +6971,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/oauth-features/" class="md-nav__link ">
+            <a href="../../auth-server/oauth-features/" class="md-nav__link ">
               
   
   
@@ -7015,7 +7015,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/auth-code-grant/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/auth-code-grant/" class="md-nav__link">
         
   
   
@@ -7043,7 +7043,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/implicit-grant/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/implicit-grant/" class="md-nav__link">
         
   
   
@@ -7071,7 +7071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/jwt-grant/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/jwt-grant/" class="md-nav__link">
         
   
   
@@ -7099,7 +7099,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/password-grant/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/password-grant/" class="md-nav__link">
         
   
   
@@ -7127,7 +7127,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/device-grant/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/device-grant/" class="md-nav__link">
         
   
   
@@ -7155,7 +7155,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/client-credential-grant/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/client-credential-grant/" class="md-nav__link">
         
   
   
@@ -7183,7 +7183,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/pkce/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/pkce/" class="md-nav__link">
         
   
   
@@ -7211,7 +7211,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/dpop/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/dpop/" class="md-nav__link">
         
   
   
@@ -7239,7 +7239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/mtls/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/mtls/" class="md-nav__link">
         
   
   
@@ -7267,7 +7267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/oauth-features/par/" class="md-nav__link">
+      <a href="../../auth-server/oauth-features/par/" class="md-nav__link">
         
   
   
@@ -7328,7 +7328,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/uma-features/" class="md-nav__link ">
+            <a href="../../auth-server/uma-features/" class="md-nav__link ">
               
   
   
@@ -7372,7 +7372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/uma-features/rpt-endpoint/" class="md-nav__link">
+      <a href="../../auth-server/uma-features/rpt-endpoint/" class="md-nav__link">
         
   
   
@@ -7400,7 +7400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/uma-features/claims-gathering-endpoint/" class="md-nav__link">
+      <a href="../../auth-server/uma-features/claims-gathering-endpoint/" class="md-nav__link">
         
   
   
@@ -7469,7 +7469,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/client-management/" class="md-nav__link ">
+            <a href="../../auth-server/client-management/" class="md-nav__link ">
               
   
   
@@ -7513,7 +7513,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/client-management/client-schema/" class="md-nav__link">
+      <a href="../../auth-server/client-management/client-schema/" class="md-nav__link">
         
   
   
@@ -7541,7 +7541,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/client-management/client-authn/" class="md-nav__link">
+      <a href="../../auth-server/client-management/client-authn/" class="md-nav__link">
         
   
   
@@ -7569,7 +7569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/client-management/client-configuration/" class="md-nav__link">
+      <a href="../../auth-server/client-management/client-configuration/" class="md-nav__link">
         
   
   
@@ -7597,7 +7597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/client-management/software-statements/" class="md-nav__link">
+      <a href="../../auth-server/client-management/software-statements/" class="md-nav__link">
         
   
   
@@ -7625,7 +7625,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/client-management/sector-identifiers/" class="md-nav__link">
+      <a href="../../auth-server/client-management/sector-identifiers/" class="md-nav__link">
         
   
   
@@ -7653,7 +7653,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/client-management/client-scripts/" class="md-nav__link">
+      <a href="../../auth-server/client-management/client-scripts/" class="md-nav__link">
         
   
   
@@ -7716,7 +7716,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/international/" class="md-nav__link ">
+            <a href="../../auth-server/international/" class="md-nav__link ">
               
   
   
@@ -7760,7 +7760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/international/web-pages/" class="md-nav__link">
+      <a href="../../auth-server/international/web-pages/" class="md-nav__link">
         
   
   
@@ -7788,7 +7788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/international/client-config/" class="md-nav__link">
+      <a href="../../auth-server/international/client-config/" class="md-nav__link">
         
   
   
@@ -7816,7 +7816,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/international/scope-descriptions/" class="md-nav__link">
+      <a href="../../auth-server/international/scope-descriptions/" class="md-nav__link">
         
   
   
@@ -7873,7 +7873,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/reporting-metrics/" class="md-nav__link ">
+            <a href="../../auth-server/reporting-metrics/" class="md-nav__link ">
               
   
   
@@ -7951,7 +7951,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/logging/" class="md-nav__link ">
+            <a href="../../auth-server/logging/" class="md-nav__link ">
               
   
   
@@ -7995,7 +7995,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/logging/standard-logs/" class="md-nav__link">
+      <a href="../../auth-server/logging/standard-logs/" class="md-nav__link">
         
   
   
@@ -8023,7 +8023,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/logging/log-levels/" class="md-nav__link">
+      <a href="../../auth-server/logging/log-levels/" class="md-nav__link">
         
   
   
@@ -8051,7 +8051,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/logging/audit-logs/" class="md-nav__link">
+      <a href="../../auth-server/logging/audit-logs/" class="md-nav__link">
         
   
   
@@ -8079,7 +8079,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/logging/custom-logs/" class="md-nav__link">
+      <a href="../../auth-server/logging/custom-logs/" class="md-nav__link">
         
   
   
@@ -8107,7 +8107,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth-server/logging/log4j2/" class="md-nav__link">
+      <a href="../../auth-server/logging/log4j2/" class="md-nav__link">
         
   
   
@@ -8148,8 +8148,6 @@
                 
   
   
-    
-  
   
   
     
@@ -8163,6 +8161,16 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -8170,22 +8178,22 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../../developer/" class="md-nav__link ">
               
   
   
   <span class="md-ellipsis">
     
   
-    Keycloak
+    Developer Guide
   
 
     
@@ -8196,160 +8204,17 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_10">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Keycloak
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="keycloak-saml-sso/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SAML SSO
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="keycloak-saml-inbound/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Inbound SAML
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../developer/" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Developer Guide
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
     Developer Guide
   
 
@@ -8394,10 +8259,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_11_2" id="__nav_2_11_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_10_2" id="__nav_2_10_2_label" tabindex="0">
             
   
   
@@ -8415,8 +8280,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8433,7 +8298,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/jans-agama-engine/" class="md-nav__link">
+      <a href="../../developer/agama/jans-agama-engine/" class="md-nav__link">
         
   
   
@@ -8461,7 +8326,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/flows-navigation-ui/" class="md-nav__link">
+      <a href="../../developer/agama/flows-navigation-ui/" class="md-nav__link">
         
   
   
@@ -8489,7 +8354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/projects-deployment/" class="md-nav__link">
+      <a href="../../developer/agama/projects-deployment/" class="md-nav__link">
         
   
   
@@ -8517,7 +8382,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/agama-best-practices/" class="md-nav__link">
+      <a href="../../developer/agama/agama-best-practices/" class="md-nav__link">
         
   
   
@@ -8545,7 +8410,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/advanced-usages/" class="md-nav__link">
+      <a href="../../developer/agama/advanced-usages/" class="md-nav__link">
         
   
   
@@ -8573,7 +8438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/engine-bridge-config/" class="md-nav__link">
+      <a href="../../developer/agama/engine-bridge-config/" class="md-nav__link">
         
   
   
@@ -8601,7 +8466,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/native-applications/" class="md-nav__link">
+      <a href="../../developer/agama/native-applications/" class="md-nav__link">
         
   
   
@@ -8629,7 +8494,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/agama/faq/" class="md-nav__link">
+      <a href="../../developer/agama/faq/" class="md-nav__link">
         
   
   
@@ -8665,7 +8530,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/external-libraries/" class="md-nav__link">
+      <a href="../../developer/external-libraries/" class="md-nav__link">
         
   
   
@@ -8693,7 +8558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/cors/" class="md-nav__link">
+      <a href="../../developer/cors/" class="md-nav__link">
         
   
   
@@ -8721,7 +8586,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/xframe/" class="md-nav__link">
+      <a href="../../developer/xframe/" class="md-nav__link">
         
   
   
@@ -8749,7 +8614,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/managed-beans/" class="md-nav__link">
+      <a href="../../developer/managed-beans/" class="md-nav__link">
         
   
   
@@ -8798,11 +8663,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_7" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../developer/customization/" class="md-nav__link ">
+            <a href="../../developer/customization/" class="md-nav__link ">
               
   
   
@@ -8820,14 +8685,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11_7" id="__nav_2_11_7_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10_7" id="__nav_2_10_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_7">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8846,7 +8711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/customization/customize-web-pages/" class="md-nav__link">
+      <a href="../../developer/customization/customize-web-pages/" class="md-nav__link">
         
   
   
@@ -8874,7 +8739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/customization/custom-client-logs/" class="md-nav__link">
+      <a href="../../developer/customization/custom-client-logs/" class="md-nav__link">
         
   
   
@@ -9007,11 +8872,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_8" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../developer/scripts/" class="md-nav__link ">
+            <a href="../../developer/scripts/" class="md-nav__link ">
               
   
   
@@ -9029,14 +8894,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11_8" id="__nav_2_11_8_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10_8" id="__nav_2_10_8_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_8">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -9055,7 +8920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/application_session/application-session/" class="md-nav__link">
+      <a href="../../../script-catalog/application_session/application-session/" class="md-nav__link">
         
   
   
@@ -9083,7 +8948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/authorization_challenge/authorization-challenge/" class="md-nav__link">
+      <a href="../../../script-catalog/authorization_challenge/authorization-challenge/" class="md-nav__link">
         
   
   
@@ -9111,7 +8976,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/authz_detail/authz-detail/" class="md-nav__link">
+      <a href="../../../script-catalog/authz_detail/authz-detail/" class="md-nav__link">
         
   
   
@@ -9139,7 +9004,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/ciba/ciba/" class="md-nav__link">
+      <a href="../../../script-catalog/ciba/ciba/" class="md-nav__link">
         
   
   
@@ -9167,7 +9032,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/client_registration/client-registration/" class="md-nav__link">
+      <a href="../../../script-catalog/client_registration/client-registration/" class="md-nav__link">
         
   
   
@@ -9195,7 +9060,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/client_authn/client-authn/" class="md-nav__link">
+      <a href="../../../script-catalog/client_authn/client-authn/" class="md-nav__link">
         
   
   
@@ -9223,7 +9088,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/config_api/config-api/" class="md-nav__link">
+      <a href="../../../script-catalog/config_api/config-api/" class="md-nav__link">
         
   
   
@@ -9251,7 +9116,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/idp/idp-extension/" class="md-nav__link">
+      <a href="../../../script-catalog/idp/idp-extension/" class="md-nav__link">
         
   
   
@@ -9279,7 +9144,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/consent_gathering/consent-gathering/" class="md-nav__link">
+      <a href="../../../script-catalog/consent_gathering/consent-gathering/" class="md-nav__link">
         
   
   
@@ -9307,7 +9172,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/dynamic_scope/dynamic-scope/" class="md-nav__link">
+      <a href="../../../script-catalog/dynamic_scope/dynamic-scope/" class="md-nav__link">
         
   
   
@@ -9335,7 +9200,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/end_session/end-session/" class="md-nav__link">
+      <a href="../../../script-catalog/end_session/end-session/" class="md-nav__link">
         
   
   
@@ -9363,7 +9228,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/id_generator/id-generator/" class="md-nav__link">
+      <a href="../../../script-catalog/id_generator/id-generator/" class="md-nav__link">
         
   
   
@@ -9391,7 +9256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/introspection/" class="md-nav__link">
+      <a href="../../../script-catalog/introspection/" class="md-nav__link">
         
   
   
@@ -9419,7 +9284,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/discovery/discovery/" class="md-nav__link">
+      <a href="../../../script-catalog/discovery/discovery/" class="md-nav__link">
         
   
   
@@ -9447,7 +9312,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/persistence_extension/persistence/" class="md-nav__link">
+      <a href="../../../script-catalog/persistence_extension/persistence/" class="md-nav__link">
         
   
   
@@ -9475,7 +9340,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/person_authentication/person-authentication/" class="md-nav__link">
+      <a href="../../../script-catalog/person_authentication/person-authentication/" class="md-nav__link">
         
   
   
@@ -9503,7 +9368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/post_authn/post-authentication/" class="md-nav__link">
+      <a href="../../../script-catalog/post_authn/post-authentication/" class="md-nav__link">
         
   
   
@@ -9531,7 +9396,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/resource_owner_password_credentials/ropc/" class="md-nav__link">
+      <a href="../../../script-catalog/resource_owner_password_credentials/ropc/" class="md-nav__link">
         
   
   
@@ -9559,7 +9424,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/revoke_token/revoke-token/" class="md-nav__link">
+      <a href="../../../script-catalog/revoke_token/revoke-token/" class="md-nav__link">
         
   
   
@@ -9587,7 +9452,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/scim/scim/" class="md-nav__link">
+      <a href="../../../script-catalog/scim/scim/" class="md-nav__link">
         
   
   
@@ -9615,7 +9480,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/token_exchange/token-exchange/" class="md-nav__link">
+      <a href="../../../script-catalog/token_exchange/token-exchange/" class="md-nav__link">
         
   
   
@@ -9643,7 +9508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/introspection/interception-scripts-debug/" class="md-nav__link">
+      <a href="../../../script-catalog/introspection/interception-scripts-debug/" class="md-nav__link">
         
   
   
@@ -9671,7 +9536,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/access_evaluation/access-evaluation/" class="md-nav__link">
+      <a href="../../../script-catalog/access_evaluation/access-evaluation/" class="md-nav__link">
         
   
   
@@ -9699,7 +9564,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/access_evaluation/access-evaluation-discovery/" class="md-nav__link">
+      <a href="../../../script-catalog/access_evaluation/access-evaluation-discovery/" class="md-nav__link">
         
   
   
@@ -9727,7 +9592,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/logout_status_jwt/logout-status-jwt/" class="md-nav__link">
+      <a href="../../../script-catalog/logout_status_jwt/logout-status-jwt/" class="md-nav__link">
         
   
   
@@ -9755,7 +9620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/par/par/" class="md-nav__link">
+      <a href="../../../script-catalog/par/par/" class="md-nav__link">
         
   
   
@@ -9783,7 +9648,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/tx_token/txtoken/" class="md-nav__link">
+      <a href="../../../script-catalog/tx_token/txtoken/" class="md-nav__link">
         
   
   
@@ -9811,7 +9676,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/cookie/cookie/" class="md-nav__link">
+      <a href="../../../script-catalog/cookie/cookie/" class="md-nav__link">
         
   
   
@@ -9839,7 +9704,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/discovery/discovery/" class="md-nav__link">
+      <a href="../../../script-catalog/discovery/discovery/" class="md-nav__link">
         
   
   
@@ -9867,7 +9732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/select_account/select-account/" class="md-nav__link">
+      <a href="../../../script-catalog/select_account/select-account/" class="md-nav__link">
         
   
   
@@ -9895,7 +9760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/spontaneous_scope/spontaneous-scope/" class="md-nav__link">
+      <a href="../../../script-catalog/spontaneous_scope/spontaneous-scope/" class="md-nav__link">
         
   
   
@@ -9923,7 +9788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/fido2_extension/fido2-extension/" class="md-nav__link">
+      <a href="../../../script-catalog/fido2_extension/fido2-extension/" class="md-nav__link">
         
   
   
@@ -9951,7 +9816,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/create_user/create-user/" class="md-nav__link">
+      <a href="../../../script-catalog/create_user/create-user/" class="md-nav__link">
         
   
   
@@ -9979,7 +9844,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/health_check/health-check/" class="md-nav__link">
+      <a href="../../../script-catalog/health_check/health-check/" class="md-nav__link">
         
   
   
@@ -10007,7 +9872,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/uma_rpt_claims/uma-claims-jwt/" class="md-nav__link">
+      <a href="../../../script-catalog/uma_rpt_claims/uma-claims-jwt/" class="md-nav__link">
         
   
   
@@ -10035,7 +9900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/uma_claims_gathering/uma-claims-web/" class="md-nav__link">
+      <a href="../../../script-catalog/uma_claims_gathering/uma-claims-web/" class="md-nav__link">
         
   
   
@@ -10063,7 +9928,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/uma_rpt_policy/uma-rpt/" class="md-nav__link">
+      <a href="../../../script-catalog/uma_rpt_policy/uma-rpt/" class="md-nav__link">
         
   
   
@@ -10091,7 +9956,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/update_token/update-token/" class="md-nav__link">
+      <a href="../../../script-catalog/update_token/update-token/" class="md-nav__link">
         
   
   
@@ -10119,7 +9984,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/link_interception/link-interception/" class="md-nav__link">
+      <a href="../../../script-catalog/link_interception/link-interception/" class="md-nav__link">
         
   
   
@@ -10147,7 +10012,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../script-catalog/ssa/ssa-modify-response/" class="md-nav__link">
+      <a href="../../../script-catalog/ssa/ssa-modify-response/" class="md-nav__link">
         
   
   
@@ -10218,11 +10083,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/" class="md-nav__link ">
+            <a href="../../reference/" class="md-nav__link ">
               
   
   
@@ -10240,14 +10105,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12" id="__nav_2_12_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10283,10 +10148,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_12_2" id="__nav_2_12_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_11_2" id="__nav_2_11_2_label" tabindex="0">
             
   
   
@@ -10304,8 +10169,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10410,10 +10275,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -10425,10 +10286,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_12_3" id="__nav_2_12_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_11_3" id="__nav_2_11_3_label" tabindex="0">
             
   
   
@@ -10446,8 +10307,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10464,7 +10325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/openapi/" class="md-nav__link">
+      <a href="../../reference/openapi/" class="md-nav__link">
         
   
   
@@ -10660,62 +10521,6 @@
   
   
     <li class="md-nav__item">
-      <a href="https://janssenproject.github.io/developer-docs/jans-keycloak-integration/server/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    jans-keycloak-integration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="https://janssenproject.github.io/developer-docs/jans-keycloak-link/server/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    jans-keycloak-link
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://janssenproject.github.io/developer-docs/jans-link/server/index.html" class="md-nav__link">
         
   
@@ -10857,11 +10662,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/json/" class="md-nav__link ">
+            <a href="../../reference/json/" class="md-nav__link ">
               
   
   
@@ -10879,14 +10684,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4" id="__nav_2_12_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4" id="__nav_2_11_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10930,11 +10735,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4_2" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/json/properties/" class="md-nav__link ">
+            <a href="../../reference/json/properties/" class="md-nav__link ">
               
   
   
@@ -10952,14 +10757,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4_2" id="__nav_2_12_4_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4_2" id="__nav_2_11_4_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_12_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4_2">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_11_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10978,7 +10783,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/json/properties/janssenauthserver-properties/" class="md-nav__link">
+      <a href="../../reference/json/properties/janssenauthserver-properties/" class="md-nav__link">
         
   
   
@@ -11006,7 +10811,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/json/properties/fido2-properties/" class="md-nav__link">
+      <a href="../../reference/json/properties/fido2-properties/" class="md-nav__link">
         
   
   
@@ -11034,7 +10839,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/json/properties/scim-properties/" class="md-nav__link">
+      <a href="../../reference/json/properties/scim-properties/" class="md-nav__link">
         
   
   
@@ -11062,7 +10867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/json/properties/config-api-properties/" class="md-nav__link">
+      <a href="../../reference/json/properties/config-api-properties/" class="md-nav__link">
         
   
   
@@ -11117,11 +10922,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4_3" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/json/feature-flags/" class="md-nav__link ">
+            <a href="../../reference/json/feature-flags/" class="md-nav__link ">
               
   
   
@@ -11139,14 +10944,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4_3" id="__nav_2_12_4_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4_3" id="__nav_2_11_4_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_12_4_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4_3">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_11_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11165,7 +10970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/json/feature-flags/janssenauthserver-feature-flags/" class="md-nav__link">
+      <a href="../../reference/json/feature-flags/janssenauthserver-feature-flags/" class="md-nav__link">
         
   
   
@@ -11228,11 +11033,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_5" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/kubernetes/" class="md-nav__link ">
+            <a href="../../reference/kubernetes/" class="md-nav__link ">
               
   
   
@@ -11250,14 +11055,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_5" id="__nav_2_12_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_5" id="__nav_2_11_5_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_5">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11276,7 +11081,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/kubernetes/config-secret-keys/" class="md-nav__link">
+      <a href="../../reference/kubernetes/config-secret-keys/" class="md-nav__link">
         
   
   
@@ -11312,7 +11117,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/learning-reference/" class="md-nav__link">
+      <a href="../../reference/learning-reference/" class="md-nav__link">
         
   
   
@@ -11375,11 +11180,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../fido/" class="md-nav__link ">
+            <a href="../../fido/" class="md-nav__link ">
               
   
   
@@ -11397,14 +11202,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_13" id="__nav_2_13_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_12" id="__nav_2_12_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_13">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11423,7 +11228,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fido/config/" class="md-nav__link">
+      <a href="../../fido/config/" class="md-nav__link">
         
   
   
@@ -11451,7 +11256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fido/vendor-metadata/" class="md-nav__link">
+      <a href="../../fido/vendor-metadata/" class="md-nav__link">
         
   
   
@@ -11479,7 +11284,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fido/logs/" class="md-nav__link">
+      <a href="../../fido/logs/" class="md-nav__link">
         
   
   
@@ -11507,7 +11312,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fido/passwordlessLoginExperience/" class="md-nav__link">
+      <a href="../../fido/passwordlessLoginExperience/" class="md-nav__link">
         
   
   
@@ -11535,7 +11340,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fido/types-of-creds/" class="md-nav__link">
+      <a href="../../fido/types-of-creds/" class="md-nav__link">
         
   
   
@@ -11602,11 +11407,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_14" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_13" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../scim/" class="md-nav__link ">
+            <a href="../../scim/" class="md-nav__link ">
               
   
   
@@ -11624,14 +11429,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_14" id="__nav_2_14_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_13" id="__nav_2_13_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_14">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_13">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11650,7 +11455,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/config/" class="md-nav__link">
+      <a href="../../scim/config/" class="md-nav__link">
         
   
   
@@ -11678,7 +11483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/logs/" class="md-nav__link">
+      <a href="../../scim/logs/" class="md-nav__link">
         
   
   
@@ -11706,7 +11511,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/monitoring/" class="md-nav__link">
+      <a href="../../scim/monitoring/" class="md-nav__link">
         
   
   
@@ -11734,7 +11539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/oauth-protection/" class="md-nav__link">
+      <a href="../../scim/oauth-protection/" class="md-nav__link">
         
   
   
@@ -11762,7 +11567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/security/" class="md-nav__link">
+      <a href="../../scim/security/" class="md-nav__link">
         
   
   
@@ -11790,7 +11595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/bulk-users/" class="md-nav__link">
+      <a href="../../scim/bulk-users/" class="md-nav__link">
         
   
   
@@ -11818,7 +11623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scim/custom-attributes/" class="md-nav__link">
+      <a href="../../scim/custom-attributes/" class="md-nav__link">
         
   
   
@@ -11862,8 +11667,6 @@
       
         
       
-        
-      
     
     
     
@@ -11875,11 +11678,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_15" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_14" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../link/" class="md-nav__link ">
+            <a href="../../link/" class="md-nav__link ">
               
   
   
@@ -11897,14 +11700,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_15" id="__nav_2_15_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_14" id="__nav_2_14_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_15">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_14">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11923,7 +11726,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../link/jans-link/" class="md-nav__link">
+      <a href="../../link/jans-link/" class="md-nav__link">
         
   
   
@@ -11931,34 +11734,6 @@
     
   
     Jans LDAP Link
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../link/jans-keycloak-link/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Jans Keycloak Link
   
 
     
@@ -12006,11 +11781,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_16" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_15" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../lock/" class="md-nav__link ">
+            <a href="../../lock/" class="md-nav__link ">
               
   
   
@@ -12028,14 +11803,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_16" id="__nav_2_16_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_15" id="__nav_2_15_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_16_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_16">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_15">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -12054,7 +11829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lock/lock-server/" class="md-nav__link">
+      <a href="../../lock/lock-server/" class="md-nav__link">
         
   
   
@@ -12087,6 +11862,8 @@
                 
   
   
+    
+  
   
   
     
@@ -12094,6 +11871,535 @@
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_16" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shibboleth Identity Provider
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_16" id="__nav_2_16_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_16_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Shibboleth Identity Provider
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Deployment
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-janssen-helm-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Janssen Helm Repository
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-shibboleth-idp-in-janssen-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enable Shibboleth IDP in Janssen Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-values-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Values File
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shibboleth-idp-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shibboleth IDP Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoscaling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autoscaling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shibboleth-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shibboleth Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ingress-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ingress Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-availability-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Availability Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uninstall
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pod-not-starting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pod Not Starting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
         
       
         
@@ -12131,7 +12437,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../recipes/" class="md-nav__link ">
+            <a href="../../recipes/" class="md-nav__link ">
               
   
   
@@ -12175,7 +12481,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/benchmark/" class="md-nav__link">
+      <a href="../../recipes/benchmark/" class="md-nav__link">
         
   
   
@@ -12203,7 +12509,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/social-login/" class="md-nav__link">
+      <a href="../../recipes/social-login/" class="md-nav__link">
         
   
   
@@ -12231,7 +12537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/inbound-oidc/" class="md-nav__link">
+      <a href="../../recipes/inbound-oidc/" class="md-nav__link">
         
   
   
@@ -12259,7 +12565,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/registration/" class="md-nav__link">
+      <a href="../../recipes/registration/" class="md-nav__link">
         
   
   
@@ -12287,7 +12593,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/password-expirations/" class="md-nav__link">
+      <a href="../../recipes/password-expirations/" class="md-nav__link">
         
   
   
@@ -12315,7 +12621,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/locking-accounts/" class="md-nav__link">
+      <a href="../../recipes/locking-accounts/" class="md-nav__link">
         
   
   
@@ -12343,7 +12649,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/stepped-up-authn/" class="md-nav__link">
+      <a href="../../recipes/stepped-up-authn/" class="md-nav__link">
         
   
   
@@ -12371,7 +12677,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/ACRouter/" class="md-nav__link">
+      <a href="../../recipes/ACRouter/" class="md-nav__link">
         
   
   
@@ -12399,7 +12705,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/device-flow-config/" class="md-nav__link">
+      <a href="../../recipes/device-flow-config/" class="md-nav__link">
         
   
   
@@ -12427,7 +12733,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../recipes/user-password-validation/" class="md-nav__link">
+      <a href="../../recipes/user-password-validation/" class="md-nav__link">
         
   
   
@@ -12443,6 +12749,169 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_17_12" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../recipes/saml/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_17_12" id="__nav_2_17_12_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_17_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_17_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SAML
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/federation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Federation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/idp-init-authn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDP-Initiated SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/sso-sp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SP Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -12490,7 +12959,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../usermgmt/" class="md-nav__link ">
+            <a href="../../usermgmt/" class="md-nav__link ">
               
   
   
@@ -12534,7 +13003,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../usermgmt/usermgmt-scim/" class="md-nav__link">
+      <a href="../../usermgmt/usermgmt-scim/" class="md-nav__link">
         
   
   
@@ -12562,7 +13031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../usermgmt/usermgmt-cli-tui/" class="md-nav__link">
+      <a href="../../usermgmt/usermgmt-cli-tui/" class="md-nav__link">
         
   
   
@@ -12590,7 +13059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../usermgmt/usermgmt-jans-link/" class="md-nav__link">
+      <a href="../../usermgmt/usermgmt-jans-link/" class="md-nav__link">
         
   
   
@@ -12664,7 +13133,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../cedarling/" class="md-nav__link ">
+            <a href="../../../cedarling/" class="md-nav__link ">
               
   
   
@@ -12762,7 +13231,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/quick-start/cedarling-quick-start/" class="md-nav__link">
+      <a href="../../../cedarling/quick-start/cedarling-quick-start/" class="md-nav__link">
         
   
   
@@ -12866,7 +13335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/cedarling-getting-started/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/cedarling-getting-started/" class="md-nav__link">
         
   
   
@@ -12894,7 +13363,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/javascript/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/javascript/" class="md-nav__link">
         
   
   
@@ -12922,7 +13391,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/python/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/python/" class="md-nav__link">
         
   
   
@@ -12950,7 +13419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/rust/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/rust/" class="md-nav__link">
         
   
   
@@ -12978,7 +13447,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/go/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/go/" class="md-nav__link">
         
   
   
@@ -13006,7 +13475,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/java/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/java/" class="md-nav__link">
         
   
   
@@ -13034,7 +13503,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/kotlin/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/kotlin/" class="md-nav__link">
         
   
   
@@ -13062,7 +13531,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/tutorials/swift/" class="md-nav__link">
+      <a href="../../../cedarling/tutorials/swift/" class="md-nav__link">
         
   
   
@@ -13174,7 +13643,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-terms/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-terms/" class="md-nav__link">
         
   
   
@@ -13202,7 +13671,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-authz/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-authz/" class="md-nav__link">
         
   
   
@@ -13230,7 +13699,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-multi-issuer/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-multi-issuer/" class="md-nav__link">
         
   
   
@@ -13258,7 +13727,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-interfaces/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-interfaces/" class="md-nav__link">
         
   
   
@@ -13286,7 +13755,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-policy-store/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-policy-store/" class="md-nav__link">
         
   
   
@@ -13314,7 +13783,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-properties/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-properties/" class="md-nav__link">
         
   
   
@@ -13342,7 +13811,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-principal-boolean-operations/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-principal-boolean-operations/" class="md-nav__link">
         
   
   
@@ -13370,7 +13839,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-logs/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-logs/" class="md-nav__link">
         
   
   
@@ -13398,7 +13867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-jwt-validation/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-jwt-validation/" class="md-nav__link">
         
   
   
@@ -13426,7 +13895,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-jwt-mapping/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-jwt-mapping/" class="md-nav__link">
         
   
   
@@ -13454,7 +13923,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-lock-server/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-lock-server/" class="md-nav__link">
         
   
   
@@ -13482,7 +13951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/reference/cedarling-entities/" class="md-nav__link">
+      <a href="../../../cedarling/reference/cedarling-entities/" class="md-nav__link">
         
   
   
@@ -13578,7 +14047,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/developer/cedarling-rust/" class="md-nav__link">
+      <a href="../../../cedarling/developer/cedarling-rust/" class="md-nav__link">
         
   
   
@@ -13606,7 +14075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/uniffi/cedarling-kotlin.md" class="md-nav__link">
+      <a href="../../../cedarling/uniffi/cedarling-kotlin.md" class="md-nav__link">
         
   
   
@@ -13692,7 +14161,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/developer/mobile-apps/cedarling-uniffi/" class="md-nav__link">
+      <a href="../../../cedarling/developer/mobile-apps/cedarling-uniffi/" class="md-nav__link">
         
   
   
@@ -13720,7 +14189,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/developer/mobile-apps/cedarling-android/" class="md-nav__link">
+      <a href="../../../cedarling/developer/mobile-apps/cedarling-android/" class="md-nav__link">
         
   
   
@@ -13748,7 +14217,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/developer/mobile-apps/cedarling-ios/" class="md-nav__link">
+      <a href="../../../cedarling/developer/mobile-apps/cedarling-ios/" class="md-nav__link">
         
   
   
@@ -13840,7 +14309,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/developer/sidecar/cedarling-sidecar-overview/" class="md-nav__link">
+      <a href="../../../cedarling/developer/sidecar/cedarling-sidecar-overview/" class="md-nav__link">
         
   
   
@@ -13868,7 +14337,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/developer/sidecar/cedarling-sidecar-tutorial/" class="md-nav__link">
+      <a href="../../../cedarling/developer/sidecar/cedarling-sidecar-tutorial/" class="md-nav__link">
         
   
   
@@ -13966,7 +14435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cedarling/integrations/cedarling-krakend/" class="md-nav__link">
+      <a href="../../../cedarling/integrations/cedarling-krakend/" class="md-nav__link">
         
   
   
@@ -14069,7 +14538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agama/introduction/" class="md-nav__link">
+      <a href="../../../agama/introduction/" class="md-nav__link">
         
   
   
@@ -14097,7 +14566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agama/language-reference/" class="md-nav__link">
+      <a href="../../../agama/language-reference/" class="md-nav__link">
         
   
   
@@ -14125,7 +14594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agama/execution-rules/" class="md-nav__link">
+      <a href="../../../agama/execution-rules/" class="md-nav__link">
         
   
   
@@ -14153,7 +14622,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agama/gama-format/" class="md-nav__link">
+      <a href="../../../agama/gama-format/" class="md-nav__link">
         
   
   
@@ -14215,7 +14684,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../casa/" class="md-nav__link ">
+            <a href="../../../casa/" class="md-nav__link ">
               
   
   
@@ -14327,7 +14796,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/quick-start/" class="md-nav__link">
+      <a href="../../../casa/administration/quick-start/" class="md-nav__link">
         
   
   
@@ -14355,7 +14824,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/admin-console/" class="md-nav__link">
+      <a href="../../../casa/administration/admin-console/" class="md-nav__link">
         
   
   
@@ -14383,7 +14852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/2fa-basics/" class="md-nav__link">
+      <a href="../../../casa/administration/2fa-basics/" class="md-nav__link">
         
   
   
@@ -14411,7 +14880,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/custom-branding/" class="md-nav__link">
+      <a href="../../../casa/administration/custom-branding/" class="md-nav__link">
         
   
   
@@ -14439,7 +14908,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/change-context-path/" class="md-nav__link">
+      <a href="../../../casa/administration/change-context-path/" class="md-nav__link">
         
   
   
@@ -14467,7 +14936,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/localization/" class="md-nav__link">
+      <a href="../../../casa/administration/localization/" class="md-nav__link">
         
   
   
@@ -14561,7 +15030,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/2fa-settings/" class="md-nav__link">
+      <a href="../../../casa/plugins/2fa-settings/" class="md-nav__link">
         
   
   
@@ -14645,7 +15114,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
+      <a href="../../../casa/plugins/accts-linking/account-linking-index/" class="md-nav__link">
         
   
   
@@ -14673,7 +15142,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/accts-linking/accts-linking-agama/" class="md-nav__link">
+      <a href="../../../casa/plugins/accts-linking/accts-linking-agama/" class="md-nav__link">
         
   
   
@@ -14709,7 +15178,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/bioid/" class="md-nav__link">
+      <a href="../../../casa/plugins/bioid/" class="md-nav__link">
         
   
   
@@ -14737,7 +15206,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/consent-management/" class="md-nav__link">
+      <a href="../../../casa/plugins/consent-management/" class="md-nav__link">
         
   
   
@@ -14765,7 +15234,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/custom-branding/" class="md-nav__link">
+      <a href="../../../casa/plugins/custom-branding/" class="md-nav__link">
         
   
   
@@ -14793,7 +15262,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/email-otp/" class="md-nav__link">
+      <a href="../../../casa/plugins/email-otp/" class="md-nav__link">
         
   
   
@@ -14877,7 +15346,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/cert-authn/" class="md-nav__link">
+      <a href="../../../casa/plugins/cert-authn/" class="md-nav__link">
         
   
   
@@ -14905,7 +15374,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/plugins/cert-authn-tutorial/" class="md-nav__link">
+      <a href="../../../casa/plugins/cert-authn-tutorial/" class="md-nav__link">
         
   
   
@@ -14949,7 +15418,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/administration/faq/" class="md-nav__link">
+      <a href="../../../casa/administration/faq/" class="md-nav__link">
         
   
   
@@ -15041,7 +15510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/developer/overview/" class="md-nav__link">
+      <a href="../../../casa/developer/overview/" class="md-nav__link">
         
   
   
@@ -15069,7 +15538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/developer/add-authn-methods/" class="md-nav__link">
+      <a href="../../../casa/developer/add-authn-methods/" class="md-nav__link">
         
   
   
@@ -15105,7 +15574,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../casa/user-guide/" class="md-nav__link">
+      <a href="../../../casa/user-guide/" class="md-nav__link">
         
   
   
@@ -15206,7 +15675,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../CONTRIBUTING/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   
@@ -15234,7 +15703,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../CODE_OF_CONDUCT/" class="md-nav__link">
+      <a href="../../../CODE_OF_CONDUCT/" class="md-nav__link">
         
   
   
@@ -15303,7 +15772,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/" class="md-nav__link ">
               
   
   
@@ -15370,7 +15839,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/agama-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/agama-design/" class="md-nav__link ">
               
   
   
@@ -15414,7 +15883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/agama-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/agama-design/adr/" class="md-nav__link">
         
   
   
@@ -15473,7 +15942,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-auth-server-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-auth-server-design/" class="md-nav__link ">
               
   
   
@@ -15517,7 +15986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-auth-server-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-auth-server-design/adr/" class="md-nav__link">
         
   
   
@@ -15576,7 +16045,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-cli-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-cli-design/" class="md-nav__link ">
               
   
   
@@ -15620,7 +16089,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-cli-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-cli-design/adr/" class="md-nav__link">
         
   
   
@@ -15681,7 +16150,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-config-api-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-config-api-design/" class="md-nav__link ">
               
   
   
@@ -15725,7 +16194,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation/" class="md-nav__link">
         
   
   
@@ -15753,7 +16222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-config-api-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-config-api-design/adr/" class="md-nav__link">
         
   
   
@@ -15812,7 +16281,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-core-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-core-design/" class="md-nav__link ">
               
   
   
@@ -15856,7 +16325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-core-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-core-design/adr/" class="md-nav__link">
         
   
   
@@ -15915,7 +16384,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-fido2-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-fido2-design/" class="md-nav__link ">
               
   
   
@@ -15959,7 +16428,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-fido2-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-fido2-design/adr/" class="md-nav__link">
         
   
   
@@ -16018,7 +16487,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-orm-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-orm-design/" class="md-nav__link ">
               
   
   
@@ -16062,7 +16531,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-orm-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-orm-design/adr/" class="md-nav__link">
         
   
   
@@ -16121,7 +16590,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-scim-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-scim-design/" class="md-nav__link ">
               
   
   
@@ -16165,7 +16634,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-scim-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-scim-design/adr/" class="md-nav__link">
         
   
   
@@ -16224,7 +16693,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-casa-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-casa-design/" class="md-nav__link ">
               
   
   
@@ -16268,7 +16737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-casa-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-casa-design/adr/" class="md-nav__link">
         
   
   
@@ -16329,7 +16798,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../contribute/implementation-design/jans-cedarling-design/" class="md-nav__link ">
+            <a href="../../../contribute/implementation-design/jans-cedarling-design/" class="md-nav__link ">
               
   
   
@@ -16373,7 +16842,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-cedarling-design/adr/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-cedarling-design/adr/" class="md-nav__link">
         
   
   
@@ -16401,7 +16870,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview/" class="md-nav__link">
+      <a href="../../../contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview/" class="md-nav__link">
         
   
   
@@ -16499,7 +16968,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/ci-cd/release-process/" class="md-nav__link">
+      <a href="../../../contribute/ci-cd/release-process/" class="md-nav__link">
         
   
   
@@ -16597,7 +17066,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/development/development/" class="md-nav__link">
+      <a href="../../../contribute/development/development/" class="md-nav__link">
         
   
   
@@ -16625,7 +17094,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/development/remote-debugging/" class="md-nav__link">
+      <a href="../../../contribute/development/remote-debugging/" class="md-nav__link">
         
   
   
@@ -16653,7 +17122,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/development/run-integration-tests/" class="md-nav__link">
+      <a href="../../../contribute/development/run-integration-tests/" class="md-nav__link">
         
   
   
@@ -16681,7 +17150,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/development/local-run-under-eclipse/" class="md-nav__link">
+      <a href="../../../contribute/development/local-run-under-eclipse/" class="md-nav__link">
         
   
   
@@ -16709,7 +17178,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/development/useful-tools/" class="md-nav__link">
+      <a href="../../../contribute/development/useful-tools/" class="md-nav__link">
         
   
   
@@ -16745,7 +17214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/testing/" class="md-nav__link">
+      <a href="../../../contribute/testing/" class="md-nav__link">
         
   
   
@@ -16773,7 +17242,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contribute/developer-faq/" class="md-nav__link">
+      <a href="../../../contribute/developer-faq/" class="md-nav__link">
         
   
   
@@ -16866,7 +17335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../governance/charter/" class="md-nav__link">
+      <a href="../../../governance/charter/" class="md-nav__link">
         
   
   
@@ -16894,7 +17363,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../governance/copyright-notices/" class="md-nav__link">
+      <a href="../../../governance/copyright-notices/" class="md-nav__link">
         
   
   
@@ -16922,7 +17391,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../governance/triage/" class="md-nav__link">
+      <a href="../../../governance/triage/" class="md-nav__link">
         
   
   
@@ -16977,10 +17446,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        This content is in progress
+        Prerequisites
       
     </span>
   </a>
@@ -16988,10 +17457,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
+  <a href="#add-janssen-helm-repository" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Have questions in the meantime?
+        Add Janssen Helm Repository
       
     </span>
   </a>
@@ -16999,13 +17468,207 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
+  <a href="#basic-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Want to contribute?
+        Basic Deployment
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Basic Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-shibboleth-idp-in-janssen-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enable Shibboleth IDP in Janssen Chart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-values-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Values File
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shibboleth-idp-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shibboleth IDP Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoscaling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autoscaling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shibboleth-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shibboleth Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ingress-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ingress Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-availability-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Availability Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uninstall
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pod-not-starting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pod Not Starting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -17038,7 +17701,21 @@
       
       
       
-        <span class="md-tag">keycloak</span>
+        <span class="md-tag">helm</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">kubernetes</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">shibboleth</span>
       
     
   </nav>
@@ -17048,13 +17725,357 @@
   
 
 
-<h1 id="keycloak">Keycloak<a class="headerlink" href="#keycloak" title="Permanent link">#</a></h1>
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h1 id="shibboleth-idp-helm-deployment">Shibboleth IDP Helm Deployment<a class="headerlink" href="#shibboleth-idp-helm-deployment" title="Permanent link">#</a></h1>
+<p>This guide covers deploying the Janssen Shibboleth IDP on Kubernetes using Helm.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li>Kubernetes 1.25+</li>
+<li>Helm 3.x</li>
+<li>Janssen Helm repository configured</li>
+<li>PersistentVolume provisioner (for configuration storage)</li>
+<li>Ingress controller (nginx, traefik, etc.)</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: The ingress-nginx project (kubernetes/ingress-nginx) is in maintenance mode and will not receive new releases after March 2026. For new deployments, consider using Gateway API implementations or maintained controllers such as Traefik, Contour, or service meshes (e.g., Istio).</p>
+</blockquote>
+<h2 id="add-janssen-helm-repository">Add Janssen Helm Repository<a class="headerlink" href="#add-janssen-helm-repository" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>janssen<span class="w"> </span>https://docs.jans.io/charts
+helm<span class="w"> </span>repo<span class="w"> </span>update
+</code></pre></div>
+<h2 id="basic-deployment">Basic Deployment<a class="headerlink" href="#basic-deployment" title="Permanent link">#</a></h2>
+<h3 id="enable-shibboleth-idp-in-janssen-chart">Enable Shibboleth IDP in Janssen Chart<a class="headerlink" href="#enable-shibboleth-idp-in-janssen-chart" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>janssen<span class="w"> </span>janssen/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--namespace<span class="w"> </span>janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--create-namespace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.fqdn<span class="o">=</span>auth.example.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>global.shibboleth-idp.enabled<span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+<h3 id="custom-values-file">Custom Values File<a class="headerlink" href="#custom-values-file" title="Permanent link">#</a></h3>
+<p>Create a <code>values.yaml</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">fqdn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth.example.com</span>
+<span class="w">  </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w">  </span><span class="nt">persistence</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span>
+
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">countryCode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">US</span>
+<span class="w">  </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin@example.com</span>
+<span class="w">  </span><span class="nt">orgName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Example Org</span>
+<span class="w">  </span><span class="nt">city</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Austin</span>
+<span class="w">  </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TX</span>
+
+<span class="nt">shibboleth-idp</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w">  </span><span class="nt">replicaCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repository</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/shibboleth</span>
+<span class="w">    </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.1.6_dev</span>
+<span class="w">    </span><span class="nt">pullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IfNotPresent</span>
+
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">limits</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000m</span>
+<span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024Mi</span>
+<span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500m</span>
+<span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512Mi</span>
+
+<span class="w">  </span><span class="nt">hpa</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">maxReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">    </span><span class="nt">targetCPUUtilizationPercentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+
+<span class="w">  </span><span class="nt">shibboleth</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">entityId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com/idp/shibboleth&quot;</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span>
+<span class="w">    </span><span class="nt">jansAuth</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">clientId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;shibboleth-client-id&quot;</span>
+<span class="w">      </span><span class="nt">scopes</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openid,profile,email&quot;</span>
+</code></pre></div>
+<p>Deploy with custom values:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>janssen<span class="w"> </span>janssen/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--namespace<span class="w"> </span>janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--create-namespace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>values.yaml
+</code></pre></div>
+<h2 id="configuration-options">Configuration Options<a class="headerlink" href="#configuration-options" title="Permanent link">#</a></h2>
+<h3 id="shibboleth-idp-values">Shibboleth IDP Values<a class="headerlink" href="#shibboleth-idp-values" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shibboleth-idp.enabled</code></td>
+<td>Enable Shibboleth IDP</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.replicaCount</code></td>
+<td>Number of replicas</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.image.repository</code></td>
+<td>Image repository</td>
+<td><code>ghcr.io/janssenproject/jans/shibboleth</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.image.tag</code></td>
+<td>Image tag</td>
+<td><code>5.1.6_dev</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.resources.limits.cpu</code></td>
+<td>CPU limit</td>
+<td><code>2000m</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.resources.limits.memory</code></td>
+<td>Memory limit</td>
+<td><code>1024Mi</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.resources.requests.cpu</code></td>
+<td>CPU request</td>
+<td><code>500m</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.resources.requests.memory</code></td>
+<td>Memory request</td>
+<td><code>512Mi</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoscaling">Autoscaling<a class="headerlink" href="#autoscaling" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shibboleth-idp.hpa.enabled</code></td>
+<td>Enable HPA</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.hpa.minReplicas</code></td>
+<td>Minimum replicas</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.hpa.maxReplicas</code></td>
+<td>Maximum replicas</td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.hpa.targetCPUUtilizationPercentage</code></td>
+<td>Target CPU</td>
+<td><code>80</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="shibboleth-configuration">Shibboleth Configuration<a class="headerlink" href="#shibboleth-configuration" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shibboleth-idp.shibboleth.entityId</code></td>
+<td>IDP Entity ID</td>
+<td>Auto-generated</td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.shibboleth.scope</code></td>
+<td>IDP scope</td>
+<td>Domain from FQDN</td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.shibboleth.signingKeyAlias</code></td>
+<td>Signing key alias</td>
+<td><code>idp-signing</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.shibboleth.encryptionKeyAlias</code></td>
+<td>Encryption key alias</td>
+<td><code>idp-encryption</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.shibboleth.jansAuth.enabled</code></td>
+<td>Enable Janssen auth</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.shibboleth.jansAuth.clientId</code></td>
+<td>OAuth client ID</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.shibboleth.jansAuth.scopes</code></td>
+<td>OAuth scopes</td>
+<td><code>openid,profile,email</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="service-configuration">Service Configuration<a class="headerlink" href="#service-configuration" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shibboleth-idp.service.type</code></td>
+<td>Service type</td>
+<td><code>ClusterIP</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.service.port</code></td>
+<td>Service port</td>
+<td><code>8080</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="ingress-configuration">Ingress Configuration<a class="headerlink" href="#ingress-configuration" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shibboleth-idp.ingress.enabled</code></td>
+<td>Enable ingress</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>shibboleth-idp.ingress.hosts[0].paths[0].path</code></td>
+<td>Ingress path</td>
+<td><code>/idp</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="high-availability-configuration">High Availability Configuration<a class="headerlink" href="#high-availability-configuration" title="Permanent link">#</a></h2>
+<p>For production deployments, configure high availability:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">shibboleth-idp</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">replicaCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="w">  </span><span class="nt">hpa</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="nt">maxReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">targetCPUUtilizationPercentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">70</span>
+<span class="w">    </span><span class="nt">behavior</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">scaleDown</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">stabilizationWindowSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+<span class="w">        </span><span class="nt">policies</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Percent</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">            </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
+<span class="w">      </span><span class="nt">scaleUp</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">stabilizationWindowSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">policies</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Percent</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">            </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
+
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">limits</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4000m</span>
+<span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048Mi</span>
+<span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000m</span>
+<span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024Mi</span>
+
+<span class="w">  </span><span class="nt">affinity</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">podAntiAffinity</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">preferredDuringSchedulingIgnoredDuringExecution</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">          </span><span class="nt">podAffinityTerm</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">labelSelector</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shibboleth-idp</span>
+<span class="w">            </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/hostname</span>
+
+<span class="w">  </span><span class="nt">topologySpreadConstraints</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">maxSkew</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topology.kubernetes.io/zone</span>
+<span class="w">      </span><span class="nt">whenUnsatisfiable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ScheduleAnyway</span>
+<span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shibboleth-idp</span>
+</code></pre></div>
+<h2 id="verify-deployment">Verify Deployment<a class="headerlink" href="#verify-deployment" title="Permanent link">#</a></h2>
+<p>Check deployment status:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check pods</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>shibboleth-idp
+
+<span class="c1"># Check service</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>shibboleth-idp
+
+<span class="c1"># Check ingress</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>janssen
+
+<span class="c1"># View logs</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>shibboleth-idp<span class="w"> </span>-f
+</code></pre></div>
+<p>Test IDP status:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Port forward for testing</span>
+kubectl<span class="w"> </span>port-forward<span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>svc/shibboleth-idp<span class="w"> </span><span class="m">8080</span>:8080
+
+<span class="c1"># Check status</span>
+curl<span class="w"> </span>http://localhost:8080/idp/status
+</code></pre></div>
+<h2 id="upgrade">Upgrade<a class="headerlink" href="#upgrade" title="Permanent link">#</a></h2>
+<p>Upgrade the deployment:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>janssen<span class="w"> </span>janssen/janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--namespace<span class="w"> </span>janssen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>values.yaml
+</code></pre></div>
+<h2 id="uninstall">Uninstall<a class="headerlink" href="#uninstall" title="Permanent link">#</a></h2>
+<p>Remove the deployment:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>uninstall<span class="w"> </span>janssen<span class="w"> </span>--namespace<span class="w"> </span>janssen
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<h3 id="pod-not-starting">Pod Not Starting<a class="headerlink" href="#pod-not-starting" title="Permanent link">#</a></h3>
+<p>Check pod events:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>shibboleth-idp
+</code></pre></div>
+<h3 id="configuration-issues">Configuration Issues<a class="headerlink" href="#configuration-issues" title="Permanent link">#</a></h3>
+<p>Check configuration:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>-it<span class="w"> </span>deployment/shibboleth-idp<span class="w"> </span>--<span class="w"> </span>cat<span class="w"> </span>/opt/shibboleth-idp/conf/idp.properties
+</code></pre></div>
+<h3 id="authentication-failures">Authentication Failures<a class="headerlink" href="#authentication-failures" title="Permanent link">#</a></h3>
+<p>Check logs for authentication errors:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>janssen<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>shibboleth-idp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;authn\|error&quot;</span>
+</code></pre></div>
 
 
 
@@ -17077,7 +18098,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 1, 2025 09:54:31 UTC"><span class="timeago" datetime="2025-12-01T09:54:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 1, 2025 09:54:31 UTC">2025-12-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 06:31:18 UTC"><span class="timeago" datetime="2026-02-03T06:31:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 06:31:18 UTC">2026-02-03</span>
   </span>
 
     
@@ -17087,7 +18108,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 06:31:18 UTC"><span class="timeago" datetime="2026-02-03T06:31:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 06:31:18 UTC">2026-02-03</span>
   </span>
 
     
@@ -17159,19 +18180,19 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["toc.autohide - search.suggest - search.highlight", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../js/timeago.min.js"></script>
+        <script src="../../../js/timeago.min.js"></script>
       
-        <script src="../../js/timeago_mkdocs_material.js"></script>
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
-        <script src="../../javascripts/skeleton-loader.js"></script>
+        <script src="../../../javascripts/skeleton-loader.js"></script>
       
-        <script src="../../javascripts/full-screen-sections.js"></script>
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 <!--Release automation scripts should replace the placeholder with actual URL-->

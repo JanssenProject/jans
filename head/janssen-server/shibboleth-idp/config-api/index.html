@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/kubernetes-ops/jans-saml/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/shibboleth-idp/config-api/">
       
       
-        <link rel="prev" href="../custom-attributes/">
+        <link rel="prev" href="../helm-deployment/">
       
       
-        <link rel="next" href="../memory-dump/">
+        <link rel="next" href="../terraform/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Jans SAML/Keycloak - Janssen Documentation</title>
+        <title>Config API - Janssen Documentation</title>
       
     
     
@@ -89,7 +89,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#jans-samlkeycloak" class="md-skip">
+        <a href="#shibboleth-idp-config-api" class="md-skip">
           Skip to content
         </a>
       
@@ -140,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Jans SAML/Keycloak
+              Config API
             
           </span>
         </div>
@@ -2175,8 +2175,6 @@
                 
   
   
-    
-  
   
   
     
@@ -2219,15 +2217,15 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../kubernetes-ops/" class="md-nav__link ">
               
   
   
@@ -2251,7 +2249,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2271,7 +2269,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../upgrade/" class="md-nav__link">
+      <a href="../../kubernetes-ops/upgrade/" class="md-nav__link">
         
   
   
@@ -2299,7 +2297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../scaling/" class="md-nav__link">
+      <a href="../../kubernetes-ops/scaling/" class="md-nav__link">
         
   
   
@@ -2327,7 +2325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../backup-restore/" class="md-nav__link">
+      <a href="../../kubernetes-ops/backup-restore/" class="md-nav__link">
         
   
   
@@ -2355,7 +2353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cert-management/" class="md-nav__link">
+      <a href="../../kubernetes-ops/cert-management/" class="md-nav__link">
         
   
   
@@ -2383,7 +2381,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../customization/" class="md-nav__link">
+      <a href="../../kubernetes-ops/customization/" class="md-nav__link">
         
   
   
@@ -2411,7 +2409,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../start-order/" class="md-nav__link">
+      <a href="../../kubernetes-ops/start-order/" class="md-nav__link">
         
   
   
@@ -2439,7 +2437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../logs/" class="md-nav__link">
+      <a href="../../kubernetes-ops/logs/" class="md-nav__link">
         
   
   
@@ -2467,7 +2465,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../external-secrets-configmaps/" class="md-nav__link">
+      <a href="../../kubernetes-ops/external-secrets-configmaps/" class="md-nav__link">
         
   
   
@@ -2495,7 +2493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../health-check/" class="md-nav__link">
+      <a href="../../kubernetes-ops/health-check/" class="md-nav__link">
         
   
   
@@ -2523,7 +2521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tui-k8s/" class="md-nav__link">
+      <a href="../../kubernetes-ops/tui-k8s/" class="md-nav__link">
         
   
   
@@ -2551,7 +2549,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../custom-attributes/" class="md-nav__link">
+      <a href="../../kubernetes-ops/custom-attributes/" class="md-nav__link">
         
   
   
@@ -2576,37 +2574,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Jans SAML/Keycloak
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../kubernetes-ops/jans-saml.md" class="md-nav__link">
         
   
   
@@ -2622,48 +2593,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#mysql" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        MySQL
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#postgresql" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PostgreSQL
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2676,7 +2605,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../memory-dump/" class="md-nav__link">
+      <a href="../../kubernetes-ops/memory-dump/" class="md-nav__link">
         
   
   
@@ -8232,6 +8161,16 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -8244,149 +8183,6 @@
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../keycloak/" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Keycloak
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_10">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Keycloak
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../keycloak/keycloak-saml-sso/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SAML SSO
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../keycloak/keycloak-saml-inbound/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Inbound SAML
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -8408,14 +8204,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8463,10 +8259,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_11_2" id="__nav_2_11_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_10_2" id="__nav_2_10_2_label" tabindex="0">
             
   
   
@@ -8484,8 +8280,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8867,7 +8663,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -8889,14 +8685,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11_7" id="__nav_2_11_7_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10_7" id="__nav_2_10_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_7">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -9076,7 +8872,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10_8" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -9098,14 +8894,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_11_8" id="__nav_2_11_8_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_10_8" id="__nav_2_10_8_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_11_8">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_10_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10287,7 +10083,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -10309,14 +10105,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12" id="__nav_2_12_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11" id="__nav_2_11_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10352,10 +10148,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_12_2" id="__nav_2_12_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_11_2" id="__nav_2_11_2_label" tabindex="0">
             
   
   
@@ -10373,8 +10169,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10479,10 +10275,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -10494,10 +10286,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_12_3" id="__nav_2_12_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_11_3" id="__nav_2_11_3_label" tabindex="0">
             
   
   
@@ -10515,8 +10307,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10729,62 +10521,6 @@
   
   
     <li class="md-nav__item">
-      <a href="https://janssenproject.github.io/developer-docs/jans-keycloak-integration/server/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    jans-keycloak-integration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="https://janssenproject.github.io/developer-docs/jans-keycloak-link/server/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    jans-keycloak-link
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="https://janssenproject.github.io/developer-docs/jans-link/server/index.html" class="md-nav__link">
         
   
@@ -10926,7 +10662,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -10948,14 +10684,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4" id="__nav_2_12_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4" id="__nav_2_11_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10999,7 +10735,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11021,14 +10757,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4_2" id="__nav_2_12_4_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4_2" id="__nav_2_11_4_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_12_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4_2">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_11_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11186,7 +10922,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_4_3" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11208,14 +10944,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_4_3" id="__nav_2_12_4_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_4_3" id="__nav_2_11_4_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_12_4_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_4_3">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_11_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11297,7 +11033,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_11_5" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11319,14 +11055,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_12_5" id="__nav_2_12_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_11_5" id="__nav_2_11_5_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_12_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_12_5">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_11_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_11_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11444,7 +11180,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_12" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11466,14 +11202,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_13" id="__nav_2_13_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_12" id="__nav_2_12_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_13">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11671,7 +11407,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_14" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_13" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11693,14 +11429,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_14" id="__nav_2_14_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_13" id="__nav_2_13_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_14">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_13">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11931,8 +11667,6 @@
       
         
       
-        
-      
     
     
     
@@ -11944,7 +11678,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_15" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_14" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -11966,14 +11700,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_15" id="__nav_2_15_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_14" id="__nav_2_14_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_15">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_14">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -12000,34 +11734,6 @@
     
   
     Jans LDAP Link
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../link/jans-keycloak-link/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Jans Keycloak Link
   
 
     
@@ -12075,7 +11781,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_16" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_15" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -12097,14 +11803,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2_16" id="__nav_2_16_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2_15" id="__nav_2_15_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_16_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_16">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_15">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -12156,6 +11862,8 @@
                 
   
   
+    
+  
   
   
     
@@ -12163,6 +11871,502 @@
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_16" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shibboleth Identity Provider
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_16" id="__nav_2_16_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_16_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Shibboleth Identity Provider
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config API
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Scopes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-token-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Token Request
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Endpoints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-idp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get IDP Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-idp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update IDP Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-trusted-service-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Trusted Service Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Responses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Responses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#401-unauthorized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        401 Unauthorized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#404-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        404 Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#409-conflict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        409 Conflict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openapi-specification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAPI Specification
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
         
       
         
@@ -12512,6 +12716,169 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_17_12" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../recipes/saml/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_17_12" id="__nav_2_17_12_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_17_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_17_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SAML
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/federation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Federation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/idp-init-authn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDP-Initiated SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/saml/sso-sp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SP Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -17046,21 +17413,193 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#mysql" class="md-nav__link">
+  <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
-        MySQL
+        Authentication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Scopes
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#postgresql" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#example-token-request" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PostgreSQL
+        Example Token Request
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Endpoints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-idp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get IDP Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-idp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update IDP Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-trusted-service-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Trusted Service Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-trusted-service-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete Trusted Service Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Responses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Responses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#401-unauthorized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        401 Unauthorized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#404-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        404 Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#409-conflict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        409 Conflict
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openapi-specification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAPI Specification
       
     </span>
   </a>
@@ -17096,28 +17635,21 @@
       
       
       
-        <span class="md-tag">jans-saml</span>
+        <span class="md-tag">config-api</span>
       
     
       
       
       
       
-        <span class="md-tag">keycloak</span>
+        <span class="md-tag">rest-api</span>
       
     
       
       
       
       
-        <span class="md-tag">kubernetes</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">operations</span>
+        <span class="md-tag">shibboleth</span>
       
     
   </nav>
@@ -17127,49 +17659,225 @@
   
 
 
-<h1 id="jans-samlkeycloak">Jans SAML/Keycloak<a class="headerlink" href="#jans-samlkeycloak" title="Permanent link">#</a></h1>
-<p>Jans-SAML/Keycloak has the flexibility to be deployed using either <a href="#mysql">MySQL</a> or <a href="#postgresql">PostgreSQL</a> as its backend.</p>
-<h2 id="mysql">MySQL<a class="headerlink" href="#mysql" title="Permanent link">#</a></h2>
-<p>Make the following changes in your <code>values.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">saml</span><span class="p">:</span>
-<span class="w">   </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">samlEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">config</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w">    </span>
-<span class="w">    </span><span class="nt">kcDbVendor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
-<span class="w">    </span><span class="nt">kcDbUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
-<span class="w">    </span><span class="nt">kcDbPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
-<span class="w">    </span><span class="nt">kcDbSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
-<span class="w">    </span><span class="nt">kcDbUrlHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql.kc.svc.cluster.local</span>
-<span class="w">    </span><span class="nt">kcDbUrlPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
-<span class="w">    </span><span class="nt">kcDbUrlDatabase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
+<h1 id="shibboleth-idp-config-api">Shibboleth IDP Config API<a class="headerlink" href="#shibboleth-idp-config-api" title="Permanent link">#</a></h1>
+<p>The Janssen Config API provides REST endpoints for managing Shibboleth IDP configuration and trusted Service Providers.</p>
+<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">#</a></h2>
+<p>All endpoints require OAuth 2.0 authentication with appropriate scopes.</p>
+<h3 id="required-scopes">Required Scopes<a class="headerlink" href="#required-scopes" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https://jans.io/oauth/config/shibboleth.readonly</code></td>
+<td>Read IDP configuration</td>
+</tr>
+<tr>
+<td><code>https://jans.io/oauth/config/shibboleth.write</code></td>
+<td>Modify IDP configuration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-token-request">Example Token Request<a class="headerlink" href="#example-token-request" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">ACCESS_TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;https://auth.example.com/jans-auth/restv1/token&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/x-www-form-urlencoded&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=client_credentials&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_id=your-client-id&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_secret=your-client-secret&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;scope=https://jans.io/oauth/config/shibboleth.readonly https://jans.io/oauth/config/shibboleth.write&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.access_token&#39;</span><span class="k">)</span>
 </code></pre></div>
-<p>If you provide a non-root MySQL user to Keycloak, you will encounter the following error and warnings:</p>
-<div class="highlight"><pre><span></span><code>SQLException: XAER_RMERR: Fatal error occurred in the transaction branch - check your data for consistency
-WARNING - jans-saml - 2024-02-05 16:54:04,256 - Unable to grant XA_RECOVER_ADMIN privilege to &#39;keycloak&#39; user; reason=Access denied; you need (at least one of) the GRANT OPTION privilege(s) for this operation
-WARNING - jans-saml - 2024-02-05 16:54:04,256 - Got insufficient permission, please try using user with XA_RECOVER_ADMIN privilege and running the following query manually via MySQL client: &quot;GRANT XA_RECOVER_ADMIN ON *.* TO &#39;keycloak&#39;@&#39;%&#39;; FLUSH PRIVILEGES;&quot;
+<h2 id="api-endpoints">API Endpoints<a class="headerlink" href="#api-endpoints" title="Permanent link">#</a></h2>
+<h3 id="get-idp-configuration">Get IDP Configuration<a class="headerlink" href="#get-idp-configuration" title="Permanent link">#</a></h3>
+<p>Retrieve the current Shibboleth IDP configuration.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">GET /jans-config-api/shibboleth/config</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+</code></pre></div></p>
+<p><strong>Response:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;entityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.example.com/idp/shibboleth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadataUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.example.com/idp/shibboleth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signingKeyAlias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idp-signing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;encryptionKeyAlias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idp-encryption&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansAuthClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shibboleth-client&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansAuthScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid,profile,email&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>cURL Example:</strong>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;https://api.example.com/jans-config-api/shibboleth/config&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="si">${</span><span class="nv">ACCESS_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+</code></pre></div></p>
+<h3 id="update-idp-configuration">Update IDP Configuration<a class="headerlink" href="#update-idp-configuration" title="Permanent link">#</a></h3>
+<p>Update the Shibboleth IDP configuration.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">PUT /jans-config-api/shibboleth/config</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+<span class="err">Content-Type: application/json</span>
+
+<span class="err">{</span>
+<span class="err">  &quot;entityId&quot;: &quot;https://idp.example.com/idp/shibboleth&quot;,</span>
+<span class="err">  &quot;scope&quot;: &quot;example.com&quot;,</span>
+<span class="err">  &quot;enabled&quot;: true,</span>
+<span class="err">  &quot;signingKeyAlias&quot;: &quot;idp-signing&quot;,</span>
+<span class="err">  &quot;encryptionKeyAlias&quot;: &quot;idp-encryption&quot;,</span>
+<span class="err">  &quot;jansAuthEnabled&quot;: true,</span>
+<span class="err">  &quot;jansAuthClientId&quot;: &quot;shibboleth-client-updated&quot;,</span>
+<span class="err">  &quot;jansAuthScopes&quot;: &quot;openid,profile,email,address&quot;</span>
+<span class="err">}</span>
+</code></pre></div></p>
+<p><strong>Response:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;entityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.example.com/idp/shibboleth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadataUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.example.com/idp/shibboleth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signingKeyAlias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idp-signing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;encryptionKeyAlias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;idp-encryption&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansAuthClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shibboleth-client-updated&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jansAuthScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid,profile,email,address&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="list-trusted-service-providers">List Trusted Service Providers<a class="headerlink" href="#list-trusted-service-providers" title="Permanent link">#</a></h3>
+<p>Get all configured trusted Service Providers.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">GET /jans-config-api/shibboleth/trust</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+</code></pre></div></p>
+<p><strong>Response:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sp1.example.org&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example SP 1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;First example service provider&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sp1.example.org/metadata&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;releasedAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;displayName&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sp2.example.org&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example SP 2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Second example service provider&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sp2.example.org/metadata&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;releasedAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></p>
+<h3 id="get-trusted-service-provider">Get Trusted Service Provider<a class="headerlink" href="#get-trusted-service-provider" title="Permanent link">#</a></h3>
+<p>Get a specific trusted Service Provider by entity ID.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">GET /jans-config-api/shibboleth/trust/{entityId}</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+</code></pre></div></p>
+<p><strong>Response:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;entityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sp1.example.org&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example SP 1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;First example service provider&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadataUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sp1.example.org/metadata&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;releasedAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;displayName&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;assertionLifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signAssertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;encryptAssertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="add-trusted-service-provider">Add Trusted Service Provider<a class="headerlink" href="#add-trusted-service-provider" title="Permanent link">#</a></h3>
+<p>Add a new trusted Service Provider.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">POST /jans-config-api/shibboleth/trust</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+<span class="err">Content-Type: application/json</span>
+
+<span class="err">{</span>
+<span class="err">  &quot;entityId&quot;: &quot;https://new-sp.example.org&quot;,</span>
+<span class="err">  &quot;name&quot;: &quot;New Service Provider&quot;,</span>
+<span class="err">  &quot;description&quot;: &quot;A new service provider&quot;,</span>
+<span class="err">  &quot;enabled&quot;: true,</span>
+<span class="err">  &quot;metadataUrl&quot;: &quot;https://new-sp.example.org/metadata&quot;,</span>
+<span class="err">  &quot;releasedAttributes&quot;: [&quot;uid&quot;, &quot;mail&quot;, &quot;displayName&quot;, &quot;eduPersonPrincipalName&quot;],</span>
+<span class="err">  &quot;assertionLifetime&quot;: 300,</span>
+<span class="err">  &quot;signAssertions&quot;: true,</span>
+<span class="err">  &quot;encryptAssertions&quot;: true</span>
+<span class="err">}</span>
+</code></pre></div></p>
+<p><strong>Response (201 Created):</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;entityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://new-sp.example.org&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Service Provider&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A new service provider&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadataUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://new-sp.example.org/metadata&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;releasedAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;displayName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;eduPersonPrincipalName&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;assertionLifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signAssertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;encryptAssertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="update-trusted-service-provider">Update Trusted Service Provider<a class="headerlink" href="#update-trusted-service-provider" title="Permanent link">#</a></h3>
+<p>Update an existing trusted Service Provider.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">PUT /jans-config-api/shibboleth/trust/{entityId}</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+<span class="err">Content-Type: application/json</span>
+
+<span class="err">{</span>
+<span class="err">  &quot;name&quot;: &quot;Updated Service Provider&quot;,</span>
+<span class="err">  &quot;description&quot;: &quot;Updated description&quot;,</span>
+<span class="err">  &quot;enabled&quot;: true,</span>
+<span class="err">  &quot;metadataUrl&quot;: &quot;https://new-sp.example.org/metadata&quot;,</span>
+<span class="err">  &quot;releasedAttributes&quot;: [&quot;uid&quot;, &quot;mail&quot;],</span>
+<span class="err">  &quot;assertionLifetime&quot;: 600,</span>
+<span class="err">  &quot;signAssertions&quot;: true,</span>
+<span class="err">  &quot;encryptAssertions&quot;: false</span>
+<span class="err">}</span>
+</code></pre></div></p>
+<h3 id="delete-trusted-service-provider">Delete Trusted Service Provider<a class="headerlink" href="#delete-trusted-service-provider" title="Permanent link">#</a></h3>
+<p>Remove a trusted Service Provider.</p>
+<p><strong>Request:</strong>
+<div class="highlight"><pre><span></span><code><span class="err">DELETE /jans-config-api/shibboleth/trust/{entityId}</span>
+<span class="err">Authorization: Bearer {access_token}</span>
+</code></pre></div></p>
+<p><strong>Response:</strong> <code>204 No Content</code></p>
+<h2 id="error-responses">Error Responses<a class="headerlink" href="#error-responses" title="Permanent link">#</a></h2>
+<h3 id="401-unauthorized">401 Unauthorized<a class="headerlink" href="#401-unauthorized" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid or expired access token&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>To resolve this issue, it's necessary to adhere to the guidance provided in the logs.</p>
-<h2 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Permanent link">#</a></h2>
-<p>Make the following changes in your <code>values.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">saml</span><span class="p">:</span>
-<span class="w">   </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">samlEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">config</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w">    </span>
-<span class="w">    </span><span class="nt">kcDbVendor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres</span>
-<span class="w">    </span><span class="nt">kcDbUsername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
-<span class="w">    </span><span class="nt">kcDbPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span>
-<span class="w">    </span><span class="nt">kcDbSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span>
-<span class="w">    </span><span class="nt">kcDbUrlHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres.kc.svc.cluster.local</span>
-<span class="w">    </span><span class="nt">kcDbUrlPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
-<span class="w">    </span><span class="nt">kcDbUrlDatabase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keycloak</span>
-<span class="w">    </span><span class="nt">kcDbUrlProperties</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<h3 id="404-not-found">404 Not Found<a class="headerlink" href="#404-not-found" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;not_found&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Service provider with entity ID not found&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
+<h3 id="409-conflict">409 Conflict<a class="headerlink" href="#409-conflict" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;conflict&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;error_description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Service Provider with this entity ID already exists&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="openapi-specification">OpenAPI Specification<a class="headerlink" href="#openapi-specification" title="Permanent link">#</a></h2>
+<p>The complete OpenAPI specification is available at:</p>
+<div class="highlight"><pre><span></span><code>https://api.example.com/jans-config-api/openapi.json
+</code></pre></div>
+<p>Filter for Shibboleth endpoints:
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;https://api.example.com/jans-config-api/openapi.json&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jq<span class="w"> </span><span class="s1">&#39;.paths | with_entries(select(.key | contains(&quot;shibboleth&quot;)))&#39;</span>
+</code></pre></div></p>
 
 
 
@@ -17192,7 +17900,7 @@ WARNING - jans-saml - 2024-02-05 16:54:04,256 - Got insufficient permission, ple
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 06:31:18 UTC"><span class="timeago" datetime="2026-02-03T06:31:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 06:31:18 UTC">2026-02-03</span>
   </span>
 
     
@@ -17202,7 +17910,7 @@ WARNING - jans-saml - 2024-02-05 16:54:04,256 - Got insufficient permission, ple
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 14, 2024 13:53:35 UTC"><span class="timeago" datetime="2024-05-14T13:53:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 14, 2024 13:53:35 UTC">2024-05-14</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 06:31:18 UTC"><span class="timeago" datetime="2026-02-03T06:31:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 06:31:18 UTC">2026-02-03</span>
   </span>
 
     
