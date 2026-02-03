@@ -10,6 +10,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
@@ -31,9 +32,11 @@ import org.slf4j.Logger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
+import static io.jans.ca.plugin.adminui.utils.CommonUtils.addMinutes;
 
 @ApplicationScoped
 public class AdminUISessionService {
@@ -56,6 +59,9 @@ public class AdminUISessionService {
 
     @Inject
     ConfigHttpService httpService;
+
+    @Inject
+    AUIConfigurationService auiConfigurationService;
 
     /**
      * Builds the LDAP distinguished name (DN) for a session identifier.
@@ -90,6 +96,66 @@ public class AdminUISessionService {
             throw ex;
         }
         return configApiSession;
+    }
+
+    /**
+     * Updates the expiration time of an Admin UI session based on user activity.
+     * <p>
+     * After a successful login, an {@link AdminUISession} is persisted in the database
+     * with an expiration date derived from the configured session timeout. On each
+     * subsequent request, this method may extend the session expiration to enforce
+     * an idle-based logout policy.
+     * </p>
+     *
+     * <p>
+     * The session expiration is refreshed only when:
+     * <ul>
+     *   <li>The session and its expiration date are not {@code null}</li>
+     *   <li>More than one minute has passed since the session was last updated</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * This approach prevents frequent database updates while ensuring that an
+     * active user session remains valid and a force logout occurs only when the
+     * application has been idle longer than the configured
+     * {@code max_idle_time}.
+     * </p>
+     *
+     * @param adminUISession the persisted Admin UI session to be evaluated and updated
+     */
+    public void updateSessionExpiryDate(AdminUISession adminUISession) {
+        if (adminUISession == null || adminUISession.getExpirationDate() == null) {
+            return;
+        }
+
+        Date lastUpdated = adminUISession.getLastUpdated();
+        long nowMillis = System.currentTimeMillis();
+
+        // Update only if last update was more than 1 minute ago
+        if (lastUpdated != null) {
+            long secondsSinceLastUpdate =
+                    TimeUnit.MILLISECONDS.toSeconds(nowMillis - lastUpdated.getTime());
+
+            if (secondsSinceLastUpdate < 60) {
+                return;
+            }
+        }
+
+        AUIConfiguration config = auiConfigurationService.getAUIConfiguration();
+        int sessionTimeoutMins = config.getSessionTimeoutInMins();
+
+        long expiryMillis = adminUISession.getExpirationDate().getTime();
+        long remainingSeconds =
+                TimeUnit.MILLISECONDS.toSeconds(expiryMillis - nowMillis);
+
+        if (remainingSeconds < 0 ) {
+            adminUISession.setExpirationDate(
+                    addMinutes(new Date(nowMillis), sessionTimeoutMins)
+            );
+            adminUISession.setLastUpdated(new Date(nowMillis));
+            persistenceEntryManager.merge(adminUISession);
+        }
     }
 
     /**

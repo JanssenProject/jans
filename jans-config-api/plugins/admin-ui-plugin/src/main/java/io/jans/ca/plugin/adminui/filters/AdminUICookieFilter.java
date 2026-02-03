@@ -77,9 +77,9 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.debug("========================================================================");
+            log.trace("========================================================================");
             log.debug("Inside AdminUICookieFilter filter...");
-            log.debug("========================================================================");
+            log.trace("========================================================================");
             Map<String, Cookie> cookies = requestContext.getCookies();
             initializeCaches();
             removeExpiredSessionsIfNeeded();
@@ -235,13 +235,14 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         log.debug("Found a Admin UI session cookie in request header.");
         Cookie adminUISessionCookie = cookies.get(ADMIN_UI_SESSION_ID);
         String sessionId = adminUISessionCookie.getValue();
-        AdminUISession configApiSession = configApiSessionService.getSession(sessionId);
+        AdminUISession adminUISession = configApiSessionService.getSession(sessionId);
+        configApiSessionService.updateSessionExpiryDate(adminUISession);
         //if config api session does not exist
-        if (configApiSession == null) {
+        if (adminUISession == null) {
             return Optional.empty();
         }
         log.debug("Admin UI session exist in persistence.");
-        String ujwtString = configApiSession.getUjwt();
+        String ujwtString = adminUISession.getUjwt();
         return Optional.ofNullable(ujwtString);
     }
 

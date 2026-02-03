@@ -26,6 +26,8 @@ public class AdminUISession {
     private Date creationDate = new Date();
     @AttributeName(name = "exp")
     private Date expirationDate;
+    @AttributeName(name = "jansLastAccessTime")
+    private Date lastUpdated;
 
     /**
      * Gets the distinguished name (DN) for this entry.
@@ -155,6 +157,14 @@ public class AdminUISession {
         this.jansUsrDN = jansUsrDN;
     }
 
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof AdminUISession)) return false;
@@ -177,6 +187,7 @@ public class AdminUISession {
                 ", ujwt='" + ujwt + '\'' +
                 ", creationDate=" + creationDate +
                 ", expirationDate=" + expirationDate +
+                ", lastUpdated=" + lastUpdated +
                 '}';
     }
 }
