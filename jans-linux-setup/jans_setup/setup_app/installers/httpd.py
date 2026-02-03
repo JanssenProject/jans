@@ -36,7 +36,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf.mako')
         self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
         self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf.mako')
-        self.enabled_modules = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir', 'auth_openidc']
+        self.enabled_modules = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'dir', 'auth_openidc']
 
         self.server_root = '/var/www/html'
 
@@ -151,7 +151,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
                         if not lsl[0].startswith('LoadModule'):
                             continue
                         module =  lsl[-1][4:-3]
-                        if not module in mods_enabled:
+                        if module not in mods_enabled:
                             mod_load_content[i] = line.replace('LoadModule', '#LoadModule')
                             modified = True
 
