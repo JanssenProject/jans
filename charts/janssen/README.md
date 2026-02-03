@@ -420,7 +420,7 @@ Kubernetes: `>=v1.23.0-0`
 | global.config-api.ingress | object | `{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | global.config-api.ingress.configApiAdditionalAnnotations | object | `{}` | ConfigAPI ingress resource additional annotations. |
 | global.config-api.ingress.configApiLabels | object | `{}` | configAPI ingress resource labels. key app is taken |
-| global.config-api.plugins | string | `"fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
+| global.config-api.plugins | string | `"fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","shibboleth","lock","jans-link") |
 | global.config.enabled | bool | `true` | Boolean flag to enable/disable the configuration chart. This normally should never be false |
 | global.configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
 | global.configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes |
