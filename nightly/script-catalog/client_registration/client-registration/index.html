@@ -3533,7 +3533,132 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
 </table>
 <h2 id="common-use-case-adding-scopes-defined-in-the-script-configuration-parameters">Common Use Case: Adding scopes defined in the script configuration parameters<a class="headerlink" href="#common-use-case-adding-scopes-defined-in-the-script-configuration-parameters" title="Permanent link">#</a></h2>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/client_registration/sample-script/SampleScript.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2016, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Movchan</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientRegistrationType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScopeService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arrays</span><span class="p">,</span> <span class="n">ArrayList</span><span class="p">,</span> <span class="n">HashSet</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ClientRegistration</span><span class="p">(</span><span class="n">ClientRegistrationType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Initialization&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientRedirectUrisSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepareClientRedirectUris</span><span class="p">(</span><span class="n">configurationAttributes</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Initialized successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="c1"># Update client entry before persistent it</span>
+    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. CreateClient method&quot;</span>
+        <span class="n">registerRequest</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRegisterRequest</span><span class="p">()</span>
+        <span class="n">configurationAttributes</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getConfigurationAttibutes</span><span class="p">()</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClient</span><span class="p">()</span>
+
+        <span class="n">redirectUris</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getRedirectUris</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Redirect Uris: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">redirectUris</span>
+
+        <span class="n">addAddressScope</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">redirectUri</span> <span class="ow">in</span> <span class="n">redirectUris</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clientRedirectUrisSet</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">redirectUri</span><span class="p">)):</span>
+                <span class="n">addAddressScope</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Is add address scope: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">addAddressScope</span>
+
+        <span class="k">if</span> <span class="n">addAddressScope</span><span class="p">:</span>
+            <span class="n">currentScopes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getScopes</span><span class="p">()</span>
+            <span class="nb">print</span> <span class="s2">&quot;Client registration. Current scopes: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">currentScopes</span>
+
+            <span class="n">scopeService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">ScopeService</span><span class="p">)</span>
+            <span class="n">addressScope</span> <span class="o">=</span> <span class="n">scopeService</span><span class="o">.</span><span class="n">getScopeByDisplayName</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">)</span>
+            <span class="n">newScopes</span> <span class="o">=</span> <span class="n">ArrayHelper</span><span class="o">.</span><span class="n">addItemToStringArray</span><span class="p">(</span><span class="n">currentScopes</span><span class="p">,</span> <span class="n">addressScope</span><span class="o">.</span><span class="n">getDn</span><span class="p">())</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Client registration. Result scopes: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">newScopes</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">setScopes</span><span class="p">(</span><span class="n">newScopes</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Update client entry before persistent it</span>
+    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">updateClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. UpdateClient method&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareClientRedirectUris</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="n">clientRedirectUrisSet</span> <span class="o">=</span> <span class="n">HashSet</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;client_redirect_uris&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">clientRedirectUrisSet</span>
+
+        <span class="n">clientRedirectUrisList</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client_redirect_uris&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">StringHelper</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">(</span><span class="n">clientRedirectUrisList</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Client registration. The property client_redirect_uris is empty&quot;</span>
+            <span class="k">return</span> <span class="n">clientRedirectUrisSet</span>    
+
+        <span class="n">clientRedirectUrisArray</span> <span class="o">=</span> <span class="n">StringHelper</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">clientRedirectUrisList</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ArrayHelper</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">(</span><span class="n">clientRedirectUrisArray</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Client registration. No clients specified in client_redirect_uris property&quot;</span>
+            <span class="k">return</span> <span class="n">clientRedirectUrisSet</span>
+
+        <span class="c1"># Convert to HashSet to quick search</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">clientRedirectUrisArray</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">:</span>
+            <span class="n">uris</span> <span class="o">=</span> <span class="n">clientRedirectUrisArray</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">clientRedirectUrisSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">clientRedirectUrisSet</span>
+
+    <span class="c1"># Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.</span>
+    <span class="c1"># context is reference of io.jans.as.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSoftwareStatementHmacSecret</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.</span>
+    <span class="c1"># context is reference of io.jans.as.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSoftwareStatementJwks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># cert - java.security.cert.X509Certificate</span>
+    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isCertValidForClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modifyPutResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modifyReadResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modifyPostResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.common.model.registration.Client</span><span class="p">;</span>

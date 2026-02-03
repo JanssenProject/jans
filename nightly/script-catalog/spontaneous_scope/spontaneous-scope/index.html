@@ -3416,7 +3416,40 @@
 </tbody>
 </table>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/spontaneous_scope/spontaneous-scope/spontaneous_scope.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2018, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Zabrovarnyy</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.spontaneous</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpontaneousScopeType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SpontaneousScope</span><span class="p">(</span><span class="n">SpontaneousScopeType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Spontaneous scope script. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Spontaneous scope script. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Spontaneous scope script. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Spontaneous scope script. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># This method is called before spontaneous scope is persisted. It&#39;s possible to disable persistence via context.setAllowSpontaneousScopePersistence(false)</span>
+    <span class="c1"># Also it&#39;s possible to manipulated already granted scopes, e.g. context.getGrantedScopes().remove(&quot;transaction:456&quot;)</span>
+    <span class="c1"># Note :</span>
+    <span class="c1"># context is reference of io.jans.as.service.external.context.SpontaneousScopeExternalContext(in https://github.com/JanssenFederation/oxauth project, )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">manipulateScopes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span>
 </code></pre></div>
 <h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
 <p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>

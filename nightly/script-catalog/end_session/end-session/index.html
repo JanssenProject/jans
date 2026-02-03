@@ -3420,7 +3420,38 @@
 <p>The example script is a proof of concept, as the <code>getFrontchannelHtml()</code> must return an actual HTML string.</p>
 </div>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/end_session/end-session/end_session.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Copyright (c) 2020, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Zabrovarnyy</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.logout</span><span class="w"> </span><span class="kn">import</span> <span class="n">EndSessionType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EndSession</span><span class="p">(</span><span class="n">EndSessionType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;EndSession script. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;EndSession script. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;EndSession script. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;EndSession script. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Returns string, it must be valid HTML (with iframes according to spec http://openid.net/specs/openid-connect-frontchannel-1_0.html)</span>
+    <span class="c1"># This method is called on `/end_session` after actual session is killed and oxauth construct HTML to return to RP.</span>
+    <span class="c1"># Note :</span>
+    <span class="c1"># context is reference of io.jans.as.service.external.context.EndSessionContext (in https://github.com/JanssenFederation/oxauth project, )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getFrontchannelHtml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>

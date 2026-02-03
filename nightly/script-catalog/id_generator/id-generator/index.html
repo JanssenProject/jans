@@ -3414,7 +3414,48 @@
 <h2 id="use-case-sample-id-generator">Use case: Sample ID generator<a class="headerlink" href="#use-case-sample-id-generator" title="Permanent link">#</a></h2>
 <p>This script has been adapted from the Gluu Server <a href="https://gluu.org/docs/gluu-server/4.4/admin-guide/sample-id-generation-script.py">sample ID generator script</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/id_generator/sample-script/SampleScript.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2016, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Movchan</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.id</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdGeneratorType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arrays</span><span class="p">,</span> <span class="n">ArrayList</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">IdGenerator</span><span class="p">(</span><span class="n">IdGeneratorType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Id generator. Initialization&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Id generator. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Id generator. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Id generator. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Id generator init method</span>
+    <span class="c1">#   appId is application Id</span>
+    <span class="c1">#   idType is Id Type</span>
+    <span class="c1">#   idPrefix is Id Prefix</span>
+    <span class="c1">#   user is io.jans.oxtrust.model.JanssenCustomPerson</span>
+    <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generateId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appId</span><span class="p">,</span> <span class="n">idType</span><span class="p">,</span> <span class="n">idPrefix</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Id generator. Generate Id&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Id generator. Generate Id. AppId: &#39;&quot;</span><span class="p">,</span> <span class="n">appId</span><span class="p">,</span> <span class="s2">&quot;&#39;, IdType: &#39;&quot;</span><span class="p">,</span> <span class="n">idType</span><span class="p">,</span> <span class="s2">&quot;&#39;, IdPrefix: &#39;&quot;</span><span class="p">,</span> <span class="n">idPrefix</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span>
+
+        <span class="c1"># Return None or empty string to trigger default Id generation method</span>
+        <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>

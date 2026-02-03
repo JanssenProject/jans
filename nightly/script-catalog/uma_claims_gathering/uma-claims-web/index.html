@@ -3384,7 +3384,98 @@
 </tbody>
 </table>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/uma_claims_gathering/uma-claims-gathering/uma_claims_gathering.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2017, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Zabrovarnyy</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.uma</span><span class="w"> </span><span class="kn">import</span> <span class="n">UmaClaimsGatheringType</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UmaClaimsGathering</span><span class="p">(</span><span class="n">UmaClaimsGatheringType</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+
+    <span class="c1"># Main gather method. Must return True (if gathering performed successfully) or False (if fail).</span>
+    <span class="c1"># Method must set claim into context (via context.putClaim(&#39;name&#39;, value)) in order to persist it (otherwise it will be lost).</span>
+    <span class="c1"># All user entered values can be access via Map&lt;String, String&gt; context.getPageClaims()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gather</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span> <span class="c1"># context is reference of io.jans.as.uma.authorization.UmaGatherContext</span>
+        <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. Gathering ...&quot;</span>
+
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">getPageClaims</span><span class="p">()</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;country&quot;</span><span class="p">)):</span>
+                <span class="n">country</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getPageClaims</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;country&quot;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;Country: &quot;</span> <span class="o">+</span> <span class="n">country</span>
+
+                <span class="n">context</span><span class="o">.</span><span class="n">putClaim</span><span class="p">(</span><span class="s2">&quot;country&quot;</span><span class="p">,</span> <span class="n">country</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. &#39;country&#39; is not provided on step 1.&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">elif</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">getPageClaims</span><span class="p">()</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">)):</span>
+                <span class="n">city</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getPageClaims</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;City: &quot;</span> <span class="o">+</span> <span class="n">city</span>
+
+                <span class="n">context</span><span class="o">.</span><span class="n">putClaim</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="n">city</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="s2">&quot;Claims-Gathering. &#39;city&#39; is not provided on step 2.&quot;</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getNextStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareForStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">10</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">isAuthenticated</span><span class="p">():</span>
+            <span class="c1"># user is not authenticated, so we are redirecting user to authorization endpoint</span>
+            <span class="c1"># client_id is specified via configuration attribute.</span>
+            <span class="c1"># Make sure that given client has redirect_uri to Claims-Gathering Endpoint with parameter authentication=true</span>
+            <span class="c1"># Sample https://sample.com/restv1/uma/gather_claims?authentication=true</span>
+            <span class="c1"># If redirect to external url is performated, make sure that viewAction has onPostback=&quot;true&quot; (otherwise redirect will not work)</span>
+            <span class="c1"># After user is authenticated then within the script it&#39;s possible to get user attributes as</span>
+            <span class="c1"># context.getUser(&quot;uid&quot;, &quot;sn&quot;)</span>
+            <span class="c1"># If user is authenticated to current AS (to the same server, not external one) then it&#39;s possible to</span>
+            <span class="c1"># access Connect session attributes directly (no need to obtain id_token after redirect with &#39;code&#39;).</span>
+            <span class="c1"># To fetch attributes please use getConnectSessionAttributes() method.</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;User is not authenticated. Redirect for authentication ...&quot;</span>
+            <span class="n">clientId</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getConfigurationAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
+            <span class="n">redirectUri</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClaimsGatheringEndpoint</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;?authentication=true&quot;</span> <span class="c1"># without authentication=true parameter it will not work</span>
+            <span class="n">authorizationUrl</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getAuthorizationEndpoint</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;?client_id=&quot;</span> <span class="o">+</span> <span class="n">clientId</span> <span class="o">+</span> <span class="s2">&quot;&amp;redirect_uri=&quot;</span> <span class="o">+</span> <span class="n">redirectUri</span> <span class="o">+</span> <span class="s2">&quot;&amp;scope=openid&amp;response_type=code&quot;</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">redirectToExternalUrl</span><span class="p">(</span><span class="n">authorizationUrl</span><span class="p">)</span> <span class="c1"># redirect to external url</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">isAuthenticated</span><span class="p">():</span> <span class="c1"># example how to get session attribute if user is authenticated to same AS</span>
+            <span class="n">arc</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getConnectSessionAttributes</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;acr&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getStepsCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getPageForStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;/uma2/sample/country.xhtml&quot;</span>
+        <span class="k">elif</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;/uma2/sample/city.xhtml&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 </code></pre></div>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you'd like to contribute content to this page, check out our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>

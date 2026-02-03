@@ -3434,7 +3434,66 @@
 <h2 id="use-case-dummy-select-account-example-script-does-not-have-impact-on-built-in-account-selection">Use case: Dummy Select Account example script (does not have impact on built-in account selection)<a class="headerlink" href="#use-case-dummy-select-account-example-script-does-not-have-impact-on-built-in-account-selection" title="Permanent link">#</a></h2>
 <p><a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/select_account/select-account/select_account.py">Select Account script example</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/select_account/select-account/select_account.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2020, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Z</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.selectaccount</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelectAccountType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SelectAccount</span><span class="p">(</span><span class="n">SelectAccountType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;SelectAccount script. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;SelectAccount script. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;SelectAccount script. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;SelectAccount script. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Returns path to select account page (e.g. /customs/page/path/myselectaccount.xhtml)</span>
+    <span class="c1"># If none or empty string is returned, AS uses built-in page.</span>
+    <span class="c1"># (Note: Custom page can be also put into `custom/pages/selectAccount.xhtml` and used without custom script.)</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext( https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSelectAccountPage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># This method is called before select account page is loaded.</span>
+    <span class="c1"># It is good place to make preparation processing.</span>
+    <span class="c1"># E.g. check whether it is ok to land on select account page or maybe redirect to external page.</span>
+    <span class="c1"># Return True - continue loading of the page</span>
+    <span class="c1"># Return False - stop loading and show error page</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext( https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Returns display name for given session id (https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/session/SessionId.java).</span>
+    <span class="c1"># Session can be accessed via context.getSessionId()</span>
+    <span class="c1"># Typical use is: context.getSessionId().getUser().getAttribute(&quot;myDisplayName&quot;)</span>
+    <span class="c1"># Returns string. If blank string is returned, AS will return built-in implementation to return display name</span>
+    <span class="c1"># which is context.getSessionId().getUser().getAttribute(&quot;displayName&quot;)</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext( https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getAccountDisplayName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># This method is called on session selection.</span>
+    <span class="c1"># Selected session can be accessed as context.getSessionId()</span>
+    <span class="c1"># Return True - continue session selection</span>
+    <span class="c1"># Return False - stop session selection (forbid it)</span>
+    <span class="c1"># context is reference of io.jans.as.server.model.common.ExecutionContext( https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">onSelect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>

@@ -3285,7 +3285,7 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>
@@ -3332,7 +3332,55 @@ The ORM module of the Janssen server does the following:</p>
 </ol>
 <h3 id="retrieve-grant-session-and-user-details-from-access-token">Retrieve Grant, Session and User Details from Access Token<a class="headerlink" href="#retrieve-grant-session-and-user-details-from-access-token" title="Permanent link">#</a></h3>
 <p>Following sample code snippet shows how to work backwards from an AccessToken to Grant, Session and User information.
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/persistence_extension/sample-script/PersistenceExtension.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2020, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Movchan</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistenceType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm.operation.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">PasswordEncryptionHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm.operation.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">PasswordEncryptionMethod</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PersistenceExtension</span><span class="p">(</span><span class="n">PersistenceType</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Persistence extension. Initialization&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Persistence extension. Destroy&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">onAfterCreate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Persistence extension. Method: onAfterCreate&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">onAfterDestroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Persistence extension. Method: onAfterDestroy&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">createHashedPassword</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">credential</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Persistence extension. Method: createHashedPassword&quot;</span>
+
+        <span class="n">hashed_password</span><span class="o">=</span> <span class="n">PasswordEncryptionHelper</span><span class="o">.</span><span class="n">createStoragePassword</span><span class="p">(</span><span class="n">credential</span><span class="p">,</span> <span class="n">PasswordEncryptionMethod</span><span class="o">.</span><span class="n">HASH_METHOD_PKCS5S2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hashed_password</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compareHashedPasswords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">credential</span><span class="p">,</span> <span class="n">storedCredential</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Persistence extension. Method: compareHashedPasswords&quot;</span>
+
+        <span class="n">auth_result</span> <span class="o">=</span> <span class="n">PasswordEncryptionHelper</span><span class="o">.</span><span class="n">compareCredentials</span><span class="p">(</span><span class="n">credential</span><span class="p">,</span> <span class="n">storedCredential</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">auth_result</span> 
 </code></pre></div></p>
 
 

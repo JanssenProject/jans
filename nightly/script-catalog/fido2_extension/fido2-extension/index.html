@@ -3461,7 +3461,114 @@ each one can be customized just in the moment the endpoint is called, just befor
 <h2 id="use-case-dummy-fido2-interception-form">Use case: Dummy Fido2 Interception Form<a class="headerlink" href="#use-case-dummy-fido2-interception-form" title="Permanent link">#</a></h2>
 <p>This script has been adapted from the Jans Server <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_extension/Fido2ExtensionSample.py">sample fido2 interception script</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/fido2_extension/Fido2ExtensionSample.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.</span>
+<span class="c1"># Copyright (c) 2023, Janssen Project</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Jorge Munoz</span>
+<span class="c1"># Author: Yuriy Movchan</span>
+<span class="c1">#</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.fido2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fido2ExtensionType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.fido2.service.operation</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttestationService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.fido2.service.operation</span><span class="w"> </span><span class="kn">import</span> <span class="n">AssertionService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">org.json</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.databind</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">org.apache.logging.log4j</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.fido2.model.u2f.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fido2ErrorResponseFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.fido2.model.u2f.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fido2ErrorResponseType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Fido2Extension</span><span class="p">(</span><span class="n">Fido2ExtensionType</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. Initialization&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. Initialized successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># To generate a bad request WebApplicationException giving a message. This method is to be called inside (interceptRegisterAttestation, interceptVerifyAttestation, interceptAuthenticateAssertion, interceptVerifyAssertion)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">throwBadRequestException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. Setting Bad request exception&quot;</span>
+
+        <span class="n">errorClaimException</span> <span class="o">=</span> <span class="n">Fido2ErrorResponseFactory</span><span class="o">.</span><span class="n">createBadRequestException</span><span class="p">(</span><span class="n">Fido2ErrorResponseType</span><span class="o">.</span><span class="n">BAD_REQUEST_INTERCEPTION</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">ThreadContext</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">CORRELATION_ID_HEADER</span><span class="p">))</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">setWebApplicationException</span><span class="p">(</span><span class="n">errorClaimException</span><span class="p">)</span>
+
+    <span class="c1"># This method is called in Attestation register endpoint before start the registration process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registerAttestationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. registerAttestationStart&quot;</span>
+        <span class="n">attestationService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AttestationService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Attestation register endpoint after start the registration process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registerAttestationFinish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. registerAttestationFinish&quot;</span>
+        <span class="n">attestationService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AttestationService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Attestation verify endpoint before finish the registration verification process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verifyAttestationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. verifyAttestationStart&quot;</span>
+        <span class="n">attestationService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AttestationService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Attestation verify endpoint after finish the registration verification process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verifyAttestationFinish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. verifyAttestationFinish&quot;</span>
+        <span class="n">attestationService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AttestationService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Assertion authenticate endpoint before start the authentication process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">authenticateAssertionStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. authenticateAssertionStart&quot;</span>
+
+        <span class="n">assertionService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AssertionService</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">paramAsJsonNode</span><span class="o">.</span><span class="n">hasNonNull</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. Username: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">paramAsJsonNode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">asText</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">paramAsJsonNode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">asText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;test_user&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">throwBadRequestException</span><span class="p">(</span><span class="s2">&quot;Fido2Extension authenticateAssertionStart : test_user&quot;</span><span class="p">,</span> <span class="s2">&quot;Description Error from script : test_user&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">throwBadRequestException</span><span class="p">(</span><span class="s2">&quot;Fido2Extension authenticateAssertionStart. Username is missing.&quot;</span><span class="p">,</span> <span class="s2">&quot;Description Error from script. Username is missing.&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Assertion authenticate endpoint after start the authentication process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">authenticateAssertionFinish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. authenticateAssertionFinish&quot;</span>
+        <span class="n">assertionService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AssertionService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Assertion verify endpoint before finish the authentication verification process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verifyAssertionStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. verifyAssertionStart&quot;</span>
+        <span class="n">assertionService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AssertionService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># This method is called in Assertion verify endpoint after finish the authentication verification process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verifyAssertionFinish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Extension. verifyAssertionFinish&quot;</span>
+        <span class="n">assertionService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AssertionService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>

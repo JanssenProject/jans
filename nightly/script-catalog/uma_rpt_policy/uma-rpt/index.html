@@ -3432,7 +3432,82 @@
 <h2 id="use-case-request-country-and-city-policies">Use case: Request Country and City Policies<a class="headerlink" href="#use-case-request-country-and-city-policies" title="Permanent link">#</a></h2>
 <p>This script was adapted from the Gluu Server <a href="https://gluu.org/docs/gluu-server/4.4/admin-guide/sample-uma-authorization-script.py">UMA RPT Authorization Script</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/uma_rpt_policy/uma-rpt-policy/uma_rpt_policy.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2017, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Zabrovarnyy</span>
+<span class="c1">#</span>
+<span class="c1"># Call sequence</span>
+<span class="c1"># 1. First is call constructor of the Script __init__</span>
+<span class="c1"># 2. Next init() method</span>
+<span class="c1"># 3. Next getRequiredClaims() - method returns required claims, so UMA engine checks whether</span>
+<span class="c1">#    in request RP provided all claims that are required. Pay attention that there can be</span>
+<span class="c1">#    multiple scripts bound to the scopes, means that UMA engine will build set of required claims</span>
+<span class="c1">#    from all scripts. If not all claims are provided need_info error is sent to RP.</span>
+<span class="c1">#    During need_info construction getClaimsGatheringScriptName() method is called</span>
+<span class="c1"># 4. authorize() method is called if all required claims are provided.</span>
+<span class="c1"># 5. destroy()</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.uma</span><span class="w"> </span><span class="kn">import</span> <span class="n">UmaRptPolicyType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.uma</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClaimDefinitionBuilder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UmaRptPolicy</span><span class="p">(</span><span class="n">UmaRptPolicyType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;RPT Policy. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;RPT Policy. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;RPT Policy. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;RPT Policy. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Returns required claims definitions.</span>
+    <span class="c1"># This method must provide definition of all claims that is used in &#39;authorize&#39; method.</span>
+    <span class="c1"># Note : name in both places must match.</span>
+    <span class="c1"># %1$s - placeholder for issuer. It uses standard Java Formatter, docs : https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getRequiredClaims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span> <span class="c1"># context is reference of io.jans.as.uma.authorization.UmaAuthorizationContext</span>
+        <span class="n">json</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[</span>
+<span class="s2">        {</span>
+<span class="s2">            &quot;issuer&quot; : [ &quot;%1$s&quot; ],</span>
+<span class="s2">            &quot;name&quot; : &quot;country&quot;,</span>
+<span class="s2">            &quot;claim_token_format&quot; : [ &quot;http://openid.net/specs/openid-connect-core-1_0.html#IDToken&quot; ],</span>
+<span class="s2">            &quot;claim_type&quot; : &quot;string&quot;,</span>
+<span class="s2">            &quot;friendly_name&quot; : &quot;country&quot;</span>
+<span class="s2">        },</span>
+<span class="s2">        {</span>
+<span class="s2">            &quot;issuer&quot; : [ &quot;%1$s&quot; ],</span>
+<span class="s2">            &quot;name&quot; : &quot;city&quot;,</span>
+<span class="s2">            &quot;claim_token_format&quot; : [ &quot;http://openid.net/specs/openid-connect-core-1_0.html#IDToken&quot; ],</span>
+<span class="s2">            &quot;claim_type&quot; : &quot;string&quot;,</span>
+<span class="s2">            &quot;friendly_name&quot; : &quot;city&quot;</span>
+<span class="s2">        }</span>
+<span class="s2">        ]&quot;&quot;&quot;</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">addRedirectUserParam</span><span class="p">(</span><span class="s2">&quot;customUserParam1&quot;</span><span class="p">,</span> <span class="s2">&quot;value1&quot;</span><span class="p">)</span> <span class="c1"># pass some custom parameters to need_info uri. It can be removed if you don&#39;t need custom parameters.</span>
+        <span class="k">return</span> <span class="n">ClaimDefinitionBuilder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">String</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">getIssuer</span><span class="p">()))</span>
+
+    <span class="c1"># Main authorization method. Must return True or False.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">authorize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span> <span class="c1"># context is reference of io.jans.as.uma.authorization.UmaAuthorizationContext</span>
+        <span class="nb">print</span> <span class="s2">&quot;RPT Policy. Authorizing ...&quot;</span>
+
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">getClaim</span><span class="p">(</span><span class="s2">&quot;country&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;US&#39;</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">getClaim</span><span class="p">(</span><span class="s2">&quot;city&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;NY&#39;</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Authorized successfully!&quot;</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Returns name of the Claims-Gathering script which will be invoked if need_info error is returned.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getClaimsGatheringScriptName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span> <span class="c1"># context is reference of io.jans.as.uma.authorization.UmaAuthorizationContext</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">addRedirectUserParam</span><span class="p">(</span><span class="s2">&quot;customUserParam2&quot;</span><span class="p">,</span> <span class="s2">&quot;value2&quot;</span><span class="p">)</span> <span class="c1"># pass some custom parameters to need_info uri. It can be removed if you don&#39;t need custom parameters.</span>
+        <span class="k">return</span> <span class="s2">&quot;sampleClaimsGathering&quot;</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>

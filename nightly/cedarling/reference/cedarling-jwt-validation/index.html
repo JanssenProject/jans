@@ -2870,7 +2870,7 @@
 </blockquote>
 <h2 id="jwt-validation-flow-diagram">JWT Validation Flow Diagram<a class="headerlink" href="#jwt-validation-flow-diagram" title="Permanent link">#</a></h2>
 <p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
-<p><img alt="" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
+<p><img alt="Cedarling JWT validation flow diagram showing token verification process" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
 <h2 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h2>
 <p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -2905,7 +2905,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 10:53:22 UTC"><span class="timeago" datetime="2026-02-03T10:53:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 10:53:22 UTC">2026-02-03</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 12:00:12 UTC"><span class="timeago" datetime="2026-02-03T12:00:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 12:00:12 UTC">2026-02-03</span>
   </span>
 
     

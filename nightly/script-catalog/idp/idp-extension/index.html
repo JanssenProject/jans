@@ -3418,7 +3418,122 @@
 </tbody>
 </table>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/idp/sample-script/SampleScript.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxShibboleth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2020, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Movchan</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.idp</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdpType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.idp.externalauth</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticatedNameTranslator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">net.shibboleth.idp.authn.principal</span><span class="w"> </span><span class="kn">import</span> <span class="n">UsernamePrincipal</span><span class="p">,</span> <span class="n">IdPAttributePrincipal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">net.shibboleth.idp.authn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExternalAuthentication</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">net.shibboleth.idp.attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdPAttribute</span><span class="p">,</span> <span class="n">StringAttributeValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">net.shibboleth.idp.authn.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationContext</span><span class="p">,</span> <span class="n">ExternalAuthenticationContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">net.shibboleth.idp.attribute.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">javax.security.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">Subject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Collections</span><span class="p">,</span> <span class="n">HashMap</span><span class="p">,</span> <span class="n">HashSet</span><span class="p">,</span> <span class="n">ArrayList</span><span class="p">,</span> <span class="n">Arrays</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">IdpExtension</span><span class="p">(</span><span class="n">IdpType</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Idp extension. Initialization&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultNameTranslator</span> <span class="o">=</span> <span class="n">AuthenticatedNameTranslator</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Idp extension. Destroy&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Translate attributes from user profile</span>
+    <span class="c1">#   context is io.jans.idp.externalauth.TranslateAttributesContext (https://github.com/JanssenFederation/shib-oxauth-authn3/blob/master/src/main/java/io.jans.idp/externalauth/TranslateAttributesContext.java)</span>
+    <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translateAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Idp extension. Method: translateAttributes&quot;</span>
+
+        <span class="c1"># Return False to use default method</span>
+        <span class="c1">#return False</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRequest</span><span class="p">()</span>
+        <span class="n">userProfile</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getUserProfile</span><span class="p">()</span>
+        <span class="n">principalAttributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultNameTranslator</span><span class="o">.</span><span class="n">produceIdpAttributePrincipal</span><span class="p">(</span><span class="n">userProfile</span><span class="o">.</span><span class="n">getAttributes</span><span class="p">())</span>
+        <span class="nb">print</span> <span class="s2">&quot;Idp extension. Converted user profile: &#39;</span><span class="si">%s</span><span class="s2">&#39; to attribute principal: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">userProfile</span><span class="p">,</span> <span class="n">principalAttributes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">principalAttributes</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">():</span>
+            <span class="nb">print</span> <span class="s2">&quot;Idp extension. Found attributes from oxAuth. Processing...&quot;</span>
+
+            <span class="c1"># Start: Custom part</span>
+            <span class="c1"># Add givenName attribute</span>
+            <span class="n">givenNameAttribute</span> <span class="o">=</span> <span class="n">IdPAttribute</span><span class="p">(</span><span class="s2">&quot;jansEnrollmentCode&quot;</span><span class="p">)</span>
+            <span class="n">givenNameAttribute</span><span class="o">.</span><span class="n">setValues</span><span class="p">(</span><span class="n">ArrayList</span><span class="p">(</span><span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="n">StringAttributeValue</span><span class="p">(</span><span class="s2">&quot;Dummy&quot;</span><span class="p">))))</span>
+            <span class="n">principalAttributes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">IdPAttributePrincipal</span><span class="p">(</span><span class="n">givenNameAttribute</span><span class="p">))</span>
+            <span class="nb">print</span> <span class="s2">&quot;Idp extension. Updated attribute principal: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">principalAttributes</span>
+            <span class="c1"># End: Custom part</span>
+
+            <span class="n">principals</span> <span class="o">=</span> <span class="n">HashSet</span><span class="p">()</span>
+            <span class="n">principals</span><span class="o">.</span><span class="n">addAll</span><span class="p">(</span><span class="n">principalAttributes</span><span class="p">)</span>
+            <span class="n">principals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UsernamePrincipal</span><span class="p">(</span><span class="n">userProfile</span><span class="o">.</span><span class="n">getId</span><span class="p">()))</span>
+
+            <span class="n">request</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">ExternalAuthentication</span><span class="o">.</span><span class="n">SUBJECT_KEY</span><span class="p">,</span> <span class="n">Subject</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Collections</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">principals</span><span class="p">),</span>
+                <span class="n">Collections</span><span class="o">.</span><span class="n">emptySet</span><span class="p">(),</span> <span class="n">Collections</span><span class="o">.</span><span class="n">emptySet</span><span class="p">()))</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Created an IdP subject instance with principals containing attributes for: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">userProfile</span><span class="o">.</span><span class="n">getId</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">idpAttributes</span> <span class="o">=</span> <span class="n">ArrayList</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">principalAttribute</span> <span class="ow">in</span> <span class="n">principalAttributes</span><span class="p">:</span>
+                    <span class="n">idpAttributes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">principalAttribute</span><span class="o">.</span><span class="n">getAttribute</span><span class="p">())</span>
+
+                <span class="n">request</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">ExternalAuthentication</span><span class="o">.</span><span class="n">ATTRIBUTES_KEY</span><span class="p">,</span> <span class="n">idpAttributes</span><span class="p">)</span>
+
+                <span class="n">authenticationKey</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getAuthenticationKey</span><span class="p">()</span>
+                <span class="n">profileRequestContext</span> <span class="o">=</span> <span class="n">ExternalAuthentication</span><span class="o">.</span><span class="n">getProfileRequestContext</span><span class="p">(</span><span class="n">authenticationKey</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+                <span class="n">authContext</span> <span class="o">=</span> <span class="n">profileRequestContext</span><span class="o">.</span><span class="n">getSubcontext</span><span class="p">(</span><span class="n">AuthenticationContext</span><span class="p">)</span>
+                <span class="n">extContext</span> <span class="o">=</span> <span class="n">authContext</span><span class="o">.</span><span class="n">getSubcontext</span><span class="p">(</span><span class="n">ExternalAuthenticationContext</span><span class="p">)</span>
+
+                <span class="n">extContext</span><span class="o">.</span><span class="n">setSubject</span><span class="p">(</span><span class="n">Subject</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Collections</span><span class="o">.</span><span class="n">singleton</span><span class="p">(</span><span class="n">principals</span><span class="p">),</span> <span class="n">Collections</span><span class="o">.</span><span class="n">emptySet</span><span class="p">(),</span> <span class="n">Collections</span><span class="o">.</span><span class="n">emptySet</span><span class="p">()));</span>
+
+                <span class="n">extContext</span><span class="o">.</span><span class="n">getSubcontext</span><span class="p">(</span><span class="n">AttributeContext</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">setUnfilteredIdPAttributes</span><span class="p">(</span><span class="n">idpAttributes</span><span class="p">)</span>
+                <span class="n">extContext</span><span class="o">.</span><span class="n">getSubcontext</span><span class="p">(</span><span class="n">AttributeContext</span><span class="p">)</span><span class="o">.</span><span class="n">setIdPAttributes</span><span class="p">(</span><span class="n">idpAttributes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;No attributes released from oxAuth. Creating an IdP principal for: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">userProfile</span><span class="o">.</span><span class="n">getId</span><span class="p">()</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">ExternalAuthentication</span><span class="o">.</span><span class="n">PRINCIPAL_NAME_KEY</span><span class="p">,</span> <span class="n">userProfile</span><span class="o">.</span><span class="n">getId</span><span class="p">())</span>
+
+        <span class="c1">#Return True to specify that default method is not needed</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Update attributes before releasing them</span>
+    <span class="c1">#   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/vreplace-janssen-version/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)</span>
+    <span class="c1">#   configurationAttributes is java.util.Map&lt;String, SimpleCustomProperty&gt;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">updateAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Idp extension. Method: updateAttributes&quot;</span>
+        <span class="n">attributeContext</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getAttributeContext</span><span class="p">()</span>
+
+        <span class="n">customAttributes</span> <span class="o">=</span> <span class="n">HashMap</span><span class="p">()</span>
+        <span class="n">customAttributes</span><span class="o">.</span><span class="n">putAll</span><span class="p">(</span><span class="n">attributeContext</span><span class="o">.</span><span class="n">getIdPAttributes</span><span class="p">())</span>
+
+        <span class="c1"># Remove givenName attribute</span>
+        <span class="n">customAttributes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;givenName&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Update surname attribute</span>
+        <span class="k">if</span> <span class="n">customAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;sn&quot;</span><span class="p">):</span>
+            <span class="n">customAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sn&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setValues</span><span class="p">(</span><span class="n">ArrayList</span><span class="p">(</span><span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="n">StringAttributeValue</span><span class="p">(</span><span class="s2">&quot;Dummy&quot;</span><span class="p">))))</span>
+
+        <span class="c1"># Set updated attributes</span>
+        <span class="n">attributeContext</span><span class="o">.</span><span class="n">setIdPAttributes</span><span class="p">(</span><span class="n">customAttributes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
 <p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>

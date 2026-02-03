@@ -3583,16 +3583,16 @@ Jans AS-&gt;&gt;RP: return token(s) (Access token, ID token or Refresh Token) re
 
 [
 {
-    &quot;value1&quot;: &quot;param_name&quot;,
-    &quot;value2&quot;: &quot;DI3ICTTJKLL8PPPNGH7YI&quot;,
-    &quot;description&quot;: &quot;This is just an example&quot;,
-    &quot;hide&quot;: true
+        &quot;value1&quot;: &quot;param_name&quot;,
+        &quot;value2&quot;: &quot;DI3ICTTJKLL8PPPNGH7YI&quot;,
+        &quot;description&quot;: &quot;This is just an example&quot;,
+        &quot;hide&quot;: true
   },
   {
-    &quot;value1&quot;: &quot;param_name_2&quot;,
-    &quot;value2&quot;: &quot;eEbJdi3hg42zxyFYbHArU5RuioPP&quot;,
-    &quot;description&quot;: &quot;yet another example&quot;,
-    &quot;hide&quot;: true
+        &quot;value1&quot;: &quot;param_name_2&quot;,
+        &quot;value2&quot;: &quot;eEbJdi3hg42zxyFYbHArU5RuioPP&quot;,
+        &quot;description&quot;: &quot;yet another example&quot;,
+        &quot;hide&quot;: true
   }
 ]
 ,
@@ -3621,9 +3621,9 @@ To Associate an Update Token script to a client (RP), execute the command below 
 <p><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
   --data '[
      {
-    "op": "add",
-    "path": "updateTokenScriptDns",
-    "value":  ["inum={SCRIPT_ID},ou=scripts,o=jans"]
+        "op": "add",
+        "path": "updateTokenScriptDns",
+        "value":  ["inum={SCRIPT_ID},ou=scripts,o=jans"]
      }
      ]'</code></p>
 <h2 id="writing-an-update-token-script-pseudo-code-for-potential-usecases">Writing an Update token script (Pseudo code for potential usecases)<a class="headerlink" href="#writing-an-update-token-script-pseudo-code-for-potential-usecases" title="Permanent link">#</a></h2>
@@ -3650,15 +3650,15 @@ To Associate an Update Token script to a client (RP), execute the command below 
     def modifyIdToken(self, jsonWebResponse, context):
 
         # header claims
-    jsonWebResponse.getHeader().setClaim(&quot;header_name&quot;, &quot;header_value&quot;)
+        jsonWebResponse.getHeader().setClaim(&quot;header_name&quot;, &quot;header_value&quot;)
 
-    #custom claims
-    jsonWebResponse.getClaims().setClaim(&quot;openbanking_intent_id&quot;, openbanking_intent_id_value)
+        #custom claims
+        jsonWebResponse.getClaims().setClaim(&quot;openbanking_intent_id&quot;, openbanking_intent_id_value)
 
-    #regular claims        
-    jsonWebResponse.getClaims().setClaim(&quot;sub&quot;, claimValue)
+        #regular claims        
+        jsonWebResponse.getClaims().setClaim(&quot;sub&quot;, claimValue)
 
-    return True
+        return True
 </code></pre></div>
 <p><img alt="Inspecting a modified ID token" src="https://github.com/JanssenProject/jans/blob/main/docs/assets/update-id-token.png" /></p>
 <h3 id="modifyaccesstoken">modifyAccessToken()<a class="headerlink" href="#modifyaccesstoken" title="Permanent link">#</a></h3>
@@ -3676,11 +3676,11 @@ To Associate an Update Token script to a client (RP), execute the command below 
     def modifyAccessToken(self, accessToken, context):
 
          #read from session
-    sessionIdService = CdiUtil.bean(SessionIdService)
-    sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
+        sessionIdService = CdiUtil.bean(SessionIdService)
+        sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
 
         org_id = sessionId.getSessionAttributes().get(&quot;org_id&quot;)
-    balance = thirdPartyApi.checkBalance(org_id)
+        balance = thirdPartyApi.checkBalance(org_id)
 
         if balance &gt; 0 :
            return True
@@ -3693,44 +3693,44 @@ To Associate an Update Token script to a client (RP), execute the command below 
     # context is reference of io.jans.oxauth.service.external.context.ExternalUpdateTokenContext
     def modifyAccessToken(self, accessToken, context):
 
-        # header claims
-        context.getHeader().setClaim(&quot;header_name&quot;, &quot;header_value&quot;)
+            # header claims
+            context.getHeader().setClaim(&quot;header_name&quot;, &quot;header_value&quot;)
 
-        #custom claims
-        context.getClaims().setClaim(&quot;claim_name&quot;, &quot;claimValue&quot;)
+            #custom claims
+            context.getClaims().setClaim(&quot;claim_name&quot;, &quot;claimValue&quot;)
 
-        #regular claims        
-        context.getClaims().setClaim(&quot;sub&quot;, claimValue)
+            #regular claims        
+            context.getClaims().setClaim(&quot;sub&quot;, claimValue)
 
-        return True
+            return True
 </code></pre></div>
 <h3 id="modify-a-specific-token-lifetime-based-on-the-context">Modify a specific token lifetime based on the context<a class="headerlink" href="#modify-a-specific-token-lifetime-based-on-the-context" title="Permanent link">#</a></h3>
 <ol>
 <li>Refresh token lifetime:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>    def getRefreshTokenLifetimeInSeconds(self, context):
-        return 24 * 60 * 60 # one day
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span><span class="w"> </span><span class="nf">getRefreshTokenLifetimeInSeconds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># one day</span>
 </code></pre></div>
 <ol>
 <li>ID token lifetime:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>    def getIdTokenLifetimeInSeconds(self, context):
-        return 10 * 60 * 60 # 10 hours
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span><span class="w"> </span><span class="nf">getIdTokenLifetimeInSeconds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># 10 hours</span>
 </code></pre></div>
 <ol>
 <li>Access token lifetime:</li>
 </ol>
-<p><div class="highlight"><pre><span></span><code>    def getAccessTokenLifetimeInSeconds(self, context):
-        return 10 * 60 * 60 # 10 hours
+<p><div class="highlight"><pre><span></span><code>    <span class="k">def</span><span class="w"> </span><span class="nf">getAccessTokenLifetimeInSeconds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># 10 hours</span>
 </code></pre></div>
 Access token lifetime from script has highest priority (it wins from client's access token lifetime configuration).</p>
 <h3 id="modifyrefreshtoken">modifyRefreshToken() :<a class="headerlink" href="#modifyrefreshtoken" title="Permanent link">#</a></h3>
 <p>Used to modify claims in a Refresh Token</p>
-<div class="highlight"><pre><span></span><code>    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
-    # refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def modifyRefreshToken(self, refreshToken, context):
-        return True
+<div class="highlight"><pre><span></span><code>    <span class="c1"># Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.</span>
+    <span class="c1"># refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())</span>
+    <span class="c1"># context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modifyRefreshToken</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refreshToken</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h2 id="introspectiontype-script-vs-updatetokentype-script">IntrospectionType script vs UpdateTokenType script<a class="headerlink" href="#introspectiontype-script-vs-updatetokentype-script" title="Permanent link">#</a></h2>
 <table>
@@ -3749,8 +3749,8 @@ Access token lifetime from script has highest priority (it wins from client's ac
 </tr>
 <tr>
 <td>Core Purpose</td>
-<td>Used to return access token meta information like current validity, approved scopes, and information about the context in which the token was issued when a Resource Server which queries the <a href="https://datatracker.ietf.org/doc/html/rfc7662">Introspection endpoint</a></td>
-<td>used to enable transformation of claims and values in id_token and Access token, set a specific token lifetime, change granularity of access control (up-scoping, down-scoping), audit logging for each token response, forbid the creation of AT based on a criteria.</td>
+<td>Returns access token meta information such as current validity, approved scopes, and issuance context when a Resource Server queries the <a href="https://datatracker.ietf.org/doc/html/rfc7662">Introspection endpoint</a>.</td>
+<td>Enables transformation of claims and values in id_token and Access token, sets specific token lifetimes, changes access control granularity (up-scoping, down-scoping), performs audit logging for each token response, and can forbid Access token creation based on a criterion.</td>
 </tr>
 <tr>
 <td>Functionality</td>
@@ -3778,23 +3778,25 @@ Access token lifetime from script has highest priority (it wins from client's ac
 <ol>
 <li>How can I add a <code>dict</code> type object as a claim value?</li>
 </ol>
-<p><div class="highlight"><pre><span></span><code>from io.jans.as.model.uti import JwtUtil
-from org.json import JSONObject;
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.uti</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">org.json</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONObject</span><span class="p">;</span>
 
-    def modifyIdToken(self, jsonWebResponse, context):
-        datas =  {&#39;country&#39;: &#39;ID&#39;, &#39;sponsor&#39;: &#39;7022952467&#39;, &#39;role&#39;: &#39;BusinessOwner&#39;, &#39;salesplanaff&#39;: &#39;220&#39;, &#39;acctsubtype&#39;: &#39;BusinessOwner&#39;, &#39;accttype&#39;: &#39;AmBCBusiness&#39;, &#39;abo&#39;: &#39;7022953754&#39;, &#39;aboname&#39;: &#39;NEW&#39;, &#39;lclpartyid&#39;: &#39;119700175&#39;, &#39;email&#39;: None, &#39;status&#39;: &#39;Active&#39;}
-        string_rep = json.dumps(datas)
-        jsonObject = JwtUtil.fromJson(string_rep)
-        jsonWebResponse.getClaims().setClaim(&quot;test&quot;, jsonObject)
-        print &quot;Update token script. Modify idToken: %s&quot; % jsonWebResponse
-        return True
+    <span class="k">def</span><span class="w"> </span><span class="nf">modifyIdToken</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsonWebResponse</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">datas</span> <span class="o">=</span>  <span class="p">{</span><span class="s1">&#39;country&#39;</span><span class="p">:</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;sponsor&#39;</span><span class="p">:</span> <span class="s1">&#39;7022952467&#39;</span><span class="p">,</span> <span class="s1">&#39;role&#39;</span><span class="p">:</span> <span class="s1">&#39;BusinessOwner&#39;</span><span class="p">,</span> <span class="s1">&#39;salesplanaff&#39;</span><span class="p">:</span> <span class="s1">&#39;220&#39;</span><span class="p">,</span> <span class="s1">&#39;acctsubtype&#39;</span><span class="p">:</span> <span class="s1">&#39;BusinessOwner&#39;</span><span class="p">,</span> <span class="s1">&#39;accttype&#39;</span><span class="p">:</span> <span class="s1">&#39;AmBCBusiness&#39;</span><span class="p">,</span> <span class="s1">&#39;abo&#39;</span><span class="p">:</span> <span class="s1">&#39;7022953754&#39;</span><span class="p">,</span> <span class="s1">&#39;aboname&#39;</span><span class="p">:</span> <span class="s1">&#39;NEW&#39;</span><span class="p">,</span> <span class="s1">&#39;lclpartyid&#39;</span><span class="p">:</span> <span class="s1">&#39;119700175&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;Active&#39;</span><span class="p">}</span>
+        <span class="n">string_rep</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">datas</span><span class="p">)</span>
+        <span class="n">jsonObject</span> <span class="o">=</span> <span class="n">JwtUtil</span><span class="o">.</span><span class="n">fromJson</span><span class="p">(</span><span class="n">string_rep</span><span class="p">)</span>
+        <span class="n">jsonWebResponse</span><span class="o">.</span><span class="n">getClaims</span><span class="p">()</span><span class="o">.</span><span class="n">setClaim</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">jsonObject</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Update token script. Modify idToken: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">jsonWebResponse</span>
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
-2. How can I set integer value in id token claim?
-<div class="highlight"><pre><span></span><code>jsonWebResponse.getClaims().setClaim(&quot;claimY&quot;, Integer.valueOf(124456191))
+<ol>
+<li>How can I set integer value in id token claim?</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="n">jsonWebResponse</span><span class="o">.</span><span class="n">getClaims</span><span class="p">()</span><span class="o">.</span><span class="n">setClaim</span><span class="p">(</span><span class="s2">&quot;claimY&quot;</span><span class="p">,</span> <span class="n">Integer</span><span class="o">.</span><span class="n">valueOf</span><span class="p">(</span><span class="mi">124456191</span><span class="p">))</span>
 </code></pre></div>
-Get it as integer, via
-<div class="highlight"><pre><span></span><code>getClaims().getClaimAsInteger(&quot;claimY&quot;)
-</code></pre></div></p>
+<p>Get it as integer, via:</p>
+<div class="highlight"><pre><span></span><code><span class="n">getClaims</span><span class="p">()</span><span class="o">.</span><span class="n">getClaimAsInteger</span><span class="p">(</span><span class="s2">&quot;claimY&quot;</span><span class="p">)</span>
+</code></pre></div>
 
 
 
@@ -3817,7 +3819,7 @@ Get it as integer, via
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 17:18:26 UTC"><span class="timeago" datetime="2025-12-16T17:18:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 17:18:26 UTC">2025-12-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 12:30:11 UTC"><span class="timeago" datetime="2026-02-03T12:30:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 12:30:11 UTC">2026-02-03</span>
   </span>
 
     

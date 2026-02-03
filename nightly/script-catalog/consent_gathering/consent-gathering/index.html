@@ -3523,7 +3523,90 @@ acrN - consentScriptN
 <h2 id="use-case-dummy-consent-gathering-form">Use case: Dummy Consent Gathering Form<a class="headerlink" href="#use-case-dummy-consent-gathering-form" title="Permanent link">#</a></h2>
 <p>This script has been adapted from the Gluu Server <a href="https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/authz/ConsentGatheringSample.py">sample consent gathering script</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/consent_gathering/sample-script/ConsentGatheringSample.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2017, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Yuriy Movchan</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.server.security</span><span class="w"> </span><span class="kn">import</span> <span class="n">Identity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.authz</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConsentGatheringType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConsentGathering</span><span class="p">(</span><span class="n">ConsentGatheringType</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Destroyed successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).</span>
+    <span class="c1"># All user entered values can be access via Map&lt;String, String&gt; context.getPageAttributes()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">authorize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span> <span class="c1"># context is reference of io.jans.as.service.external.context.ConsentGatheringContext</span>
+        <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Authorizing...&quot;</span>
+
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">allowButton</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRequestParameters</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;authorizeForm:allowButton&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">allowButton</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">allowButton</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Authorization success for step 1&quot;</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Authorization declined for step 1&quot;</span>
+        <span class="k">elif</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">allowButton</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRequestParameters</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;authorizeForm:allowButton&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">allowButton</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">allowButton</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Authorization success for step 2&quot;</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Consent-Gathering. Authorization declined for step 2&quot;</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getNextStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareForStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">isAuthenticated</span><span class="p">():</span>
+            <span class="nb">print</span> <span class="s2">&quot;User is not authenticated. Aborting authorization flow ...&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pageAttributes</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getPageAttributes</span><span class="p">()</span>
+
+            <span class="c1"># Generate random consent gathering request</span>
+            <span class="n">consentRequest</span> <span class="o">=</span> <span class="s2">&quot;Requested transaction #</span><span class="si">%s</span><span class="s2"> approval for the amount of sum $ </span><span class="si">%s</span><span class="s2">.00&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">100000</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">pageAttributes</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;consent_request&quot;</span><span class="p">,</span> <span class="n">consentRequest</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getStepsCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getPageForStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;/authz/authorize.xhtml&quot;</span>
+        <span class="k">elif</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;/authz/transaction.xhtml&quot;</span>
+
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
@@ -3662,17 +3745,17 @@ acrN - consentScriptN
 <tr>
 <td><code>getClient</code></td>
 <td>Gets a reference to the OAuth client associated to the authentication request</td>
-<td><a href="https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java">Client</a></td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java">Client</a></td>
 </tr>
 <tr>
 <td><code>getScopes</code></td>
 <td>A list of OAuth scopes requested</td>
-<td><a href="https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java">Scope</a></td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java">Scope</a></td>
 </tr>
 <tr>
 <td><code>getUser</code></td>
 <td>A reference to the user attempting authentication</td>
-<td><a href="https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">User</a> / <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java">SimpleUser</a></td>
+<td><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">User</a> / <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java">SimpleUser</a></td>
 </tr>
 <tr>
 <td><code>getSessionAttributes</code></td>

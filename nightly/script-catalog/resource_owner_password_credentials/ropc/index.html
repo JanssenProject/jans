@@ -3374,7 +3374,7 @@
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -3424,7 +3424,7 @@
 <tbody>
 <tr>
 <td style="text-align: left;"><code>customScript</code></td>
-<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>configurationAttributes</code></td>
@@ -3432,11 +3432,11 @@
 </tr>
 <tr>
 <td style="text-align: left;"><code>SimpleCustomProperty</code></td>
-<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>context</code></td>
-<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
@@ -3447,7 +3447,62 @@
 By default it is not enabled but it can be enabled if set <code>forceRopcInAuthorizationEndpoint</code> AS configuration property to <code>true</code>.</p>
 <p>Also it is required to set <code>user</code> in context in custom script (<code>context.setUser(&lt;user&gt;)</code>). Without it authorization will go on in normal way (with pages and redirects).</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/resource_owner_password_credentials/resource-owner-password-credentials/resource_owner_password_credentials.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.owner</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceOwnerPasswordCredentialsType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.server.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ResourceOwnerPasswordCredentials</span><span class="p">(</span><span class="n">ResourceOwnerPasswordCredentialsType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;ROPC script. Initializing ...&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">usernameParamName</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">passwordParamName</span> <span class="o">=</span> <span class="s2">&quot;password&quot;</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;ROPC script. Initialized successfully&quot;</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;ROPC script. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;ROPC script. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+    <span class="c1"># Returns True and set user into context when user authenticated succesfully</span>
+    <span class="c1"># Returns False when user not authenticated or it&#39;s needed to cancel notmal flow</span>
+    <span class="c1"># Note :</span>
+    <span class="c1"># context is reference of io.jans.as.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/JanssenFederation/oxauth project, )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;ROPC script. Authenticate&quot;</span>
+        <span class="n">deviceIdParam</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getHttpRequest</span><span class="p">()</span><span class="o">.</span><span class="n">getParameterValues</span><span class="p">(</span><span class="s2">&quot;device_id&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">deviceIdParam</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">deviceIdParam</span><span class="o">.</span><span class="n">lenght</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">deviceIdParam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;device_id_1&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="c1"># Set auntenticated user in context</span>
+            <span class="c1"># context.setUser(user)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Do generic authentication in other cases</span>
+        <span class="n">authService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AuthenticationService</span><span class="p">)</span>
+
+        <span class="n">username</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getHttpRequest</span><span class="p">()</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">usernameParamName</span><span class="p">)</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getHttpRequest</span><span class="p">()</span><span class="o">.</span><span class="n">getParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passwordParamName</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">authService</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;ROPC script. Authenticate. Could not authenticate user &#39;</span><span class="si">%s</span><span class="s2">&#39; &quot;</span> <span class="o">%</span> <span class="n">username</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">context</span><span class="o">.</span><span class="n">setUser</span><span class="p">(</span><span class="n">authService</span><span class="o">.</span><span class="n">getAuthenticatedUser</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
@@ -3502,12 +3557,11 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
 <span class="w">                </span><span class="n">ExternalResourceOwnerPasswordCredentialsContext</span><span class="w"> </span><span class="n">ropcContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ExternalResourceOwnerPasswordCredentialsContext</span><span class="p">)</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
 <span class="w">                </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ropcContext</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameterValues</span><span class="p">(</span><span class="s">&quot;device_id&quot;</span><span class="p">);</span>
 <span class="w">                </span><span class="k">if</span><span class="p">(</span><span class="n">deviceIdParam</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="p">.</span><span class="na">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceIdParam</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;device_id_1&quot;</span><span class="p">;</span>
+<span class="w">                        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;device_id_1&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">deviceIdParam</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">);</span>
 <span class="w">                        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                                </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
 <span class="w">                        </span><span class="p">}</span>
-<span class="w">            </span><span class="c1">// Set authenticated user in context</span>
-<span class="w">            </span><span class="c1">// context.setUser(user)</span>
+<span class="w">            </span><span class="c1">// Set authenticated user in context using ropcContext.setUser(user)</span>
 <span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">                </span><span class="c1">// generic authentication in other cases</span>
@@ -3554,7 +3608,7 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 10:53:22 UTC"><span class="timeago" datetime="2026-02-03T10:53:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 10:53:22 UTC">2026-02-03</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 12:00:12 UTC"><span class="timeago" datetime="2026-02-03T12:00:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 12:00:12 UTC">2026-02-03</span>
   </span>
 
     

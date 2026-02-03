@@ -3362,7 +3362,89 @@
 </table>
 <h2 id="sample-script-which-demonstrates-basic-client-authentication">Sample script which demonstrates basic client authentication<a class="headerlink" href="#sample-script-which-demonstrates-basic-client-authentication" title="Permanent link">#</a></h2>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">--</span><span class="mi">8</span><span class="o">&lt;--</span> <span class="s2">&quot;script-catalog/config_api/config-api-interception/config_api_interception.py&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.</span>
+<span class="c1"># Copyright (c) 2018, Janssen</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Puja Sharma</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jwt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.crypto</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthCryptoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomScriptConfiguration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.configapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigApiType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistenceEntryManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringHelper</span><span class="p">,</span> <span class="n">ArrayHelper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.configapi.model.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiAppConfiguration</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">org.json</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jakarta.servlet.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpServletRequest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jakarta.servlet.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpServletResponse</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigApiAuthorization</span><span class="p">(</span><span class="n">ConfigApiType</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType script. Initializing ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType script. Initialized successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType script. Destroying ...&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType script. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+
+    <span class="c1"># Returns boolean true or false depending on the process, if the client is authorized</span>
+    <span class="c1"># or not.</span>
+    <span class="c1"># This method is called after introspection response is ready. This method can modify introspection response.</span>
+    <span class="c1"># Note :</span>
+    <span class="c1"># responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json</span>
+    <span class="c1"># context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">authorize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot; responseAsJsonObject: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">responseAsJsonObject</span>
+        <span class="nb">print</span> <span class="s2">&quot; context: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">context</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Config Authentication process&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">httpRequest</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">httpResponse</span>
+        <span class="nb">print</span> <span class="s2">&quot; request = : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">request</span>
+        <span class="nb">print</span> <span class="s2">&quot; response = : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">response</span>
+
+        <span class="n">appConfiguration</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getApiAppConfiguration</span><span class="p">()</span>
+        <span class="n">customScriptConfiguration</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getScript</span><span class="p">()</span>
+        <span class="n">issuer</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRequestParameters</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ISSUER&quot;</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span>  <span class="n">context</span><span class="o">.</span><span class="n">getRequestParameters</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TOKEN&quot;</span><span class="p">)</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRequestParameters</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;METHOD&quot;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRequestParameters</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PATH&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot; requese2: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">request</span>
+        <span class="nb">print</span> <span class="s2">&quot; response2 new: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">response</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.appConfiguration: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">appConfiguration</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.customScriptConfiguration: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">customScriptConfiguration</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.issuer: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">issuer</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.token: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">token</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.method: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">method</span>
+        <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.path: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span>
+
+        <span class="c1">#Example to validate method</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;GET&quot;</span> <span class="o">==</span> <span class="n">StringHelper</span><span class="o">.</span><span class="n">toUpperCase</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="p">):</span>
+          <span class="nb">print</span> <span class="s2">&quot;Validate method: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">method</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;attributes&quot;</span> <span class="o">==</span> <span class="n">StringHelper</span><span class="o">.</span><span class="n">toLowerCase</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">):</span>
+          <span class="nb">print</span> <span class="s2">&quot;ConfigApiType.path: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span>
+
+        <span class="n">responseAsJsonObject</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="s2">&quot;key_from_script&quot;</span><span class="p">,</span> <span class="s2">&quot;value_from_script&quot;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot; final responseAsJsonObject: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">responseAsJsonObject</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
 <p><a href="../config-api-interception/config_api_interception.py">ConfigApiInterception</a></p>
