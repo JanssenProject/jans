@@ -87,7 +87,6 @@ async fn check_default_authorize_resource_entity() {
 
     let auth_entities = cedarling
         .build_entities(&request)
-        .await
         .expect("entities should be build without errors");
 
     let default_resource_entity_value1 = json!({

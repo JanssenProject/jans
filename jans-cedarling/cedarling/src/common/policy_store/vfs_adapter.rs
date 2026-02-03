@@ -84,11 +84,11 @@ impl PhysicalVfs {
         Self { root }
     }
 
-    /// Helper to get a VfsPath from a string path.
+    /// Helper to get a `VfsPath` from a string path.
     fn get_path(&self, path: &str) -> io::Result<vfs::VfsPath> {
         self.root
             .join(path)
-            .map_err(|e| io::Error::other(format!("Invalid path '{}': {}", path, e)))
+            .map_err(|e| io::Error::other(format!("Invalid path '{path}': {e}")))
     }
 }
 
@@ -141,16 +141,14 @@ impl VfsFileSystem for PhysicalVfs {
         self.get_path(path)
             .ok()
             .and_then(|p| p.metadata().ok())
-            .map(|m| m.file_type == vfs::VfsFileType::Directory)
-            .unwrap_or(false)
+            .is_some_and(|m| m.file_type == vfs::VfsFileType::Directory)
     }
 
     fn is_file(&self, path: &str) -> bool {
         self.get_path(path)
             .ok()
             .and_then(|p| p.metadata().ok())
-            .map(|m| m.file_type == vfs::VfsFileType::File)
-            .unwrap_or(false)
+            .is_some_and(|m| m.file_type == vfs::VfsFileType::File)
     }
 }
 
@@ -173,11 +171,11 @@ impl MemoryVfs {
         Self { root }
     }
 
-    /// Helper to get a VfsPath from a string path.
+    /// Helper to get a `VfsPath` from a string path.
     fn get_path(&self, path: &str) -> io::Result<vfs::VfsPath> {
         self.root
             .join(path)
-            .map_err(|e| io::Error::other(format!("Invalid path '{}': {}", path, e)))
+            .map_err(|e| io::Error::other(format!("Invalid path '{path}': {e}")))
     }
 
     /// Create a file with the given content.
@@ -255,16 +253,14 @@ impl VfsFileSystem for MemoryVfs {
         self.get_path(path)
             .ok()
             .and_then(|p| p.metadata().ok())
-            .map(|m| m.file_type == vfs::VfsFileType::Directory)
-            .unwrap_or(false)
+            .is_some_and(|m| m.file_type == vfs::VfsFileType::Directory)
     }
 
     fn is_file(&self, path: &str) -> bool {
         self.get_path(path)
             .ok()
             .and_then(|p| p.metadata().ok())
-            .map(|m| m.file_type == vfs::VfsFileType::File)
-            .unwrap_or(false)
+            .is_some_and(|m| m.file_type == vfs::VfsFileType::File)
     }
 }
 

@@ -50,7 +50,7 @@ pub struct TokenEntityMetadata {
     #[builder(default)]
     pub claim_mapping: ClaimMappings,
     /// The claims in this Vec will be required on token validation and will be
-    /// validated if it is a registered claim listed in [`RFC 7519, Section 4.1`] (https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)
+    /// validated if it is a registered claim listed in [`RFC 7519, Section 4.1`] (<https://datatracker.ietf.org/doc/html/rfc7519#section-4.1>)
     #[serde(default)]
     #[builder(default)]
     pub required_claims: HashSet<String>,

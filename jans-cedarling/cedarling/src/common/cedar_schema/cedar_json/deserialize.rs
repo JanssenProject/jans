@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::*;
+use super::{Attribute, AttributeName};
 use serde::de;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -23,7 +23,7 @@ where
 
     // loop through each attr then deserialize into Self
     let mut attrs = HashMap::<AttributeName, Attribute>::new();
-    for (key, val) in attrs_json.into_iter() {
+    for (key, val) in attrs_json {
         let val = serde_json::from_value::<Attribute>(val).map_err(|e| {
             de::Error::custom(format!(
                 "error while deserializing cedar record attribute: {e}"
