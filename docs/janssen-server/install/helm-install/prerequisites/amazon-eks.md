@@ -16,7 +16,7 @@ This guide covers the prerequisites and cluster creation specific to Amazon Elas
 
 1. Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-2. Configure your AWS user account using the [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This user account must have permissions to work with Amazon EKS IAM roles, service linked roles, AWS CloudFormation, and VPC resources.
+2. Configure your AWS user account using the [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This user account must have permissions to work with Amazon EKS IAM roles, service-linked roles, AWS CloudFormation, and VPC resources.
 
 3. Install [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
 

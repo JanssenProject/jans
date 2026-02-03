@@ -11,7 +11,7 @@ Deploy Janssen on Kubernetes using Helm charts. This guide walks you through the
 
 ## Installation Flow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │  1. Choose Your Platform                                        │
 │     └─> Set up your Kubernetes cluster                          │

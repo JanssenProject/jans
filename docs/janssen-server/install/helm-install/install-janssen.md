@@ -31,10 +31,13 @@ config:
     cnSqlDbPort: 3306
     cnSqlDbDialect: mysql
     cnSqlDbHost: mysql.jans.svc
-    cnSqlDbUser: root
+    cnSqlDbUser: root  # Use a dedicated user in production
     cnSqlDbTimezone: UTC
-    cnSqldbUserPassword: Test1234#
+    cnSqldbUserPassword: Test1234#  # Change for production!
 ```
+
+!!! warning "Security"
+    Replace example credentials with secure values for production deployments.
 
 Adjust values based on your choices from the previous steps.
 
@@ -48,7 +51,7 @@ helm repo update
 ## Install Janssen
 
 ```bash
-helm install janssen janssen/janssen -n jans -f override.yaml
+helm install janssen janssen/janssen -n jans --create-namespace -f override.yaml
 ```
 
 ## Verify Installation

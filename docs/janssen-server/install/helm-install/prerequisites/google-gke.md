@@ -21,6 +21,7 @@ This guide covers the prerequisites and cluster creation specific to Google Kube
 3. Install [gcloud CLI](https://cloud.google.com/sdk/docs/quickstarts).
 
 4. Install kubectl:
+
    ```bash
    gcloud components install kubectl
    ```

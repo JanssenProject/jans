@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 
 public class DynamicScope implements DynamicScopeType {
 
-  private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+  private static final Logger log = LoggerFactory.getLogger(DynamicScope.class);
         
     @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {

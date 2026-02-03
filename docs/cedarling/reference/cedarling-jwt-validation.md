@@ -174,7 +174,7 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 
 JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
 
-![](../../assets/lock-cedarling-diagram-4.jpg)
+![Cedarling JWT validation flow diagram showing token verification process](../../assets/lock-cedarling-diagram-4.jpg)
 
 ## Local JWKS
 

@@ -40,6 +40,11 @@ markdown_extensions:
     emoji_generator: !!python/name:material.extensions.emoji.to_svg
     emoji_index: !!python/name:material.extensions.emoji.twemoji
 - pymdownx.details
+- pymdownx.snippets:
+    base_path:
+      - docs
+      - .
+    check_paths: true
 
 nav:
 # ====================
@@ -163,7 +168,7 @@ nav:
       - Lock Server: cedarling/reference/cedarling-lock-server.md
     - Developer:
       - Rust: cedarling/developer/cedarling-rust.md
-      - Kotlin/Java: cedarling/uniffi/cedarling-kotlin.md
+      - Kotlin/Java: cedarling/developer/cedarling-kotlin.md
       - Mobile Apps:
         - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
         - Android: cedarling/developer/mobile-apps/cedarling-android.md
@@ -429,7 +434,6 @@ nav:
     - External Secrets/Configmaps: janssen-server/kubernetes-ops/external-secrets-configmaps.md
     - TUI for K8s: janssen-server/kubernetes-ops/tui-k8s.md
     - Custom Attributes: janssen-server/kubernetes-ops/custom-attributes.md
-    - Jans SAML/Keycloak: janssen-server/kubernetes-ops/jans-saml.md
     - Memory Dump: janssen-server/kubernetes-ops/memory-dump.md
   - VM Operations:
     - janssen-server/vm-ops/README.md

@@ -73,6 +73,9 @@ gatewayApi:
 
 Use this if you prefer the traditional Ingress resource.
 
+!!! warning "Retirement Notice"
+    The upstream [ingress-nginx](https://github.com/kubernetes/ingress-nginx) project is in a terminal maintenance window through March 2026 and will receive no further releases, bug fixes, or security updates after that date. Consider migrating to Gateway API (Option 1) or an alternative maintained ingress controller. See the [upstream announcement](https://github.com/kubernetes/ingress-nginx) for details.
+
 ### Install Nginx Ingress Controller
 
 ```bash

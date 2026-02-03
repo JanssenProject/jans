@@ -23,8 +23,11 @@ This guide covers installing Janssen through the Rancher Marketplace.
 ## Start Rancher
 
 ```bash
-docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher:latest
+docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher:v2.10.2
 ```
+
+!!! tip "Version Pinning"
+    Use a specific version tag (e.g., `v2.10.2`) instead of `latest` for production deployments to ensure reproducibility.
 
 !!! note
     If deploying an Ingress controller that uses ports 80 and 443, adjust the host ports. See [Rancher documentation](https://ranchermanager.docs.rancher.com/reference-guides/single-node-rancher-in-docker/advanced-options#running-rancherrancher-and-rancherrancher-agent-on-the-same-node) for details.

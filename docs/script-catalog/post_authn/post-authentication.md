@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 public class PostAuthn implements PostAuthnType {
         
-        private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+        private static final Logger log = LoggerFactory.getLogger(PostAuthn.class);
 
         @Override
         public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {

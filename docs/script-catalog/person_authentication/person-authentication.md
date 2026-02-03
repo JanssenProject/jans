@@ -375,7 +375,7 @@ method will be displayed to the user.
 
 ### 2. How is redirection to a third party application for authentication handled in a script?
 
-For user authentication or consent gathering, there might be a need to redirect to a third party application to perform some operation and return the control back to authentication steps of the custom script. Please apply these steps to a person authentication script in such a scenario:
+For user authentication or consent gathering, there might be a need to redirect to a third-party application to perform some operation and return control to authentication steps of the custom script. Please apply these steps to a person authentication script in such a scenario:
 
  - Return from def getPageForStep(self, step, context), a page /auth/method_name/redirect.html ; with content similar to the code snippet below -
         ```

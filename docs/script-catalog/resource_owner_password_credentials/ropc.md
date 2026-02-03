@@ -106,12 +106,11 @@ public class ResourceOwnerPasswordCredentials implements ResourceOwnerPasswordCr
                 ExternalResourceOwnerPasswordCredentialsContext ropcContext = (ExternalResourceOwnerPasswordCredentialsContext) context;
                 String[] deviceIdParam = ropcContext.getHttpRequest().getParameterValues("device_id");
                 if(deviceIdParam != null && deviceIdParam.length > 0) {
-                        boolean result = deviceIdParam[0] == "device_id_1";
+                        boolean result = "device_id_1".equals(deviceIdParam[0]);
                         if (!result) {
                                 return false;
                         }
-            // Set authenticated user in context
-            // context.setUser(user)
+            // Set authenticated user in context using ropcContext.setUser(user)
             return true;
                 }
                 // generic authentication in other cases
