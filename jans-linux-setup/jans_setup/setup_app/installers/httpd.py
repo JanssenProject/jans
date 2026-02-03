@@ -1,5 +1,4 @@
 import os
-import copy
 import glob
 import shutil
 
@@ -102,7 +101,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
     def enable_modules(self):
 
-        mods_enabled = copy.deepcopy(self.enabled_modules)
+        mods_enabled = self.enabled_modules.copy()
         if Config.install_jans_lock:
             mods_enabled.append('http2')
             mods_enabled.append('proxy_http2')
