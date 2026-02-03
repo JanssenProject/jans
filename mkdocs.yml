@@ -1,4 +1,4 @@
-copyright: Copyright &copy; 2025, The Janssen Project
+copyright: Copyright &copy; 2026, The Janssen Project
 docs_dir: ./docs
 edit_uri: edit/main/docs/
 extra:
@@ -145,6 +145,7 @@ nav:
     - FAQ: janssen-server/developer/agama/faq.md
   - Cedarling (Authorization):
     - Overview: cedarling/README.md
+    - Cedar Introduction: cedar-intro.md
     - Tutorials:
       - Getting Started: cedarling/tutorials/cedarling-getting-started.md
       - Javascript: cedarling/tutorials/javascript.md
@@ -585,7 +586,6 @@ nav:
 # ====================
 - Product & Releases:
   - Changelog: CHANGELOG.md
-  - Cedar Introduction: cedar-intro.md
   - Contributing:
     - Contribution Guidelines: CONTRIBUTING.md
     - Code of Conduct: CODE_OF_CONDUCT.md
