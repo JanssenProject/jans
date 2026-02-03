@@ -1,6 +1,0 @@
-{
-   "alias" : "review profile config",
-   "config" : {
-     "update.profile.on.first.login" : "off"
-   }
-}
