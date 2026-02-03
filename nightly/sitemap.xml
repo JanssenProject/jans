@@ -301,6 +301,10 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/contribute/implementation-design/jans-notify/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/contribute/implementation-design/technical-overview-template/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1049,43 +1053,39 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/database-setup/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/amazon-eks/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/ingress-setup/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/digitalocean-dok/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/install-janssen/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/google-gke/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/post-install/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/local/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/prerequisites/amazon-eks/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/microsoft-azure/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/prerequisites/google-gke/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/rancher/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/prerequisites/local/</loc>
-         <lastmod>2026-02-03</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/prerequisites/microsoft-aks/</loc>
-         <lastmod>2026-02-03</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/prerequisites/rancher/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/helm-install/red-hat-open-shift/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/janssen-server/install/vm-install/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/install/vm-install/disa-stig/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1130,6 +1130,10 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/janssen-server/kubernetes-ops/external-secrets-configmaps/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/kubernetes-ops/faq/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1297,6 +1301,10 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/adaptive-authn/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/benchmark/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1309,11 +1317,31 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/faq/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/forcing-reauthn/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/impersonation/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/inbound-oidc/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/inbound-saml/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/locking-accounts/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/mobile-apps/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1325,7 +1353,19 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/passwordless/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/registration/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/returning-group/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/single-page-apps/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1341,7 +1381,203 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/web-apps/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/access-tokens/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/client-credential-grant-flow/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/oauth-api-gateway/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/opa-access-tokens/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/openapi-best-practice/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/scope-access/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/software-statements/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/api-access-control/user-claims-tokens/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/drupal/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/kafka/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/magento/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/moodle/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/nextcloud/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/rancher/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/rocket/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/teleport/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/apps/wordpress/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/angular/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/appauth-android/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/appauth-ios/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/appauth-js/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/asp-net/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/authn-with-apache-reverse-proxy/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/django/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/flask/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/mod-auth-openidc/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/node/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/react-native/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/react/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/custom-web-development/spring-boot/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/forgot-password/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/forgot-password/email/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/forgot-password/sms/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/open-banking/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/open-banking/client-registration/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/open-banking/fapi-authn-request/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/open-banking/requirements/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/aws/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/docusign/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/google/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/jira/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/office365/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/salesforce/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/webex/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/saas/zoom/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1362,6 +1598,10 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/janssen-server/reference/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/reference/javadocs/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1565,6 +1805,10 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/vm-ops/faq/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/vm-ops/jans-command/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1582,6 +1826,14 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/janssen-server/vm-ops/upgrade/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/vm-ops/web-services/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/id-token/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1625,6 +1877,10 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/client_registration/sample-script/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/config_api/config-api/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1650,6 +1906,26 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/script-catalog/dynamic_scope/dynamic-scope/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/dynamic_scope/dynamic-permission/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/dynamic_scope/memberof-attribute/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/dynamic_scope/org-name/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/dynamic_scope/session-parameter/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/dynamic_scope/work-phone/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1685,6 +1961,18 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/introspection/introspection/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/introspection/introspection-custom-parameters/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/introspection/introspection-role-based-scope/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/link_interception/link-interception/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1713,7 +2001,19 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/agama-bridge/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/apple-external-authenticator/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/basic-external-authenticator/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/basic-lock-account-external-authenticator/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1741,7 +2041,15 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/authz/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/azuread/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/basic.change_password/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1781,7 +2089,15 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/bcrypt_ssha_migration/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/bioid/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/cas2/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1802,6 +2118,10 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/cert/Quick%20certs%20guide%20for%20testing/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/ciba/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1833,6 +2153,10 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/inwebo/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/otp/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1845,11 +2169,27 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/phonefactor/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/postauthn/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/registration/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/saml/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/saml-passport/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/toopher/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1865,6 +2205,10 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/wikid/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/other/wwpass/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
@@ -1877,11 +2221,27 @@
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/otp-external-authenticator/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/smpp-2fa/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/super-gluu-external-authenticator/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/twilio-2fa/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/user-cert-external-authenticator/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/yubicloud-external-authenticator/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
@@ -1942,6 +2302,14 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/script-catalog/uma_rpt_policy/uma-rpt/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/uma_rpt_policy/uma-client-authz-rpt-policy/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/script-catalog/uma_rpt_policy/uma-rpt-policy/</loc>
          <lastmod>2026-02-03</lastmod>
     </url>
     <url>
