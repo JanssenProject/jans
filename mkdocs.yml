@@ -341,9 +341,9 @@ nav:
       - SSA Modify Response: script-catalog/ssa/ssa-modify-response.md
   - Reference Guide:
     - janssen-server/reference/README.md
-    - Cedarling Development Docs:
-        - Rust : https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
-        - Python:  https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
+  - Cedarling Development Docs:
+    - Rust : https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
+    - Python: 'cedarling/getting-started/python.md'
     - Javadocs / OpenAPI:
       - janssen-server/reference/openapi.md
       - agama: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
