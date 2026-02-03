@@ -1,4 +1,5 @@
 import os
+import copy
 import glob
 import shutil
 
@@ -35,6 +36,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf.mako')
         self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
         self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf.mako')
+        self.enabled_modules = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir', 'auth_openidc']
 
         self.server_root = '/var/www/html'
 
@@ -83,37 +85,37 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         for tmp_fn in error_templates:
             self.copyFile(tmp_fn, self.server_root)
 
-        # we only need these modules
-        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir', 'auth_openidc']
+        self.enable_modules()
+
+        if not Config.get('httpdKeyPass'):
+            Config.httpdKeyPass = self.getPW()
+
+
+        if Config.profile == SetupProfiles.OPENBANKING:
+            self.ob_mtls_config()
+        else:
+            # generate httpd self signed certificate
+            self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
+
+        self.enable()
+        self.start()
+
+    def enable_modules(self):
+
+        mods_enabled = copy.deepcopy(self.enabled_modules)
+        if Config.install_jans_lock:
+            mods_enabled.append('http2')
+            mods_enabled.append('proxy_http2')
+
+        self.logIt(f"Apache modules to be enabled: {' '.join(mods_enabled)}")
 
         cmd_a2enmod = shutil.which('a2enmod')
         cmd_a2dismod = shutil.which('a2dismod')
 
-        if base.snap:
-            mods_enabled_dir = os.path.join(base.snap_common, 'etc/apache2/mods-enabled')
-            mods_available_dir = os.path.join(base.snap_common, 'etc/apache2/mods-available')
-
-            for em in os.listdir(mods_enabled_dir):
-                em_n, em_e = os.path.splitext(em)
-                if not em_n in mods_enabled:
-                    os.unlink(os.path.join(mods_enabled_dir, em))
-
-            for m in mods_enabled:
-                load_fn = os.path.join(mods_available_dir, m + '.load')
-                conf_fn = os.path.join(mods_available_dir, m + '.conf')
-                if os.path.exists(load_fn):
-                    target_fn = os.path.join(mods_enabled_dir, m + '.load')
-                    if not os.path.exists(target_fn):
-                        os.symlink(load_fn, target_fn)
-                if os.path.exists(conf_fn):
-                    target_fn = os.path.join(mods_enabled_dir, m + '.conf')
-                    if not os.path.exists(target_fn):
-                        os.symlink(conf_fn, target_fn)
-
-        elif base.clone_type == 'deb':
+        if base.clone_type == 'deb':
             for mod_load_fn in glob.glob('/etc/apache2/mods-enabled/*'):
                 mod_load_base_name = os.path.basename(mod_load_fn)
-                f_name, f_ext = os.path.splitext(mod_load_base_name)
+                f_name, _f_ext = os.path.splitext(mod_load_base_name)
                 if not f_name in mods_enabled:
                     self.run([cmd_a2dismod, mod_load_fn])
             for amod in mods_enabled:
@@ -142,34 +144,20 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
                 modified = False
 
-                for i, l in enumerate(mod_load_content[:]):
-                    ls = l.strip()
-
+                for i, line in enumerate(mod_load_content[:]):
+                    ls = line.strip()
                     if ls and not ls.startswith('#'):
                         lsl = ls.split('/')
                         if not lsl[0].startswith('LoadModule'):
                             continue
                         module =  lsl[-1][4:-3]
                         if not module in mods_enabled:
-                            mod_load_content[i] = l.replace('LoadModule', '#LoadModule')
+                            mod_load_content[i] = line.replace('LoadModule', '#LoadModule')
                             modified = True
 
                 if modified:
                     self.writeFile(mod_load_fn, ''.join(mod_load_content))
 
-
-        if not Config.get('httpdKeyPass'):
-            Config.httpdKeyPass = self.getPW()
-
-
-        if Config.profile == SetupProfiles.OPENBANKING:
-            self.ob_mtls_config()
-        else:
-            # generate httpd self signed certificate
-            self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
-
-        self.enable()
-        self.start()
 
     def write_httpd_config(self):
         self.update_rendering_dict()
