@@ -8,6 +8,7 @@ on:
       - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
+      - 'CHANGELOG.md'
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
+      - 'CHANGELOG.md'
   release:
     types:
       - published
@@ -72,6 +74,10 @@ jobs:
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
           cp mkdocs.yml ../
+
+      - name: Sync CHANGELOG to docs
+        run: |
+          cp CHANGELOG.md docs/CHANGELOG.md
 
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-

@@ -54,7 +54,6 @@ import java.util.Map;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.postauthn.PostAuthnType;
-import io.jans.service.custom.script.CustomScriptManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
