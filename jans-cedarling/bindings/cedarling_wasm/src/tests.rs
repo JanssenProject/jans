@@ -951,3 +951,327 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
     let result = instance.authorize_multi_issuer(js_request).await;
     assert!(result.is_err(), "Should fail with empty token array");
 }
+
+/// Test Data API - push and get operations
+#[wasm_bindgen_test]
+async fn test_data_api_push_and_get() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Push data without TTL
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data("key1", value1, None)
+        .expect("push_data should succeed");
+
+    let result1 = instance.get_data("key1").expect("get_data should succeed");
+    assert_ne!(result1, JsValue::NULL, "result should not be null");
+    let result_str: String =
+        serde_wasm_bindgen::from_value(result1).expect("result should be deserializable to string");
+    assert_eq!(
+        result_str, "value1",
+        "retrieved value should match pushed value"
+    );
+
+    // Push data with TTL
+    let value2 = serde_wasm_bindgen::to_value(&json!({"nested": "data"}))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data("key2", value2, Some(60))
+        .expect("push_data with TTL should succeed");
+
+    let result2 = instance.get_data("key2").expect("get_data should succeed");
+    assert_ne!(result2, JsValue::NULL, "result should not be null");
+
+    // Push array
+    let value3 = serde_wasm_bindgen::to_value(&json!([1, 2, 3]))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data("key3", value3, None)
+        .expect("push_data should succeed");
+
+    let result3 = instance.get_data("key3").expect("get_data should succeed");
+    assert_ne!(result3, JsValue::NULL, "result should not be null");
+}
+
+/// Test Data API - get data entry with metadata
+#[wasm_bindgen_test]
+async fn test_data_api_get_data_entry() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value = serde_wasm_bindgen::to_value(&json!({"foo": "bar"}))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data("test_key", value, None)
+        .expect("push_data should succeed");
+
+    let entry_js = instance
+        .get_data_entry("test_key")
+        .expect("get_data_entry should succeed");
+    assert_ne!(entry_js, JsValue::NULL, "entry should not be null");
+
+    // Verify entry has expected fields
+    let entry_obj = Object::unchecked_from_js(entry_js);
+    let key = Reflect::get(&entry_obj, &"key".into())
+        .expect("entry should have key field")
+        .as_string()
+        .expect("key should be a string");
+    assert_eq!(key, "test_key", "entry key should match");
+
+    let _access_count = Reflect::get(&entry_obj, &"access_count".into())
+        .expect("entry should have access_count field")
+        .as_f64()
+        .expect("access_count should be a number") as u64;
+    // access_count is u64, so it's always >= 0
+}
+
+/// Test Data API - remove data
+#[wasm_bindgen_test]
+async fn test_data_api_remove_data() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value =
+        serde_wasm_bindgen::to_value(&json!("data")).expect("value should be converted to JsValue");
+    instance
+        .push_data("to_remove", value, None)
+        .expect("push_data should succeed");
+
+    let result = instance
+        .get_data("to_remove")
+        .expect("get_data should succeed");
+    assert_ne!(result, JsValue::NULL, "data should exist before removal");
+
+    let removed = instance
+        .remove_data("to_remove")
+        .expect("remove_data should succeed");
+    assert!(removed, "remove_data should return true for existing key");
+
+    let result_after = instance
+        .get_data("to_remove")
+        .expect("get_data should succeed");
+    assert_eq!(
+        result_after,
+        JsValue::NULL,
+        "data should be null after removal"
+    );
+
+    // Try removing non-existent key
+    let removed_nonexistent = instance
+        .remove_data("non_existent")
+        .expect("remove_data should succeed");
+    assert!(
+        !removed_nonexistent,
+        "remove_data should return false for non-existent key"
+    );
+}
+
+/// Test Data API - clear all data
+#[wasm_bindgen_test]
+async fn test_data_api_clear_data() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    let value2 = serde_wasm_bindgen::to_value(&json!("value2"))
+        .expect("value should be converted to JsValue");
+    let value3 = serde_wasm_bindgen::to_value(&json!("value3"))
+        .expect("value should be converted to JsValue");
+
+    instance
+        .push_data("key1", value1, None)
+        .expect("push_data should succeed");
+    instance
+        .push_data("key2", value2, None)
+        .expect("push_data should succeed");
+    instance
+        .push_data("key3", value3, None)
+        .expect("push_data should succeed");
+
+    assert_ne!(
+        instance.get_data("key1").expect("get_data should succeed"),
+        JsValue::NULL,
+        "key1 should exist"
+    );
+    assert_ne!(
+        instance.get_data("key2").expect("get_data should succeed"),
+        JsValue::NULL,
+        "key2 should exist"
+    );
+    assert_ne!(
+        instance.get_data("key3").expect("get_data should succeed"),
+        JsValue::NULL,
+        "key3 should exist"
+    );
+
+    instance.clear_data().expect("clear_data should succeed");
+
+    assert_eq!(
+        instance.get_data("key1").expect("get_data should succeed"),
+        JsValue::NULL,
+        "key1 should be null after clear"
+    );
+    assert_eq!(
+        instance.get_data("key2").expect("get_data should succeed"),
+        JsValue::NULL,
+        "key2 should be null after clear"
+    );
+    assert_eq!(
+        instance.get_data("key3").expect("get_data should succeed"),
+        JsValue::NULL,
+        "key3 should be null after clear"
+    );
+}
+
+/// Test Data API - list all data entries
+#[wasm_bindgen_test]
+async fn test_data_api_list_data() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    let value2 = serde_wasm_bindgen::to_value(&json!({"nested": "data"}))
+        .expect("value should be converted to JsValue");
+    let value3 = serde_wasm_bindgen::to_value(&json!([1, 2, 3]))
+        .expect("value should be converted to JsValue");
+
+    instance
+        .push_data("key1", value1, None)
+        .expect("push_data should succeed");
+    instance
+        .push_data("key2", value2, None)
+        .expect("push_data should succeed");
+    instance
+        .push_data("key3", value3, None)
+        .expect("push_data should succeed");
+
+    let entries = instance.list_data().expect("list_data should succeed");
+    assert_eq!(entries.length(), 3, "should have 3 entries");
+
+    // Collect keys from entries
+    let mut keys = Vec::new();
+    for i in 0..entries.length() {
+        let entry = entries.get(i);
+        let entry_obj = Object::unchecked_from_js(entry);
+        let key = Reflect::get(&entry_obj, &"key".into())
+            .expect("entry should have key field")
+            .as_string()
+            .expect("key should be a string");
+        keys.push(key);
+    }
+
+    assert!(
+        keys.contains(&"key1".to_string()),
+        "entries should contain key1"
+    );
+    assert!(
+        keys.contains(&"key2".to_string()),
+        "entries should contain key2"
+    );
+    assert!(
+        keys.contains(&"key3".to_string()),
+        "entries should contain key3"
+    );
+}
+
+/// Test Data API - get statistics
+#[wasm_bindgen_test]
+async fn test_data_api_get_stats() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let stats = instance.get_stats().expect("get_stats should succeed");
+    assert_eq!(stats.entry_count, 0, "initial entry count should be 0");
+
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    let value2 = serde_wasm_bindgen::to_value(&json!("value2"))
+        .expect("value should be converted to JsValue");
+
+    instance
+        .push_data("key1", value1, None)
+        .expect("push_data should succeed");
+    instance
+        .push_data("key2", value2, None)
+        .expect("push_data should succeed");
+
+    let stats_after = instance.get_stats().expect("get_stats should succeed");
+    assert_eq!(
+        stats_after.entry_count, 2,
+        "entry count should be 2 after pushing data"
+    );
+    // total_size_bytes is usize, so it's always >= 0
+    let _total_size = stats_after.total_size_bytes;
+}
+
+/// Test Data API - invalid key error
+#[wasm_bindgen_test]
+async fn test_data_api_invalid_key() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value = serde_wasm_bindgen::to_value(&json!("value"))
+        .expect("value should be converted to JsValue");
+    let result = instance.push_data("", value, None);
+    assert!(result.is_err(), "push_data with empty key should fail");
+}
