@@ -10,6 +10,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
@@ -30,6 +31,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import static io.jans.ca.plugin.adminui.utils.CommonUtils.addMinutes;
+
 import static io.jans.as.model.util.Util.escapeLog;
 
 @ApplicationScoped
@@ -53,6 +57,9 @@ public class AdminUISessionService {
 
     @Inject
     ConfigHttpService httpService;
+
+    @Inject
+    AUIConfigurationService auiConfigurationService;
 
     /**
      * Builds the LDAP distinguished name (DN) for a session identifier.
@@ -87,6 +94,66 @@ public class AdminUISessionService {
             throw ex;
         }
         return configApiSession;
+    }
+
+    /**
+     * Updates the expiration time of an Admin UI session based on user activity.
+     * <p>
+     * After a successful login, an {@link AdminUISession} is persisted in the database
+     * with an expiration date derived from the configured session timeout. On each
+     * subsequent request, this method may extend the session expiration to enforce
+     * an idle-based logout policy.
+     * </p>
+     *
+     * <p>
+     * The session expiration is refreshed only when:
+     * <ul>
+     *   <li>The session and its expiration date are not {@code null}</li>
+     *   <li>More than 30 seconds has passed since the session was last updated</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * This approach prevents frequent database updates while ensuring that an
+     * active user session remains valid and a force logout occurs only when the
+     * application has been idle longer than the configured
+     * {@code max_idle_time}.
+     * </p>
+     *
+     * @param adminUISession the persisted Admin UI session to be evaluated and updated
+     */
+    public void updateSessionExpiryDate(AdminUISession adminUISession) {
+        if (adminUISession == null || adminUISession.getExpirationDate() == null) {
+            return;
+        }
+        try {
+            Date lastUpdated = adminUISession.getLastUpdated();
+            long nowMillis = System.currentTimeMillis();
+
+            // Update expiry date only if last update was more than 30 sec ago : the intent of the 30-second throttle is to reduce database writes
+            if (lastUpdated != null) {
+                long secondsSinceLastUpdate =
+                        TimeUnit.MILLISECONDS.toSeconds(nowMillis - lastUpdated.getTime());
+
+                if (secondsSinceLastUpdate < 30) {
+                    return;
+                }
+            }
+
+            AUIConfiguration config = auiConfigurationService.getAUIConfiguration();
+            if (config == null) {
+                logger.warn("AUI configuration is null, cannot update session expiry");
+                return;
+            }
+            int sessionTimeoutMins = config.getSessionTimeoutInMins();
+
+            adminUISession.setExpirationDate(addMinutes(new Date(nowMillis), sessionTimeoutMins));
+            adminUISession.setLastUpdated(new Date(nowMillis));
+            persistenceEntryManager.merge(adminUISession);
+        } catch (Exception e) {
+            logger.warn("Failed to update session expiry for session {}: {}",
+                    adminUISession.getSessionId(), e.getMessage());
+        }
     }
 
     /**
@@ -187,14 +254,14 @@ public class AdminUISessionService {
     }
 
     /**
-         * Exchange token request parameters with the authorization server and return parsed token response parameters.
-         *
-         * @param tokenRequest  token request details (grant type, client credentials, redirect URI; may include authorization code and PKCE verifier)
-         * @param tokenEndpoint the token endpoint URL to call
-         * @param userInfoJwt   optional user-info JWT to include as the `ujwt` parameter
-         * @return              a map of token response parameters (for example `access_token`, `expires_in`) with any `token_type` entry removed
-         * @throws ConfigApiApplicationException if the HTTP exchange fails or the response cannot be parsed as JSON
-         */
+     * Exchange token request parameters with the authorization server and return parsed token response parameters.
+     *
+     * @param tokenRequest  token request details (grant type, client credentials, redirect URI; may include authorization code and PKCE verifier)
+     * @param tokenEndpoint the token endpoint URL to call
+     * @param userInfoJwt   optional user-info JWT to include as the `ujwt` parameter
+     * @return              a map of token response parameters (for example `access_token`, `expires_in`) with any `token_type` entry removed
+     * @throws ConfigApiApplicationException if the HTTP exchange fails or the response cannot be parsed as JSON
+     */
     public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws ConfigApiApplicationException {
 
         try {
