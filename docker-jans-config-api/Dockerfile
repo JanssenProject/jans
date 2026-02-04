@@ -244,7 +244,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/jans-config-api/custom/libs \
-    ${JETTY_BASE}/jans-config-api/etc/security \
+    ${JETTY_BASE}/jans-config-api/etc/jetty/security \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
@@ -268,6 +268,9 @@ RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler
 RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-config-api/log4j2-adminui.xml
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
+
+# extra java.security (activated when admin-ui plugin is enabled)
+COPY contrib/java.security ${JETTY_BASE}/jans-config-api/etc/jetty/security/java.security
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
