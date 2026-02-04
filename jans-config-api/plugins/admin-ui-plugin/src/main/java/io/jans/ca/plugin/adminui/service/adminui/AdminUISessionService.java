@@ -132,7 +132,7 @@ public class AdminUISessionService {
         Date lastUpdated = adminUISession.getLastUpdated();
         long nowMillis = System.currentTimeMillis();
 
-        // Update only if last update was more than 5 sec ago
+        // Update expiry date only if last update was more than 5 sec ago
         if (lastUpdated != null) {
             long secondsSinceLastUpdate =
                     TimeUnit.MILLISECONDS.toSeconds(nowMillis - lastUpdated.getTime());
