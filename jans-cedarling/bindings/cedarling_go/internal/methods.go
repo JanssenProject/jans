@@ -99,3 +99,38 @@ func CallGetLogsByRequestIdAndTag(instance_id uint, request_id string, tag strin
 func CallShutDown(instance_id uint) {
 	G2R.shut_down(&instance_id)
 }
+
+func CallPushData(instance_id uint, key string, value_json string, ttl_secs int64) Result {
+	result := G2R.push_data(&instance_id, &key, &value_json, &ttl_secs)
+	return result
+}
+
+func CallGetData(instance_id uint, key string) Result {
+	result := G2R.get_data(&instance_id, &key)
+	return result
+}
+
+func CallGetDataEntry(instance_id uint, key string) Result {
+	result := G2R.get_data_entry(&instance_id, &key)
+	return result
+}
+
+func CallRemoveData(instance_id uint, key string) Result {
+	result := G2R.remove_data(&instance_id, &key)
+	return result
+}
+
+func CallClearData(instance_id uint) Result {
+	result := G2R.clear_data(&instance_id)
+	return result
+}
+
+func CallListData(instance_id uint) Result {
+	result := G2R.list_data(&instance_id)
+	return result
+}
+
+func CallGetStats(instance_id uint) Result {
+	result := G2R.get_stats(&instance_id)
+	return result
+}

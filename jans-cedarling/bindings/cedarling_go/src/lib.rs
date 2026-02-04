@@ -9,7 +9,7 @@ use std::{
 };
 use tokio::runtime::Runtime;
 
-use cedarling::{self as base, BootstrapConfig, BootstrapConfigRaw, LogStorage};
+use cedarling::{self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage};
 
 mod cedarling_interface;
 use cedarling_interface::{Result, ResultInstance};
@@ -215,5 +215,67 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
     fn shut_down(instance_id: usize) {
         let instance = get_instance_or_return!(instance_id);
         BINDINGS_RUNTIME.runtime.block_on(instance.shut_down());
+    }
+
+    fn push_data(instance_id: usize, key: String, value_json: String, ttl_secs: i64) -> Result {
+        let instance = get_instance!(instance_id);
+        let value: serde_json::Value = from_json_str!(value_json);
+        let ttl = if ttl_secs > 0 {
+            Some(std::time::Duration::from_secs(ttl_secs as u64))
+        } else {
+            None
+        };
+        match instance.push_data(&key, value, ttl) {
+            Ok(()) => Result::success(()),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn get_data(instance_id: usize, key: String) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.get_data(&key) {
+            Ok(value) => Result::success(value),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn get_data_entry(instance_id: usize, key: String) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.get_data_entry(&key) {
+            Ok(entry) => Result::success(entry),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn remove_data(instance_id: usize, key: String) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.remove_data(&key) {
+            Ok(removed) => Result::success(removed),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn clear_data(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.clear_data() {
+            Ok(()) => Result::success(()),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn list_data(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.list_data() {
+            Ok(entries) => Result::success(entries),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn get_stats(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.get_stats() {
+            Ok(stats) => Result::success(stats),
+            Err(e) => Result::error(e),
+        }
     }
 }
