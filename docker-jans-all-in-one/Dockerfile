@@ -14,7 +14,8 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
-ARG JANS_SHIBBOLETH_IMAGE=ghcr.io/janssenproject/jans/shibboleth:${BASE_VERSION}
+# @NOTE: shibboleth is temporarily disabled
+# ARG JANS_SHIBBOLETH_IMAGE=ghcr.io/janssenproject/jans/shibboleth:${BASE_VERSION}
 # @NOTE: jans-link is temporarily disabled
 # ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
 
@@ -36,7 +37,8 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
-FROM ${JANS_SHIBBOLETH_IMAGE} AS jans-shibboleth-src
+# @NOTE: shibboleth support is temporarily disabled
+# FROM ${JANS_SHIBBOLETH_IMAGE} AS jans-shibboleth-src
 
 # @NOTE: jans-link support is temporarily disabled
 # FROM ${JANS_LINK_IMAGE} AS jans-link-src
@@ -157,11 +159,11 @@ RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.s
 # COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
 # RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
 
-COPY --from=jans-shibboleth-src /app/templates /app/templates/jans-shibboleth
-COPY --from=jans-shibboleth-src /app/scripts /app/jans_aio/jans_shibboleth
-COPY --from=jans-shibboleth-src /opt/shibboleth-idp /opt/shibboleth-idp
-COPY --from=jans-shibboleth-src /opt/jetty /opt/shibboleth-jetty
-RUN ln -sf /app/jans_aio/jans_shibboleth/entrypoint.sh /app/bin/jans-shibboleth-entrypoint.sh
+# COPY --from=jans-shibboleth-src /app/templates /app/templates/jans-shibboleth
+# COPY --from=jans-shibboleth-src /app/scripts /app/jans_aio/jans_shibboleth
+# COPY --from=jans-shibboleth-src /opt/shibboleth-idp /opt/shibboleth-idp
+# COPY --from=jans-shibboleth-src /opt/jetty /opt/shibboleth-jetty
+# RUN ln -sf /app/jans_aio/jans_shibboleth/entrypoint.sh /app/bin/jans-shibboleth-entrypoint.sh
 
 # @NOTE: jans-link support is temporarily disabled
 # COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
@@ -281,10 +283,9 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/log/nginx \
     /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java \
-    /opt/idp \
-    /opt/keycloak/logs \
-    /opt/keycloak/conf
+    /usr/share/java
+    # \
+    # /opt/idp
 
 # @NOTE: jans-link is temporarily disabled
 # ${JETTY_BASE}/jans-link/resources \
@@ -321,10 +322,9 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/log/nginx \
     /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java \
-    /opt/idp \
-    /opt/keycloak/logs \
-    /opt/keycloak/conf
+    /usr/share/java
+    # \
+    # /opt/idp
 
 RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \
