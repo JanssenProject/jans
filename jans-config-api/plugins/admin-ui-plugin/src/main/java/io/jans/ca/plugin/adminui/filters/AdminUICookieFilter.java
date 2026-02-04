@@ -236,12 +236,12 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         Cookie adminUISessionCookie = cookies.get(ADMIN_UI_SESSION_ID);
         String sessionId = adminUISessionCookie.getValue();
         AdminUISession adminUISession = configApiSessionService.getSession(sessionId);
-        configApiSessionService.updateSessionExpiryDate(adminUISession);
         //if config api session does not exist
         if (adminUISession == null) {
             return Optional.empty();
         }
         log.debug("Admin UI session exist in persistence.");
+        configApiSessionService.updateSessionExpiryDate(adminUISession);
         String ujwtString = adminUISession.getUjwt();
         return Optional.ofNullable(ujwtString);
     }
