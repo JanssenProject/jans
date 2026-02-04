@@ -16,6 +16,7 @@ from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
 
 Config.shibboleth_idp_port = '8086'
 Config.shibboleth_idp_entity_id = ''
+Config.install_jans_shib_pre_released = True
 
 
 class ShibbolethInstaller(JettyInstaller):
@@ -32,7 +33,6 @@ class ShibbolethInstaller(JettyInstaller):
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'install_jans_shib'
-        Config.install_jans_shib_pre_released = True
 
         self.register_progess()
 
