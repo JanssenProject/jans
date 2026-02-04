@@ -5,7 +5,6 @@
 
 use std::sync::RwLock;
 
-use super::InitLockServiceError;
 use super::LogLevel;
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
@@ -26,7 +25,7 @@ pub(crate) struct LogStrategy {
     log_level: Option<LogLevel>,
 }
 
-/// LogStrategy implements strategy pattern for logging.
+/// [`LogStrategy`] implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
 pub(crate) enum LogStrategyLogger {
     Off(NopLogger),
@@ -35,35 +34,30 @@ pub(crate) enum LogStrategyLogger {
 }
 
 impl LogStrategy {
-    /// Creates a new `LogStrategy` based on the provided configuration.
+    /// Creates a new [`LogStrategy`] based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
     pub(crate) fn new(
         config: &LogConfig,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
-    ) -> Result<Self, InitLockServiceError> {
+    ) -> Self {
         let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) => {
-                LogStrategyLogger::MemoryLogger(Box::new(MemoryLogger::new(
-                    memory_config.clone(),
-                    config.log_level,
-                    pdp_id,
-                    app_name.clone(),
-                )))
-            },
+            LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(Box::new(
+                MemoryLogger::new(*memory_config, config.log_level, pdp_id, app_name.clone()),
+            )),
             LogTypeConfig::StdOut(stdout_config) => {
                 let logger = StdOutLogger::new(config.log_level, *stdout_config);
                 LogStrategyLogger::StdOut(logger)
             },
         };
-        Ok(Self {
+        Self {
             logger,
             pdp_id,
             app_name,
             lock_service: RwLock::new(None),
             log_level: Some(config.log_level),
-        })
+        }
     }
 
     // is used as fallback for memory logger if error happens
@@ -110,18 +104,15 @@ impl LogStrategy {
         R: Loggable + Indexed,
         for<'a> F: Fn(BaseLogEntry) -> R,
     {
-        match &self.log_level {
-            Some(logger_level) => {
-                if log_fn.can_log(*logger_level) {
-                    let entry = log_fn.build();
-                    self.log_entry(entry);
-                }
-            },
-            None => {
-                // this case happens only when call `new_with_logger` method
+        if let Some(logger_level) = &self.log_level {
+            if log_fn.can_log(*logger_level) {
                 let entry = log_fn.build();
                 self.log_entry(entry);
-            },
+            }
+        } else {
+            // this case happens only when call `new_with_logger` method
+            let entry = log_fn.build();
+            self.log_entry(entry);
         }
     }
 
@@ -140,7 +131,7 @@ impl LogStrategy {
             .take();
 
         if let Some(mut lock_service) = lock {
-            lock_service.shut_down().await
+            lock_service.shut_down().await;
         }
     }
 }
@@ -190,7 +181,11 @@ impl LogWriter for LogStrategy {
 }
 
 impl<E: Loggable> LogEntryWithClientInfo<E> {
-    pub(crate) fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
+    pub(crate) fn from_loggable(
+        entry: E,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Self {
         Self {
             entry,
             pdp_id,

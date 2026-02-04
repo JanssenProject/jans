@@ -3,7 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::*;
+use super::{
+    BuildEntityError, BuildEntityErrorKind, BuiltEntities, Entity, EntityBuilder, HashSet,
+    build_cedar_entity, build_entity_attrs,
+};
 use crate::EntityData;
 
 impl EntityBuilder {
@@ -35,7 +38,7 @@ impl EntityBuilder {
         if let Some(resource_default_entity) = self.default_entities.get(&resource.uid())
             && resource_data.attributes.is_empty()
         {
-            resource = resource_default_entity.clone()
+            resource = resource_default_entity.clone();
         }
 
         Ok(resource)
@@ -46,7 +49,6 @@ impl EntityBuilder {
 mod test {
     use super::super::test::*;
     use super::super::*;
-    use super::*;
     use crate::CedarEntityMapping;
     use serde_json::json;
 
@@ -78,7 +80,7 @@ mod test {
 
         assert_entity_eq(
             &entity,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::HTTP_Request", "id": "some_request"},
                 "attrs": {
                     "url": {

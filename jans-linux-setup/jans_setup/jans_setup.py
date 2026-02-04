@@ -143,7 +143,8 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.jans_link import JansLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
-    from setup_app.installers.jans_saml import JansSamlInstaller
+    # Shibboleth IDP replaces Keycloak-based SAML (jans_saml)
+    from setup_app.installers.shibboleth import ShibbolethInstaller
     from setup_app.installers.jans_lock import JansLockInstaller
 
 from setup_app.installers.config_api import ConfigApiInstaller

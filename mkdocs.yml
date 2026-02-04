@@ -278,10 +278,6 @@ nav:
       - Audit Logs: janssen-server/auth-server/logging/audit-logs.md
       - Custom Logs: janssen-server/auth-server/logging/custom-logs.md
       - log4j2 Configuration: janssen-server/auth-server/logging/log4j2.md
-  - Keycloak:
-      - janssen-server/keycloak/README.md
-      - SAML SSO: janssen-server/keycloak/keycloak-saml-sso.md
-      - Inbound SAML: janssen-server/keycloak/keycloak-saml-inbound.md
   - Developer Guide:
     - janssen-server/developer/README.md
     - Agama:
@@ -356,8 +352,6 @@ nav:
       - jans-config-api: https://janssenproject.github.io/developer-docs/jans-config-api/server/index.html
       - jans-core: https://janssenproject.github.io/developer-docs/jans-core/server/io/jans/server/filters/package-summary.html
       - jans-fido2: https://janssenproject.github.io/developer-docs/jans-fido2/server/index.html
-      - jans-keycloak-integration: https://janssenproject.github.io/developer-docs/jans-keycloak-integration/server/index.html
-      - jans-keycloak-link: https://janssenproject.github.io/developer-docs/jans-keycloak-link/server/index.html
       - jans-link: https://janssenproject.github.io/developer-docs/jans-link/server/index.html
       - jans-lock: https://janssenproject.github.io/developer-docs/jans-lock/server/index.html
       - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
@@ -396,10 +390,17 @@ nav:
   - Link Guide:
     - janssen-server/link/README.md
     - Jans LDAP Link: janssen-server/link/jans-link.md
-    - Jans Keycloak Link: janssen-server/link/jans-keycloak-link.md
   - Lock Guide:
       - janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
+  - Shibboleth Identity Provider:
+    - janssen-server/shibboleth-idp/README.md
+    - Installation: janssen-server/shibboleth-idp/installation.md
+    - Configuration: janssen-server/shibboleth-idp/configuration.md
+    - Helm Deployment: janssen-server/shibboleth-idp/helm-deployment.md
+    - Config API: janssen-server/shibboleth-idp/config-api.md
+    - Terraform: janssen-server/shibboleth-idp/terraform.md
+    - Testing: janssen-server/shibboleth-idp/testing.md
   - Janssen Recipes:
     - janssen-server/recipes/README.md
     - Benchmark: janssen-server/recipes/benchmark.md
@@ -412,6 +413,11 @@ nav:
     - User Journeys: janssen-server/recipes/ACRouter.md
     - Authentication via Device Flow: janssen-server/recipes/device-flow-config.md
     - Password Validation: janssen-server/recipes/user-password-validation.md
+    - SAML:
+      - janssen-server/recipes/saml/README.md
+      - Federation: janssen-server/recipes/saml/federation.md
+      - IDP-Initiated SSO: janssen-server/recipes/saml/idp-init-authn.md
+      - SP Configuration: janssen-server/recipes/saml/sso-sp.md
   - User Management:
       - janssen-server/usermgmt/README.md
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md

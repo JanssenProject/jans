@@ -41,9 +41,7 @@ fn add_heap_usage(value: &Value, total: &mut usize) {
                 add_heap_usage(value, total);
             }
         },
-        // next values are alocated on the stack and size taken into account
-        Value::Number(_) => {},
-        Value::Null => {},
-        Value::Bool(_) => {},
+        // next values are allocated on the stack and size taken into account
+        Value::Number(_) | Value::Null | Value::Bool(_) => {},
     }
 }

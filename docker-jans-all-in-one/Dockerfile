@@ -14,8 +14,7 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
-ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}
-
+ARG JANS_SHIBBOLETH_IMAGE=ghcr.io/janssenproject/jans/shibboleth:${BASE_VERSION}
 # @NOTE: jans-link is temporarily disabled
 # ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
 
@@ -37,11 +36,10 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
-FROM ${JANS_SAML_IMAGE} AS jans-saml-src
+FROM ${JANS_SHIBBOLETH_IMAGE} AS jans-shibboleth-src
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# @NOTE: jans-link support is temporarily disabled
 # FROM ${JANS_LINK_IMAGE} AS jans-link-src
-# FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
 
 # ===
 # app
@@ -152,11 +150,18 @@ COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
 COPY --from=jans-casa-src /usr/share/java/casa-agama-project.zip /usr/share/java
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
-COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
-COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
-COPY --from=jans-saml-src /opt/idp /opt/idp
-COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
-RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
+# @NOTE: jans-saml (Keycloak-based) has been replaced by jans-shibboleth
+# COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
+# COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
+# COPY --from=jans-saml-src /opt/idp /opt/idp
+# COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
+# RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
+
+COPY --from=jans-shibboleth-src /app/templates /app/templates/jans-shibboleth
+COPY --from=jans-shibboleth-src /app/scripts /app/jans_aio/jans_shibboleth
+COPY --from=jans-shibboleth-src /opt/shibboleth-idp /opt/shibboleth-idp
+COPY --from=jans-shibboleth-src /opt/jetty /opt/shibboleth-jetty
+RUN ln -sf /app/jans_aio/jans_shibboleth/entrypoint.sh /app/bin/jans-shibboleth-entrypoint.sh
 
 # @NOTE: jans-link support is temporarily disabled
 # COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
@@ -213,20 +218,10 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_CASA_JAVA_OPTIONS="" \
     CN_SHARE_AUTH_CONF=false \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
-    CN_SAML_HTTP_HOST=127.0.0.1 \
-    CN_SAML_HTTP_PORT=8083 \
-    CN_SAML_JAVA_OPTIONS="" \
-    CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
-    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
-    KC_LOG_LEVEL=INFO \
-    KC_DB=mysql \
-    KC_DB_USERNAME=keycloak \
-    KC_DB_SCHEMA=keycloak \
-    KC_DB_URL_HOST=localhost \
-    KC_DB_URL_PORT=3306 \
-    KC_DB_URL_DATABASE=keycloak \
-    KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
-    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
+    CN_SHIBBOLETH_HTTP_HOST=127.0.0.1 \
+    CN_SHIBBOLETH_HTTP_PORT=8086 \
+    CN_SHIBBOLETH_JAVA_OPTIONS="" \
+    SHIBBOLETH_HOME=/opt/shibboleth-idp
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \

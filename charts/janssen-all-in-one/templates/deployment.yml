@@ -75,6 +75,8 @@ spec:
             value: {{ include "config-api.customJavaOptions" . | trim }}
           - name: CN_SAML_JAVA_OPTIONS
             value: {{ include "saml.customJavaOptions" . | trim }}
+          - name: CN_SHIBBOLETH_JAVA_OPTIONS
+            value: {{ include "shibboleth.customJavaOptions" . | trim }}
           - name: CN_SCIM_JAVA_OPTIONS
             value: {{ include "scim.customJavaOptions" . | trim }}
           {{- include "janssen-all-in-one.usr-envs" . | indent 12 }}

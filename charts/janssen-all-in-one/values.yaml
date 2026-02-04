@@ -140,28 +140,6 @@ configmap:
   lbAddr: ""
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
-  # -- Keycloak  admin UI password
-  kcAdminPassword: Test1234#
-  # -- Keycloak admin UI username
-  kcAdminUsername: admin
-  # -- Keycloak logging level
-  kcLogLevel: INFO
-  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
-  kcDbVendor: mysql
-  # -- Keycloak database username
-  kcDbUsername: keycloak
-  # -- Password for Keycloak database access
-  kcDbPassword: Test1234#
-  # -- Keycloak database schema name (note that PostgreSQL may using "public" schema).
-  kcDbSchema: keycloak
-  # -- Keycloak database host
-  kcDbUrlHost: mysql.kc.svc.cluster.local
-  # -- Keycloak database port (default to port 3306 for mysql).
-  kcDbUrlPort: 3306
-  # -- Keycloak database name
-  kcDbUrlDatabase: keycloak
-  # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
-  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 nameOverride: ""
@@ -425,7 +403,7 @@ config-api:
     configApiLabels: { }
     # -- ConfigAPI ingress resource additional annotations.
     configApiAdditionalAnnotations: { }
-  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml")
+  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt")
   plugins: "fido2,scim,user-mgt"
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
@@ -530,6 +508,42 @@ saml:
     samlLabels: { }
     # -- SAML ingress resource additional annotations.
     samlAdditionalAnnotations: { }
+
+shibboleth:
+  # -- Name of the shibboleth service. Please keep it as default.
+  shibbolethServiceName: shibboleth-idp
+  # -- Boolean flag to enable/disable the Shibboleth IDP.
+  enabled: false
+  # -- passing custom java options to Shibboleth IDP. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
+  # -- Shibboleth IDP HTTP host
+  httpHost: "127.0.0.1"
+  # -- Shibboleth IDP HTTP port
+  httpPort: 8086
+  # -- Application loggers settings
+  appLoggers:
+    # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e shibboleth ===> 2022-12-20 17:49:55,744 INFO
+    enableStdoutLogPrefix: "true"
+    # -- shibboleth.log target
+    shibbolethLogTarget: "STDOUT"
+    # -- shibboleth.log level
+    shibbolethLogLevel: "INFO"
+  # -- IDP entity ID (defaults to https://<hostname>/idp/shibboleth)
+  entityId: ""
+  # -- IDP scope for attribute release
+  scope: ""
+  # -- Enable authentication via Janssen Auth Server
+  jansAuthEnabled: true
+  # -- OAuth scopes for Janssen Auth Server authentication
+  jansAuthScopes: "openid,profile,email"
+  # -- Enable endpoints in either istio or nginx ingress depending on users choice
+  ingress:
+    # -- Enable Shibboleth IDP endpoints /idp
+    shibbolethEnabled: false
+    # -- Shibboleth IDP ingress resource labels. key app is taken
+    shibbolethLabels: {}
+    # -- Shibboleth IDP ingress resource additional annotations.
+    shibbolethAdditionalAnnotations: {}
 
 # Global properties
 # -- Boolean flag to enable mapping lbIp  to fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.

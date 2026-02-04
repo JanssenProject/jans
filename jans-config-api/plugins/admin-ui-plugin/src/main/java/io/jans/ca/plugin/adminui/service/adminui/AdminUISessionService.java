@@ -10,6 +10,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
@@ -28,11 +29,7 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
-
 import static io.jans.as.model.util.Util.escapeLog;
 
 @ApplicationScoped
@@ -102,7 +99,7 @@ public class AdminUISessionService {
         List<AdminUISession> adminUISessions =  persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
         Date currentDate = new Date();
         adminUISessions.stream().filter(ele ->
-                ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
+                        ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
                 .forEach(e -> persistenceEntryManager.remove(e));
     }
 
@@ -125,7 +122,7 @@ public class AdminUISessionService {
 
         HttpServiceResponse httpServiceResponse = httpService
                 .executePost(auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint(),
-                        token, toUrlEncodedString(body),
+                        token, CommonUtils.toUrlEncodedString(body),
                         ContentType.APPLICATION_FORM_URLENCODED,
                         "Bearer " );
         String jsonString = null;
@@ -190,14 +187,14 @@ public class AdminUISessionService {
     }
 
     /**
-     * Exchanges the provided token request parameters with the authorization server and returns the parsed token response.
-     *
-     * @param tokenRequest  the token request details (grant type, client credentials, redirect URI, optional code and PKCE verifier)
-     * @param tokenEndpoint the token endpoint URL to call
-     * @param userInfoJwt   optional user-info JWT to include in the request as `ujwt`
-     * @return              a map of token response parameters (for example `access_token`, `expires_in`), with any `token_type` entry removed; returns an empty map if the exchange fails
-     * @throws ConfigApiApplicationException if the token endpoint response cannot be parsed as JSON
-     */
+         * Exchange token request parameters with the authorization server and return parsed token response parameters.
+         *
+         * @param tokenRequest  token request details (grant type, client credentials, redirect URI; may include authorization code and PKCE verifier)
+         * @param tokenEndpoint the token endpoint URL to call
+         * @param userInfoJwt   optional user-info JWT to include as the `ujwt` parameter
+         * @return              a map of token response parameters (for example `access_token`, `expires_in`) with any `token_type` entry removed
+         * @throws ConfigApiApplicationException if the HTTP exchange fails or the response cannot be parsed as JSON
+         */
     public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws ConfigApiApplicationException {
 
         try {
@@ -223,7 +220,7 @@ public class AdminUISessionService {
             body.put("client_id", tokenRequest.getAuthUsername());
 
             HttpServiceResponse httpServiceResponse = httpService
-                    .executePost(tokenEndpoint, tokenRequest.getEncodedCredentials(), toUrlEncodedString(body), ContentType.APPLICATION_FORM_URLENCODED,
+                    .executePost(tokenEndpoint, tokenRequest.getEncodedCredentials(), CommonUtils.toUrlEncodedString(body), ContentType.APPLICATION_FORM_URLENCODED,
                             "Basic " );
             String jsonString = null;
             if (httpServiceResponse.getHttpResponse() != null
@@ -254,23 +251,6 @@ public class AdminUISessionService {
             logger.error(TOKEN_GENERATION_ERROR, e);
             throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
         }
-    }
-
-    /**
-     * Builds a UTF-8 URL-encoded query string from the provided parameters.
-     *
-     * @param params a map of parameter names to values; entries with a null value are omitted
-     * @return a URL-encoded string of `key=value` pairs joined with `&`, encoded using UTF-8
-     */
-    private static String toUrlEncodedString(Map<String, String> params) {
-        return params.entrySet()
-                .stream()
-                .filter(e -> e.getValue() !=null)
-                .map(e ->
-                        URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
-                                URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)
-                )
-                .collect(Collectors.joining("&"));
     }
 
     /**
