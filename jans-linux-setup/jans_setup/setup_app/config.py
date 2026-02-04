@@ -185,7 +185,6 @@ class Config:
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_shib = False
-        self.install_jans_shib_pre_released = True
         self.install_jans_lock = False
         self.install_opa = False
 

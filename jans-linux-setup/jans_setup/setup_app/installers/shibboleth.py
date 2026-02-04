@@ -32,6 +32,8 @@ class ShibbolethInstaller(JettyInstaller):
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'install_jans_shib'
+        Config.install_jans_shib_pre_released = True
+
         self.register_progess()
 
         self.systemd_units = ['jans-shibboleth-idp']
@@ -71,7 +73,6 @@ class ShibbolethInstaller(JettyInstaller):
         _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
 
-        jans_scopes = self.dbUtils.get_scopes()
         scope_openid = self.dbUtils.get_scope_by_jansid('openid')
         scope_profile = self.dbUtils.get_scope_by_jansid('profile')
         scope_email = self.dbUtils.get_scope_by_jansid('email')
@@ -158,15 +159,9 @@ class ShibbolethInstaller(JettyInstaller):
                                   os.path.join(self.shibboleth_home, 'conf'))
 
     def configure_jans_authentication(self):
-        jans_properties_template = os.path.join(self.template_dir, 'jans.properties')
-        jans_properties_output = os.path.join(self.shibboleth_home, 'conf', 'jans.properties')
-
         Config.templateRenderingDict['shibboleth_idp_client_id'] = Config.shibboleth_idp_client_id
         Config.templateRenderingDict['shibboleth_idp_client_secret'] = Config.shibboleth_idp_client_pw
         Config.templateRenderingDict['shibboleth_callback_uri'] = f'https://{Config.hostname}/idp/Authn/Jans/callback'
-
-        self.renderTemplateInOut(jans_properties_template, self.template_dir,
-                                  os.path.join(self.shibboleth_home, 'conf'))
 
     def install_jetty_service(self):
         self.logIt("Installing Shibboleth IDP Jetty service")

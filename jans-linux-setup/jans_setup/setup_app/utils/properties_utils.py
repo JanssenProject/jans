@@ -161,6 +161,9 @@ class PropertiesUtils(SetupUtils):
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
+        if p.get('install_jans_saml'):
+            base.argsp.install_jans_shib = True
+
         if base.as_bool(p.get('loadTestData', False)):
             base.argsp.t = True
 

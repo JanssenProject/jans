@@ -649,7 +649,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
-                        ('jans-shibboleth-idp', 'install_jans_saml'),
+                        ('jans-shibboleth-idp', 'install_jans_shib'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()
