@@ -69,7 +69,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Scim Server', 'install_scim_server'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
-                        ('Install Shibboleth IDP', 'install_jans_saml')):
+                        ('Install Shibboleth IDP', 'install_jans_shib')):
                     txt += get_install_string(prompt_str, install_var)
 
                 if base.argsp.install_link:
