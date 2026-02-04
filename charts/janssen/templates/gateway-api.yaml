@@ -5,7 +5,6 @@
 {{- $fido2Svc := .Values.global.fido2.fido2ServiceName -}}
 {{- $scimSvc := .Values.global.scim.scimServiceName -}}
 {{- $casaSvc := .Values.global.casa.casaServiceName -}}
-{{- $samlSvc := .Values.global.saml.samlServiceName -}}
 {{- $namespace := .Release.Namespace -}}
 
 apiVersion: gateway.networking.k8s.io/v1
@@ -335,17 +334,6 @@ spec:
       port: 8080
   {{- end }}
 
-  {{- /* 6. SAML (/kc) */}}
-  {{- if .Values.global.saml.ingress.samlEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /kc
-    backendRefs:
-    - name: {{ $samlSvc }}
-      port: 8083
-  {{- end }}
-
 ---
 {{- /* ======================================================== */}}
 {{- /* ROUTE 3: SECURE APPS (HTTP REDIRECT)                     */}}
@@ -431,19 +419,6 @@ spec:
     - path:
         type: PathPrefix
         value: /jans-scim
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
-  {{- end }}
-
-  {{- /* 6. SAML Redirect */}}
-  {{- if .Values.global.saml.ingress.samlEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /kc
     filters:
     - type: RequestRedirect
       requestRedirect:
