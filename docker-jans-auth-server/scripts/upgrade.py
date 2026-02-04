@@ -53,9 +53,6 @@ def _transform_lock_dynamic_config(conf, manager):
             "externalPolicyStoreUri": ""
         }),
         ("auditPersistenceMode", "internal"),
-        ("grpcConfiguration", {
-            "serverMode": "bridge",
-        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -82,6 +79,26 @@ def _transform_lock_dynamic_config(conf, manager):
     if conf["protectionMode"] == "CEDARLING":
         conf["protectionMode"] = "cedarling"
         should_update = True
+
+    grpc_mode = os.environ.get("CN_LOCK_GRPC_SERVER_MODE", "bridge")
+    grpc_port = os.environ.get("CN_LOCK_GRPC_PORT", "8080")
+
+    if "grpcConfiguration" not in conf:
+        conf["grpcConfiguration"] = {
+            "serverMode": grpc_mode,
+            "grpcPort": int(grpc_port),
+        }
+        should_update = True
+    else:
+        # check for keys that can be modified via env vars
+        for attr in [
+            ("serverMode", "bridge", grpc_mode),
+            ("grpcPort", 8080, grpc_port),
+
+        ]:
+            if conf["grpcConfiguration"].get(attr[0], attr[1]) != attr[2]:
+                conf["grpcConfiguration"][attr[0]] = attr[2]
+                should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update
