@@ -115,7 +115,7 @@ impl BootstrapConfig {
             .transpose()?;
 
         let trusted_issuer_workers = NonZeroUsize::new(raw.trusted_issuer_loader_workers)
-            .unwrap_or_else(|| unsafe { NonZeroUsize::new_unchecked(1) });
+            .unwrap_or_else(|| NonZeroUsize::MIN);
 
         // JWT Config
         let jwt_config = JwtConfig {
