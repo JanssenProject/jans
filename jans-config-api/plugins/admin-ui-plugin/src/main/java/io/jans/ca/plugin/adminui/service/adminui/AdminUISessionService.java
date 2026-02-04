@@ -132,12 +132,14 @@ public class AdminUISessionService {
         Date lastUpdated = adminUISession.getLastUpdated();
         long nowMillis = System.currentTimeMillis();
 
-        // Update only if last update was more than 1 minute ago
+        // Update only if last update was more than 5 sec ago
         if (lastUpdated != null) {
             long secondsSinceLastUpdate =
                     TimeUnit.MILLISECONDS.toSeconds(nowMillis - lastUpdated.getTime());
 
-            if (secondsSinceLastUpdate < 60) {
+            if (secondsSinceLastUpdate < 5) {
+                adminUISession.setLastUpdated(new Date(nowMillis));
+                persistenceEntryManager.merge(adminUISession);
                 return;
             }
         }
@@ -145,17 +147,9 @@ public class AdminUISessionService {
         AUIConfiguration config = auiConfigurationService.getAUIConfiguration();
         int sessionTimeoutMins = config.getSessionTimeoutInMins();
 
-        long expiryMillis = adminUISession.getExpirationDate().getTime();
-        long remainingSeconds =
-                TimeUnit.MILLISECONDS.toSeconds(expiryMillis - nowMillis);
-
-        if (remainingSeconds < 0 ) {
-            adminUISession.setExpirationDate(
-                    addMinutes(new Date(nowMillis), sessionTimeoutMins)
-            );
-            adminUISession.setLastUpdated(new Date(nowMillis));
-            persistenceEntryManager.merge(adminUISession);
-        }
+        adminUISession.setExpirationDate(addMinutes(new Date(nowMillis), sessionTimeoutMins));
+        adminUISession.setLastUpdated(new Date(nowMillis));
+        persistenceEntryManager.merge(adminUISession);
     }
 
     /**
