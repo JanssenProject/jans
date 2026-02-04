@@ -153,7 +153,6 @@ class ShibbolethInstaller(JettyInstaller):
 
     def configure_idp_properties(self):
         idp_properties_template = os.path.join(self.template_dir, 'idp.properties')
-        idp_properties_output = os.path.join(self.shibboleth_home, 'conf', 'idp.properties')
 
         self.renderTemplateInOut(idp_properties_template, self.template_dir, 
                                   os.path.join(self.shibboleth_home, 'conf'))
@@ -166,7 +165,7 @@ class ShibbolethInstaller(JettyInstaller):
     def install_jetty_service(self):
         self.logIt("Installing Shibboleth IDP Jetty service")
 
-        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], supportCustomizations=True)
 
         war_file = os.path.join(Config.dist_jans_dir, 'jans-shibboleth-idp-webapp.war')
         webapps_dir = os.path.join(self.jetty_base, self.service_name, 'webapps')
