@@ -141,7 +141,7 @@ public class AdminUISessionService {
             }
 
             AUIConfiguration config = auiConfigurationService.getAUIConfiguration();
-            if (config == null) {
+            if (config == null || config.getSessionTimeoutInMins() == null) {
                 logger.warn("AUI configuration is null, cannot update session expiry");
                 return;
             }
