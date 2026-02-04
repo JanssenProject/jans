@@ -29,6 +29,7 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -111,7 +112,7 @@ public class AdminUISessionService {
      * The session expiration is refreshed only when:
      * <ul>
      *   <li>The session and its expiration date are not {@code null}</li>
-     *   <li>More than one minute has passed since the session was last updated</li>
+     *   <li>More than 30 seconds has passed since the session was last updated</li>
      * </ul>
      * </p>
      *
@@ -128,28 +129,34 @@ public class AdminUISessionService {
         if (adminUISession == null || adminUISession.getExpirationDate() == null) {
             return;
         }
+        try {
+            Date lastUpdated = adminUISession.getLastUpdated();
+            long nowMillis = System.currentTimeMillis();
 
-        Date lastUpdated = adminUISession.getLastUpdated();
-        long nowMillis = System.currentTimeMillis();
+            // Update expiry date only if last update was more than 30 sec ago : the intent of the 30-second throttle is to reduce database writes
+            if (lastUpdated != null) {
+                long secondsSinceLastUpdate =
+                        TimeUnit.MILLISECONDS.toSeconds(nowMillis - lastUpdated.getTime());
 
-        // Update expiry date only if last update was more than 5 sec ago
-        if (lastUpdated != null) {
-            long secondsSinceLastUpdate =
-                    TimeUnit.MILLISECONDS.toSeconds(nowMillis - lastUpdated.getTime());
+                if (secondsSinceLastUpdate < 30) {
+                    return;
+                }
+            }
 
-            if (secondsSinceLastUpdate < 5) {
-                adminUISession.setLastUpdated(new Date(nowMillis));
-                persistenceEntryManager.merge(adminUISession);
+            AUIConfiguration config = auiConfigurationService.getAUIConfiguration();
+            if (config == null) {
+                logger.warn("AUI configuration is null, cannot update session expiry");
                 return;
             }
+            int sessionTimeoutMins = config.getSessionTimeoutInMins();
+
+            adminUISession.setExpirationDate(addMinutes(new Date(nowMillis), sessionTimeoutMins));
+            adminUISession.setLastUpdated(new Date(nowMillis));
+            persistenceEntryManager.merge(adminUISession);
+        } catch (Exception e) {
+            logger.warn("Failed to update session expiry for session {}: {}",
+                    adminUISession.getSessionId(), e.getMessage());
         }
-
-        AUIConfiguration config = auiConfigurationService.getAUIConfiguration();
-        int sessionTimeoutMins = config.getSessionTimeoutInMins();
-
-        adminUISession.setExpirationDate(addMinutes(new Date(nowMillis), sessionTimeoutMins));
-        adminUISession.setLastUpdated(new Date(nowMillis));
-        persistenceEntryManager.merge(adminUISession);
     }
 
     /**
@@ -159,17 +166,17 @@ public class AdminUISessionService {
      */
     public void removeAllExpiredSessions() {
         final Filter filter = Filter.createPresenceFilter(SID);
-        List<AdminUISession> adminUISessions =  persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
+        List<AdminUISession> adminUISessions = persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
         Date currentDate = new Date();
         adminUISessions.stream().filter(ele ->
-                ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
+                        ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
                 .forEach(e -> persistenceEntryManager.remove(e));
     }
 
     /**
      * Checks whether a cached token is active by calling the Admin UI introspection endpoint.
      *
-     * @param token the token to introspect; may be null or empty
+     * @param token            the token to introspect; may be null or empty
      * @param auiConfiguration configuration holding the introspection endpoint URL
      * @return `true` if the introspection response contains `"active": true`, `false` otherwise
      * @throws JsonProcessingException if the introspection response body cannot be parsed as JSON
@@ -187,7 +194,7 @@ public class AdminUISessionService {
                 .executePost(auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint(),
                         token, toUrlEncodedString(body),
                         ContentType.APPLICATION_FORM_URLENCODED,
-                        "Bearer " );
+                        "Bearer ");
         String jsonString = null;
         if (httpServiceResponse.getHttpResponse() != null
                 && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -196,7 +203,7 @@ public class AdminUISessionService {
                     "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                     httpServiceResponse.getHttpResponse().getEntity());
-            if(httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+            if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                 ObjectMapper mapper = new ObjectMapper();
 
                 HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
@@ -204,7 +211,7 @@ public class AdminUISessionService {
                     jsonString = httpService.getContent(httpEntity);
 
                     HashMap<String, Object> payloadMap = mapper.readValue(jsonString, HashMap.class);
-                    if(payloadMap.containsKey("active")) {
+                    if (payloadMap.containsKey("active")) {
                         return (boolean) payloadMap.get("active");
                     }
                     return false;
@@ -220,7 +227,7 @@ public class AdminUISessionService {
      *
      * @param ujwtString       the user-info JWT to include in the token request; must be non-null and non-empty to generate a token
      * @param auiConfiguration configuration containing the backend token endpoint, client ID, encrypted client secret, and redirect URI
-     * @return                 a TokenResponse containing the access token, or `null` if `ujwtString` is null or empty
+     * @return a TokenResponse containing the access token, or `null` if `ujwtString` is null or empty
      * @throws StringEncrypter.EncryptionException if decrypting the client secret fails
      * @throws JsonProcessingException             if parsing token responses fails
      */
@@ -255,7 +262,7 @@ public class AdminUISessionService {
      * @param tokenRequest  the token request details (grant type, client credentials, redirect URI, optional code and PKCE verifier)
      * @param tokenEndpoint the token endpoint URL to call
      * @param userInfoJwt   optional user-info JWT to include in the request as `ujwt`
-     * @return              a map of token response parameters (for example `access_token`, `expires_in`), with any `token_type` entry removed; returns an empty map if the exchange fails
+     * @return a map of token response parameters (for example `access_token`, `expires_in`), with any `token_type` entry removed; returns an empty map if the exchange fails
      * @throws ConfigApiApplicationException if the token endpoint response cannot be parsed as JSON
      */
     public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws ConfigApiApplicationException {
@@ -284,7 +291,7 @@ public class AdminUISessionService {
 
             HttpServiceResponse httpServiceResponse = httpService
                     .executePost(tokenEndpoint, tokenRequest.getEncodedCredentials(), toUrlEncodedString(body), ContentType.APPLICATION_FORM_URLENCODED,
-                            "Basic " );
+                            "Basic ");
             String jsonString = null;
             if (httpServiceResponse.getHttpResponse() != null
                     && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -293,7 +300,7 @@ public class AdminUISessionService {
                         " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                         httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                         httpServiceResponse.getHttpResponse().getEntity());
-                if(httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+                if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                     ObjectMapper mapper = new ObjectMapper();
 
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
@@ -325,7 +332,7 @@ public class AdminUISessionService {
     private static String toUrlEncodedString(Map<String, String> params) {
         return params.entrySet()
                 .stream()
-                .filter(e -> e.getValue() !=null)
+                .filter(e -> e.getValue() != null)
                 .map(e ->
                         URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
                                 URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)
