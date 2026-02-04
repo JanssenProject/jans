@@ -454,11 +454,16 @@ spec:
 ---
 
 {{- /* ======================================================== */}}
-{{- /* ROUTE 5: gRPC APPS                                       */}}
+{{- /* ROUTE 4: gRPC APPS                                       */}}
 {{- /* These endpoints use gRPC                                 */}}
 {{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
+{{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+{{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
+kind: HTTPRoute
+{{- else }}
 kind: GRPCRoute
+{{- end }}
 metadata:
   name: {{ $fullName }}-grpc-routes
   namespace: {{ $namespace }}
@@ -481,6 +486,16 @@ spec:
   {{- /* 1. Lock Server Audit */}}
   {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled") }}
   {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
+  {{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+  {{- /* HTTPRoute matches for istio */}}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /io.jans.lock.audit.AuditService
+    backendRefs:
+    - name: {{ $authSvc }}-grpc
+      port: 50051
+  {{- else }}
   - matches:
     - method:
         service: io.jans.lock.audit.AuditService
@@ -503,6 +518,7 @@ spec:
     backendRefs:
     - name: {{ $authSvc }}-grpc
       port: 50051
+  {{- end }}
   {{- end }}
 
 {{- end }}

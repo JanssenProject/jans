@@ -63,7 +63,7 @@ spec:
   ports:
   - port: 50051 # avoid using the same pod port as some gateway implementation doesn't _like_ shared port for gRPC and non-gRPC
     targetPort: {{ .Values.service.port }}
-    name: {{ .Values.service.name }}
+    name: grpc-{{ .Values.service.name }}
   selector:
     app: {{ .Release.Name }}-{{ include "auth-server.name" . }} #auth-server
   sessionAffinity: {{ .Values.service.sessionAffinity }}
