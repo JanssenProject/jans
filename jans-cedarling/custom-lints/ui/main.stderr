@@ -1,27 +1,32 @@
-warning: using EntityUid::from_str with format!() is inefficient
+warning: using `EntityUid::from_str` with format! is inefficient
   --> $DIR/main.rs:3:16
    |
 LL |     let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try this instead: `EntityUid::from_str("User::/"alice/"")`
    |
-   = help: use string literals instead
    = note: `#[warn(bad_string_concatenation)]` on by default
 
-warning: using EntityUid::from_str with format!() is inefficient
+warning: using `EntityUid::from_str` with format! is inefficient
   --> $DIR/main.rs:7:16
    |
 LL |     let eid2 = EntityUid::from_str(&format!(r#"User::"{}""#, user));
    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
-   = help: use string literals instead
+   = help: consider using `EntityUid::from_type_name_and_id` instead
 
-warning: using EntityUid::from_str with format!() is inefficient
+warning: using `EntityUid::from_str` with format! is inefficient
   --> $DIR/main.rs:10:16
    |
 LL |     let eid3 = EntityUid::from_str(&std::format!(r#"User::"bob""#));
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: use string literals instead
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try this instead: `EntityUid::from_str("User::/"bob/"")`
 
-warning: 3 warnings emitted
+warning: using `EntityUid::from_str` with format! is inefficient
+  --> $DIR/main.rs:21:16
+   |
+LL |     let eid7 = EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: consider using `EntityUid::from_type_name_and_id` instead
+
+warning: 4 warnings emitted
 
