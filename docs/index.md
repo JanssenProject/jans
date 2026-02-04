@@ -239,8 +239,8 @@ https://your-domain/jans-auth/restv1/authorize?
 *Janssen is a Linux Foundation project that provides next-generation identity and access management, building upon years of experience in enterprise security.*
 
 <div class="linux-foundation-footer">
-  <div class="foundation-badge-bottom">
+  <a href="https://www.linuxfoundation.org/projects" target="_blank" rel="noopener noreferrer" class="foundation-badge-bottom">
     <img src="assets/logo/linux_foundation.svg" alt="Linux Foundation" class="linux-foundation-logo-bottom" />
     <div class="foundation-text-bottom">A Linux Foundation Project</div>
-  </div>
+  </a>
 </div>

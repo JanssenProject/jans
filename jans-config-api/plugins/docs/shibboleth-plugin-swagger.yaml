@@ -1,0 +1,362 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - Shibboleth IDP Plugin
+  description: |
+    Manage Shibboleth Identity Provider configuration for SAML 2.0 authentication.
+    This plugin provides endpoints to configure Shibboleth IDP settings and manage 
+    trusted SAML service providers.
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+tags:
+- name: Shibboleth IDP - Config Management
+  description: Manage Shibboleth Identity Provider configuration and trusted service providers
+paths:
+  /shibboleth/config:
+    get:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Gets Shibboleth IDP configuration
+      description: Gets Shibboleth IDP configuration
+      operationId: get-shibboleth-config
+      responses:
+        "200":
+          description: Shibboleth IDP configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShibbolethIdpConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.readonly
+    put:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Updates Shibboleth IDP configuration
+      description: Updates Shibboleth IDP configuration
+      operationId: put-shibboleth-config
+      requestBody:
+        description: ShibbolethIdpConfiguration object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShibbolethIdpConfiguration"
+        required: true
+      responses:
+        "200":
+          description: Updated Shibboleth IDP configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShibbolethIdpConfiguration"
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.write
+  /shibboleth/trust:
+    get:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Gets trusted service providers
+      description: Gets list of trusted SAML service providers
+      operationId: get-shibboleth-trust
+      responses:
+        "200":
+          description: Trusted service providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrustedServiceProvider"
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.readonly
+    post:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Adds trusted service provider
+      description: Adds a new trusted SAML service provider
+      operationId: post-shibboleth-trust
+      requestBody:
+        description: TrustedServiceProvider object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrustedServiceProvider"
+        required: true
+      responses:
+        "201":
+          description: Created trusted service provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustedServiceProvider"
+        "400":
+          description: Bad Request - Entity ID is required
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict - Entity already exists
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.write
+  /shibboleth/trust/{entityId}:
+    get:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Gets a trusted service provider
+      description: Gets a trusted SAML service provider by entity ID
+      operationId: get-shibboleth-trust-by-id
+      parameters:
+      - name: entityId
+        in: path
+        description: Entity ID of the service provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Trusted service provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustedServiceProvider"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.readonly
+    put:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Updates trusted service provider
+      description: Updates an existing trusted SAML service provider
+      operationId: put-shibboleth-trust
+      parameters:
+      - name: entityId
+        in: path
+        description: Entity ID of the service provider
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: TrustedServiceProvider object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrustedServiceProvider"
+        required: true
+      responses:
+        "200":
+          description: Updated trusted service provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustedServiceProvider"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.write
+    delete:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Deletes trusted service provider
+      description: Deletes a trusted SAML service provider
+      operationId: delete-shibboleth-trust
+      parameters:
+      - name: entityId
+        in: path
+        description: Entity ID of the service provider
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.write
+  /shibboleth/metadata:
+    get:
+      tags:
+      - Shibboleth IDP - Config Management
+      summary: Gets IDP metadata
+      description: Gets Shibboleth IDP SAML metadata
+      operationId: get-shibboleth-metadata
+      responses:
+        "200":
+          description: IDP SAML metadata
+          content:
+            application/xml:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "501":
+          description: Not Implemented
+        "500":
+          description: Internal Server Error
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth.readonly
+components:
+  schemas:
+    ShibbolethIdpConfiguration:
+      type: object
+      description: Shibboleth IDP configuration object
+      properties:
+        dn:
+          type: string
+          description: Distinguished name
+        shibbolethIdpProperties:
+          $ref: "#/components/schemas/ShibbolethIdpConfigurationProperties"
+        revision:
+          type: integer
+          format: int64
+          description: Configuration revision number
+    ShibbolethIdpConfigurationProperties:
+      type: object
+      description: Shibboleth IDP configuration properties
+      properties:
+        entityId:
+          type: string
+          description: The SAML entity ID of the Identity Provider
+          example: "https://idp.example.org/idp/shibboleth"
+        scope:
+          type: string
+          description: The scope for attribute release
+          example: "example.org"
+        enabled:
+          type: boolean
+          description: Whether the Shibboleth IDP is enabled
+        metadataProviders:
+          type: array
+          description: List of metadata provider URLs
+          items:
+            type: string
+        trustedServiceProviders:
+          type: array
+          description: List of trusted SAML service providers
+          items:
+            $ref: "#/components/schemas/TrustedServiceProvider"
+        attributeMappings:
+          type: array
+          description: Mappings between Janssen attributes and SAML attributes
+          items:
+            $ref: "#/components/schemas/AttributeMapping"
+    TrustedServiceProvider:
+      type: object
+      description: Trusted SAML Service Provider configuration
+      required:
+      - entityId
+      properties:
+        entityId:
+          type: string
+          description: The SAML entity ID of the service provider
+          example: "https://sp.example.org/shibboleth"
+        name:
+          type: string
+          description: Display name of the service provider
+          example: "Example Service Provider"
+        description:
+          type: string
+          description: Description of the service provider
+        metadataUrl:
+          type: string
+          description: URL to fetch the SP metadata
+          example: "https://sp.example.org/metadata"
+        metadataXml:
+          type: string
+          description: Raw SAML metadata XML (alternative to metadataUrl)
+        enabled:
+          type: boolean
+          description: Whether the service provider is enabled
+        releasedAttributes:
+          type: array
+          description: List of attribute names to release to this SP
+          items:
+            type: string
+          example: ["uid", "mail", "displayName"]
+        nameIdFormat:
+          type: string
+          description: SAML NameID format to use
+          example: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+    AttributeMapping:
+      type: object
+      description: Mapping between Janssen attribute and SAML attribute
+      properties:
+        id:
+          type: string
+          description: Unique identifier for this mapping
+        jansAttribute:
+          type: string
+          description: The Janssen attribute name
+          example: "uid"
+        samlAttribute:
+          type: string
+          description: The SAML attribute name
+          example: "urn:oid:0.9.2342.19200300.100.1.1"
+        samlAttributeOid:
+          type: string
+          description: The SAML attribute OID
+          example: "0.9.2342.19200300.100.1.1"
+        friendlyName:
+          type: string
+          description: Friendly name for the SAML attribute
+          example: "uid"
+        nameFormat:
+          type: string
+          description: SAML attribute name format
+          example: "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+        enabled:
+          type: boolean
+          description: Whether this attribute mapping is enabled
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/oauth/config/shibboleth.readonly: View Shibboleth IDP configuration
+            https://jans.io/oauth/config/shibboleth.write: Manage Shibboleth IDP configuration
+            https://jans.io/oauth/config/read-all: Super admin for viewing application resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application resource information
