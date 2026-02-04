@@ -168,4 +168,9 @@ public class AccessEvaluation implements AccessEvaluationType {
 
 
 ## Sample Scripts
-- [Access Evaluation](../../../script-catalog/access_evaluation/AccessEvaluation.java)
+
+### Access Evaluation Script
+
+```java
+--8<-- "script-catalog/access_evaluation/AccessEvaluation.java"
+```
