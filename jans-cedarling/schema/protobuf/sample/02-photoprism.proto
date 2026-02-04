@@ -1,0 +1,224 @@
+syntax = "proto3";
+
+package jans;
+
+// ============================================================================
+// PHOTOPRISM APPLICATION - ADDITIONAL ENTITIES
+// ============================================================================
+
+// Photo entity type
+message Photo {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  string photo_id = 1;
+  string title = 2;
+  optional string description = 3;
+  optional User owner = 4;
+  repeated string photo_tags = 5;  // Set<String> - renamed to avoid conflict with meta field
+  optional int64 taken_at = 6;
+  optional int64 uploaded_at = 7;
+  optional string location = 8;
+  optional Album album = 9;
+  optional bool is_private = 10;
+}
+
+// Album entity type
+message Album {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  string album_id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional User owner = 4;
+  optional int64 created_at = 5;
+  optional int64 updated_at = 6;
+  optional bool is_shared = 7;
+  repeated User shared_with = 8;  // Set of users who have access
+}
+
+// Comment entity type
+message Comment {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  string comment_id = 1;
+  string text = 2;
+  User author = 3;
+  optional Photo photo = 4;
+  optional Album album = 5;
+  int64 created_at = 6;
+  optional int64 updated_at = 7;
+}
+
+// ============================================================================
+// PHOTOPRISM - BASE ACTIONS
+// ============================================================================
+
+// Base action for Photo resources
+message PhotoAction {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  
+  // Resource types
+  message ResourceTypes {
+    optional Photo photo = 1;
+  }
+  
+  // Principal types
+  message PrincipalTypes {
+    optional User user = 1;
+    optional Workload workload = 2;
+  }
+  
+  // Context
+  message ContextTypes {
+    optional Context context = 1;
+  }
+  
+  ResourceTypes resource_types = 1;
+  PrincipalTypes principal_types = 2;
+  optional ContextTypes context_types = 3;
+}
+
+// Base action for Album resources
+message AlbumAction {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  
+  // Resource types
+  message ResourceTypes {
+    optional Album album = 1;
+  }
+  
+  // Principal types
+  message PrincipalTypes {
+    optional User user = 1;
+    optional Workload workload = 2;
+  }
+  
+  // Context
+  message ContextTypes {
+    optional Context context = 1;
+  }
+  
+  ResourceTypes resource_types = 1;
+  PrincipalTypes principal_types = 2;
+  optional ContextTypes context_types = 3;
+}
+
+// Base action for Comment resources (User only)
+message CommentAction {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  
+  // Resource types
+  message ResourceTypes {
+    optional Comment comment = 1;
+  }
+  
+  // Principal types
+  message PrincipalTypes {
+    optional User user = 1;
+  }
+  
+  // Context
+  message ContextTypes {
+    optional Context context = 1;
+  }
+  
+  ResourceTypes resource_types = 1;
+  PrincipalTypes principal_types = 2;
+  optional ContextTypes context_types = 3;
+}
+
+// ============================================================================
+// PHOTOPRISM - PHOTO ACTIONS
+// ============================================================================
+
+// View photo action
+message ViewPhoto {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  PhotoAction memberOfTypes = 101;
+}
+
+// Upload photo action
+message UploadPhoto {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  PhotoAction memberOfTypes = 101;
+}
+
+// Edit photo action
+message EditPhoto {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  PhotoAction memberOfTypes = 101;
+}
+
+// Delete photo action
+message DeletePhoto {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  optional PhotoAction memberOfTypes = 101;
+}
+
+// Download photo action
+message DownloadPhoto {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  PhotoAction memberOfTypes = 101;
+}
+
+// Like photo action
+message LikePhoto {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  PhotoAction memberOfTypes = 101;
+}
+
+// ============================================================================
+// PHOTOPRISM - ALBUM ACTIONS
+// ============================================================================
+
+// View album action
+message ViewAlbum {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  AlbumAction memberOfTypes = 101;
+}
+
+// Create album action
+message CreateAlbum {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  AlbumAction memberOfTypes = 101;
+}
+
+// Edit album action
+message EditAlbum {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  AlbumAction memberOfTypes = 101;
+}
+
+// Delete album action
+message DeleteAlbum {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  AlbumAction memberOfTypes = 101;
+}
+
+// Share album action
+message ShareAlbum {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  AlbumAction memberOfTypes = 101;
+}
+
+// ============================================================================
+// PHOTOPRISM - COMMENT ACTIONS
+// ============================================================================
+
+// Add comment action
+message AddComment {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  CommentAction memberOfTypes = 101;
+}
+
+// Edit comment action
+message EditComment {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  CommentAction memberOfTypes = 101;
+}
+
+// Delete comment action
+message DeleteComment {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  CommentAction memberOfTypes = 101;
+}

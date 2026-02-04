@@ -187,7 +187,7 @@
           }
         }
       },
-      "HttpRequest": {
+      "HTTP_Request": {
         "shape": {
           "type": "Record",
           "attributes": {
@@ -487,8 +487,536 @@
             "name": "String"
           }
         }
+      },
+      "Photo": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "photo_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "title": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "description": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "owner": {
+              "type": "EntityOrCommon",
+              "name": "User",
+              "required": false
+            },
+            "photo_tags": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "String"
+              },
+              "required": false
+            },
+            "taken_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "uploaded_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "location": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "album": {
+              "type": "EntityOrCommon",
+              "name": "Album",
+              "required": false
+            },
+            "is_private": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            }
+          }
+        }
+      },
+      "Album": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "album_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "name": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "description": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "owner": {
+              "type": "EntityOrCommon",
+              "name": "User",
+              "required": false
+            },
+            "created_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "updated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            },
+            "is_shared": {
+              "type": "EntityOrCommon",
+              "name": "String",
+              "required": false
+            },
+            "shared_with": {
+              "type": "Set",
+              "element": {
+                "type": "EntityOrCommon",
+                "name": "User"
+              },
+              "required": false
+            }
+          }
+        }
+      },
+      "Comment": {
+        "shape": {
+          "type": "Record",
+          "attributes": {
+            "comment_id": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "text": {
+              "type": "EntityOrCommon",
+              "name": "String"
+            },
+            "author": {
+              "type": "EntityOrCommon",
+              "name": "User"
+            },
+            "photo": {
+              "type": "EntityOrCommon",
+              "name": "Photo",
+              "required": false
+            },
+            "album": {
+              "type": "EntityOrCommon",
+              "name": "Album",
+              "required": false
+            },
+            "created_at": {
+              "type": "EntityOrCommon",
+              "name": "Long"
+            },
+            "updated_at": {
+              "type": "EntityOrCommon",
+              "name": "Long",
+              "required": false
+            }
+          }
+        }
       }
     },
-    "actions": {}
+    "actions": {
+      "Compare": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Execute": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Monitor": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Read": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Search": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Share": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Tag": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "Write": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Application"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "DELETE": {
+        "appliesTo": {
+          "resourceTypes": [
+            "HTTP_Request"
+          ],
+          "principalTypes": [
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "GET": {
+        "appliesTo": {
+          "resourceTypes": [
+            "HTTP_Request"
+          ],
+          "principalTypes": [
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "HEAD": {
+        "appliesTo": {
+          "resourceTypes": [
+            "HTTP_Request"
+          ],
+          "principalTypes": [
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "PATCH": {
+        "appliesTo": {
+          "resourceTypes": [
+            "HTTP_Request"
+          ],
+          "principalTypes": [
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "POST": {
+        "appliesTo": {
+          "resourceTypes": [
+            "HTTP_Request"
+          ],
+          "principalTypes": [
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "PUT": {
+        "appliesTo": {
+          "resourceTypes": [
+            "HTTP_Request"
+          ],
+          "principalTypes": [
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "ViewPhoto": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Photo"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "UploadPhoto": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Photo"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "EditPhoto": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Photo"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "DeletePhoto": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Photo"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "DownloadPhoto": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Photo"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "LikePhoto": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Photo"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "ViewAlbum": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Album"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "CreateAlbum": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Album"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "EditAlbum": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Album"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "DeleteAlbum": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Album"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "ShareAlbum": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Album"
+          ],
+          "principalTypes": [
+            "User",
+            "Workload"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "AddComment": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Comment"
+          ],
+          "principalTypes": [
+            "User"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "EditComment": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Comment"
+          ],
+          "principalTypes": [
+            "User"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      },
+      "DeleteComment": {
+        "appliesTo": {
+          "resourceTypes": [
+            "Comment"
+          ],
+          "principalTypes": [
+            "User"
+          ],
+          "context": {
+            "type": "Context"
+          }
+        }
+      }
+    }
   }
 }

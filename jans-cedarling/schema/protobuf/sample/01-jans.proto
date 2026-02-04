@@ -1,0 +1,331 @@
+syntax = "proto3";
+
+package jans;
+
+// Enum to differentiate between common types, entity types, and action types
+enum TypeCategory {
+  COMMON_TYPE = 0;
+  ENTITY_TYPE = 1;
+  ACTION_TYPE = 2;
+}
+
+// ============================================================================
+// COMMON TYPES
+// ============================================================================
+
+// Context from commonTypes
+message Context {
+  TypeCategory category = 100 [default = COMMON_TYPE];
+
+  // Reserved field for inheritance (not used here, kept for consistency)
+  optional Context memberOfTypes = 101;
+
+  optional int64 current_time = 1;
+  repeated string device_health = 2;  // Set<String>
+  repeated string fraud_indicators = 3;  // Set<String>
+  repeated string geolocation = 4;  // Set<String>
+  optional string network = 5;
+  optional string network_type = 6;
+  optional string operating_system = 7;
+  optional TokensContext tokens = 8;
+  optional string user_agent = 9;
+}
+
+// TokensContext from commonTypes
+message TokensContext {
+  TypeCategory category = 100 [default = COMMON_TYPE];
+
+  int64 total_token_count = 1;
+}
+
+// Url from commonTypes
+message Url {
+  TypeCategory category = 100 [default = COMMON_TYPE];
+
+  optional string host = 1;
+  optional string path = 2;
+  optional string protocol = 3;
+}
+
+// email_address from commonTypes
+message EmailAddress {
+  TypeCategory category = 100 [default = COMMON_TYPE];
+
+  optional string domain = 1;
+  optional string uid = 2;
+}
+
+// ============================================================================
+// ENTITY TYPES
+// ============================================================================
+
+// Access_token entity type
+message AccessToken {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  // Tags from Cedar schema - not an attribute
+  repeated string tags = 102;
+
+  optional string aud = 1;
+  optional int64 exp = 2;
+  optional int64 iat = 3;
+  optional TrustedIssuer iss = 4;
+  optional string jti = 5;
+  optional int64 nbf = 6;
+  repeated string scope = 7;  // Set<String>
+  optional string token_type = 8;
+  optional int64 validated_at = 9;
+}
+
+// Application entity type
+message Application {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  string app_id = 1;
+  string name = 2;
+  Url url = 3;
+}
+
+// HTTP_Request entity type
+message HTTP_Request {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  message Header {
+    optional string Accept = 1;
+  }
+
+  Header header = 1;
+  Url url = 2;
+}
+
+// Role entity type
+message Role {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+}
+
+// TrustedIssuer entity type
+message TrustedIssuer {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  Url issuer_entity_id = 1;
+}
+
+// User entity type
+message User {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  // Reserved field for inheritance from Role
+  Role memberOfTypes = 101;
+
+  optional EmailAddress email = 1;
+  optional IdToken id_token = 2;
+  optional string phone_number = 3;
+  repeated string role = 4;  // Set<String>
+  string sub = 5;
+  optional UserinfoToken userinfo_token = 6;
+  optional string username = 7;
+}
+
+// Userinfo_token entity type
+message UserinfoToken {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  // Tags from Cedar schema - not an attribute
+  repeated string tags = 102;
+
+  optional string aud = 1;
+  optional string birthdate = 2;
+  optional EmailAddress email = 3;
+  optional int64 exp = 4;
+  optional int64 iat = 5;
+  optional TrustedIssuer iss = 6;
+  optional string jti = 7;
+  optional string name = 8;
+  optional string phone_number = 9;
+  repeated string role = 10;  // Set<String>
+  optional string sub = 11;
+  optional string token_type = 12;
+  optional int64 validated_at = 13;
+}
+
+// Workload entity type
+message Workload {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  optional AccessToken access_token = 1;
+  string client_id = 2;
+  optional TrustedIssuer iss = 3;
+  optional string name = 4;
+  optional string rp_id = 5;
+  optional string spiffe_id = 6;
+}
+
+// id_token entity type
+message IdToken {
+  TypeCategory category = 100 [default = ENTITY_TYPE];
+
+  // Tags from Cedar schema - not an attribute
+  repeated string tags = 102;
+
+  optional string acr = 1;
+  repeated string amr = 2;  // Set<String>
+  repeated string aud = 3;  // Set<String>
+  optional string azp = 4;
+  optional string birthdate = 5;
+  optional EmailAddress email = 6;
+  optional int64 exp = 7;
+  optional int64 iat = 8;
+  optional TrustedIssuer iss = 9;
+  optional string jti = 10;
+  optional string name = 11;
+  optional string phone_number = 12;
+  repeated string role = 13;  // Set<String>
+  optional string sub = 14;
+  optional string token_type = 15;
+  optional int64 validated_at = 16;
+}
+
+// ============================================================================
+// BASE ACTIONS
+// ============================================================================
+
+// Base action for Application resources with User and Workload principals
+message ApplicationAction {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  
+  // Resource types
+  message ResourceTypes {
+    optional Application application = 1;
+  }
+  
+  // Principal types
+  message PrincipalTypes {
+    optional User user = 1;
+    optional Workload workload = 2;
+  }
+  
+  // Context
+  message ContextTypes {
+    optional Context context = 1;
+  }
+  
+  ResourceTypes resource_types = 1;
+  PrincipalTypes principal_types = 2;
+  optional ContextTypes context_types = 3;
+}
+
+// Base action for HTTP_Request resources with Workload principal
+message HttpRequestAction {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  
+  // Resource types
+  message ResourceTypes {
+    optional HTTP_Request http_request = 1;
+  }
+  
+  // Principal types
+  message PrincipalTypes {
+    optional Workload workload = 1;
+  }
+  
+  // Context
+  message ContextTypes {
+    optional Context context = 1;
+  }
+  
+  ResourceTypes resource_types = 1;
+  PrincipalTypes principal_types = 2;
+  optional ContextTypes context_types = 3;
+}
+
+// ============================================================================
+// APPLICATION ACTIONS (inheriting from ApplicationAction)
+// ============================================================================
+
+// Compare action
+message Compare {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Execute action
+message Execute {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Monitor action
+message Monitor {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Read action
+message Read {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Search action
+message Search {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Share action
+message Share {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Tag action
+message Tag {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// Write action
+message Write {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  ApplicationAction memberOfTypes = 101;
+}
+
+// ============================================================================
+// HTTP REQUEST ACTIONS (inheriting from HttpRequestAction)
+// ============================================================================
+
+// DELETE action
+message DELETE {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  HttpRequestAction memberOfTypes = 101;
+}
+
+// GET action
+message GET {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  HttpRequestAction memberOfTypes = 101;
+}
+
+// HEAD action
+message HEAD {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  HttpRequestAction memberOfTypes = 101;
+}
+
+// PATCH action
+message PATCH {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  HttpRequestAction memberOfTypes = 101;
+}
+
+// POST action
+message POST {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  HttpRequestAction memberOfTypes = 101;
+}
+
+// PUT action
+message PUT {
+  TypeCategory category = 100 [default = ACTION_TYPE];
+  HttpRequestAction memberOfTypes = 101;
+}
