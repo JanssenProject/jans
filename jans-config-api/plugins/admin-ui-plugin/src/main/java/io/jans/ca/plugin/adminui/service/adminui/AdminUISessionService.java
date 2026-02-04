@@ -30,8 +30,10 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 import static io.jans.ca.plugin.adminui.utils.CommonUtils.addMinutes;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -147,12 +149,17 @@ public class AdminUISessionService {
             }
             int sessionTimeoutMins = config.getSessionTimeoutInMins();
 
-            adminUISession.setExpirationDate(addMinutes(new Date(nowMillis), sessionTimeoutMins));
-            adminUISession.setLastUpdated(new Date(nowMillis));
+            Date now = new Date(nowMillis);
+            // do not update if the sesiion is already expired. AdminUICookieFilter will remove this session.
+            if (adminUISession.getExpirationDate().before(now)) {
+                return;
+            }
+            adminUISession.setExpirationDate(addMinutes(now, sessionTimeoutMins));
+            adminUISession.setLastUpdated(now);
             persistenceEntryManager.merge(adminUISession);
         } catch (Exception e) {
-            logger.warn("Failed to update session expiry for session {}: {}",
-                    adminUISession.getSessionId(), e.getMessage());
+            logger.warn("Failed to update session expiry for session {}",
+                    adminUISession.getSessionId(), e);
         }
     }
 
@@ -163,7 +170,7 @@ public class AdminUISessionService {
      */
     public void removeAllExpiredSessions() {
         final Filter filter = Filter.createPresenceFilter(SID);
-        List<AdminUISession> adminUISessions =  persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
+        List<AdminUISession> adminUISessions = persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
         Date currentDate = new Date();
         adminUISessions.stream().filter(ele ->
                         ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
@@ -173,7 +180,7 @@ public class AdminUISessionService {
     /**
      * Checks whether a cached token is active by calling the Admin UI introspection endpoint.
      *
-     * @param token the token to introspect; may be null or empty
+     * @param token            the token to introspect; may be null or empty
      * @param auiConfiguration configuration holding the introspection endpoint URL
      * @return `true` if the introspection response contains `"active": true`, `false` otherwise
      * @throws JsonProcessingException if the introspection response body cannot be parsed as JSON
@@ -191,7 +198,7 @@ public class AdminUISessionService {
                 .executePost(auiConfiguration.getAuiBackendApiServerIntrospectionEndpoint(),
                         token, CommonUtils.toUrlEncodedString(body),
                         ContentType.APPLICATION_FORM_URLENCODED,
-                        "Bearer " );
+                        "Bearer ");
         String jsonString = null;
         if (httpServiceResponse.getHttpResponse() != null
                 && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -200,7 +207,7 @@ public class AdminUISessionService {
                     "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                     httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                     httpServiceResponse.getHttpResponse().getEntity());
-            if(httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+            if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                 ObjectMapper mapper = new ObjectMapper();
 
                 HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
@@ -208,7 +215,7 @@ public class AdminUISessionService {
                     jsonString = httpService.getContent(httpEntity);
 
                     HashMap<String, Object> payloadMap = mapper.readValue(jsonString, HashMap.class);
-                    if(payloadMap.containsKey("active")) {
+                    if (payloadMap.containsKey("active")) {
                         return (boolean) payloadMap.get("active");
                     }
                     return false;
@@ -224,7 +231,7 @@ public class AdminUISessionService {
      *
      * @param ujwtString       the user-info JWT to include in the token request; must be non-null and non-empty to generate a token
      * @param auiConfiguration configuration containing the backend token endpoint, client ID, encrypted client secret, and redirect URI
-     * @return                 a TokenResponse containing the access token, or `null` if `ujwtString` is null or empty
+     * @return a TokenResponse containing the access token, or `null` if `ujwtString` is null or empty
      * @throws StringEncrypter.EncryptionException if decrypting the client secret fails
      * @throws JsonProcessingException             if parsing token responses fails
      */
@@ -259,7 +266,7 @@ public class AdminUISessionService {
      * @param tokenRequest  token request details (grant type, client credentials, redirect URI; may include authorization code and PKCE verifier)
      * @param tokenEndpoint the token endpoint URL to call
      * @param userInfoJwt   optional user-info JWT to include as the `ujwt` parameter
-     * @return              a map of token response parameters (for example `access_token`, `expires_in`) with any `token_type` entry removed
+     * @return a map of token response parameters (for example `access_token`, `expires_in`) with any `token_type` entry removed
      * @throws ConfigApiApplicationException if the HTTP exchange fails or the response cannot be parsed as JSON
      */
     public Map<String, Object> getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws ConfigApiApplicationException {
@@ -288,7 +295,7 @@ public class AdminUISessionService {
 
             HttpServiceResponse httpServiceResponse = httpService
                     .executePost(tokenEndpoint, tokenRequest.getEncodedCredentials(), CommonUtils.toUrlEncodedString(body), ContentType.APPLICATION_FORM_URLENCODED,
-                            "Basic " );
+                            "Basic ");
             String jsonString = null;
             if (httpServiceResponse.getHttpResponse() != null
                     && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
@@ -297,7 +304,7 @@ public class AdminUISessionService {
                         " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
                         httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
                         httpServiceResponse.getHttpResponse().getEntity());
-                if(httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+                if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                     ObjectMapper mapper = new ObjectMapper();
 
                     HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
