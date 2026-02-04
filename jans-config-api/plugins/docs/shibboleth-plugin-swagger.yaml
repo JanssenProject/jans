@@ -1,31 +1,31 @@
 openapi: 3.0.1
 info:
   title: Jans Config API - Shibboleth IDP Plugin
-  description: |
-    Manage Shibboleth Identity Provider configuration for SAML 2.0 authentication.
-    This plugin provides endpoints to configure Shibboleth IDP settings and manage 
-    trusted SAML service providers.
+  description: REST API for managing Shibboleth Identity Provider configuration and trusted Service Providers
   contact:
-    name: Gluu Support
-    url: https://support.gluu.org
-    email: xxx@gluu.org
+    name: Janssen Support
+    url: https://jans.io
+    email: support@jans.io
   license:
     name: Apache 2.0
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
   version: 1.0.0
 servers:
-- url: https://jans.io/
+- url: https://jans.io
   description: The Jans server
+security:
+- oauth2:
+  - https://jans.io/oauth/config/shibboleth.readonly
 tags:
 - name: Shibboleth IDP - Config Management
-  description: Manage Shibboleth Identity Provider configuration and trusted service providers
+  description: Manage Shibboleth Identity Provider configuration
 paths:
   /shibboleth/config:
     get:
       tags:
       - Shibboleth IDP - Config Management
       summary: Gets Shibboleth IDP configuration
-      description: Gets Shibboleth IDP configuration
+      description: Gets the current Shibboleth IDP configuration
       operationId: get-shibboleth-config
       responses:
         "200":
@@ -45,7 +45,7 @@ paths:
       tags:
       - Shibboleth IDP - Config Management
       summary: Updates Shibboleth IDP configuration
-      description: Updates Shibboleth IDP configuration
+      description: Updates the Shibboleth IDP configuration
       operationId: put-shibboleth-config
       requestBody:
         description: ShibbolethIdpConfiguration object
@@ -73,17 +73,31 @@ paths:
       tags:
       - Shibboleth IDP - Config Management
       summary: Gets trusted service providers
-      description: Gets list of trusted SAML service providers
+      description: Gets paginated list of trusted SAML service providers
       operationId: get-shibboleth-trust
+      parameters:
+      - name: limit
+        in: query
+        description: Maximum number of results to return
+        required: false
+        schema:
+          type: integer
+          default: 50
+          maximum: 200
+      - name: offset
+        in: query
+        description: Number of results to skip for pagination
+        required: false
+        schema:
+          type: integer
+          default: 0
       responses:
         "200":
           description: Trusted service providers
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TrustedServiceProvider"
+                $ref: "#/components/schemas/TrustedServiceProviderPage"
         "401":
           description: Unauthorized
         "500":
@@ -111,8 +125,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TrustedServiceProvider"
-        "400":
-          description: Bad Request - Entity ID is required
         "401":
           description: Unauthorized
         "409":
@@ -132,10 +144,13 @@ paths:
       parameters:
       - name: entityId
         in: path
-        description: Entity ID of the service provider
+        description: |
+          Entity ID of the service provider. Must be URL-encoded since SAML entity IDs are URLs.
+          Example: encode https://sp.example.org as https%3A%2F%2Fsp.example.org
         required: true
         schema:
           type: string
+        example: https%3A%2F%2Fsp.example.org
       responses:
         "200":
           description: Trusted service provider
@@ -161,10 +176,13 @@ paths:
       parameters:
       - name: entityId
         in: path
-        description: Entity ID of the service provider
+        description: |
+          Entity ID of the service provider. Must be URL-encoded since SAML entity IDs are URLs.
+          Example: encode https://sp.example.org as https%3A%2F%2Fsp.example.org
         required: true
         schema:
           type: string
+        example: https%3A%2F%2Fsp.example.org
       requestBody:
         description: TrustedServiceProvider object
         content:
@@ -197,10 +215,13 @@ paths:
       parameters:
       - name: entityId
         in: path
-        description: Entity ID of the service provider
+        description: |
+          Entity ID of the service provider. Must be URL-encoded since SAML entity IDs are URLs.
+          Example: encode https://sp.example.org as https%3A%2F%2Fsp.example.org
         required: true
         schema:
           type: string
+        example: https%3A%2F%2Fsp.example.org
       responses:
         "204":
           description: Deleted
@@ -240,123 +261,144 @@ components:
   schemas:
     ShibbolethIdpConfiguration:
       type: object
-      description: Shibboleth IDP configuration object
-      properties:
-        dn:
-          type: string
-          description: Distinguished name
-        shibbolethIdpProperties:
-          $ref: "#/components/schemas/ShibbolethIdpConfigurationProperties"
-        revision:
-          type: integer
-          format: int64
-          description: Configuration revision number
-    ShibbolethIdpConfigurationProperties:
-      type: object
-      description: Shibboleth IDP configuration properties
+      description: Shibboleth IDP configuration
       properties:
         entityId:
           type: string
-          description: The SAML entity ID of the Identity Provider
-          example: "https://idp.example.org/idp/shibboleth"
+          description: IDP Entity ID
+          example: https://idp.example.org/idp/shibboleth
         scope:
           type: string
-          description: The scope for attribute release
-          example: "example.org"
-        enabled:
-          type: boolean
-          description: Whether the Shibboleth IDP is enabled
-        metadataProviders:
+          description: Scope for released attributes
+          example: example.org
+        organizationName:
+          type: string
+          description: Organization name
+        organizationDisplayName:
+          type: string
+          description: Organization display name
+        organizationUrl:
+          type: string
+          description: Organization URL
+        technicalContact:
+          type: string
+          description: Technical contact email
+        signingCertificate:
+          type: string
+          description: IDP signing certificate (PEM format)
+        encryptionCertificate:
+          type: string
+          description: IDP encryption certificate (PEM format)
+        metadataValidUntil:
+          type: integer
+          description: Metadata validity period in hours
+          default: 168
+        sessionTimeout:
+          type: integer
+          description: Session timeout in seconds
+          default: 1800
+        assertionLifetime:
+          type: integer
+          description: SAML assertion lifetime in seconds
+          default: 300
+        jansAuthServerUrl:
+          type: string
+          description: Janssen Auth Server URL for authentication delegation
+        jansAuthClientId:
+          type: string
+          description: OAuth client ID for Janssen Auth Server
+        jansAuthScopes:
           type: array
-          description: List of metadata provider URLs
+          description: OAuth scopes to request from Janssen Auth Server
           items:
             type: string
-        trustedServiceProviders:
+          default:
+          - openid
+          - profile
+          - email
+    TrustedServiceProviderPage:
+      type: object
+      description: Paginated list of trusted service providers
+      properties:
+        total:
+          type: integer
+          description: Total number of trusted service providers
+        offset:
+          type: integer
+          description: Current offset
+        limit:
+          type: integer
+          description: Page size
+        items:
           type: array
-          description: List of trusted SAML service providers
+          description: List of trusted service providers
           items:
             $ref: "#/components/schemas/TrustedServiceProvider"
-        attributeMappings:
-          type: array
-          description: Mappings between Janssen attributes and SAML attributes
-          items:
-            $ref: "#/components/schemas/AttributeMapping"
     TrustedServiceProvider:
       type: object
-      description: Trusted SAML Service Provider configuration
+      description: Trusted SAML service provider
       required:
       - entityId
+      - name
       properties:
         entityId:
           type: string
-          description: The SAML entity ID of the service provider
-          example: "https://sp.example.org/shibboleth"
+          description: SP Entity ID (unique identifier)
+          example: https://sp.example.org
         name:
           type: string
-          description: Display name of the service provider
-          example: "Example Service Provider"
+          description: Human-readable name for the SP
         description:
           type: string
           description: Description of the service provider
+        enabled:
+          type: boolean
+          description: Whether this SP is enabled
+          default: true
         metadataUrl:
           type: string
-          description: URL to fetch the SP metadata
-          example: "https://sp.example.org/metadata"
-        metadataXml:
+          description: URL to fetch SP metadata
+          example: https://sp.example.org/metadata
+        metadataFile:
           type: string
-          description: Raw SAML metadata XML (alternative to metadataUrl)
-        enabled:
-          type: boolean
-          description: Whether the service provider is enabled
+          description: Path to local metadata file
         releasedAttributes:
           type: array
-          description: List of attribute names to release to this SP
+          description: Attributes to release to this SP
           items:
             type: string
-          example: ["uid", "mail", "displayName"]
-        nameIdFormat:
-          type: string
-          description: SAML NameID format to use
-          example: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
-    AttributeMapping:
-      type: object
-      description: Mapping between Janssen attribute and SAML attribute
-      properties:
-        id:
-          type: string
-          description: Unique identifier for this mapping
-        jansAttribute:
-          type: string
-          description: The Janssen attribute name
-          example: "uid"
-        samlAttribute:
-          type: string
-          description: The SAML attribute name
-          example: "urn:oid:0.9.2342.19200300.100.1.1"
-        samlAttributeOid:
-          type: string
-          description: The SAML attribute OID
-          example: "0.9.2342.19200300.100.1.1"
-        friendlyName:
-          type: string
-          description: Friendly name for the SAML attribute
-          example: "uid"
-        nameFormat:
-          type: string
-          description: SAML attribute name format
-          example: "urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
-        enabled:
+          example:
+          - uid
+          - mail
+          - displayName
+        assertionLifetime:
+          type: integer
+          description: SAML assertion validity in seconds
+          default: 300
+        signAssertions:
           type: boolean
-          description: Whether this attribute mapping is enabled
+          description: Whether to sign SAML assertions
+          default: true
+        encryptAssertions:
+          type: boolean
+          description: Whether to encrypt SAML assertions
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          readOnly: true
   securitySchemes:
     oauth2:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: "https://{op-hostname}/.../token"
+          tokenUrl: https://{op-hostname}/jans-auth/restv1/token
           scopes:
             https://jans.io/oauth/config/shibboleth.readonly: View Shibboleth IDP configuration
             https://jans.io/oauth/config/shibboleth.write: Manage Shibboleth IDP configuration
-            https://jans.io/oauth/config/read-all: Super admin for viewing application resource information
-            https://jans.io/oauth/config/write-all: Super admin for updating application resource information
-            https://jans.io/oauth/config/delete-all: Super admin for deleting application resource information
