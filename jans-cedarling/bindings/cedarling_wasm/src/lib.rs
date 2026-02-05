@@ -297,6 +297,19 @@ impl Cedarling {
     /// Push a value into the data store with an optional TTL.
     /// If the key already exists, the value will be replaced.
     /// If TTL is not provided, the default TTL from configuration is used.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry (must not be empty)
+    /// * `value` - The value to store (any JSON-serializable JavaScript value: object, array, string, number, boolean)
+    /// * `ttl_secs` - Optional TTL in seconds (undefined/null uses default from config)
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await cedarling.push_data("user:123", { name: "John", age: 30 }, 3600);
+    /// await cedarling.push_data("config", { setting: "value" }); // Uses default TTL
+    /// ```
     pub fn push_data(&self, key: &str, value: JsValue, ttl_secs: Option<u64>) -> Result<(), Error> {
         let json_value: serde_json::Value = serde_wasm_bindgen::from_value(value)?;
         let ttl = ttl_secs.map(Duration::from_secs);
@@ -307,6 +320,19 @@ impl Cedarling {
 
     /// Get a value from the data store by key.
     /// Returns null if the key doesn't exist or the entry has expired.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry to retrieve
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const value = await cedarling.get_data("user:123");
+    /// if (value !== null) {
+    ///     console.log(value.name); // "John"
+    /// }
+    /// ```
     pub fn get_data(&self, key: &str) -> Result<JsValue, Error> {
         match self.instance.get_data(key).map_err(Error::new)? {
             Some(value) => {
@@ -319,6 +345,23 @@ impl Cedarling {
 
     /// Get a data entry with full metadata by key.
     /// Returns null if the key doesn't exist or the entry has expired.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry to retrieve
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const entry = await cedarling.get_data_entry("user:123");
+    /// if (entry !== null) {
+    ///     console.log(entry.key); // "user:123"
+    ///     console.log(entry.value); // { name: "John", age: 30 }
+    ///     console.log(entry.data_type); // "Record"
+    ///     console.log(entry.created_at); // "2024-01-01T12:00:00Z"
+    ///     console.log(entry.access_count); // 5
+    /// }
+    /// ```
     pub fn get_data_entry(&self, key: &str) -> Result<JsValue, Error> {
         match self.instance.get_data_entry(key).map_err(Error::new)? {
             Some(entry) => {
@@ -332,17 +375,46 @@ impl Cedarling {
 
     /// Remove a value from the data store by key.
     /// Returns true if the key existed and was removed, false otherwise.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry to remove
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const removed = await cedarling.remove_data("user:123");
+    /// if (removed) {
+    ///     console.log("Entry was successfully removed");
+    /// }
+    /// ```
     pub fn remove_data(&self, key: &str) -> Result<bool, Error> {
         self.instance.remove_data(key).map_err(Error::new)
     }
 
     /// Clear all entries from the data store.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await cedarling.clear_data();
+    /// console.log("All data entries cleared");
+    /// ```
     pub fn clear_data(&self) -> Result<(), Error> {
         self.instance.clear_data().map_err(Error::new)
     }
 
     /// List all entries with their metadata.
     /// Returns an array of DataEntry objects.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const entries = await cedarling.list_data();
+    /// entries.forEach(entry => {
+    ///     console.log(`${entry.key}: ${entry.data_type} (accessed ${entry.access_count} times)`);
+    /// });
+    /// ```
     pub fn list_data(&self) -> Result<Array, Error> {
         let entries = self.instance.list_data().map_err(Error::new)?;
         let result = Array::new();
@@ -355,6 +427,15 @@ impl Cedarling {
     }
 
     /// Get statistics about the data store.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const stats = await cedarling.get_stats();
+    /// console.log(`Entries: ${stats.entry_count}/${stats.max_entries || 'unlimited'}`);
+    /// console.log(`Capacity: ${stats.capacity_usage_percent.toFixed(2)}%`);
+    /// console.log(`Total size: ${stats.total_size_bytes} bytes`);
+    /// ```
     pub fn get_stats(&self) -> Result<DataStoreStats, Error> {
         self.instance
             .get_stats()

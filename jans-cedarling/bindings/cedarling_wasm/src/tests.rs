@@ -1273,5 +1273,5 @@ async fn test_data_api_invalid_key() {
     let value = serde_wasm_bindgen::to_value(&json!("value"))
         .expect("value should be converted to JsValue");
     let result = instance.push_data("", value, None);
-    assert!(result.is_err(), "push_data with empty key should fail");
+    assert!(matches!(result, Err(_)), "push_data with empty key should fail");
 }
