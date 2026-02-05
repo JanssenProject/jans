@@ -59,7 +59,7 @@ public final class CertUtil {
             certChain = cf.generateCertificates(is).stream().map(X509Certificate.class::cast)
                     .collect(Collectors.toList());
             
-        } catch (CertificateException e) {
+        } catch (IOException | CertificateException e) {
             logger.error(e.getMessage(), e);
             p.setFirst(ValidationStatus.UNPARSABLE);
             return p;
