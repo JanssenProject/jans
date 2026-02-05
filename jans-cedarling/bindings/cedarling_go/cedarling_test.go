@@ -898,7 +898,10 @@ func TestDataAPIListData(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Clear any existing data
-	instance.ClearData()
+	err = instance.ClearData()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
 
 	// Push multiple entries
 	err = instance.PushData("list_key1", "value1", nil)
@@ -934,7 +937,10 @@ func TestDataAPIGetStats(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Clear and add some data
-	instance.ClearData()
+	err = instance.ClearData()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
 	err = instance.PushData("stats_key", "stats_value", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
