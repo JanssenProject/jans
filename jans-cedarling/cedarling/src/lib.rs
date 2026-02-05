@@ -354,7 +354,7 @@ impl LogStorage for Cedarling {
 // implements DataApi for Cedarling
 // provides public interface for pushing and retrieving data
 impl DataApi for Cedarling {
-    fn push_data(
+    fn push_data_ctx(
         &self,
         key: &str,
         value: serde_json::Value,
@@ -388,28 +388,28 @@ impl DataApi for Cedarling {
         Ok(())
     }
 
-    fn get_data(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
+    fn get_data_ctx(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
         Ok(self.data.get(key))
     }
 
-    fn get_data_entry(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+    fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
         Ok(self.data.get_entry(key))
     }
 
-    fn remove_data(&self, key: &str) -> Result<bool, DataError> {
+    fn remove_data_ctx(&self, key: &str) -> Result<bool, DataError> {
         Ok(self.data.remove(key))
     }
 
-    fn clear_data(&self) -> Result<(), DataError> {
+    fn clear_data_ctx(&self) -> Result<(), DataError> {
         self.data.clear();
         Ok(())
     }
 
-    fn list_data(&self) -> Result<Vec<DataEntry>, DataError> {
+    fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
         Ok(self.data.list_entries())
     }
 
-    fn get_stats(&self) -> Result<DataStoreStats, DataError> {
+    fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
         let config = self.data.config();
         let entry_count = self.data.count();
         let total_size_bytes = self.data.total_size();

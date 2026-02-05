@@ -449,7 +449,7 @@ impl Cedarling {
     /// If the key already exists, the value will be replaced.
     /// If TTL is not provided, the default TTL from configuration is used.
     #[uniffi::method]
-    pub fn push_data(
+    pub fn push_data_ctx(
         &self,
         key: String,
         value: JsonValue,
@@ -463,7 +463,7 @@ impl Cedarling {
 
         let ttl = ttl_secs.map(Duration::from_secs);
         self.inner
-            .push_data(&key, json_value, ttl)
+            .push_data_ctx(&key, json_value, ttl)
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),
             })
@@ -472,10 +472,10 @@ impl Cedarling {
     /// Get a value from the data store by key.
     /// Returns None if the key doesn't exist or the entry has expired.
     #[uniffi::method]
-    pub fn get_data(&self, key: String) -> Result<Option<JsonValue>, DataError> {
+    pub fn get_data_ctx(&self, key: String) -> Result<Option<JsonValue>, DataError> {
         match self
             .inner
-            .get_data(&key)
+            .get_data_ctx(&key)
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),
             })? {
@@ -491,10 +491,10 @@ impl Cedarling {
     /// Get a data entry with full metadata by key.
     /// Returns None if the key doesn't exist or the entry has expired.
     #[uniffi::method]
-    pub fn get_data_entry(&self, key: String) -> Result<Option<DataEntry>, DataError> {
+    pub fn get_data_entry_ctx(&self, key: String) -> Result<Option<DataEntry>, DataError> {
         match self
             .inner
-            .get_data_entry(&key)
+            .get_data_entry_ctx(&key)
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),
             })? {
@@ -506,9 +506,9 @@ impl Cedarling {
     /// Remove a value from the data store by key.
     /// Returns true if the key existed and was removed, false otherwise.
     #[uniffi::method]
-    pub fn remove_data(&self, key: String) -> Result<bool, DataError> {
+    pub fn remove_data_ctx(&self, key: String) -> Result<bool, DataError> {
         self.inner
-            .remove_data(&key)
+            .remove_data_ctx(&key)
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),
             })
@@ -516,9 +516,9 @@ impl Cedarling {
 
     /// Clear all entries from the data store.
     #[uniffi::method]
-    pub fn clear_data(&self) -> Result<(), DataError> {
+    pub fn clear_data_ctx(&self) -> Result<(), DataError> {
         self.inner
-            .clear_data()
+            .clear_data_ctx()
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),
             })
@@ -527,9 +527,9 @@ impl Cedarling {
     /// List all entries with their metadata.
     /// Returns a list of DataEntry objects.
     #[uniffi::method]
-    pub fn list_data(&self) -> Result<Vec<DataEntry>, DataError> {
+    pub fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
         self.inner
-            .list_data()
+            .list_data_ctx()
             .map(|entries| entries.into_iter().map(Into::into).collect())
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),
@@ -538,9 +538,9 @@ impl Cedarling {
 
     /// Get statistics about the data store.
     #[uniffi::method]
-    pub fn get_stats(&self) -> Result<DataStoreStats, DataError> {
+    pub fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
         self.inner
-            .get_stats()
+            .get_stats_ctx()
             .map(Into::into)
             .map_err(|e| DataError::DataOperationFailed {
                 error_msg: e.to_string(),

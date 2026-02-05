@@ -110,36 +110,36 @@ impl LogStorage for Cedarling {
 }
 
 impl DataApi for Cedarling {
-    fn push_data(
+    fn push_data_ctx(
         &self,
         key: &str,
         value: serde_json::Value,
         ttl: Option<Duration>,
     ) -> Result<(), DataError> {
-        self.instance.push_data(key, value, ttl)
+        self.instance.push_data_ctx(key, value, ttl)
     }
 
-    fn get_data(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
-        self.instance.get_data(key)
+    fn get_data_ctx(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
+        self.instance.get_data_ctx(key)
     }
 
-    fn get_data_entry(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
-        self.instance.get_data_entry(key)
+    fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+        self.instance.get_data_entry_ctx(key)
     }
 
-    fn remove_data(&self, key: &str) -> Result<bool, DataError> {
-        self.instance.remove_data(key)
+    fn remove_data_ctx(&self, key: &str) -> Result<bool, DataError> {
+        self.instance.remove_data_ctx(key)
     }
 
-    fn clear_data(&self) -> Result<(), DataError> {
-        self.instance.clear_data()
+    fn clear_data_ctx(&self) -> Result<(), DataError> {
+        self.instance.clear_data_ctx()
     }
 
-    fn list_data(&self) -> Result<Vec<DataEntry>, DataError> {
-        self.instance.list_data()
+    fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
+        self.instance.list_data_ctx()
     }
 
-    fn get_stats(&self) -> Result<DataStoreStats, DataError> {
-        self.instance.get_stats()
+    fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
+        self.instance.get_stats_ctx()
     }
 }

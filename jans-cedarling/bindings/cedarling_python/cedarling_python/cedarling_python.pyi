@@ -271,7 +271,7 @@ class Cedarling:
 
     def shut_down(self): ...
 
-    def push_data(
+    def push_data_ctx(
         self, key: str, value: Any, *, ttl_secs: Optional[int] = None
     ) -> None:
         """
@@ -290,7 +290,7 @@ class Cedarling:
         """
         ...
 
-    def get_data(self, key: str) -> Optional[Any]:
+    def get_data_ctx(self, key: str) -> Optional[Any]:
         """
         Get a value from the data store by key.
 
@@ -308,7 +308,7 @@ class Cedarling:
         """
         ...
 
-    def get_data_entry(self, key: str) -> Optional["DataEntry"]:
+    def get_data_entry_ctx(self, key: str) -> Optional["DataEntry"]:
         """
         Get a data entry with full metadata by key.
 
@@ -326,7 +326,7 @@ class Cedarling:
         """
         ...
 
-    def remove_data(self, key: str) -> bool:
+    def remove_data_ctx(self, key: str) -> bool:
         """
         Remove a value from the data store by key.
 
@@ -341,7 +341,7 @@ class Cedarling:
         """
         ...
 
-    def clear_data(self) -> None:
+    def clear_data_ctx(self) -> None:
         """
         Clear all entries from the data store.
 
@@ -350,7 +350,7 @@ class Cedarling:
         """
         ...
 
-    def list_data(self) -> List["DataEntry"]:
+    def list_data_ctx(self) -> List["DataEntry"]:
         """
         List all entries with their metadata.
 
@@ -364,7 +364,7 @@ class Cedarling:
         """
         ...
 
-    def get_stats(self) -> "DataStoreStats":
+    def get_stats_ctx(self) -> "DataStoreStats":
         """
         Get statistics about the data store.
 

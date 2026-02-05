@@ -217,7 +217,12 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         BINDINGS_RUNTIME.runtime.block_on(instance.shut_down());
     }
 
-    fn push_data(instance_id: usize, key: String, value_json: String, ttl_nanos: i64) -> Result {
+    fn push_data_ctx(
+        instance_id: usize,
+        key: String,
+        value_json: String,
+        ttl_nanos: i64,
+    ) -> Result {
         let instance = get_instance!(instance_id);
         let value: serde_json::Value = from_json_str!(value_json);
         let ttl = if ttl_nanos > 0 {
@@ -225,55 +230,55 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         } else {
             None
         };
-        match instance.push_data(&key, value, ttl) {
+        match instance.push_data_ctx(&key, value, ttl) {
             Ok(()) => Result::success(()),
             Err(e) => Result::error(e),
         }
     }
 
-    fn get_data(instance_id: usize, key: String) -> Result {
+    fn get_data_ctx(instance_id: usize, key: String) -> Result {
         let instance = get_instance!(instance_id);
-        match instance.get_data(&key) {
+        match instance.get_data_ctx(&key) {
             Ok(value) => Result::success(value),
             Err(e) => Result::error(e),
         }
     }
 
-    fn get_data_entry(instance_id: usize, key: String) -> Result {
+    fn get_data_entry_ctx(instance_id: usize, key: String) -> Result {
         let instance = get_instance!(instance_id);
-        match instance.get_data_entry(&key) {
+        match instance.get_data_entry_ctx(&key) {
             Ok(entry) => Result::success(entry),
             Err(e) => Result::error(e),
         }
     }
 
-    fn remove_data(instance_id: usize, key: String) -> Result {
+    fn remove_data_ctx(instance_id: usize, key: String) -> Result {
         let instance = get_instance!(instance_id);
-        match instance.remove_data(&key) {
+        match instance.remove_data_ctx(&key) {
             Ok(removed) => Result::success(removed),
             Err(e) => Result::error(e),
         }
     }
 
-    fn clear_data(instance_id: usize) -> Result {
+    fn clear_data_ctx(instance_id: usize) -> Result {
         let instance = get_instance!(instance_id);
-        match instance.clear_data() {
+        match instance.clear_data_ctx() {
             Ok(()) => Result::success(()),
             Err(e) => Result::error(e),
         }
     }
 
-    fn list_data(instance_id: usize) -> Result {
+    fn list_data_ctx(instance_id: usize) -> Result {
         let instance = get_instance!(instance_id);
-        match instance.list_data() {
+        match instance.list_data_ctx() {
             Ok(entries) => Result::success(entries),
             Err(e) => Result::error(e),
         }
     }
 
-    fn get_stats(instance_id: usize) -> Result {
+    fn get_stats_ctx(instance_id: usize) -> Result {
         let instance = get_instance!(instance_id);
-        match instance.get_stats() {
+        match instance.get_stats_ctx() {
             Ok(stats) => Result::success(stats),
             Err(e) => Result::error(e),
         }

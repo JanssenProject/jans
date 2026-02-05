@@ -307,14 +307,19 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// await cedarling.push_data("user:123", { name: "John", age: 30 }, 3600);
-    /// await cedarling.push_data("config", { setting: "value" }); // Uses default TTL
+    /// await cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
+    /// await cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
     /// ```
-    pub fn push_data(&self, key: &str, value: JsValue, ttl_secs: Option<u64>) -> Result<(), Error> {
+    pub fn push_data_ctx(
+        &self,
+        key: &str,
+        value: JsValue,
+        ttl_secs: Option<u64>,
+    ) -> Result<(), Error> {
         let json_value: serde_json::Value = serde_wasm_bindgen::from_value(value)?;
         let ttl = ttl_secs.map(Duration::from_secs);
         self.instance
-            .push_data(key, json_value, ttl)
+            .push_data_ctx(key, json_value, ttl)
             .map_err(Error::new)
     }
 
@@ -328,13 +333,13 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const value = await cedarling.get_data("user:123");
+    /// const value = await cedarling.get_data_ctx("user:123");
     /// if (value !== null) {
     ///     console.log(value.name); // "John"
     /// }
     /// ```
-    pub fn get_data(&self, key: &str) -> Result<JsValue, Error> {
-        match self.instance.get_data(key).map_err(Error::new)? {
+    pub fn get_data_ctx(&self, key: &str) -> Result<JsValue, Error> {
+        match self.instance.get_data_ctx(key).map_err(Error::new)? {
             Some(value) => {
                 let js_value = serde_wasm_bindgen::to_value(&value)?;
                 Ok(to_object_recursive(js_value)?)
@@ -353,7 +358,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entry = await cedarling.get_data_entry("user:123");
+    /// const entry = await cedarling.get_data_entry_ctx("user:123");
     /// if (entry !== null) {
     ///     console.log(entry.key); // "user:123"
     ///     console.log(entry.value); // { name: "John", age: 30 }
@@ -362,8 +367,8 @@ impl Cedarling {
     ///     console.log(entry.access_count); // 5
     /// }
     /// ```
-    pub fn get_data_entry(&self, key: &str) -> Result<JsValue, Error> {
-        match self.instance.get_data_entry(key).map_err(Error::new)? {
+    pub fn get_data_entry_ctx(&self, key: &str) -> Result<JsValue, Error> {
+        match self.instance.get_data_entry_ctx(key).map_err(Error::new)? {
             Some(entry) => {
                 let wasm_entry = DataEntry::from(entry);
                 let js_value = serde_wasm_bindgen::to_value(&wasm_entry)?;
@@ -383,13 +388,13 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const removed = await cedarling.remove_data("user:123");
+    /// const removed = await cedarling.remove_data_ctx("user:123");
     /// if (removed) {
     ///     console.log("Entry was successfully removed");
     /// }
     /// ```
-    pub fn remove_data(&self, key: &str) -> Result<bool, Error> {
-        self.instance.remove_data(key).map_err(Error::new)
+    pub fn remove_data_ctx(&self, key: &str) -> Result<bool, Error> {
+        self.instance.remove_data_ctx(key).map_err(Error::new)
     }
 
     /// Clear all entries from the data store.
@@ -397,11 +402,11 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// await cedarling.clear_data();
+    /// await cedarling.clear_data_ctx();
     /// console.log("All data entries cleared");
     /// ```
-    pub fn clear_data(&self) -> Result<(), Error> {
-        self.instance.clear_data().map_err(Error::new)
+    pub fn clear_data_ctx(&self) -> Result<(), Error> {
+        self.instance.clear_data_ctx().map_err(Error::new)
     }
 
     /// List all entries with their metadata.
@@ -410,13 +415,13 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entries = await cedarling.list_data();
+    /// const entries = await cedarling.list_data_ctx();
     /// entries.forEach(entry => {
     ///     console.log(`${entry.key}: ${entry.data_type} (accessed ${entry.access_count} times)`);
     /// });
     /// ```
-    pub fn list_data(&self) -> Result<Array, Error> {
-        let entries = self.instance.list_data().map_err(Error::new)?;
+    pub fn list_data_ctx(&self) -> Result<Array, Error> {
+        let entries = self.instance.list_data_ctx().map_err(Error::new)?;
         let result = Array::new();
         for entry in entries {
             let wasm_entry = DataEntry::from(entry);
@@ -431,14 +436,14 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const stats = await cedarling.get_stats();
+    /// const stats = await cedarling.get_stats_ctx();
     /// console.log(`Entries: ${stats.entry_count}/${stats.max_entries || 'unlimited'}`);
     /// console.log(`Capacity: ${stats.capacity_usage_percent.toFixed(2)}%`);
     /// console.log(`Total size: ${stats.total_size_bytes} bytes`);
     /// ```
-    pub fn get_stats(&self) -> Result<DataStoreStats, Error> {
+    pub fn get_stats_ctx(&self) -> Result<DataStoreStats, Error> {
         self.instance
-            .get_stats()
+            .get_stats_ctx()
             .map(|stats| stats.into())
             .map_err(Error::new)
     }
