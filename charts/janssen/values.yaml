@@ -765,7 +765,7 @@ global:
       # -- jans-auth_audit.log level
       auditStatsLogLevel: "INFO"
       # -- jans-lock.log target
-      lockLogTarget: "STDOUT"
+      lockLogTarget: "FILE"
       # -- jans-lock.log level
       lockLogLevel: "INFO"
     # -- space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)

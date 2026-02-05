@@ -20,7 +20,6 @@ from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 from hooks import get_auth_keys_hook
-from lock import configure_lock_logging
 from lock import LockPersistenceSetup
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -87,8 +86,6 @@ def main():
     copy_builtin_libs()
 
     if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
-        configure_lock_logging()
-
         with manager.create_lock("lock-setup"):
             persistence_setup = LockPersistenceSetup(manager)
             persistence_setup.import_ldif_files()
@@ -109,6 +106,8 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "lock_log_target": "STDOUT",
+        "lock_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -153,6 +152,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_AUTH_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_AUTH_SCRIPT_LOG_FILE",
         "audit_log_target": "JANS_AUTH_AUDIT_LOG_FILE",
+        "lock_log_target": "JANS_LOCK_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
