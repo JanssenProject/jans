@@ -156,7 +156,7 @@ public final class CertUtil {
         logger.info("Applying mapping to certificate attributes...");
         Map<String, String> profile = op.apply(certAttributes);
         
-        logger.info("Resulting profile: {}", profile);
+        logger.debug("Resulting profile: {}", profile);
         
         String uid = profile.get("uid");
         if (uid == null) {

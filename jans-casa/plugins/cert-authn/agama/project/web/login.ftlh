@@ -136,7 +136,7 @@
             let platform = { name: uapr.browser.name, version: uapr.browser.version, 
                     osName: uapr.os.name, osVersion: uapr.os.version }                        
             field.value = JSON.stringify(platform)
-            console.log(field.value)
+            //console.log(field.value)
 
         }
 
