@@ -299,7 +299,7 @@ impl Cedarling {
         let ttl = ttl_secs.map(Duration::from_secs);
         self.inner
             .push_data_ctx(key, json_value, ttl)
-            .map_err(|err| data_error_to_py(Box::new(err)))?;
+            .map_err(data_error_to_py)?;
         Ok(())
     }
 
@@ -312,11 +312,7 @@ impl Cedarling {
     /// :returns: The value as a Python object, or None if not found
     /// :raises DataError: If the operation fails
     fn get_data_ctx(&self, key: &str, py: Python) -> PyResult<Option<Py<PyAny>>> {
-        match self
-            .inner
-            .get_data_ctx(key)
-            .map_err(|err| data_error_to_py(Box::new(err)))?
-        {
+        match self.inner.get_data_ctx(key).map_err(data_error_to_py)? {
             Some(value) => {
                 let py_obj = to_pyobject(py, &value)
                     .map(|v| v.unbind())
@@ -339,7 +335,7 @@ impl Cedarling {
         match self
             .inner
             .get_data_entry_ctx(key)
-            .map_err(|err| data_error_to_py(Box::new(err)))?
+            .map_err(data_error_to_py)?
         {
             Some(entry) => Ok(Some(entry.into())),
             None => Ok(None),
@@ -352,18 +348,14 @@ impl Cedarling {
     /// :returns: True if the key existed and was removed, False otherwise
     /// :raises DataError: If the operation fails
     fn remove_data_ctx(&self, key: &str) -> PyResult<bool> {
-        self.inner
-            .remove_data_ctx(key)
-            .map_err(|err| data_error_to_py(Box::new(err)))
+        self.inner.remove_data_ctx(key).map_err(data_error_to_py)
     }
 
     /// Clear all entries from the data store.
     ///
     /// :raises DataError: If the operation fails
     fn clear_data_ctx(&self) -> PyResult<()> {
-        self.inner
-            .clear_data_ctx()
-            .map_err(|err| data_error_to_py(Box::new(err)))
+        self.inner.clear_data_ctx().map_err(data_error_to_py)
     }
 
     /// List all entries with their metadata.
@@ -376,7 +368,7 @@ impl Cedarling {
         self.inner
             .list_data_ctx()
             .map(|entries| entries.into_iter().map(|e| e.into()).collect())
-            .map_err(|err| data_error_to_py(Box::new(err)))
+            .map_err(data_error_to_py)
     }
 
     /// Get statistics about the data store.
@@ -389,7 +381,7 @@ impl Cedarling {
         self.inner
             .get_stats_ctx()
             .map(|stats| stats.into())
-            .map_err(|err| data_error_to_py(Box::new(err)))
+            .map_err(data_error_to_py)
     }
 }
 

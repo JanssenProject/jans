@@ -69,9 +69,8 @@ impl ErrorPayload {
 }
 
 // Convert CedarlingDataError to Python exception
-#[allow(clippy::boxed_local)]
-pub fn data_error_to_py(err: Box<CedarlingDataError>) -> PyErr {
-    let err_args = ErrorPayload(*err);
+pub fn data_error_to_py(err: CedarlingDataError) -> PyErr {
+    let err_args = ErrorPayload(err);
     match err_args.0 {
         CedarlingDataError::InvalidKey => PyErr::new::<InvalidKey, _>(err_args),
         CedarlingDataError::KeyNotFound { .. } => PyErr::new::<KeyNotFound, _>(err_args),
