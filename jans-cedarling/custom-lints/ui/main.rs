@@ -23,6 +23,8 @@ fn main() {
     let entity_type_name = "Jans::User";
     let entity_id = "user123";
     let eid7 = cedar_policy::EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
+
+    let eid8 = cedar_policy::EntityUid::from_str(&format!(r#"Jans::User::"bob123""#));
 }
 
 // Mock EntityUid for testing (since we don't want to pull in the actual Cedar crate)

@@ -13,6 +13,7 @@ extern crate rustc_span;
 
 use clippy_utils::{
     diagnostics::{span_lint_and_help, span_lint_and_sugg},
+    source::snippet,
     sym,
 };
 use rustc_ast::LitKind::Str;
@@ -74,13 +75,14 @@ impl<'tcx> LateLintPass<'tcx> for BadStringConcatenation {
             && let ExprKind::Call(_, [format_arg]) = &bexpr.kind
         {
             if let Some(arg) = extract_string_literal(format_arg) {
+                let ty_snippet = snippet(cx, ty.span, "EntityUid");
                 span_lint_and_sugg(
                     cx,
                     BAD_STRING_CONCATENATION,
                     expr.span,
                     "using `EntityUid::from_str` with format! is inefficient",
                     "try this instead",
-                    format!("EntityUid::from_str({arg:?})"),
+                    format!("{ty_snippet}::from_str({arg:?})"),
                     Applicability::MachineApplicable,
                 );
             } else {
