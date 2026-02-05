@@ -43,7 +43,9 @@ jobs:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
     - name: Install dylint
-      run: cargo install cargo-dylint dylint-link
+      run: |
+        cargo install cargo-dylint --version 5.0.0 --locked
+        cargo install dylint-link --version 5.0.0 --locked
     - name: Run Tests
       working-directory: jans-cedarling/custom-lints
       run: cargo test

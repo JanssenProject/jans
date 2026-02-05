@@ -27,7 +27,7 @@ dylint_linting::declare_late_lint! {
     /// warned against in the Cedar documentation for performance reasons.
     ///
     /// ### Why is this bad?
-    /// The Cedar create documentation specifically warns that using `format!()`
+    /// The Cedar crate documentation specifically warns that using `format!()`
     /// with `EntityUid::from_str` is inefficient. Use string literals instead.
     ///
     /// ### Example
