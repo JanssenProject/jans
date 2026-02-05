@@ -10,7 +10,7 @@ When validated is true
     c = obj.data.cert
     status = Call io.jans.casa.certauthn.CertUtil#enroll uid c.x509 c.fingerPrint
     
-    obj = { error: status }
+    obj = { status: status }
     //Show feedback to user before returning to Casa
     RRF "enroll-feedback.ftlh" obj
 

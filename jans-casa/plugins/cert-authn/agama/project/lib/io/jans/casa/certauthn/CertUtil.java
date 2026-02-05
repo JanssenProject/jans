@@ -33,7 +33,7 @@ public final class CertUtil {
     private static final String CERT_PREFIX = "cert:";
     
     private static UserService userService = CdiUtil.bean(UserService.class);
-    private static Logger logger = LoggerFactory.getLogger(CertAuthnHelper.class);
+    private static Logger logger = LoggerFactory.getLogger(CertUtil.class);
     
     public static Pair<ValidationStatus, X509Certificate> validate(String certPEM, String certChainPEM) {
         
@@ -145,7 +145,7 @@ public final class CertUtil {
     }
     
     public static String register(X509Certificate certificate, String classField)
-        throws IllegalAccessException {
+        throws IllegalAccessException, NoSuchFieldException {
         
         Class<?> clazz = AttributeMappings.class;
         Field f = clazz.getDeclaredField(classField);
@@ -200,7 +200,7 @@ public final class CertUtil {
 
     private static Map<String, String> getAttributes(X509Certificate cert) {
         
-        String dn = cert.getSubjectX500Principal().getName()
+        String dn = cert.getSubjectX500Principal().getName();
         Map<String, String> map = new HashMap<String, String>();
         try {
             RDN[] rdns = DN.getRDNs(dn);
@@ -232,7 +232,7 @@ public final class CertUtil {
                     if (list != null && list.size() == 2 && rfc822NameType.equals(list.get(0))
                             && list.get(1).toString().contains("@")) {
                         email = list.get(1).toString();
-                        logger.info("Found e-mail in SAN extension: {}", email);
+                        logger.debug("Found e-mail in SAN extension: {}", email);
                     }
                 }
                 map.put("mail", email);                
@@ -244,38 +244,8 @@ public final class CertUtil {
         return map;
         
     }
-    
-    private static List<CustomObjectAttribute> attributesForUpdate(List<CustomObjectAttribute> customAttributes,
-            Map<String, List<Object>> profile, boolean cumulative) {
 
-        //Merge existing data of user plus incoming data in profile
-        List<CustomObjectAttribute> customAttrs = new ArrayList<>(customAttributes);
-
-        for (CustomObjectAttribute coa : customAttrs) {
-            String attrName = coa.getName();
-            List<Object> newValues = profile.get(attrName);
-
-            if (newValues != null) {
-                List<Object> values = new ArrayList<>(cumulative ? coa.getValues() : Collections.emptyList());
-                newValues.stream().filter(nv -> !values.contains(nv)).forEach(values::add);
-
-                profile.remove(attrName);
-                coa.setValues(values);
-            }
-        }
-
-        profile.forEach((k, v) -> {
-                CustomObjectAttribute coa = new CustomObjectAttribute(k);
-                coa.setValues(v);
-                customAttrs.add(coa);
-        });
-
-        logger.trace("Resulting list of attributes:\n{}", customAttrs.toString());
-        return customAttrs;
-
-    }
-    
-    private static String makeJans509(X509Certificate certificate) {
+    private static String makeJans509(X509Certificate certificate) throws CertificateEncodingException {
 
         byte[] DEREncoded = certificate.getEncoded();
         io.jans.scim.model.scim2.user.X509Certificate scimX509Cert = new io.jans.scim.model.scim2.user.X509Certificate();
