@@ -451,7 +451,7 @@ func (G2RCallImpl) shut_down(instance_id *uint) {
 	runtime.KeepAlive(_internal_params)
 	runtime.KeepAlive(instance_id_buffer)
 }
-func (G2RCallImpl) push_data(instance_id *uint, key *string, value_json *string, ttl_secs *int64) Result {
+func (G2RCallImpl) push_data(instance_id *uint, key *string, value_json *string, ttl_nanos *int64) Result {
 	_internal_slot := [2]unsafe.Pointer{}
 	_internal_params := [4]unsafe.Pointer{}
 	instance_id_ref, instance_id_buffer := cvt_ref(cntC_uintptr_t, refC_uintptr_t)(instance_id)
@@ -460,15 +460,15 @@ func (G2RCallImpl) push_data(instance_id *uint, key *string, value_json *string,
 	_internal_params[1] = unsafe.Pointer(&key_ref)
 	value_json_ref, value_json_buffer := cvt_ref(cntString, refString)(value_json)
 	_internal_params[2] = unsafe.Pointer(&value_json_ref)
-	ttl_secs_ref, ttl_secs_buffer := cvt_ref(cntC_int64_t, refC_int64_t)(ttl_secs)
-	_internal_params[3] = unsafe.Pointer(&ttl_secs_ref)
+	ttl_nanos_ref, ttl_nanos_buffer := cvt_ref(cntC_int64_t, refC_int64_t)(ttl_nanos)
+	_internal_params[3] = unsafe.Pointer(&ttl_nanos_ref)
 	asmcall.CallFuncG0P2(unsafe.Pointer(C.c_G2RCall_push_data), unsafe.Pointer(&_internal_slot), unsafe.Pointer(&_internal_params))
 	runtime.KeepAlive(_internal_slot)
 	runtime.KeepAlive(_internal_params)
 	runtime.KeepAlive(instance_id_buffer)
 	runtime.KeepAlive(key_buffer)
 	runtime.KeepAlive(value_json_buffer)
-	runtime.KeepAlive(ttl_secs_buffer)
+	runtime.KeepAlive(ttl_nanos_buffer)
 	val := ownResult(*(*C.ResultRef)(_internal_slot[0]))
 	asmcall.CallFuncG0P1(unsafe.Pointer(C.c_rust2go_internal_drop), unsafe.Pointer(_internal_slot[1]))
 	return val

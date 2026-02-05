@@ -217,11 +217,11 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         BINDINGS_RUNTIME.runtime.block_on(instance.shut_down());
     }
 
-    fn push_data(instance_id: usize, key: String, value_json: String, ttl_secs: i64) -> Result {
+    fn push_data(instance_id: usize, key: String, value_json: String, ttl_nanos: i64) -> Result {
         let instance = get_instance!(instance_id);
         let value: serde_json::Value = from_json_str!(value_json);
-        let ttl = if ttl_secs > 0 {
-            Some(std::time::Duration::from_secs(ttl_secs as u64))
+        let ttl = if ttl_nanos > 0 {
+            Some(std::time::Duration::from_nanos(ttl_nanos as u64))
         } else {
             None
         };

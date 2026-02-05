@@ -159,12 +159,13 @@ func (c *Cedarling) PushData(key string, value any, ttl *time.Duration) error {
 		return err
 	}
 
-	var ttl_secs int64 = 0
+	var ttl_nanos int64 = 0
 	if ttl != nil && *ttl > 0 {
-		ttl_secs = int64(ttl.Seconds())
+		// Use nanoseconds to preserve full sub-second precision
+		ttl_nanos = ttl.Nanoseconds()
 	}
 
-	result := internal.CallPushData(c.instance_id, key, string(value_json), ttl_secs)
+	result := internal.CallPushData(c.instance_id, key, string(value_json), ttl_nanos)
 	return result.Error()
 }
 

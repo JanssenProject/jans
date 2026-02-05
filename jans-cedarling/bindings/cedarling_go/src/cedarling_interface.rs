@@ -68,7 +68,7 @@ pub trait G2RCall {
     fn shut_down(instance_id: usize);
 
    
-    fn push_data(instance_id: usize, key: String, value_json: String, ttl_secs: i64) -> Result;
+    fn push_data(instance_id: usize, key: String, value_json: String, ttl_nanos: i64) -> Result;
     fn get_data(instance_id: usize, key: String) -> Result;
     fn get_data_entry(instance_id: usize, key: String) -> Result;
     fn remove_data(instance_id: usize, key: String) -> Result;
