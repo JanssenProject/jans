@@ -1,28 +1,6 @@
-<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
 <?page language="xhtml"?>
-<?init class="org.zkoss.zk.ui.util.Composition" template="cbasic.zul"?>
-<z:div xmlns:z="http://www.zkoss.org/2005/zul" xmlns:zk="zk" self="@define(content)"
-       viewModel="@('io.jans.casa.plugins.certauthn.vm.CertAuthnVM')">
-
-    <z:div class="f6 flex justify-center mv4">
-        <div class="w-90 w-75-ns ba bw1 br2 b--light-gray flex flex-column items-center bg-blank">
-
-            <div class="f5 ph5 pv4 tc">
-                ${c:l(vm.messageKey)}
-            </div>
-            <div class="pa3">
-                <zk:zk if="${vm.enroll}">
-                    <a href="${zkService.contextPath}/pl/cert-authn/cert-detail.zul"
-                            class="link ${css.primaryButton}">${labels.usrcert.back}</a>
-                </zk:zk>
-            
-                <zk:zk if="${not vm.enroll}">
-                    <a href="${vm.flowCallbackUrl}" 
-                            class="link ${css.primaryButton}">${labels.general.continue_}</a>
-                </zk:zk>
-            </div>
-
-        </div>
-    </z:div>
-
-</z:div>
+<h:html xmlns:h="xhtml" xmlns:z="http://www.zkoss.org/2005/zul">
+    <h:body>
+        <z:div viewModel="@('io.jans.casa.plugins.certauthn.vm.CertAuthnVM')"></z:div>
+    </h:body>
+</h:html>
