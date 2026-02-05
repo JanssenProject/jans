@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 fn main() {
     // This should trigger the lint
     let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
