@@ -60,7 +60,7 @@ impl<'tcx> LateLintPass<'tcx> for BadStringConcatenation {
             && let TyKind::Path(QPath::Resolved(_, path)) = &ty.kind
             // Checks for the type path segments identifier is `EntityUid` or not
             // e.g., cedar_policy::EntityUid::from_str will have 2 path segments cedar_policy and EntityUid
-            && path.segments[0].ident.name.as_str() == "EntityUid"
+            && path.segments.last().is_some_and(|s| s.ident.name.as_str().eq("EntityUid"))
             // Checks if the function name is `from_str` or not
             && segment.ident.name == sym::from_str
             // Checks if the argument of `from_str` is a reference and extract the expression inside

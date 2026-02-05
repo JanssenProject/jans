@@ -1,5 +1,5 @@
 warning: using `EntityUid::from_str` with format! is inefficient
-  --> $DIR/main.rs:5:16
+  --> $DIR/main.rs:7:16
    |
 LL |     let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try this instead: `EntityUid::from_str("User::/"alice/"")`
@@ -7,7 +7,7 @@ LL |     let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
    = note: `#[warn(bad_string_concatenation)]` on by default
 
 warning: using `EntityUid::from_str` with format! is inefficient
-  --> $DIR/main.rs:9:16
+  --> $DIR/main.rs:11:16
    |
 LL |     let eid2 = EntityUid::from_str(&format!(r#"User::"{}""#, user));
    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -15,16 +15,16 @@ LL |     let eid2 = EntityUid::from_str(&format!(r#"User::"{}""#, user));
    = help: consider using `EntityUid::from_type_name_and_id` instead
 
 warning: using `EntityUid::from_str` with format! is inefficient
-  --> $DIR/main.rs:12:16
+  --> $DIR/main.rs:14:16
    |
 LL |     let eid3 = EntityUid::from_str(&std::format!(r#"User::"bob""#));
    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try this instead: `EntityUid::from_str("User::/"bob/"")`
 
 warning: using `EntityUid::from_str` with format! is inefficient
-  --> $DIR/main.rs:23:16
+  --> $DIR/main.rs:25:16
    |
-LL |     let eid7 = EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+LL |     let eid7 = cedar_policy::EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
    = help: consider using `EntityUid::from_type_name_and_id` instead
 

@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use cedar_policy::EntityUid;
+
 fn main() {
     // This should trigger the lint
     let eid1 = EntityUid::from_str(&format!(r#"User::"alice""#));
@@ -20,14 +22,16 @@ fn main() {
 
     let entity_type_name = "Jans::User";
     let entity_id = "user123";
-    let eid7 = EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
+    let eid7 = cedar_policy::EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
 }
 
 // Mock EntityUid for testing (since we don't want to pull in the actual Cedar crate)
-struct EntityUid;
+mod cedar_policy {
+    pub(super) struct EntityUid;
 
-impl EntityUid {
-    fn from_str(s: &str) -> Result<Self, String> {
-        Ok(EntityUid)
+    impl EntityUid {
+        pub(super) fn from_str(s: &str) -> Result<Self, String> {
+            Ok(EntityUid)
+        }
     }
 }
