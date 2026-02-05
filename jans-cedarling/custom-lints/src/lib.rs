@@ -66,7 +66,7 @@ impl<'tcx> LateLintPass<'tcx> for BadStringConcatenation {
             && segment.ident.name == sym::from_str
             // Checks if the argument of `from_str` is a reference and extract the expression inside
             && let ExprKind::AddrOf(_, _, exp) = arg.kind
-            // Checks if the argument inside `from_str` is a function call then extarct the
+            // Checks if the argument inside `from_str` is a function call then extract the
             // argument of said function
             && let ExprKind::Call(_, [format_call]) = exp.kind
             && let ExprKind::Block(block, _) = format_call.kind
