@@ -91,6 +91,7 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')
     parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
     parser.add_argument('--install-opa', help="Install OPA", action='store_true')
+    parser.add_argument('--install-jans-shib', help="Install Jans Shibboleth", action='store_true')
 
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 

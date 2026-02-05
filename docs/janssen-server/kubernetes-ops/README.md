@@ -29,5 +29,5 @@ This Operation guide helps you learn about the common operations for Janssen on 
 - [Health Check](health-check.md)
 - [TUI K8s](tui-k8s.md)
 - [Custom Attributes](custom-attributes.md)
-- [Jans SAML/Keycloak](jans-saml.md)
+- [Shibboleth IDP](../shibboleth-idp/helm-deployment.md)
 - [Memory Dump](memory-dump.md)
