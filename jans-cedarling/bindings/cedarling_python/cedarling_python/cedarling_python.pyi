@@ -553,23 +553,33 @@ class DataStoreStats:
     memory_alert_threshold: float
     memory_alert_triggered: bool
 
-@final
 class CedarType:
     """
     Represents the type of a Cedar value based on JSON structure.
 
-    Values:
-        String: String type
-        Long: Long (integer) type
-        Bool: Boolean type
-        Set: Set (array) type
-        Record: Record (object) type
-        Entity: Entity reference type
-        Ip: IP address extension type (ipaddr)
-        Decimal: Decimal extension type
-        DateTime: DateTime extension type
-        Duration: Duration extension type
+    This is an enum with the following variants:
+        - String: String type
+        - Long: Long (integer) type
+        - Bool: Boolean type
+        - Set: Set (array) type
+        - Record: Record (object) type
+        - Entity: Entity reference type
+        - Ip: IP address extension type (ipaddr)
+        - Decimal: Decimal extension type
+        - DateTime: DateTime extension type
+        - Duration: Duration extension type
     """
+
+    String: "CedarType"
+    Long: "CedarType"
+    Bool: "CedarType"
+    Set: "CedarType"
+    Record: "CedarType"
+    Entity: "CedarType"
+    Ip: "CedarType"
+    Decimal: "CedarType"
+    DateTime: "CedarType"
+    Duration: "CedarType"
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...

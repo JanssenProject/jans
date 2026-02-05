@@ -25,47 +25,84 @@ use pyo3::prelude::*;
 /// - Duration: Duration extension type
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[pyclass]
-pub struct CedarType {
-    inner: cedarling::CedarType,
+#[pyo3(name = "CedarType")]
+pub enum CedarType {
+    /// String type
+    String,
+    /// Long (integer) type
+    Long,
+    /// Boolean type
+    Bool,
+    /// Set (array) type
+    Set,
+    /// Record (object) type
+    Record,
+    /// Entity reference type
+    Entity,
+    /// IP address extension type (ipaddr)
+    Ip,
+    /// Decimal extension type
+    Decimal,
+    /// DateTime extension type
+    DateTime,
+    /// Duration extension type
+    Duration,
 }
 
 #[pymethods]
 impl CedarType {
     /// Get the string representation of the type
-    fn __str__(&self) -> String {
-        match self.inner {
-            cedarling::CedarType::String => "string".to_string(),
-            cedarling::CedarType::Long => "long".to_string(),
-            cedarling::CedarType::Bool => "bool".to_string(),
-            cedarling::CedarType::Set => "set".to_string(),
-            cedarling::CedarType::Record => "record".to_string(),
-            cedarling::CedarType::Entity => "entity".to_string(),
-            cedarling::CedarType::Ip => "ip".to_string(),
-            cedarling::CedarType::Decimal => "decimal".to_string(),
-            cedarling::CedarType::DateTime => "datetime".to_string(),
-            cedarling::CedarType::Duration => "duration".to_string(),
+    fn __str__(&self) -> &'static str {
+        match self {
+            CedarType::String => "string",
+            CedarType::Long => "long",
+            CedarType::Bool => "bool",
+            CedarType::Set => "set",
+            CedarType::Record => "record",
+            CedarType::Entity => "entity",
+            CedarType::Ip => "ip",
+            CedarType::Decimal => "decimal",
+            CedarType::DateTime => "datetime",
+            CedarType::Duration => "duration",
         }
     }
 
     /// Get the detailed type representation
     fn __repr__(&self) -> String {
-        format!("CedarType({})", self.__str__())
-    }
-
-    /// Equality operator
-    fn __eq__(&self, other: &CedarType) -> bool {
-        self.inner == other.inner
+        format!("CedarType.{}", self.__str__().to_uppercase())
     }
 }
 
 impl From<cedarling::CedarType> for CedarType {
     fn from(value: cedarling::CedarType) -> Self {
-        Self { inner: value }
+        match value {
+            cedarling::CedarType::String => CedarType::String,
+            cedarling::CedarType::Long => CedarType::Long,
+            cedarling::CedarType::Bool => CedarType::Bool,
+            cedarling::CedarType::Set => CedarType::Set,
+            cedarling::CedarType::Record => CedarType::Record,
+            cedarling::CedarType::Entity => CedarType::Entity,
+            cedarling::CedarType::Ip => CedarType::Ip,
+            cedarling::CedarType::Decimal => CedarType::Decimal,
+            cedarling::CedarType::DateTime => CedarType::DateTime,
+            cedarling::CedarType::Duration => CedarType::Duration,
+        }
     }
 }
 
 impl From<CedarType> for cedarling::CedarType {
     fn from(value: CedarType) -> Self {
-        value.inner
+        match value {
+            CedarType::String => cedarling::CedarType::String,
+            CedarType::Long => cedarling::CedarType::Long,
+            CedarType::Bool => cedarling::CedarType::Bool,
+            CedarType::Set => cedarling::CedarType::Set,
+            CedarType::Record => cedarling::CedarType::Record,
+            CedarType::Entity => cedarling::CedarType::Entity,
+            CedarType::Ip => cedarling::CedarType::Ip,
+            CedarType::Decimal => cedarling::CedarType::Decimal,
+            CedarType::DateTime => cedarling::CedarType::DateTime,
+            CedarType::Duration => cedarling::CedarType::Duration,
+        }
     }
 }
