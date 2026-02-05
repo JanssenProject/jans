@@ -260,9 +260,8 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
-    jans_saml_installer = JansSamlInstaller()
     jans_lock_installer = JansLockInstaller()
-
+    shibboleth_installer = ShibbolethInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
@@ -421,9 +420,9 @@ def main():
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
 
-                if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
-                    jans_saml_installer.start_installation()
+                if (Config.installed_instance and shibboleth_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(shibboleth_installer.install_var)):
+                    shibboleth_installer.start_installation()
 
                 if (Config.installed_instance and jans_lock_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_lock_installer.install_var)):

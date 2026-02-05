@@ -8,6 +8,7 @@ on:
       - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
+      - 'CHANGELOG.md'
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
+      - 'CHANGELOG.md'
   release:
     types:
       - published
@@ -87,6 +89,12 @@ jobs:
           github.event_name == 'workflow_dispatch'
         run: |
           mv ../mkdocs.yml mkdocs.yml
+          cp ../CHANGELOG.md docs/CHANGELOG.md
+
+      - name: Sync CHANGELOG to docs
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          cp CHANGELOG.md docs/CHANGELOG.md
 
       - name: Copy generated chart from main
         run: |
