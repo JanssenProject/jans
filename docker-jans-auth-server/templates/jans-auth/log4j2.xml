@@ -10,9 +10,7 @@
         </Console>
 
         <RollingFile name="JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE" fileName="${sys:log.base}/logs/http_request_response.log" filePattern="${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
-
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
                 <SizeBasedTriggeringPolicy size="250 MB" />
@@ -21,9 +19,7 @@
         </RollingFile>
 
         <RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-auth.log" filePattern="${sys:log.base}/logs/jans-auth-%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
-
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
                 <SizeBasedTriggeringPolicy size="250 MB" />
@@ -32,9 +28,7 @@
         </RollingFile>
 
         <RollingFile name="JANS_AUTH_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence.log" filePattern="${sys:log.base}/logs/jans-auth_persistence-%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
-
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
                 <SizeBasedTriggeringPolicy size="250 MB" />
@@ -43,9 +37,7 @@
         </RollingFile>
 
         <RollingFile name="JANS_AUTH_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_duration.log" filePattern="${sys:log.base}/logs/jans-auth_persistence_duration-%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
-
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
                 <SizeBasedTriggeringPolicy size="250 MB" />
@@ -54,7 +46,6 @@
         </RollingFile>
 
         <RollingFile name="JANS_AUTH_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_script.log" filePattern="${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
 
             <Policies>
@@ -65,9 +56,7 @@
         </RollingFile>
 
         <RollingFile name="JANS_AUTH_AUDIT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_audit.log" filePattern="${sys:log.base}/logs/jans-auth_audit-%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout pattern="%d %-5p [%macAddr] [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
-
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
                 <SizeBasedTriggeringPolicy size="250 MB" />
@@ -77,8 +66,8 @@
 
         <RollingFile name="JANS_LOCK_FILE" fileName="${sys:log.base}/logs/jans-lock.log" filePattern="${sys:log.base}/logs/jans-lock-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
-
             <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
                 <SizeBasedTriggeringPolicy size="5 MB" />
             </Policies>
             <DefaultRolloverStrategy max="30" />
