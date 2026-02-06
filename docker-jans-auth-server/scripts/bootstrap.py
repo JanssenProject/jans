@@ -83,8 +83,8 @@ def main():
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
 
-    if lock_enabled := as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
-        logger.info(f"The jans-lock plugin is enabled via CN_LOCK_ENABLED={lock_enabled}")
+    if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
+        logger.info("The jans-lock plugin is enabled via CN_LOCK_ENABLED=true")
 
         # copy required JARs to run jans-lock plugin
         copy_lock_libs()

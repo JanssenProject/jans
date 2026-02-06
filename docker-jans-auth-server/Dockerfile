@@ -95,7 +95,7 @@ RUN set -e \
 
 # dependencies to run jans-lock as plugin
 RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
-    && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/custom/_lock_libs \
+    && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/_lock_libs \
     && rm -f /tmp/lock-svc-deps.zip
 
 # ===========
