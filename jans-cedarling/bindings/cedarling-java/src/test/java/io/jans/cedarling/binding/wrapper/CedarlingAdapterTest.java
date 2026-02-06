@@ -4,6 +4,7 @@ import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
 import io.jans.cedarling.binding.wrapper.utils.AppUtils;
 import org.testng.annotations.*;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.util.*;
 
@@ -132,11 +133,16 @@ public class CedarlingAdapterTest {
         assertNotNull(result2);
         assertEquals(result2.getString("nested"), "data");
 
-        // Push array as JSON string
+        // Push array as JSON string - getData should throw JSONException when trying to parse non-object JSON
         String arrayJson = "[1, 2, 3]";
         adapter.pushData("key3", arrayJson, null);
-        JSONObject result3 = adapter.getData("key3");
-        assertNotNull(result3);
+        try {
+            adapter.getData("key3");
+            fail("Expected JSONException when calling getData on non-object JSON");
+        } catch (JSONException e) {
+            // Expected: JSONObject constructor throws JSONException when parsing array string
+            assertNotNull(e);
+        }
     }
 
     @Test
@@ -213,7 +219,7 @@ public class CedarlingAdapterTest {
         adapter.pushData("key2", value2);
 
         String arrayJson = "[1, 2, 3]";
-        adapter.pushData("key3", arrayJson);
+        adapter.pushData("key3", arrayJson, null);
 
         List<DataEntry> entries = adapter.listData();
         assertNotNull(entries);
@@ -244,8 +250,8 @@ public class CedarlingAdapterTest {
 
         DataStoreStats statsAfter = adapter.getStats();
         assertNotNull(statsAfter);
-        assertTrue(statsAfter.getEntryCount() >= 2);
-        assertNotNull(statsAfter.getMetricsEnabled());
+        assertEquals(statsAfter.getEntryCount(), 2L);
+        assertTrue(statsAfter.getMetricsEnabled());
         assertTrue(statsAfter.getTotalSizeBytes() >= 0);
     }
 

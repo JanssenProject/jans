@@ -77,6 +77,9 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushData(String key, JSONObject value, Long ttlSecs) throws DataException {
+        if (value == null) {
+            throw new DataException("value cannot be null");
+        }
         JsonValue jsonValue = new JsonValue(value.toString());
         cedarling.pushDataCtx(key, jsonValue, ttlSecs);
     }
@@ -92,6 +95,9 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushData(String key, String value, Long ttlSecs) throws DataException {
+        if (value == null) {
+            throw new DataException("value cannot be null");
+        }
         JsonValue jsonValue = new JsonValue(value);
         cedarling.pushDataCtx(key, jsonValue, ttlSecs);
     }
@@ -104,6 +110,17 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushData(String key, JSONObject value) throws DataException {
+        pushData(key, value, null);
+    }
+
+    /**
+     * Push a value into the data store without TTL (uses default from config).
+     *
+     * @param key The key for the data entry
+     * @param value The value to store (as JSON string)
+     * @throws DataException If the operation fails
+     */
+    public void pushData(String key, String value) throws DataException {
         pushData(key, value, null);
     }
 
