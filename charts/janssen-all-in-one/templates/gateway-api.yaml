@@ -443,9 +443,8 @@ spec:
         statusCode: 301
   {{- end }}
 
----
-
 {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
+---
 {{- /* ======================================================== */}}
 {{- /* ROUTE 4: gRPC APPS                                       */}}
 {{- /* These endpoints use gRPC                                 */}}

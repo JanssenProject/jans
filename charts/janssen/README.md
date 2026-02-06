@@ -343,7 +343,7 @@ Kubernetes: `>=v1.23.0-0`
 | global.auth-server.ingress.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
 | global.auth-server.ingress.firebaseMessagingLabels | object | `{}` | Firebase Messaging ingress resource labels. key app is taken |
 | global.auth-server.ingress.lockAdditionalAnnotations | object | `{}` | Lock ingress resource additional annotations. |
-| global.auth-server.ingress.lockAuditEnabled | bool | `false` | Enabled endpoint /io.jans.lock.audit.AuditService |
+| global.auth-server.ingress.lockAuditEnabled | bool | `false` | Enable endpoint /io.jans.lock.audit.AuditService |
 | global.auth-server.ingress.lockConfigAdditionalAnnotations | object | `{}` | Lock config ingress resource additional annotations. |
 | global.auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration |
 | global.auth-server.ingress.lockConfigLabels | object | `{}` | Lock config ingress resource labels. key app is taken |

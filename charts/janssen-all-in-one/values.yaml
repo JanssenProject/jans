@@ -217,7 +217,7 @@ auth-server:
     u2fConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration
     lockConfigEnabled: false
-    # -- Enabled endpoint /io.jans.lock.audit.AuditService
+    # -- Enable endpoint /io.jans.lock.audit.AuditService
     lockAuditEnabled: false
     # -- Lock config ingress resource labels. key app is taken
     lockConfigLabels: {}

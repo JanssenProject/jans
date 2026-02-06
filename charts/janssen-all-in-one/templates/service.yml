@@ -33,9 +33,8 @@ spec:
 {{ toYaml . | indent 4 }}
   {{- end }}
 
----
-
 {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
+---
 apiVersion: v1
 kind: Service
 metadata:
