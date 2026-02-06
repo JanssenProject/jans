@@ -1,0 +1,12 @@
+[package]
+name = "protobuf-to-cedar"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "protobuf_to_cedar"
+path = "protobuf_to_cedar.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

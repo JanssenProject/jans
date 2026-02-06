@@ -152,7 +152,7 @@ message EditPhoto {
 // Delete photo action
 message DeletePhoto {
   TypeCategory category = 100 [default = ACTION_TYPE];
-  optional PhotoAction memberOfTypes = 101;
+  PhotoAction memberOfTypes = 101;
 }
 
 // Download photo action
