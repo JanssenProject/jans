@@ -28,8 +28,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_lock_dynamic_config(conf, manager):
     should_update = False
 
-    hostname = manager.config.get("hostname")
-
     # add missing top-level keys
     hostname = manager.config.get("hostname")
     for missing_key, value in [
