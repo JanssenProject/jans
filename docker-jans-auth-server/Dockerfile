@@ -69,6 +69,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
 
 RUN mkdir -p /usr/share/java \
     ${JETTY_BASE}/jans-auth/_libs \
+    ${JETTY_BASE}/jans-auth/_lock_libs \
     ${JETTY_BASE}/jans-auth/custom/libs
 
 ARG TWILIO_VERSION=7.17.0
@@ -84,17 +85,17 @@ RUN set -e \
         wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
     done
 
-# Download jans-lock JARs to _libs (conditionally copied via Python script when lock is enabled)
+# Download jans-lock JARs to _lock_libs (conditionally copied via Python script when lock is enabled)
 # Using set -e to ensure any failed wget aborts the build
 RUN set -e \
     && for lock_lib in jans-lock-service jans-lock-model jans-lock-cedarling; \
     do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs" || exit 1; \
+        wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_lock_libs" || exit 1; \
     done
 
 # dependencies to run jans-lock as plugin
 RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
-    && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/custom/libs \
+    && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/custom/_lock_libs \
     && rm -f /tmp/lock-svc-deps.zip
 
 # ===========
@@ -314,6 +315,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown 1000:0 ${JETTY_BASE}/jans-auth/webapps/jans-auth.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_lock_libs \
     && chown -R 1000:0 /app/templates
 
 USER 1000

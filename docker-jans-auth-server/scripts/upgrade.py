@@ -53,6 +53,9 @@ def _transform_lock_dynamic_config(conf, manager):
             "externalPolicyStoreUri": ""
         }),
         ("auditPersistenceMode", "internal"),
+        ("grpcConfiguration", {
+            "serverMode": "bridge",
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -79,43 +82,6 @@ def _transform_lock_dynamic_config(conf, manager):
     if conf["protectionMode"] == "CEDARLING":
         conf["protectionMode"] = "cedarling"
         should_update = True
-
-    # by default, gRPC port in bridge mode uses the same port as jetty
-    jetty_port = os.environ.get("CN_AUTH_JETTY_PORT", "8080")
-    grpc_port = os.environ.get("CN_LOCK_GRPC_PORT", jetty_port)
-    grpc_mode = os.environ.get("CN_LOCK_GRPC_SERVER_MODE", "bridge")
-
-    if any([
-        "CN_LOCK_GRPC_SERVER_MODE" in os.environ,
-        "CN_LOCK_GRPC_PORT" in os.environ,
-    ]):
-        logger.warning(
-            "Detected experimental env vars CN_LOCK_GRPC_SERVER_MODE or CN_LOCK_GRPC_PORT. "
-            "It is recommended to use the default gRPC server mode and port by removing these env vars."
-        )
-
-    try:
-        grpc_port = int(grpc_port)
-    except (TypeError, ValueError):
-        logger.warning(f"Found invalid value for CN_LOCK_GRPC_PORT={grpc_port}; fallback to default port {jetty_port}")
-        grpc_port = int(jetty_port)
-
-    if "grpcConfiguration" not in conf:
-        conf["grpcConfiguration"] = {
-            "serverMode": grpc_mode,
-            "grpcPort": grpc_port,
-        }
-        should_update = True
-    else:
-        # check for keys that can be modified via env vars
-        for attr in [
-            ("serverMode", "bridge", grpc_mode),
-            ("grpcPort", 8080, grpc_port),
-
-        ]:
-            if conf["grpcConfiguration"].get(attr[0], attr[1]) != attr[2]:
-                conf["grpcConfiguration"][attr[0]] = attr[2]
-                should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update

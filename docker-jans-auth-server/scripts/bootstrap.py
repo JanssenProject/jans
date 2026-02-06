@@ -83,9 +83,12 @@ def main():
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
 
-    copy_builtin_libs()
+    if lock_enabled := as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
+        logger.info(f"The jans-lock plugin is enabled via CN_LOCK_ENABLED={lock_enabled}")
 
-    if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
+        # copy required JARs to run jans-lock plugin
+        copy_lock_libs()
+
         with manager.create_lock("lock-setup"):
             persistence_setup = LockPersistenceSetup(manager)
             persistence_setup.import_ldif_files()
@@ -173,18 +176,14 @@ def configure_logging():
         f.write(tmpl.safe_substitute(config))
 
 
-def copy_builtin_libs():
-    lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
-
-    if not lock_enabled:
-        return
-
-    libs_path = Path("/opt/jans/jetty/jans-auth/_libs")
-    lock_jars = list(libs_path.glob("jans-lock*.jar"))
+def copy_lock_libs():
+    libs_path = Path("/opt/jans/jetty/jans-auth/_lock_libs")
+    lock_jars = list(libs_path.glob("*.jar"))
 
     if not lock_jars:
         logger.warning(
-            f"CN_LOCK_ENABLED is true but no jans-lock*.jar files were found in {libs_path}"
+            f"Required JAR files to run jans-lock plugin were not found in {libs_path}. "
+            "The plugin may not run properly and affect jans-auth server."
         )
         return
 
