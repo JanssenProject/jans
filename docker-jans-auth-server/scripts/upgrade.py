@@ -38,7 +38,7 @@ def _transform_lock_dynamic_config(conf, manager):
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
         ("tokenUrl", f"https://{hostname}/jans-auth/restv1/token"),
         ("statEnabled", True),
-        ("protectionMode", "cedarling"),
+        ("protectionMode", "oauth"),
         ("cedarlingConfiguration", {
             "enabled": True,
             "policySources": [
