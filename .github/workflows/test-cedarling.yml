@@ -42,8 +42,8 @@ jobs:
       with:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
+    - uses: cargo-bins/cargo-binstall@main
     - name: Install dylint
-      uses: cargo-bins/cargo-binstall@main
       run: |
         cargo binstall cargo-dylint --version 5.0.0 --locked
         cargo binstall dylint-link --version 5.0.0 --locked
