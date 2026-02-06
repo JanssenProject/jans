@@ -445,6 +445,7 @@ spec:
 
 ---
 
+{{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
 {{- /* ======================================================== */}}
 {{- /* ROUTE 4: gRPC APPS                                       */}}
 {{- /* These endpoints use gRPC                                 */}}
@@ -476,7 +477,6 @@ spec:
   - {{ .Values.fqdn | quote }}
   rules:
   {{- /* 1. Lock Server Audit */}}
-  {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
   {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
   {{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
   {{- /* HTTPRoute matches for istio */}}
@@ -511,6 +511,6 @@ spec:
     - name: {{ $svcName }}-grpc
       port: 50051
   {{- end }}
-  {{- end }}
+{{- end }}
 
 {{- end }}
