@@ -25,6 +25,10 @@ fn main() {
     let eid7 = cedar_policy::EntityUid::from_str(&format!(r#"{entity_type_name}::"{entity_id}""#));
 
     let eid8 = cedar_policy::EntityUid::from_str(&format!(r#"Jans::User::"bob123""#));
+
+    // This should be flagged as well since it also has an impact on the performance
+    let raw_eid = format!(r#"{entity_type_name}::"{entity_id}""#);
+    let eid9 = EntityUid::from_str(&raw_eid);
 }
 
 // Mock EntityUid for testing (since we don't want to pull in the actual Cedar crate)

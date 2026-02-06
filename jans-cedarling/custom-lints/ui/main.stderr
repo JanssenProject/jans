@@ -34,5 +34,17 @@ warning: using `EntityUid::from_str` with format! is inefficient
 LL |     let eid8 = cedar_policy::EntityUid::from_str(&format!(r#"Jans::User::"bob123""#));
    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try this instead: `cedar_policy::EntityUid::from_str("Jans::User::/"bob123/"")`
 
-warning: 5 warnings emitted
+warning: using `EntityUid::from_str` with format! is inefficient
+  --> $DIR/main.rs:31:16
+   |
+LL |     let eid9 = EntityUid::from_str(&raw_eid);
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: variable defined here
+  --> $DIR/main.rs:30:5
+   |
+LL |     let raw_eid = format!(r#"{entity_type_name}::"{entity_id}""#);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: 6 warnings emitted
 

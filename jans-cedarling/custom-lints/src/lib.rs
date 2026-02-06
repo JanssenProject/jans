@@ -12,13 +12,13 @@ extern crate rustc_hir;
 extern crate rustc_span;
 
 use clippy_utils::{
-    diagnostics::{span_lint_and_help, span_lint_and_sugg},
+    diagnostics::{span_lint_and_help, span_lint_and_sugg, span_lint_and_then},
     source::snippet,
     sym,
 };
 use rustc_ast::LitKind::Str;
 use rustc_errors::Applicability;
-use rustc_hir::{Expr, ExprKind, QPath, TyKind};
+use rustc_hir::{Expr, ExprKind, Node, QPath, TyKind, def::Res::Local};
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_span::{Symbol, source_map::Spanned};
 
@@ -66,66 +66,70 @@ impl<'tcx> LateLintPass<'tcx> for BadStringConcatenation {
             && segment.ident.name == sym::from_str
             // Checks if the argument of `from_str` is a reference and extract the expression inside
             && let ExprKind::AddrOf(_, _, exp) = arg.kind
-            // Checks if the argument inside `from_str` is a function call then extract the
-            // argument of said function
-            && let ExprKind::Call(_, [format_call]) = exp.kind
-            && let ExprKind::Block(block, _) = format_call.kind
-            && is_format_macro(cx, block.expr)
-            && let Some(bexpr) = block.expr
-            && let ExprKind::Call(_, [format_arg]) = &bexpr.kind
         {
-            if let Some(arg) = extract_string_literal(format_arg) {
-                let ty_snippet = snippet(cx, ty.span, "EntityUid");
-                span_lint_and_sugg(
-                    cx,
-                    BAD_STRING_CONCATENATION,
-                    expr.span,
-                    "using `EntityUid::from_str` with format! is inefficient",
-                    "try this instead",
-                    format!("{ty_snippet}::from_str({arg:?})"),
-                    Applicability::MachineApplicable,
-                );
-            } else {
-                span_lint_and_help(
-                    cx,
-                    BAD_STRING_CONCATENATION,
-                    expr.span,
-                    "using `EntityUid::from_str` with format! is inefficient",
-                    None,
-                    "consider using `EntityUid::from_type_name_and_id` instead",
-                );
+            // Checks if the argument inside `from_str` is a function call or a definition
+            match exp.kind {
+                ExprKind::Path(QPath::Resolved(_, path)) => {
+                    if let Local(id) = path.res
+                        && let Node::Pat(pattern) = cx.tcx.hir_node(id)
+                        && let Node::LetStmt(parent) = cx.tcx.parent_hir_node(pattern.hir_id)
+                        && let Some(init) = parent.init
+                        && let ExprKind::Call(_, [arg]) = &init.kind
+                        && extract_format_args(arg).is_some()
+                    {
+                        span_lint_and_then(
+                            cx,
+                            BAD_STRING_CONCATENATION,
+                            expr.span,
+                            "using `EntityUid::from_str` with format! is inefficient",
+                            |diag| {
+                                diag.span_note(parent.span, "variable defined here");
+                            },
+                        );
+                    }
+                },
+                ExprKind::Call(_, [arg]) => {
+                    // Checks if the given expression is a format macro
+                    if let Some([format_arg]) = extract_format_args(arg) {
+                        if let Some(arg) = extract_string_literal(format_arg) {
+                            let ty_snippet = snippet(cx, ty.span, "EntityUid");
+                            span_lint_and_sugg(
+                                cx,
+                                BAD_STRING_CONCATENATION,
+                                expr.span,
+                                "using `EntityUid::from_str` with format! is inefficient",
+                                "try this instead",
+                                format!("{ty_snippet}::from_str({arg:?})"),
+                                Applicability::MachineApplicable,
+                            );
+                        } else {
+                            span_lint_and_help(
+                                cx,
+                                BAD_STRING_CONCATENATION,
+                                expr.span,
+                                "using `EntityUid::from_str` with format! is inefficient",
+                                None,
+                                "consider using `EntityUid::from_type_name_and_id` instead",
+                            );
+                        }
+                    }
+                },
+                _ => {},
             }
         }
     }
 }
 
-/// Checks if the given expression is a format macro or not
-fn is_format_macro<'tcx>(cx: &LateContext<'tcx>, expr: Option<&Expr<'tcx>>) -> bool {
-    if let Some(expr) = expr
-        && let ExprKind::Call(callee, _) = &expr.kind
-        && let ExprKind::Path(QPath::Resolved(_, path)) = &callee.kind
+/// Checks if the given expression is a format macro or not and returns the arguments
+fn extract_format_args<'tcx>(expr: &Expr<'tcx>) -> Option<&'tcx [Expr<'tcx>]> {
+    if let ExprKind::Block(block, _) = expr.kind
+        && let Some(bexpr) = block.expr
+        && let ExprKind::Call(_, args) = &bexpr.kind
     {
-        if path.segments.len() >= 2 {
-            let last_two: Vec<_> = path
-                .segments
-                .iter()
-                .rev()
-                .take(2)
-                .map(|s| s.ident.name.as_str())
-                .collect();
-
-            if last_two[0] == "format" && last_two[1] == "fmt" {
-                return true;
-            }
-        }
-
-        // Fallback: check def_id
-        if let Some(def_id) = path.res.opt_def_id() {
-            let path_str = cx.tcx.def_path_str(def_id);
-            return matches!(path_str.as_str(), "alloc::fmt::format" | "std::fmt::format");
-        }
+        return Some(args);
     }
-    false
+
+    None
 }
 
 // Checks if the argument of format macro is a string literal and extract it
