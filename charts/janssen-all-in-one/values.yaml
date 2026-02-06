@@ -185,7 +185,7 @@ auth-server:
     scriptLogTarget: "FILE"
     # -- jans-auth_script.log level
     scriptLogLevel: "INFO"
-    # -- jans-auth_script.log target
+    # -- jans-auth_audit.log target
     auditStatsLogTarget: "FILE"
     # -- jans-auth_audit.log level
     auditStatsLogLevel: "INFO"

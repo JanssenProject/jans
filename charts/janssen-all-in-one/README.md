@@ -61,7 +61,7 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server-key-rotation.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 | auth-server.appLoggers | object | `{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","lockLogLevel":"INFO","lockLogTarget":"STDOUT","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | auth-server.appLoggers.auditStatsLogLevel | string | `"INFO"` | jans-auth_audit.log level |
-| auth-server.appLoggers.auditStatsLogTarget | string | `"FILE"` | jans-auth_script.log target |
+| auth-server.appLoggers.auditStatsLogTarget | string | `"FILE"` | jans-auth_audit.log target |
 | auth-server.appLoggers.authLogLevel | string | `"INFO"` | jans-auth.log level |
 | auth-server.appLoggers.authLogTarget | string | `"STDOUT"` | jans-auth.log target |
 | auth-server.appLoggers.enableStdoutLogPrefix | string | `"true"` | Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e auth-server-script ===> 2022-12-20 17:49:55,744 INFO |
