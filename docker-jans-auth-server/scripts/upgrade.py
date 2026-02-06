@@ -80,13 +80,30 @@ def _transform_lock_dynamic_config(conf, manager):
         conf["protectionMode"] = "cedarling"
         should_update = True
 
+    # by default, gRPC port in bridge mode uses the same port as jetty
+    jetty_port = os.environ.get("CN_AUTH_JETTY_PORT", "8080")
+    grpc_port = os.environ.get("CN_LOCK_GRPC_PORT", jetty_port)
     grpc_mode = os.environ.get("CN_LOCK_GRPC_SERVER_MODE", "bridge")
-    grpc_port = os.environ.get("CN_LOCK_GRPC_PORT", "8080")
+
+    if any([
+        "CN_LOCK_GRPC_SERVER_MODE" in os.environ,
+        "CN_LOCK_GRPC_PORT" in os.environ,
+    ]):
+        logger.warning(
+            "Detected experimental env vars CN_LOCK_GRPC_SERVER_MODE or CN_LOCK_GRPC_PORT. "
+            "It is recommended to use the default gRPC server mode and port by removing these env vars."
+        )
+
+    try:
+        grpc_port = int(grpc_port)
+    except (TypeError, ValueError):
+        logger.warning(f"Found invalid value for CN_LOCK_GRPC_PORT={grpc_port}; fallback to default port {jetty_port}")
+        grpc_port = int(jetty_port)
 
     if "grpcConfiguration" not in conf:
         conf["grpcConfiguration"] = {
             "serverMode": grpc_mode,
-            "grpcPort": int(grpc_port),
+            "grpcPort": grpc_port,
         }
         should_update = True
     else:

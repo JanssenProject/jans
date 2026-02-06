@@ -96,7 +96,6 @@ RUN set -e \
 RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
     && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/custom/libs \
     && rm -f /tmp/lock-svc-deps.zip
-    # && rm -f ${JETTY_BASE}/jans-auth/custom/libs/grpc-bridge-runtime-*.jar \
 
 # ===========
 # Assets sync

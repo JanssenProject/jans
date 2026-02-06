@@ -252,6 +252,9 @@ RUN chmod +x /app/bin/entrypoint.sh
 # ${JETTY_BASE}/jans-link/logs \
 # /var/jans/link-snapshots \
 
+# @NOTE: jans-shibboleth support is temporarily disabled
+# /opt/idp
+
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -284,13 +287,14 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java
-    # \
-    # /opt/idp
 
 # @NOTE: jans-link is temporarily disabled
 # ${JETTY_BASE}/jans-link/resources \
 # ${JETTY_BASE}/jans-link/logs \
 # /var/jans/link-snapshots \
+
+# @NOTE: jans-shibboleth support is temporarily disabled
+# /opt/idp
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -323,8 +327,6 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/log/adminui \
     /etc/nginx/jans-aio \
     /usr/share/java
-    # \
-    # /opt/idp
 
 RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \
