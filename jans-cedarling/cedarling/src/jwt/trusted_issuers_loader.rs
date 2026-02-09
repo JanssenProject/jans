@@ -26,7 +26,7 @@ use crate::http::spawn_task;
 #[derive(Clone)]
 pub(super) struct TrustedIssuerLoader {
     pub(super) jwt_config: JwtConfig,
-    pub(super) status_lists: Arc<StatusListCache>,
+    pub(super) status_lists: StatusListCache,
     pub(super) issuer_configs: Arc<IssuerIndex>,
     pub(super) validators: Arc<JwtValidatorCache>,
     pub(super) key_service: Arc<KeyService>,
@@ -273,7 +273,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -326,7 +326,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -400,7 +400,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -442,7 +442,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -473,7 +473,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()), // empty key service
@@ -497,7 +497,7 @@ mod test {
                 jwt_status_validation: false,
                 ..Default::default()
             },
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(key_service_with_keys),
@@ -531,7 +531,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -594,7 +594,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -655,7 +655,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -710,7 +710,7 @@ mod test {
 
         let loader = TrustedIssuerLoader {
             jwt_config,
-            status_lists: Arc::new(StatusListCache::default()),
+            status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),

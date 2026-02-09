@@ -148,7 +148,7 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
-        let status_lists = Arc::new(StatusListCache::default());
+        let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());
         let key_service = Arc::new(KeyService::new());
