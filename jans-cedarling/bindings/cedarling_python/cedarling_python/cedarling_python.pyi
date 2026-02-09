@@ -4,6 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from typing import Optional, List, final, Dict, Any
+from enum import Enum
 
 @final
 class BootstrapConfig:
@@ -553,7 +554,7 @@ class DataStoreStats:
     memory_alert_threshold: float
     memory_alert_triggered: bool
 
-class CedarType:
+class CedarType(Enum):
     """
     Represents the type of a Cedar value based on JSON structure.
 
@@ -570,16 +571,16 @@ class CedarType:
         - Duration: Duration extension type
     """
 
-    String: "CedarType"
-    Long: "CedarType"
-    Bool: "CedarType"
-    Set: "CedarType"
-    Record: "CedarType"
-    Entity: "CedarType"
-    Ip: "CedarType"
-    Decimal: "CedarType"
-    DateTime: "CedarType"
-    Duration: "CedarType"
+    String = "String"
+    Long = "Long"
+    Bool = "Bool"
+    Set = "Set"
+    Record = "Record"
+    Entity = "Entity"
+    Ip = "Ip"
+    Decimal = "Decimal"
+    DateTime = "DateTime"
+    Duration = "Duration"
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
