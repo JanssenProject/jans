@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{ include = "main" }]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 flask = "^3.1.1"
 flask-smorest = "^0.45.0"
 pyyaml = "^6.0.2"

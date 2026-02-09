@@ -542,7 +542,7 @@ jobs:
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
         command: build
-        args: --release -i python3.10 python3.11
+        args: --release -i python3.11
 
     - name: Sign and upload Cedarling Python wheels
       id: sign-cedarling
@@ -560,7 +560,6 @@ jobs:
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
         gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.asc
 
