@@ -11,7 +11,9 @@
             "roundTripMaxTime": 45
         },
         "io.jans.casa.cert.oneStepAuthn": {
-            "useAcctLinking": false,
+            "useAcctLinking": false
+        },
+        "io.jans.casa.cert.standaloneOneStepAuthn": {
             "mappingClassField": "STRAIGHT"
         }
     }
