@@ -287,7 +287,7 @@ impl Cedarling {
     /// :param value: The value to store (dict, list, str, int, float, bool)
     /// :param ttl_secs: Optional TTL in seconds (None uses default from config)
     /// :raises DataError: If the operation fails
-    #[pyo3(signature = (key, value, *, ttl_secs = None))]
+    #[pyo3(signature = (key, value, ttl_secs = None))]
     fn push_data_ctx(
         &self,
         key: &str,

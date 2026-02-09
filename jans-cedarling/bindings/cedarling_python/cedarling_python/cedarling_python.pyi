@@ -273,7 +273,7 @@ class Cedarling:
     def shut_down(self): ...
 
     def push_data_ctx(
-        self, key: str, value: Any, *, ttl_secs: Optional[int] = None
+        self, key: str, value: Any, ttl_secs: Optional[int] = None
     ) -> None:
         """
         Push a value into the data store with an optional TTL.
