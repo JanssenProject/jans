@@ -85,7 +85,7 @@ Kubernetes: `>=v1.22.0-0`
 | email | string | `"support@jans.io"` | Email address of the administrator usually. Used for certificate creation. |
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
+| image.repository | string | `"ghcr.io/janssenproject/jans/configurator"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |

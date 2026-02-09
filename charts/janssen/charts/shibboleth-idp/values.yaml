@@ -2,9 +2,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: janssenproject/shibboleth
+  repository: ghcr.io/janssenproject/jans/shibboleth
   pullPolicy: IfNotPresent
-  tag: "5.1.6_dev"
+  tag: "0.0.0-nightly"
 
 replicaCount: 1
 

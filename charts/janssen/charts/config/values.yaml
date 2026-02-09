@@ -134,7 +134,7 @@ countryCode: US
 email: support@jans.io
 image:
   # -- Image  to use for deploying.
-  repository: janssenproject/configurator
+  repository: ghcr.io/janssenproject/jans/configurator
   # -- Image  tag to use for deploying.
   tag: 0.0.0-nightly
   # -- Image Pull Secrets
