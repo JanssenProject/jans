@@ -495,7 +495,22 @@ async fn test_memory_log_interface() {
             .get_log_by_id(log_id_str.as_str())
             .expect("get_log_by_id should not throw error");
 
-        assert_ne!(log_val, JsValue::NULL, "log result should be not null")
+        assert_ne!(log_val, JsValue::NULL, "log result should be not null");
+
+        // Verify log entry has expected structure
+        let log_obj = Object::unchecked_from_js(log_val);
+        let log_id = Reflect::get(&log_obj, &"id".into())
+            .expect("log should have id field")
+            .as_string()
+            .expect("id should be a string");
+        assert_eq!(log_id, log_id_str, "log id should match the requested id");
+
+        // Verify log has log_kind field
+        let log_kind = Reflect::get(&log_obj, &"log_kind".into())
+            .expect("log should have log_kind field")
+            .as_string()
+            .expect("log_kind should be a string");
+        assert!(!log_kind.is_empty(), "log_kind should not be empty");
     }
 
     let pop_logs_result = instance.pop_logs().expect("pop_logs not throw error");
@@ -995,6 +1010,13 @@ async fn test_data_api_push_and_get() {
         .get_data_ctx("key2")
         .expect("get_data_ctx should succeed");
     assert_ne!(result2, JsValue::NULL, "result should not be null");
+    let result_obj: serde_json::Value =
+        serde_wasm_bindgen::from_value(result2).expect("result should be deserializable to object");
+    assert_eq!(
+        result_obj,
+        json!({"nested": "data"}),
+        "retrieved value should match pushed value"
+    );
 
     // Push array
     let value3 = serde_wasm_bindgen::to_value(&json!([1, 2, 3]))
@@ -1007,6 +1029,13 @@ async fn test_data_api_push_and_get() {
         .get_data_ctx("key3")
         .expect("get_data_ctx should succeed");
     assert_ne!(result3, JsValue::NULL, "result should not be null");
+    let result_array: serde_json::Value =
+        serde_wasm_bindgen::from_value(result3).expect("result should be deserializable to array");
+    assert_eq!(
+        result_array,
+        json!([1, 2, 3]),
+        "retrieved value should match pushed value"
+    );
 }
 
 /// Test Data API - get data entry with metadata
@@ -1042,11 +1071,12 @@ async fn test_data_api_get_data_entry_ctx() {
         .expect("key should be a string");
     assert_eq!(key, "test_key", "entry key should match");
 
-    let _access_count = Reflect::get(&entry_obj, &"access_count".into())
+    let access_count = Reflect::get(&entry_obj, &"access_count".into())
         .expect("entry should have access_count field")
         .as_f64()
         .expect("access_count should be a number") as u64;
-    // access_count is u64, so it's always >= 0
+    // After one get_data_entry_ctx call, access_count should be 1
+    assert_eq!(access_count, 1, "access_count should be 1 after one access");
 }
 
 /// Test Data API - remove data
@@ -1281,8 +1311,11 @@ async fn test_data_api_get_stats_ctx() {
         stats_after.entry_count, 2,
         "entry count should be 2 after pushing data"
     );
-    // total_size_bytes is usize, so it's always >= 0
-    let _total_size = stats_after.total_size_bytes;
+    // total_size_bytes should be greater than 0 after pushing data
+    assert!(
+        stats_after.total_size_bytes > 0,
+        "total_size_bytes should be greater than 0 after pushing data"
+    );
 }
 
 /// Test Data API - invalid key error
