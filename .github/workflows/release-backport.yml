@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Create backport PRs
-        uses: korthout/backport-action@ca4972adce8039ff995e618f5fc02d1b7961f27a # v3.3.0
+        uses: korthout/backport-action@c656f5d5851037b2b38fb5db2691a03fa229e3b2 # v4.0.1
         with:
           # Config README: https://github.com/zeebe-io/backport-action#backport-action
           github_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
