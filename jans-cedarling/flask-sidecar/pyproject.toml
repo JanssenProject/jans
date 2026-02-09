@@ -9,16 +9,16 @@ packages = [{ include = "main" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-flask = "^3.1.0"
+flask = "^3.1.1"
 flask-smorest = "^0.45.0"
 pyyaml = "^6.0.2"
 maturin = "^1.7.4"
-flask-cors = "^5.0.0"
+flask-cors = "^6.0.0"
 python-dotenv = "^1.0.1"
 structlog = "^24.4.0"
 python-json-logger = "^2.0.7"
 gunicorn = "^22.0.0"
-orjson = "^3.10.14"
+orjson = "^3.11.5"
 
 
 [tool.poetry.group.test.dependencies]
