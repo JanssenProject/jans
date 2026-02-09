@@ -3,7 +3,7 @@ Tests for the Data API functionality in Cedarling Python bindings.
 """
 import pytest
 from cedarling_python import BootstrapConfig, Cedarling
-from cedarling_python import data_errors
+from cedarling_python import data_errors_ctx
 from config import load_bootstrap_config
 
 
@@ -132,7 +132,7 @@ def test_data_error_invalid_key():
     config = load_bootstrap_config()
     instance = Cedarling(config)
 
-    with pytest.raises(data_errors.InvalidKey):
+    with pytest.raises(data_errors_ctx.InvalidKey):
         instance.push_data_ctx("", "value")
 
     instance.shut_down()

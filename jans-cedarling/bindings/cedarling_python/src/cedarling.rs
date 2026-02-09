@@ -113,7 +113,7 @@ use std::time::Duration;
 ///     :param key: The key for the data entry
 ///     :param value: The value to store (dict, list, str, int, float, bool)
 ///     :param ttl_secs: Optional TTL in seconds (None uses default from config)
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 ///
 /// .. method:: get_data_ctx(self, key: str) -> Any | None
 ///
@@ -122,7 +122,7 @@ use std::time::Duration;
 ///
 ///     :param key: The key to retrieve
 ///     :returns: The value as a Python object, or None if not found
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 ///
 /// .. method:: get_data_entry_ctx(self, key: str) -> DataEntry | None
 ///
@@ -131,7 +131,7 @@ use std::time::Duration;
 ///
 ///     :param key: The key to retrieve
 ///     :returns: A DataEntry object with metadata, or None if not found
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 ///
 /// .. method:: remove_data_ctx(self, key: str) -> bool
 ///
@@ -139,13 +139,13 @@ use std::time::Duration;
 ///
 ///     :param key: The key to remove
 ///     :returns: True if the key existed and was removed, False otherwise
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 ///
 /// .. method:: clear_data_ctx(self)
 ///
 ///     Clear all entries from the data store.
 ///
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 ///
 /// .. method:: list_data_ctx(self) -> List[DataEntry]
 ///
@@ -153,7 +153,7 @@ use std::time::Duration;
 ///     Returns a list of DataEntry objects containing key, value, type, and timing metadata.
 ///
 ///     :returns: A list of DataEntry objects
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 ///
 /// .. method:: get_stats_ctx(self) -> DataStoreStats
 ///
@@ -161,7 +161,7 @@ use std::time::Duration;
 ///     Returns current entry count, capacity limits, and configuration state.
 ///
 ///     :returns: A DataStoreStats object
-///     :raises DataError: If the operation fails
+///     :raises DataErrorCtx: If the operation fails
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -286,7 +286,7 @@ impl Cedarling {
     /// :param key: The key for the data entry
     /// :param value: The value to store (dict, list, str, int, float, bool)
     /// :param ttl_secs: Optional TTL in seconds (None uses default from config)
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     #[pyo3(signature = (key, value, ttl_secs = None))]
     fn push_data_ctx(
         &self,
@@ -310,7 +310,7 @@ impl Cedarling {
     ///
     /// :param key: The key to retrieve
     /// :returns: The value as a Python object, or None if not found
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     fn get_data_ctx(&self, key: &str, py: Python) -> PyResult<Option<Py<PyAny>>> {
         match self.inner.get_data_ctx(key).map_err(data_error_to_py)? {
             Some(value) => {
@@ -330,7 +330,7 @@ impl Cedarling {
     ///
     /// :param key: The key to retrieve
     /// :returns: A DataEntry object with metadata, or None if not found
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     fn get_data_entry_ctx(&self, key: &str) -> PyResult<Option<DataEntry>> {
         match self
             .inner
@@ -346,14 +346,14 @@ impl Cedarling {
     ///
     /// :param key: The key to remove
     /// :returns: True if the key existed and was removed, False otherwise
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     fn remove_data_ctx(&self, key: &str) -> PyResult<bool> {
         self.inner.remove_data_ctx(key).map_err(data_error_to_py)
     }
 
     /// Clear all entries from the data store.
     ///
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     fn clear_data_ctx(&self) -> PyResult<()> {
         self.inner.clear_data_ctx().map_err(data_error_to_py)
     }
@@ -363,7 +363,7 @@ impl Cedarling {
     /// Returns a list of DataEntry objects containing key, value, type, and timing metadata.
     ///
     /// :returns: A list of DataEntry objects
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     fn list_data_ctx(&self) -> PyResult<Vec<DataEntry>> {
         self.inner
             .list_data_ctx()
@@ -376,7 +376,7 @@ impl Cedarling {
     /// Returns current entry count, capacity limits, and configuration state.
     ///
     /// :returns: A DataStoreStats object
-    /// :raises DataError: If the operation fails
+    /// :raises DataErrorCtx: If the operation fails
     fn get_stats_ctx(&self) -> PyResult<DataStoreStats> {
         self.inner
             .get_stats_ctx()

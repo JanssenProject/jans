@@ -10,51 +10,51 @@ use pyo3::{create_exception, prelude::*};
 
 // Define a base class for Data errors in Python
 create_exception!(
-    data_errors,
-    DataError,
+    data_errors_ctx,
+    DataErrorCtx,
     pyo3::exceptions::PyException,
-    "Exception raised by data_errors"
+    "Exception raised by data_errors_ctx"
 );
 
 create_exception!(
-    data_errors,
+    data_errors_ctx,
     InvalidKey,
-    DataError,
+    DataErrorCtx,
     "Invalid key provided (key is empty)"
 );
 
 create_exception!(
-    data_errors,
+    data_errors_ctx,
     KeyNotFound,
-    DataError,
+    DataErrorCtx,
     "Key not found in store"
 );
 
 create_exception!(
-    data_errors,
+    data_errors_ctx,
     StorageLimitExceeded,
-    DataError,
+    DataErrorCtx,
     "Storage limit exceeded"
 );
 
 create_exception!(
-    data_errors,
+    data_errors_ctx,
     TTLExceeded,
-    DataError,
+    DataErrorCtx,
     "TTL exceeds maximum allowed"
 );
 
 create_exception!(
-    data_errors,
+    data_errors_ctx,
     ValueTooLarge,
-    DataError,
+    DataErrorCtx,
     "Value size exceeds maximum allowed size"
 );
 
 create_exception!(
-    data_errors,
+    data_errors_ctx,
     SerializationError,
-    DataError,
+    DataErrorCtx,
     "Serialization error"
 );
 
@@ -84,7 +84,7 @@ pub fn data_error_to_py(err: CedarlingDataError) -> PyErr {
 }
 
 pub fn data_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("DataError", m.py().get_type::<DataError>())?;
+    m.add("DataErrorCtx", m.py().get_type::<DataErrorCtx>())?;
     m.add("InvalidKey", m.py().get_type::<InvalidKey>())?;
     m.add("KeyNotFound", m.py().get_type::<KeyNotFound>())?;
     m.add(

@@ -287,7 +287,7 @@ class Cedarling:
             ttl_secs: Optional TTL in seconds (None uses default from config).
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 
@@ -305,7 +305,7 @@ class Cedarling:
             The value as a Python object, or None if not found.
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 
@@ -323,7 +323,7 @@ class Cedarling:
             A DataEntry object with metadata, or None if not found.
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 
@@ -338,7 +338,7 @@ class Cedarling:
             True if the key existed and was removed, False otherwise.
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 
@@ -347,7 +347,7 @@ class Cedarling:
         Clear all entries from the data store.
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 
@@ -361,7 +361,7 @@ class Cedarling:
             A list of DataEntry objects.
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 
@@ -375,7 +375,7 @@ class Cedarling:
             A DataStoreStats object.
 
         Raises:
-            DataError: If the operation fails.
+            DataErrorCtx: If the operation fails.
         """
         ...
 

@@ -17,7 +17,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<data_entry::DataEntry>()?;
     m.add_class::<data_store_stats::DataStoreStats>()?;
 
-    let submodule = PyModule::new(m.py(), "data_errors")?;
+    let submodule = PyModule::new(m.py(), "data_errors_ctx")?;
     errors::data_errors_module(&submodule)?;
     m.add_submodule(&submodule)?;
 
