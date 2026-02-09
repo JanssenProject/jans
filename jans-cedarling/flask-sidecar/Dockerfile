@@ -62,7 +62,7 @@ RUN chmod -R g=u /api \
     && chown -R 1000:1000 /api
 
 # Project initialization:
-RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp311-cp311-manylinux_2_34_x86_64.whl \
+RUN poetry add /api/cedarling_python-"$(cat /api/cedarling_version)"-cp311-cp311-manylinux_2_34_x86_64.whl \
     && poetry install --no-dev --no-root --no-interaction --no-ansi \
     # Cleaning poetry installation's cache for production:
     && rm -rf "$POETRY_CACHE_DIR"
