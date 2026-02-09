@@ -22,7 +22,7 @@ import org.zkoss.util.Pair;
 import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
-import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -96,6 +96,15 @@ public class CertAuthenticationSummaryVM {
         
     }
 
+    public void download(Certificate certificate) {
+        
+        String fileName = Optional.ofNullable(certificate.getCommonName())
+                .map(s -> s.replaceAll("[^\\w ]+", "_")).orElse("");
+        fileName = fileName.length() == 0 ? "cert" : fileName;
+        Filedownload.save(certificate.getPemContent(), "application/x-pem-file", fileName + ".pem");
+        
+    }
+    
     public void delete(Certificate certificate) {
 
         String resetMessages = sndFactorUtils.removalConflict(CertService.AGAMA_FLOW, certificates.size(), user).getY();
@@ -108,7 +117,7 @@ public class CertAuthenticationSummaryVM {
                     if (Messagebox.ON_YES.equals(event.getName())) {
                         try {
                             String fingerprint = certificate.getFingerPrint();
-                            boolean success = certService.removeFromUser(fingerprint, userId);                           
+                            boolean success = certService.removeFromUser(certificate, userId);                           
                             
                             if (success) {
                                 logger.info("Certificate {} removed from user account", fingerprint);
