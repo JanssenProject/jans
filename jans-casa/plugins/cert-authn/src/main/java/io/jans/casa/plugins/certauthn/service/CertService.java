@@ -78,10 +78,9 @@ public class CertService {
 
     }
 
-    public boolean removeFromUser(String fingerPrint, String userId) throws Exception {
+    public boolean removeFromUser(Certificate certificate, String userId) throws Exception {
 
         CertPerson person = persistenceService.get(CertPerson.class, persistenceService.getPersonDn(userId));
-
         List<String> stringCerts = Optional.ofNullable(person.getX509Certificates()).orElse(new ArrayList<>());
         List<io.jans.scim.model.scim2.user.X509Certificate> scimCerts = getScimX509Certificates(stringCerts);
 
@@ -89,13 +88,13 @@ public class CertService {
         int i;
         for (i = 0; i < scimCerts.size() && !found; i++) {
             String val = scimCerts.get(i).getValue();
-            found = getFingerPrint(CertUtils.x509CertificateFromPem(val)).equals(fingerPrint);
+            found = val != null && val.equals(certificate.getPemContent());
         }
         if (found) {
             logger.info("Removing cert from SCIM profile data"); 
             person.getX509Certificates().remove(i - 1);
         }
-        person.getJansExtUid().remove(CERT_PREFIX + fingerPrint);
+        person.getJansExtUid().remove(CERT_PREFIX + certificate.getFingerPrint());
 
         logger.info("Removing cert reference from user");
         return persistenceService.modify(person);
@@ -141,6 +140,7 @@ public class CertService {
                     long date = x509Certificate.getNotAfter().getTime();
                     cert.setExpirationDate(date);
                     cert.setExpired(date < System.currentTimeMillis());
+                    cert.setPemContent(sc.getValue());
 
                     break;
                 }
