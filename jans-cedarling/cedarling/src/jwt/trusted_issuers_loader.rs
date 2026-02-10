@@ -3,13 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use serde_json::map;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
 use thiserror::Error;
-use tokio::sync::AcquireError;
 
 use crate::{
     JwtConfig, LogLevel,
@@ -30,15 +28,15 @@ pub enum TrustedIssuerLoaderError {
     #[error(
         "failed to acquire semaphore permit for concurrent issuer loading - this indicates a serious concurrency issue or resource exhaustion"
     )]
-    SemaphoreAcquireError,
+    SemaphoreAcquire,
     #[error(
         "failed to extract errors Arc - other references may still exist indicating concurrent access during issuer loading"
     )]
-    ErrorsArcExtractionError,
+    ErrorsArcExtraction,
     #[error(
         "failed to extract errors from Mutex - mutex may be poisoned due to panic while holding lock"
     )]
-    ErrorsMutexExtractionError,
+    ErrorsMutexExtraction,
 }
 
 /// Loads and initializes trusted issuers for JWT validation.
@@ -74,7 +72,7 @@ impl TrustedIssuerLoader {
                                 "Error happened on load_trusted_issuers, it is critical"
                                     .to_string(),
                             ),
-                        )
+                        );
                     })
             },
             TrustedIssuerLoaderConfig::Async { workers } => {
@@ -93,7 +91,7 @@ impl TrustedIssuerLoader {
                                     "Error happened on load_trusted_issuers, it is critical"
                                         .to_string(),
                                 ),
-                            )
+                            );
                         });
                 });
                 Ok(())
@@ -129,7 +127,7 @@ async fn load_trusted_issuers(
             .clone()
             .acquire_owned()
             .await
-            .map_err(|_| TrustedIssuerLoaderError::SemaphoreAcquireError)?;
+            .map_err(|_| TrustedIssuerLoaderError::SemaphoreAcquire)?;
         let loader_clone = loader.clone();
         let errors_clone = errors.clone();
 
@@ -167,9 +165,9 @@ async fn load_trusted_issuers(
     loader.check_keys_loaded();
 
     let errors = Arc::into_inner(errors)
-        .ok_or(TrustedIssuerLoaderError::ErrorsArcExtractionError)?
+        .ok_or(TrustedIssuerLoaderError::ErrorsArcExtraction)?
         .into_inner()
-        .map_err(|_| TrustedIssuerLoaderError::ErrorsMutexExtractionError)?;
+        .map_err(|_| TrustedIssuerLoaderError::ErrorsMutexExtraction)?;
 
     // if there were any errors, return the first one
     if let Some(first_error) = errors.into_iter().next() {
