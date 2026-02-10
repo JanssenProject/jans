@@ -3,7 +3,7 @@
     "memory": {
       "max_allowed_mb": 2048,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.30
+      "ratio": 0.25
     },
     "jetty": {
       "modules": "server,resources,http,http-forwarded,threadpool,console-capture,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate"
@@ -64,7 +64,7 @@
       "max_allowed_mb": 1024,
       "metaspace_mb": 128,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.15
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,resources,http,http-forwarded,console-capture,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate"
@@ -84,5 +84,17 @@
     },
     "installed": false,
     "name": "jans-lock"
+  },
+  "jans-shibboleth-idp": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+      },
+    "jetty": {
+      "modules": "server,deploy,webapp,http,resources,http-forwarded,console-capture,ee10-webapp,ee10-deploy"
+    },
+    "installed": false,
+    "name": "jans-shibboleth-idp"
   }
 }

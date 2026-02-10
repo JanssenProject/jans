@@ -177,6 +177,7 @@ public class OAuth2Service extends BaseService {
         adminUISession.setUjwt(ujwt);
         adminUISession.setJansUsrDN(getDnForUser((String) claims.get("inum")));
         adminUISession.setCreationDate(currentDate);
+        adminUISession.setLastUpdated(currentDate);
         adminUISession.setExpirationDate(addMinutes(currentDate, auiConfiguration.getSessionTimeoutInMins()));
 
         entryManager.persist(adminUISession);
