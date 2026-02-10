@@ -36,11 +36,17 @@ get_prometheus_lib() {
 }
 
 get_java_options() {
+    # if admin-ui plugin is enabled, override java.security via Java option
+    sec_prop_option=""
+    if [ -f /opt/jans/jetty/jans-config-api/custom/libs/admin-ui-plugin.jar ]; then
+        sec_prop_option="-Djava.security.properties=etc/jetty/security/java.security"
+    fi
+
     if [ -n "${CN_CONFIG_API_JAVA_OPTIONS}" ]; then
-        echo " ${CN_CONFIG_API_JAVA_OPTIONS} "
+        echo " ${sec_prop_option} ${CN_CONFIG_API_JAVA_OPTIONS} "
     else
         # backward-compat
-        echo " ${CN_JAVA_OPTIONS} "
+        echo " ${sec_prop_option} ${CN_JAVA_OPTIONS} "
     fi
 }
 

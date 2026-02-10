@@ -37,8 +37,8 @@ Kubernetes: `>=v1.23.0-0`
 | hpa.minReplicas | int | `1` |  |
 | hpa.targetCPUUtilizationPercentage | int | `80` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"janssenproject/shibboleth"` |  |
-| image.tag | string | `"5.1.6_dev"` |  |
+| image.repository | string | `"ghcr.io/janssenproject/jans/shibboleth"` |  |
+| image.tag | string | `"0.0.0-nightly"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.enabled | bool | `true` |  |
