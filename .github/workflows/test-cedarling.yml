@@ -29,6 +29,33 @@ jobs:
       run: |
         rustup component add clippy
         cargo clippy --workspace --all-targets -- -D warnings
+  custom_lints:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Rust Nightly
+      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3
+      with:
+        toolchain: nightly-2025-09-18
+        components: llvm-tools-preview, rustc-dev
+    - uses: cargo-bins/cargo-binstall@v1.17.4
+    - name: Install dylint
+      run: |
+        cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
+        cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
+    - name: Run Tests
+      working-directory: jans-cedarling/custom-lints
+      run: cargo test
+    - name: Install Rust Stable (for workspace)
+      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+    - name: Run custom lints on workspace
+      working-directory: jans-cedarling
+      run: |
+        RUSTFLAGS="-Dwarnings" cargo dylint --all --workspace --path custom-lints
   rust_benchmarks:
     runs-on: ubuntu-latest
     steps:
