@@ -149,7 +149,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
     - name: Install Golang dependencies
-      uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
           go-version: '1.24'
     - name: Run build rust artifacts
