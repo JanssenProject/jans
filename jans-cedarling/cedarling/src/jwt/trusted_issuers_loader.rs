@@ -3,10 +3,13 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use serde_json::map;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
+use thiserror::Error;
+use tokio::sync::AcquireError;
 
 use crate::{
     JwtConfig, LogLevel,
@@ -21,6 +24,22 @@ use crate::{
 };
 
 use crate::http::spawn_task;
+
+#[derive(Error, Debug)]
+pub enum TrustedIssuerLoaderError {
+    #[error(
+        "failed to acquire semaphore permit for concurrent issuer loading - this indicates a serious concurrency issue or resource exhaustion"
+    )]
+    SemaphoreAcquireError,
+    #[error(
+        "failed to extract errors Arc - other references may still exist indicating concurrent access during issuer loading"
+    )]
+    ErrorsArcExtractionError,
+    #[error(
+        "failed to extract errors from Mutex - mutex may be poisoned due to panic while holding lock"
+    )]
+    ErrorsMutexExtractionError,
+}
 
 /// Loads and initializes trusted issuers for JWT validation.
 #[derive(Clone)]
@@ -109,8 +128,8 @@ async fn load_trusted_issuers(
         let permit = semaphore
             .clone()
             .acquire_owned()
-             .await
-             .expect("failed to acquire semaphore permit for concurrent issuer loading - this indicates a serious concurrency issue or resource exhaustion");
+            .await
+            .map_err(|_| TrustedIssuerLoaderError::SemaphoreAcquireError)?;
         let loader_clone = loader.clone();
         let errors_clone = errors.clone();
 
@@ -128,10 +147,13 @@ async fn load_trusted_issuers(
                     .set_message(format!("Could not load trusted issuer: {issuer_id}"))
                     .set_error(error.to_string()),
                 );
+
+                // we can't return the error from this async task
+                // so we can use only `expect`
                 errors_clone
-                     .lock()
-                     .expect("failed to lock errors mutex while recording issuer loading failure - mutex may be poisoned due to panic in another thread")
-                     .push(error);
+                    .lock()
+                    .expect("failed to lock errors mutex while recording issuer loading failure - mutex may be poisoned due to panic in another thread")
+                    .push(error);
             }
         });
         handles.push(handle);
@@ -145,9 +167,11 @@ async fn load_trusted_issuers(
     loader.check_keys_loaded();
 
     let errors = Arc::into_inner(errors)
-         .expect("failed to extract errors Arc - other references may still exist indicating concurrent access during issuer loading")
-         .into_inner()
-         .expect("failed to extract errors from Mutex - mutex may be poisoned due to panic while holding lock");
+        .ok_or(TrustedIssuerLoaderError::ErrorsArcExtractionError)?
+        .into_inner()
+        .map_err(|_| TrustedIssuerLoaderError::ErrorsMutexExtractionError)?;
+
+    // if there were any errors, return the first one
     if let Some(first_error) = errors.into_iter().next() {
         return Err(first_error);
     }
