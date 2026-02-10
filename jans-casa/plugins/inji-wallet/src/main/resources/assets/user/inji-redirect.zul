@@ -1,0 +1,44 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - Inji Wallet Redirect</h:title>
+
+    <z:div viewModel="@('io.jans.casa.plugins.injiwallet.vm.InjiWalletRedirectVM')"
+           self="@define(maincontent)">
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2" data-bind="@load(vm.title)">${vm.title}</h2>
+                    <p data-bind="@load(vm.text)">${vm.text}</p>
+                    
+                    <z:div visible="@load(vm.success)">
+                        <div class="pt3">
+                            <p class="text-success">This window will close automatically in a few seconds...</p>
+                        </div>
+                    </z:div>
+                    
+                    <z:div visible="@load(not vm.success)">
+                        <div class="pt3">
+                            <z:button label="Close Window" 
+                                    sclass="${css.primaryButton}" 
+                                    onClick="window.close()" />
+                        </div>
+                    </z:div>
+                </div>
+            </section>
+        </div>
+
+    </z:div>
+    
+    <z:div self="@define(extra)">
+        <z:script if="${vm.success}">
+            // Auto-close popup after successful linking
+            setTimeout(function() {
+                window.close();
+            }, 2000);
+        </z:script>
+    </z:div>
+
+</zk:zk>

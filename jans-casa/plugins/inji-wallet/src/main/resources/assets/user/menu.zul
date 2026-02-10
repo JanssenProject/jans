@@ -1,0 +1,11 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+
+    <li>
+        <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/user/" data-priority="${priority}">
+            <img src="${zkService.contextPath}/pl/inji-wallet/images/inji-logo.png" 
+                 class="mh2" style="width: 16px; height: 16px; vertical-align: middle;" />
+            <span class="collapsible-menu-item di">Inji Wallet</span>
+        </a>
+    </li>
+
+</z:zk>

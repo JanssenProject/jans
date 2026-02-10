@@ -1,0 +1,133 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - Inji Wallet</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.injiwallet.vm.InjiWalletUserVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <style>
+            /* override default bootstrap styling */
+            .table td, .table th {
+                vertical-align: middle;
+            }
+        </style>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">Inji Wallet</h2>
+                    
+                    <p>
+                        Manage your MOSIP verifiable credentials from Inji Wallet for secure authentication. 
+                        This integration allows you to use your MOSIP verifiable credentials stored in Inji Wallet for authentication.
+                    </p>
+                    
+                    <div class="alert alert-success dn" id="feedback-inji" role="alert" />
+
+                    <!-- Credentials Section -->
+                    <h:div class="pa3 pb1">
+                        <z:div sclass="flex items-center flex-column pt2 ph3-ns">
+                            
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"></th>
+                                        <th scope="col" class="f6 dark-blue2">Credential Type</th>
+                                        <th scope="col" class="f6 dark-blue2">Status</th>
+                                        <th scope="col" class="f6 dark-blue2">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="f7 table-striped">
+                                    <!-- National ID Row -->
+                                    <tr>
+                                        <td>
+                                            <img width="50" src="/jans-casa/pl/inji-wallet/images/veridonia-logo.png" 
+                                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjMjhBNzQ1Ci8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjEwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPklEPC90ZXh0Pgo8L3N2Zz4K'" />
+                                        </td>
+                                        <td class="f6 dark-blue2">National ID</td>
+                                        <td>
+                                            <!-- NID status based on verifiableCredentials attribute -->
+                                            <z:div visible="@load(vm.hasNidCredential)">
+                                                <span class="text-success"><i class="fas fa-check-circle"></i> Linked</span>
+                                            </z:div>
+                                            <z:div visible="@load(not vm.hasNidCredential)">
+                                                <span class="text-muted"><i class="fas fa-times-circle"></i> Not Linked</span>
+                                            </z:div>
+                                        </td>
+                                        <td>
+                                            <z:button label="Link" 
+                                                    sclass="${css.primaryButton} lh-tight mr2" 
+                                                    visible="@load(not vm.hasNidCredential)"
+                                                    disabled="@load(vm.pendingCredentialType ne null)"
+                                                    w:onClick="externalAuthnPop('inji-redirect.zul?credentialType=NID')" />
+                                            <z:button label="View" sclass="${css.tertiaryButton} lh-tight mr2" 
+                                                    visible="@load(vm.hasNidCredential)"
+                                                    onClick="@command('viewNidCredentials')" />
+                                            <z:button label="Remove" sclass="${css.secondaryButton} lh-tight" 
+                                                    visible="@load(vm.hasNidCredential)"
+                                                    onClick="@command('removeNationalId')" />
+                                        </td>
+                                    </tr>
+
+                                    <!-- TAX Row -->
+                                    <tr>
+                                        <td>
+                                            <img width="50" src="/jans-casa/pl/inji-wallet/images/tan-logo.png" 
+                                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjMDA3QkZGIi8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjEyIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPklOSkk8L3RleHQ+Cjwvc3ZnPgo='" />
+                                        </td>
+                                        <td class="f6 dark-blue2">TAX ID</td>
+                                        <td>
+                                            <!-- TAX status based on verifiableCredentials attribute -->
+                                            <z:div visible="@load(vm.hasTaxCredential)">
+                                                <span class="text-success"><i class="fas fa-check-circle"></i> Linked</span>
+                                            </z:div>
+                                            <z:div visible="@load(not vm.hasTaxCredential)">
+                                                <span class="text-muted"><i class="fas fa-times-circle"></i> Not Linked</span>
+                                            </z:div>
+                                        </td>
+                                        <td>
+                                            <!-- TAX ID enrollment -->
+                                            <z:button label="Link" 
+                                                    sclass="${css.primaryButton} lh-tight mr2" 
+                                                    visible="@load(not vm.hasTaxCredential)"
+                                                    disabled="@load(vm.pendingCredentialType ne null)"
+                                                    w:onClick="externalAuthnPop('inji-redirect.zul?credentialType=TAX')" />
+                                            <z:button label="View" sclass="${css.tertiaryButton} lh-tight mr2" 
+                                                    visible="@load(vm.hasTaxCredential)"
+                                                    onClick="@command('viewTaxCredentials')" />
+                                            <z:button label="Remove" sclass="${css.secondaryButton} lh-tight" 
+                                                    visible="@load(vm.hasTaxCredential)"
+                                                    onClick="@command('removeTaxId')" />
+                                        </td>
+                                    </tr>
+                                    
+                                    
+                                </tbody>
+                            </table>
+                        </z:div>
+                    </h:div>
+
+                </div>
+            </section>
+        </div>
+
+        <z:timer id="timer" delay="2000" repeats="true" onTimer="@command('poll')" />
+
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <script>
+            function externalAuthnPop(url){
+                let v = window.open(url, "injipop", "popup=true,width=600,height=700")
+                if (v == null) {
+                    console.log("Pop-up blocked. Please allow popups for this site.") 
+                    alert("Pop-up blocked. Please allow popups for this site and try again.")
+                }
+            }
+        </script>
+    </z:div>
+</zk:zk>

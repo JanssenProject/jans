@@ -1,0 +1,13 @@
+META-INF/extensions.idx
+io/jans/casa/plugins/injiwallet/vm/InjiWalletAdminVM.class
+io/jans/casa/plugins/injiwallet/service/InjiWalletLinkingService$2.class
+io/jans/casa/plugins/injiwallet/extension/InjiWalletAdminMenu.class
+io/jans/casa/plugins/injiwallet/model/PersonWithCredentials.class
+io/jans/casa/plugins/injiwallet/extension/InjiWalletUserMenu.class
+io/jans/casa/plugins/injiwallet/InjiWalletPlugin.class
+io/jans/casa/plugins/injiwallet/vm/InjiWalletRedirectVM.class
+io/jans/casa/plugins/injiwallet/service/AgamaConfigService.class
+io/jans/casa/plugins/injiwallet/service/AgamaConfigService$1.class
+io/jans/casa/plugins/injiwallet/service/InjiWalletLinkingService.class
+io/jans/casa/plugins/injiwallet/service/InjiWalletLinkingService$1.class
+io/jans/casa/plugins/injiwallet/vm/InjiWalletUserVM.class

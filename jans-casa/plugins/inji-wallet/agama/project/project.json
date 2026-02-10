@@ -1,0 +1,149 @@
+{
+    "projectName": "agama-inji-wallet",
+    "description": "Agama Project to validate the MOSIP Inji web wallet",
+    "type": "community",
+    "author": "GluuFederation",
+    "version": "1.0.0",
+    "authorWebsite": "https://github.com/GluuFederation/agama-inji-wallet",
+    "githubUri": "https://github.com/GluuFederation/agama-inji-wallet",
+    "license": "apache-2.0",
+    "lastUpdated": "1770065168559",
+    "tags": [
+        "jans",
+        "community",
+        "authentication"
+    ],
+    "noDirectLaunch": [],
+    "configs": {
+        "com.gluu.agama.inji.verifyCredential": {
+            "injiWebBaseURL": "https://injiweb.collab.mosip.net",
+            "injiVerifyBaseURL": "https://injiverify.collab.mosip.net",
+            "agamaCallBackUrl": "https://mosip-demo.gluu.info/jans-auth/fl/callback",
+            "clientId": "agama-app",
+            "credentialMappings": [
+                {
+                    "credentialType": "NID",
+                    "vcToGluuMapping": {
+                        "fullName": "displayName",
+                        "phone": "mobile",
+                        "gender": "gender",
+                        "email": "mail",
+                        "dateOfBirth": "birthdate"
+                    }
+                }
+            ],
+            "presentationDefinition": {
+                "id": "c4822b58-7fb4-454e-b827-f8758fe27f9a",
+                "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
+                "format": {
+                    "ldp_vc": {
+                        "proof_type": [
+                            "Ed25519Signature2020"
+                        ]
+                    }
+                },
+                "input_descriptors": [
+                    {
+                        "id": "id card credential",
+                        "format": {
+                            "ldp_vc": {
+                                "proof_type": [
+                                    "RsaSignature2018"
+                                ]
+                            }
+                        },
+                        "constraints": {
+                            "fields": [
+                                {
+                                    "path": [
+                                        "$.type"
+                                    ],
+                                    "filter": {
+                                        "type": "object",
+                                        "pattern": "MOSIPVerifiableCredential"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "clientMetadata": {
+                "client_name": "Agama Application",
+                "logo_uri": "https://mosip.github.io/inji-config/logos/StayProtectedInsurance.png",
+                "vp_formats": {
+                    "ldp_vp": {
+                        "proof_type": [
+                            "Ed25519Signature2018",
+                            "Ed25519Signature2020",
+                            "RsaSignature2018"
+                        ]
+                    }
+                }
+            }
+        },
+        "images": {
+            "injiWebBaseURL": "https://injiweb.collab.mosip.net",
+            "injiVerifyBaseURL": "https://injiverify.collab.mosip.net",
+            "agamaCallBackUrl": "https://mosip-demo.gluu.info/jans-auth/fl/callback",
+            "clientId": "agama-app",
+            "vcToGluuMapping": {
+                "fullName": "displayName",
+                "phone": "mobile",
+                "gender": "gender",
+                "email": "mail",
+                "dateOfBirth": "birthdate"
+            },
+            "presentationDefinition": {
+                "id": "c4822b58-7fb4-454e-b827-f8758fe27f9a",
+                "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
+                "format": {
+                    "ldp_vc": {
+                        "proof_type": [
+                            "Ed25519Signature2020"
+                        ]
+                    }
+                },
+                "input_descriptors": [
+                    {
+                        "id": "id card credential",
+                        "format": {
+                            "ldp_vc": {
+                                "proof_type": [
+                                    "RsaSignature2018"
+                                ]
+                            }
+                        },
+                        "constraints": {
+                            "fields": [
+                                {
+                                    "path": [
+                                        "$.type"
+                                    ],
+                                    "filter": {
+                                        "type": "object",
+                                        "pattern": "MOSIPVerifiableCredential"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "clientMetadata": {
+                "client_name": "Agama Application",
+                "logo_uri": "https://mosip.github.io/inji-config/logos/StayProtectedInsurance.png",
+                "vp_formats": {
+                    "ldp_vp": {
+                        "proof_type": [
+                            "Ed25519Signature2018",
+                            "Ed25519Signature2020",
+                            "RsaSignature2018"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "name": "agama-inji-wallet"
+}

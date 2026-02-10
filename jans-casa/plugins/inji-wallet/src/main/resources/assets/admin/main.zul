@@ -1,0 +1,249 @@
+<?page language="xhtml"?>
+<?init class="io.jans.casa.core.navigation.AdminProtectionInitiator"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - Inji Wallet Configuration</h:title>
+
+    <z:div if="${empty pageScope.error and sessionContext.user.admin}"
+           viewModel="@('io.jans.casa.plugins.injiwallet.vm.InjiWalletAdminVM')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul" />
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">Inji Wallet Configuration</h2>
+                    <p class="mb0 f6 gray">Configuration is loaded from the Agama deployment API</p>
+                </div>
+                
+                <div class="${css.panel}">
+                    
+                    <!-- Configuration Questions -->
+                    <div class="pa3">
+                        <div class="alert alert-info">
+                            <h4 class="f5 dark-blue2">Configuration Questions:</h4>
+                            <ul class="mb0">
+                                <li>Which MOSIP credentials are trusted?</li>
+                                <li>Which credentials can be used for registration?</li>
+                                <li>What is the VC to Gluu claims mapping?</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Configuration Status -->
+                    <h:table class="mt4 table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col" width="25%">Setting</th>
+                                <th scope="col" width="60%">Current Value</th>
+                                <th scope="col" width="15%">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="f7">
+                            <tr>
+                                <td>Inji Web Base URL</td>
+                                <td class="text-break">${vm.injiWebBaseUrl}</td>
+                                <td><i class="f5 fas fa-check text-success"/></td>
+                            </tr>
+                            <tr>
+                                <td>Inji Verify Base URL</td>
+                                <td class="text-break">${vm.injiVerifyBaseUrl}</td>
+                                <td><i class="f5 fas fa-check text-success"/></td>
+                            </tr>
+                            <tr>
+                                <td>Agama Callback URL</td>
+                                <td class="text-break">${vm.agamaCallbackUrl}</td>
+                                <td><i class="f5 fas fa-check text-success"/></td>
+                            </tr>
+                            <tr>
+                                <td>Client ID</td>
+                                <td class="text-break">${vm.clientId}</td>
+                                <td><i class="f5 fas fa-check text-success"/></td>
+                            </tr>
+                            <tr>
+                                <td>Registration Enabled</td>
+                                <td class="text-break">${vm.enableRegistration ? 'Yes' : 'No'}</td>
+                                <td><i class="f5 fas fa-check text-success"/></td>
+                            </tr>
+                        </tbody>
+                    </h:table>
+                </div>
+                
+                
+                <!-- Credential Mappings Configuration -->
+                <div class="${css.panel}">
+                    <h3 class="f5 dark-blue2">Credential Mappings Configuration</h3>
+                    
+                    <div class="pa3">
+                        <div class="alert alert-info mb3">
+                            <h5 class="f6 dark-blue2">About Credential Mappings:</h5>
+                            <p class="mb0">Define how different MOSIP credential types map to Jans user attributes. Each credential type (e.g., NID, TAX) can have its own mapping.</p>
+                        </div>
+                        
+                        <!-- Table View for Credential Mappings -->
+                        <z:div if="${not empty vm.credentialMappingsList}">
+                            <h:div children="@load(vm.credentialMappingsList)">
+                                <zk:template name="children">
+                                    <div class="mb4">
+                                        <h4 class="f5 dark-blue2 mb2 d-flex align-items-center">
+                                            <!-- Conditional logo based on credential type -->
+                                            <img width="40" height="40" class="mr2" 
+                                                 src="${each.credentialType eq 'NID' ? '/jans-casa/pl/inji-wallet/images/veridonia-logo.png' : (each.credentialType eq 'TAX' ? '/jans-casa/pl/inji-wallet/images/tan-logo.png' : '/jans-casa/pl/inji-wallet/images/inji-logo.png')}" 
+                                                 alt="${each.credentialType} Logo" />
+                                            <span>Credential Type: <span class="badge badge-primary">${each.credentialType}</span></span>
+                                        </h4>
+                                        
+                                        <h:table class="table table-sm table-bordered table-hover">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th scope="col" class="f6 dark-blue2">VC Claim Name</th>
+                                                    <th scope="col" class="f6 dark-blue2 text-center" width="80">Mapping</th>
+                                                    <th scope="col" class="f6 dark-blue2">Jans Attribute</th>
+                                                </tr>
+                                            </thead>
+                                            <h:tbody children="@load(each.vcToGluuMapping.entrySet())" sclass="f7">
+                                                <zk:template name="children">
+                                                    <tr>
+                                                        <td><code class="text-primary">${each.key}</code></td>
+                                                        <td class="text-center"><i class="fas fa-arrow-right text-muted"></i></td>
+                                                        <td><code class="text-success">${each.value}</code></td>
+                                                    </tr>
+                                                </zk:template>
+                                            </h:tbody>
+                                        </h:table>
+                                    </div>
+                                </zk:template>
+                            </h:div>
+                        </z:div>
+                        
+                        <z:div if="${empty vm.credentialMappingsList}">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle mr2"></i>
+                                No credential mappings configured
+                            </div>
+                        </z:div>
+                    </div>
+                </div>
+                
+                <!-- Presentation Definition -->
+                <div class="${css.panel}">
+                    <h3 class="f5 dark-blue2">Presentation Definition</h3>
+                    
+                    <div class="pa3">
+                        <div class="alert alert-info mb3">
+                            <h5 class="f6 dark-blue2">About Presentation Definition:</h5>
+                            <p class="mb0">Defines which MOSIP credentials are accepted and how they should be verified according to OpenID4VP standards.</p>
+                        </div>
+                        
+                        <div class="bg-light p-3 border rounded">
+                            <pre class="mb0"><code>${vm.presentationDefinition}</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+        </div>
+
+    </z:div>
+    
+    <z:div self="@define(extra)">
+        <style>
+            /* Custom styles for credential mapping tables */
+            .badge {
+                display: inline-block;
+                padding: 0.25em 0.6em;
+                font-size: 0.875rem;
+                font-weight: 600;
+                line-height: 1;
+                color: #fff;
+                text-align: center;
+                white-space: nowrap;
+                vertical-align: baseline;
+                border-radius: 0.25rem;
+            }
+            
+            .badge-primary {
+                background-color: #007bff;
+            }
+            
+            .table-bordered {
+                border: 1px solid #dee2e6;
+            }
+            
+            .table-bordered th,
+            .table-bordered td {
+                border: 1px solid #dee2e6;
+            }
+            
+            .thead-light th {
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+            
+            .table-hover tbody tr:hover {
+                background-color: #f5f5f5;
+            }
+            
+            /* Prevent text overflow */
+            .text-break {
+                word-wrap: break-word;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                max-width: 100%;
+            }
+            
+            /* Ensure tables don't overflow */
+            .table {
+                table-layout: fixed;
+                width: 100%;
+            }
+            
+            code {
+                padding: 0.2rem 0.4rem;
+                border-radius: 0.25rem;
+                font-size: 0.875rem;
+                word-wrap: break-word;
+                word-break: break-word;
+            }
+            
+            .text-primary {
+                color: #007bff !important;
+                background-color: #e7f3ff;
+            }
+            
+            .text-success {
+                color: #28a745 !important;
+                background-color: #e8f5e9;
+            }
+            
+            pre {
+                background-color: #f8f9fa;
+                padding: 1rem;
+                border-radius: 0.25rem;
+                overflow-x: auto;
+                font-size: 0.875rem;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+            
+            /* Flexbox utilities for logo alignment */
+            .d-flex {
+                display: flex !important;
+            }
+            
+            .align-items-center {
+                align-items: center !important;
+            }
+            
+            /* Logo styling */
+            h4 img {
+                border-radius: 0.25rem;
+                object-fit: contain;
+            }
+        </style>
+    </z:div>
+    
+</zk:zk>
