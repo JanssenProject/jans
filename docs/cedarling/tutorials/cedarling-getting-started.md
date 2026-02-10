@@ -487,7 +487,7 @@ Cedarling currently provides two modes of authorization:
 - Doesn't use principal and all token information is stored in context.
 - This makes authorization decisions by rules based on context values (token payloads).
 
-[More information](./cedarling-multi-issuer.md)
+[More information](../reference/cedarling-multi-issuer.md)
 
 ### Logging
 

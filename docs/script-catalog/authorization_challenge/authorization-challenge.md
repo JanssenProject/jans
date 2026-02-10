@@ -482,5 +482,15 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
 
 
 ## Sample Scripts
-- [AuthorizationChallenge](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
-- [Multi-step AuthorizationChallenge](../../../script-catalog/authorization_challenge/multi_step/AuthorizationChallenge.java)
+
+### Authorization Challenge Script
+
+```java
+--8<-- "script-catalog/authorization_challenge/AuthorizationChallenge.java"
+```
+
+### Multi-step Authorization Challenge Script
+
+```java
+--8<-- "script-catalog/authorization_challenge/multi_step/AuthorizationChallenge.java"
+```
