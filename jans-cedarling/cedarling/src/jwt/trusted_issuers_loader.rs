@@ -62,17 +62,7 @@ impl TrustedIssuerLoader {
                 load_trusted_issuers(self, trusted_issuers, workers.get())
                     .await
                     .inspect_err(|e| {
-                        self.logger.log_any(
-                            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                                LogLevel::FATAL,
-                                None,
-                            ))
-                            .set_error(e.to_string())
-                            .set_message(
-                                "Error happened on load_trusted_issuers, it is critical"
-                                    .to_string(),
-                            ),
-                        );
+                        log_load_trusted_issuers_error(self.logger.clone(), e);
                     })
             },
             TrustedIssuerLoaderConfig::Async { workers } => {
@@ -81,17 +71,7 @@ impl TrustedIssuerLoader {
                     let _ = load_trusted_issuers(&loader, trusted_issuers, workers.get())
                         .await
                         .inspect_err(|e| {
-                            loader.logger.log_any(
-                                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                                    LogLevel::FATAL,
-                                    None,
-                                ))
-                                .set_error(e.to_string())
-                                .set_message(
-                                    "Error happened on load_trusted_issuers, it is critical"
-                                        .to_string(),
-                                ),
-                            );
+                            log_load_trusted_issuers_error(loader.logger.clone(), e);
                         });
                 });
                 Ok(())
@@ -227,6 +207,7 @@ pub(super) async fn load_trusted_issuer(
     Ok(())
 }
 
+/// Fetches the OpenID configuration for a trusted issuer and updates the issuer configuration accordingly.
 async fn update_openid_config(
     iss_config: &mut IssuerConfig,
     logger: Option<&Logger>,
@@ -249,6 +230,7 @@ async fn update_openid_config(
     Ok(iss_claim)
 }
 
+/// Inserts keys into the key service based on the JWT configuration and issuer configuration.
 async fn insert_keys(
     key_service: &KeyService,
     jwt_config: &JwtConfig,
@@ -270,6 +252,18 @@ async fn insert_keys(
     }
 
     Ok(())
+}
+
+/// Logs a critical error that occurred during the loading of trusted issuers.
+fn log_load_trusted_issuers_error(logger: Option<Logger>, error: &JwtServiceInitError) {
+    logger.log_any(
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::FATAL,
+            None,
+        ))
+        .set_error(error.to_string())
+        .set_message("Error happened on load_trusted_issuers, it is critical".to_string()),
+    );
 }
 
 #[cfg(test)]
