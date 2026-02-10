@@ -733,3 +733,273 @@ func TestValidationGracefulDegradationInvalidToken(t *testing.T) {
 		t.Error("request_id should be present")
 	}
 }
+
+// TestDataAPIPushAndGet tests basic push and get operations
+func TestDataAPIPushAndGet(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data without TTL
+	value := map[string]interface{}{
+		"level":   "premium",
+		"country": "US",
+	}
+	err = instance.PushData("user_profile", value, nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get data
+	result, err := instance.GetData("user_profile")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if result == nil {
+		t.Fatal("Expected data to be present")
+	}
+
+	// Verify value structure
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected result to be a map, got %T", result)
+	}
+	if resultMap["level"] != "premium" {
+		t.Errorf("Expected level to be 'premium', got %v", resultMap["level"])
+	}
+}
+
+// TestDataAPIGetDataEntry tests getting data with metadata
+func TestDataAPIGetDataEntry(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data
+	err = instance.PushData("test_key", "test_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get entry with metadata
+	entry, err := instance.GetDataEntry("test_key")
+	if err != nil {
+		t.Fatalf("Failed to get data entry: %v", err)
+	}
+	if entry == nil {
+		t.Fatal("Expected entry to be present")
+	}
+
+	if entry.Key != "test_key" {
+		t.Errorf("Expected key to be 'test_key', got %v", entry.Key)
+	}
+	if entry.CreatedAt == "" {
+		t.Error("Expected created_at to be set")
+	}
+}
+
+// TestDataAPIRemoveData tests removing data
+func TestDataAPIRemoveData(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data
+	err = instance.PushData("to_remove", "value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Remove data
+	removed, err := instance.RemoveData("to_remove")
+	if err != nil {
+		t.Fatalf("Failed to remove data: %v", err)
+	}
+	if !removed {
+		t.Error("Expected remove to return true")
+	}
+
+	// Verify it's gone
+	result, err := instance.GetData("to_remove")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if result != nil {
+		t.Error("Expected data to be removed")
+	}
+}
+
+// TestDataAPIClearData tests clearing all data
+func TestDataAPIClearData(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push multiple entries
+	err = instance.PushData("key1", "value1", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+	err = instance.PushData("key2", "value2", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Clear all data
+	err = instance.ClearData()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+
+	// Verify all data is gone
+	stats, err := instance.GetStats()
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+	if stats.EntryCount != 0 {
+		t.Errorf("Expected entry count to be 0, got %v", stats.EntryCount)
+	}
+}
+
+// TestDataAPIListData tests listing all data entries
+func TestDataAPIListData(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Clear any existing data
+	err = instance.ClearData()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+
+	// Push multiple entries
+	err = instance.PushData("list_key1", "value1", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+	err = instance.PushData("list_key2", "value2", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// List all entries
+	entries, err := instance.ListData()
+	if err != nil {
+		t.Fatalf("Failed to list data: %v", err)
+	}
+
+	if len(entries) != 2 {
+		t.Errorf("Expected 2 entries, got %v", len(entries))
+	}
+}
+
+// TestDataAPIGetStats tests getting data store statistics
+func TestDataAPIGetStats(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Clear and add some data
+	err = instance.ClearData()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+	err = instance.PushData("stats_key", "stats_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get stats
+	stats, err := instance.GetStats()
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+
+	if stats.EntryCount != 1 {
+		t.Errorf("Expected entry count to be 1, got %v", stats.EntryCount)
+	}
+	if stats.MaxEntries == 0 {
+		t.Error("Expected max_entries to be set")
+	}
+}
+
+// TestDataAPIInstanceIsolation tests that data is isolated between instances
+func TestDataAPIInstanceIsolation(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+
+	instance1, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create first Cedarling instance: %v", err)
+	}
+	defer instance1.ShutDown()
+
+	instance2, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create second Cedarling instance: %v", err)
+	}
+	defer instance2.ShutDown()
+
+	// Push data to instance1
+	err = instance1.PushData("isolated_key", "instance1_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data to instance1: %v", err)
+	}
+
+	// Verify data is NOT in instance2
+	result, err := instance2.GetData("isolated_key")
+	if err != nil {
+		t.Fatalf("Failed to get data from instance2: %v", err)
+	}
+	if result != nil {
+		t.Error("Data should be isolated between instances")
+	}
+
+	// Verify data IS in instance1
+	result, err = instance1.GetData("isolated_key")
+	if err != nil {
+		t.Fatalf("Failed to get data from instance1: %v", err)
+	}
+	if result == nil {
+		t.Error("Data should be present in instance1")
+	}
+}

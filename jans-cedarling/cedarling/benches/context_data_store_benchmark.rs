@@ -147,7 +147,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
 // DataStore CRUD Benchmarks
 // =============================================================================
 
-fn bench_push_data(c: &mut Criterion) {
+fn bench_push_data_ctx(c: &mut Criterion) {
     let runtime = Runtime::new().expect("init tokio runtime");
 
     let cedarling = runtime
@@ -164,7 +164,7 @@ fn bench_push_data(c: &mut Criterion) {
             let key = format!("key_{}", counter % 1000);
             counter += 1;
             cedarling
-                .push_data(
+                .push_data_ctx(
                     black_box(&key),
                     black_box(json!("small_value")),
                     black_box(Some(Duration::from_secs(60))),
@@ -174,7 +174,7 @@ fn bench_push_data(c: &mut Criterion) {
     });
 
     // Clean up
-    cedarling.clear_data().expect("clear should succeed");
+    cedarling.clear_data_ctx().expect("clear should succeed");
 
     // Benchmark push with medium value (nested JSON)
     group.bench_function("medium_value", |b| {
@@ -188,7 +188,7 @@ fn bench_push_data(c: &mut Criterion) {
             let key = format!("key_{}", counter % 1000);
             counter += 1;
             cedarling
-                .push_data(
+                .push_data_ctx(
                     black_box(&key),
                     black_box(medium_value.clone()),
                     black_box(Some(Duration::from_secs(60))),
@@ -198,7 +198,7 @@ fn bench_push_data(c: &mut Criterion) {
     });
 
     // Clean up
-    cedarling.clear_data().expect("clear should succeed");
+    cedarling.clear_data_ctx().expect("clear should succeed");
 
     // Benchmark push with large value (array)
     group.bench_function("large_value", |b| {
@@ -211,7 +211,7 @@ fn bench_push_data(c: &mut Criterion) {
             let key = format!("key_{}", counter % 1000);
             counter += 1;
             cedarling
-                .push_data(
+                .push_data_ctx(
                     black_box(&key),
                     black_box(large_value.clone()),
                     black_box(Some(Duration::from_secs(60))),
@@ -223,7 +223,7 @@ fn bench_push_data(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_get_data(c: &mut Criterion) {
+fn bench_get_data_ctx(c: &mut Criterion) {
     let runtime = Runtime::new().expect("init tokio runtime");
 
     let cedarling = runtime
@@ -233,7 +233,7 @@ fn bench_get_data(c: &mut Criterion) {
     // Pre-populate with data
     for i in 0..1000 {
         cedarling
-            .push_data(
+            .push_data_ctx(
                 &format!("key_{i}"),
                 json!({"index": i, "data": "test_data"}),
                 Some(Duration::from_secs(300)),
@@ -252,7 +252,7 @@ fn bench_get_data(c: &mut Criterion) {
             counter += 1;
             black_box(
                 cedarling
-                    .get_data(black_box(&key))
+                    .get_data_ctx(black_box(&key))
                     .expect("get should succeed"),
             )
         });
@@ -263,7 +263,7 @@ fn bench_get_data(c: &mut Criterion) {
         b.iter(|| {
             black_box(
                 cedarling
-                    .get_data(black_box("nonexistent_key"))
+                    .get_data_ctx(black_box("nonexistent_key"))
                     .expect("get should succeed"),
             )
         });
@@ -282,7 +282,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
     // Pre-populate
     for i in 0..100 {
         cedarling
-            .push_data(
+            .push_data_ctx(
                 &format!("key_{i}"),
                 json!({"index": i}),
                 Some(Duration::from_secs(300)),
@@ -300,7 +300,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
                 // Write (20%) - Use modulo to reuse keys and prevent storage limit exhaustion
                 let key = format!("new_key_{}", counter % 1000);
                 cedarling
-                    .push_data(
+                    .push_data_ctx(
                         black_box(&key),
                         black_box(json!({"counter": counter})),
                         black_box(Some(Duration::from_secs(60))),
@@ -311,7 +311,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
                 let key = format!("key_{}", counter % 100);
                 black_box(
                     cedarling
-                        .get_data(black_box(&key))
+                        .get_data_ctx(black_box(&key))
                         .expect("get should succeed"),
                 );
             }
@@ -335,7 +335,7 @@ fn bench_authorization_with_data(c: &mut Criterion) {
 
     // Push data that enables the policy
     cedarling
-        .push_data("enabled", json!(true), Some(Duration::from_secs(300)))
+        .push_data_ctx("enabled", json!(true), Some(Duration::from_secs(300)))
         .expect("push should succeed");
 
     let request = RequestUnsigned {
@@ -404,7 +404,7 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
 
         // Push the schema-defined "enabled" key
         cedarling
-            .push_data("enabled", json!(true), Some(Duration::from_secs(300)))
+            .push_data_ctx("enabled", json!(true), Some(Duration::from_secs(300)))
             .expect("push should succeed");
 
         let request = RequestUnsigned {
@@ -454,8 +454,8 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
 
 criterion_group!(
     data_store_benchmarks,
-    bench_push_data,
-    bench_get_data,
+    bench_push_data_ctx,
+    bench_get_data_ctx,
     bench_mixed_workload,
     bench_authorization_with_data,
     bench_authorization_varying_data_size,

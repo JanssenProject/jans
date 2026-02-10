@@ -57,8 +57,9 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # Plugins
 # =======
 
+# @TODO: add shibboleth as plugin when artifact is ready
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock jans-link; \
+    && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
@@ -243,6 +244,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/jans-config-api/custom/libs \
+    ${JETTY_BASE}/jans-config-api/etc/jetty/security \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
@@ -267,6 +269,9 @@ RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
+# extra java.security (activated when admin-ui plugin is enabled)
+COPY contrib/java.security ${JETTY_BASE}/jans-config-api/etc/jetty/security/java.security
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
@@ -279,12 +284,14 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod 664 /etc/hosts.back \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chmod -R g=u /app/templates/jans-config-api \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/etc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/custom/libs \
     && chmod -R g=u ${JETTY_BASE}/jans-config-api/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/etc \
     && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
     && chown -R 1000:0 /var/log/adminui

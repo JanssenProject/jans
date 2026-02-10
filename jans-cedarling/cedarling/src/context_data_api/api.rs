@@ -56,31 +56,31 @@ pub struct DataStoreStats {
 ///
 /// fn use_data_api(cedarling: &Cedarling) -> Result<(), DataError> {
 ///     // Push data with a 5-minute TTL
-///     cedarling.push_data(
+///     cedarling.push_data_ctx(
 ///         "user_roles",
 ///         json!(["admin", "editor"]),
 ///         Some(Duration::from_secs(300)),
 ///     )?;
 ///
 ///     // Retrieve data
-///     if let Some(roles) = cedarling.get_data("user_roles")? {
+///     if let Some(roles) = cedarling.get_data_ctx("user_roles")? {
 ///         println!("User roles: {}", roles);
 ///     }
 ///
 ///     // List all entries with metadata
-///     for entry in cedarling.list_data()? {
+///     for entry in cedarling.list_data_ctx()? {
 ///         println!("Key: {}, Type: {:?}", entry.key, entry.data_type);
 ///     }
 ///
 ///     // Get store statistics
-///     let stats = cedarling.get_stats()?;
+///     let stats = cedarling.get_stats_ctx()?;
 ///     println!("Entries: {}/{}", stats.entry_count, stats.max_entries);
 ///
 ///     // Remove data
-///     cedarling.remove_data("user_roles")?;
+///     cedarling.remove_data_ctx("user_roles")?;
 ///
 ///     // Clear all data
-///     cedarling.clear_data()?;
+///     cedarling.clear_data_ctx()?;
 ///
 ///     Ok(())
 /// }
@@ -90,35 +90,40 @@ pub trait DataApi {
     ///
     /// If the key already exists, the value will be replaced.
     /// If TTL is not provided, the default TTL from configuration is used.
-    fn push_data(&self, key: &str, value: Value, ttl: Option<Duration>) -> Result<(), DataError>;
+    fn push_data_ctx(
+        &self,
+        key: &str,
+        value: Value,
+        ttl: Option<Duration>,
+    ) -> Result<(), DataError>;
 
     /// Get a value from the store by key.
     ///
     /// Returns `Ok(None)` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
-    fn get_data(&self, key: &str) -> Result<Option<Value>, DataError>;
+    fn get_data_ctx(&self, key: &str) -> Result<Option<Value>, DataError>;
 
     /// Get a data entry with full metadata by key.
     ///
     /// Returns `Ok(None)` if the key doesn't exist or the entry has expired.
     /// Includes metadata like creation time, expiration, access count, and type.
-    fn get_data_entry(&self, key: &str) -> Result<Option<DataEntry>, DataError>;
+    fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, DataError>;
 
     /// Remove a value from the store by key.
     ///
     /// Returns `Ok(true)` if the key existed and was removed, `Ok(false)` otherwise.
-    fn remove_data(&self, key: &str) -> Result<bool, DataError>;
+    fn remove_data_ctx(&self, key: &str) -> Result<bool, DataError>;
 
     /// Clear all entries from the store.
-    fn clear_data(&self) -> Result<(), DataError>;
+    fn clear_data_ctx(&self) -> Result<(), DataError>;
 
     /// List all entries with their metadata.
     ///
     /// Returns a vector of `DataEntry` containing key, value, type, and timing metadata.
-    fn list_data(&self) -> Result<Vec<DataEntry>, DataError>;
+    fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError>;
 
     /// Get statistics about the data store.
     ///
     /// Returns current entry count, capacity limits, and configuration state.
-    fn get_stats(&self) -> Result<DataStoreStats, DataError>;
+    fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError>;
 }
