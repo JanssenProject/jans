@@ -42,12 +42,40 @@ impl TrustedIssuerLoader {
     ) -> Result<(), JwtServiceInitError> {
         match self.jwt_config.trusted_issuer_loader {
             TrustedIssuerLoaderConfig::Sync { workers } => {
-                load_trusted_issuers(self, trusted_issuers, workers.get()).await
+                load_trusted_issuers(self, trusted_issuers, workers.get())
+                    .await
+                    .inspect_err(|e| {
+                        self.logger.log_any(
+                            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                                LogLevel::FATAL,
+                                None,
+                            ))
+                            .set_error(e.to_string())
+                            .set_message(
+                                "Error happened on load_trusted_issuers, it is critical"
+                                    .to_string(),
+                            ),
+                        )
+                    })
             },
             TrustedIssuerLoaderConfig::Async { workers } => {
                 let loader = self.clone();
                 spawn_task(async move {
-                    let _ = load_trusted_issuers(&loader, trusted_issuers, workers.get()).await;
+                    let _ = load_trusted_issuers(&loader, trusted_issuers, workers.get())
+                        .await
+                        .inspect_err(|e| {
+                            loader.logger.log_any(
+                                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                                    LogLevel::FATAL,
+                                    None,
+                                ))
+                                .set_error(e.to_string())
+                                .set_message(
+                                    "Error happened on load_trusted_issuers, it is critical"
+                                        .to_string(),
+                                ),
+                            )
+                        });
                 });
                 Ok(())
             },
