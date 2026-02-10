@@ -102,7 +102,6 @@ impl TrustedIssuerLoader {
     /// Quick check so we don't get surprised if the program runs but can't validate
     /// if signed authorization is unavailable and signature validation is enabled, log a warning
     pub(crate) fn check_keys_loaded(&self) {
-        // anything
         let signed_authz_available = self.key_service.has_keys();
         if !signed_authz_available && self.jwt_config.jwt_sig_validation {
             self.logger.log_any(JwtLogEntry::new(
