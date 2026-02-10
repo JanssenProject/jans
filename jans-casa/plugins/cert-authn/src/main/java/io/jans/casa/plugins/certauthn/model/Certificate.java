@@ -9,6 +9,7 @@ public class Certificate {
     private long expirationDate;
     private boolean expired;
     private String fingerPrint;
+    private String pemContent;
 
     public String getCommonName() {
         return commonName;
@@ -66,4 +67,12 @@ public class Certificate {
         this.formattedName = formattedName;
     }
 
+    public String getPemContent() {
+        return pemContent;
+    }
+
+    public void setPemContent(String pemContent) {
+        this.pemContent = pemContent;
+    }
+    
 }

@@ -56,7 +56,7 @@ impl HttpClient {
 
     /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
     ///
-    /// This method will attempt to fetch the resource up to the configured max_retries,
+    /// This method will attempt to fetch the resource up to the configured `max_retries`,
     /// with exponential backoff between each attempt. Useful for fetching binary content
     /// like archive files.
     pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
@@ -80,7 +80,7 @@ impl Response {
     }
 }
 
-/// Error type for the HttpClient - re-export from http_utils for compatibility
+/// Error type for the [`HttpClient`] - re-export from [`http_utils`] for compatibility
 pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(test)]

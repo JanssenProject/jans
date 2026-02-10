@@ -8,8 +8,8 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
-    RequestUnsigned,
+    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage,
+    MultiIssuerAuthorizeResult, Request, RequestUnsigned,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -48,7 +48,9 @@ impl Cedarling {
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, Box<AuthorizeError>> {
-        self.runtime.block_on(self.instance.authorize(request)).map_err(Box::new)
+        self.runtime
+            .block_on(self.instance.authorize(request))
+            .map_err(Box::new)
     }
 
     /// Authorize request with unsigned data.
