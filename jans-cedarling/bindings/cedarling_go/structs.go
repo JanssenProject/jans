@@ -250,3 +250,28 @@ type MultiIssuerAuthorizeResult struct {
 	Decision  bool          `json:"decision"`
 	RequestID string        `json:"request_id"`
 }
+
+// DataEntry represents a single entry in the data store with metadata
+type DataEntry struct {
+	Key         string `json:"key"`
+	Value       any    `json:"value"`
+	DataType    string `json:"data_type"`
+	CreatedAt   string `json:"created_at"`
+	ExpiresAt   string `json:"expires_at,omitempty"`
+	AccessCount uint64 `json:"access_count"`
+	LastAccess  string `json:"last_access,omitempty"`
+	SizeBytes   uint64 `json:"size_bytes"`
+}
+
+// DataStoreStats represents statistics about the data store
+type DataStoreStats struct {
+	EntryCount            uint64  `json:"entry_count"`
+	MaxEntries            uint64  `json:"max_entries"`
+	MaxEntrySize          uint64  `json:"max_entry_size"`
+	MetricsEnabled        bool    `json:"metrics_enabled"`
+	TotalSizeBytes        uint64  `json:"total_size_bytes"`
+	AvgEntrySizeBytes     uint64  `json:"avg_entry_size_bytes"`
+	CapacityUsagePercent  float64 `json:"capacity_usage_percent"`
+	MemoryAlertThreshold  float64 `json:"memory_alert_threshold"`
+	MemoryAlertTriggered  bool    `json:"memory_alert_triggered"`
+}

@@ -60,10 +60,28 @@ def fix_newlines(str_value):
     return str_value.replace("\n:", "  \n:")
 
 
+# Add more descriptive docstrings for data_errors_ctx error classes
+DATA_ERRORS_CTX_DOCS = {
+    "DataErrorCtx": "Base exception for errors encountered during data operations in Cedarling context storage.",
+    "InvalidKey": "Raised when an invalid (e.g., empty) key is provided to the context data store. This typically means the key argument was missing or empty.",
+    "KeyNotFound": "Raised when a requested key is not found in the context data store. This usually means the key does not exist or has expired.",
+    "SerializationError": "Raised when there is a failure serializing or deserializing data for storage or retrieval in the context data store.",
+    "StorageLimitExceeded": "Raised when an operation would exceed the maximum allowed storage size for the context data store.",
+    "TTLExceeded": "Raised when a requested time-to-live (TTL) value exceeds the maximum allowed by the context data store.",
+    "ValueTooLarge": "Raised when a value is too large to be stored in the context data store, exceeding the allowed size limit."
+}
+
+
 def print_doc(type_value: any, module_name: str | None = None):
     '''
         this is a helper function show to doc string for a given type
     '''
+    # Patch docstrings for data_errors_ctx error classes
+    if module_name and module_name.endswith("data_errors_ctx"):
+        doc_override = DATA_ERRORS_CTX_DOCS.get(type_value.__name__)
+        if doc_override:
+            type_value.__doc__ = doc_override
+
     message = fix_newlines(type_value.__doc__)
     message_lines = message.split("\n")
     if len(message_lines) != 0:

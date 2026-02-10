@@ -168,17 +168,17 @@ async fn test_authorization_with_pushed_data_allows_access() {
 
     // Push data that satisfies the policy
     cedarling
-        .push_data(
+        .push_data_ctx(
             "user_level",
             json!("premium"),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
 
     // Verify data was pushed correctly
     let data = cedarling
-        .get_data("user_level")
-        .expect("get_data should succeed");
+        .get_data_ctx("user_level")
+        .expect("get_data_ctx should succeed");
     assert_eq!(
         data,
         Some(json!("premium")),
@@ -230,8 +230,8 @@ async fn test_authorization_with_wrong_data_value_denies_access() {
 
     // Push data with wrong value
     cedarling
-        .push_data("user_level", json!("basic"), Some(Duration::from_secs(60)))
-        .expect("push_data should succeed");
+        .push_data_ctx("user_level", json!("basic"), Some(Duration::from_secs(60)))
+        .expect("push_data_ctx should succeed");
 
     let request = create_test_request("AccessPremiumContent");
     let result = cedarling
@@ -257,12 +257,12 @@ async fn test_authorization_with_boolean_flag() {
 
     // Push feature flag as true
     cedarling
-        .push_data(
+        .push_data_ctx(
             "feature_enabled",
             json!(true),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
 
     let request = create_test_request("UseFeature");
     let result = cedarling
@@ -288,12 +288,12 @@ async fn test_authorization_with_nested_data() {
 
     // Push nested configuration data (only fields declared in schema)
     cedarling
-        .push_data(
+        .push_data_ctx(
             "config",
             json!({"enabled": true}),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
 
     let request = create_test_request("NestedAccess");
     let result = cedarling
@@ -353,17 +353,17 @@ async fn test_multiple_instances_have_isolated_data() {
 
     // Push data only to cedarling1
     cedarling1
-        .push_data(
+        .push_data_ctx(
             "user_level",
             json!("premium"),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
 
     // cedarling1 should have the data
     let data1 = cedarling1
-        .get_data("user_level")
-        .expect("get_data should succeed");
+        .get_data_ctx("user_level")
+        .expect("get_data_ctx should succeed");
     assert_eq!(
         data1,
         Some(json!("premium")),
@@ -372,8 +372,8 @@ async fn test_multiple_instances_have_isolated_data() {
 
     // cedarling2 should NOT have the data (isolated)
     let data2 = cedarling2
-        .get_data("user_level")
-        .expect("get_data should succeed");
+        .get_data_ctx("user_level")
+        .expect("get_data_ctx should succeed");
     assert_eq!(
         data2, None,
         "cedarling2 should NOT have the data (isolated)"
@@ -412,12 +412,12 @@ async fn test_data_removal_affects_authorization() {
 
     // Push data
     cedarling
-        .push_data(
+        .push_data_ctx(
             "user_level",
             json!("premium"),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
 
     // First authorization should succeed
     let request1 = create_test_request("AccessPremiumContent");
@@ -429,7 +429,7 @@ async fn test_data_removal_affects_authorization() {
 
     // Remove the data
     let removed = cedarling
-        .remove_data("user_level")
+        .remove_data_ctx("user_level")
         .expect("remove should succeed");
     assert!(removed, "Data should have been removed");
 
@@ -454,29 +454,33 @@ async fn test_data_clear_affects_authorization() {
 
     // Push multiple data entries
     cedarling
-        .push_data(
+        .push_data_ctx(
             "user_level",
             json!("premium"),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
     cedarling
-        .push_data(
+        .push_data_ctx(
             "feature_enabled",
             json!(true),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data should succeed");
+        .expect("push_data_ctx should succeed");
 
     // Verify data exists
-    let stats = cedarling.get_stats().expect("get_stats should succeed");
+    let stats = cedarling
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
     assert_eq!(stats.entry_count, 2, "Should have 2 entries");
 
     // Clear all data
-    cedarling.clear_data().expect("clear should succeed");
+    cedarling.clear_data_ctx().expect("clear should succeed");
 
     // Verify data is gone
-    let stats_after = cedarling.get_stats().expect("get_stats should succeed");
+    let stats_after = cedarling
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
     assert_eq!(
         stats_after.entry_count, 0,
         "Should have 0 entries after clear"
@@ -503,8 +507,8 @@ async fn test_data_update_affects_authorization() {
 
     // Push initial data (basic user)
     cedarling
-        .push_data("user_level", json!("basic"), Some(Duration::from_secs(60)))
-        .expect("push_data should succeed");
+        .push_data_ctx("user_level", json!("basic"), Some(Duration::from_secs(60)))
+        .expect("push_data_ctx should succeed");
 
     // Authorization should fail (not premium)
     let request1 = create_test_request("AccessPremiumContent");
@@ -516,12 +520,12 @@ async fn test_data_update_affects_authorization() {
 
     // Update to premium
     cedarling
-        .push_data(
+        .push_data_ctx(
             "user_level",
             json!("premium"),
             Some(Duration::from_secs(60)),
         )
-        .expect("push_data update should succeed");
+        .expect("push_data_ctx update should succeed");
 
     // Authorization should now succeed
     let request2 = create_test_request("AccessPremiumContent");
@@ -547,21 +551,23 @@ async fn test_data_list_and_stats() {
 
     // Push multiple entries
     cedarling
-        .push_data("key1", json!("value1"), Some(Duration::from_secs(60)))
+        .push_data_ctx("key1", json!("value1"), Some(Duration::from_secs(60)))
         .expect("push should succeed");
     cedarling
-        .push_data(
+        .push_data_ctx(
             "key2",
             json!({"nested": true}),
             Some(Duration::from_secs(60)),
         )
         .expect("push should succeed");
     cedarling
-        .push_data("key3", json!([1, 2, 3]), Some(Duration::from_secs(60)))
+        .push_data_ctx("key3", json!([1, 2, 3]), Some(Duration::from_secs(60)))
         .expect("push should succeed");
 
     // Check stats
-    let stats = cedarling.get_stats().expect("get_stats should succeed");
+    let stats = cedarling
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
     assert_eq!(stats.entry_count, 3, "Should have 3 entries");
     assert!(stats.total_size_bytes > 0, "Total size should be positive");
     assert!(
@@ -570,7 +576,9 @@ async fn test_data_list_and_stats() {
     );
 
     // List entries
-    let entries = cedarling.list_data().expect("list_data should succeed");
+    let entries = cedarling
+        .list_data_ctx()
+        .expect("list_data_ctx should succeed");
     assert_eq!(entries.len(), 3, "Should list 3 entries");
 
     // Verify keys are present
@@ -581,7 +589,7 @@ async fn test_data_list_and_stats() {
 }
 
 #[test]
-async fn test_get_data_entry_with_metadata() {
+async fn test_get_data_entry_ctx_with_metadata() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_WITH_DATA_ACCESS.to_string()),
         |config| {
@@ -592,7 +600,7 @@ async fn test_get_data_entry_with_metadata() {
 
     // Push an entry
     cedarling
-        .push_data(
+        .push_data_ctx(
             "test_key",
             json!("test_value"),
             Some(Duration::from_secs(300)),
@@ -601,8 +609,8 @@ async fn test_get_data_entry_with_metadata() {
 
     // Get entry with metadata
     let entry = cedarling
-        .get_data_entry("test_key")
-        .expect("get_data_entry should succeed")
+        .get_data_entry_ctx("test_key")
+        .expect("get_data_entry_ctx should succeed")
         .expect("entry should exist");
 
     assert_eq!(entry.key, "test_key", "Key should match");

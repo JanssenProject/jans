@@ -460,15 +460,15 @@ impl DataValidator {
 
         // Fast path for special object types
         if CedarValueMapper::is_entity_reference(value) {
-            return Self::validate_entity_reference(value, &path);
+            return Self::validate_entity_reference(value, path.as_ref());
         }
         if let Some(extn) = obj.get("__extn") {
-            return self.validate_extension_marker(extn, &path);
+            return self.validate_extension_marker(extn, path.as_ref());
         }
 
         // Validate keys and values
         for (key, val) in obj {
-            Self::validate_key(key, &path)?;
+            Self::validate_key(key, path.as_ref())?;
             let field_path = Cow::Owned(format!("{path}.{key}"));
             self.validate_at_path(val, field_path, depth + 1)?;
         }
@@ -477,16 +477,16 @@ impl DataValidator {
 
     /// Validates an object key.
     #[inline]
-    fn validate_key(key: &str, path: &Cow<'_, str>) -> Result<(), ValidationError> {
+    fn validate_key(key: &str, path: &str) -> Result<(), ValidationError> {
         if key.is_empty() {
             return Err(ValidationError::InvalidKey {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 reason: "empty key".to_string(),
             });
         }
         if key.chars().any(char::is_control) {
             return Err(ValidationError::InvalidKey {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 reason: "key contains control characters".to_string(),
             });
         }
@@ -523,24 +523,19 @@ impl DataValidator {
                     });
                 }
             },
-            Value::String(s) => self.validate_string_collecting(s, path, errors),
-            Value::Array(arr) => self.validate_array_collecting(arr, path, depth, errors),
+            Value::String(s) => self.validate_string_collecting(s, path.as_ref(), errors),
+            Value::Array(arr) => self.validate_array_collecting(arr, path.as_ref(), depth, errors),
             Value::Object(obj) => {
-                self.validate_object_collecting(value, obj, path, depth, errors);
+                self.validate_object_collecting(value, obj, path.as_ref(), depth, errors);
             },
         }
     }
 
     /// Validate a string value, collecting all errors.
-    fn validate_string_collecting(
-        &self,
-        s: &str,
-        path: Cow<'_, str>,
-        errors: &mut Vec<ValidationError>,
-    ) {
+    fn validate_string_collecting(&self, s: &str, path: &str, errors: &mut Vec<ValidationError>) {
         if s.len() > self.config.max_string_length {
             errors.push(ValidationError::StringTooLong {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 length: s.len(),
                 max: self.config.max_string_length,
             });
@@ -549,43 +544,39 @@ impl DataValidator {
         // If it looks like an extension type, validate its format
         if self.config.strict_extension_validation
             && let Some(ext) = CedarValueMapper::detect_extension(s)
-            && let Some(err) = self.check_extension_format(&ext, &path)
+            && let Some(err) = self.check_extension_format(&ext, path)
         {
             errors.push(err);
         }
     }
 
     /// Check extension format and return an error if invalid.
-    fn check_extension_format(
-        &self,
-        ext: &ExtensionValue,
-        path: &Cow<'_, str>,
-    ) -> Option<ValidationError> {
+    fn check_extension_format(&self, ext: &ExtensionValue, path: &str) -> Option<ValidationError> {
         match ext {
             ExtensionValue::IpAddr(ip) if self.validate_extension(ip, "ip").is_err() => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     extension_type: "ipaddr".to_string(),
                     value: ip.clone(),
                 })
             },
             ExtensionValue::Decimal(d) if d.parse::<f64>().is_err() => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     extension_type: "decimal".to_string(),
                     value: d.clone(),
                 })
             },
             ExtensionValue::DateTime(dt) if !Self::is_valid_datetime(dt) => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     extension_type: "datetime".to_string(),
                     value: dt.clone(),
                 })
             },
             ExtensionValue::Duration(dur) if !Self::is_valid_duration(dur) => {
                 Some(ValidationError::InvalidExtensionFormat {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     extension_type: "duration".to_string(),
                     value: dur.clone(),
                 })
@@ -598,13 +589,13 @@ impl DataValidator {
     fn validate_array_collecting(
         &self,
         arr: &[Value],
-        path: Cow<'_, str>,
+        path: &str,
         depth: usize,
         errors: &mut Vec<ValidationError>,
     ) {
         if arr.len() > self.config.max_array_length {
             errors.push(ValidationError::ArrayTooLong {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 length: arr.len(),
                 max: self.config.max_array_length,
             });
@@ -620,13 +611,13 @@ impl DataValidator {
         &self,
         value: &Value,
         obj: &serde_json::Map<String, Value>,
-        path: Cow<'_, str>,
+        path: &str,
         depth: usize,
         errors: &mut Vec<ValidationError>,
     ) {
         if obj.len() > self.config.max_object_keys {
             errors.push(ValidationError::TooManyKeys {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 count: obj.len(),
                 max: self.config.max_object_keys,
             });
@@ -634,7 +625,7 @@ impl DataValidator {
 
         // Check for entity reference
         if CedarValueMapper::is_entity_reference(value) {
-            if let Err(e) = Self::validate_entity_reference(value, &path) {
+            if let Err(e) = Self::validate_entity_reference(value, path) {
                 errors.push(e);
             }
             return;
@@ -642,7 +633,7 @@ impl DataValidator {
 
         // Check for extension type marker
         if let Some(extn) = obj.get("__extn") {
-            if let Err(e) = self.validate_extension_marker(extn, &path) {
+            if let Err(e) = self.validate_extension_marker(extn, path) {
                 errors.push(e);
             }
             return;
@@ -652,13 +643,13 @@ impl DataValidator {
         for (key, val) in obj {
             if key.is_empty() {
                 errors.push(ValidationError::InvalidKey {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     reason: "empty key".to_string(),
                 });
             }
             if key.chars().any(char::is_control) {
                 errors.push(ValidationError::InvalidKey {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     reason: "key contains control characters".to_string(),
                 });
             }
@@ -668,40 +659,33 @@ impl DataValidator {
     }
 
     // Validate entity reference format
-    fn validate_entity_reference(
-        value: &Value,
-        path: &Cow<'_, str>,
-    ) -> Result<(), ValidationError> {
+    fn validate_entity_reference(value: &Value, path: &str) -> Result<(), ValidationError> {
         match CedarValueMapper::parse_entity_reference(value) {
             Ok(entity_ref) => {
                 // Validate entity type format (should be like "Namespace::Type" or just "Type")
                 if entity_ref.entity_type.is_empty() {
                     return Err(ValidationError::InvalidEntityReference {
-                        path: path.clone().into_owned(),
+                        path: path.to_string(),
                         reason: "empty entity type".to_string(),
                     });
                 }
                 if entity_ref.entity_id.is_empty() {
                     return Err(ValidationError::InvalidEntityReference {
-                        path: path.clone().into_owned(),
+                        path: path.to_string(),
                         reason: "empty entity id".to_string(),
                     });
                 }
                 Ok(())
             },
             Err(_) => Err(ValidationError::InvalidEntityReference {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 reason: "invalid format".to_string(),
             }),
         }
     }
 
     // Validate extension type marker
-    fn validate_extension_marker(
-        &self,
-        extn: &Value,
-        path: &Cow<'_, str>,
-    ) -> Result<(), ValidationError> {
+    fn validate_extension_marker(&self, extn: &Value, path: &str) -> Result<(), ValidationError> {
         if let Some(obj) = extn.as_object() {
             let fn_name = obj.get("fn").and_then(|v| v.as_str());
             let arg = obj.get("arg").and_then(|v| v.as_str());
@@ -709,20 +693,20 @@ impl DataValidator {
             match (fn_name, arg) {
                 (Some(fn_name), Some(arg)) => self.validate_extension(arg, fn_name).map_err(|_| {
                     ValidationError::InvalidExtensionFormat {
-                        path: path.clone().into_owned(),
+                        path: path.to_string(),
                         extension_type: fn_name.to_string(),
                         value: arg.to_string(),
                     }
                 }),
                 _ => Err(ValidationError::InvalidExtensionFormat {
-                    path: path.clone().into_owned(),
+                    path: path.to_string(),
                     extension_type: "unknown".to_string(),
                     value: extn.to_string(),
                 }),
             }
         } else {
             Err(ValidationError::InvalidExtensionFormat {
-                path: path.clone().into_owned(),
+                path: path.to_string(),
                 extension_type: "unknown".to_string(),
                 value: extn.to_string(),
             })
