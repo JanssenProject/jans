@@ -94,7 +94,7 @@ The steps given are supposed to be executed in a developer or administrative mac
 
     1. Build the certificate chain file: `cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt > chain.pem`
 
-    1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd` --not-after=720h. This command will create a certificate signed with the intermediate certificate
+    1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd --not-after=720h`. This command will create a certificate signed with the intermediate certificate
 
     1. Inspect the created cert: `step certificate inspect joe.crt`. Note the expiration is of 30 days and that "Client authentication" is explicitly part of the extended key usages
 
