@@ -22,7 +22,7 @@ The Casa client certificate authentication plugin offers:
 
 - A Janssen server with Apache or nginx HTTP front
 - Jans Casa 1.16.0 or higher. Need it in an [older](#can-the-plugin-be-used-on-older-versions-of-jans) version?
-- It is assumed your organization already has an establish mechanism of certificate issuance and deployment. For the purpose of testing, this documentation provides manual steps for issuing certificates
+- It is assumed your organization already has an established mechanism of certificate issuance and deployment. For the purpose of testing, this documentation provides manual steps for issuing certificates
 
 ### Configuration steps
 
@@ -146,7 +146,7 @@ The `cert-authn` Agama project is an utility project that allows administrators 
 
     - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert. Then access to the application is granted
     
-    - If the certificate is mapped to an existing account, access to the application is granted to such user 
+    - If the certificate is mapped to an existing account, access to the application is granted to such user
 
 - Display a login page as the above including the configured identity providers, if any, in case the [accounts linking](./accts-linking/account-linking-index.md) plugin is installed  
 
@@ -175,7 +175,7 @@ Offering users the login page and the account onboarding regarded above is up to
 
 1. Optional. If integration with accounts linking plugin is desired, set `useAcctLinking` to `true` for flow `io.jans.casa.cert.oneStepAuthn`
 
-1. Optional. Reference an attribute mapping for account onboarding in property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn`. More on this [here](#how-does-account-onboarding-works)
+1. Optional. Reference an attribute mapping for account onboarding in property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn`. More details [here](#how-does-account-onboarding-works)
 
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
@@ -209,7 +209,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 This step is required only if account onboarding via certificate attributes is desired or if you want to authenticate users by presenting a certificate alone (no username).
 
-Note these instructions apply for VM-based installations. On containers-based environments, please open a github discussion or a support ticket.
+Note these instructions apply for VM-based installations. On containers-based environments, please open a Github discussion or a support ticket.
 
 1. Download file `https://maven.jans.io/maven/io/jans/jans-scim-model/replace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 
@@ -276,7 +276,7 @@ Having followed [these](#update-the-casa-acr) steps, visit the Casa login page.
 
 1. The browser will be redirected to the configured cert pickup URL and a native dialog will appear. From here, choose one of the available certificates
 
-1. You will be authenticated as the user that previously enrolled that cert, otherwise a new account has been created for the user. Check the user profile data (TUI or admin-ui) and see how attributes have been populated for the account
+1. You will be authenticated as the user who previously enrolled that cert, otherwise a new account has been created for the user. Check the user profile data (TUI or admin-ui) and see how attributes have been populated for the account
 
 ## FAQ
 
@@ -344,7 +344,7 @@ The input data contains the key/value pairs found in the subject of the certific
 
 Note attribute names are lowercased. Additionally, if there is a Subject Alternative Name (SAN) consisting of an e-mail, the input map will contain such value under attribute name `mail`.
 
-The "input" map can then be used to generate the resulting profile of the user to onboard. For example, the default project uses a method called `STRAIGHT`, which returns a copy of the incoming map restricted to the attributes `o`, `cn`, `l`, and `mail`. Also the `uid` attribute is added with the same value of `mail`.
+The "input" map can then be used to generate the resulting profile of the user to onboard. For example, by default the project employs a method called `STRAIGHT`, which returns a copy of the incoming map restricted to the attributes `o`, `cn`, `l`, and `mail`. Also the `uid` attribute is added with the same value of `mail`. This mapping is useful in general but administrators might like to supply their own mapping.
 
 To provide your own mapping, edit the cert-authn project: in file `lib/io/jans/casa/certauthn/AttributeMappings.java` add a new field based on the current (`STRAIGHT`) mapping. Then point to the new mapping in the project configuration accordingly. Ensure to always set an `uid`.
 
@@ -352,4 +352,4 @@ Note attribute mapping only takes place when creating an account, that is, if th
 
 ### Is there a way to offer certificate enrollment/authentication without having Casa installed?
 
-Yes, that's possible. Open a github discussion or a support ticket.
+Yes, that's possible. Open a Github discussion or a support ticket.
