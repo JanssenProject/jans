@@ -269,13 +269,12 @@ fn log_load_trusted_issuers_error(logger: Option<Logger>, error: &JwtServiceInit
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::common::issuer_utils::IssClaim;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::MockServer;
+    use crate::{common::issuer_utils::IssClaim, jwt_config::WorkersCount};
     use jsonwebtoken::Algorithm;
     use mockito::Server;
     use std::collections::HashMap;
-    use std::num::NonZeroUsize;
     use std::sync::Arc;
     use tokio::time::{Duration, sleep};
     use url::Url;
@@ -362,7 +361,7 @@ mod test {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
-                workers: NonZeroUsize::new(2).unwrap(),
+                workers: WorkersCount::new(2),
             },
             ..Default::default()
         };
@@ -478,7 +477,7 @@ mod test {
             jwt_sig_validation: true,
             jwt_status_validation: false,
             trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
-                workers: NonZeroUsize::new(1).unwrap(),
+                workers: WorkersCount::new(1),
             },
             ..Default::default()
         };
@@ -746,7 +745,7 @@ mod test {
             jwt_sig_validation: true,
             jwt_status_validation: false,
             trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
-                workers: NonZeroUsize::new(2).unwrap(),
+                workers: WorkersCount::new(2),
             },
             ..Default::default()
         };

@@ -14,7 +14,7 @@ use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
-use crate::jwt_config::TrustedIssuerLoaderTypeRaw;
+use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
@@ -24,13 +24,13 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
 /// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
 //
 //  All fields should be available to parse from string, because env vars always string.
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -320,14 +320,16 @@ pub struct BootstrapConfigRaw {
     pub trusted_issuer_loader_type: TrustedIssuerLoaderTypeRaw,
     /// Number of concurrent workers to use when loading trusted issuers.
     /// Applies to both SYNC (parallel loading during initialization) and ASYNC (parallel background loading) modes.
-    /// Default value is 1.
-    /// Zero will be treated as default value.
+    /// Minimum possible value is 1. Zero will be used as 1.
+    ///
+    /// For WASM maximum value is 6, default is 2.
+    /// For native maximum value is 1000, default is 10.
     #[serde(
         rename = "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS",
         default,
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
-    pub trusted_issuer_loader_workers: usize,
+    pub trusted_issuer_loader_workers: WorkersCount,
 }
 
 impl Default for BootstrapConfigRaw {

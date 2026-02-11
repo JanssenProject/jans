@@ -21,7 +21,7 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
-use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw};
+use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -114,9 +114,6 @@ impl BootstrapConfig {
             })
             .transpose()?;
 
-        let trusted_issuer_workers = NonZeroUsize::new(raw.trusted_issuer_loader_workers)
-            .unwrap_or(NonZeroUsize::MIN);
-
         // JWT Config
         let jwt_config = JwtConfig {
             jwks,
@@ -128,7 +125,7 @@ impl BootstrapConfig {
             token_cache_earliest_expiration_eviction: raw.token_cache_earliest_expiration_eviction,
             trusted_issuer_loader: raw
                 .trusted_issuer_loader_type
-                .to_config(trusted_issuer_workers),
+                .to_config(raw.trusted_issuer_loader_workers),
         };
 
         let authorization_config = AuthorizationConfig {
