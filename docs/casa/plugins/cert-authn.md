@@ -330,10 +330,10 @@ The implementation requires defining a maximum time for the completion of the ta
 
 If the process is not completed in this timeframe, it will fail and the log will report errors regarding expired cache entries. In this case, consider using a higher value for `roundTripMaxTime`.
 
-### How does account onboarding works?
+### How does account onboarding work?
 
 Registering an account based on the information found in a certificate is done via attribute mappings:
-Config property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn` points to a Java method found in class `io.jans.casa.certauthn.AttributeMappings` of the cert-authn Agama project. Such method takes a `Map<String, String>` as input and returns a `Map<String, String>` as well. 
+Config property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn` points to a Java method found in class `io.jans.casa.certauthn.AttributeMappings` of the cert-authn Agama project. Such method takes a `Map<String, String>` as input and returns a `Map<String, String>` as well.
 
 The input data contains the key/value pairs found in the subject of the certificate. As an example, if the cert was issued to `CN=Joe, O=foobar`, then the map will look like:
 
@@ -348,7 +348,7 @@ The "input" map can then be used to generate the resulting profile of the user t
 
 To provide your own mapping, edit the cert-authn project: in file `lib/io/jans/casa/certauthn/AttributeMappings.java` add a new field based on the current (`STRAIGHT`) mapping. Then point to the new mapping in the project configuration accordingly. Ensure to always set an `uid`.
 
-Note attribute mapping only takes place when creating an account, that is, if the certificate in question is associated to an existing user, no profile update occurs. 
+Note attribute mapping only takes place when creating an account, that is, if the certificate in question is associated to an existing user, no profile update occurs.
 
 ### Is there a way to offer certificate enrollment/authentication without having Casa installed?
 
