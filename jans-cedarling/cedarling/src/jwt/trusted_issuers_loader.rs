@@ -62,7 +62,7 @@ impl TrustedIssuerLoader {
                 load_trusted_issuers(self, trusted_issuers, workers.get())
                     .await
                     .inspect_err(|e| {
-                        log_load_trusted_issuers_error(self.logger.clone(), e);
+                        log_load_trusted_issuers_error(self.logger.as_ref(), e);
                     })
             },
             TrustedIssuerLoaderConfig::Async { workers } => {
@@ -71,7 +71,7 @@ impl TrustedIssuerLoader {
                     let _ = load_trusted_issuers(&loader, trusted_issuers, workers.get())
                         .await
                         .inspect_err(|e| {
-                            log_load_trusted_issuers_error(loader.logger.clone(), e);
+                            log_load_trusted_issuers_error(loader.logger.as_ref(), e);
                         });
                 });
                 Ok(())
@@ -207,7 +207,7 @@ pub(super) async fn load_trusted_issuer(
     Ok(())
 }
 
-/// Fetches the OpenID configuration for a trusted issuer and updates the issuer configuration accordingly.
+/// Fetches the `OpenID` configuration for a trusted issuer and updates the issuer configuration accordingly.
 async fn update_openid_config(
     iss_config: &mut IssuerConfig,
     logger: Option<&Logger>,
@@ -255,7 +255,7 @@ async fn insert_keys(
 }
 
 /// Logs a critical error that occurred during the loading of trusted issuers.
-fn log_load_trusted_issuers_error(logger: Option<Logger>, error: &JwtServiceInitError) {
+fn log_load_trusted_issuers_error(logger: Option<&Logger>, error: &JwtServiceInitError) {
     logger.log_any(
         LogEntry::new(BaseLogEntry::new_system_opt_request_id(
             LogLevel::FATAL,
