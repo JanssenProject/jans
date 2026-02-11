@@ -140,7 +140,7 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 
 ## Deploy and configure the Agama project
 
-The `cert-authn` Agama project is an utility project that allows administrators do things like:
+The `cert-authn` Agama project is a utility project that allows administrators do things like:
 
 - Display a login page where users are shown the option to present a certificate
 
