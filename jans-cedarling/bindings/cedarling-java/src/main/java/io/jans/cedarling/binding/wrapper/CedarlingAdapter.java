@@ -76,12 +76,11 @@ public class CedarlingAdapter implements AutoCloseable {
      * @param ttlSecs Optional TTL in seconds (null uses default from config)
      * @throws DataException If the operation fails
      */
-    public void pushData(String key, JSONObject value, Long ttlSecs) throws DataException {
+    public void pushDataCtx(String key, JSONObject value, Long ttlSecs) throws DataException {
         if (value == null) {
-            throw new DataException("value cannot be null");
+            throw new DataException.DataOperationFailed("value cannot be null");
         }
-        JsonValue jsonValue = new JsonValue(value.toString());
-        cedarling.pushDataCtx(key, jsonValue, ttlSecs);
+        cedarling.pushDataCtx(key, value.toString(), ttlSecs);
     }
 
     /**
@@ -94,12 +93,11 @@ public class CedarlingAdapter implements AutoCloseable {
      * @param ttlSecs Optional TTL in seconds (null uses default from config)
      * @throws DataException If the operation fails
      */
-    public void pushData(String key, String value, Long ttlSecs) throws DataException {
+    public void pushDataCtx(String key, String value, Long ttlSecs) throws DataException {
         if (value == null) {
-            throw new DataException("value cannot be null");
+            throw new DataException.DataOperationFailed("value cannot be null");
         }
-        JsonValue jsonValue = new JsonValue(value);
-        cedarling.pushDataCtx(key, jsonValue, ttlSecs);
+        cedarling.pushDataCtx(key, value, ttlSecs);
     }
 
     /**
@@ -109,8 +107,8 @@ public class CedarlingAdapter implements AutoCloseable {
      * @param value The value to store (as JSONObject)
      * @throws DataException If the operation fails
      */
-    public void pushData(String key, JSONObject value) throws DataException {
-        pushData(key, value, null);
+    public void pushDataCtx(String key, JSONObject value) throws DataException {
+        pushDataCtx(key, value, null);
     }
 
     /**
@@ -120,8 +118,8 @@ public class CedarlingAdapter implements AutoCloseable {
      * @param value The value to store (as JSON string)
      * @throws DataException If the operation fails
      */
-    public void pushData(String key, String value) throws DataException {
-        pushData(key, value, null);
+    public void pushDataCtx(String key, String value) throws DataException {
+        pushDataCtx(key, value, null);
     }
 
     /**
@@ -132,13 +130,12 @@ public class CedarlingAdapter implements AutoCloseable {
      * @return The value as a JSONObject, or null if not found
      * @throws DataException If the operation fails
      */
-    public JSONObject getData(String key) throws DataException {
-        JsonValue result = cedarling.getDataCtx(key);
+    public JSONObject getDataCtx(String key) throws DataException {
+        String result = cedarling.getDataCtx(key);
         if (result == null) {
             return null;
         }
-        // JsonValue is a custom newtype wrapping String, access via inner() method
-        return new JSONObject(result.inner());
+        return new JSONObject(result);
     }
 
     /**
@@ -149,7 +146,7 @@ public class CedarlingAdapter implements AutoCloseable {
      * @return A DataEntry object with metadata, or null if not found
      * @throws DataException If the operation fails
      */
-    public DataEntry getDataEntry(String key) throws DataException {
+    public DataEntry getDataEntryCtx(String key) throws DataException {
         return cedarling.getDataEntryCtx(key);
     }
 
@@ -160,7 +157,7 @@ public class CedarlingAdapter implements AutoCloseable {
      * @return True if the key existed and was removed, False otherwise
      * @throws DataException If the operation fails
      */
-    public boolean removeData(String key) throws DataException {
+    public boolean removeDataCtx(String key) throws DataException {
         return cedarling.removeDataCtx(key);
     }
 
@@ -169,7 +166,7 @@ public class CedarlingAdapter implements AutoCloseable {
      *
      * @throws DataException If the operation fails
      */
-    public void clearData() throws DataException {
+    public void clearDataCtx() throws DataException {
         cedarling.clearDataCtx();
     }
 
@@ -179,7 +176,7 @@ public class CedarlingAdapter implements AutoCloseable {
      * @return A list of DataEntry objects
      * @throws DataException If the operation fails
      */
-    public List<DataEntry> listData() throws DataException {
+    public List<DataEntry> listDataCtx() throws DataException {
         return cedarling.listDataCtx();
     }
 
@@ -189,7 +186,7 @@ public class CedarlingAdapter implements AutoCloseable {
      * @return A DataStoreStats object
      * @throws DataException If the operation fails
      */
-    public DataStoreStats getStats() throws DataException {
+    public DataStoreStats getStatsCtx() throws DataException {
         return cedarling.getStatsCtx();
     }
 

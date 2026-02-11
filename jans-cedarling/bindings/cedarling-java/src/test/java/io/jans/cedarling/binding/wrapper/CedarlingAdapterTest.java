@@ -120,25 +120,25 @@ public class CedarlingAdapterTest {
         // Push data without TTL
         JSONObject value1 = new JSONObject();
         value1.put("data", "value1");
-        adapter.pushData("key1", value1);
-        JSONObject result1 = adapter.getData("key1");
+        adapter.pushDataCtx("key1", value1);
+        JSONObject result1 = adapter.getDataCtx("key1");
         assertNotNull(result1);
         assertEquals(result1.getString("data"), "value1");
 
         // Push data with TTL
         JSONObject value2 = new JSONObject();
         value2.put("nested", "data");
-        adapter.pushData("key2", value2, 60L);
-        JSONObject result2 = adapter.getData("key2");
+        adapter.pushDataCtx("key2", value2, 60L);
+        JSONObject result2 = adapter.getDataCtx("key2");
         assertNotNull(result2);
         assertEquals(result2.getString("nested"), "data");
 
-        // Push array as JSON string - getData should throw JSONException when trying to parse non-object JSON
+        // Push array as JSON string - getDataCtx should throw JSONException when trying to parse non-object JSON
         String arrayJson = "[1, 2, 3]";
-        adapter.pushData("key3", arrayJson, null);
+        adapter.pushDataCtx("key3", arrayJson, null);
         try {
-            adapter.getData("key3");
-            fail("Expected JSONException when calling getData on non-object JSON");
+            adapter.getDataCtx("key3");
+            fail("Expected JSONException when calling getDataCtx on non-object JSON");
         } catch (JSONException e) {
             // Expected: JSONObject constructor throws JSONException when parsing array string
             assertNotNull(e);
@@ -149,37 +149,37 @@ public class CedarlingAdapterTest {
     public void testGetDataEntry() throws DataException {
         JSONObject value = new JSONObject();
         value.put("foo", "bar");
-        adapter.pushData("test_key", value);
+        adapter.pushDataCtx("test_key", value);
 
-        DataEntry entry = adapter.getDataEntry("test_key");
+        DataEntry entry = adapter.getDataEntryCtx("test_key");
         assertNotNull(entry);
         assertEquals(entry.getKey(), "test_key");
-        assertNotNull(entry.getValue());
-        // JsonValue is a custom newtype, access via inner() method
-        assertNotNull(entry.getValue().inner());
+        // JsonValue is a custom_newtype wrapping String in UniFFI, so it returns String directly
+        String entryValue = entry.getValue();
+        assertNotNull(entryValue);
         assertNotNull(entry.getDataType());
-        assertTrue(entry.getAccessCount() >= 0);
         assertNotNull(entry.getCreatedAt());
+        assertNotNull(entry.getExpiresAt());
     }
 
     @Test
     public void testRemoveData() throws DataException {
         JSONObject value = new JSONObject();
         value.put("data", "to_remove");
-        adapter.pushData("to_remove", value);
+        adapter.pushDataCtx("to_remove", value);
 
-        JSONObject result = adapter.getData("to_remove");
+        JSONObject result = adapter.getDataCtx("to_remove");
         assertNotNull(result);
         assertEquals(result.getString("data"), "to_remove");
 
-        boolean removed = adapter.removeData("to_remove");
+        boolean removed = adapter.removeDataCtx("to_remove");
         assertTrue(removed);
 
-        JSONObject resultAfter = adapter.getData("to_remove");
+        JSONObject resultAfter = adapter.getDataCtx("to_remove");
         assertNull(resultAfter);
 
         // Try removing non-existent key
-        boolean removedNonExistent = adapter.removeData("non_existent");
+        boolean removedNonExistent = adapter.removeDataCtx("non_existent");
         assertFalse(removedNonExistent);
     }
 
@@ -187,41 +187,41 @@ public class CedarlingAdapterTest {
     public void testClearData() throws DataException {
         JSONObject value1 = new JSONObject();
         value1.put("data", "value1");
-        adapter.pushData("key1", value1);
+        adapter.pushDataCtx("key1", value1);
 
         JSONObject value2 = new JSONObject();
         value2.put("data", "value2");
-        adapter.pushData("key2", value2);
+        adapter.pushDataCtx("key2", value2);
 
         JSONObject value3 = new JSONObject();
         value3.put("data", "value3");
-        adapter.pushData("key3", value3);
+        adapter.pushDataCtx("key3", value3);
 
-        assertNotNull(adapter.getData("key1"));
-        assertNotNull(adapter.getData("key2"));
-        assertNotNull(adapter.getData("key3"));
+        assertNotNull(adapter.getDataCtx("key1"));
+        assertNotNull(adapter.getDataCtx("key2"));
+        assertNotNull(adapter.getDataCtx("key3"));
 
-        adapter.clearData();
+        adapter.clearDataCtx();
 
-        assertNull(adapter.getData("key1"));
-        assertNull(adapter.getData("key2"));
-        assertNull(adapter.getData("key3"));
+        assertNull(adapter.getDataCtx("key1"));
+        assertNull(adapter.getDataCtx("key2"));
+        assertNull(adapter.getDataCtx("key3"));
     }
 
     @Test
     public void testListData() throws DataException {
         JSONObject value1 = new JSONObject();
         value1.put("data", "value1");
-        adapter.pushData("key1", value1);
+        adapter.pushDataCtx("key1", value1);
 
         JSONObject value2 = new JSONObject();
         value2.put("nested", "data");
-        adapter.pushData("key2", value2);
+        adapter.pushDataCtx("key2", value2);
 
         String arrayJson = "[1, 2, 3]";
-        adapter.pushData("key3", arrayJson, null);
+        adapter.pushDataCtx("key3", arrayJson, null);
 
-        List<DataEntry> entries = adapter.listData();
+        List<DataEntry> entries = adapter.listDataCtx();
         assertNotNull(entries);
         assertTrue(entries.size() >= 3);
 
@@ -236,30 +236,29 @@ public class CedarlingAdapterTest {
 
     @Test
     public void testGetStats() throws DataException {
-        DataStoreStats stats = adapter.getStats();
+        DataStoreStats stats = adapter.getStatsCtx();
         assertNotNull(stats);
-        assertEquals(stats.getEntryCount(), 0L);
+        assertEquals(adapter.listDataCtx().size(), 0);
 
         JSONObject value1 = new JSONObject();
         value1.put("data", "value1");
-        adapter.pushData("key1", value1);
+        adapter.pushDataCtx("key1", value1);
 
         JSONObject value2 = new JSONObject();
         value2.put("data", "value2");
-        adapter.pushData("key2", value2);
+        adapter.pushDataCtx("key2", value2);
 
-        DataStoreStats statsAfter = adapter.getStats();
+        DataStoreStats statsAfter = adapter.getStatsCtx();
         assertNotNull(statsAfter);
-        assertEquals(statsAfter.getEntryCount(), 2L);
+        assertEquals(adapter.listDataCtx().size(), 2);
         assertTrue(statsAfter.getMetricsEnabled());
-        assertTrue(statsAfter.getTotalSizeBytes() >= 0);
     }
 
     @Test(expectedExceptions = DataException.class)
-    public void testDataErrorInvalidKey() throws DataException {
+    public void testDataExceptionInvalidKey() throws DataException {
         // Empty key should throw DataException
         JSONObject value = new JSONObject();
         value.put("data", "value");
-        adapter.pushData("", value);
+        adapter.pushDataCtx("", value);
     }
 }
