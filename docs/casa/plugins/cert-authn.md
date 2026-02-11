@@ -145,16 +145,16 @@ The `cert-authn` Agama project is an utility project that allows administrators 
 - Display a login page where users are shown the option to present a certificate
 
     - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert. Then access to the application is granted
-    
+
     - If the certificate is mapped to an existing account, access to the application is granted to such user
 
 - Display a login page as the above including the configured identity providers, if any, in case the [accounts linking](./accts-linking/account-linking-index.md) plugin is installed  
 
 - Offer users the ability to enroll a certificate when they are already logged into Casa
 
-- Usage of certificates as a form of second-factor authentication 
+- Usage of certificates as a form of second-factor authentication
 
-Offering users the login page and the account onboarding regarded above is up to administrators (optional feature). 
+Offering users the login page and the account onboarding regarded above is up to administrators (optional feature).
 
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
@@ -175,7 +175,7 @@ Offering users the login page and the account onboarding regarded above is up to
 
 1. Optional. If integration with accounts linking plugin is desired, set `useAcctLinking` to `true` for flow `io.jans.casa.cert.oneStepAuthn`
 
-1. Optional. Reference an attribute mapping for account onboarding in property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn`. More details [here](#how-does-account-onboarding-works)
+1. Optional. Reference an attribute mapping for account onboarding in property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn`. More details [here](#how-does-account-onboarding-work)
 
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
@@ -209,7 +209,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 This step is required only if account onboarding via certificate attributes is desired or if you want to authenticate users by presenting a certificate alone (no username).
 
-Note these instructions apply for VM-based installations. On containers-based environments, please open a Github discussion or a support ticket.
+Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
 1. Download file `https://maven.jans.io/maven/io/jans/jans-scim-model/replace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 
@@ -352,4 +352,4 @@ Note attribute mapping only takes place when creating an account, that is, if th
 
 ### Is there a way to offer certificate enrollment/authentication without having Casa installed?
 
-Yes, that's possible. Open a Github discussion or a support ticket.
+Yes, that's possible. Open a GitHub discussion or a support ticket.
