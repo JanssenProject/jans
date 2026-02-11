@@ -144,6 +144,7 @@ public final class CertUtil {
         
     }
     
+    @SuppressWarnings("unchecked")
     public static String register(X509Certificate certificate, String classField)
         throws IllegalAccessException, NoSuchFieldException {
         

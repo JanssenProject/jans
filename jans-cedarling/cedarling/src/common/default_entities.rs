@@ -5,6 +5,8 @@
 
 use base64::prelude::*;
 use cedar_policy::Entity;
+use cedar_policy::EntityId;
+use cedar_policy::EntityTypeName;
 use cedar_policy::EntityUid;
 use cedar_policy::ExpressionConstructionError;
 use cedar_policy::RestrictedExpression;
@@ -401,16 +403,17 @@ fn parse_cedar_format<'a>(
                 parent_obj.get("id").and_then(|v| v.as_str()),
             )
         {
-            let parent_uid_str = format!("{parent_entity_type}::\"{id_v}\"");
-            match EntityUid::from_str(&parent_uid_str) {
-                Ok(parent_uid) => {
+            let entity_id = EntityId::from_str(id_v).unwrap_or_else(|e| match e {});
+            match EntityTypeName::from_str(parent_entity_type) {
+                Ok(type_name) => {
+                    let parent_uid = EntityUid::from_type_name_and_id(type_name, entity_id);
                     parents_set.insert(parent_uid);
                 },
                 Err(e) => {
                     // log warn that we could not parse uid
                     warns.push(DefaultEntityWarning::InvalidParentUid {
                         entry_id: entry_id.to_string(),
-                        parent_uid_str: parent_uid_str.clone(),
+                        parent_uid_str: format!("{parent_entity_type}::\"{id_v}\""),
                         error: e.to_string(),
                     });
                 },
