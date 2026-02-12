@@ -236,7 +236,7 @@ jobs:
             os: ubuntu-22.04
             python_version: '3.10'
             use_docker: true
-            docker_image: opensuse/leap:15.4
+            docker_image: opensuse/leap:15.6
           - name: macos
             os: macos-latest
             python_version: '3.10'
@@ -263,22 +263,15 @@ jobs:
         image: ${{ matrix.docker_image }}
         options: -v ${{ github.workspace }}:/workspace
         run: |
-          zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.1/standard/openSUSE:Leap:15.1.repo
           zypper --gpg-auto-import-keys refresh
-          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel openssl
-          zypper addrepo https://download.opensuse.org/repositories/home:smarty12:Python/RaspberryPi_Leap_15.2/home:smarty12:Python.repo
-          zypper --gpg-auto-import-keys refresh
-          zypper download python3-dev
-          rpm -i --nodeps /var/cache/zypp/packages/home_smarty12_Python/noarch/python3-dev-0.4.0-lp152.1.4.noarch.rpm
-          zypper --non-interactive install -y python3 python3-devel
-          pip install shiv
+          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool openssl python311 python311-pip python311-setuptools python311-wheel python311-devel
+          python3.11 -m pip install shiv
           cd /workspace/jans-linux-setup
-          make zipapp
+          python3.11 -m shiv --compressed -o jans-linux-setup.pyz -p '/usr/bin/env python3' -e jans_setup.jans_setup:main . --no-cache
           mv jans-linux-setup.pyz jans-linux-suse-X86-64-setup.pyz
           cd ../jans-cli-tui
-          make zipapp 
+          python3.11 -m shiv --compressed -o jans-cli-tui.pyz -p '/usr/bin/env python3' -e cli_tui.jans_cli_tui:run . --no-cache
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
-
     - name: Build with Ubuntu
       if: matrix.name == 'ubuntu'
       run: |
