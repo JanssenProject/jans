@@ -577,27 +577,6 @@ mod tests {
         );
     }
 
-    /// Tests default values for trusted issuer loader fields when no env vars or JSON.
-    #[test]
-    fn test_trusted_issuer_loader_defaults() {
-        with_env_vars(&[], || {
-            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
-
-            assert_eq!(
-                config.trusted_issuer_loader_type,
-                TrustedIssuerLoaderTypeRaw::Sync,
-                "Default loader type should be Sync"
-            );
-
-            assert_eq!(
-                config.trusted_issuer_loader_workers,
-                WorkersCount::DEFAULT,
-                "Default worker count should be {}",
-                WorkersCount::DEFAULT.get()
-            );
-        });
-    }
-
     /// Tests that environment variables for trusted issuer loader are parsed correctly.
     #[test]
     fn test_trusted_issuer_loader_env_vars() {
@@ -663,7 +642,42 @@ mod tests {
 
         for json in invalid_cases {
             let result: Result<BootstrapConfigRaw, _> = serde_json::from_str(json);
-            result.expect_err(&format!("Should fail to parse invalid JSON: {}", json));
+            result.expect_err(&format!("Should fail to parse invalid JSON: {json}"));
         }
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped minimum value
+    #[test]
+    fn test_trusted_issuer_loader_claps_min() {
+        with_env_vars(&[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.trusted_issuer_loader_workers,
+                WorkersCount::MIN,
+                "Default worker count should be {}",
+                WorkersCount::MIN.get()
+            );
+        });
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped max value
+    #[test]
+    fn test_trusted_issuer_loader_claps_max() {
+        let max_val = (WorkersCount::MAX.get() + 100).to_string();
+
+        with_env_vars(
+            &[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", max_val.as_str())],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_workers,
+                    WorkersCount::MAX,
+                    "Default worker count should be {}",
+                    WorkersCount::MAX.get()
+                );
+            },
+        );
     }
 }

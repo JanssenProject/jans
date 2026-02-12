@@ -281,17 +281,18 @@ mod test {
 
     /// Helper to retry an assertion for a short period, useful for async tests
     /// where operations may complete slightly after tasks are awaited.
+    /// First check is performed immediately.
     async fn retry_assert<F, Fut>(mut assertion: F, max_retries: u32, delay_ms: u64, message: &str)
     where
         F: FnMut() -> Fut,
         Fut: std::future::Future<Output = bool>,
     {
         for i in 0..max_retries {
+            if i != 0 && i < max_retries - 1 {
+                sleep(Duration::from_millis(delay_ms)).await;
+            }
             if assertion().await {
                 return;
-            }
-            if i < max_retries - 1 {
-                sleep(Duration::from_millis(delay_ms)).await;
             }
         }
         panic!("{message} (failed after {max_retries} retries)");
@@ -680,18 +681,24 @@ mod test {
     /// Verifies that when `jwt_status_validation` is true, the status list cache is initialized
     /// for the issuer and contains the expected status list.
     #[tokio::test]
-    #[ignore = "Mock server issue with status list endpoint"]
     async fn load_trusted_issuer_with_status_validation_sync() {
         let mut server = MockServer::new_with_defaults().await.unwrap();
         // Generate status list endpoint before creating trusted issuer
+        // First consume the default OIDC mock to allow clean replacement
+        let client = reqwest::Client::new();
+        let oidc_url = server.openid_config_endpoint().unwrap();
+        let _ = client.get(oidc_url.as_str()).send().await.unwrap();
+
+        // Now generate status list endpoint and update OIDC config
         server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], None);
         server.update_openid_config_with_status_list_endpoint();
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
-            jwt_sig_validation: false,
+            jwt_sig_validation: true,
             jwt_status_validation: true,
             trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            signature_algorithms_supported: std::collections::HashSet::from([Algorithm::HS256]),
             ..Default::default()
         };
 
@@ -828,6 +835,196 @@ mod test {
             10,
             10,
             "HS256 key from second OpenID configuration should be stored in key service",
+        )
+        .await;
+    }
+
+    /// Tests loading trusted issuers with the many allowed workers.
+    ///
+    /// Verifies that the loader can handle concurrent loading with the a lot of
+    /// workers without panicking or deadlocking.
+    #[tokio::test]
+    async fn load_max_workers_concurrent() {
+        // Create multiple mock servers (up to a reasonable count)
+        const NUM_ISSUERS: usize = 10;
+        let mut servers = Vec::new();
+        for _ in 0..NUM_ISSUERS {
+            servers.push(MockServer::new_with_defaults().await.unwrap());
+        }
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true,
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
+                workers: WorkersCount::new(NUM_ISSUERS),
+            },
+            ..Default::default()
+        };
+
+        let loader = TrustedIssuerLoader {
+            jwt_config,
+            status_lists: StatusListCache::default(),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        for (i, server) in servers.iter().enumerate() {
+            trusted_issuers.insert(format!("issuer{i}"), server.trusted_issuer());
+        }
+
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        result.expect("should load multiple trusted issuers successfully with max workers");
+
+        // Verify all issuers were loaded with retry for async operations
+        for (i, server) in servers.iter().enumerate() {
+            let issuer_claim = server.issuer();
+            retry_assert(
+                || async {
+                    loader
+                        .issuer_configs
+                        .get_trusted_issuer(&issuer_claim)
+                        .is_some()
+                },
+                10,
+                1,
+                &format!("trusted issuer {i} should be inserted into issuer index"),
+            )
+            .await;
+        }
+
+        // Verify keys are stored when signature validation is enabled
+        assert!(
+            loader.key_service.has_keys(),
+            "key service should have keys when signature validation is enabled"
+        );
+    }
+
+    /// Tests loading many trusted issuers with a single worker.
+    ///
+    /// Verifies that the loader can handle many issuers sequentially with a
+    /// single worker without panicking or deadlocking.
+    #[tokio::test]
+    async fn load_single_worker_many_issuers() {
+        // Create multiple mock servers
+        const NUM_ISSUERS: usize = 5;
+        let mut servers = Vec::new();
+        for _ in 0..NUM_ISSUERS {
+            servers.push(MockServer::new_with_defaults().await.unwrap());
+        }
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: false,
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::Sync {
+                workers: WorkersCount::new(1),
+            },
+            ..Default::default()
+        };
+
+        let loader = TrustedIssuerLoader {
+            jwt_config,
+            status_lists: StatusListCache::default(),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        for (i, server) in servers.iter().enumerate() {
+            trusted_issuers.insert(format!("issuer{i}"), server.trusted_issuer());
+        }
+
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        result.expect("should load many trusted issuers successfully with single worker");
+
+        // Verify all issuers were loaded
+        for (i, server) in servers.iter().enumerate() {
+            let issuer_claim = server.issuer();
+            assert!(
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&issuer_claim)
+                    .is_some(),
+                "trusted issuer {i} should be inserted into issuer index"
+            );
+        }
+
+        // Verify no keys are stored when signature validation is disabled
+        assert!(
+            !loader.key_service.has_keys(),
+            "key service should have no keys when signature validation is disabled"
+        );
+    }
+
+    /// Tests that async loading returns immediately without blocking startup.
+    ///
+    /// Verifies that when using async loading mode, `load_trusted_issuers` returns
+    /// quickly (within a short timeout) while issuer loading continues in the background.
+    #[tokio::test]
+    async fn async_loading_returns_immediately() {
+        let server = MockServer::new_with_defaults().await.unwrap();
+        let trusted_issuer = server.trusted_issuer();
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: false,
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
+                workers: WorkersCount::new(1),
+            },
+            ..Default::default()
+        };
+
+        let loader = TrustedIssuerLoader {
+            jwt_config,
+            status_lists: StatusListCache::default(),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        // Start timing
+        let start = tokio::time::Instant::now();
+
+        // in `impl GetFromUrl<OpenIdConfig> for OpenIdConfig{`
+        // we have 5ms delay (for tests), so if initialization is sync it should take at least 5ms.
+
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        result.expect("async loading should return Ok immediately");
+
+        let expected_start_delay = Duration::from_millis(1);
+
+        // Verify the function returned quickly (should be < 1ms for async mode)
+        let elapsed = tokio::time::Instant::now().duration_since(start);
+        assert!(
+            elapsed < expected_start_delay,
+            "Async loading should return quickly (took {}ms), indicating non-blocking behavior",
+            elapsed.as_millis()
+        );
+
+        // Verify issuer is not necessarily loaded immediately (async background)
+        // but eventually loads within a reasonable time
+        let issuer_claim = server.issuer();
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&issuer_claim)
+                    .is_some()
+            },
+            10,
+            5,
+            "trusted issuer should eventually be inserted into issuer index via async loading",
         )
         .await;
     }

@@ -65,6 +65,16 @@ where
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
+        // add delay to simulate network latency and test async behavior of trusted issuers loading
+        // it would be great to implement delay in mock server, but mockito doesn't support it.
+        #[cfg(test)]
+        {
+            use std::time::Duration;
+            use tokio::time::sleep;
+
+            sleep(Duration::from_millis(5)).await;
+        }
+
         let openid_config = HTTP_CLIENT
             .get(url.as_str())
             .send()

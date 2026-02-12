@@ -319,7 +319,7 @@ impl WorkersCount {
 
 impl WorkersCount {
     /// Creates a new `NonZeroUsizeLimited` instance, ensuring the value is non-zero and does not exceed the defined maximum.
-    #[must_use] 
+    #[must_use]
     pub fn new(value: usize) -> Self {
         let value = NonZeroUsize::new(value)
             .unwrap_or(NonZeroUsize::MIN)
