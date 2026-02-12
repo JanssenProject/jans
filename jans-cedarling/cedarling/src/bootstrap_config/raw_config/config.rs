@@ -588,9 +588,12 @@ mod tests {
                 TrustedIssuerLoaderTypeRaw::Sync,
                 "Default loader type should be Sync"
             );
+
             assert_eq!(
-                config.trusted_issuer_loader_workers, 0,
-                "Default worker count should be 0 (will be treated as 1 later)"
+                config.trusted_issuer_loader_workers,
+                WorkersCount::DEFAULT,
+                "Default worker count should be {}",
+                WorkersCount::DEFAULT.get()
             );
         });
     }
