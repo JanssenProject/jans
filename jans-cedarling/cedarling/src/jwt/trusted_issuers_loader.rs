@@ -126,11 +126,10 @@ async fn load_trusted_issuers(
                 );
 
                 // we can't return the error from this async task
-                // so we can use only `expect`
-                errors_clone
-                    .lock()
-                    .expect("failed to lock errors mutex while recording issuer loading failure - mutex may be poisoned due to panic in another thread")
-                    .push(error);
+                // and we don't want to panic
+                if let Ok(mut guard) = errors_clone.lock() {
+                    guard.push(error);
+                }
             }
         });
         handles.push(handle);
