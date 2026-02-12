@@ -287,7 +287,7 @@ In custom script it's easy to code what data has to be kept in `auth_session`.
 ```
 
 
-More details in [Authorization Challenge Custom Script Page](../../developer/scripts/authorization-challenge.md).
+More details in [Authorization Challenge Custom Script Page](../../../script-catalog/authorization_challenge/authorization-challenge.md).
 
 Full multi-step sample script can be found [here](../../../script-catalog/authorization_challenge/multi_step/AuthorizationChallenge.java)
 

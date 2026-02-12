@@ -18,12 +18,10 @@ annotations:
       image: ghcr.io/janssenproject/jans/casa:0.0.0-nightly
     - name: scim
       image: ghcr.io/janssenproject/jans/scim:0.0.0-nightly
-    - name: saml
-      image: ghcr.io/janssenproject/jans/saml:0.0.0-nightly
-    - name: kc-scheduler
-      image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
     - name: cleanup
       image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly
+    - name: shibboleth-idp
+      image: ghcr.io/janssenproject/jans/shibboleth:5.1.6_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -80,18 +78,14 @@ dependencies:
       condition: global.persistence.enabled
       version: 0.0.0-nightly
 
-    - name: saml
-      condition: global.saml.enabled
-      version: 0.0.0-nightly
-
     - name: cn-istio-ingress
       condition: global.istio.ingress
       version: 0.0.0-nightly
 
-    - name: kc-scheduler
-      condition: global.kc-scheduler.enabled
-      version: 0.0.0-nightly
-
     - name: cleanup
       condition: global.cleanup.enabled
+      version: 0.0.0-nightly
+
+    - name: shibboleth-idp
+      condition: global.shibboleth-idp.enabled
       version: 0.0.0-nightly

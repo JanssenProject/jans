@@ -2,17 +2,17 @@
   "applicationName":"saml",
   "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
   "samlEnabled": "true",
-  "selectedIdp": "keycloak",
-  "idpRootDir": "/opt/idp/configs/",
+  "selectedIdp": "shibboleth",
+  "idpRootDir": "/opt/shibboleth-idp/",
   "idpMetadataFilePattern":"%s-idp-metadata.xml",
   "spMetadataFilePattern":"%s-sp-metadata.xml",
   "idpConfigs":[
     {
-      "configId":"keycloak",
-      "rootDir":"/opt/idp/configs/keycloak",
+      "configId":"shibboleth",
+      "rootDir":"/opt/shibboleth-idp",
       "enabled": "true",
-      "metadataTempDir": "/opt/idp/configs/keycloak/temp_metadata",
-      "metadataDir":"/opt/idp/configs/keycloak/metadata",
+      "metadataTempDir": "/opt/shibboleth-idp/temp_metadata",
+      "metadataDir":"/opt/shibboleth-idp/metadata",
       "metadataFilePattern":"%s-idp-metadata.xml"
     }
   ]

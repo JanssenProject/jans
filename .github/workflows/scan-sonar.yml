@@ -10,8 +10,6 @@ on:
       - '!update-pycloud-in-**'
     paths:
       - 'jans-link/**'
-      - 'jans-keycloak-integration/**'
-      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-lock/**'
       - 'jans-orm/**'
@@ -24,6 +22,7 @@ on:
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
       - 'jans-casa/**'
+      - 'jans-shibboleth-idp/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -37,8 +36,6 @@ on:
       - synchronize
     paths:
       - 'jans-link/**'
-      - 'jans-keycloak-integration/**'
-      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
       - 'jans-lock/**'
       - 'jans-orm/**'
@@ -51,6 +48,7 @@ on:
       - 'jans-cli-tui/**'
       - 'jans-pycloudlib/**'
       - 'jans-casa/**'
+      - 'jans-shibboleth-idp/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
 
@@ -64,11 +62,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-link, jans-casa, jans-lock]
+        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-link, jans-casa, jans-lock, jans-shibboleth-idp]
     env:
       JVM_PROJECTS: |
-        jans-keycloak-integration
-        jans-keycloak-link
         jans-link
         jans-auth-server
         jans-lock
@@ -79,6 +75,7 @@ jobs:
         jans-fido2
         jans-casa
         agama
+        jans-shibboleth-idp
       NON_JVM_PROJECTS: |
         jans-linux-setup
         jans-cli-tui
@@ -88,12 +85,12 @@ jobs:
         pull-requests: read
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
       - name: check out code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
 
@@ -132,7 +129,7 @@ jobs:
       - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: '17'
           distribution: 'adopt'
@@ -181,7 +178,7 @@ jobs:
 
       - name: SonarCloud Scan for non-JVM project
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.NON_JVM_PROJECTS, matrix.module)
-        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         with:
           args: >
             -Dsonar.organization=${{ env.REPO_ORG }}

@@ -1,0 +1,18 @@
+Flow io.jans.casa.cert.enroll
+    Basepath ""
+    Inputs uidRef
+
+uid = Call io.jans.casa.certauthn.CertAuthnHelper#decryptValue uidRef
+obj = Trigger io.jans.casa.cert.promptAndValidate
+validated = obj.success
+
+When validated is true
+    c = obj.data.cert
+    status = Call io.jans.casa.certauthn.CertUtil#enroll uid c.x509 c.fingerPrint
+    
+    obj = { status: status }
+    //Show feedback to user before returning to Casa
+    RRF "enroll-feedback.ftlh" obj
+
+//Always terminate successfully (there was session already in Casa)
+Finish uid
