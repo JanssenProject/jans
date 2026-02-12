@@ -1027,4 +1027,133 @@ mod test {
         )
         .await;
     }
+
+    /// Tests synchronous loading when one trusted issuer has an invalid URL.
+    ///
+    /// Verifies that sync mode returns an error when at least one issuer cannot be loaded,
+    /// but other issuers are still loaded successfully.
+    #[tokio::test]
+    async fn load_trusted_issuer_with_invalid_url_sync() {
+        // Create a valid mock server for successful issuer
+        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_issuer = valid_server.trusted_issuer();
+
+        // Create an invalid issuer with a URL that will fail to fetch
+        let mut invalid_issuer = TrustedIssuer::default();
+        invalid_issuer.set_oidc_endpoint(
+            Url::parse("invalid://example.com/.well-known/openid-configuration").unwrap(),
+        );
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true, // Required to trigger OpenID config fetch
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            ..Default::default()
+        };
+
+        let loader = TrustedIssuerLoader {
+            jwt_config,
+            status_lists: StatusListCache::default(),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        trusted_issuers.insert("valid_issuer".to_string(), valid_issuer);
+        trusted_issuers.insert("invalid_issuer".to_string(), invalid_issuer);
+
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        // Should return error because at least one issuer failed
+        result.expect_err("sync mode should return error when an issuer has invalid URL");
+
+        // Verify valid issuer was loaded despite the error
+        let valid_issuer_claim = valid_server.issuer();
+        assert!(
+            loader
+                .issuer_configs
+                .get_trusted_issuer(&valid_issuer_claim)
+                .is_some(),
+            "valid issuer should be loaded even when another issuer fails in sync mode"
+        );
+    }
+
+    /// Tests asynchronous loading when one trusted issuer has an invalid URL.
+    ///
+    /// Verifies that async mode returns Ok immediately and other issuers are loaded
+    /// successfully while the failing issuer does not block the process.
+    #[tokio::test]
+    async fn load_trusted_issuer_with_invalid_url_async() {
+        // Create two valid mock servers for successful issuers
+        let valid_server1 = MockServer::new_with_defaults().await.unwrap();
+        let valid_server2 = MockServer::new_with_defaults().await.unwrap();
+        let valid_issuer1 = valid_server1.trusted_issuer();
+        let valid_issuer2 = valid_server2.trusted_issuer();
+
+        // Create an invalid issuer with a URL that will fail to fetch
+        let mut invalid_issuer = TrustedIssuer::default();
+        invalid_issuer.set_oidc_endpoint(
+            Url::parse("invalid://example.com/.well-known/openid-configuration").unwrap(),
+        );
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true,
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
+                workers: WorkersCount::new(2),
+            },
+            ..Default::default()
+        };
+
+        let loader = TrustedIssuerLoader {
+            jwt_config,
+            status_lists: StatusListCache::default(),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        trusted_issuers.insert("valid_issuer1".to_string(), valid_issuer1);
+        trusted_issuers.insert("valid_issuer2".to_string(), valid_issuer2);
+        trusted_issuers.insert("invalid_issuer".to_string(), invalid_issuer);
+
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        // Async mode should return Ok immediately even if some issuers fail
+        result.expect(
+            "async mode should not fail entire load process when an issuer has invalid URL",
+        );
+
+        // Verify both valid issuers are eventually loaded
+        let valid_issuer_claim1 = valid_server1.issuer();
+        let valid_issuer_claim2 = valid_server2.issuer();
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&valid_issuer_claim1)
+                    .is_some()
+            },
+            10,
+            1,
+            "first valid issuer should be inserted into issuer index",
+        )
+        .await;
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&valid_issuer_claim2)
+                    .is_some()
+            },
+            10,
+            1,
+            "second valid issuer should be inserted into issuer index",
+        )
+        .await;
+    }
 }
