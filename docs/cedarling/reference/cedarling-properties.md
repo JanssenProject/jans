@@ -45,7 +45,7 @@ Cedarling now supports a directory-based policy store format with human-readable
 !!! NOTE
 All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.
 
-**Auxilliary properties**
+**Auxiliary properties**
 
 - **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy store in case there is more than one policy_store_id in the policy store.
 
@@ -60,7 +60,7 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 
 - **`CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`** : `SYNC` | `ASYNC` -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. Async loader means that trusted issuers will be loaded in background. Default is `SYNC`.
 
-- **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers to use when loading trusted issuers. Applies to both `SYNC` (parallel loading during initialization) and `ASYNC` (parallel background loading) modes. Default value is 1. Zero will be treated as default value.
+- **`CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`** : Number of concurrent workers to use when loading trusted issuers. Applies to both `SYNC` (parallel loading during initialization) and `ASYNC` (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.
 
 **Cedar Entity Mapping properties**
 
