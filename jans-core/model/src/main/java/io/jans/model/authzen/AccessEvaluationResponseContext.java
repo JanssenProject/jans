@@ -5,14 +5,13 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * @author Yuriy Z
  */
-public class AccessEvaluationResponseContext implements Serializable {
+public class AccessEvaluationResponseContext {
 
     @JsonProperty("id")
     private String id;

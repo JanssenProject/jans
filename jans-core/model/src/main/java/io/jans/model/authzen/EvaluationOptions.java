@@ -2,7 +2,9 @@ package io.jans.model.authzen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EvaluationOptions {
+import java.io.Serializable;
+
+public class EvaluationOptions implements Serializable {
 
     public static final String EXECUTE_ALL = "execute_all";
 

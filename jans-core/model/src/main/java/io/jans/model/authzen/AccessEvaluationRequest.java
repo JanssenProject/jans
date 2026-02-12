@@ -1,12 +1,11 @@
 package io.jans.model.authzen;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Yuriy Z
  */
-public class AccessEvaluationRequest implements Serializable {
+public class AccessEvaluationRequest {
 
     private Subject subject;
     private Resource resource;

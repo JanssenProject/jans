@@ -3,8 +3,6 @@ package io.jans.model.authzen;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
-
 /**
  * AuthZEN Search Action Request.
  * Used for POST /access/v1/search/action endpoint.
@@ -14,7 +12,7 @@ import java.io.Serializable;
  * @author Yuriy Z
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SearchActionRequest implements Serializable {
+public class SearchActionRequest {
 
     @JsonProperty("subject")
     private Subject subject;

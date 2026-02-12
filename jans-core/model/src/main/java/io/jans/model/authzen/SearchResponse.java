@@ -3,7 +3,6 @@ package io.jans.model.authzen;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,7 +12,7 @@ import java.util.List;
  * @author Yuriy Z
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SearchResponse<T> implements Serializable {
+public class SearchResponse<T> {
 
     @JsonProperty("page")
     private PageResponse page;

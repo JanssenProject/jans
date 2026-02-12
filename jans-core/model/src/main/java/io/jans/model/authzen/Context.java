@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ import java.util.Map;
  * @author Yuriy Z
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Context implements Serializable {
+public class Context {
 
     private final Map<String, Object> attributes = new LinkedHashMap<>();
 
