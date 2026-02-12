@@ -10,15 +10,19 @@ tags:
 
 ## Overview
 
-At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in a SSL/TLS session.
+At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in an SSL/TLS session.
 
-The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports [smart cards](#is-the-plugin-compatible-with-smart-cards) as well.
+The Casa client certificate authentication plugin offers:
+
+- Enrollment of digital certificates - includes account onboarding
+- Authentication by presenting a valid certificate (no username or password required)
+- Use enrolled certificates as a form of second-factor authentication
 
 ### Requisites
 
 - A Janssen server with Apache or nginx HTTP front
 - Jans Casa 1.16.0 or higher. Need it in an [older](#can-the-plugin-be-used-on-older-versions-of-jans) version?
-- It is assumed your organization already has an establish mechanism of certificate issuance and deployment. For the purpose of testing, this documentation provides manual steps for certificate issuance
+- It is assumed your organization already has an established mechanism of certificate issuance and deployment. For the purpose of testing, this documentation provides manual steps for issuing certificates
 
 ### Configuration steps
 
@@ -29,6 +33,7 @@ The below are the steps required to setup client certificate authentication with
 - Setup a cert pickup URL in your front HTTP server
 - Deploy and configure the cert-authn Agama project in the server
 - Install the cert-authn Casa plugin
+- Update the Casa ACR
 
 ## Generate testing certificates
 
@@ -89,9 +94,9 @@ The steps given are supposed to be executed in a developer or administrative mac
 
     1. Build the certificate chain file: `cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt > chain.pem`
 
-    1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd`. This command will create a certificate signed with the intermediate certificate
+    1. Create a private key and a certificate for `cn=Joe` (subject of the cert): `step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd --not-after=720h`. This command will create a certificate signed with the intermediate certificate
 
-    1. Inspect the created cert: `step certificate inspect joe.crt`. Note the expiration is of one day and that "Client authentication" is explicitly part of the extended key usages
+    1. Inspect the created cert: `step certificate inspect joe.crt`. Note the expiration is of 30 days and that "Client authentication" is explicitly part of the extended key usages
 
     1. Package Joe's certificate and key into a `p12` file: `step certificate p12 joe.p12 joe.crt joe.key`. You will be prompted two passwords: one for the `p12` file itself, and the password previously used to encrypt the private key of the user certificate
 
@@ -131,9 +136,25 @@ The instructions to setup this URL vary depending on the TLS version required an
 
 ### Test
 
-Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL configured, e.g. `https://acme.co:444` (TLS 1.3) or `https://acme.co/jans-casa/pl/cert-authn/` (TLS 1.2). This will display a dialog like [this](../../assets/casa/plugins/cert-authn-browser_dialog.png) listing the certificates imported so far. Do not select anything and close the browser window.
+Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL configured, e.g. `https://acme.co:444` (TLS 1.3) or `https://acme.co/jans-casa/pl/cert-authn/index.zul` (TLS 1.2). This will display a dialog like [this](../../assets/casa/plugins/cert-authn-browser_dialog.png) listing the certificates imported so far. Do not select anything and close the browser window.
 
 ## Deploy and configure the Agama project
+
+The `cert-authn` Agama project is a utility project that allows administrators do things like:
+
+- Display a login page where users are shown the option to present a certificate
+
+    - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert. Then access to the application is granted
+
+    - If the certificate is mapped to an existing account, access to the application is granted to such user
+
+- Display a login page as the above including the configured identity providers, if any, in case the [accounts linking](./accts-linking/account-linking-index.md) plugin is installed  
+
+- Offer users the ability to enroll a certificate when they are already logged into Casa
+
+- Usage of certificates as a form of second-factor authentication
+
+Offering users the login page and the account onboarding regarded above is up to administrators (optional feature).
 
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
@@ -146,11 +167,15 @@ Restart Apache (e.g. `systemctl restart apache2`) and in a browser visit the URL
 
 1. Open the configuration management dialog (press `c`) and choose to export the sample configuration to a file on disk
 
-1. Edit property `certPickupUrl` accordingly. This is the URL that displays the browser dialog for choosing a certificate
+1. Edit property `certPickupUrl` of flow `io.jans.casa.cert.promptAndValidate` accordingly. This is the URL that displays the browser dialog for choosing a certificate
 
-1. If you did not [Generate testing certificates](#generate-testing-certificates), i.e. already own some certs, create a file named `chain.pem` by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
+1. If you did not [generate testing certificates](#generate-testing-certificates), i.e. already own some certs, create a file named `chain.pem` by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included
 
 1. Compute a one-liner JSON string for the contents of `certChainPEM` property, for example: `sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem`
+
+1. Optional. If integration with accounts linking plugin is desired, set `useAcctLinking` to `true` for flow `io.jans.casa.cert.oneStepAuthn`
+
+1. Optional. Reference an attribute mapping for account onboarding in property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn`. More details [here](#how-does-account-onboarding-work)
 
 1. Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file
 
@@ -179,6 +204,18 @@ The next **optional** step is assigning an icon to certificate authentication fo
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
 
 1. Navigate to Casa main dashboard. A new menu item will appear for the certificate enrollment
+
+## Update the Casa ACR
+
+This step is required only if account onboarding via certificate attributes is desired or if you want to authenticate users by presenting a certificate alone (no username).
+
+Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
+
+1. Download file `https://maven.jans.io/maven/io/jans/jans-scim-model/replace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+
+1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
+
+1. Restart `jans-casa` and `jans-auth` services
 
 ## Testing
 
@@ -231,15 +268,25 @@ Testing can be extended to the following scenarios where authentication should f
 - Selecting a certificate that was enrolled but has expired
 - Not selecting any certificate: hitting "Cancel" or "Don't send a certificate" option in the browser dialog
 
+## Account onboarding (optional)
+
+Having followed [these](#update-the-casa-acr) steps, visit the Casa login page.
+
+1. Click on the "Smart card | User certificate" option
+
+1. The browser will be redirected to the configured cert pickup URL and a native dialog will appear. From here, choose one of the available certificates
+
+1. You will be authenticated as the user who previously enrolled that cert, otherwise a new account has been created for the user. Check the user profile data (TUI or admin-ui) and see how attributes have been populated for the account
+
 ## FAQ
-
-### How to customize the browser dialog for not remembering the user choice?
-
-This is not possible - at least from Janssen server.
 
 ### Is the plugin compatible with smart cards?
 
 Yes. There is a simple demonstrative [tutorial](./cert-authn-tutorial.md) available.
+
+### How to customize the browser dialog for not remembering the user choice?
+
+This is not possible - at least from Janssen server.
 
 ### Does the plugin support revocation?
 
@@ -279,6 +326,30 @@ We chose not to require the presence of the purpose.
 
 ### What's the `roundTripMaxTime` property in the Agama project used for?
 
-The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning to the page that originated the task. A default value of 30 seconds is used.
+The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning to the page that originated the task. A default value of 45 seconds is used.
 
 If the process is not completed in this timeframe, it will fail and the log will report errors regarding expired cache entries. In this case, consider using a higher value for `roundTripMaxTime`.
+
+### How does account onboarding work?
+
+Registering an account based on the information found in a certificate is done via attribute mappings:
+Config property `mappingClassField` of flow `io.jans.casa.cert.standaloneOneStepAuthn` points to a Java method found in class `io.jans.casa.certauthn.AttributeMappings` of the cert-authn Agama project. Such method takes a `Map<String, String>` as input and returns a `Map<String, String>` as well.
+
+The input data contains the key/value pairs found in the subject of the certificate. As an example, if the cert was issued to `CN=Joe, O=foobar`, then the map will look like:
+
+|Attribute Name|Value|
+|-|-|
+|`cn`|`Joe`|
+|`o`|`foobar`|
+
+Note attribute names are lowercased. Additionally, if there is a Subject Alternative Name (SAN) consisting of an e-mail, the input map will contain such value under attribute name `mail`.
+
+The "input" map can then be used to generate the resulting profile of the user to onboard. For example, by default the project employs a method called `STRAIGHT`, which returns a copy of the incoming map restricted to the attributes `o`, `cn`, `l`, and `mail`. Also the `uid` attribute is added with the same value of `mail`. This mapping is useful in general but administrators might like to supply their own mapping.
+
+To provide your own mapping, edit the cert-authn project: in file `lib/io/jans/casa/certauthn/AttributeMappings.java` add a new field based on the current (`STRAIGHT`) mapping. Then point to the new mapping in the project configuration accordingly. Ensure to always set an `uid`.
+
+Note attribute mapping only takes place when creating an account, that is, if the certificate in question is associated to an existing user, no profile update occurs.
+
+### Is there a way to offer certificate enrollment/authentication without having Casa installed?
+
+Yes, that's possible. Open a GitHub discussion or a support ticket.
