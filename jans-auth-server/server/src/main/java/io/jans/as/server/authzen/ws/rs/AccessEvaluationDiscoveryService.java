@@ -75,11 +75,11 @@ public class AccessEvaluationDiscoveryService {
 
     public static void fillJsonObject(JSONObject jsonObj, String issuer, String baseEndpoint) {
         jsonObj.put(AUTHZEN_POLICY_DECISION_POINT, issuer);
-        jsonObj.put(AUTHZEN_ACCESS_EVALUATION_ENDPOINT, baseEndpoint + "/evaluation");
-        jsonObj.put(AUTHZEN_ACCESS_EVALUATIONS_ENDPOINT, baseEndpoint + "/evaluations");
-        jsonObj.put(AUTHZEN_SEARCH_SUBJECT_ENDPOINT, baseEndpoint + "/search/subject");
-        jsonObj.put(AUTHZEN_SEARCH_RESOURCE_ENDPOINT, baseEndpoint + "/search/resource");
-        jsonObj.put(AUTHZEN_SEARCH_ACTION_ENDPOINT, baseEndpoint + "/search/action");
+        jsonObj.put(AUTHZEN_ACCESS_EVALUATION_ENDPOINT, baseEndpoint + "/access/v1/evaluation");
+        jsonObj.put(AUTHZEN_ACCESS_EVALUATIONS_ENDPOINT, baseEndpoint + "/access/v1/evaluations");
+        jsonObj.put(AUTHZEN_SEARCH_SUBJECT_ENDPOINT, baseEndpoint + "/access/v1/search/subject");
+        jsonObj.put(AUTHZEN_SEARCH_RESOURCE_ENDPOINT, baseEndpoint + "/access/v1/search/resource");
+        jsonObj.put(AUTHZEN_SEARCH_ACTION_ENDPOINT, baseEndpoint + "/access/v1/search/action");
 
         // Capabilities - can be extended via custom script
         JSONArray capabilities = new JSONArray();
