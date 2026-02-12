@@ -394,7 +394,7 @@ mod test {
                     .is_some()
             },
             10,
-            10,
+            1,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -406,7 +406,7 @@ mod test {
                     .is_some()
             },
             10,
-            10,
+            1,
             "second trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -784,7 +784,7 @@ mod test {
                     .is_some()
             },
             10,
-            10,
+            5,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -796,7 +796,7 @@ mod test {
                     .is_some()
             },
             10,
-            10,
+            5,
             "second trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -805,7 +805,7 @@ mod test {
         retry_assert(
             || async { loader.key_service.has_keys() },
             10,
-            10,
+            5,
             "key service should have keys after loading OpenID configurations in async mode",
         )
         .await;
@@ -819,7 +819,7 @@ mod test {
         retry_assert(
             || async { loader.key_service.get_key(&key_info1).is_some() },
             10,
-            10,
+            5,
             "HS256 key from first OpenID configuration should be stored in key service",
         )
         .await;
@@ -832,7 +832,7 @@ mod test {
         retry_assert(
             || async { loader.key_service.get_key(&key_info2).is_some() },
             10,
-            10,
+            5,
             "HS256 key from second OpenID configuration should be stored in key service",
         )
         .await;
@@ -1022,7 +1022,7 @@ mod test {
                     .is_some()
             },
             10,
-            5,
+            1,
             "trusted issuer should eventually be inserted into issuer index via async loading",
         )
         .await;
