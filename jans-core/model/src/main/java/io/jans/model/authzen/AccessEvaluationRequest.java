@@ -67,16 +67,18 @@ public class AccessEvaluationRequest {
         return evaluations;
     }
 
-    public void setEvaluations(List<AccessEvaluationRequest> evaluations) {
+    public AccessEvaluationRequest setEvaluations(List<AccessEvaluationRequest> evaluations) {
         this.evaluations = evaluations;
+        return this;
     }
 
     public EvaluationOptions getOptions() {
         return options;
     }
 
-    public void setOptions(EvaluationOptions options) {
+    public AccessEvaluationRequest setOptions(EvaluationOptions options) {
         this.options = options;
+        return this;
     }
 
     @Override

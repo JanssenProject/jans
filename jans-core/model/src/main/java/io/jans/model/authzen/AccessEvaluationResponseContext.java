@@ -85,8 +85,9 @@ public class AccessEvaluationResponseContext {
 
 
     @JsonAnySetter
-    public void putExtra(String key, Object value) {
+    public AccessEvaluationResponseContext putExtra(String key, Object value) {
         extra.put(key, value);
+        return this;
     }
 
     @JsonAnyGetter
@@ -98,24 +99,27 @@ public class AccessEvaluationResponseContext {
         return code;
     }
 
-    public void setCode(String code) {
+    public AccessEvaluationResponseContext setCode(String code) {
         this.code = code;
+        return this;
     }
 
     public String getReason() {
         return reason;
     }
 
-    public void setReason(String reason) {
+    public AccessEvaluationResponseContext setReason(String reason) {
         this.reason = reason;
+        return this;
     }
 
     public JsonNode getError() {
         return error;
     }
 
-    public void setError(JsonNode error) {
+    public AccessEvaluationResponseContext setError(JsonNode error) {
         this.error = error;
+        return this;
     }
 
     @Override

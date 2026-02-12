@@ -1,9 +1,11 @@
 package io.jans.model.authzen;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EvaluationOptions implements Serializable {
 
     public static final String EXECUTE_ALL = "execute_all";
