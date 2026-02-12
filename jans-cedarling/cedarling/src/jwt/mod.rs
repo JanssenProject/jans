@@ -174,17 +174,6 @@ impl JwtService {
 
         loader.load_trusted_issuers(trusted_issuers.clone()).await?;
 
-        // Load local JWKS if configured and no trusted issuers were provided
-        // This ensures local JWKS-only configurations work correctly
-        // works only in synchronous mode loading
-        if loader.jwt_config.trusted_issuer_loader.is_sync()
-            && !key_service.has_keys()
-            && jwt_config.jwt_sig_validation
-            && let Some(jwks) = jwt_config.jwks.as_ref()
-        {
-            key_service.insert_keys_from_str(jwks)?;
-        }
-
         // Create TrustedIssuerValidator for advanced validation scenarios
         let trusted_issuer_validator = TrustedIssuerValidator::new(trusted_issuers);
 

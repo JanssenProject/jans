@@ -101,6 +101,16 @@ async fn load_trusted_issuers(
     let mut handles = Vec::new();
     let errors = Arc::new(Mutex::new(Vec::new()));
 
+    // Load local JWKS once before processing issuers to avoid redundant work
+    if loader.jwt_config.jwt_sig_validation
+        && let Some(jwks) = loader.jwt_config.jwks.as_ref()
+    {
+        loader
+            .key_service
+            .insert_keys_from_str(jwks)
+            .map_err(JwtServiceInitError::PrepareKeys)?;
+    }
+
     for (issuer_id, iss) in trusted_issuers {
         let permit = semaphore
             .clone()
@@ -238,10 +248,6 @@ async fn insert_keys(
 ) -> Result<(), KeyServiceError> {
     if !jwt_config.jwt_sig_validation {
         return Ok(());
-    }
-
-    if let Some(jwks) = jwt_config.jwks.as_ref() {
-        key_service.insert_keys_from_str(jwks)?;
     }
 
     if let Some(openid_config) = iss_config.openid_config.as_ref() {
