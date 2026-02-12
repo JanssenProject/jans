@@ -2,10 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.SimpleCustomProperty;
-import io.jans.model.authzen.AccessEvaluationRequest;
-import io.jans.model.authzen.AccessEvaluationResponse;
-import io.jans.model.authzen.AccessEvaluationResponseContext;
-import io.jans.model.authzen.Resource;
+import io.jans.model.authzen.*;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.authzen.AccessEvaluationType;
 import io.jans.service.custom.script.CustomScriptManager;
@@ -84,5 +81,23 @@ public class AccessEvaluation implements AccessEvaluationType {
     @Override
     public int getApiVersion() {
         return 11;
+    }
+
+    @Override
+    public SearchResponse<Subject> searchSubject(SearchSubjectRequest request, Object context) {
+        // Not implemented - return null to use default empty response
+        return null;
+    }
+
+    @Override
+    public SearchResponse<Resource> searchResource(SearchResourceRequest request, Object context) {
+        // Not implemented - return null to use default empty response
+        return null;
+    }
+
+    @Override
+    public SearchResponse<Action> searchAction(SearchActionRequest request, Object context) {
+        // Not implemented - return null to use default empty response
+        return null;
     }
 }

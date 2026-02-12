@@ -1,25 +1,30 @@
 package io.jans.model.authzen;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Z
  */
-public class AccessEvaluationRequest implements Serializable {
+public class AccessEvaluationRequest {
 
     private Subject subject;
     private Resource resource;
     private Action action;
     private Context context;
+    private List<AccessEvaluationRequest> evaluations;
+    private EvaluationOptions options;
 
     public AccessEvaluationRequest() {
+        // empty
     }
 
-    public AccessEvaluationRequest(Subject subject, Resource resource, Action action, Context context) {
+    public AccessEvaluationRequest(Subject subject, Resource resource, Action action, Context context, List<AccessEvaluationRequest> evaluations, EvaluationOptions options) {
         this.subject = subject;
         this.resource = resource;
         this.action = action;
         this.context = context;
+        this.evaluations = evaluations;
+        this.options = options;
     }
 
     public Subject getSubject() {
@@ -58,6 +63,24 @@ public class AccessEvaluationRequest implements Serializable {
         return this;
     }
 
+    public List<AccessEvaluationRequest> getEvaluations() {
+        return evaluations;
+    }
+
+    public AccessEvaluationRequest setEvaluations(List<AccessEvaluationRequest> evaluations) {
+        this.evaluations = evaluations;
+        return this;
+    }
+
+    public EvaluationOptions getOptions() {
+        return options;
+    }
+
+    public AccessEvaluationRequest setOptions(EvaluationOptions options) {
+        this.options = options;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "AccessEvaluationRequest{" +
@@ -65,6 +88,8 @@ public class AccessEvaluationRequest implements Serializable {
                 ", resource=" + resource +
                 ", action=" + action +
                 ", context=" + context +
+                ", evaluations=" + evaluations +
+                ", options=" + options +
                 '}';
     }
 }

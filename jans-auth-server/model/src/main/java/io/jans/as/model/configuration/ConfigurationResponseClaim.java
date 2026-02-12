@@ -20,7 +20,6 @@ public final class ConfigurationResponseClaim {
     public static final String AUTHORIZATION_CHALLENGE_ENDPOINT = "authorization_challenge_endpoint";
     public static final String STATUS_LIST_ENDPOINT = "status_list_endpoint";
     public static final String STATUS_LIST_AGGREGATION_ENDPOINT = "status_list_aggregation_endpoint";
-    public static final String ACCESS_EVALUATION_V1_ENDPOINT = "access_evaluation_v1_endpoint";
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
     public static final String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";
@@ -102,4 +101,14 @@ public final class ConfigurationResponseClaim {
 
     // SSA
     public static final String SSA_ENDPOINT = "ssa_endpoint";
+
+    // AuthZEN
+    public static final String AUTHZEN_POLICY_DECISION_POINT = "policy_decision_point";
+    public static final String ACCESS_EVALUATION_V1_ENDPOINT = "access_evaluation_v1_endpoint";
+    public static final String AUTHZEN_ACCESS_EVALUATION_ENDPOINT = "access_evaluation_endpoint";
+    public static final String AUTHZEN_ACCESS_EVALUATIONS_ENDPOINT = "access_evaluations_endpoint";
+    public static final String AUTHZEN_SEARCH_SUBJECT_ENDPOINT = "search_subject_endpoint";
+    public static final String AUTHZEN_SEARCH_RESOURCE_ENDPOINT = "search_resource_endpoint";
+    public static final String AUTHZEN_SEARCH_ACTION_ENDPOINT = "search_action_endpoint";
+    public static final String AUTHZEN_CAPABILITIES = "capabilities";
 }

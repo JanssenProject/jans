@@ -18,6 +18,7 @@ public class AccessEvaluationResponse {
     private AccessEvaluationResponseContext context;
 
     public AccessEvaluationResponse() {
+        // empty
     }
 
     public AccessEvaluationResponse(boolean decision, AccessEvaluationResponseContext context) {

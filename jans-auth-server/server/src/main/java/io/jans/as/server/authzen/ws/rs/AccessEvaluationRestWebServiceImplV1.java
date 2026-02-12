@@ -7,6 +7,7 @@ import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.authzen.AccessEvaluationRequest;
 import io.jans.model.authzen.AccessEvaluationResponse;
+import io.jans.model.authzen.AccessEvaluationsResponse;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +21,9 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 /**
+ * AuthZEN Access Evaluation API v1.
+ * Implements single and batch evaluation endpoints per AuthZEN spec.
+ *
  * @author Yuriy Z
  */
 @Path("/access/v1")
@@ -36,6 +40,10 @@ public class AccessEvaluationRestWebServiceImplV1 {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    /**
+     * Single access evaluation endpoint.
+     * POST /access/v1/evaluation
+     */
     @POST
     @Path("/evaluation")
     @Produces({MediaType.APPLICATION_JSON})
@@ -51,7 +59,7 @@ public class AccessEvaluationRestWebServiceImplV1 {
 
             accessEvaluationService.validateAuthorization(authorization);
 
-            AccessEvaluationRequest request = readRequest(requestParams);
+            AccessEvaluationRequest request = readEvaluationRequest(requestParams);
 
             ExecutionContext executionContext = ExecutionContext.of(httpRequest, httpResponse).setRequestId(requestId);
             AccessEvaluationResponse response = accessEvaluationService.evaluation(request, executionContext);
@@ -77,14 +85,58 @@ public class AccessEvaluationRestWebServiceImplV1 {
         }
     }
 
-    protected AccessEvaluationRequest readRequest(String requestParams) {
+    /**
+     * Batch access evaluations endpoint.
+     * POST /access/v1/evaluations
+     */
+    @POST
+    @Path("/evaluations")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response evaluations(String requestParams, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
+
+        log.trace("/evaluations - request params: {}", requestParams);
+
+        try {
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
+
+            String requestId = httpRequest.getHeader(X_REQUEST_ID);
+            String authorization = httpRequest.getHeader("Authorization");
+
+            accessEvaluationService.validateAuthorization(authorization);
+
+            AccessEvaluationRequest request = readEvaluationRequest(requestParams);
+
+            ExecutionContext executionContext = ExecutionContext.of(httpRequest, httpResponse).setRequestId(requestId);
+            AccessEvaluationsResponse response = accessEvaluationService.evaluations(request, executionContext);
+
+            final String responseAsString = ServerUtil.asJson(response);
+
+            log.trace("/evaluations - response entity: {}", responseAsString);
+            return Response.status(Response.Status.OK)
+                    .entity(responseAsString)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .header(X_REQUEST_ID, requestId)
+                    .build();
+        } catch (WebApplicationException e) {
+            if (log.isTraceEnabled()) {
+                log.trace(e.getMessage(), e);
+            }
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build();
+        }
+    }
+
+    protected AccessEvaluationRequest readEvaluationRequest(String requestParams) {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, AccessEvaluationRequest.class);
         } catch (JsonProcessingException e) {
-            String msg = String.format("Failed to parse request json: %s", requestParams);
-            log.error(msg, e);
+            log.error(String.format("Failed to parse evaluation request json: %s", requestParams), e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                    .entity(msg)
+                    .entity("Failed to parse evaluation request.")
                     .type(MediaType.APPLICATION_JSON_TYPE).build());
         }
     }
