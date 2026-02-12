@@ -63,13 +63,14 @@ public class AccessEvaluationSearchWSTest {
                 "\"subject\": {\"type\": \"user\"}," +
                 "\"resource\": {\"type\": \"document\", \"id\": \"doc-123\"}," +
                 "\"action\": {\"name\": \"read\"}," +
-                "\"context\": {\"properties\": {\"ip\": \"192.168.1.1\"}}" +
+                "\"context\": {\"ip\": \"192.168.1.1\"}" +
                 "}";
 
         SearchSubjectRequest request = accessEvaluationSearchWS.readSearchSubjectRequest(json);
 
         assertNotNull(request);
         assertNotNull(request.getContext());
+        assertEquals("192.168.1.1", request.getContext().get("ip"));
     }
 
     @Test
@@ -167,7 +168,7 @@ public class AccessEvaluationSearchWSTest {
         String json = "{" +
                 "\"subject\": {\"type\": \"user\", \"id\": \"user-123\"}," +
                 "\"resource\": {\"type\": \"document\", \"id\": \"doc-456\"}," +
-                "\"context\": {\"properties\": {\"timestamp\": \"2024-01-01T00:00:00Z\"}}" +
+                "\"context\": {\"timestamp\": \"2024-01-01T00:00:00Z\"}" +
                 "}";
 
         SearchActionRequest request = accessEvaluationSearchWS.readSearchActionRequest(json);
