@@ -29,6 +29,7 @@ public class SearchSubjectRequest {
     private PageRequest page;
 
     public SearchSubjectRequest() {
+        // empty
     }
 
     public Subject getSubject() {

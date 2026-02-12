@@ -19,6 +19,7 @@ public class Context {
     private final Map<String, Object> attributes = new LinkedHashMap<>();
 
     public Context() {
+        // empty
     }
 
     public Context(Map<String, Object> attributes) {

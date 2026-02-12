@@ -27,6 +27,7 @@ public class SearchActionRequest {
     private PageRequest page;
 
     public SearchActionRequest() {
+        // empty
     }
 
     public Subject getSubject() {

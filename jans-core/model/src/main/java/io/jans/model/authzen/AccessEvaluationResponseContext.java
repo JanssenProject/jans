@@ -38,6 +38,7 @@ public class AccessEvaluationResponseContext {
     private final Map<String, Object> extra = new LinkedHashMap<>();
 
     public AccessEvaluationResponseContext() {
+        // empty
     }
 
     public AccessEvaluationResponseContext(String id, JsonNode reasonAdmin, JsonNode reasonUser) {

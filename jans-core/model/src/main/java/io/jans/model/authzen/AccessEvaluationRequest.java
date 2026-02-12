@@ -15,6 +15,7 @@ public class AccessEvaluationRequest {
     private EvaluationOptions options;
 
     public AccessEvaluationRequest() {
+        // empty
     }
 
     public AccessEvaluationRequest(Subject subject, Resource resource, Action action, Context context, List<AccessEvaluationRequest> evaluations, EvaluationOptions options) {

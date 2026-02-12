@@ -18,6 +18,7 @@ public class AccessEvaluationsResponse {
     private List<AccessEvaluationResponse> evaluations;
 
     public AccessEvaluationsResponse() {
+        // empty
     }
 
     public AccessEvaluationsResponse(List<AccessEvaluationResponse> evaluations) {

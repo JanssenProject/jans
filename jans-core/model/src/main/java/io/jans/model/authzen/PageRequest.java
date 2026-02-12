@@ -23,6 +23,7 @@ public class PageRequest {
     private JsonNode properties;
 
     public PageRequest() {
+        // empty
     }
 
     public String getToken() {

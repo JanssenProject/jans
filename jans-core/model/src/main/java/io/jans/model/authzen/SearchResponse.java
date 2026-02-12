@@ -24,6 +24,7 @@ public class SearchResponse<T> {
     private List<T> results;
 
     public SearchResponse() {
+        // empty
     }
 
     public SearchResponse(List<T> results, PageResponse page) {

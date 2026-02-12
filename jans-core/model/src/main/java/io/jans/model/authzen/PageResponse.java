@@ -26,6 +26,7 @@ public class PageResponse {
     private JsonNode properties;
 
     public PageResponse() {
+        // empty
     }
 
     public PageResponse(String nextToken, Integer count, Integer total) {
