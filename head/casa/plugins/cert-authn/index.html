@@ -1890,6 +1890,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#update-the-casa-acr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update the Casa ACR
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#testing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1929,6 +1940,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#account-onboarding-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account onboarding (optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#faq" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1941,10 +1963,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice" class="md-nav__link">
+  <a href="#is-the-plugin-compatible-with-smart-cards" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to customize the browser dialog for not remembering the user choice?
+        Is the plugin compatible with smart cards?
       
     </span>
   </a>
@@ -1952,10 +1974,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#is-the-plugin-compatible-with-smart-cards" class="md-nav__link">
+  <a href="#how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Is the plugin compatible with smart cards?
+        How to customize the browser dialog for not remembering the user choice?
       
     </span>
   </a>
@@ -2000,6 +2022,28 @@
     <span class="md-ellipsis">
       
         What's the roundTripMaxTime property in the Agama project used for?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-account-onboarding-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How does account onboarding work?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-there-a-way-to-offer-certificate-enrollmentauthentication-without-having-casa-installed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Is there a way to offer certificate enrollment/authentication without having Casa installed?
       
     </span>
   </a>
@@ -2644,6 +2688,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#update-the-casa-acr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update the Casa ACR
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#testing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2683,6 +2738,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#account-onboarding-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account onboarding (optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#faq" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2695,10 +2761,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice" class="md-nav__link">
+  <a href="#is-the-plugin-compatible-with-smart-cards" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to customize the browser dialog for not remembering the user choice?
+        Is the plugin compatible with smart cards?
       
     </span>
   </a>
@@ -2706,10 +2772,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#is-the-plugin-compatible-with-smart-cards" class="md-nav__link">
+  <a href="#how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Is the plugin compatible with smart cards?
+        How to customize the browser dialog for not remembering the user choice?
       
     </span>
   </a>
@@ -2754,6 +2820,28 @@
     <span class="md-ellipsis">
       
         What's the roundTripMaxTime property in the Agama project used for?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-account-onboarding-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How does account onboarding work?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-there-a-way-to-offer-certificate-enrollmentauthentication-without-having-casa-installed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Is there a way to offer certificate enrollment/authentication without having Casa installed?
       
     </span>
   </a>
@@ -2905,13 +2993,18 @@
 
 <h1 id="client-certificate-authentication">Client certificate authentication<a class="headerlink" href="#client-certificate-authentication" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in a SSL/TLS session.</p>
-<p>The Casa client certificate authentication plugin allows users to enroll digital certificates and use them as a form of second-factor authentication in the Janssen server. This approach supports <a href="#is-the-plugin-compatible-with-smart-cards">smart cards</a> as well.</p>
+<p>At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in an SSL/TLS session.</p>
+<p>The Casa client certificate authentication plugin offers:</p>
+<ul>
+<li>Enrollment of digital certificates - includes account onboarding</li>
+<li>Authentication by presenting a valid certificate (no username or password required)</li>
+<li>Use enrolled certificates as a form of second-factor authentication</li>
+</ul>
 <h3 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h3>
 <ul>
 <li>A Janssen server with Apache or nginx HTTP front</li>
 <li>Jans Casa 1.16.0 or higher. Need it in an <a href="#can-the-plugin-be-used-on-older-versions-of-jans">older</a> version?</li>
-<li>It is assumed your organization already has an establish mechanism of certificate issuance and deployment. For the purpose of testing, this documentation provides manual steps for certificate issuance</li>
+<li>It is assumed your organization already has an established mechanism of certificate issuance and deployment. For the purpose of testing, this documentation provides manual steps for issuing certificates</li>
 </ul>
 <h3 id="configuration-steps">Configuration steps<a class="headerlink" href="#configuration-steps" title="Permanent link">#</a></h3>
 <p>The below are the steps required to setup client certificate authentication with Casa in Jans:</p>
@@ -2921,6 +3014,7 @@
 <li>Setup a cert pickup URL in your front HTTP server</li>
 <li>Deploy and configure the cert-authn Agama project in the server</li>
 <li>Install the cert-authn Casa plugin</li>
+<li>Update the Casa ACR</li>
 </ul>
 <h2 id="generate-testing-certificates">Generate testing certificates<a class="headerlink" href="#generate-testing-certificates" title="Permanent link">#</a></h2>
 <div class="admonition note">
@@ -2986,10 +3080,10 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Build the certificate chain file: <code>cat .step/certs/root_ca.crt .step/certs/intermediate_ca.crt &gt; chain.pem</code></p>
 </li>
 <li>
-<p>Create a private key and a certificate for <code>cn=Joe</code> (subject of the cert): <code>step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd</code>. This command will create a certificate signed with the intermediate certificate</p>
+<p>Create a private key and a certificate for <code>cn=Joe</code> (subject of the cert): <code>step certificate create Joe joe.crt joe.key --ca ~/.step/certs/intermediate_ca.crt --ca-key ~/.step/secrets/intermediate_ca_key --ca-password-file capwd --not-after=720h</code>. This command will create a certificate signed with the intermediate certificate</p>
 </li>
 <li>
-<p>Inspect the created cert: <code>step certificate inspect joe.crt</code>. Note the expiration is of one day and that "Client authentication" is explicitly part of the extended key usages</p>
+<p>Inspect the created cert: <code>step certificate inspect joe.crt</code>. Note the expiration is of 30 days and that "Client authentication" is explicitly part of the extended key usages</p>
 </li>
 <li>
 <p>Package Joe's certificate and key into a <code>p12</code> file: <code>step certificate p12 joe.p12 joe.crt joe.key</code>. You will be prompted two passwords: one for the <code>p12</code> file itself, and the password previously used to encrypt the private key of the user certificate</p>
@@ -3027,8 +3121,32 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 </div>
 </div>
 <h3 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h3>
-<p>Restart Apache (e.g. <code>systemctl restart apache2</code>) and in a browser visit the URL configured, e.g. <code>https://acme.co:444</code> (TLS 1.3) or <code>https://acme.co/jans-casa/pl/cert-authn/</code> (TLS 1.2). This will display a dialog like <a href="../../../assets/casa/plugins/cert-authn-browser_dialog.png">this</a> listing the certificates imported so far. Do not select anything and close the browser window.</p>
+<p>Restart Apache (e.g. <code>systemctl restart apache2</code>) and in a browser visit the URL configured, e.g. <code>https://acme.co:444</code> (TLS 1.3) or <code>https://acme.co/jans-casa/pl/cert-authn/index.zul</code> (TLS 1.2). This will display a dialog like <a href="../../../assets/casa/plugins/cert-authn-browser_dialog.png">this</a> listing the certificates imported so far. Do not select anything and close the browser window.</p>
 <h2 id="deploy-and-configure-the-agama-project">Deploy and configure the Agama project<a class="headerlink" href="#deploy-and-configure-the-agama-project" title="Permanent link">#</a></h2>
+<p>The <code>cert-authn</code> Agama project is a utility project that allows administrators do things like:</p>
+<ul>
+<li>
+<p>Display a login page where users are shown the option to present a certificate</p>
+<ul>
+<li>
+<p>If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert. Then access to the application is granted</p>
+</li>
+<li>
+<p>If the certificate is mapped to an existing account, access to the application is granted to such user</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Display a login page as the above including the configured identity providers, if any, in case the <a href="../accts-linking/account-linking-index/">accounts linking</a> plugin is installed  </p>
+</li>
+<li>
+<p>Offer users the ability to enroll a certificate when they are already logged into Casa</p>
+</li>
+<li>
+<p>Usage of certificates as a form of second-factor authentication</p>
+</li>
+</ul>
+<p>Offering users the login page and the account onboarding regarded above is up to administrators (optional feature).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism</p>
@@ -3047,13 +3165,19 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Open the configuration management dialog (press <code>c</code>) and choose to export the sample configuration to a file on disk</p>
 </li>
 <li>
-<p>Edit property <code>certPickupUrl</code> accordingly. This is the URL that displays the browser dialog for choosing a certificate</p>
+<p>Edit property <code>certPickupUrl</code> of flow <code>io.jans.casa.cert.promptAndValidate</code> accordingly. This is the URL that displays the browser dialog for choosing a certificate</p>
 </li>
 <li>
-<p>If you did not <a href="#generate-testing-certificates">Generate testing certificates</a>, i.e. already own some certs, create a file named <code>chain.pem</code> by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included</p>
+<p>If you did not <a href="#generate-testing-certificates">generate testing certificates</a>, i.e. already own some certs, create a file named <code>chain.pem</code> by concatenating the contents in PEM format of the certificate chain starting with the root CA cert, and appending the rest of intermediate certificates. The last certificate would be the one employed to sign the end-entity (user certificate). Ensure the BEGIN/END CERTIFICATE marker lines are included</p>
 </li>
 <li>
 <p>Compute a one-liner JSON string for the contents of <code>certChainPEM</code> property, for example: <code>sed -i.bak ':a;N;$!ba;s/\n/\\n/g' chain.pem</code></p>
+</li>
+<li>
+<p>Optional. If integration with accounts linking plugin is desired, set <code>useAcctLinking</code> to <code>true</code> for flow <code>io.jans.casa.cert.oneStepAuthn</code></p>
+</li>
+<li>
+<p>Optional. Reference an attribute mapping for account onboarding in property <code>mappingClassField</code> of flow <code>io.jans.casa.cert.standaloneOneStepAuthn</code>. More details <a href="#how-does-account-onboarding-work">here</a></p>
 </li>
 <li>
 <p>Save the JSON file and open again the configuration management dialog for the cert-authn Agama project. Import the resulting file</p>
@@ -3089,6 +3213,20 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 </li>
 <li>
 <p>Navigate to Casa main dashboard. A new menu item will appear for the certificate enrollment</p>
+</li>
+</ol>
+<h2 id="update-the-casa-acr">Update the Casa ACR<a class="headerlink" href="#update-the-casa-acr" title="Permanent link">#</a></h2>
+<p>This step is required only if account onboarding via certificate attributes is desired or if you want to authenticate users by presenting a certificate alone (no username).</p>
+<p>Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.</p>
+<ol>
+<li>
+<p>Download file <code>https://maven.jans.io/maven/io/jans/jans-scim-model/replace-janssen-version/jans-scim-model-replace-janssen-version.jar</code> and place it in your server under <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+</li>
+<li>
+<p>Edit the file <code>/etc/default/jans-casa</code>: locate a segment that reads <code>-Dacr=</code> and assign <code>agama_io.jans.casa.cert.oneStepAuthn</code> as new value. Save the change</p>
+</li>
+<li>
+<p>Restart <code>jans-casa</code> and <code>jans-auth</code> services</p>
 </li>
 </ol>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h2>
@@ -3152,11 +3290,24 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <li>Selecting a certificate that was enrolled but has expired</li>
 <li>Not selecting any certificate: hitting "Cancel" or "Don't send a certificate" option in the browser dialog</li>
 </ul>
+<h2 id="account-onboarding-optional">Account onboarding (optional)<a class="headerlink" href="#account-onboarding-optional" title="Permanent link">#</a></h2>
+<p>Having followed <a href="#update-the-casa-acr">these</a> steps, visit the Casa login page.</p>
+<ol>
+<li>
+<p>Click on the "Smart card | User certificate" option</p>
+</li>
+<li>
+<p>The browser will be redirected to the configured cert pickup URL and a native dialog will appear. From here, choose one of the available certificates</p>
+</li>
+<li>
+<p>You will be authenticated as the user who previously enrolled that cert, otherwise a new account has been created for the user. Check the user profile data (TUI or admin-ui) and see how attributes have been populated for the account</p>
+</li>
+</ol>
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">#</a></h2>
-<h3 id="how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice">How to customize the browser dialog for not remembering the user choice?<a class="headerlink" href="#how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice" title="Permanent link">#</a></h3>
-<p>This is not possible - at least from Janssen server.</p>
 <h3 id="is-the-plugin-compatible-with-smart-cards">Is the plugin compatible with smart cards?<a class="headerlink" href="#is-the-plugin-compatible-with-smart-cards" title="Permanent link">#</a></h3>
 <p>Yes. There is a simple demonstrative <a href="../cert-authn-tutorial/">tutorial</a> available.</p>
+<h3 id="how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice">How to customize the browser dialog for not remembering the user choice?<a class="headerlink" href="#how-to-customize-the-browser-dialog-for-not-remembering-the-user-choice" title="Permanent link">#</a></h3>
+<p>This is not possible - at least from Janssen server.</p>
 <h3 id="does-the-plugin-support-revocation">Does the plugin support revocation?<a class="headerlink" href="#does-the-plugin-support-revocation" title="Permanent link">#</a></h3>
 <p>It's not implemented but we may add CRL functionality on request. OCSP is another option but it seems to be a <a href="https://www.feistyduck.com/newsletter/issue_121_the_slow_death_of_ocsp">discouraged</a> practice these days.</p>
 <p>Another practice to consider for your PKI is using passive revocation and short-lived certificates. Here, a certificate that has been revoked can no longer be renewed at the CA. It will still be valid for the remainder of its validity period, but cannot be prolonged.</p>
@@ -3193,8 +3344,36 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 </blockquote>
 <p>We chose not to require the presence of the purpose.</p>
 <h3 id="whats-the-roundtripmaxtime-property-in-the-agama-project-used-for">What's the <code>roundTripMaxTime</code> property in the Agama project used for?<a class="headerlink" href="#whats-the-roundtripmaxtime-property-in-the-agama-project-used-for" title="Permanent link">#</a></h3>
-<p>The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning to the page that originated the task. A default value of 30 seconds is used.</p>
+<p>The implementation requires defining a maximum time for the completion of the task consisting of initiating enrollment (or authentication), selecting a certificate, entering a PIN (in the case of smart cards), and returning to the page that originated the task. A default value of 45 seconds is used.</p>
 <p>If the process is not completed in this timeframe, it will fail and the log will report errors regarding expired cache entries. In this case, consider using a higher value for <code>roundTripMaxTime</code>.</p>
+<h3 id="how-does-account-onboarding-work">How does account onboarding work?<a class="headerlink" href="#how-does-account-onboarding-work" title="Permanent link">#</a></h3>
+<p>Registering an account based on the information found in a certificate is done via attribute mappings:
+Config property <code>mappingClassField</code> of flow <code>io.jans.casa.cert.standaloneOneStepAuthn</code> points to a Java method found in class <code>io.jans.casa.certauthn.AttributeMappings</code> of the cert-authn Agama project. Such method takes a <code>Map&lt;String, String&gt;</code> as input and returns a <code>Map&lt;String, String&gt;</code> as well.</p>
+<p>The input data contains the key/value pairs found in the subject of the certificate. As an example, if the cert was issued to <code>CN=Joe, O=foobar</code>, then the map will look like:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cn</code></td>
+<td><code>Joe</code></td>
+</tr>
+<tr>
+<td><code>o</code></td>
+<td><code>foobar</code></td>
+</tr>
+</tbody>
+</table>
+<p>Note attribute names are lowercased. Additionally, if there is a Subject Alternative Name (SAN) consisting of an e-mail, the input map will contain such value under attribute name <code>mail</code>.</p>
+<p>The "input" map can then be used to generate the resulting profile of the user to onboard. For example, by default the project employs a method called <code>STRAIGHT</code>, which returns a copy of the incoming map restricted to the attributes <code>o</code>, <code>cn</code>, <code>l</code>, and <code>mail</code>. Also the <code>uid</code> attribute is added with the same value of <code>mail</code>. This mapping is useful in general but administrators might like to supply their own mapping.</p>
+<p>To provide your own mapping, edit the cert-authn project: in file <code>lib/io/jans/casa/certauthn/AttributeMappings.java</code> add a new field based on the current (<code>STRAIGHT</code>) mapping. Then point to the new mapping in the project configuration accordingly. Ensure to always set an <code>uid</code>.</p>
+<p>Note attribute mapping only takes place when creating an account, that is, if the certificate in question is associated to an existing user, no profile update occurs.</p>
+<h3 id="is-there-a-way-to-offer-certificate-enrollmentauthentication-without-having-casa-installed">Is there a way to offer certificate enrollment/authentication without having Casa installed?<a class="headerlink" href="#is-there-a-way-to-offer-certificate-enrollmentauthentication-without-having-casa-installed" title="Permanent link">#</a></h3>
+<p>Yes, that's possible. Open a GitHub discussion or a support ticket.</p>
 
 
 
@@ -3217,7 +3396,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 14, 2026 18:44:44 UTC"><span class="timeago" datetime="2026-01-14T18:44:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 14, 2026 18:44:44 UTC">2026-01-14</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 12, 2026 05:47:44 UTC"><span class="timeago" datetime="2026-02-12T05:47:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 12, 2026 05:47:44 UTC">2026-02-12</span>
   </span>
 
     
