@@ -267,12 +267,6 @@ pub enum TrustedIssuerLoaderConfig {
     },
 }
 
-impl TrustedIssuerLoaderConfig {
-    pub(crate) fn is_sync(&self) -> bool {
-        matches!(self, TrustedIssuerLoaderConfig::Sync { .. })
-    }
-}
-
 impl Default for TrustedIssuerLoaderConfig {
     fn default() -> Self {
         Self::Sync {
