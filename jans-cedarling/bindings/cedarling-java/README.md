@@ -160,3 +160,72 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```
 
 For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+These methods are available on the underlying UniFFI-generated `Cedarling` instance returned by `getCedarling()`.
+In Java/Kotlin bindings, `JsonValue` is represented as a plain `String`.
+
+```java
+import uniffi.cedarling_uniffi.*;
+import org.json.JSONObject;
+
+CedarlingAdapter adapter = new CedarlingAdapter();
+adapter.loadFromJson(bootstrapJson);
+Cedarling cedarling = adapter.getCedarling();
+
+// Push data with optional TTL (in seconds)
+String value = "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}";
+cedarling.pushDataCtx("user:123", value, null);  // null uses default TTL
+// For a custom TTL, pass a value matching the generated binding type.
+
+// Get data
+String result = cedarling.getDataCtx("user:123");
+if (result != null) {
+    JSONObject data = new JSONObject(result);
+}
+
+// Get data entry
+DataEntry entry = cedarling.getDataEntryCtx("user:123");
+if (entry != null) {
+    System.out.println("Key: " + entry.getKey());
+    System.out.println("Data type: " + entry.getDataType());
+    System.out.println("Created at: " + entry.getCreatedAt());
+}
+
+// Remove / clear / list / stats
+boolean removed = cedarling.removeDataCtx("user:123");
+cedarling.clearDataCtx();
+List<DataEntry> entries = cedarling.listDataCtx();
+DataStoreStats stats = cedarling.getStatsCtx();
+```
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+### Error Handling
+
+The Context Data API methods throw `DataException`:
+
+```java
+try {
+    cedarling.pushDataCtx("", "{\"data\":\"value\"}", null); // Empty key
+} catch (DataException.DataOperationFailed e) {
+    System.out.println("Data operation failed: " + e.getMessage());
+}
+```
