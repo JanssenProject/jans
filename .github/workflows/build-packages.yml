@@ -233,7 +233,7 @@ jobs:
             os: ubuntu-22.04
             python_version: '3.10'
           - name: suse
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             python_version: '3.10'
             use_docker: true
             docker_image: opensuse/leap:15.4
