@@ -212,7 +212,7 @@ jobs:
     - name: Upload cosign bundle to release
       if: contains(matrix.sign_cmd, 'cosign')
       id: upload_cosign_bundle
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/cosign.bundle
@@ -258,20 +258,19 @@ jobs:
 
     - name: Build with Docker (SUSE)
       if: matrix.use_docker
-      uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-      with:
-        image: ${{ matrix.docker_image }}
-        options: -v ${{ github.workspace }}:/workspace
-        run: |
+      run: |
+        docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace ${{ matrix.docker_image }} bash -c '
           zypper --gpg-auto-import-keys refresh
           zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool openssl python311 python311-pip python311-setuptools python311-wheel python311-devel
           python3.11 -m pip install shiv
           cd /workspace/jans-linux-setup
-          python3.11 -m shiv --compressed -o jans-linux-setup.pyz -p '/usr/bin/env python3' -e jans_setup.jans_setup:main . --no-cache
+          python3.11 -m shiv --compressed -o jans-linux-setup.pyz -p "/usr/bin/env python3" -e jans_setup.jans_setup:main . --no-cache
           mv jans-linux-setup.pyz jans-linux-suse-X86-64-setup.pyz
           cd ../jans-cli-tui
-          python3.11 -m shiv --compressed -o jans-cli-tui.pyz -p '/usr/bin/env python3' -e cli_tui.jans_cli_tui:run . --no-cache
+          python3.11 -m shiv --compressed -o jans-cli-tui.pyz -p "/usr/bin/env python3" -e cli_tui.jans_cli_tui:run . --no-cache
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
+        '
+
     - name: Build with Ubuntu
       if: matrix.name == 'ubuntu'
       run: |
