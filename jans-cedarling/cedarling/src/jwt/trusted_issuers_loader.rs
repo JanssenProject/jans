@@ -912,7 +912,7 @@ mod test {
                         .is_some()
                 },
                 10,
-                1,
+                5,
                 &format!("trusted issuer {i} should be inserted into issuer index"),
             )
             .await;
