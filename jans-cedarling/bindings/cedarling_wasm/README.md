@@ -149,6 +149,102 @@ export class Cedarling {
    * Return log entries that match the given request_id and tag.
    */
   get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
+  /**
+   * Push a value into the data store with an optional TTL.
+   * If the key already exists, the value will be replaced.
+   * If TTL is not provided, the default TTL from configuration is used.
+   *
+   * # Arguments
+   * * `key` - The key for the data entry
+   * * `value` - The value to store (any JSON-serializable value)
+   * * `ttl_secs` - Optional TTL in seconds (undefined uses default from config)
+   *
+   * # Example
+   * ```javascript
+   * await cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
+   * await cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+   * ```
+   */
+  push_data_ctx(key: string, value: any, ttl_secs?: number): Promise<void>;
+  /**
+   * Get a value from the data store by key.
+   * Returns null if the key doesn't exist or the entry has expired.
+   *
+   * # Arguments
+   * * `key` - The key to retrieve
+   *
+   * # Example
+   * ```javascript
+   * const value = await cedarling.get_data_ctx("user:123");
+   * if (value) {
+   *   console.log(value.name);
+   * }
+   * ```
+   */
+  get_data_ctx(key: string): Promise<any>;
+  /**
+   * Get a data entry with full metadata by key.
+   * Returns null if the key doesn't exist or the entry has expired.
+   * Includes metadata like creation time, expiration, access count, and type.
+   *
+   * # Arguments
+   * * `key` - The key to retrieve
+   *
+   * # Example
+   * ```javascript
+   * const entry = await cedarling.get_data_entry_ctx("user:123");
+   * if (entry) {
+   *   console.log(`Created: ${entry.created_at}, Access count: ${entry.access_count}`);
+   * }
+   * ```
+   */
+  get_data_entry_ctx(key: string): Promise<any>;
+  /**
+   * Remove a value from the data store by key.
+   * Returns true if the key existed and was removed, false otherwise.
+   *
+   * # Arguments
+   * * `key` - The key to remove
+   *
+   * # Example
+   * ```javascript
+   * const removed = await cedarling.remove_data_ctx("user:123");
+   * ```
+   */
+  remove_data_ctx(key: string): Promise<boolean>;
+  /**
+   * Clear all entries from the data store.
+   *
+   * # Example
+   * ```javascript
+   * await cedarling.clear_data_ctx();
+   * ```
+   */
+  clear_data_ctx(): Promise<void>;
+  /**
+   * List all entries with their metadata.
+   * Returns an array of data entries containing key, value, type, and timing metadata.
+   *
+   * # Example
+   * ```javascript
+   * const entries = await cedarling.list_data_ctx();
+   * entries.forEach(entry => {
+   *   console.log(`Key: ${entry.key}, Type: ${entry.data_type}`);
+   * });
+   * ```
+   */
+  list_data_ctx(): Promise<any[]>;
+  /**
+   * Get statistics about the data store.
+   * Returns current entry count, capacity limits, and configuration state.
+   *
+   * # Example
+   * ```javascript
+   * const stats = await cedarling.get_stats_ctx();
+   * console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
+   * ```
+   */
+  get_stats_ctx(): Promise<DataStoreStats>;
 }
 
 /**
@@ -263,6 +359,52 @@ export class PolicyEvaluationError {
    */
   readonly error: string;
 }
+
+/**
+ * DataStoreStats
+ * ==============
+ *
+ * Statistics about the DataStore, providing insight into the current state
+ * and usage of the data store, including memory usage metrics and capacity information.
+ */
+export class DataStoreStats {
+  /**
+   * Number of entries currently stored
+   */
+  readonly entry_count: number;
+  /**
+   * Maximum number of entries allowed (0 = unlimited)
+   */
+  readonly max_entries: number;
+  /**
+   * Maximum size per entry in bytes (0 = unlimited)
+   */
+  readonly max_entry_size: number;
+  /**
+   * Whether metrics tracking is enabled
+   */
+  readonly metrics_enabled: boolean;
+  /**
+   * Total size of all entries in bytes (approximate, based on JSON serialization)
+   */
+  readonly total_size_bytes: number;
+  /**
+   * Average size per entry in bytes (0 if no entries)
+   */
+  readonly avg_entry_size_bytes: number;
+  /**
+   * Percentage of capacity used (0.0-100.0, based on entry count)
+   */
+  readonly capacity_usage_percent: number;
+  /**
+   * Memory usage threshold percentage (from config)
+   */
+  readonly memory_alert_threshold: number;
+  /**
+   * Whether memory usage exceeds the alert threshold
+   */
+  readonly memory_alert_triggered: boolean;
+}
 ```
 
 ## Configuration
@@ -335,3 +477,136 @@ const BOOTSTRAP_CONFIG = {
 ```
 
 For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md) or on [our page](https://docs.jans.io/stable/cedarling/cedarling-properties/).
+
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+### Push Data
+
+Store data with an optional TTL (Time To Live):
+
+```javascript
+// Push data without TTL (uses default from config)
+await cedarling.push_data_ctx("user:123", {
+  role: ["admin", "editor"],
+  country: "US"
+});
+
+// Push data with TTL (5 minutes = 300 seconds)
+await cedarling.push_data_ctx("config:app", { setting: "value" }, 300);
+
+// Push different data types
+await cedarling.push_data_ctx("key1", "string_value");
+await cedarling.push_data_ctx("key2", 42);
+await cedarling.push_data_ctx("key3", [1, 2, 3]);
+await cedarling.push_data_ctx("key4", { nested: "data" });
+```
+
+### Get Data
+
+Retrieve stored data:
+
+```javascript
+// Get data by key
+const value = await cedarling.get_data_ctx("user:123");
+if (value) {
+  console.log(`User roles: ${value.role}`);
+}
+```
+
+### Get Data Entry with Metadata
+
+Get a data entry with full metadata including creation time, expiration, access count, and type:
+```javascript
+const entry = await cedarling.get_data_entry_ctx("user:123");
+if (entry) {
+  console.log(`Key: ${entry.key}`);
+  console.log(`Created at: ${entry.created_at}`);
+  console.log(`Access count: ${entry.access_count}`);
+  console.log(`Data type: ${entry.data_type}`);
+  console.log(`Value:`, entry.value);
+}
+```
+
+### Remove Data
+
+Remove a specific entry:
+
+```javascript
+// Remove data by key
+const removed = await cedarling.remove_data_ctx("user:123");
+if (removed) {
+  console.log("Entry was removed");
+} else {
+  console.log("Entry did not exist");
+}
+```
+
+### Clear All Data
+
+Remove all entries from the data store:
+
+```javascript
+await cedarling.clear_data_ctx();
+```
+
+### List All Data
+
+List all entries with their metadata:
+
+```javascript
+const entries = await cedarling.list_data_ctx();
+entries.forEach(entry => {
+  console.log(`Key: ${entry.key}, Type: ${entry.data_type}, Created: ${entry.created_at}`);
+});
+```
+
+### Get Statistics
+
+Get statistics about the data store:
+
+```javascript
+const stats = await cedarling.get_stats_ctx();
+console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
+console.log(`Total size: ${stats.total_size_bytes} bytes`);
+console.log(`Capacity usage: ${stats.capacity_usage_percent}%`);
+```
+
+### Error Handling
+
+The Context Data API methods throw errors for different error conditions:
+
+```javascript
+try {
+  await cedarling.push_data_ctx("", { data: "value" }); // Empty key
+} catch (error) {
+  if (error.message.includes("InvalidKey")) {
+    console.log("Invalid key provided");
+  }
+}
+
+try {
+  const value = await cedarling.get_data_ctx("nonexistent");
+} catch (error) {
+  if (error.message.includes("KeyNotFound")) {
+    console.log("Key not found");
+  }
+}
+```
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.

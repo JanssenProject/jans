@@ -33,6 +33,7 @@ The main way you will interact with Cedarling are through the following interfac
 
 - [Initialization](#initialization)
 - [Authorization](#authorization)
+- [Context Data API](#context-data-api)
 - [Logging](#logging)
 
 ### Initialization
@@ -488,6 +489,180 @@ Cedarling currently provides two modes of authorization:
 - This makes authorization decisions by rules based on context values (token payloads).
 
 [More information](../reference/cedarling-multi-issuer.md)
+
+### Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace. This enables dynamic, runtime-based authorization decisions.
+
+=== "JavaScript"
+
+    ```js
+    // Push data with optional TTL (5 minutes = 300 seconds)
+    await cedarling.push_data_ctx("user:123", {
+      role: ["admin", "editor"],
+      country: "US"
+    }, 300);
+
+    // Get data
+    const value = await cedarling.get_data_ctx("user:123");
+    if (value) {
+      console.log(`User roles: ${value.role}`);
+    }
+
+    // Get statistics
+    const stats = await cedarling.get_stats_ctx();
+    console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
+    ```
+
+=== "Python"
+
+    ```py
+    # Push data with optional TTL (5 minutes = 300 seconds)
+    cedarling.push_data_ctx("user:123", {
+        "role": ["admin", "editor"],
+        "country": "US"
+    }, ttl_secs=300)
+
+    # Get data
+    value = cedarling.get_data_ctx("user:123")
+    if value:
+        print(f"User roles: {value['role']}")
+
+    # Get statistics
+    stats = cedarling.get_stats_ctx()
+    print(f"Entries: {stats.entry_count}/{stats.max_entries}")
+    ```
+
+=== "Rust"
+
+    ```rs
+    use std::time::Duration;
+    use serde_json::json;
+
+    // Push data with optional TTL (5 minutes)
+    cedarling.push_data_ctx(
+        "user:123",
+        json!({
+            "role": ["admin", "editor"],
+            "country": "US"
+        }),
+        Some(Duration::from_secs(300))
+    )?;
+
+    // Get data
+    if let Some(value) = cedarling.get_data_ctx("user:123")? {
+        println!("User roles: {:?}", value["role"]);
+    }
+
+    // Get statistics
+    let stats = cedarling.get_stats_ctx()?;
+    println!("Entries: {}/{}", stats.entry_count, stats.max_entries);
+    ```
+
+=== "Kotlin"
+
+    ```kotlin
+    // Push data with optional TTL (5 minutes = 300 seconds)
+    // JsonValue is represented as String in Kotlin/JVM bindings
+    val value = """{"role":["admin","editor"],"country":"US"}"""
+    cedarling.pushDataCtx("user:123", value, 300L)
+
+    // Get data
+    val result = cedarling.getDataCtx("user:123")
+    if (result != null) {
+        // Parse and use the JSON string
+    }
+
+    // Get statistics
+    val stats = cedarling.getStatsCtx()
+    println("Entries: ${stats.entryCount}/${stats.maxEntries}")
+    ```
+
+=== "Swift"
+
+    ```swift
+    // Push data with optional TTL (5 minutes = 300 seconds)
+    let value = JsonValue(value: "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}")
+    try cedarling.pushDataCtx(key: "user:123", value: value, ttlSecs: 300)
+
+    // Get data
+    if let result = try cedarling.getDataCtx(key: "user:123") {
+        let jsonStr = result.inner()
+        // Parse and use the JSON string
+    }
+
+    // Get statistics
+    let stats = try cedarling.getStatsCtx()
+    print("Entries: \(stats.entryCount)/\(stats.maxEntries)")
+    ```
+
+=== "Go"
+
+    ```go
+    import "time"
+
+    // Push data with optional TTL (5 minutes)
+    userData := map[string]any{
+        "role":    []string{"admin", "editor"},
+        "country": "US",
+    }
+    ttl := 5 * time.Minute
+    err := instance.PushData("user:123", userData, &ttl)
+    if err != nil {
+        // Handle error
+    }
+
+    // Get data
+    value, err := instance.GetData("user:123")
+    if err != nil {
+        // Handle error
+    }
+    if value != nil {
+        // Use the value
+    }
+
+    // Get statistics
+    stats, err := instance.GetStats()
+    if err != nil {
+        // Handle error
+    }
+    fmt.Printf("Entries: %d/%d\n", stats.EntryCount, stats.MaxEntries)
+    ```
+
+=== "Java"
+
+    ```java
+    import uniffi.cedarling_uniffi.*;
+
+    // Push data with optional TTL (5 minutes = 300 seconds)
+    // In Java/Kotlin bindings, JsonValue is represented as a plain String
+    String value = "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}";
+    Cedarling cedarling = adapter.getCedarling();
+    cedarling.pushDataCtx("user:123", value, 300L);
+
+    // Get data
+    String result = cedarling.getDataCtx("user:123");
+    if (result != null) {
+        // Parse and use the JSON string
+        JSONObject data = new JSONObject(result);
+    }
+
+    // Get statistics
+    DataStoreStats stats = cedarling.getStatsCtx();
+    System.out.println("Entries: " + stats.getEntryCount() + "/" + stats.getMaxEntries());
+    ```
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data["user:123"].role.contains("admin")
+};
+```
 
 ### Logging
 

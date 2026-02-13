@@ -8,6 +8,7 @@ Go bindings for the Jans Cedarling authorization engine, providing policy-based 
 - Custom principal authorization (`AuthorizeUnsigned()`)
 - Comprehensive logging capabilities
 - Flexible configuration options
+- Context Data API for pushing external data into policy evaluation context
 
 ## Installation
 
@@ -264,6 +265,148 @@ log := instance.GetLogById("log123")
 // Get logs by tag (e.g., "info")
 logs := instance.GetLogsByTag("info")
 ```
+
+### Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+#### Push Data
+
+Store data with an optional TTL (Time To Live):
+
+```go
+import "time"
+
+// Push data without TTL (uses default from config)
+userData := map[string]any{
+    "role":    []string{"admin", "editor"},
+    "country": "US",
+}
+err := instance.PushDataCtx("user:123", userData, nil)
+if err != nil {
+    // Handle error
+}
+
+// Push data with TTL (5 minutes)
+ttl := 5 * time.Minute
+configData := map[string]any{
+    "setting": "value",
+}
+err = instance.PushDataCtx("config:app", configData, &ttl)
+if err != nil {
+    // Handle error
+}
+```
+
+#### Get Data
+
+Retrieve stored data:
+
+```go
+// Get data by key
+value, err := instance.GetDataCtx("user:123")
+if err != nil {
+    // Handle error
+}
+if value != nil {
+    // Use the value (it's unmarshaled as any)
+    if userData, ok := value.(map[string]any); ok {
+        roles := userData["role"]
+        // ...
+    }
+}
+```
+
+#### Get Data Entry with Metadata
+
+Get a data entry with full metadata including creation time, expiration, access count, and type:
+
+```go
+entry, err := instance.GetDataEntryCtx("user:123")
+if err != nil {
+    // Handle error
+}
+if entry != nil {
+    fmt.Printf("Key: %s\n", entry.Key)
+    fmt.Printf("Created at: %s\n", entry.CreatedAt)
+    fmt.Printf("Access count: %d\n", entry.AccessCount)
+    fmt.Printf("Data type: %s\n", entry.DataType)
+    // Access the value via entry.Value
+}
+```
+
+#### Remove Data
+
+Remove a specific entry:
+
+```go
+// Remove data by key
+removed, err := instance.RemoveDataCtx("user:123")
+if err != nil {
+    // Handle error
+}
+if removed {
+    fmt.Println("Entry was removed")
+} else {
+    fmt.Println("Entry did not exist")
+}
+```
+
+#### Clear All Data
+
+Remove all entries from the data store:
+
+```go
+err := instance.ClearDataCtx()
+if err != nil {
+    // Handle error
+}
+```
+
+#### List All Data
+
+List all entries with their metadata:
+
+```go
+entries, err := instance.ListDataCtx()
+if err != nil {
+    // Handle error
+}
+for _, entry := range entries {
+    fmt.Printf("Key: %s, Type: %s, Created: %s\n",
+        entry.Key, entry.DataType, entry.CreatedAt)
+}
+```
+
+#### Get Statistics
+
+Get statistics about the data store:
+
+```go
+stats, err := instance.GetStatsCtx()
+if err != nil {
+    // Handle error
+}
+fmt.Printf("Entries: %d/%d\n", stats.EntryCount, stats.MaxEntries)
+fmt.Printf("Total size: %d bytes\n", stats.TotalSizeBytes)
+fmt.Printf("Capacity usage: %.2f%%\n", stats.CapacityUsagePercent)
+```
+
+#### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
 
 ## Configuration
 

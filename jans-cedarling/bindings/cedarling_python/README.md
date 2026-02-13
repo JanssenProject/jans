@@ -187,6 +187,142 @@ os.environ['CEDARLING_JWT_SIG_VALIDATION'] = 'disabled'
 
 For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
 
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+### Push Data
+
+Store data with an optional TTL (Time To Live):
+
+```python
+from cedarling_python import Cedarling, BootstrapConfig
+
+config = BootstrapConfig.load_from_file("bootstrap-config.yaml")
+instance = Cedarling(config)
+
+# Push data without TTL (uses default from config)
+instance.push_data_ctx("user:123", {"role": ["admin", "editor"], "country": "US"})
+
+# Push data with TTL (5 minutes = 300 seconds)
+instance.push_data_ctx("config:app", {"setting": "value"}, ttl_secs=300)
+
+# Push different data types
+instance.push_data_ctx("key1", "string_value")
+instance.push_data_ctx("key2", 42)
+instance.push_data_ctx("key3", [1, 2, 3])
+instance.push_data_ctx("key4", {"nested": "data"})
+```
+
+### Get Data
+
+Retrieve stored data:
+
+```python
+# Get data by key
+value = instance.get_data_ctx("user:123")
+if value is not None:
+    print(f"User roles: {value['role']}")
+```
+
+### Get Data Entry with Metadata
+
+Get a data entry with full metadata including creation time, expiration, access count, and type:
+
+```python
+entry = instance.get_data_entry_ctx("user:123")
+if entry is not None:
+    print(f"Key: {entry.key}")
+    print(f"Created at: {entry.created_at}")
+    print(f"Access count: {entry.access_count}")
+    print(f"Data type: {entry.data_type}")
+    print(f"Value: {entry.value()}")
+```
+
+### Remove Data
+
+Remove a specific entry:
+
+```python
+# Remove data by key
+removed = instance.remove_data_ctx("user:123")
+if removed:
+    print("Entry was removed")
+else:
+    print("Entry did not exist")
+```
+
+### Clear All Data
+
+Remove all entries from the data store:
+
+```python
+instance.clear_data_ctx()
+```
+
+### List All Data
+
+List all entries with their metadata:
+
+```python
+entries = instance.list_data_ctx()
+for entry in entries:
+    print(f"Key: {entry.key}, Type: {entry.data_type}, Created: {entry.created_at}")
+```
+
+### Get Statistics
+
+Get statistics about the data store:
+
+```python
+stats = instance.get_stats_ctx()
+print(f"Entries: {stats.entry_count}/{stats.max_entries}")
+print(f"Total size: {stats.total_size_bytes} bytes")
+print(f"Capacity usage: {stats.capacity_usage_percent}%")
+```
+
+### Error Handling
+
+The Context Data API methods raise specific exceptions for different error conditions:
+
+```python
+from cedarling_python import data_errors
+
+try:
+    instance.push_data_ctx("", {"data": "value"})  # Empty key
+except data_errors.InvalidKey:
+    print("Invalid key provided")
+
+try:
+    value = instance.get_data_ctx("nonexistent")
+except data_errors.KeyNotFound:
+    print("Key not found")
+```
+
+Available exceptions:
+- `InvalidKey`: The provided key is invalid (e.g., empty)
+- `KeyNotFound`: The requested key does not exist
+- `StorageLimitExceeded`: The data store has reached its capacity limit
+- `TTLExceeded`: The requested TTL exceeds the maximum allowed TTL
+- `ValueTooLarge`: The value exceeds the maximum entry size
+- `SerializationError`: Failed to serialize/deserialize the value
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
 ## Building the Python Library
 
 If you only want to build the library without installing it in the Python environment, follow these steps:

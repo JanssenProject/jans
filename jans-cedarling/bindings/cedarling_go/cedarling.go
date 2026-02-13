@@ -150,10 +150,10 @@ func (c *Cedarling) ShutDown() {
 	internal.CallShutDown(c.instance_id)
 }
 
-// PushData stores a value in the data store with an optional TTL.
+// PushDataCtx stores a value in the data store with an optional TTL.
 // If ttl is nil or zero, the default TTL from configuration is used.
 // The value can be any JSON-serializable Go value.
-func (c *Cedarling) PushData(key string, value any, ttl *time.Duration) error {
+func (c *Cedarling) PushDataCtx(key string, value any, ttl *time.Duration) error {
 	value_json, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -165,14 +165,14 @@ func (c *Cedarling) PushData(key string, value any, ttl *time.Duration) error {
 		ttl_nanos = ttl.Nanoseconds()
 	}
 
-	result := internal.CallPushData(c.instance_id, key, string(value_json), ttl_nanos)
+	result := internal.CallPushDataCtx(c.instance_id, key, string(value_json), ttl_nanos)
 	return result.Error()
 }
 
-// GetData retrieves a value from the data store by key.
+// GetDataCtx retrieves a value from the data store by key.
 // Returns nil if the key doesn't exist or the entry has expired.
-func (c *Cedarling) GetData(key string) (any, error) {
-	result := internal.CallGetData(c.instance_id, key)
+func (c *Cedarling) GetDataCtx(key string) (any, error) {
+	result := internal.CallGetDataCtx(c.instance_id, key)
 	err := result.Error()
 	if err != nil {
 		return nil, err
@@ -192,10 +192,10 @@ func (c *Cedarling) GetData(key string) (any, error) {
 	return value, nil
 }
 
-// GetDataEntry retrieves a data entry with full metadata by key.
+// GetDataEntryCtx retrieves a data entry with full metadata by key.
 // Returns nil if the key doesn't exist or the entry has expired.
-func (c *Cedarling) GetDataEntry(key string) (*DataEntry, error) {
-	result := internal.CallGetDataEntry(c.instance_id, key)
+func (c *Cedarling) GetDataEntryCtx(key string) (*DataEntry, error) {
+	result := internal.CallGetDataEntryCtx(c.instance_id, key)
 	err := result.Error()
 	if err != nil {
 		return nil, err
@@ -215,10 +215,10 @@ func (c *Cedarling) GetDataEntry(key string) (*DataEntry, error) {
 	return &entry, nil
 }
 
-// RemoveData removes a value from the data store by key.
+// RemoveDataCtx removes a value from the data store by key.
 // Returns true if the key existed and was removed, false otherwise.
-func (c *Cedarling) RemoveData(key string) (bool, error) {
-	result := internal.CallRemoveData(c.instance_id, key)
+func (c *Cedarling) RemoveDataCtx(key string) (bool, error) {
+	result := internal.CallRemoveDataCtx(c.instance_id, key)
 	err := result.Error()
 	if err != nil {
 		return false, err
@@ -233,15 +233,15 @@ func (c *Cedarling) RemoveData(key string) (bool, error) {
 	return removed, nil
 }
 
-// ClearData removes all entries from the data store.
-func (c *Cedarling) ClearData() error {
-	result := internal.CallClearData(c.instance_id)
+// ClearDataCtx removes all entries from the data store.
+func (c *Cedarling) ClearDataCtx() error {
+	result := internal.CallClearDataCtx(c.instance_id)
 	return result.Error()
 }
 
-// ListData returns all entries in the data store with their metadata.
-func (c *Cedarling) ListData() ([]DataEntry, error) {
-	result := internal.CallListData(c.instance_id)
+// ListDataCtx returns all entries in the data store with their metadata.
+func (c *Cedarling) ListDataCtx() ([]DataEntry, error) {
+	result := internal.CallListDataCtx(c.instance_id)
 	err := result.Error()
 	if err != nil {
 		return nil, err
@@ -256,9 +256,9 @@ func (c *Cedarling) ListData() ([]DataEntry, error) {
 	return entries, nil
 }
 
-// GetStats returns statistics about the data store.
-func (c *Cedarling) GetStats() (*DataStoreStats, error) {
-	result := internal.CallGetStats(c.instance_id)
+// GetStatsCtx returns statistics about the data store.
+func (c *Cedarling) GetStatsCtx() (*DataStoreStats, error) {
+	result := internal.CallGetStatsCtx(c.instance_id)
 	err := result.Error()
 	if err != nil {
 		return nil, err
