@@ -14,7 +14,8 @@ use crate::{
     common::{issuer_utils::IssClaim, policy_store::TrustedIssuer},
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
-        OpenIdConfig, TokenCache, key_service::KeyServiceError, status_list::StatusListCache,
+        OpenIdConfig, TokenCache, key_service::KeyServiceError,
+        loading_state::TrustedIssuerLoadingState, status_list::StatusListCache,
         validation::JwtValidatorCache,
     },
     jwt_config::TrustedIssuerLoaderConfig,
@@ -49,6 +50,7 @@ pub(super) struct TrustedIssuerLoader {
     pub(super) key_service: Arc<KeyService>,
     pub(super) token_cache: TokenCache,
     pub(super) logger: Option<Logger>,
+    pub(super) loading_state: Arc<TrustedIssuerLoadingState>,
 }
 
 impl TrustedIssuerLoader {
@@ -140,6 +142,9 @@ async fn load_trusted_issuers(
                 if let Ok(mut guard) = errors_clone.lock() {
                     guard.push(error);
                 }
+                loader_clone
+                    .loading_state
+                    .add_trusted_issuer_failed(issuer_id.clone());
             }
         });
         handles.push(handle);
@@ -212,6 +217,7 @@ pub(super) async fn load_trusted_issuer(
     }
 
     loader.issuer_configs.insert(iss_claim, iss_config);
+    loader.loading_state.add_trusted_issuer_loaded();
 
     Ok(())
 }
@@ -327,6 +333,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -380,6 +387,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -454,6 +462,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -496,6 +505,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -524,9 +534,10 @@ mod test {
             status_lists: StatusListCache::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()), // empty key service
+            key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         // This should not panic
@@ -551,6 +562,7 @@ mod test {
             key_service: Arc::new(key_service_with_keys),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         loader_with_keys.check_keys_loaded();
@@ -585,6 +597,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -648,6 +661,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -715,6 +729,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -770,6 +785,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -874,6 +890,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -938,6 +955,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -993,6 +1011,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -1065,6 +1084,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();
@@ -1121,6 +1141,7 @@ mod test {
             key_service: Arc::new(KeyService::new()),
             token_cache: TokenCache::default(),
             logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
         };
 
         let mut trusted_issuers = HashMap::new();

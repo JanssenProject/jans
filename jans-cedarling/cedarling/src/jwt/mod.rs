@@ -70,6 +70,8 @@ mod error;
 mod http_utils;
 mod issuer_index;
 mod key_service;
+mod loading_info;
+mod loading_state;
 mod log_entry;
 mod status_list;
 mod token;
@@ -81,6 +83,7 @@ pub(crate) mod test_utils;
 
 pub(crate) use decode::*;
 pub(crate) use error::*;
+pub use loading_info::TrustedIssuerLoadingInfo;
 pub(crate) use token::{Token, TokenClaimTypeError, TokenClaims};
 pub(crate) use token_cache::TokenCache;
 pub(crate) use validation::TrustedIssuerError;
@@ -98,6 +101,7 @@ use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
 use issuer_index::IssuerIndex;
 use key_service::KeyService;
+use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
 use serde_json::json;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
@@ -120,6 +124,7 @@ pub(crate) struct JwtService {
     logger: Option<Logger>,
     token_cache: TokenCache,
     jwt_sig_validation_required: bool,
+    loading_state: Arc<TrustedIssuerLoadingState>,
 }
 
 struct IssuerConfig {
@@ -161,6 +166,7 @@ impl JwtService {
         );
 
         let trusted_issuers = trusted_issuers.unwrap_or_default();
+        let loading_state = Arc::new(TrustedIssuerLoadingState::new(trusted_issuers.len()));
 
         let loader = TrustedIssuerLoader {
             jwt_config: jwt_config.clone(),
@@ -170,6 +176,7 @@ impl JwtService {
             key_service: key_service.clone(),
             token_cache: token_cache.clone(),
             logger: logger.clone(),
+            loading_state: loading_state.clone(),
         };
 
         loader.load_trusted_issuers(trusted_issuers.clone()).await?;
@@ -185,6 +192,7 @@ impl JwtService {
             logger,
             token_cache,
             jwt_sig_validation_required: jwt_config.jwt_sig_validation,
+            loading_state,
         })
     }
 
@@ -533,6 +541,33 @@ impl JwtService {
 
         // If not found, return the original mapping (fallback)
         Cow::Borrowed(entity_type_name)
+    }
+}
+
+impl TrustedIssuerLoadingInfo for JwtService {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.issuer_configs.is_issuer_id_present(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        let iss = IssClaim::new(iss_claim);
+        self.issuer_configs.contains_iss(&iss)
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.issuer_configs.len()
+    }
+
+    fn percent_loaded_trusted_issuers(&self) -> f32 {
+        self.loading_state.percent_handled()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.issuer_configs.loaded_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.loading_state.failed_issuers()
     }
 }
 

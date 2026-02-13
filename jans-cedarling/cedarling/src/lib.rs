@@ -32,10 +32,12 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
+use std::collections::HashSet;
 use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
+pub use crate::jwt::TrustedIssuerLoadingInfo;
 use crate::log::BaseLogEntry;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
@@ -207,6 +209,32 @@ impl Cedarling {
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
         self.log.shut_down().await;
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Cedarling {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.authz.loaded_trusted_issuers_count()
+    }
+
+    fn percent_loaded_trusted_issuers(&self) -> f32 {
+        self.authz.percent_loaded_trusted_issuers()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.failed_trusted_issuer_ids()
     }
 }
 
