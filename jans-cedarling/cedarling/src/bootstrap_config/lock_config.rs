@@ -1,7 +1,19 @@
 use crate::log::LogLevel;
 use crate::{BootstrapConfigLoadingError, BootstrapConfigRaw};
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use url::Url;
+
+/// Transport protocol for Lock Server communication
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+pub enum LockTransport {
+    /// REST/HTTP transport
+    #[default]
+    Rest,
+    /// gRPC transport (default when `grpc` feature is enabled)
+    #[cfg(feature = "grpc")]
+    Grpc,
+}
 
 /// Lock service config
 #[derive(Debug, Clone, PartialEq)]
@@ -29,6 +41,10 @@ pub struct LockServiceConfig {
     pub listen_sse: bool,
     /// Allow interaction with a Lock server with invalid certificates. Used for testing.
     pub accept_invalid_certs: bool,
+    /// Transport protocol to use for Lock Server communication
+    pub transport: LockTransport,
+    /// gRPC endpoint to use for Lock Server communication
+    pub grpc_endpoint: Option<String>,
 }
 
 /// Raw lock service config
@@ -52,6 +68,10 @@ pub struct LockServiceConfigRaw {
     pub listen_sse: bool,
     /// Accept invalid certs
     pub accept_invalid_certs: bool,
+    /// Transport protocol
+    pub transport: LockTransport,
+    /// gRPC endpoint
+    pub grpc_endpoint: Option<String>,
 }
 
 impl Default for LockServiceConfig {
@@ -68,6 +88,8 @@ impl Default for LockServiceConfig {
             telemetry_interval: None,
             listen_sse: false,
             accept_invalid_certs: false,
+            transport: LockTransport::default(),
+            grpc_endpoint: None,
         }
     }
 }
@@ -87,6 +109,8 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
             telemetry_interval: raw.telemetry_interval,
             listen_sse: raw.listen_sse,
             accept_invalid_certs: raw.accept_invalid_certs,
+            transport: raw.transport,
+            grpc_endpoint: raw.grpc_endpoint,
         }
     }
 }
@@ -102,6 +126,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .parse()?;
 
         let ssa_jwt = raw.lock_ssa_jwt.clone();
+        let grpc_endpoint = raw.grpc_endpoint.clone();
 
         let log_interval =
             (raw.audit_log_interval > 0).then(|| Duration::from_secs(raw.audit_log_interval));
@@ -122,6 +147,8 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             listen_sse,
             log_level: raw.log_level,
             accept_invalid_certs: raw.accept_invalid_certs.into(),
+            transport: raw.lock_transport,
+            grpc_endpoint,
         })
     }
 }

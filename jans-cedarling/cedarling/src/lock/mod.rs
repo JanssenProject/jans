@@ -91,16 +91,25 @@ mod log_entry;
 mod log_worker;
 mod register_client;
 pub(crate) mod ssa_validation;
+mod transport;
+
+#[cfg(feature = "grpc")]
+mod proto {
+    // These lints are disabled because they are triggered by the generated code
+    #![allow(unreachable_pub)]
+    #![allow(clippy::pedantic)]
+    tonic::include_proto!("jans.lock.audit");
+}
 
 use crate::app_types::PdpID;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
-use crate::{LockServiceConfig, LogWriter};
+use crate::{LockServiceConfig, LockTransport, LogWriter};
 use futures::channel::mpsc;
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
-use log_worker::{LogWorker, SerializedLogEntry};
+use log_worker::LogWorker;
 use register_client::{ClientRegistrationError, register_client};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -108,6 +117,7 @@ use ssa_validation::validate_ssa_jwt;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio_util::sync::CancellationToken;
+use transport::{SerializedLogEntry, rest::RestTransport};
 
 /// The base duration to wait for if an http request fails for workers.
 pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
@@ -189,42 +199,18 @@ impl LockService {
         )
         .await?;
 
-        // Build a default http client that already has the access_token in the headers
-        let mut headers = HeaderMap::new();
-        let mut auth_header =
-            HeaderValue::from_str(&format!("Bearer {}", client_creds.access_token))
-                .expect("build header");
-        auth_header.set_sensitive(true);
-        headers.insert("Authorization", auth_header);
-        let http_client = Arc::new(init_http_client(
-            Some(headers),
-            bootstrap_conf.accept_invalid_certs,
-        )?);
-
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
             (Some(log_interval), Some(log_endpoint)) => {
-                let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(100);
-
-                // Spawn log worker
-                let mut log_worker = LogWorker::new(
+                let worker = create_log_worker(
+                    bootstrap_conf,
+                    log_endpoint,
+                    &client_creds.access_token,
                     log_interval,
-                    http_client.clone(),
-                    log_endpoint.0.clone(),
                     logger.clone(),
-                );
-
-                let cancel_tkn = cancel_tkn.clone();
-
-                let handle =
-                    crate::http::spawn_task(
-                        async move { log_worker.run(log_rx, cancel_tkn).await },
-                    );
-
-                Some(WorkerSenderAndHandle {
-                    tx: log_tx.into(),
-                    handle,
-                })
+                    cancel_tkn.clone(),
+                )?;
+                Some(worker)
             },
             // Other cases that will always resolve to Cedarling not having to send logs
             _ => None,
@@ -242,6 +228,63 @@ impl LockService {
         if let Some(log_worker) = self.log_worker.take() {
             () = log_worker.handle.await_result().await;
         }
+    }
+}
+
+fn create_log_worker(
+    bootstrap_conf: &LockServiceConfig,
+    log_endpoint: lock_config::Url,
+    access_token: &str,
+    log_interval: Duration,
+    logger: Option<LoggerWeak>,
+    cancel_tkn: CancellationToken,
+) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
+    let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(100);
+
+    match bootstrap_conf.transport {
+        LockTransport::Rest => {
+            // Build a default http client that already has the access_token in the headers
+            let mut headers = HeaderMap::new();
+            let mut auth_header =
+                HeaderValue::from_str(&format!("Bearer {access_token}",)).expect("build header");
+            auth_header.set_sensitive(true);
+            headers.insert("Authorization", auth_header);
+
+            let http_client = Arc::new(init_http_client(
+                Some(headers),
+                bootstrap_conf.accept_invalid_certs,
+            )?);
+
+            let transport = Arc::new(RestTransport::new(http_client, log_endpoint.0));
+
+            let mut log_worker = LogWorker::new(log_interval, transport, logger);
+            let handle =
+                crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+
+            Ok(WorkerSenderAndHandle {
+                tx: log_tx.into(),
+                handle,
+            })
+        },
+        #[cfg(feature = "grpc")]
+        LockTransport::Grpc => {
+            use transport::grpc::GrpcTransport;
+
+            let grpc_endpoint = bootstrap_conf
+                .grpc_endpoint
+                .as_ref()
+                .ok_or(InitLockServiceError::MissingGrpcEndpoint)?;
+
+            let transport = Arc::new(GrpcTransport::new(grpc_endpoint)?);
+            let mut log_worker = LogWorker::new(log_interval, transport, logger);
+            let handle =
+                crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+
+            Ok(WorkerSenderAndHandle {
+                tx: log_tx.into(),
+                handle,
+            })
+        },
     }
 }
 
@@ -295,6 +338,12 @@ pub enum InitLockServiceError {
     ClientRegistration(#[from] ClientRegistrationError),
     #[error("failed to initialize the Lock logger's HttpClient: {0}")]
     InitHttpClient(#[from] reqwest::Error),
+    #[error("transport error: {0}")]
+    TransportError(#[from] transport::TransportError),
+    #[error("gRPC endpoint is not configured for the lock server")]
+    MissingGrpcEndpoint,
+    #[error("the feature 'grpc' is not enabled")]
+    MissingGrpcFeature,
 }
 
 #[cfg(test)]
@@ -352,6 +401,8 @@ mod test {
             listen_sse: false,
             log_level: LogLevel::TRACE,
             accept_invalid_certs: true, // Allow invalid certs for testing
+            transport: LockTransport::Rest,
+            grpc_endpoint: None,
         };
 
         // Test startup
@@ -403,6 +454,8 @@ mod test {
             listen_sse: false,
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            grpc_endpoint: None,
         };
 
         // Test startup without SSA
@@ -450,6 +503,8 @@ mod test {
             listen_sse: false,
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            grpc_endpoint: None,
         };
 
         // Test startup with invalid SSA should fail

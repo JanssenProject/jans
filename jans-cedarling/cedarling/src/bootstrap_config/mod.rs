@@ -34,7 +34,7 @@ pub use entity_builder_config::{
     EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc,
 };
 pub use jwt_config::JwtConfig;
-pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
+pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
