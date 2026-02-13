@@ -249,10 +249,11 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 Store data with an optional TTL (Time To Live):
 
 **Kotlin:**
+
 ```kotlin
 // JsonValue is represented as String in Kotlin/JVM bindings.
 val value = """{"role":["admin","editor"],"country":"US"}"""
-pppppp
+
 // Push data without TTL (uses default from config)
 cedarling.pushDataCtx("user:123", value, null)
 
@@ -261,6 +262,7 @@ cedarling.pushDataCtx("config:app", value, 300L)
 ```
 
 **Swift:**
+
 ```swift
 // Push data without TTL (uses default from config)
 let value = JsonValue(value: "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}")
@@ -275,6 +277,7 @@ try cedarling.pushDataCtx(key: "config:app", value: value, ttlSecs: 300)
 Retrieve stored data:
 
 **Kotlin:**
+
 ```kotlin
 val result = cedarling.getDataCtx("user:123")
 if (result != null) {
@@ -283,6 +286,7 @@ if (result != null) {
 ```
 
 **Swift:**
+
 ```swift
 if let result = try cedarling.getDataCtx(key: "user:123") {
     let jsonStr = result.inner()
@@ -295,6 +299,7 @@ if let result = try cedarling.getDataCtx(key: "user:123") {
 Get a data entry with full metadata including creation time, expiration, access count, and type:
 
 **Kotlin:**
+
 ```kotlin
 val entry = cedarling.getDataEntryCtx("user:123")
 if (entry != null) {
@@ -306,6 +311,7 @@ if (entry != null) {
 ```
 
 **Swift:**
+
 ```swift
 if let entry = try cedarling.getDataEntryCtx(key: "user:123") {
     print("Key: \(entry.key)")
@@ -320,6 +326,7 @@ if let entry = try cedarling.getDataEntryCtx(key: "user:123") {
 Remove a specific entry:
 
 **Kotlin:**
+
 ```kotlin
 val removed = cedarling.removeDataCtx("user:123")
 if (removed) {
@@ -330,6 +337,7 @@ if (removed) {
 ```
 
 **Swift:**
+
 ```swift
 let removed = try cedarling.removeDataCtx(key: "user:123")
 if removed {
@@ -344,11 +352,13 @@ if removed {
 Remove all entries from the data store:
 
 **Kotlin:**
+
 ```kotlin
 cedarling.clearDataCtx()
 ```
 
 **Swift:**
+
 ```swift
 try cedarling.clearDataCtx()
 ```
@@ -358,6 +368,7 @@ try cedarling.clearDataCtx()
 List all entries with their metadata:
 
 **Kotlin:**
+
 ```kotlin
 val entries = cedarling.listDataCtx()
 entries.forEach { entry ->
@@ -366,6 +377,7 @@ entries.forEach { entry ->
 ```
 
 **Swift:**
+
 ```swift
 let entries = try cedarling.listDataCtx()
 for entry in entries {
@@ -378,6 +390,7 @@ for entry in entries {
 Get statistics about the data store:
 
 **Kotlin:**
+
 ```kotlin
 val stats = cedarling.getStatsCtx()
 println("Entries: ${stats.entryCount}/${stats.maxEntries}")
@@ -386,6 +399,7 @@ println("Capacity usage: ${stats.capacityUsagePercent}%")
 ```
 
 **Swift:**
+
 ```swift
 let stats = try cedarling.getStatsCtx()
 print("Entries: \(stats.entryCount)/\(stats.maxEntries)")
@@ -398,6 +412,7 @@ print("Capacity usage: \(stats.capacityUsagePercent)%")
 The Context Data API methods throw `DataException`:
 
 **Kotlin:**
+
 ```kotlin
 try {
     cedarling.pushDataCtx("", """{"data":"value"}""", null) // Empty key
@@ -407,6 +422,7 @@ try {
 ```
 
 **Swift:**
+
 ```swift
 do {
     let value = JsonValue(value: "{\"data\":\"value\"}")

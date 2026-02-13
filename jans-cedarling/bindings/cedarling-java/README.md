@@ -177,9 +177,11 @@ adapter.loadFromJson(bootstrapJson);
 Cedarling cedarling = adapter.getCedarling();
 
 // Push data with optional TTL (in seconds)
+// The TTL parameter is a nullable Long representing seconds.
+// Pass null to use the default TTL from configuration, or pass a Long value for a custom TTL.
 String value = "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}";
 cedarling.pushDataCtx("user:123", value, null);  // null uses default TTL
-// For a custom TTL, pass a value matching the generated binding type.
+cedarling.pushDataCtx("config:app", value, 300L);  // Custom TTL: 300 seconds (5 minutes)
 
 // Get data
 String result = cedarling.getDataCtx("user:123");
