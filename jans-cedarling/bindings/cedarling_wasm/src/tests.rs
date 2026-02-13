@@ -951,3 +951,11 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
     let result = instance.authorize_multi_issuer(js_request).await;
     assert!(result.is_err(), "Should fail with empty token array");
 }
+
+/// Test that function `spawn_task` works as expected
+#[wasm_bindgen_test]
+async fn test_spawn_task() {
+    let handle = cedarling::bindings::spawn_task(async { 42 });
+    let result = handle.await_result().await;
+    assert_eq!(result, 42);
+}

@@ -35,6 +35,7 @@ use zip::read::ZipArchive;
 
 use super::utils::*;
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
+
 use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{BootstrapConfig, Cedarling, PolicyStoreConfig, PolicyStoreSource};
@@ -995,8 +996,9 @@ fn create_jwt_cedarling_config(
     policy_store_source: PolicyStoreSource,
     jwt_sig_validation: bool,
 ) -> BootstrapConfig {
+    use crate::jwt_config::JwtConfig;
     use crate::{
-        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, JwtConfig, LogConfig,
+        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, LogConfig,
         LogTypeConfig,
     };
 
@@ -1163,5 +1165,263 @@ permit(
     assert!(
         matches!(&err, crate::authz::AuthorizeError::ProcessTokens(_)),
         "Expected JWT processing error for tampered token, got: {err:?}"
+    );
+}
+
+/// Test that async loading of trusted issuers does not block service responsiveness.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_async_loading_responsive() {
+    // Build the policy store without trusted issuer (JWT validation disabled)
+    let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
+        .with_name("Async Loading Test Policy Store")
+        .with_schema(
+            r#"namespace TestApp {
+    entity User {
+        name: String,
+        user_type: String,
+    };
+    entity Resource {
+        name: String,
+    };
+    
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+    
+    action "write" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}
+"#,
+        )
+        .with_policy(
+            "allow-read",
+            r#"@id("allow-read")
+permit(
+    principal is TestApp::User,
+    action == TestApp::Action::"read",
+    resource is TestApp::Resource
+);"#,
+        );
+
+    let archive = builder.build_archive().expect("Failed to build archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    // Configure Cedarling with async loading and JWT validation disabled
+    let mut config = create_jwt_cedarling_config(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        false, // jwt_sig_validation disabled
+    );
+    config.jwt_config.trusted_issuer_loader = crate::jwt_config::TrustedIssuerLoaderConfig::Async {
+        workers: crate::jwt_config::WorkersCount::new(2),
+    };
+    // Adjust config for user principal (since our test uses TestApp::User)
+    config.authorization_config.use_user_principal = true;
+    config.authorization_config.use_workload_principal = false;
+    config.authorization_config.principal_bool_operator = crate::JsonRule::new(json!({
+        "===": [{"var": "TestApp::User"}, "ALLOW"]
+    }))
+    .expect("Failed to create principal bool operator");
+    config.authorization_config.decision_log_workload_claims = vec![];
+    config.entity_builder_config.build_user = true;
+    config.entity_builder_config.build_workload = false;
+    config.entity_builder_config.entity_names.user = "TestApp::User".to_string();
+
+    // Instantiate Cedarling - should return quickly with async loading
+    let start = tokio::time::Instant::now();
+    let cedarling = crate::Cedarling::new(&config)
+        .await
+        .expect("Cedarling should initialize with async loading");
+    let elapsed = start.elapsed();
+    assert!(
+        elapsed.as_millis() < 100,
+        "Async loading should return quickly (took {}ms)",
+        elapsed.as_millis()
+    );
+
+    // While loading is in progress, we should be able to authorize unsigned requests
+    let request = create_test_unsigned_request(
+        "TestApp::Action::\"read\"",
+        vec![
+            create_test_principal(
+                "TestApp::User",
+                "test_user",
+                json!({"name": "Test User", "user_type": "admin"}),
+            )
+            .unwrap(),
+        ],
+        create_test_principal(
+            "TestApp::Resource",
+            "resource1",
+            json!({"name": "Test Resource"}),
+        )
+        .unwrap(),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed while issuers are loading asynchronously");
+    assert!(result.decision, "Read action should be allowed");
+
+    // Wait a bit for async loading to complete (optional)
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+
+    // Verify that the trusted issuer was loaded (indirectly by checking that
+    // JWT validation would work if enabled - but we have it disabled)
+    // For simplicity, just ensure no panics.
+}
+
+/// Test concurrent token validation during async loading of trusted issuers.
+///
+/// Verifies that multiple validation attempts while issuers are loading
+/// do not cause panics or deadlocks, even if validation fails because
+/// the issuer isn't fully loaded yet.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::too_many_lines)]
+async fn test_concurrent_token_validation_during_async_loading() {
+    use crate::jwt::test_utils::MockServer;
+
+    // Create mock server for OIDC/JWKS
+    let mut mock_server = MockServer::new_with_defaults()
+        .await
+        .expect("Failed to create mock server");
+
+    let issuer_url = mock_server.issuer();
+    let oidc_endpoint = format!("{issuer_url}/.well-known/openid-configuration");
+
+    // Create trusted issuer JSON that points to mock server
+    let trusted_issuer_json = create_jwt_trusted_issuer_json(&oidc_endpoint);
+
+    // Build the policy store with trusted issuer
+    let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
+        .with_name("Race Condition Test Policy Store")
+        .with_schema(SCHEMA)
+        .with_policy(
+            "allow-workload-read",
+            r#"@id("allow-workload-read")
+permit(
+    principal is Jans::Workload,
+    action == Jans::Action::"Read",
+    resource is Jans::Resource
+)when{
+    principal.access_token.org_id == resource.org_id
+};"#,
+        )
+        .with_trusted_issuer("mock_issuer", trusted_issuer_json);
+
+    let archive = builder.build_archive().expect("Failed to build archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    // Configure Cedarling with async loading and JWT validation enabled
+    let mut config = create_jwt_cedarling_config(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        true, // jwt_sig_validation enabled
+    );
+    config.jwt_config.trusted_issuer_loader = crate::jwt_config::TrustedIssuerLoaderConfig::Async {
+        workers: crate::jwt_config::WorkersCount::new(2),
+    };
+
+    // Generate signed tokens before loading starts
+    let access_token = mock_server
+        .generate_token_with_hs256sig(
+            &mut json!({
+                "org_id": "test_org",
+                "jti": "access_jti",
+                "client_id": "test_client",
+                "aud": "test_aud",
+                "exp": chrono::Utc::now().timestamp() + 3600,
+                "iat": chrono::Utc::now().timestamp(),
+            }),
+            None,
+        )
+        .expect("Failed to generate access token");
+
+    let id_token = mock_server
+        .generate_token_with_hs256sig(
+            &mut json!({
+                "jti": "id_jti",
+                "aud": ["test_aud"],
+                "sub": "test_user",
+                "exp": chrono::Utc::now().timestamp() + 3600,
+                "iat": chrono::Utc::now().timestamp(),
+            }),
+            None,
+        )
+        .expect("Failed to generate id token");
+
+    let userinfo_token = mock_server
+        .generate_token_with_hs256sig(
+            &mut json!({
+                "jti": "userinfo_jti",
+                "sub": "test_user",
+                "country": "US",
+                "role": ["Admin"],
+                "exp": chrono::Utc::now().timestamp() + 3600,
+                "iat": chrono::Utc::now().timestamp(),
+            }),
+            None,
+        )
+        .expect("Failed to generate userinfo token");
+
+    // Instantiate Cedarling with async loading - returns quickly
+    let start = tokio::time::Instant::now();
+    let cedarling = crate::Cedarling::new(&config)
+        .await
+        .expect("Cedarling should initialize with async loading");
+    let elapsed = start.elapsed();
+    assert!(
+        elapsed.as_millis() < 100,
+        "Async loading should return quickly (took {}ms)",
+        elapsed.as_millis()
+    );
+
+    // While loading is in progress, attempt multiple concurrent validations
+    // These may fail because the issuer isn't fully loaded yet, but shouldn't panic
+    let mut handles = Vec::new();
+    for i in 0..5 {
+        let cedarling_clone = cedarling.clone();
+        let access_token_clone = access_token.clone();
+        let id_token_clone = id_token.clone();
+        let userinfo_token_clone = userinfo_token.clone();
+
+        handles.push(tokio::spawn(async move {
+            // Small delay to increase chance of overlapping with loading
+            tokio::time::sleep(tokio::time::Duration::from_millis(i * 10)).await;
+
+            let request = prepare_cedarling_request(
+                &access_token_clone,
+                &id_token_clone,
+                &userinfo_token_clone,
+            )
+            .expect("Request should be deserialized");
+
+            // Authorization may fail (issuer not loaded) but shouldn't panic
+            let _ = cedarling_clone.authorize(request).await;
+        }));
+    }
+
+    // Wait for all validation attempts to complete
+    for handle in handles {
+        let _ = handle.await;
+    }
+
+    // Wait a bit for async loading to complete
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+
+    // Now validation should succeed because issuer is loaded
+    let request = prepare_cedarling_request(&access_token, &id_token, &userinfo_token)
+        .expect("Request should be deserialized");
+    let result = cedarling
+        .authorize(request)
+        .await
+        .expect("Authorization should succeed after loading completes");
+    assert!(
+        result.decision,
+        "Read action should be allowed after issuer loading completes"
     );
 }

@@ -14,6 +14,7 @@ use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
+use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
@@ -23,13 +24,13 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
 /// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
 //
 //  All fields should be available to parse from string, because env vars always string.
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -305,6 +306,30 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
+    /// Type of trusted issuer loader.
+    /// If not set, synchronous loader is used.
+    /// Can be `SYNC` or `ASYNC`.
+    ///
+    /// Sync loader means that trusted issuers will be loaded on initialization.
+    /// Async loader means that trusted issuers will be loaded in background.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_type: TrustedIssuerLoaderTypeRaw,
+    /// Number of concurrent workers to use when loading trusted issuers.
+    /// Applies to both SYNC (parallel loading during initialization) and ASYNC (parallel background loading) modes.
+    /// Minimum possible value is 1. Zero will be used as 1.
+    ///
+    /// For WASM maximum value is 6, default is 2.
+    /// For native maximum value is 1000, default is 10.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_workers: WorkersCount,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -548,6 +573,110 @@ mod tests {
 
                 assert_eq!(config.application_name, "");
                 assert_eq!(config.policy_store_uri, None);
+            },
+        );
+    }
+
+    /// Tests that environment variables for trusted issuer loader are parsed correctly.
+    #[test]
+    fn test_trusted_issuer_loader_env_vars() {
+        with_env_vars(
+            &[
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_TYPE", "ASYNC"),
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "5"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_type,
+                    TrustedIssuerLoaderTypeRaw::Async,
+                    "Loader type should be Async from env var"
+                );
+                assert_eq!(
+                    config.trusted_issuer_loader_workers, 5,
+                    "Worker count should be 5 from env var"
+                );
+            },
+        );
+    }
+
+    /// Tests JSON deserialization for trusted issuer loader fields.
+    #[test]
+    fn test_trusted_issuer_loader_json_deserialization() {
+        // Valid JSON values
+        let valid_cases = vec![
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "SYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 3}"#,
+                TrustedIssuerLoaderTypeRaw::Sync,
+                3,
+            ),
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "ASYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 1}"#,
+                TrustedIssuerLoaderTypeRaw::Async,
+                1,
+            ),
+        ];
+
+        for (json, expected_type, expected_workers) in valid_cases {
+            let config: BootstrapConfigRaw = serde_json::from_str(json).unwrap();
+            assert_eq!(
+                config.trusted_issuer_loader_type, expected_type,
+                "Loader type mismatch for JSON: {}",
+                json
+            );
+            assert_eq!(
+                config.trusted_issuer_loader_workers, expected_workers,
+                "Worker count mismatch for JSON: {}",
+                json
+            );
+        }
+
+        // Invalid JSON values should produce errors
+        let invalid_cases = vec![
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "INVALID"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": -1}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": "not_a_number"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": 123}"#,
+        ];
+
+        for json in invalid_cases {
+            let result: Result<BootstrapConfigRaw, _> = serde_json::from_str(json);
+            result.expect_err(&format!("Should fail to parse invalid JSON: {json}"));
+        }
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped minimum value
+    #[test]
+    fn test_trusted_issuer_loader_claps_min() {
+        with_env_vars(&[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.trusted_issuer_loader_workers,
+                WorkersCount::MIN,
+                "Default worker count should be {}",
+                WorkersCount::MIN.get()
+            );
+        });
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped max value
+    #[test]
+    fn test_trusted_issuer_loader_claps_max() {
+        let max_val = (WorkersCount::MAX.get() + 100).to_string();
+
+        with_env_vars(
+            &[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", max_val.as_str())],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_workers,
+                    WorkersCount::MAX,
+                    "Default worker count should be {}",
+                    WorkersCount::MAX.get()
+                );
             },
         );
     }

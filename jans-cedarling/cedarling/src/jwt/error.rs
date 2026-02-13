@@ -3,6 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::jwt::trusted_issuers_loader::TrustedIssuerLoaderError;
+
 use super::http_utils::HttpError;
 use super::key_service;
 use super::status_list::UpdateStatusListError;
@@ -46,4 +48,6 @@ pub enum JwtServiceInitError {
     GetOpenidConfigurations(#[from] HttpError),
     #[error("failed to update JWT status list: {0}")]
     UpdateStatusList(#[from] UpdateStatusListError),
+    #[error("failed to load trusted issuers: {0}")]
+    LoadTrustedIssuers(#[from] TrustedIssuerLoaderError),
 }

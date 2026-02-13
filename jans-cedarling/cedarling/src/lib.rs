@@ -65,7 +65,7 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
-
+    pub use crate::http::spawn_task;
     pub use serde_json;
     pub use serde_yml;
 }
