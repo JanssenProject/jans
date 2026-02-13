@@ -101,7 +101,7 @@ jobs:
             sign_cmd: rpm --addsign
             python_version: 3.8
           - name: suse15
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             asset_suffix: .suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
