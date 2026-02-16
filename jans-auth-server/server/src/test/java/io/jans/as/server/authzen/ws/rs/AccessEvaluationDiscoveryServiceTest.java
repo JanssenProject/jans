@@ -68,6 +68,7 @@ public class AccessEvaluationDiscoveryServiceTest {
     public void discovery_shouldContainAccessEvaluationEndpoint() {
         when(externalAccessEvaluationDiscoveryService.modifyDiscovery(any(), any())).thenReturn(true);
         when(appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION)).thenReturn(true);
+        when(appConfiguration.getEndSessionEndpoint()).thenReturn("https://example.com/jans-auth/restv1/end_session");
 
         ExecutionContext context = new ExecutionContext(null, null);
         JSONObject response = accessEvaluationDiscoveryService.discovery(context);
