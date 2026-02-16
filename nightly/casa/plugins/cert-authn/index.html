@@ -1923,12 +1923,7 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1938,8 +1933,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#account-onboarding-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1947,6 +1942,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2721,12 +2721,7 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2736,8 +2731,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#account-onboarding-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2745,6 +2740,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2996,7 +2996,7 @@
 <p>At a high level, certificate authentication is a method of verifying identity using digital certificates. Here, the client (user or device) provides a certificate to the server to prove its identity. A certificate contains information like a digital signature, expiration date, name of client (a.k.a subject), certificate authority (CA) name, serial number, and more, all structured using the X.509 standard. Actual authentication occurs in the SSL/TLS handshake, an important process that takes place before any relevant data is transmitted in an SSL/TLS session.</p>
 <p>The Casa client certificate authentication plugin offers:</p>
 <ul>
-<li>Enrollment of digital certificates - includes account onboarding</li>
+<li>Enrollment of digital certificates (may include automatic user registration)</li>
 <li>Authentication by presenting a valid certificate (no username or password required)</li>
 <li>Use enrolled certificates as a form of second-factor authentication</li>
 </ul>
@@ -3107,7 +3107,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. <code>https://acme.co:444/</code>; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  </p>
-<p>The easiest way to set this up is adding a <code>VirtualHost</code> directive associated to a new port, for instance 444. This <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf">snippet</a> exemplifies a safe way to do so. Note you have to edit accordingly:</p>
+<p>The easiest way to set this up is adding a <code>VirtualHost</code> directive associated to a new port, for instance 444. This <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf">snippet</a> exemplifies a safe way to do so. Note you have to edit accordingly:</p>
 <ul>
 <li>The server name</li>
 <li>The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication</li>
@@ -3115,7 +3115,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Transfer the edited file to <code>/etc/apache2/sites-enabled</code>. Note there is already a file named <code>https_jans.conf</code> with a <code>VirtualHost</code> for port 443 that you can use as a guide. Finally, add a <code>Listen 444</code> directive to file <code>/etc/apache2/ports.conf</code>.</p>
 </div>
 <div class="tabbed-block">
-<p>This is the fastest approach and involves adding a directive inside the existing <code>VirtualHost</code> for port 443 in  <code>/etc/apache2/sites-enabled/https_jans.conf</code>. Copy this <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf">snippet</a> and paste it just after the closing of the <code>Location</code> directive associated to <code>/jans-casa</code>.</p>
+<p>This is the fastest approach and involves adding a directive inside the existing <code>VirtualHost</code> for port 443 in  <code>/etc/apache2/sites-enabled/https_jans.conf</code>. Copy this <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf">snippet</a> and paste it just after the closing of the <code>Location</code> directive associated to <code>/jans-casa</code>.</p>
 <p>In this case your cert pickup URL is <code>https://&lt;your-host-name&gt;/jans-casa/pl/cert-authn/index.zul</code>.</p>
 </div>
 </div>
@@ -3129,7 +3129,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Display a login page where users are shown the option to present a certificate</p>
 <ul>
 <li>
-<p>If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert. Then access to the application is granted</p>
+<p>If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert (automatic user registration). Then access to the application is granted</p>
 </li>
 <li>
 <p>If the certificate is mapped to an existing account, access to the application is granted to such user</p>
@@ -3153,7 +3153,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 </div>
 <ol>
 <li>
-<p>Download the certificate authentication Agama project archive: <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn-agama/0.0.0-nightly/cert-authn-agama-0.0.0-nightly-project.zip</code></p>
+<p>Download the certificate authentication Agama project archive: <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn-agama/replace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -&gt; "Upload project". Wait one minute</p>
@@ -3206,7 +3206,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <h2 id="install-the-cert-authn-plugin">Install the cert-authn plugin<a class="headerlink" href="#install-the-cert-authn-plugin" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/0.0.0-nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code>. Alternatively upload the file using Casa itself: go to <code>Administration console</code> &gt; <code>Casa plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/cert-authn/replace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code>. Alternatively upload the file using Casa itself: go to <code>Administration console</code> &gt; <code>Casa plugins</code></p>
 </li>
 <li>
 <p>Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"</p>
@@ -3220,7 +3220,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <p>Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.</p>
 <ol>
 <li>
-<p>Download file <code>https://maven.jans.io/maven/io/jans/jans-scim-model/0.0.0-nightly/jans-scim-model-0.0.0-nightly.jar</code> and place it in your server under <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download file <code>https://maven.jans.io/maven/io/jans/jans-scim-model/replace-janssen-version/jans-scim-model-replace-janssen-version.jar</code> and place it in your server under <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
 <p>Edit the file <code>/etc/default/jans-casa</code>: locate a segment that reads <code>-Dacr=</code> and assign <code>agama_io.jans.casa.cert.oneStepAuthn</code> as new value. Save the change</p>
@@ -3263,7 +3263,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <li>Attempt to enroll an expired certificate</li>
 <li>Attempt to enroll an invalid certificate if you have one at hand (as in the NIST PKI certs), or a certificate issued with a certificate chain that is different from the chain currently configured for the <code>cert-authn</code> Agama project</li>
 </ul>
-<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">#</a></h2>
+<h3 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">#</a></h3>
 <p>Once testing users have certificates enrolled, add other credentials like OTP so second-factor authentication can be turned on for them.</p>
 <p>Here are steps for testing authentication for a given user (happy path):</p>
 <ol>
@@ -3290,7 +3290,7 @@ base64<span class="w"> </span>GoodCACert.crt<span class="w"> </span>&gt;&gt;<spa
 <li>Selecting a certificate that was enrolled but has expired</li>
 <li>Not selecting any certificate: hitting "Cancel" or "Don't send a certificate" option in the browser dialog</li>
 </ul>
-<h2 id="account-onboarding-optional">Account onboarding (optional)<a class="headerlink" href="#account-onboarding-optional" title="Permanent link">#</a></h2>
+<h3 id="account-onboarding-optional">Account onboarding (optional)<a class="headerlink" href="#account-onboarding-optional" title="Permanent link">#</a></h3>
 <p>Having followed <a href="#update-the-casa-acr">these</a> steps, visit the Casa login page.</p>
 <ol>
 <li>
@@ -3360,11 +3360,11 @@ Config property <code>mappingClassField</code> of flow <code>io.jans.casa.cert.s
 <tbody>
 <tr>
 <td><code>cn</code></td>
-<td><code>Joe</code></td>
+<td>Joe</td>
 </tr>
 <tr>
 <td><code>o</code></td>
-<td><code>foobar</code></td>
+<td>foobar</td>
 </tr>
 </tbody>
 </table>
@@ -3396,7 +3396,7 @@ Config property <code>mappingClassField</code> of flow <code>io.jans.casa.cert.s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 12, 2026 05:47:44 UTC"><span class="timeago" datetime="2026-02-12T05:47:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 12, 2026 05:47:44 UTC">2026-02-12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 16, 2026 12:29:22 UTC"><span class="timeago" datetime="2026-02-16T12:29:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 16, 2026 12:29:22 UTC">2026-02-16</span>
   </span>
 
     
