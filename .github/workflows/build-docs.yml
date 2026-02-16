@@ -49,7 +49,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
@@ -78,7 +78,7 @@ jobs:
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: '${{ github.event.inputs.version }}'
           fetch-depth: 0
@@ -227,8 +227,9 @@ jobs:
             fi
           done
           sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
+          sed -i -e "s/enable_reo_flag/True/g" ${STABLE}/overrides/main.html
           git add ${STABLE}/overrides/main.html && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url"
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url and enable reo integration"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

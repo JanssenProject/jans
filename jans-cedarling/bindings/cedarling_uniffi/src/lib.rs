@@ -453,7 +453,7 @@ impl Cedarling {
         &self,
         key: String,
         value: JsonValue,
-        ttl_secs: Option<u64>,
+        ttl_secs: Option<i64>,
     ) -> Result<(), DataError> {
         let json_value: Value = value
             .try_into()
@@ -461,7 +461,15 @@ impl Cedarling {
                 error_msg: format!("Failed to parse JSON value: {}", e),
             })?;
 
-        let ttl = ttl_secs.map(Duration::from_secs);
+        let ttl = ttl_secs
+            .map(|secs| {
+                u64::try_from(secs).map(Duration::from_secs).map_err(|_| {
+                    DataError::DataOperationFailed {
+                        error_msg: "TTL must be a non-negative integer".to_string(),
+                    }
+                })
+            })
+            .transpose()?;
         self.inner
             .push_data_ctx(&key, json_value, ttl)
             .map_err(|e| DataError::DataOperationFailed {
