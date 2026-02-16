@@ -27,6 +27,10 @@ public class AccessEvaluationValidator {
      * Validate single evaluation request.
      */
     public void validateAccessEvaluationRequest(AccessEvaluationRequest request) {
+        if (request == null) {
+            throw badRequest("Invalid request. Request is null");
+        }
+
         validateSubject(request.getSubject());
         validateResource(request.getResource());
         validateAction(request.getAction());
