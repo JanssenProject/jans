@@ -123,9 +123,8 @@ public class Fido2MetricsAggregationScheduler {
                 }
             }
         } catch (Exception e) {
-            String errorMsg = String.format("Failed to execute %s aggregation job: %s", jobType, e.getMessage());
-            log.error(errorMsg, e);
-            throw new JobExecutionException(errorMsg, e);
+            throw new JobExecutionException(
+                String.format("Failed to execute %s aggregation job: %s", jobType, e.getMessage()), e);
         }
     }
     
@@ -529,8 +528,8 @@ public class Fido2MetricsAggregationScheduler {
 
             quartzSchedulerManager.schedule(jobDetail, trigger);
         } catch (Exception e) {
-            log.error("Failed to register {} job: {}", jobName, e.getMessage(), e);
-            throw new IllegalStateException("Failed to register " + jobName + " job", e);
+            throw new IllegalStateException(
+                "Failed to register " + jobName + " job: " + e.getMessage(), e);
         }
     }
 
