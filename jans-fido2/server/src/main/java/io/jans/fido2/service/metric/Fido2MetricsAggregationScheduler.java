@@ -107,14 +107,12 @@ public class Fido2MetricsAggregationScheduler {
             }
 
             // In cluster mode, try to start periodic lock updates
-            // If lock updates fail, we may have lost the lock - return early to prevent duplicate aggregation
             ScheduledFuture<?> updateTask = initializeClusterLockUpdates(scheduler, jobType, log);
             
-            // In cluster mode, if we couldn't start lock updates, we likely lost the lock
-            // Return early to prevent duplicate aggregation across nodes
+            // If we're in cluster mode but couldn't start lock updates (e.g. ou=node not configured),
+            // run aggregation anyway as single-node fallback instead of skipping
             if (scheduler.isClusterEnvironment && updateTask == null) {
-                log.warn("Skipping {} aggregation - failed to acquire/maintain cluster lock", jobType);
-                return;
+                log.info("FIDO2 metrics: cluster lock unavailable, proceeding with {} aggregation (single-node fallback)", jobType);
             }
             
             try {
