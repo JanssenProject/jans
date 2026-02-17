@@ -140,7 +140,6 @@
         "jansServiceModule": [
           "jans-auth",
           "jans-config-api",
-          "jans-keycloak-link",
           "jans-scim",
           "jans-lock",
           "jans-link"
@@ -291,16 +290,6 @@
           "jans-fido2"
         ],
         "description": " FIDO Server Metadata."
-      },
-      {
-        "directory": "/var/jans/keycloak-link-snapshots",
-        "type": [
-          "txt"
-        ],
-        "jansServiceModule": [
-          "jans-keycloak-link"
-        ],
-        "description": "Keycloak link snapshots."
       },
       {
         "directory": "/var/jans/link-snapshots/",

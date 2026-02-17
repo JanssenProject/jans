@@ -39,7 +39,7 @@ pub(crate) struct DecodedJwtClaims {
 }
 
 pub(crate) fn decode_jwt(jwt: &str) -> Result<DecodedJwt, DecodeJwtError> {
-    let split = jwt.split(".").collect::<Vec<&str>>();
+    let split = jwt.split('.').collect::<Vec<&str>>();
     if split.len() != 3 {
         return Err(DecodeJwtError::InvalidJwtFormat);
     }
@@ -98,7 +98,7 @@ mod test {
                     inner: json!({
                         "sub": "1234567890",
                         "name": "John Doe",
-                        "iat": 1516239022,
+                        "iat": 1_516_239_022,
                     })
                 }
             }

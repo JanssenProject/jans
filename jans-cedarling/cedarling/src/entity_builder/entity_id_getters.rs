@@ -20,22 +20,19 @@ pub(super) fn get_first_valid_entity_id(
 ) -> Result<SmolStr, BuildEntityErrorKind> {
     let mut errors = Vec::new();
 
-    for src in id_srcs.iter() {
+    for src in id_srcs {
         match src {
             EntityIdSrc::Token {
                 token,
                 claim: claim_name,
             } => {
-                let claim = match token.get_claim_val(claim_name) {
-                    Some(claim) => claim,
-                    None => {
-                        errors.push(GetEntityIdError {
-                            token: token.name.clone(),
-                            claim: claim_name.to_string(),
-                            reason: GetEntityIdErrorReason::MissingClaim,
-                        });
-                        continue;
-                    },
+                let Some(claim) = token.get_claim_val(claim_name) else {
+                    errors.push(GetEntityIdError {
+                        token: token.name.clone(),
+                        claim: (*claim_name).to_string(),
+                        reason: GetEntityIdErrorReason::MissingClaim,
+                    });
+                    continue;
                 };
 
                 let claim = claim.to_string();
@@ -44,7 +41,7 @@ pub(super) fn get_first_valid_entity_id(
                 if id.is_empty() {
                     errors.push(GetEntityIdError {
                         token: token.name.clone(),
-                        claim: claim_name.to_string(),
+                        claim: (*claim_name).to_string(),
                         reason: GetEntityIdErrorReason::EmptyString,
                     });
                     continue;
@@ -83,7 +80,8 @@ fn id_str_src_to_value(eid: &str) -> Option<Value> {
 }
 
 fn claim_to_ids(claim: Value) -> Vec<SmolStr> {
-    let mut ids = Vec::with_capacity(1 + claim.as_array().map(|v| v.len()).unwrap_or_default());
+    let mut ids =
+        Vec::with_capacity(1 + claim.as_array().map(std::vec::Vec::len).unwrap_or_default());
     match claim {
         serde_json::Value::Number(number) => {
             ids.push(number.to_smolstr());
@@ -128,7 +126,7 @@ impl From<Vec<GetEntityIdError>> for GetEntityIdErrors {
 
 impl Display for GetEntityIdErrors {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
+        write!(f, "{:?}", self.0.iter().map(ToString::to_string))
     }
 }
 

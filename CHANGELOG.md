@@ -1,5 +1,73 @@
 # Changelog
 
+## [1.16.0](https://github.com/JanssenProject/jans/compare/v1.15.0...v1.16.0) (2026-01-22)
+
+
+### Features
+
+* **charts:** make Gateway ports configurable and support Gateway in janssen helm chart ([#12995](https://github.com/JanssenProject/jans/issues/12995)) ([583b64c](https://github.com/JanssenProject/jans/commit/583b64cb9f5aecf482de3631e4d7d4fa347ad43e))
+* **charts:** support gateway api in janssen-aio ([#12907](https://github.com/JanssenProject/jans/issues/12907)) ([f5077ae](https://github.com/JanssenProject/jans/commit/f5077ae9d06e8deef912462532d824747eadc129))
+* client certificate authentication casa plugin ([#12927](https://github.com/JanssenProject/jans/issues/12927)) ([6d80354](https://github.com/JanssenProject/jans/commit/6d80354d28a92ef6086b4e8b8300be69c751afde))
+* **cloud-native:** add feature to update config-api scopes sync from template ([#12909](https://github.com/JanssenProject/jans/issues/12909)) ([17d0462](https://github.com/JanssenProject/jans/commit/17d0462362b544956e0dc9c95de2bccd37181e70))
+* **cloud-native:** support for additional schema files ([#13011](https://github.com/JanssenProject/jans/issues/13011)) ([ac78d8b](https://github.com/JanssenProject/jans/commit/ac78d8b0d85778fd3763c950a5f8b1417716b737))
+* **config-api:** feature wise admin scope for endpoints ([#12736](https://github.com/JanssenProject/jans/issues/12736)) ([a02118e](https://github.com/JanssenProject/jans/commit/a02118eb264481a36cd89958a1ce476f87586e97))
+* **core:** fix deps2 ([#12965](https://github.com/JanssenProject/jans/issues/12965)) ([19ad682](https://github.com/JanssenProject/jans/commit/19ad682cc1f29777e760ac3dd2cc1c2fe7792dc4))
+* **core:** merge logging changes from gluu4 ([#12871](https://github.com/JanssenProject/jans/issues/12871)) ([1fabadb](https://github.com/JanssenProject/jans/commit/1fabadb1887f714bf68180373372400999075b71))
+* correct the jans_assets scopes names ([#13025](https://github.com/JanssenProject/jans/issues/13025)) ([02409e4](https://github.com/JanssenProject/jans/commit/02409e4af02f3e74b0409e402734573cb9037333))
+* introduce roundTripMaxTime config property ([#13009](https://github.com/JanssenProject/jans/issues/13009)) ([e5ab6dc](https://github.com/JanssenProject/jans/commit/e5ab6dc48e8d1989bac700bb0fe596fdad2026f4))
+* **jans-auth-server:** Added configurable rate limiting for authentication endpoints to prevent brute-force attacks [#12664](https://github.com/JanssenProject/jans/issues/12664) ([#12868](https://github.com/JanssenProject/jans/issues/12868)) ([7a5f846](https://github.com/JanssenProject/jans/commit/7a5f846a8088df7304e6cec39c3d51465ec66580))
+* **jans-auth-server:** sanitized log in AuthenticationService [#12958](https://github.com/JanssenProject/jans/issues/12958) ([#12959](https://github.com/JanssenProject/jans/issues/12959)) ([ba21b2f](https://github.com/JanssenProject/jans/commit/ba21b2fc141ceae1a47e1bfd350d8512b300e2a4))
+* **jans-auth:** remove old jackson2 dependency ([#12886](https://github.com/JanssenProject/jans/issues/12886)) ([31e31cf](https://github.com/JanssenProject/jans/commit/31e31cf86aed9ba1363382f1ca96211e9bd7dcec))
+* **jans-cli-tui:** additional config-api parameters ([#12914](https://github.com/JanssenProject/jans/issues/12914)) ([819a206](https://github.com/JanssenProject/jans/commit/819a206ffe1457a8cb8ba05ef4e308e6cf3f4c6f))
+* **jans-cli-tui:** remove Admin-UI plugin ([#12893](https://github.com/JanssenProject/jans/issues/12893)) ([28a40a0](https://github.com/JanssenProject/jans/commit/28a40a0343e2dca03c92ad993bae91ffa72a524b))
+* **jans-config-api:** change in process of accessing config-api endpoints in Admin UI ([#12983](https://github.com/JanssenProject/jans/issues/12983)) ([7b984ee](https://github.com/JanssenProject/jans/commit/7b984ee29ad9c1e744d19d45e1d3d7c07c9cbb62))
+* **jans-core:** remove tika-core from jackrabbit-core deps ([#12960](https://github.com/JanssenProject/jans/issues/12960)) ([75fa989](https://github.com/JanssenProject/jans/commit/75fa989acbf8b5e56462d31389b41ffcc5e7f54c))
+* **jans-core:** removed FILE script type ([48b8080](https://github.com/JanssenProject/jans/commit/48b808069529e90144d6ead422728166004a44ff))
+* **jans-core:** removed FILE script type [#12997](https://github.com/JanssenProject/jans/issues/12997) ([#12998](https://github.com/JanssenProject/jans/issues/12998)) ([48b8080](https://github.com/JanssenProject/jans/commit/48b808069529e90144d6ead422728166004a44ff))
+* **jans-linux-setup:** flex update requirements ([#12985](https://github.com/JanssenProject/jans/issues/12985)) ([a9eb502](https://github.com/JanssenProject/jans/commit/a9eb502af6af77c4fb0dc0d063cb2b3835a9f74f))
+* **jans-linux-setup:** introduce Mako templating engine ([#13054](https://github.com/JanssenProject/jans/issues/13054)) ([1b904a9](https://github.com/JanssenProject/jans/commit/1b904a9f46a0a1a0a40411419ab4ad89ddfb3eed))
+* **jans-linux-setup:** update the renamed scopes in role-to-scope mapping ([#12899](https://github.com/JanssenProject/jans/issues/12899)) ([ec72a0f](https://github.com/JanssenProject/jans/commit/ec72a0fc0905a04e6d5b96e798619973a6e664fe))
+* **jans-pycloudlib:** add support for user session-level postgres schema selection ([#12889](https://github.com/JanssenProject/jans/issues/12889)) ([b8cc3ab](https://github.com/JanssenProject/jans/commit/b8cc3abc201eb2800e22c00fe8a1917c1727ff4e))
+* **jans-tarp:** implement Cedar-Policy-Aware AI Agent Scaffolding in jans-tarp ([#12806](https://github.com/JanssenProject/jans/issues/12806)) ([6e1646a](https://github.com/JanssenProject/jans/commit/6e1646a6d5c6d71afec6557eab363039b713d44e))
+* **orm:** add method to check data after entry update ([#12873](https://github.com/JanssenProject/jans/issues/12873)) ([03a48e7](https://github.com/JanssenProject/jans/commit/03a48e70d6944449c92ed631501cdefe36ef1b94))
+* send 403 - Forbidden error code in response if Admin UI requests Config API with expired session. This will indicate to Admin UI to logout. ([#13022](https://github.com/JanssenProject/jans/issues/13022)) ([a2701ae](https://github.com/JanssenProject/jans/commit/a2701aec5d87c9bd2776ee70a812dea584a323b8))
+* update the renamed scopes in role-to-scope mapping ([ec72a0f](https://github.com/JanssenProject/jans/commit/ec72a0fc0905a04e6d5b96e798619973a6e664fe))
+
+
+### Bug Fixes
+
+* **admin-ui:** failed logout on tarp ([#12882](https://github.com/JanssenProject/jans/issues/12882)) ([6e4be8a](https://github.com/JanssenProject/jans/commit/6e4be8a83753fcd00f826ab1f67e1dd3e6feb904))
+* AdminUICookieFilter should not be called in Jans installation ([#13041](https://github.com/JanssenProject/jans/issues/13041)) ([2f2675f](https://github.com/JanssenProject/jans/commit/2f2675f5ef30f4fc2b0616896c7d967322f8b3c9))
+* **cloud-native:** set restrictive file permissions on SQL property files containing credentials ([#12901](https://github.com/JanssenProject/jans/issues/12901)) ([280b2f7](https://github.com/JanssenProject/jans/commit/280b2f70a36f94dd9260378f72e8b0edeccfdfb6))
+* **config-api:** client secret getting encrypted ([#12930](https://github.com/JanssenProject/jans/issues/12930)) ([7b73e80](https://github.com/JanssenProject/jans/commit/7b73e803e439c60a32a6a336c771576c93700507))
+* **docker-jans-cloudtools:** add type validation for --limit parameter ([#12946](https://github.com/JanssenProject/jans/issues/12946)) ([4fdd2dd](https://github.com/JanssenProject/jans/commit/4fdd2dd11f0ff86dab64359a66512d6741a3019c))
+* **docs:** add PostgreSQL-related commands to Docker install quick start ([#13032](https://github.com/JanssenProject/jans/issues/13032)) ([ad0147d](https://github.com/JanssenProject/jans/commit/ad0147d7a358629d65b119f6ca5349f9f33c50e8))
+* **docs:** broken links in Authorization Endpoint ([#12243](https://github.com/JanssenProject/jans/issues/12243)) ([#12745](https://github.com/JanssenProject/jans/issues/12745)) ([42225c6](https://github.com/JanssenProject/jans/commit/42225c68e1afadb3c5c5cfd51f11b00dee484822))
+* **docs:** fix linting issues - trailing spaces and EOF newline  ([#12879](https://github.com/JanssenProject/jans/issues/12879)) ([734f644](https://github.com/JanssenProject/jans/commit/734f6447587b9982353340252ebb2ca02fcf91cf))
+* **docs:** fix linting issues - trailing spaces and EOF newline ([#12859](https://github.com/JanssenProject/jans/issues/12859)) ([05683c2](https://github.com/JanssenProject/jans/commit/05683c2816f3c9ced364e1978c29aa307730413a))
+* **docs:** Set CEDARLING_JWT_SIG_VALIDATION to "disabled" ([#12917](https://github.com/JanssenProject/jans/issues/12917)) ([c4665b4](https://github.com/JanssenProject/jans/commit/c4665b4c4b306c85974a193dbb63c6131bcf25b6))
+* **docs:** update contribution guide, jans README, and Docker Compose… ([#12990](https://github.com/JanssenProject/jans/issues/12990)) ([4887ac7](https://github.com/JanssenProject/jans/commit/4887ac7ef7883361289f68cd4235836d7f0511d0))
+* fix build error ([#13040](https://github.com/JanssenProject/jans/issues/13040)) ([97d5cf0](https://github.com/JanssenProject/jans/commit/97d5cf0f2c0377a79b1e2c75a5932e78e020fb4b))
+* fix error in signing firefox extension for self distribution ([#13053](https://github.com/JanssenProject/jans/issues/13053)) ([22ec96f](https://github.com/JanssenProject/jans/commit/22ec96fe29d16345dbf5a55669ef2993f6349bb8))
+* **jans-auth-server:** fix build after dependencies upgrade (tika) [#12971](https://github.com/JanssenProject/jans/issues/12971) ([#12972](https://github.com/JanssenProject/jans/issues/12972)) ([43acf6a](https://github.com/JanssenProject/jans/commit/43acf6acc5d41b03f7256024a62979226405c5e6))
+* **jans-cedarling:** fix benchmarks to actually work ([#12923](https://github.com/JanssenProject/jans/issues/12923)) ([4518da7](https://github.com/JanssenProject/jans/commit/4518da79d226c939042326f4951aeb0ef745c347))
+* **jans-cedarling:** Fix cedarling to handle domains in different cases (upper and lower) ([3e61fb1](https://github.com/JanssenProject/jans/commit/3e61fb139ae94aef168b6bdc17a176d24f3b8f31))
+* **jans-cedarling:** Fix cedarling to handle iss in different cases ([#12982](https://github.com/JanssenProject/jans/issues/12982)) ([3e61fb1](https://github.com/JanssenProject/jans/commit/3e61fb139ae94aef168b6bdc17a176d24f3b8f31))
+* **jans-cedarling:** fix entities mapping for not required entities ([#13024](https://github.com/JanssenProject/jans/issues/13024)) ([f9caf73](https://github.com/JanssenProject/jans/commit/f9caf731b4918e045bc7d9dfabf7b2f107b8d6cd))
+* **jans-cedarling:** remove nested field parsing in trusted_issuer parser ([#13005](https://github.com/JanssenProject/jans/issues/13005)) ([bedac4d](https://github.com/JanssenProject/jans/commit/bedac4d524cd54e6cd36215516f102d7668c97f2))
+* **jans-cli-tui:** check if log exists before iteration ([#13003](https://github.com/JanssenProject/jans/issues/13003)) ([293b13e](https://github.com/JanssenProject/jans/commit/293b13eb92e2a143fa71046e91187413fecb538f))
+* **jans-cli-tui:** display confirmation message after saving jans-lock server config ([#12911](https://github.com/JanssenProject/jans/issues/12911)) ([3884dcd](https://github.com/JanssenProject/jans/commit/3884dcd7641a60690a984b5f9d63c71e0af5b7ec))
+* **jans-cli-tui:** scim configuration param disableExternalLoggerConfiguration ([#12918](https://github.com/JanssenProject/jans/issues/12918)) ([84ac4fa](https://github.com/JanssenProject/jans/commit/84ac4fa3e27196cefc499aca1c67eb59add90b93))
+* **jans-cli-tui:** support only db location for custom scripts ([#12987](https://github.com/JanssenProject/jans/issues/12987)) ([6d88aa1](https://github.com/JanssenProject/jans/commit/6d88aa138864fdaf27bd164f8e5a517b462a5f96))
+* **jans-config-api:** move AdminUICookieFilter to Admin UI plugin ([#13050](https://github.com/JanssenProject/jans/issues/13050)) ([40f41f5](https://github.com/JanssenProject/jans/commit/40f41f5ae12b510172a4f58c7f1206301667083a))
+* **jans-config-api:** the session check should be excluded for certai… ([#13031](https://github.com/JanssenProject/jans/issues/13031)) ([c7f6cda](https://github.com/JanssenProject/jans/commit/c7f6cdaaf3fefab29a2230911f78b0eba97db25d))
+* **jans-keycloak-integration:** bump libraries with cve vulns [#12992](https://github.com/JanssenProject/jans/issues/12992) ([#12993](https://github.com/JanssenProject/jans/issues/12993)) ([4317fdf](https://github.com/JanssenProject/jans/commit/4317fdfcd2dc458415f173644cdae97120d8bc7c))
+* **jans-linux-setup:** typo ([#13047](https://github.com/JanssenProject/jans/issues/13047)) ([03d4655](https://github.com/JanssenProject/jans/commit/03d46551531219531a2acb4e083902887c159bed))
+* refactor DN parsing ([#12935](https://github.com/JanssenProject/jans/issues/12935)) ([67adb65](https://github.com/JanssenProject/jans/commit/67adb65c9323390eda7c0405aa5325ac6ba48ad6))
+* **terraform-jans-provider:** missing grant types in terraform oidc client resource ([#12999](https://github.com/JanssenProject/jans/issues/12999)) ([610ab26](https://github.com/JanssenProject/jans/commit/610ab267903bc61055cad2e6354457466b2ec5f0))
+* update override_sql_ssl_property in sql.py to prevent SSL proper… ([#12878](https://github.com/JanssenProject/jans/issues/12878)) ([ab84ff7](https://github.com/JanssenProject/jans/commit/ab84ff707192042a0cb818b12dc38bb1be3475db))
+* vulns and docs bullet points ([#12940](https://github.com/JanssenProject/jans/issues/12940)) ([c807bdb](https://github.com/JanssenProject/jans/commit/c807bdbce16670ea27f63492743d46b8fad9ba9e))
+
 ## [1.15.0](https://github.com/JanssenProject/jans/compare/v1.14.0...v1.15.0) (2025-12-19)
 
 

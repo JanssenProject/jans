@@ -4,9 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,12 +30,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CommonUtils {
     @Inject
@@ -199,13 +206,87 @@ public class CommonUtils {
     }
 
     /**
-     * Converts a Boolean object to a boolean primitive.
-     * Returns false if the input Boolean object is null.
+     * Convert a Boolean reference to its primitive form, using a default value when the input is null.
      *
-     * @param booleanObject The Boolean object to convert.
-     * @return The boolean primitive value, or false if the input is null.
+     * @return `true` if the input is `Boolean.TRUE`, `false` if the input is `Boolean.FALSE` or `null`.
      */
     public static boolean toPrimitiveOrDefaultFalse(Boolean booleanObject) {
         return booleanObject != null ? booleanObject : false;
+    }
+
+    /**
+     * Return a new Date representing the given date plus the specified number of minutes.
+     *
+     * @param date         the base date to adjust
+     * @param minutesToAdd the number of minutes to add; may be negative to subtract minutes
+     * @return the adjusted Date shifted by {@code minutesToAdd} minutes from {@code date}
+     */
+    public static Date addMinutes(Date date, int minutesToAdd) {
+        if (date == null) {
+            return null;
+        }
+        // Convert the Date to an Instant
+        Instant instant = date.toInstant();
+
+        // Add the minutes using ChronoUnit
+        Instant updatedInstant = instant.plus(minutesToAdd, ChronoUnit.MINUTES);
+
+        // Convert the Instant back to a Date
+        return Date.from(updatedInstant);
+    }
+
+    /**
+     * Extracts claims from a Jwt into a Map keyed by claim name.
+     *
+     * <p>The returned map contains claim values using appropriate Java types:
+     * Strings, Integer, Long, Boolean, List<String> for JSON arrays, or JSONObject for JSON objects.</p>
+     *
+     * @param jwtObj the Jwt to extract claims from; may be null
+     * @return a map of claim names to claim values, empty if {@code jwtObj} is null
+     */
+    public static Map<String, Object> getClaims(Jwt jwtObj) {
+        Map<String, Object> claims = Maps.newHashMap();
+        if (jwtObj == null) {
+            return claims;
+        }
+        JwtClaims jwtClaims = jwtObj.getClaims();
+        Set<String> keys = jwtClaims.keys();
+        keys.forEach(key -> {
+
+            Object claimValue = jwtClaims.getClaim(key);
+
+            if (claimValue instanceof String) {
+                claims.put(key, claimValue);
+            } else if (claimValue instanceof Integer) {
+                claims.put(key, claimValue);
+            } else if (claimValue instanceof Long) {
+                claims.put(key, claimValue);
+            } else if (claimValue instanceof Boolean) {
+                claims.put(key, claimValue);
+            } else if (claimValue instanceof JSONArray) {
+                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
+                claims.put(key, sourceArr);
+            } else if (claimValue instanceof JSONObject) {
+                claims.put(key, claimValue);
+            }
+        });
+        return claims;
+    }
+
+    /**
+     * Builds a UTF-8 URL-encoded query string from the provided parameters.
+     *
+     * @param params a map of parameter names to values; entries with a null value are omitted
+     * @return a URL-encoded string of `key=value` pairs joined with `&`, encoded using UTF-8
+     */
+    public static String toUrlEncodedString(Map<String, String> params) {
+        return params.entrySet()
+                .stream()
+                .filter(e -> e.getValue() !=null)
+                .map(e ->
+                        URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
+                                URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)
+                )
+                .collect(Collectors.joining("&"));
     }
 }

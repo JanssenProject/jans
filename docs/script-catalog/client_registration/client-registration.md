@@ -62,71 +62,7 @@ The client registration script implements the [ClientRegistrationType](https://g
 ### Script Type: Python
 
 ```python
-from io.jans.model.custom.script.type.client import ClientRegistrationType
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.orm.util import StringHelper, ArrayHelper
-from io.jans.as.server.service import ScopeService
-
-import json
-
-class ClientRegistration(ClientRegistrationType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "Client registration. Initialization"
-        
-        if (not configurationAttributes.containsKey("scope_list")):
-            print "Client registration. Initialization failed. Scope List not defined."
-            return False
-        else: 
-            self.scope_list = configurationAttributes.get("scope_list").getValue2() 
-            
-        print "Client registration. Initialized successfully"
-        return True   
-
-    def destroy(self, configurationAttributes):
-        print "Client registration. Destroy"
-        print "Client registration. Destroyed successfully"
-        return True   
-
-    def createClient(self, context):
-        scopeService = CdiUtil.bean(ScopeService)
-        currentScopes = client.getScopes()
-        for newScope in self.scope_list:
-            foundScope = scopeService.getScopeById(newScope)
-            if foundScope is None:
-                print "Client Registration. New scope(s) not found."
-                return False
-            newScopes = ArrayHelper.addItemToStringArray(currentScopes, foundScope.getDn())
-
-        client.setScopes(newScopes)
-        return True
-
-    def updateClient(self, context):
-        print "SSA Client registration. UpdateClient method"
-        pass
-
-    def getApiVersion(self):
-        return 11
-
-    # Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.
-    def getSoftwareStatementHmacSecret(self, context):
-        pass
-
-    # Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.
-    def getSoftwareStatementJwks(self, context):
-        pass
-
-    
-    def modifyPutResponse(self, responseAsJsonObject, executionContext):
-        return False
-
-    def modifyReadResponse(self, responseAsJsonObject, executionContext):
-        return False
-
-    def modifyPostResponse(self, responseAsJsonObject, executionContext):
-        return False
+--8<-- "script-catalog/client_registration/sample-script/SampleScript.py"
 ```
 
 ### Script Type: Java

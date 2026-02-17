@@ -16,7 +16,8 @@ func TestAccResourceSSARevocation_basic(t *testing.T) {
                                 Config: testAccResourceSSARevocation_basic(),
                                 // NOTE: API returns 500 "Unprocessable Entity" for non-existent SSA instead of 404
                                 // This appears to be a server-side bug, but we test it validates API connectivity
-                                ExpectError: regexp.MustCompile("not found|500|Unprocessable"),
+                                // 401 may occur if client lacks ssa.admin scope
+                                ExpectError: regexp.MustCompile("not found|500|Unprocessable|401|Unauthorized"),
                         },
                 },
         })

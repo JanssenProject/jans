@@ -2,8 +2,10 @@ package io.jans.lock.cedarling.service.filter;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import io.jans.lock.cedarling.service.CedarlingProtection;
 import io.jans.lock.cedarling.service.app.audit.ApplicationCedarlingAuditLogger;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.app.audit.AuditActionType;
@@ -70,7 +72,7 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		log.debug("REST call to '{}' intercepted", path);
 		
 		if (LockProtectionMode.CEDARLING.equals(appConfiguration.getProtectionMode())) {
-			Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
+            Response authorizationResponse = protectionService.processAuthorization(extractBearerToken(), resourceInfo);
 			boolean success = authorizationResponse == null;
 
 	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.CEDARLING_AUTHZ_FILTER);
@@ -85,14 +87,14 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		}
 	}
 
-    private Response unprotectedApiResponse(String name) {
-        return Response.status(Response.Status.UNAUTHORIZED).entity(name + " API not protected")
-                .build();
-    }
+    private String extractBearerToken() {
+        String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);
+        
+        if (StringUtils.isEmpty(authHeader)) {
+            return null;
+        }
 
-    private Response disabledApiResponse(String name) {
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(name + " API is disabled")
-                .build();
+        return authHeader.replaceFirst("(?i)Bearer\\s+", "");
     }
 
 }

@@ -8,7 +8,7 @@ use super::{
     schema::{EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc},
 };
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
-use cedar_policy::{EntityUid, RestrictedExpression};
+use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display, str::FromStr};
@@ -40,8 +40,11 @@ impl TknClaimAttrSrc {
 
 impl EntityRefAttrSrc {
     pub(super) fn build_expr(&self, id: &str) -> Result<RestrictedExpression, Box<BuildExprError>> {
-        let uid = EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
-            .map_err(|e| Box::new(e.into()))?;
+        let entity_type_name = EntityTypeName::from_str(&self.0).map_err(|e| Box::new(e.into()))?;
+        // This should never fail since EntityId::from_str returns Result<_, Infallible>
+        let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
+
+        let uid = EntityUid::from_type_name_and_id(entity_type_name, entity_id);
         Ok(RestrictedExpression::new_entity_uid(uid))
     }
 }
@@ -51,21 +54,21 @@ impl EntityRefSetSrc {
         &self,
         ids: &[SmolStr],
     ) -> Result<RestrictedExpression, BuildExprErrorVec> {
-        let (uids, errs): (Vec<_>, Vec<_>) = ids
+        let entity_type_name =
+            EntityTypeName::from_str(&self.0).map_err(|e| BuildExprErrorVec(vec![e.into()]))?;
+
+        let uids: Vec<_> = ids
             .iter()
             .map(|id| {
-                EntityUid::from_str(&format!("{}::\"{}\"", &self.0, id))
-                    .map(RestrictedExpression::new_entity_uid)
-            })
-            .partition_result();
+                // This should never fail since EntityId::from_str returns Result<_, Infallible>
+                let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
 
-        if !errs.is_empty() {
-            return Err(BuildExprErrorVec::from(
-                errs.into_iter()
-                    .map(BuildExprError::ParseUid)
-                    .collect::<Vec<_>>(),
-            ));
-        }
+                RestrictedExpression::new_entity_uid(EntityUid::from_type_name_and_id(
+                    entity_type_name.clone(),
+                    entity_id,
+                ))
+            })
+            .collect();
 
         Ok(RestrictedExpression::new_set(uids))
     }
@@ -107,12 +110,14 @@ fn build_expr_from_value(
             let (vals, errs): (Vec<_>, Vec<_>) = src
                 .iter()
                 .map(|src| build_expr_from_value(expected_claim_type, src))
-                .filter_map(|expr| expr.transpose())
+                .filter_map(std::result::Result::transpose)
                 .partition_result();
 
             if !errs.is_empty() {
                 return Err(BuildExprErrorVec(
-                    errs.into_iter().flat_map(|e| e.into_inner()).collect(),
+                    errs.into_iter()
+                        .flat_map(BuildExprErrorVec::into_inner)
+                        .collect(),
                 ))?;
             }
 
@@ -139,7 +144,9 @@ fn build_expr_from_value(
                 fields.into_iter().collect()
             } else {
                 return Err(BuildExprErrorVec(
-                    errs.into_iter().flat_map(|e| e.into_inner()).collect(),
+                    errs.into_iter()
+                        .flat_map(BuildExprErrorVec::into_inner)
+                        .collect(),
                 ))?;
             };
 
@@ -197,7 +204,11 @@ pub struct TypeMismatchError {
 
 impl Display for BuildExprErrorVec {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
+        write!(
+            f,
+            "{:?}",
+            self.0.iter().map(ToString::to_string).collect::<Vec<_>>()
+        )
     }
 }
 

@@ -16,13 +16,10 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.lock.model.AuditEndpointType;
 import io.jans.lock.model.app.audit.AuditActionType;
@@ -33,7 +30,6 @@ import io.jans.lock.model.audit.TelemetryEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.AuditPersistenceMode;
 import io.jans.lock.service.AuditService;
-import io.jans.lock.service.DataMapperService;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.audit.AuditForwarderService;
 import io.jans.lock.service.stat.StatService;
@@ -57,8 +53,6 @@ import jakarta.ws.rs.core.SecurityContext;
 @Dependent
 public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWebService {
 
-	private static final String LOG_PRINCIPAL_ID = "principalId";
-	private static final String LOG_CLIENT_ID = "clientId";
 	private static final String LOG_DECISION_RESULT = "decisionResult";
 	private static final String LOG_ACTION = "action";
 
@@ -70,9 +64,6 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 
 	@Inject
 	private AppConfiguration appConfiguration;
-
-	@Inject
-	private DataMapperService dataMapperService;
 
 	@Inject
 	private JsonService jsonService;
@@ -90,22 +81,27 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	private ApplicationAuditLogger applicationAuditLogger;
 
 	/**
-	 * Processes an incoming health audit request and delegates handling to the
-	 * audit processor.
+	 * Processes an incoming health audit request with typed HealthEntry bean.
 	 *
-	 * @return a Response containing the HTTP response to return for the health
-	 *         audit request
+	 * @param healthEntry the health entry bean
+	 * @param request the HTTP servlet request
+	 * @param sec the security context
+	 * @return a Response containing the HTTP response to return for the health audit request
 	 */
 	@Override
-	public Response processHealthRequest(HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Health request - request: {}", request);
+	public Response processHealthRequest(HealthEntry healthEntry, HttpServletRequest request, SecurityContext sec) {
+		log.info("Processing Health request - healthEntry: {}", healthEntry);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		if (healthEntry == null) {
+			throwBadRequestException("Health entry is required");
+		}
+
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_HEALTH_WRITE);
 
 		Response response = null;
 		try {
-			response = processAuditRequest(request, AuditEndpointType.HEALTH);
+			response = processAuditRequest(healthEntry, AuditEndpointType.HEALTH);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
@@ -114,24 +110,27 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	}
 
 	/**
-	 * Handles incoming bulk health audit requests.
+	 * Handles incoming bulk health audit requests with typed list of HealthEntry beans.
 	 *
-	 * Produces a Response representing the outcome of processing the bulk health
-	 * audit payload.
-	 *
-	 * @return the Response representing the outcome of processing the bulk health
-	 *         audit request
+	 * @param healthEntries list of health entry beans
+	 * @param request the HTTP servlet request
+	 * @param sec the security context
+	 * @return the Response representing the outcome of processing the bulk health audit request
 	 */
 	@Override
-	public Response processBulkHealthRequest(HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Bulk Health request - request: {}", request);
+	public Response processBulkHealthRequest(List<HealthEntry> healthEntries, HttpServletRequest request, SecurityContext sec) {
+		log.info("Processing Bulk Health request - entries count: {}", healthEntries != null ? healthEntries.size() : 0);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		if (healthEntries == null || healthEntries.isEmpty()) {
+			throwBadRequestException("Health entries list is required and cannot be empty");
+		}
+
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_HEALTH_BULK_WRITE);
 
 		Response response = null;
 		try {
-			response = processAuditRequest(request, AuditEndpointType.HEALTH_BULK);
+			response = processBulkAuditRequest(healthEntries, AuditEndpointType.HEALTH_BULK);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
@@ -139,27 +138,39 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 		return response;
 	}
 
+	private String getClientIpAddress(HttpServletRequest request) {
+		if (request != null) {
+			return InetAddressUtility.getIpAddress(request);
+		} else {
+			// gRPC request
+			return ServerUtil.getClientContextIpAddress();
+		}
+	}
+
 	/**
-	 * Handle an incoming audit log request for a single log event and process it
-	 * while reporting statistics.
+	 * Handle an incoming audit log request with typed LogEntry bean.
 	 *
-	 * @param request  the HTTP servlet request containing the log JSON payload
-	 * @param response the HTTP servlet response (unused by this method but provided
-	 *                 by the servlet layer)
-	 * @param sec      the security context for the request
-	 * @return a JAX-RS Response containing the processing result; `400 BAD_REQUEST`
-	 *         on parse failure, `200 OK` on success
+	 * @param logEntry the log entry bean
+	 * @param request the HTTP servlet request
+	 * @param sec the security context
+	 * @return a JAX-RS Response containing the processing result
 	 */
 	@Override
-	public Response processLogRequest(HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Log request - request: {}", request);
+	public Response processLogRequest(LogEntry logEntry, HttpServletRequest request, SecurityContext sec) {
+		log.info("Processing Log request - logEntry: {}", logEntry);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		if (logEntry == null) {
+			throwBadRequestException("Log entry is required");
+		}
+
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_LOG_WRITE);
 
 		Response response = null;
 		try {
-			response = processAuditRequest(request, AuditEndpointType.LOG, true, false);
+			// Report statistics for single log entry
+			reportLogStat(logEntry);
+			response = processAuditRequest(logEntry, AuditEndpointType.LOG);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
@@ -168,25 +179,31 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	}
 
 	/**
-	 * Handles an incoming bulk log audit request, reports relevant statistics, and
-	 * delegates processing.
+	 * Handles an incoming bulk log audit request with typed list of LogEntry beans.
 	 *
-	 * @param request  the HTTP request containing the bulk log payload
-	 * @param response the HTTP response
-	 * @param sec      the security context for the request
-	 * @return the HTTP response representing the processing result; status
-	 *         indicates success or failure
+	 * @param logEntries list of log entry beans
+	 * @param request the HTTP request
+	 * @param sec the security context for the request
+	 * @return the HTTP response representing the processing result
 	 */
 	@Override
-	public Response processBulkLogRequest(HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Bulk Log request - request: {}", request);
+	public Response processBulkLogRequest(List<LogEntry> logEntries, HttpServletRequest request, SecurityContext sec) {
+		log.info("Processing Bulk Log request - entries count: {}", logEntries != null ? logEntries.size() : 0);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		if (logEntries == null || logEntries.isEmpty()) {
+			throwBadRequestException("Log entries list is required and cannot be empty");
+		}
+
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_LOG_BULK_WRITE);
 
 		Response response = null;
 		try {
-			response = processAuditRequest(request, AuditEndpointType.LOG_BULK, true, true);
+			// Report statistics for bulk log entries
+			for (LogEntry entry : logEntries) {
+				reportLogStat(entry);
+			}
+			response = processBulkAuditRequest(logEntries, AuditEndpointType.LOG_BULK);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
@@ -195,24 +212,27 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	}
 
 	/**
-	 * Handle an incoming telemetry audit request.
+	 * Handle an incoming telemetry audit request with typed TelemetryEntry bean.
 	 *
-	 * @param request  the HTTP servlet request containing the telemetry payload
-	 * @param response the HTTP servlet response
-	 * @param sec      the security context for the request
-	 * @return a Response representing the result of processing the telemetry audit
-	 *         request
+	 * @param telemetryEntry the telemetry entry bean
+	 * @param request the HTTP servlet request
+	 * @param sec the security context for the request
+	 * @return a Response representing the result of processing the telemetry audit request
 	 */
 	@Override
-	public Response processTelemetryRequest(HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Telemetry request - request: {}", request);
+	public Response processTelemetryRequest(TelemetryEntry telemetryEntry, HttpServletRequest request, SecurityContext sec) {
+		log.info("Processing Telemetry request - telemetryEntry: {}", telemetryEntry);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		if (telemetryEntry == null) {
+			throwBadRequestException("Telemetry entry is required");
+		}
+
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_TELEMETRY_WRITE);
 
 		Response response = null;
 		try {
-			response = processAuditRequest(request, AuditEndpointType.TELEMETRY);
+			response = processAuditRequest(telemetryEntry, AuditEndpointType.TELEMETRY);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
@@ -221,21 +241,27 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	}
 
 	/**
-	 * Handles an incoming bulk telemetry audit request.
+	 * Handles an incoming bulk telemetry audit request with typed list of TelemetryEntry beans.
 	 *
-	 * @return a Response representing the result of processing the bulk telemetry
-	 *         audit request
+	 * @param telemetryEntries list of telemetry entry beans
+	 * @param request the HTTP servlet request
+	 * @param sec the security context
+	 * @return a Response representing the result of processing the bulk telemetry audit request
 	 */
 	@Override
-	public Response processBulkTelemetryRequest(HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Bulk Telemetry request - request: {}", request);
+	public Response processBulkTelemetryRequest(List<TelemetryEntry> telemetryEntries, HttpServletRequest request, SecurityContext sec) {
+		log.info("Processing Bulk Telemetry request - entries count: {}", telemetryEntries != null ? telemetryEntries.size() : 0);
 
-		AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(request),
+		if (telemetryEntries == null || telemetryEntries.isEmpty()) {
+			throwBadRequestException("Telemetry entries list is required and cannot be empty");
+		}
+
+		AuditLogEntry auditLogEntry = new AuditLogEntry(getClientIpAddress(request),
 				AuditActionType.AUDIT_TELEMETRY_BULK_WRITE);
 
 		Response response = null;
 		try {
-			response = processAuditRequest(request, AuditEndpointType.TELEMETRY_BULK);
+			response = processBulkAuditRequest(telemetryEntries, AuditEndpointType.TELEMETRY_BULK);
 		} finally {
 			applicationAuditLogger.log(auditLogEntry, getResponseResult(response));
 		}
@@ -244,101 +270,92 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	}
 
 	/**
-	 * Delegates processing of an audit HTTP request to the main processor using
-	 * default flags (do not report statistics, not bulk data).
+	 * Process a single audit request with typed entry object.
 	 *
-	 * @param request     the incoming HTTP servlet request containing the audit
-	 *                    JSON payload
-	 * @param requestType the audit endpoint type indicating which audit path to
-	 *                    process
-	 * @return the JAX-RS response produced by processing the audit request
+	 * @param entry the audit entry object (HealthEntry, LogEntry, or TelemetryEntry)
+	 * @param requestType the audit endpoint type
+	 * @return a JAX-RS Response
 	 */
-	private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType) {
-		return processAuditRequest(request, requestType, false, false);
-	}
-
-	/**
-	 * Process an incoming audit HTTP request: parse its JSON payload, optionally
-	 * report statistics, then either forward the payload to the configured audit
-	 * API or persist it locally, and return an HTTP response containing the
-	 * operation result.
-	 *
-	 * @param request     the HTTP request containing the audit JSON payload
-	 * @param requestType the audit endpoint type (HEALTH, LOG, TELEMETRY or their
-	 *                    bulk variants)
-	 * @param reportStat  when true, report usage/operation statistics extracted
-	 *                    from the payload
-	 * @param bulkData    when true, treat the payload as an array of entries for
-	 *                    bulk reporting
-	 * @return a JAX-RS Response whose entity is the result message from forwarding
-	 *         or persistence; the response is marked private and no-store with a
-	 *         Pragma: no-cache header
-	 */
-	private Response processAuditRequest(HttpServletRequest request, AuditEndpointType requestType, boolean reportStat,
-			boolean bulkData) {
-		log.info("Processing request - request: {}, requestType: {}", request, requestType);
-
-		JsonNode json = getJsonNode(request);
-		if (json == null) {
-			throwBadRequestException("Failed to parse request");
-		}
-
-		if (reportStat) {
-			if (bulkData) {
-				reportBulkStat(json);
-			} else {
-				reportStat(json);
-			}
-		}
+	private Response processAuditRequest(Object entry, AuditEndpointType requestType) {
+		log.info("Processing single audit request - requestType: {}", requestType);
 
 		Response.ResponseBuilder builder = Response.ok();
 
-		String response;
-		if (AuditPersistenceMode.CONFIG_API.equals(appConfiguration.getAuditPersistenceMode())) {
-			response = auditForwarderService.post(builder, requestType, json.toString(), ContentType.APPLICATION_JSON);
-		} else {
-			response = persistetAuditData(builder, requestType, json.toString());
+		try {
+			String response;
+			if (AuditPersistenceMode.CONFIG_API.equals(appConfiguration.getAuditPersistenceMode())) {
+				String json = jsonService.objectToJson(entry);
+				response = auditForwarderService.post(builder, requestType, json, ContentType.APPLICATION_JSON);
+			} else {
+				response = persistAuditData(builder, requestType, entry);
+			}
+
+			builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+			builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+			builder.entity(response);
+			
+			log.debug("Response entity: {}", response);
+		} catch (Exception ex) {
+			builder.status(Status.INTERNAL_SERVER_ERROR);
+			log.error("Failed to process audit request", ex);
+			builder.entity("Failed to process audit request");
 		}
-
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-
-		builder.entity(response);
-		log.debug("Response entity: {}", response);
 
 		return builder.build();
 	}
 
-	private JsonNode getJsonNode(HttpServletRequest request) {
-		if (request == null) {
-			return null;
-		}
+	/**
+	 * Process bulk audit requests with typed list of entry objects.
+	 *
+	 * @param entries list of audit entry objects
+	 * @param requestType the audit endpoint type
+	 * @return a JAX-RS Response
+	 */
+	private Response processBulkAuditRequest(List<?> entries, AuditEndpointType requestType) {
+		log.info("Processing bulk audit request - requestType: {}, count: {}", requestType, entries.size());
 
-		JsonNode jsonBody = null;
+		Response.ResponseBuilder builder = Response.ok();
+
 		try {
-			jsonBody = dataMapperService.readTree(request.getInputStream());
-			log.debug("Parsed request body data: {}", jsonBody);
+			String response;
+
+			if (AuditPersistenceMode.CONFIG_API.equals(appConfiguration.getAuditPersistenceMode())) {
+				String json = jsonService.objectToJson(entries);
+				response = auditForwarderService.post(builder, requestType, json, ContentType.APPLICATION_JSON);
+			} else {
+				response = persistBulkAuditData(builder, requestType, entries);
+			}
+
+			builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+			builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+			builder.entity(response);
+			
+			log.debug("Response entity: {}", response);
 		} catch (Exception ex) {
-			log.error("Failed to parse request", ex);
+			builder.status(Status.INTERNAL_SERVER_ERROR);
+			log.error("Failed to process bulk audit request", ex);
+			builder.entity("Failed to process bulk audit request");
 		}
 
-		return jsonBody;
+		return builder.build();
 	}
 
-	private void reportStat(JsonNode json) {
-		boolean hasClientId = json.hasNonNull(LOG_CLIENT_ID);
-		if (hasClientId) {
-			statService.reportActiveClient(json.get(LOG_CLIENT_ID).asText());
+	/**
+	 * Report statistics for a single log entry.
+	 *
+	 * @param logEntry the log entry to report statistics for
+	 */
+	private void reportLogStat(LogEntry logEntry) {
+		if (logEntry.getClientId() != null) {
+			statService.reportActiveClient(logEntry.getClientId());
 		}
 
-		boolean hasPrincipalId = json.hasNonNull(LOG_PRINCIPAL_ID);
-		if (hasPrincipalId) {
-			statService.reportActiveUser(json.get(LOG_PRINCIPAL_ID).asText());
+		if (logEntry.getPrincipalId() != null) {
+			statService.reportActiveUser(logEntry.getPrincipalId());
 		}
 
-		boolean hasВecisionResult = json.hasNonNull(LOG_DECISION_RESULT);
-		if (hasВecisionResult) {
-			String decisionResult = json.get(LOG_DECISION_RESULT).asText();
+		if (logEntry.getDecisionResult() != null) {
+			String decisionResult = logEntry.getDecisionResult();
 			if (LOG_DECISION_RESULT_ALLOW.equals(decisionResult)) {
 				statService.reportAllow(LOG_DECISION_RESULT);
 			} else if (LOG_DECISION_RESULT_DENY.equals(decisionResult)) {
@@ -346,96 +363,81 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 			}
 		}
 
-		boolean hasAction = json.hasNonNull(LOG_ACTION);
-		if (hasAction) {
-			statService.reportOpearation(LOG_ACTION, json.get(LOG_ACTION).asText());
+		if (logEntry.getAction() != null) {
+			statService.reportOpearation(LOG_ACTION, logEntry.getAction());
 		}
 	}
 
 	/**
-	 * Reports statistics for each element of a JSON array representing bulk audit
-	 * entries.
+	 * Persist a single audit entry.
 	 *
-	 * If the provided node is not a JSON array, an error is logged and the method
-	 * still attempts to process its elements.
-	 *
-	 * @param json JSON array of audit entries whose elements will be processed to
-	 *             report statistics
+	 * @param builder response builder
+	 * @param requestType the audit endpoint type
+	 * @param entry the audit entry object
+	 * @return empty string on success, error message on failure
 	 */
-	private void reportBulkStat(JsonNode json) {
-		if (!json.isArray()) {
-			log.error("Failed to calculate stat for bulk log entry: {}", json);
-		}
-
-		for (JsonNode jsonItem : json) {
-			reportStat(jsonItem);
-		}
-
-	}
-
-	/**
-	 * Persist audit data for the given request type.
-	 *
-	 * <p>
-	 * Parses the provided JSON payload into the appropriate audit entry or entries
-	 * based on {@code requestType} and persists them via the audit service.
-	 * </p>
-	 *
-	 * @param builder     response builder that will be updated to BAD_REQUEST on
-	 *                    parse failure
-	 * @param requestType the type of audit endpoint (log, health, telemetry, or
-	 *                    their bulk variants)
-	 * @param json        the JSON payload to parse and persist
-	 * @return an empty string on success, or the message "Failed to parse data" if
-	 *         parsing failed
-	 */
-	private String persistetAuditData(ResponseBuilder builder, AuditEndpointType requestType, String json) {
+	private String persistAuditData(ResponseBuilder builder, AuditEndpointType requestType, Object entry) {
 		try {
 			switch (requestType) {
 			case LOG:
-				LogEntry logEntry = jsonService.jsonToObject(json, LogEntry.class);
-				auditService.addLogEntry(logEntry);
+				auditService.addLogEntry((LogEntry) entry);
 				break;
+			case HEALTH:
+				auditService.addHealthEntry((HealthEntry) entry);
+				break;
+			case TELEMETRY:
+				auditService.addTelemetryEntry((TelemetryEntry) entry);
+				break;
+			default:
+				builder.status(Status.BAD_REQUEST);
+				return "Invalid request type for single entry";
+			}
+		} catch (Exception ex) {
+			builder.status(Status.INTERNAL_SERVER_ERROR);
+			log.error("Failed to persist audit data", ex);
+			return "Failed to persist data";
+		}
+		return "";
+	}
+
+	/**
+	 * Persist bulk audit entries.
+	 *
+	 * @param builder response builder
+	 * @param requestType the audit endpoint type
+	 * @param entries list of audit entry objects
+	 * @return empty string on success, error message on failure
+	 */
+	@SuppressWarnings("unchecked")
+	private String persistBulkAuditData(ResponseBuilder builder, AuditEndpointType requestType, List<?> entries) {
+		try {
+			switch (requestType) {
 			case LOG_BULK:
-				List<LogEntry> logEntries = jsonService.jsonToObject(json,
-						jsonService.getTypeFactory().constructCollectionType(List.class, LogEntry.class));
+				List<LogEntry> logEntries = (List<LogEntry>) entries;
 				for (LogEntry entry : logEntries) {
 					auditService.addLogEntry(entry);
 				}
 				break;
-			case HEALTH:
-				HealthEntry healthEntry = jsonService.jsonToObject(json, HealthEntry.class);
-				auditService.addHealthEntry(healthEntry);
-				break;
 			case HEALTH_BULK:
-				List<HealthEntry> healthEntries = jsonService.jsonToObject(json,
-						jsonService.getTypeFactory().constructCollectionType(List.class, HealthEntry.class));
+				List<HealthEntry> healthEntries = (List<HealthEntry>) entries;
 				for (HealthEntry entry : healthEntries) {
 					auditService.addHealthEntry(entry);
 				}
 				break;
-			case TELEMETRY:
-				TelemetryEntry telemetryEntry = jsonService.jsonToObject(json, TelemetryEntry.class);
-				auditService.addTelemetryEntry(telemetryEntry);
-				break;
 			case TELEMETRY_BULK:
-				List<TelemetryEntry> telemetryEntries = jsonService.jsonToObject(json,
-						jsonService.getTypeFactory().constructCollectionType(List.class, TelemetryEntry.class));
+				List<TelemetryEntry> telemetryEntries = (List<TelemetryEntry>) entries;
 				for (TelemetryEntry entry : telemetryEntries) {
 					auditService.addTelemetryEntry(entry);
 				}
 				break;
+			default:
+				builder.status(Status.BAD_REQUEST);
+				return "Invalid request type for bulk entries";
 			}
-		} catch (IOException ex) {
-			builder.status(Status.BAD_REQUEST);
-			log.warn("Failed to parse data", ex);
-
-			return "Failed to parse data";
 		} catch (Exception ex) {
 			builder.status(Status.INTERNAL_SERVER_ERROR);
-			log.error("Failed to persist audit data", ex);
-
-			return "Failed to persist data";
+			log.error("Failed to persist bulk audit data", ex);
+			return "Failed to persist bulk data";
 		}
 		return "";
 	}

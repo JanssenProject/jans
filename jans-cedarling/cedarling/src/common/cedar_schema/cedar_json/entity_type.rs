@@ -4,8 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::attribute::Attribute;
-use super::deserialize::*;
-use super::*;
+use super::deserialize::deserialize_record_attrs;
+use super::{AttributeName, EntityTypeName, HashMap};
 use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashSet;

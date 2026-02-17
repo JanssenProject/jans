@@ -220,7 +220,7 @@ config:
     cnSqldbUserPassword: Test1234#
     # -- Enable SSL connection to SQL database.
     cnSqlSslEnabled: false
-  # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
+    # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
     cnSqlSslMode: ""
     # -- Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication.
     cnSqlSslCaCert: ""
@@ -314,28 +314,6 @@ config:
     lbAddr: ""
     # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
     quarkusTransactionEnableRecovery: true
-    # -- Keycloak  admin UI password
-    kcAdminPassword: Test1234#
-    # -- Keycloak admin UI username
-    kcAdminUsername: admin
-    # -- Keycloak logging level
-    kcLogLevel: INFO
-    # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
-    kcDbVendor: mysql
-    # -- Keycloak database username
-    kcDbUsername: keycloak
-    # -- Password for Keycloak database access
-    kcDbPassword: Test1234#
-    # -- Keycloak database schema name (note that PostgreSQL may be using "public" schema).
-    kcDbSchema: keycloak
-    # -- Keycloak database host uri
-    kcDbUrlHost: mysql.kc.svc.cluster.local
-    # -- Keycloak database port (default to port 3306 for mysql).
-    kcDbUrlPort: 3306
-    # -- Keycloak database name.
-    kcDbUrlDatabase: keycloak
-    # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
-    kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
     # -- Message type (one of POSTGRES, REDIS, or DISABLED)
     cnMessageType: DISABLED
   # -- Country code. Used for certificate creation.
@@ -911,7 +889,7 @@ global:
     adminEnabled: true
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
-      # -- Enable casa endpoints /casa
+      # -- Enable casa endpoints /jans-casa
       casaEnabled: false
       # -- Casa ingress resource labels. key app is taken
       casaLabels: { }
@@ -997,7 +975,7 @@ global:
       configApiLabels: { }
       # -- ConfigAPI ingress resource additional annotations.
       configApiAdditionalAnnotations: { }
-    # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml")
+    # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt")
     plugins: "fido2,scim,user-mgt"
   # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
   fqdn: demoexample.jans.io
@@ -1077,6 +1055,9 @@ global:
     gateways: [ ]
   # -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable.
   lbIp: 22.22.22.22
+  gatewayApi:
+    # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
+    enabled: false
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
     enabled: true
@@ -1157,36 +1138,8 @@ global:
     provisioner: microk8s.io/hostpath
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
-  saml:
-    # — Add custom annotations for kubernetes resources for the service
-    customAnnotations:
-      destinationRule: {}
-      podDisruptionBudget: {}
-      virtualService: {}
-      pod: {}
-      deployment: {}
-      horizontalPodAutoscaler: {}
-      service: {}
-      secret: {}
-    # -- Name of the saml service. Please keep it as default.
-    samlServiceName: saml
-    # -- Boolean flag to enable/disable the saml chart.
-    enabled: false
-    # -- Enable endpoints in either istio or nginx ingress depending on users choice
-    ingress:
-      # Enable saml endpoints /kc
-      samlEnabled: false
-      # -- SAML config ingress resource labels. key app is taken
-      samlLabels: { }
-      # -- SAML ingress resource additional annotations.
-      samlAdditionalAnnotations: { }
-    # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
-    cnCustomJavaOptions: ""
   # -- Path to the SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
-  kc-scheduler:
-    # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
-    enabled: false
   # -- Path to the configuration schema file
   cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
   # -- Path to the dumped configuration schema file
@@ -1202,6 +1155,48 @@ global:
   cleanup:
     # -- Boolean flag to enable/disable the cleanup cronjob chart.
     enabled: true
+  shibboleth-idp:
+    # -- Boolean flag to enable/disable the Shibboleth IDP chart.
+    enabled: false
+    # -- Custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      pod: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}
+    # -- App loggers for Shibboleth IDP
+    appLoggers:
+      enableStdoutLogPrefix: "true"
+      shibbolethLogTarget: "STDOUT"
+      shibbolethLogLevel: "INFO"
+    # -- Enable Shibboleth IDP ingress
+    ingress:
+      shibbolethIdpEnabled: true
+      shibbolethIdpLabels: {}
+      shibbolethIdpAdditionalAnnotations: {}
+gatewayApi:
+  # -- Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant
+  gatewayClassName: nginx
+  # -- The name of the Gateway resource to be created
+  name: jans-gateway
+  # -- Gateway http port number
+  httpPort: 80
+  # -- Gateway https port number
+  httpsPort: 443
+  # -- Secret containing the TLS certificate for the Gateway
+  tlsSecretName: tls-certificate
+  # -- Specific labels for the Gateway resource
+  gatewayLabels: {}
+  # -- Specific annotations for the Gateway resource
+  gatewayAnnotations: {}
+  # -- Specific labels for the HTTPRoute resource
+  routeLabels: {}
+  # -- Specific annotations for the HTTPRoute resource
+  routeAnnotations: {}
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
@@ -1403,183 +1398,6 @@ scim:
   customCommand: []
   # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
   nodeSelector: {}
-# -- SAML.
-saml:
-  # -- Add tolerations for the pods
-  tolerations: [ ]
-  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
-  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
-  topologySpreadConstraints: {}
-    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
-    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
-    #tsc1:
-    #  maxSkew: 1
-    #  minDomains: 1 # optional; beta since v1.25
-    #  topologyKey: kubernetes.io/hostname
-    #  whenUnsatisfiable: DoNotSchedule
-    #  matchLabelKeys: [] # optional; alpha since v1.25
-    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
-    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
-    #tsc2:
-      #maxSkew: 1
-  # -- Configure the PodDisruptionBudget
-  pdb:
-    enabled: true
-    maxUnavailable: "90%"
-  # -- Configure the HorizontalPodAutoscaler
-  hpa:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 50
-    # -- metrics if targetCPUUtilizationPercentage is not set
-    metrics: []
-    # -- Scaling Policies
-    behavior: {}
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/saml
-    # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
-    # -- Image Pull Secrets
-    pullSecrets: [ ]
-  # -- Service replica number.
-  replicas: 1
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 500m
-      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
-      memory: 1200Mi
-    requests:
-      # -- CPU request.
-      cpu: 500m
-      # -- Memory request.
-      memory: 1200Mi
-  # -- Configure the liveness healthcheck for the auth server if needed.
-  livenessProbe:
-    # -- http liveness probe endpoint
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    initialDelaySeconds: 30
-    periodSeconds: 30
-    timeoutSeconds: 5
-    failureThreshold: 10
-  readinessProbe:
-    # -- http readiness probe endpoint
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    initialDelaySeconds: 25
-    periodSeconds: 25
-    timeoutSeconds: 5
-    failureThreshold: 10
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-  # Actions on lifecycle events such as postStart and preStop
-  # Example
-  # lifecycle:
-  #   postStart:
-  #     exec:
-  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
-  lifecycle: {}
-
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: { }
-  # -- Add custom scripts that have been mounted to run before the entrypoint.
-  # - /tmp/custom.sh
-  # - /tmp/custom2.sh
-  customScripts: [ ]
-  # -- Add custom pod's command. If passed, it will override the default conditional command.
-  customCommand: []
-  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
-  nodeSelector: {}
-
-# -- Responsible for synchronizing Keycloak SAML clients
-kc-scheduler:
-  # -- Add tolerations for the pods
-  tolerations: [ ]
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: ghcr.io/janssenproject/jans/cloudtools
-    # -- Image  tag to use for deploying.
-    tag: 0.0.0-nightly
-    # -- Image Pull Secrets
-    pullSecrets: [ ]
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 300m
-      # -- Memory limit.
-      memory: 300Mi
-    requests:
-      # -- CPU request.
-      cpu: 300m
-      # -- Memory request.
-      memory: 300Mi
-  # -- Interval of running the scheduler (in minutes)
-  interval: 10
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-  # Actions on lifecycle events such as postStart and preStop
-  # Example
-  # lifecycle:
-  #   postStart:
-  #     exec:
-  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
-  lifecycle: {}
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: {}
-  # -- Add custom scripts that have been mounted to run before the entrypoint.
-  # - /tmp/custom.sh
-  # - /tmp/custom2.sh
-  customScripts: []
-  # -- Add custom job's command. If passed, it will override the default conditional command.
-  customCommand: []
-  # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
-  nodeSelector: {}
-
 # -- Cleanup expired entries in persistence
 cleanup:
   # -- Add tolerations for the pods
@@ -1644,3 +1462,101 @@ cleanup:
   customCommand: []
   # -- Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
   nodeSelector: {}
+
+# -- Shibboleth Identity Provider 5.1.6 for SAML SSO
+shibboleth-idp:
+  # -- Add tolerations for the pods
+  tolerations: []
+  # -- Configure the topology spread constraints
+  topologySpreadConstraints: {}
+  # -- Configure the PodDisruptionBudget
+  pdb:
+    enabled: true
+    maxUnavailable: "90%"
+  # -- Configure the HorizontalPodAutoscaler
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    metrics: []
+    behavior: {}
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    normal: {}
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image to use for deploying.
+    repository: ghcr.io/janssenproject/jans/shibboleth
+    # -- Image tag to use for deploying.
+    tag: 5.1.6_dev
+    # -- Image Pull Secrets
+    pullSecrets: []
+  # -- Service replica number.
+  replicaCount: 1
+  # -- Resource specs.
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  # -- Configure the liveness healthcheck
+  livenessProbe:
+    httpGet:
+      path: /idp/status
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 5
+  # -- Configure the readiness healthcheck
+  readinessProbe:
+    httpGet:
+      path: /idp/status
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  # -- Configure any additional volumes
+  volumes: []
+  # -- Configure any additional volumesMounts
+  volumeMounts: []
+  # -- Actions on lifecycle events
+  lifecycle: {}
+  # -- Additional labels
+  additionalLabels: {}
+  # -- Additional annotations
+  additionalAnnotations: {}
+  # -- Add custom scripts that run before the entrypoint
+  customScripts: []
+  # -- Add custom command override
+  customCommand: []
+  # -- Add nodeSelector
+  nodeSelector: {}
+  # -- Shibboleth IDP specific configuration
+  shibboleth:
+    # -- IDP entity ID (defaults to https://<hostname>/idp/shibboleth)
+    entityId: ""
+    # -- IDP scope for attribute release
+    scope: ""
+    # -- Signing key alias in keystore
+    signingKeyAlias: "idp-signing"
+    # -- Encryption key alias in keystore
+    encryptionKeyAlias: "idp-encryption"
+    # -- Janssen Auth Server integration
+    jansAuth:
+      # -- Enable Janssen Auth integration for authentication
+      enabled: true
+      # -- OAuth client ID for Shibboleth IDP
+      clientId: ""
+      # -- OAuth redirect URI
+      redirectUri: ""
+      # -- OAuth scopes to request
+      scopes: "openid,profile,email"

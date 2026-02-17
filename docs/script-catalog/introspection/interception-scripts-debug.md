@@ -406,13 +406,13 @@ For Jython scripts, we need additional steps to enable breakpoints.
 
 1. Create a connection to the ldap browser. The default password will be `Test1234#` if not changed in the helm install command.
  
-    ![LDAP browser connection](../../../assets/ldap_browser_connection.png)
+    ![LDAP browser connection](../../assets/ldap_browser_connection.png)
 
 1. Inside the browser navigate to `o=jans, ou=scripts`. Right click on `ou=scripts` and click on `Quick Search`. Inside the pop up box that appears fill `Returning Attributes` with `displayName`, and press `Apply and Close`
 
 1. In the results that appear click on the `Dn` that has a `displayName` of `basic`.
 
-    ![LDAP basic script ](../../../assets/basic_script.png)
+    ![LDAP basic script ](../../assets/basic_script.png)
 
 1. Choose to load the script from file instead of db. Inside the browser change `jansModuleProperty` with value `{"value1":"location_type","value2":"db","description":""}` to `{"value1":"location_type","value2":"file","description":""}`
 
@@ -420,7 +420,7 @@ For Jython scripts, we need additional steps to enable breakpoints.
 
 1. Enable the script by settings `jansEnabled` to `true`. The following is an example of how the basic script entry should look.  
 
-    ![LDAP basic script ](../../../assets/basic_script_enabled.png)
+    ![LDAP basic script ](../../assets/basic_script_enabled.png)
 
 1. Check the following log inside the the auth-server container to verify that auth server loaded the script properly: `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`. It should look like this:    
 

@@ -785,21 +785,21 @@
       "tag": "lock-config"
     },
     {
-      "permission": "https://jans.io/oauth/config/jans_asset-read",
+      "permission": "https://jans.io/oauth/config/asset.readonly",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
       "tag": "jans_asset"
     },
     {
-      "permission": "https://jans.io/oauth/config/jans_asset-write",
+      "permission": "https://jans.io/oauth/config/asset.write",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
       "tag": "jans_asset"
     },
     {
-      "permission": "https://jans.io/oauth/config/jans_asset-delete",
+      "permission": "https://jans.io/oauth/config/asset.admin",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false,
@@ -906,20 +906,6 @@
     {
       "tag": "security",
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/security.write",
-      "description": "",
-      "defaultPermissionInToken": false,
-      "essentialPermissionInAdminUI": false
-    },
-    {
-      "tag": "kc-link-config",
-      "permission": "https://jans.io/oauth/kc-link-config.readonly",
-      "description": "",
-      "defaultPermissionInToken": false,
-      "essentialPermissionInAdminUI": false
-    },
-    {
-      "tag": "kc-link-config",
-      "permission": "https://jans.io/oauth/kc-link-config.write",
       "description": "",
       "defaultPermissionInToken": false,
       "essentialPermissionInAdminUI": false
@@ -1085,13 +1071,11 @@
         "https://jans.io/idp/saml.write",
         "https://jans.io/idp/saml.delete",
         "https://jans.io/oauth/config/app-version.readonly",
-        "https://jans.io/oauth/kc-link-config.readonly",
-        "https://jans.io/oauth/kc-link-config.write",
         "https://jans.io/oauth/lock-config.readonly",
         "https://jans.io/oauth/lock-config.write",
-        "https://jans.io/oauth/config/jans_asset-read",
-        "https://jans.io/oauth/config/jans_asset-write",
-        "https://jans.io/oauth/config/jans_asset-delete",
+        "https://jans.io/oauth/config/asset.readonly",
+        "https://jans.io/oauth/config/asset.write",
+        "https://jans.io/oauth/config/asset.admin",
         "https://jans.io/oauth/lock/audit.readonly",
         "https://jans.io/oauth/lock/audit.write",
         "https://jans.io/oauth/lock/health.readonly",

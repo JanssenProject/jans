@@ -16,9 +16,9 @@ SUPPORTED_PLUGINS = (
     "scim",
     "fido2",
     "user-mgt",
-    "kc-saml",
     "lock",
     "jans-link",
+    # shibboleth
 )
 
 

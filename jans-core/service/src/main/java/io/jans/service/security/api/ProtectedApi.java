@@ -17,4 +17,9 @@ public @interface ProtectedApi {
      */
 	String[] scopes() default {};
 
+	/**
+	 * @return gRPC method name mapped to this endpoint (empty if not applicable)
+	 */
+	String grpcMethodName() default "";
+
 }
