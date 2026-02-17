@@ -100,37 +100,37 @@ func CallShutDown(instance_id uint) {
 	G2R.shut_down(&instance_id)
 }
 
-func CallPushData(instance_id uint, key string, value_json string, ttl_nanos int64) Result {
+func CallPushDataCtx(instance_id uint, key string, value_json string, ttl_nanos int64) Result {
 	result := G2R.push_data_ctx(&instance_id, &key, &value_json, &ttl_nanos)
 	return result
 }
 
-func CallGetData(instance_id uint, key string) Result {
+func CallGetDataCtx(instance_id uint, key string) Result {
 	result := G2R.get_data_ctx(&instance_id, &key)
 	return result
 }
 
-func CallGetDataEntry(instance_id uint, key string) Result {
+func CallGetDataEntryCtx(instance_id uint, key string) Result {
 	result := G2R.get_data_entry_ctx(&instance_id, &key)
 	return result
 }
 
-func CallRemoveData(instance_id uint, key string) Result {
+func CallRemoveDataCtx(instance_id uint, key string) Result {
 	result := G2R.remove_data_ctx(&instance_id, &key)
 	return result
 }
 
-func CallClearData(instance_id uint) Result {
+func CallClearDataCtx(instance_id uint) Result {
 	result := G2R.clear_data_ctx(&instance_id)
 	return result
 }
 
-func CallListData(instance_id uint) Result {
+func CallListDataCtx(instance_id uint) Result {
 	result := G2R.list_data_ctx(&instance_id)
 	return result
 }
 
-func CallGetStats(instance_id uint) Result {
+func CallGetStatsCtx(instance_id uint) Result {
 	result := G2R.get_stats_ctx(&instance_id)
 	return result
 }

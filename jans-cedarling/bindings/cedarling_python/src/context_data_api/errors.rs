@@ -13,49 +13,49 @@ create_exception!(
     data_errors_ctx,
     DataErrorCtx,
     pyo3::exceptions::PyException,
-    "Exception raised by data_errors_ctx"
+    "Base exception for errors encountered during data operations in Cedarling context storage."
 );
 
 create_exception!(
     data_errors_ctx,
     InvalidKey,
     DataErrorCtx,
-    "Invalid key provided (key is empty)"
+    "Raised when an invalid (e.g., empty) key is provided to the context data store. This typically means the key argument was missing or empty."
 );
 
 create_exception!(
     data_errors_ctx,
     KeyNotFound,
     DataErrorCtx,
-    "Key not found in store"
+    "Raised when a requested key is not found in the context data store. This usually means the key does not exist or has expired."
 );
 
 create_exception!(
     data_errors_ctx,
     StorageLimitExceeded,
     DataErrorCtx,
-    "Storage limit exceeded"
+    "Raised when an operation would exceed the maximum allowed storage size for the context data store."
 );
 
 create_exception!(
     data_errors_ctx,
     TTLExceeded,
     DataErrorCtx,
-    "TTL exceeds maximum allowed"
+    "Raised when a requested time-to-live (TTL) value exceeds the maximum allowed by the context data store."
 );
 
 create_exception!(
     data_errors_ctx,
     ValueTooLarge,
     DataErrorCtx,
-    "Value size exceeds maximum allowed size"
+    "Raised when a value is too large to be stored in the context data store, exceeding the allowed size limit."
 );
 
 create_exception!(
     data_errors_ctx,
     SerializationError,
     DataErrorCtx,
-    "Serialization error"
+    "Raised when there is a failure serializing or deserializing data for storage or retrieval in the context data store."
 );
 
 #[pyclass]

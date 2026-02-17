@@ -734,8 +734,8 @@ func TestValidationGracefulDegradationInvalidToken(t *testing.T) {
 	}
 }
 
-// TestDataAPIPushAndGet tests basic push and get operations
-func TestDataAPIPushAndGet(t *testing.T) {
+// TestDataAPIPushAndGetCtx tests basic push and get operations
+func TestDataAPIPushAndGetCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -751,13 +751,13 @@ func TestDataAPIPushAndGet(t *testing.T) {
 		"level":   "premium",
 		"country": "US",
 	}
-	err = instance.PushData("user_profile", value, nil)
+	err = instance.PushDataCtx("user_profile", value, nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
 
 	// Get data
-	result, err := instance.GetData("user_profile")
+	result, err := instance.GetDataCtx("user_profile")
 	if err != nil {
 		t.Fatalf("Failed to get data: %v", err)
 	}
@@ -775,8 +775,8 @@ func TestDataAPIPushAndGet(t *testing.T) {
 	}
 }
 
-// TestDataAPIGetDataEntry tests getting data with metadata
-func TestDataAPIGetDataEntry(t *testing.T) {
+// TestDataAPIGetDataEntryCtx tests getting data with metadata
+func TestDataAPIGetDataEntryCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -788,13 +788,13 @@ func TestDataAPIGetDataEntry(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Push data
-	err = instance.PushData("test_key", "test_value", nil)
+	err = instance.PushDataCtx("test_key", "test_value", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
 
 	// Get entry with metadata
-	entry, err := instance.GetDataEntry("test_key")
+	entry, err := instance.GetDataEntryCtx("test_key")
 	if err != nil {
 		t.Fatalf("Failed to get data entry: %v", err)
 	}
@@ -810,8 +810,8 @@ func TestDataAPIGetDataEntry(t *testing.T) {
 	}
 }
 
-// TestDataAPIRemoveData tests removing data
-func TestDataAPIRemoveData(t *testing.T) {
+// TestDataAPIRemoveDataCtx tests removing data
+func TestDataAPIRemoveDataCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -823,13 +823,13 @@ func TestDataAPIRemoveData(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Push data
-	err = instance.PushData("to_remove", "value", nil)
+	err = instance.PushDataCtx("to_remove", "value", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
 
 	// Remove data
-	removed, err := instance.RemoveData("to_remove")
+	removed, err := instance.RemoveDataCtx("to_remove")
 	if err != nil {
 		t.Fatalf("Failed to remove data: %v", err)
 	}
@@ -838,7 +838,7 @@ func TestDataAPIRemoveData(t *testing.T) {
 	}
 
 	// Verify it's gone
-	result, err := instance.GetData("to_remove")
+	result, err := instance.GetDataCtx("to_remove")
 	if err != nil {
 		t.Fatalf("Failed to get data: %v", err)
 	}
@@ -847,8 +847,8 @@ func TestDataAPIRemoveData(t *testing.T) {
 	}
 }
 
-// TestDataAPIClearData tests clearing all data
-func TestDataAPIClearData(t *testing.T) {
+// TestDataAPIClearDataCtx tests clearing all data
+func TestDataAPIClearDataCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -860,23 +860,23 @@ func TestDataAPIClearData(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Push multiple entries
-	err = instance.PushData("key1", "value1", nil)
+	err = instance.PushDataCtx("key1", "value1", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
-	err = instance.PushData("key2", "value2", nil)
+	err = instance.PushDataCtx("key2", "value2", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
 
 	// Clear all data
-	err = instance.ClearData()
+	err = instance.ClearDataCtx()
 	if err != nil {
 		t.Fatalf("Failed to clear data: %v", err)
 	}
 
 	// Verify all data is gone
-	stats, err := instance.GetStats()
+	stats, err := instance.GetStatsCtx()
 	if err != nil {
 		t.Fatalf("Failed to get stats: %v", err)
 	}
@@ -885,8 +885,8 @@ func TestDataAPIClearData(t *testing.T) {
 	}
 }
 
-// TestDataAPIListData tests listing all data entries
-func TestDataAPIListData(t *testing.T) {
+// TestDataAPIListDataCtx tests listing all data entries
+func TestDataAPIListDataCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -898,23 +898,23 @@ func TestDataAPIListData(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Clear any existing data
-	err = instance.ClearData()
+	err = instance.ClearDataCtx()
 	if err != nil {
 		t.Fatalf("Failed to clear data: %v", err)
 	}
 
 	// Push multiple entries
-	err = instance.PushData("list_key1", "value1", nil)
+	err = instance.PushDataCtx("list_key1", "value1", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
-	err = instance.PushData("list_key2", "value2", nil)
+	err = instance.PushDataCtx("list_key2", "value2", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
 
 	// List all entries
-	entries, err := instance.ListData()
+	entries, err := instance.ListDataCtx()
 	if err != nil {
 		t.Fatalf("Failed to list data: %v", err)
 	}
@@ -924,8 +924,8 @@ func TestDataAPIListData(t *testing.T) {
 	}
 }
 
-// TestDataAPIGetStats tests getting data store statistics
-func TestDataAPIGetStats(t *testing.T) {
+// TestDataAPIGetStatsCtx tests getting data store statistics
+func TestDataAPIGetStatsCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -937,17 +937,17 @@ func TestDataAPIGetStats(t *testing.T) {
 	defer instance.ShutDown()
 
 	// Clear and add some data
-	err = instance.ClearData()
+	err = instance.ClearDataCtx()
 	if err != nil {
 		t.Fatalf("Failed to clear data: %v", err)
 	}
-	err = instance.PushData("stats_key", "stats_value", nil)
+	err = instance.PushDataCtx("stats_key", "stats_value", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data: %v", err)
 	}
 
 	// Get stats
-	stats, err := instance.GetStats()
+	stats, err := instance.GetStatsCtx()
 	if err != nil {
 		t.Fatalf("Failed to get stats: %v", err)
 	}
@@ -960,8 +960,8 @@ func TestDataAPIGetStats(t *testing.T) {
 	}
 }
 
-// TestDataAPIInstanceIsolation tests that data is isolated between instances
-func TestDataAPIInstanceIsolation(t *testing.T) {
+// TestDataAPIInstanceIsolationCtx tests that data is isolated between instances
+func TestDataAPIInstanceIsolationCtx(t *testing.T) {
 	config, err := loadTestConfig(nil)
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
@@ -980,13 +980,13 @@ func TestDataAPIInstanceIsolation(t *testing.T) {
 	defer instance2.ShutDown()
 
 	// Push data to instance1
-	err = instance1.PushData("isolated_key", "instance1_value", nil)
+	err = instance1.PushDataCtx("isolated_key", "instance1_value", nil)
 	if err != nil {
 		t.Fatalf("Failed to push data to instance1: %v", err)
 	}
 
 	// Verify data is NOT in instance2
-	result, err := instance2.GetData("isolated_key")
+	result, err := instance2.GetDataCtx("isolated_key")
 	if err != nil {
 		t.Fatalf("Failed to get data from instance2: %v", err)
 	}
@@ -995,7 +995,7 @@ func TestDataAPIInstanceIsolation(t *testing.T) {
 	}
 
 	// Verify data IS in instance1
-	result, err = instance1.GetData("isolated_key")
+	result, err = instance1.GetDataCtx("isolated_key")
 	if err != nil {
 		t.Fatalf("Failed to get data from instance1: %v", err)
 	}
