@@ -73,7 +73,7 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
-          cp mkdocs.yml ../
+          cp mkdocs.yml CHANGELOG.md ../
 
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
