@@ -525,7 +525,7 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
     # Get data
     value = cedarling.get_data_ctx("user:123")
-    if value:
+    if value is not None:
         print(f"User roles: {value['role']}")
 
     # Get statistics
@@ -599,18 +599,21 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 === "Go"
 
     ```go
+    package main
+
     import "time"
 
-    // Push data with optional TTL (5 minutes)
-    userData := map[string]any{
-        "role":    []string{"admin", "editor"},
-        "country": "US",
-    }
-    ttl := 5 * time.Minute
-    err := instance.PushData("user:123", userData, &ttl)
-    if err != nil {
-        // Handle error
-    }
+    func main() {
+        // Push data with optional TTL (5 minutes)
+        userData := map[string]any{
+            "role":    []string{"admin", "editor"},
+            "country": "US",
+        }
+        ttl := 5 * time.Minute
+        err := instance.PushData("user:123", userData, &ttl)
+        if err != nil {
+            // Handle error
+        }
 
     // Get data
     value, err := instance.GetData("user:123")

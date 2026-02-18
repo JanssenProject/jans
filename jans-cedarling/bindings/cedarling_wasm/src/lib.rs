@@ -317,6 +317,12 @@ impl Cedarling {
         ttl_secs: Option<u64>,
     ) -> Result<(), Error> {
         let json_value: serde_json::Value = serde_wasm_bindgen::from_value(value)?;
+
+        // Reject null values on write
+        if json_value.is_null() {
+            return Err(Error::new("null values are not allowed in data ctx"));
+        }
+
         let ttl = ttl_secs.map(Duration::from_secs);
         self.instance
             .push_data_ctx(key, json_value, ttl)

@@ -167,9 +167,11 @@ public class CedarlingAdapterTest {
         value.put("data", "to_remove");
         adapter.pushDataCtx("to_remove", value);
 
-        JSONObject result = adapter.getDataCtx("to_remove");
+        Object result = adapter.getDataCtx("to_remove");
         assertNotNull(result);
-        assertEquals(result.getString("data"), "to_remove");
+        assertTrue(result instanceof JSONObject);
+        JSONObject resultObj = (JSONObject) result;
+        assertEquals(resultObj.getString("data"), "to_remove");
 
         boolean removed = adapter.removeDataCtx("to_remove");
         assertTrue(removed);

@@ -192,7 +192,7 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const entry = cedarling.get_data_entry_ctx("user:123");
+   * const entry = await cedarling.get_data_entry_ctx("user:123");
    * if (entry) {
    *   console.log(`Created: ${entry.created_at}, Access count: ${entry.access_count}`);
    * }
@@ -520,7 +520,7 @@ if (value) {
 Get a data entry with full metadata including creation time, expiration, access count, and type:
 
 ```javascript
-const entry = cedarling.get_data_entry_ctx("user:123");
+const entry = await cedarling.get_data_entry_ctx("user:123");
 if (entry) {
   console.log(`Key: ${entry.key}`);
   console.log(`Created at: ${entry.created_at}`);
@@ -587,7 +587,7 @@ try {
   }
 }
 
-const value = cedarling.get_data_ctx("nonexistent");
+const value = await cedarling.get_data_ctx("nonexistent");
 if (value === null) {
   console.log("Key not found");
 }

@@ -888,10 +888,10 @@ mod tests {
         });
 
         let result = validator.validate(&deep);
-        assert!(matches!(
-            result,
-            Err(ValidationError::MaxDepthExceeded { .. })
-        ));
+        assert!(
+            matches!(result, Err(ValidationError::MaxDepthExceeded { .. })),
+            "validation should fail with MaxDepthExceeded when depth exceeds max_depth"
+        );
     }
 
     #[test]
@@ -900,7 +900,10 @@ mod tests {
 
         let long_string = json!("this is a very long string");
         let result = validator.validate(&long_string);
-        assert!(matches!(result, Err(ValidationError::StringTooLong { .. })));
+        assert!(
+            matches!(result, Err(ValidationError::StringTooLong { .. })),
+            "validation should fail with StringTooLong when string exceeds max_string_length"
+        );
     }
 
     #[test]
@@ -909,7 +912,10 @@ mod tests {
 
         let long_array = json!([1, 2, 3, 4, 5]);
         let result = validator.validate(&long_array);
-        assert!(matches!(result, Err(ValidationError::ArrayTooLong { .. })));
+        assert!(
+            matches!(result, Err(ValidationError::ArrayTooLong { .. })),
+            "validation should fail with ArrayTooLong when array length exceeds max_array_length"
+        );
     }
 
     #[test]
@@ -918,7 +924,10 @@ mod tests {
 
         let many_keys = json!({"a": 1, "b": 2, "c": 3});
         let result = validator.validate(&many_keys);
-        assert!(matches!(result, Err(ValidationError::TooManyKeys { .. })));
+        assert!(
+            matches!(result, Err(ValidationError::TooManyKeys { .. })),
+            "validation should fail with TooManyKeys when object has more keys than max_object_keys"
+        );
     }
 
     #[test]
@@ -932,18 +941,18 @@ mod tests {
         // Invalid - empty type
         let invalid_type = json!({"type": "", "id": "alice"});
         let result = validator.validate(&invalid_type);
-        assert!(matches!(
-            result,
-            Err(ValidationError::InvalidEntityReference { .. })
-        ));
+        assert!(
+            matches!(result, Err(ValidationError::InvalidEntityReference { .. })),
+            "validation should fail with InvalidEntityReference when entity type is empty"
+        );
 
         // Invalid - empty id
         let invalid_id = json!({"type": "User", "id": ""});
         let result = validator.validate(&invalid_id);
-        assert!(matches!(
-            result,
-            Err(ValidationError::InvalidEntityReference { .. })
-        ));
+        assert!(
+            matches!(result, Err(ValidationError::InvalidEntityReference { .. })),
+            "validation should fail with InvalidEntityReference when entity id is empty"
+        );
     }
 
     #[test]
@@ -961,10 +970,10 @@ mod tests {
         // Invalid IP format
         let invalid_ip = json!({"__extn": {"fn": "ip", "arg": "not-an-ip"}});
         let result = validator.validate(&invalid_ip);
-        assert!(matches!(
-            result,
-            Err(ValidationError::InvalidExtensionFormat { .. })
-        ));
+        assert!(
+            matches!(result, Err(ValidationError::InvalidExtensionFormat { .. })),
+            "validation should fail with InvalidExtensionFormat when IP format is invalid"
+        );
     }
 
     #[test]
@@ -995,7 +1004,10 @@ mod tests {
 
         // Type mismatch
         let result = validator.validate_type(&json!("hello"), CedarType::Long);
-        assert!(matches!(result, Err(ValidationError::TypeMismatch { .. })));
+        assert!(
+            matches!(result, Err(ValidationError::TypeMismatch { .. })),
+            "validate_type should fail with TypeMismatch when value type doesn't match expected type"
+        );
     }
 
     #[test]
@@ -1043,7 +1055,10 @@ mod tests {
             path: "$".to_string(),
         });
         assert!(!result.is_valid());
-        assert!(result.into_result().is_err());
+        assert!(
+            matches!(result.into_result(), Err(_)),
+            "expected ValidationResult::into_result() to return Err(ValidationError::NullNotSupported {{ .. }})"
+        );
     }
 
     #[test]
@@ -1053,6 +1068,9 @@ mod tests {
         // Empty key
         let data = json!({"": 1});
         let result = validator.validate(&data);
-        assert!(matches!(result, Err(ValidationError::InvalidKey { .. })));
+        assert!(
+            matches!(result, Err(ValidationError::InvalidKey { .. })),
+            "validation should fail with InvalidKey when object has an empty key"
+        );
     }
 }

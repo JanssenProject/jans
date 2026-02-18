@@ -120,8 +120,9 @@ impl DataStore {
         }
 
         // Calculate effective TTL using the helper function
-        let effective_ttl_chrono = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
-        
+        let effective_ttl_chrono =
+            get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
+
         // Convert back to StdDuration for DataEntry::new
         // chrono::Duration can be converted to std::time::Duration via num_seconds
         let effective_ttl_std = if effective_ttl_chrono.num_seconds() >= 0 {
@@ -256,9 +257,14 @@ impl DataStore {
 
     /// Get the number of entries currently in the store.
     /// Uses read lock for concurrent access.
+    /// Filters out expired entries to match get_all()/list_entries() behavior.
     pub(crate) fn count(&self) -> usize {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
-        storage.len()
+        let now = chrono::Utc::now();
+        storage
+            .iter()
+            .filter(|(_, entry)| !entry.is_expired(now))
+            .count()
     }
 
     /// Get all active (non-expired) entries as a `HashMap`.
@@ -295,10 +301,13 @@ impl DataStore {
     /// Calculate the total size of all entries in bytes.
     ///
     /// Size is computed based on JSON serialization of each entry.
+    /// Filters out expired entries to match get_all()/list_entries() behavior.
     pub(crate) fn total_size(&self) -> usize {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+        let now = chrono::Utc::now();
         storage
             .iter()
+            .filter(|(_, entry)| !entry.is_expired(now))
             .map(|(_, entry)| serde_json::to_string(entry).map(|s| s.len()).unwrap_or(0))
             .sum()
     }
@@ -532,10 +541,10 @@ mod tests {
 
         // Third entry should fail
         let result = store.push("key3", json!("value3"), None);
-        assert!(matches!(
-            result,
-            Err(DataError::StorageLimitExceeded { max: 2 })
-        ));
+        assert!(
+            matches!(result, Err(DataError::StorageLimitExceeded { max: 2 })),
+            "push with max_entries=2 should fail with StorageLimitExceeded when adding third entry"
+        );
     }
 
     #[test]
@@ -574,7 +583,10 @@ mod tests {
 
         // TTL exceeding limit should fail
         let result = store.push("key2", json!("value2"), Some(StdDuration::from_secs(120)));
-        assert!(matches!(result, Err(DataError::TTLExceeded { .. })));
+        assert!(
+            matches!(result, Err(DataError::TTLExceeded { .. })),
+            "push with TTL exceeding max_ttl should fail with TTLExceeded"
+        );
     }
 
     #[test]
