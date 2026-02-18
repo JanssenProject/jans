@@ -49,13 +49,6 @@ public class AuditLogResource extends ConfigBaseResource {
     public static final String AUDIT_FILE_NAME = "configapi-audit.log";
     public static final String AUDIT_FILE_DATE_FORMAT = "dd-MM-yyyy";
 
-    /** ISO-8601 date-time with optional offset (e.g. yyyy-MM-ddTHH:mm:ssZ or yyyy-MM-ddTHH:mm:ss.SSSZ). */
-    private static final DateTimeFormatter ISO_OFFSET_DATE_TIME = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-    /** ISO-8601 local date-time (e.g. yyyy-MM-ddTHH:mm:ss). */
-    private static final DateTimeFormatter ISO_LOCAL_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-    /** ISO-8601 date only (e.g. yyyy-MM-dd). */
-    private static final DateTimeFormatter ISO_LOCAL_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
-
     static final String AUDIT = "/audit";
 
     private class LogPagedResult extends PagedResult<String> {
@@ -380,21 +373,21 @@ public class AuditLogResource extends ConfigBaseResource {
         String trimmed = dateStr.trim();
         // Try ISO-8601 offset date-time (e.g. 2024-02-13T10:30:00Z, 2024-02-13T10:30:00+01:00)
         try {
-            ZonedDateTime zdt = ZonedDateTime.parse(trimmed, ISO_OFFSET_DATE_TIME);
+            ZonedDateTime zdt = ZonedDateTime.parse(trimmed, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             return zdt.toLocalDate();
         } catch (DateTimeParseException ignored) {
             // continue
         }
         // Try ISO local date-time (e.g. 2024-02-13T10:30:00)
         try {
-            LocalDateTime ldt = LocalDateTime.parse(trimmed, ISO_LOCAL_DATE_TIME);
+            LocalDateTime ldt = LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             return ldt.toLocalDate();
         } catch (DateTimeParseException ignored) {
             // continue
         }
         // Try ISO date only (e.g. 2024-02-13)
         try {
-            return LocalDate.parse(trimmed, ISO_LOCAL_DATE);
+            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException ignored) {
             // continue
         }
@@ -406,8 +399,11 @@ public class AuditLogResource extends ConfigBaseResource {
                 // continue
             }
         }
-        // Fallback to legacy dd-MM-yyyy
+        // Fallback to legacy dd-MM-yyyy (skip if already tried via fallbackFormatter)
         DateTimeFormatter legacy = DateTimeFormatter.ofPattern(AUDIT_FILE_DATE_FORMAT);
+        if (legacy.equals(fallbackFormatter)) {
+            throw new DateTimeParseException("Text '" + trimmed + "' could not be parsed.", trimmed, 0);
+        }
         return LocalDate.parse(trimmed, legacy);
     }
 
