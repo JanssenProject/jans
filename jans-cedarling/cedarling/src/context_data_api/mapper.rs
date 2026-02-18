@@ -789,9 +789,9 @@ mod tests {
             Some(ExtensionValue::DateTime(_))
         ));
 
-        // With timezone offset
+        // With timezone offset (RFC3339 requires colon in timezone)
         assert!(matches!(
-            CedarValueMapper::detect_extension("2024-10-15T11:35:00+0100"),
+            CedarValueMapper::detect_extension("2024-10-15T11:35:00+01:00"),
             Some(ExtensionValue::DateTime(_))
         ));
 

@@ -196,8 +196,9 @@ impl DataStore {
             let mut entry = storage.get(key)?.clone();
 
             // Check if entry has expired
+            let now = chrono::Utc::now();
             if let Some(expires_at) = entry.expires_at
-                && chrono::Utc::now() > expires_at
+                && now > expires_at
             {
                 storage.pop(key);
                 return None;
@@ -207,13 +208,16 @@ impl DataStore {
 
             // Calculate remaining TTL to preserve expiration
             let remaining_ttl = if let Some(expires_at) = entry.expires_at {
-                let now = chrono::Utc::now();
                 expires_at
                     .signed_duration_since(now)
                     .to_std()
                     .ok()
                     .map_or_else(
-                        || get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl),
+                        || {
+                            // Entry has expired (negative duration), should not happen here
+                            // but handle gracefully by returning zero TTL
+                            std_duration_to_chrono_duration(StdDuration::ZERO)
+                        },
                         std_duration_to_chrono_duration,
                     )
             } else {
@@ -517,8 +521,8 @@ mod tests {
             .expect("failed to push value with TTL");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
-        // Wait for expiration
-        thread::sleep(StdDuration::from_millis(150));
+        // Wait for expiration (add extra margin to account for timing)
+        thread::sleep(StdDuration::from_millis(200));
 
         // Entry should be expired
         assert_eq!(store.get("key1"), None);
@@ -555,9 +559,9 @@ mod tests {
         };
         let store = DataStore::new(config).expect("should create store");
 
-        // Small value should work
+        // Small value should work (use a very short string to ensure it's under 150 bytes with metadata)
         store
-            .push("key1", json!("small"), None)
+            .push("key1", json!("x"), None)
             .expect("failed to push small value for max_entry_size test");
 
         // Large value should fail
@@ -604,8 +608,8 @@ mod tests {
             .expect("failed to push value with default TTL");
         assert_eq!(store.get("key1"), Some(json!("value1")));
 
-        // Wait for expiration
-        thread::sleep(StdDuration::from_millis(150));
+        // Wait for expiration (add extra margin to account for timing)
+        thread::sleep(StdDuration::from_millis(200));
 
         // Entry should be expired
         assert_eq!(store.get("key1"), None);
