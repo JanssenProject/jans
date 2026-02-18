@@ -43,10 +43,48 @@ pub enum LogError {
 }
 
 // Enum representing data store errors
+// Mirrors the core DataError variants to allow programmatic error matching
 #[derive(Debug, thiserror::Error, uniffi::Enum)]
 pub enum DataError {
-    #[error("Data Error: {error_msg}")]
-    DataOperationFailed { error_msg: String },
+    /// Invalid key provided (key is empty)
+    #[error("invalid key: key cannot be empty")]
+    InvalidKey,
+
+    /// Key not found in store
+    #[error("key not found: {key}")]
+    KeyNotFound {
+        /// The key that was not found
+        key: String,
+    },
+
+    /// Storage limit exceeded
+    #[error("storage limit exceeded: max {max} entries")]
+    StorageLimitExceeded {
+        /// Maximum allowed entries
+        max: u64,
+    },
+
+    /// TTL exceeds maximum allowed
+    #[error("TTL exceeds max allowed")]
+    TTLExceeded {
+        /// The requested TTL in seconds
+        requested: u64,
+        /// The maximum allowed TTL in seconds
+        max: u64,
+    },
+
+    /// Value too large
+    #[error("value size {size} bytes exceeds max {max} bytes")]
+    ValueTooLarge {
+        /// Actual size in bytes
+        size: u64,
+        /// Maximum allowed size in bytes
+        max: u64,
+    },
+
+    /// Serialization error
+    #[error("serialization error: {0}")]
+    SerializationError(String),
 }
 
 #[derive(Debug, Clone, uniffi::Object)]
@@ -111,21 +149,61 @@ pub struct DataStoreStats {
     pub memory_alert_triggered: bool,
 }
 
-impl From<CoreDataEntry> for DataEntry {
-    fn from(entry: CoreDataEntry) -> Self {
-        Self {
+impl TryFrom<CoreDataEntry> for DataEntry {
+    type Error = DataError;
+
+    fn try_from(entry: CoreDataEntry) -> Result<Self, Self::Error> {
+        // Use serde_json::to_string for stable serialization of CedarType
+        let data_type = serde_json::to_string(&entry.data_type)
+            .map_err(|e| DataError::SerializationError(format!("Failed to serialize data_type: {}", e)))?;
+        // Remove quotes from the serialized string (serde_json adds quotes for enum strings)
+        let data_type = data_type.trim_matches('"').to_string();
+
+        Ok(Self {
             key: entry.key,
             value: JsonValue(
                 serde_json::to_string(&entry.value)
-                    .expect("DataEntry value should be serializable to JSON"),
+                    .map_err(|e| DataError::SerializationError(format!("Failed to serialize value: {}", e)))?,
             ),
-            data_type: format!("{:?}", entry.data_type).to_lowercase(),
+            data_type,
             created_at: entry.created_at.to_rfc3339(),
             expires_at: entry
                 .expires_at
                 .map(|dt| dt.to_rfc3339())
                 .unwrap_or_default(),
             access_count: entry.access_count,
+        })
+    }
+}
+
+// Helper function to convert core DataError to uniffi DataError
+impl From<core::DataError> for DataError {
+    fn from(err: core::DataError) -> Self {
+        match err {
+            core::DataError::InvalidKey => DataError::InvalidKey,
+            core::DataError::KeyNotFound { key } => {
+                DataError::KeyNotFound { key }
+            },
+            core::DataError::StorageLimitExceeded { max } => {
+                DataError::StorageLimitExceeded {
+                    max: max as u64,
+                }
+            },
+            core::DataError::TTLExceeded { requested, max } => {
+                DataError::TTLExceeded {
+                    requested: requested.as_secs(),
+                    max: max.as_secs(),
+                }
+            },
+            core::DataError::ValueTooLarge { size, max } => {
+                DataError::ValueTooLarge {
+                    size: size as u64,
+                    max: max as u64,
+                }
+            },
+            core::DataError::SerializationError(e) => {
+                DataError::SerializationError(e.to_string())
+            },
         }
     }
 }
@@ -457,24 +535,18 @@ impl Cedarling {
     ) -> Result<(), DataError> {
         let json_value: Value = value
             .try_into()
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: format!("Failed to parse JSON value: {}", e),
-            })?;
+            .map_err(|e| DataError::SerializationError(format!("Failed to parse JSON value: {}", e)))?;
 
         let ttl = ttl_secs
             .map(|secs| {
                 u64::try_from(secs).map(Duration::from_secs).map_err(|_| {
-                    DataError::DataOperationFailed {
-                        error_msg: "TTL must be a non-negative integer".to_string(),
-                    }
+                    DataError::SerializationError("TTL must be a non-negative integer".to_string())
                 })
             })
             .transpose()?;
         self.inner
             .push_data_ctx(&key, json_value, ttl)
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })
+            .map_err(Into::into)
     }
 
     /// Get a value from the data store by key.
@@ -484,13 +556,9 @@ impl Cedarling {
         match self
             .inner
             .get_data_ctx(&key)
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })? {
+            .map_err(Into::into)? {
             Some(value) => Ok(Some(JsonValue(serde_json::to_string(&value).map_err(
-                |e| DataError::DataOperationFailed {
-                    error_msg: format!("Failed to serialize value: {}", e),
-                },
+                |e| DataError::SerializationError(format!("Failed to serialize value: {}", e)),
             )?))),
             None => Ok(None),
         }
@@ -503,10 +571,8 @@ impl Cedarling {
         match self
             .inner
             .get_data_entry_ctx(&key)
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })? {
-            Some(entry) => Ok(Some(entry.into())),
+            .map_err(Into::into)? {
+            Some(entry) => Ok(Some(entry.try_into()?)),
             None => Ok(None),
         }
     }
@@ -517,9 +583,7 @@ impl Cedarling {
     pub fn remove_data_ctx(&self, key: String) -> Result<bool, DataError> {
         self.inner
             .remove_data_ctx(&key)
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })
+            .map_err(Into::into)
     }
 
     /// Clear all entries from the data store.
@@ -527,9 +591,7 @@ impl Cedarling {
     pub fn clear_data_ctx(&self) -> Result<(), DataError> {
         self.inner
             .clear_data_ctx()
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })
+            .map_err(Into::into)
     }
 
     /// List all entries with their metadata.
@@ -538,10 +600,10 @@ impl Cedarling {
     pub fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
         self.inner
             .list_data_ctx()
-            .map(|entries| entries.into_iter().map(Into::into).collect())
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })
+            .map_err(Into::into)?
+            .into_iter()
+            .map(TryInto::try_into)
+            .collect()
     }
 
     /// Get statistics about the data store.
@@ -550,8 +612,6 @@ impl Cedarling {
         self.inner
             .get_stats_ctx()
             .map(Into::into)
-            .map_err(|e| DataError::DataOperationFailed {
-                error_msg: e.to_string(),
-            })
+            .map_err(Into::into)
     }
 }

@@ -223,7 +223,7 @@ public class CedarlingAdapterTest {
 
         List<DataEntry> entries = adapter.listDataCtx();
         assertNotNull(entries);
-        assertTrue(entries.size() >= 3);
+        assertEquals(3, entries.size());
 
         Set<String> keys = new HashSet<>();
         for (DataEntry entry : entries) {

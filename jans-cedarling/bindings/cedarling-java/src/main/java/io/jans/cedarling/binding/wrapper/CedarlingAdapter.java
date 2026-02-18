@@ -77,6 +77,9 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushDataCtx(String key, JSONObject value, Long ttlSecs) throws DataException {
+        if (key == null) {
+            throw new DataException.DataOperationFailed("key cannot be null");
+        }
         if (value == null) {
             throw new DataException.DataOperationFailed("value cannot be null");
         }
@@ -94,6 +97,9 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushDataCtx(String key, String value, Long ttlSecs) throws DataException {
+        if (key == null) {
+            throw new DataException.DataOperationFailed("key cannot be null");
+        }
         if (value == null) {
             throw new DataException.DataOperationFailed("value cannot be null");
         }
@@ -135,7 +141,11 @@ public class CedarlingAdapter implements AutoCloseable {
         if (result == null) {
             return null;
         }
-        return new JSONObject(result);
+        try {
+            return new JSONObject(result);
+        } catch (org.json.JSONException e) {
+            throw new DataException.DataOperationFailed("Failed to parse JSON result: " + e.getMessage(), e);
+        }
     }
 
     /**

@@ -11,6 +11,10 @@
 //! - Mixed read/write workloads
 //! - Authorization with pushed data
 
+use std::hint::black_box;
+use std::sync::LazyLock;
+use std::time::Duration;
+
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityBuilderConfig,
     EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
@@ -19,9 +23,6 @@ use cedarling::{
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use serde::Deserialize;
 use serde_json::json;
-use std::hint::black_box;
-use std::sync::LazyLock;
-use std::time::Duration;
 use tokio::runtime::Runtime;
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
@@ -374,14 +375,18 @@ fn bench_authorization_with_data(c: &mut Criterion) {
         BenchmarkId::new("authorize_unsigned", "with_pushed_data"),
         &runtime,
         |b, rt| {
-            b.to_async(rt).iter(|| async {
-                black_box(
-                    cedarling
-                        .authorize_unsigned(black_box(request.clone()))
-                        .await
-                        .expect("authorization should succeed"),
-                )
-            });
+            b.to_async(rt).iter_batched(
+                || request.clone(),
+                |cloned_request| async {
+                    black_box(
+                        cedarling
+                            .authorize_unsigned(black_box(cloned_request))
+                            .await
+                            .expect("authorization should succeed"),
+                    )
+                },
+                criterion::BatchSize::SmallInput,
+            );
         },
     );
 

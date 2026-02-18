@@ -207,12 +207,16 @@ fn test_authorize_unsigned_success() {
     );
 }
 
-#[test]
-fn test_data_api_push_and_get() {
-    let cedarling = Cedarling::load_from_file(String::from(
+fn create_test_cedarling() -> Cedarling {
+    Cedarling::load_from_file(String::from(
         "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
     ))
-    .expect("Error in initializing Cedarling");
+    .expect("Error in initializing Cedarling")
+}
+
+#[test]
+fn test_data_api_push_and_get() {
+    let cedarling = create_test_cedarling();
 
     // Push data without TTL
     cedarling
@@ -244,6 +248,9 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key2".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result2.is_some(), "result should not be None");
+    let value2: serde_json::Value = serde_json::from_str(&result2.unwrap().0)
+        .expect("result should be deserializable to JSON");
+    assert_eq!(value2, serde_json::json!({"nested": "data"}), "retrieved nested object should match pushed value");
 
     // Push array
     cedarling
@@ -258,14 +265,14 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key3".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result3.is_some(), "result should not be None");
+    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().0)
+        .expect("result should be deserializable to array");
+    assert_eq!(value3, vec![1, 2, 3], "retrieved array should match pushed value");
 }
 
 #[test]
 fn test_data_api_get_data_entry_ctx() {
-    let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
-    ))
-    .expect("Error in initializing Cedarling");
+    let cedarling = create_test_cedarling();
 
     cedarling
         .push_data_ctx(
@@ -290,10 +297,7 @@ fn test_data_api_get_data_entry_ctx() {
 
 #[test]
 fn test_data_api_remove_data_ctx() {
-    let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
-    ))
-    .expect("Error in initializing Cedarling");
+    let cedarling = create_test_cedarling();
 
     cedarling
         .push_data_ctx(
@@ -333,10 +337,7 @@ fn test_data_api_remove_data_ctx() {
 
 #[test]
 fn test_data_api_clear_data_ctx() {
-    let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
-    ))
-    .expect("Error in initializing Cedarling");
+    let cedarling = create_test_cedarling();
 
     cedarling
         .push_data_ctx(
@@ -411,10 +412,7 @@ fn test_data_api_clear_data_ctx() {
 
 #[test]
 fn test_data_api_list_data_ctx() {
-    let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
-    ))
-    .expect("Error in initializing Cedarling");
+    let cedarling = create_test_cedarling();
 
     cedarling
         .push_data_ctx(
@@ -460,10 +458,7 @@ fn test_data_api_list_data_ctx() {
 
 #[test]
 fn test_data_api_get_stats_ctx() {
-    let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
-    ))
-    .expect("Error in initializing Cedarling");
+    let cedarling = create_test_cedarling();
 
     let stats = cedarling
         .get_stats_ctx()
@@ -496,11 +491,8 @@ fn test_data_api_get_stats_ctx() {
 
 #[test]
 fn test_data_api_invalid_key() {
-    let cedarling = Cedarling::load_from_file(String::from(
-        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
-    ))
-    .expect("Error in initializing Cedarling");
+    let cedarling = create_test_cedarling();
 
     let result = cedarling.push_data_ctx("".to_string(), JsonValue(r#""value""#.to_string()), None);
-    assert!(result.is_err(), "push_data_ctx with empty key should fail");
+    result.expect_err("push_data_ctx with empty key should fail");
 }

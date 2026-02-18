@@ -8,7 +8,7 @@
       "trusted_issuers": {
         "some_test_iss_id": {
           "name": "Jans",
-          "description": "Some Test Issuer",
+          "description": "Jans Test Issuer",
           "openid_configuration_endpoint": "https://account.gluu.org/.well-known/openid-configuration",
           "token_metadata": {
             "access_token": {
