@@ -2489,7 +2489,7 @@ like below:</p>
 <p>User Info response should contain: <code>sub</code>, <code>jti</code> and <code>client_id</code> claims.</p>
 <p>Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the userinfo endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/User_Info">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>userinfo</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#userinfo">USERINFO feature flag</a>.
 Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -2653,7 +2653,15 @@ Navigate to <code>Auth Server</code>-&gt;<code>Scopes</code>-&gt;<code>Add Scope
         <script src="../../../../javascripts/full-screen-sections.js"></script>
       
     
-
+<!--Release automation scripts should replace the placeholder with actual URL-->
+<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
+<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
+<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
+<!--nightly docs may be used extensively by development team and contributors-->
+<!--for testing purposes-->
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
 
 
   </body>
