@@ -660,6 +660,7 @@ permit(
     action == Action::"read",
     resource
 ) when {
+    context.data has "user:123" &&
     context.data["user:123"].role.contains("admin")
 };
 ```

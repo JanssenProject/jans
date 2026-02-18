@@ -67,6 +67,11 @@ impl CedarType {
         }
     }
 
+    /// Compare two CedarType values for equality
+    fn __eq__(&self, other: &Self) -> bool {
+        self == other
+    }
+
     /// Get the detailed type representation
     fn __repr__(&self) -> String {
         let variant_name = match self {

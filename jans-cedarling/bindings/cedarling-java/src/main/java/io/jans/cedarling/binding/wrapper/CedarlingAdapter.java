@@ -133,16 +133,21 @@ public class CedarlingAdapter implements AutoCloseable {
      * Returns null if the key doesn't exist or the entry has expired.
      *
      * @param key The key to retrieve
-     * @return The value as a JSONObject, or null if not found
+     * @return The value as an Object (JSONObject, JSONArray, String, Number, Boolean, or null), or null if not found
      * @throws DataException If the operation fails
      */
-    public JSONObject getDataCtx(String key) throws DataException {
+    public Object getDataCtx(String key) throws DataException {
         String result = cedarling.getDataCtx(key);
         if (result == null) {
             return null;
         }
         try {
-            return new JSONObject(result);
+            org.json.JSONTokener tokener = new org.json.JSONTokener(result);
+            Object value = tokener.nextValue();
+            if (value == org.json.JSONObject.NULL) {
+                return null;
+            }
+            return value;
         } catch (org.json.JSONException e) {
             throw new DataException.DataOperationFailed("Failed to parse JSON result: " + e.getMessage(), e);
         }

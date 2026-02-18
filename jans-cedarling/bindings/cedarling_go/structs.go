@@ -259,8 +259,6 @@ type DataEntry struct {
 	CreatedAt   string `json:"created_at"`
 	ExpiresAt   *string `json:"expires_at,omitempty"`
 	AccessCount uint64  `json:"access_count"`
-	LastAccess  *string `json:"last_access,omitempty"`
-	SizeBytes   uint64 `json:"size_bytes"`
 }
 
 // DataStoreStats represents statistics about the data store

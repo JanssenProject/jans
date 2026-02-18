@@ -1058,25 +1058,19 @@ async fn test_data_api_get_data_entry_ctx() {
         .push_data_ctx("test_key", value, None)
         .expect("push_data_ctx should succeed");
 
-    let entry_js = instance
+    let entry_opt = instance
         .get_data_entry_ctx("test_key")
         .expect("get_data_entry_ctx should succeed");
-    assert_ne!(entry_js, JsValue::NULL, "entry should not be null");
+    assert!(entry_opt.is_some(), "entry should not be null");
+    let entry = entry_opt.unwrap();
 
     // Verify entry has expected fields
-    let entry_obj = Object::unchecked_from_js(entry_js);
-    let key = Reflect::get(&entry_obj, &"key".into())
-        .expect("entry should have key field")
-        .as_string()
-        .expect("key should be a string");
-    assert_eq!(key, "test_key", "entry key should match");
-
-    let access_count = Reflect::get(&entry_obj, &"access_count".into())
-        .expect("entry should have access_count field")
-        .as_f64()
-        .expect("access_count should be a number") as u64;
+    assert_eq!(entry.key, "test_key", "entry key should match");
     // After one get_data_entry_ctx call, access_count should be 1
-    assert_eq!(access_count, 1, "access_count should be 1 after one access");
+    assert_eq!(
+        entry.access_count, 1,
+        "access_count should be 1 after one access"
+    );
 }
 
 /// Test Data API - remove data
@@ -1250,8 +1244,8 @@ async fn test_data_api_list_data_ctx() {
     // Collect keys from entries
     let mut keys = Vec::new();
     for i in 0..entries.length() {
-        let entry = entries.get(i);
-        let entry_obj = Object::unchecked_from_js(entry);
+        let entry_js = entries.get(i);
+        let entry_obj = Object::unchecked_from_js(entry_js);
         let key = Reflect::get(&entry_obj, &"key".into())
             .expect("entry should have key field")
             .as_string()

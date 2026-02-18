@@ -280,8 +280,8 @@ Attributes
 ----------
 key : str
     The key for this entry
-value : dict
-    The actual value stored (as a Python dict)
+value : Any
+    The actual value stored (any JSON-deserializable Python type: dict, list, str, int, float, bool, None)
 data_type : CedarType
     The inferred Cedar type of the value
 created_at : str

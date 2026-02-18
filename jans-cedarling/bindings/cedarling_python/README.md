@@ -320,7 +320,7 @@ permit(
     action == Jans::Action::"read",
     resource
 ) when {
-    has(context.data, "user:123") &&
+    context.data has "user:123" &&
     context.data["user:123"].role.contains("admin")
 };
 ```

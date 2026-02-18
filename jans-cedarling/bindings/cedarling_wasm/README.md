@@ -587,12 +587,9 @@ try {
   }
 }
 
-try {
-  const value = await cedarling.get_data_ctx("nonexistent");
-} catch (error) {
-  if (error.message.includes("KeyNotFound")) {
-    console.log("Key not found");
-  }
+const value = cedarling.get_data_ctx("nonexistent");
+if (value === null) {
+  console.log("Key not found");
 }
 ```
 

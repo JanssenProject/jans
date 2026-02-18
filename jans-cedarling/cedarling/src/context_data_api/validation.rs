@@ -775,10 +775,10 @@ mod tests {
     fn test_validate_null_rejected() {
         let validator = DataValidator::new();
         let result = validator.validate(&json!(null));
-        assert!(matches!(
-            result,
-            Err(ValidationError::NullNotSupported { .. })
-        ));
+        assert!(
+            matches!(result, Err(ValidationError::NullNotSupported { .. })),
+            "expected NullNotSupported error when validating null"
+        );
     }
 
     #[test]

@@ -71,6 +71,33 @@ pub struct BootstrapConfig {
     pub data_store_config: DataStoreConfig,
 }
 
+impl Default for BootstrapConfig {
+    fn default() -> Self {
+        use crate::log::LogLevel;
+        Self {
+            application_name: String::new(),
+            log_config: LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_items: None,
+                    max_item_size: None,
+                }),
+                log_level: LogLevel::INFO,
+            },
+            policy_store_config: PolicyStoreConfig {
+                source: PolicyStoreSource::Yaml("cedar_version: v4.0.0\npolicy_stores: {}\n".to_string()),
+            },
+            jwt_config: JwtConfig::new_without_validation(),
+            authorization_config: AuthorizationConfig::default(),
+            entity_builder_config: EntityBuilderConfig::default(),
+            lock_config: None,
+            max_default_entities: None,
+            max_base64_size: None,
+            data_store_config: DataStoreConfig::default(),
+        }
+    }
+}
+
 impl BootstrapConfig {
     /// Loads a `BootstrapConfig` from a file.
     ///

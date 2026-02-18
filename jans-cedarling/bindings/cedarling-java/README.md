@@ -171,6 +171,7 @@ In Java/Kotlin bindings, `JsonValue` is represented as a plain `String`.
 ```java
 import uniffi.cedarling_uniffi.*;
 import org.json.JSONObject;
+import java.util.List;
 
 CedarlingAdapter adapter = new CedarlingAdapter();
 adapter.loadFromJson(bootstrapJson);

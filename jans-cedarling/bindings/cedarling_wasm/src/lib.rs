@@ -367,14 +367,13 @@ impl Cedarling {
     ///     console.log(entry.access_count); // 5
     /// }
     /// ```
-    pub fn get_data_entry_ctx(&self, key: &str) -> Result<JsValue, Error> {
+    pub fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, Error> {
         match self.instance.get_data_entry_ctx(key).map_err(Error::new)? {
             Some(entry) => {
                 let wasm_entry = DataEntry::from(entry);
-                let js_value = serde_wasm_bindgen::to_value(&wasm_entry)?;
-                Ok(to_object_recursive(js_value)?)
+                Ok(Some(wasm_entry))
             },
-            None => Ok(JsValue::NULL),
+            None => Ok(None),
         }
     }
 
@@ -425,8 +424,7 @@ impl Cedarling {
         let result = Array::new();
         for entry in entries {
             let wasm_entry = DataEntry::from(entry);
-            let js_value = serde_wasm_bindgen::to_value(&wasm_entry)?;
-            result.push(&to_object_recursive(js_value)?);
+            result.push(&wasm_bindgen::JsValue::from(wasm_entry));
         }
         Ok(result)
     }

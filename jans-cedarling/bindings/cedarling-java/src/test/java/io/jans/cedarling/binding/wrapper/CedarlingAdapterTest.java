@@ -121,35 +121,34 @@ public class CedarlingAdapterTest {
         JSONObject value1 = new JSONObject();
         value1.put("data", "value1");
         adapter.pushDataCtx("key1", value1);
-        JSONObject result1 = adapter.getDataCtx("key1");
+        Object result1 = adapter.getDataCtx("key1");
         assertNotNull(result1);
-        assertEquals(result1.getString("data"), "value1");
+        assertTrue(result1 instanceof JSONObject);
+        assertEquals(((JSONObject) result1).getString("data"), "value1");
 
         // Push data with TTL
         JSONObject value2 = new JSONObject();
         value2.put("nested", "data");
         adapter.pushDataCtx("key2", value2, 60L);
-        JSONObject result2 = adapter.getDataCtx("key2");
+        Object result2 = adapter.getDataCtx("key2");
         assertNotNull(result2);
-        assertEquals(result2.getString("nested"), "data");
+        assertTrue(result2 instanceof JSONObject);
+        assertEquals(((JSONObject) result2).getString("nested"), "data");
 
-        // Push array as JSON string - getDataCtx should throw JSONException when trying to parse non-object JSON
+        // Push array as JSON string - getDataCtx should return JSONArray (not throw)
         String arrayJson = "[1, 2, 3]";
         adapter.pushDataCtx("key3", arrayJson, null);
-        try {
-            adapter.getDataCtx("key3");
-            fail("Expected JSONException when calling getDataCtx on non-object JSON");
-        } catch (JSONException e) {
-            // Expected: JSONObject constructor throws JSONException when parsing array string
-            assertNotNull(e);
-        }
+        Object result3 = adapter.getDataCtx("key3");
+        assertNotNull(result3);
+        assertTrue(result3 instanceof org.json.JSONArray);
     }
 
     @Test
     public void testGetDataEntry() throws DataException {
         JSONObject value = new JSONObject();
         value.put("foo", "bar");
-        adapter.pushDataCtx("test_key", value);
+        // Push with explicit TTL to ensure expiresAt is non-null
+        adapter.pushDataCtx("test_key", value, 3600L);
 
         DataEntry entry = adapter.getDataEntryCtx("test_key");
         assertNotNull(entry);
@@ -175,7 +174,7 @@ public class CedarlingAdapterTest {
         boolean removed = adapter.removeDataCtx("to_remove");
         assertTrue(removed);
 
-        JSONObject resultAfter = adapter.getDataCtx("to_remove");
+        Object resultAfter = adapter.getDataCtx("to_remove");
         assertNull(resultAfter);
 
         // Try removing non-existent key

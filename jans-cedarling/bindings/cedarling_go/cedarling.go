@@ -224,8 +224,13 @@ func (c *Cedarling) RemoveDataCtx(key string) (bool, error) {
 		return false, err
 	}
 
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return false, nil
+	}
+
 	var removed bool
-	err = json.Unmarshal([]byte(result.JsonValue()), &removed)
+	err = json.Unmarshal([]byte(json_value), &removed)
 	if err != nil {
 		return false, err
 	}
@@ -271,8 +276,13 @@ func (c *Cedarling) GetStatsCtx() (*DataStoreStats, error) {
 		return nil, err
 	}
 
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return nil, nil
+	}
+
 	var stats DataStoreStats
-	err = json.Unmarshal([]byte(result.JsonValue()), &stats)
+	err = json.Unmarshal([]byte(json_value), &stats)
 	if err != nil {
 		return nil, err
 	}

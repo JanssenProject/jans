@@ -403,6 +403,10 @@ mod tests {
         let store = create_test_store();
 
         let result = store.push("", json!("value"), None);
+        assert!(
+            matches!(result, Err(DataError::InvalidKey)),
+            "push with empty key should return DataError::InvalidKey"
+        );
         assert!(matches!(result, Err(DataError::InvalidKey)));
     }
 
