@@ -33,11 +33,11 @@ const DEFAULT_MAX_OBJECT_KEYS: usize = 1_000;
 #[derive(Debug)]
 pub struct ValidationResult {
     /// Whether validation passed
-    pub is_valid: bool,
+    is_valid: bool,
     /// Collected errors (if any)
-    pub errors: Vec<ValidationError>,
+    errors: Vec<ValidationError>,
     /// Warnings that don't prevent validation
-    pub warnings: Vec<String>,
+    warnings: Vec<String>,
 }
 
 impl ValidationResult {
@@ -78,6 +78,24 @@ impl ValidationResult {
         self
     }
 
+    /// Check if validation passed
+    #[must_use]
+    pub fn is_valid(&self) -> bool {
+        self.is_valid
+    }
+
+    /// Get the list of errors
+    #[must_use]
+    pub fn error_list(&self) -> &[ValidationError] {
+        &self.errors
+    }
+
+    /// Get the list of warnings
+    #[must_use]
+    pub fn warnings(&self) -> &[String] {
+        &self.warnings
+    }
+
     /// Convert to Result type.
     ///
     /// Returns `Ok(())` if validation passed, or an error with validation failures.
@@ -90,6 +108,13 @@ impl ValidationResult {
     pub fn into_result(mut self) -> Result<(), ValidationError> {
         if self.is_valid {
             Ok(())
+        } else if self.errors.is_empty() {
+            // Invariant violation: is_valid is false but errors is empty
+            // Convert to a single explicit error
+            Err(ValidationError::InvalidKey {
+                path: "$".to_string(),
+                reason: "validation failed but no errors were collected".to_string(),
+            })
         } else if self.errors.len() == 1 {
             // pop() is safe here since we verified len() == 1
             Err(self.errors.pop().expect("errors has exactly one element"))
@@ -104,7 +129,7 @@ impl ValidationResult {
 pub struct ValidationConfig {
     /// Maximum nesting depth
     pub max_depth: usize,
-    /// Maximum string length in characters
+    /// Maximum string length in bytes
     pub max_string_length: usize,
     /// Maximum array length
     pub max_array_length: usize,
@@ -213,14 +238,7 @@ impl DataValidator {
         if self.config.collect_all_errors {
             let mut errors = Vec::new();
             self.validate_collecting(value, Cow::Borrowed("$"), 0, &mut errors);
-            if errors.is_empty() {
-                Ok(())
-            } else if errors.len() == 1 {
-                // pop() is safe here since we verified len() == 1
-                Err(errors.pop().expect("errors has exactly one element"))
-            } else {
-                Err(ValidationError::Multiple(errors))
-            }
+            ValidationResult::errors(errors).into_result()
         } else {
             self.validate_at_path(value, Cow::Borrowed("$"), 0)?;
             Ok(())
@@ -284,7 +302,7 @@ impl DataValidator {
                 })
             },
             "decimal" => {
-                if value.parse::<f64>().is_err() {
+                if !Self::is_valid_cedar_decimal(value) {
                     return Err(ValidationError::InvalidExtensionFormat {
                         path: "$".to_string(),
                         extension_type: extension_type.to_string(),
@@ -401,7 +419,7 @@ impl DataValidator {
                 v.clone(),
                 self.validate_extension(v, "ip").is_ok(),
             ),
-            ExtensionValue::Decimal(v) => ("decimal", v.clone(), v.parse::<f64>().is_ok()),
+            ExtensionValue::Decimal(v) => ("decimal", v.clone(), Self::is_valid_cedar_decimal(v)),
             ExtensionValue::DateTime(v) => ("datetime", v.clone(), Self::is_valid_datetime(v)),
             ExtensionValue::Duration(v) => ("duration", v.clone(), Self::is_valid_duration(v)),
         };
@@ -515,13 +533,7 @@ impl DataValidator {
                 });
             },
             Value::Bool(_) => {},
-            Value::Number(n) => {
-                if !n.is_i64() && !n.is_u64() && !n.is_f64() {
-                    errors.push(ValidationError::NumberOutOfRange {
-                        path: path.into_owned(),
-                    });
-                }
-            },
+            Value::Number(_) => {},
             Value::String(s) => self.validate_string_collecting(s, path.as_ref(), errors),
             Value::Array(arr) => self.validate_array_collecting(arr, path.as_ref(), depth, errors),
             Value::Object(obj) => {
@@ -559,7 +571,7 @@ impl DataValidator {
                     value: ip.clone(),
                 })
             },
-            ExtensionValue::Decimal(d) if d.parse::<f64>().is_err() => {
+            ExtensionValue::Decimal(d) if !Self::is_valid_cedar_decimal(d) => {
                 Some(ValidationError::InvalidExtensionFormat {
                     path: path.to_string(),
                     extension_type: "decimal".to_string(),
@@ -640,17 +652,9 @@ impl DataValidator {
 
         // Validate keys and recursively validate values
         for (key, val) in obj {
-            if key.is_empty() {
-                errors.push(ValidationError::InvalidKey {
-                    path: path.to_string(),
-                    reason: "empty key".to_string(),
-                });
-            }
-            if key.chars().any(char::is_control) {
-                errors.push(ValidationError::InvalidKey {
-                    path: path.to_string(),
-                    reason: "key contains control characters".to_string(),
-                });
+            if let Err(err) = Self::validate_key(key, path) {
+                errors.push(err);
+                continue;
             }
             let field_path = Cow::Owned(format!("{path}.{key}"));
             self.validate_collecting(val, field_path, depth + 1, errors);
@@ -723,6 +727,66 @@ impl DataValidator {
     fn is_valid_duration(value: &str) -> bool {
         crate::context_data_api::entry::CedarType::is_duration_format(value)
     }
+
+    /// Check if a string is a valid Cedar decimal (fixed-point, no exponent).
+    /// Rejects scientific notation, NaN, infinity, and requires at least one digit.
+    fn is_valid_cedar_decimal(value: &str) -> bool {
+        // Must contain exactly one decimal point
+        if value.chars().filter(|&c| c == '.').count() != 1 {
+            return false;
+        }
+
+        // Reject exponent notation
+        if value.contains('e') || value.contains('E') {
+            return false;
+        }
+
+        // Must not end with decimal point
+        if value.ends_with('.') {
+            return false;
+        }
+
+        // Find decimal point position
+        if let Some(dot_pos) = value.find('.') {
+            let before_dot = &value[..dot_pos];
+            let after_dot = &value[dot_pos + 1..];
+
+            // After decimal point must be non-empty and all digits
+            if after_dot.is_empty() || !after_dot.chars().all(|c| c.is_ascii_digit()) {
+                return false;
+            }
+
+            // Before decimal point: allow optional sign, then digits
+            let before_ok = if before_dot.is_empty() {
+                true
+            } else if before_dot == "+" || before_dot == "-" {
+                true
+            } else {
+                before_dot
+                    .chars()
+                    .all(|c| c.is_ascii_digit() || c == '+' || c == '-')
+                    && before_dot.chars().any(|c| c.is_ascii_digit())
+            };
+
+            if !before_ok {
+                return false;
+            }
+
+            // Must have at least one digit total (before or after decimal)
+            if !before_dot.chars().any(|c| c.is_ascii_digit())
+                && !after_dot.chars().any(|c| c.is_ascii_digit())
+            {
+                return false;
+            }
+
+            // Parse as f64 to validate numeric format (but we've already rejected exponents)
+            value.parse::<f64>()
+                .map(|n| n.is_finite()) // Reject NaN and infinity
+                .unwrap_or(false)
+        } else {
+            false
+        }
+    }
 }
 
 /// Recursive helper for sanitizing JSON values.
@@ -733,8 +797,11 @@ fn sanitize_value_recursive(value: &Value) -> Value {
     match value {
         Value::Null => Value::String(String::new()),
         Value::String(s) => {
-            // Remove control characters
-            let sanitized: String = s.chars().filter(|c| !c.is_control()).collect();
+            // Remove control characters, but preserve common whitespace (tabs, newlines, carriage returns)
+            let sanitized: String = s
+                .chars()
+                .filter(|c| !c.is_control() || matches!(c, '\n' | '\r' | '\t'))
+                .collect();
             Value::String(sanitized)
         },
         Value::Array(arr) => Value::Array(arr.iter().map(sanitize_value_recursive).collect()),
@@ -962,20 +1029,20 @@ mod tests {
         });
 
         let result = validator.validate_detailed(&data);
-        assert!(!result.is_valid);
-        assert_eq!(result.errors.len(), 2);
+        assert!(!result.is_valid());
+        assert_eq!(result.error_list().len(), 2);
     }
 
     #[test]
     fn test_validation_result() {
         let result = ValidationResult::ok();
-        assert!(result.is_valid);
+        assert!(result.is_valid());
         assert!(result.into_result().is_ok());
 
         let result = ValidationResult::error(ValidationError::NullNotSupported {
             path: "$".to_string(),
         });
-        assert!(!result.is_valid);
+        assert!(!result.is_valid());
         assert!(result.into_result().is_err());
     }
 

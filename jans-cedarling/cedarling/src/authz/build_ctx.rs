@@ -154,14 +154,10 @@ pub(super) fn build_multi_issuer_context(
     // Add total token count as specified in design
     tokens_context.insert("total_token_count".to_string(), json!(token_entities.len()));
 
-    // Merge with request context
-    if let Some(context_obj) = context_json.as_object_mut() {
-        context_obj.insert("tokens".to_string(), Value::Object(tokens_context));
-    } else {
-        context_json = json!({
-            "tokens": Value::Object(tokens_context)
-        });
-    }
+    // Merge tokens into request context, checking for conflicts
+    let tokens_value = Value::Object(tokens_context);
+    let tokens_wrapper = json!({ "tokens": tokens_value });
+    context_json = merge_json_values(context_json, &tokens_wrapper)?;
 
     // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {

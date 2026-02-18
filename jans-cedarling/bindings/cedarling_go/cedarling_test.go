@@ -758,11 +758,11 @@ func TestDataAPIPushAndGetCtx(t *testing.T) {
 	}
 
 	// Get data
-	result, err := instance.GetDataCtx("user_profile")
+	resultProfile, err := instance.GetDataCtx("user_profile")
 	if err != nil {
 		t.Fatalf("Failed to get data: %v", err)
 	}
-	if result == nil {
+	if resultProfile == nil {
 		t.Fatal("Expected data to be present")
 	}
 
@@ -770,18 +770,19 @@ func TestDataAPIPushAndGetCtx(t *testing.T) {
 	ttlValue := map[string]interface{}{
 		"temp": "data",
 	}
-	// Push with 1 second TTL (1_000_000_000 nanoseconds)
-	err = instance.PushDataCtx("temp_key", ttlValue, int64(1_000_000_000))
+	// Push with 1 second TTL
+	d := time.Second
+	err = instance.PushDataCtx("temp_key", ttlValue, &d)
 	if err != nil {
 		t.Fatalf("Failed to push data with TTL: %v", err)
 	}
 
 	// Verify data exists immediately
-	result, err = instance.GetDataCtx("temp_key")
-	if err != nil {
-		t.Fatalf("Failed to get data: %v", err)
+	resultTemp, errTemp := instance.GetDataCtx("temp_key")
+	if errTemp != nil {
+		t.Fatalf("Failed to get data: %v", errTemp)
 	}
-	if result == nil {
+	if resultTemp == nil {
 		t.Fatal("Expected data to be present immediately after push")
 	}
 
@@ -789,18 +790,18 @@ func TestDataAPIPushAndGetCtx(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Verify data is expired
-	result, err = instance.GetDataCtx("temp_key")
-	if err != nil {
-		t.Fatalf("Failed to get data: %v", err)
+	resultTemp, errTemp = instance.GetDataCtx("temp_key")
+	if errTemp != nil {
+		t.Fatalf("Failed to get data: %v", errTemp)
 	}
-	if result != nil {
+	if resultTemp != nil {
 		t.Fatal("Expected data to be expired after TTL")
 	}
 
-	// Verify value structure
-	resultMap, ok := result.(map[string]interface{})
+	// Verify value structure from original result
+	resultMap, ok := resultProfile.(map[string]interface{})
 	if !ok {
-		t.Fatalf("Expected result to be a map, got %T", result)
+		t.Fatalf("Expected result to be a map, got %T", resultProfile)
 	}
 	if resultMap["level"] != "premium" {
 		t.Errorf("Expected level to be 'premium', got %v", resultMap["level"])

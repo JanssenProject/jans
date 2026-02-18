@@ -41,9 +41,13 @@ def test_get_data_entry_ctx():
     assert entry is not None
     assert entry.key == "test_key"
     assert entry.value() == {"foo": "bar"}
-    assert entry.data_type is not None
+    from cedarling_python import CedarType
+    assert isinstance(entry.data_type, CedarType)
+    assert entry.data_type == CedarType.Record
     assert entry.access_count == 1
-    assert entry.created_at is not None
+    from datetime import datetime
+    # Verify created_at is a valid ISO 8601 timestamp
+    datetime.fromisoformat(entry.created_at.replace('Z', '+00:00'))
 
     instance.shut_down()
 

@@ -309,7 +309,9 @@ mod tests {
     fn test_push_data_ctx_invalid_key() {
         let cedarling = create_test_cedarling();
         let result = cedarling.push_data_ctx("", json!("value"), None);
-        assert!(result.is_err(), "push_data_ctx with empty key should fail");
-        assert!(matches!(result.unwrap_err(), DataError::InvalidKey));
+        assert!(
+            matches!(result, Err(DataError::InvalidKey)),
+            "push_data_ctx with empty key should fail with DataError::InvalidKey"
+        );
     }
 }

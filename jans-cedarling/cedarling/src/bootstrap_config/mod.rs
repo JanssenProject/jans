@@ -337,6 +337,6 @@ mod tests {
         // Verify data store configuration
         assert_eq!(config.data_store_config.max_entries, 10000);
         assert_eq!(config.data_store_config.default_ttl, None);
-        assert_eq!(config.data_store_config.enable_metrics, true);
+        assert!(config.data_store_config.enable_metrics);
     }
 }

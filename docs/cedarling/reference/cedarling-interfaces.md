@@ -204,7 +204,7 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   - `value`: The stored value
   - `data_type`: The inferred Cedar type (String, Long, Bool, Set, Record, Entity, Ip, Decimal, DateTime, Duration)
   - `created_at`: Timestamp when the entry was created (RFC 3339 format)
-  - `expires_at`: Timestamp when the entry expires (RFC 3339 format, or empty if no TTL)
+  - `expires_at`: Timestamp when the entry expires (RFC 3339 format, or null if no TTL)
   - `access_count`: Number of times this entry has been accessed
 
 ### Remove Data

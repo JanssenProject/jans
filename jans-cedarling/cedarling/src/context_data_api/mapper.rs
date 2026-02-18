@@ -265,13 +265,30 @@ impl CedarValueMapper {
         }
 
         // Check for decimal (must contain decimal point and be parseable as f64)
-        // Must have exactly one decimal point and not end with it
+        // Must have exactly one decimal point, not end with it, and reject exponent notation
         if value.contains('.')
-            && value.parse::<f64>().is_ok()
+            && !value.contains('e')
+            && !value.contains('E')
             && !value.ends_with('.')
             && value.chars().filter(|&c| c == '.').count() == 1
         {
-            return Some(ExtensionValue::Decimal(value.to_string()));
+            // Parse as f64 to validate numeric format, but ensure it's fixed-point
+            if let Ok(_) = value.parse::<f64>() {
+                // Additional check: ensure there's at least one digit before and after the decimal point
+                if let Some(dot_pos) = value.find('.') {
+                    let before_dot = &value[..dot_pos];
+                    let after_dot = &value[dot_pos + 1..];
+                    // Allow optional leading sign, then require digits
+                    let before_ok = before_dot.is_empty()
+                        || before_dot == "+"
+                        || before_dot == "-"
+                        || before_dot.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-');
+                    let after_ok = !after_dot.is_empty() && after_dot.chars().all(|c| c.is_ascii_digit());
+                    if before_ok && after_ok && (before_dot.chars().any(|c| c.is_ascii_digit()) || after_dot.chars().any(|c| c.is_ascii_digit())) {
+                        return Some(ExtensionValue::Decimal(value.to_string()));
+                    }
+                }
+            }
         }
 
         None
@@ -675,7 +692,11 @@ mod tests {
     fn test_json_to_cedar_null_error() {
         let mapper = CedarValueMapper::new();
         let result = mapper.json_to_cedar(&json!(null));
-        assert!(matches!(result, Err(ValueMappingError::NullNotSupported)));
+        assert!(
+            matches!(result, Err(ValueMappingError::NullNotSupported)),
+            "expected Err(ValueMappingError::NullNotSupported), got: {:?}",
+            result
+        );
     }
 
     #[test]

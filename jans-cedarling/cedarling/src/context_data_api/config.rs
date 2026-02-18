@@ -11,8 +11,10 @@ use std::time::Duration;
 ///
 /// ## TTL Semantics
 ///
-/// - `default_ttl: None` means entries without explicit TTL will effectively never expire (10 years)
-/// - `max_ttl: None` means no upper limit on TTL values (10 years max)
+/// - `default_ttl: None` means entries without explicit TTL will effectively never expire.
+///   The implementation uses an internal sentinel cap of 10 years (not user-configurable).
+/// - `max_ttl: None` means no user-configured upper limit on TTL values.
+///   The implementation uses an internal sentinel cap of 10 years (not user-configurable).
 /// - If both are `Some`, the effective TTL will always respect `max_ttl` constraints
 ///
 /// ## Examples
@@ -42,10 +44,12 @@ pub struct DataStoreConfig {
     /// Maximum size per entry in bytes (0 = unlimited)
     pub max_entry_size: usize,
     /// Default TTL for entries without explicit expiration.
-    /// `None` means entries effectively never expire (uses 10 years).
+    /// `None` means entries effectively never expire.
+    /// The implementation uses an internal sentinel cap of 10 years (not user-configurable).
     pub default_ttl: Option<Duration>,
     /// Maximum allowed TTL.
-    /// `None` means no upper limit on TTL values (uses 10 years).
+    /// `None` means no user-configured upper limit on TTL values.
+    /// The implementation uses an internal sentinel cap of 10 years (not user-configurable).
     pub max_ttl: Option<Duration>,
     /// Enable metrics tracking (access counts, timestamps)
     pub enable_metrics: bool,

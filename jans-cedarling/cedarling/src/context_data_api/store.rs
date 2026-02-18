@@ -50,8 +50,6 @@ impl DataStore {
     /// - If `config.max_ttl` is `None`, uses 10 years (effectively infinite)
     /// - If `config.default_ttl` is `None`, uses 10 years (effectively infinite)
     ///
-    /// # Errors
-    ///
     /// Returns `ConfigValidationError` if the configuration is invalid.
     pub(crate) fn new(config: DataStoreConfig) -> Result<Self, ConfigValidationError> {
         // Validate configuration before creating the store
@@ -110,8 +108,30 @@ impl DataStore {
             return Err(DataError::InvalidKey);
         }
 
-        // Create DataEntry with metadata
-        let entry = DataEntry::new(key.to_string(), value, ttl);
+        // Validate explicit TTL against max_ttl before calculating effective TTL
+        if let Some(explicit_ttl) = ttl
+            && let Some(max_ttl) = self.config.max_ttl
+            && explicit_ttl > max_ttl
+        {
+            return Err(DataError::TTLExceeded {
+                requested: explicit_ttl,
+                max: max_ttl,
+            });
+        }
+
+        // Calculate effective TTL using the helper function
+        let effective_ttl_chrono = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
+        
+        // Convert back to StdDuration for DataEntry::new
+        // chrono::Duration can be converted to std::time::Duration via num_seconds
+        let effective_ttl_std = if effective_ttl_chrono.num_seconds() >= 0 {
+            StdDuration::from_secs(effective_ttl_chrono.num_seconds() as u64)
+        } else {
+            StdDuration::ZERO
+        };
+
+        // Create DataEntry with metadata using effective TTL
+        let entry = DataEntry::new(key.to_string(), value, Some(effective_ttl_std));
 
         // Check entry size before storing (including metadata)
         let entry_size = serde_json::to_string(&entry)
@@ -125,19 +145,7 @@ impl DataStore {
             });
         }
 
-        // Validate explicit TTL against max_ttl before calculating effective TTL
-        if let Some(explicit_ttl) = ttl
-            && let Some(max_ttl) = self.config.max_ttl
-            && explicit_ttl > max_ttl
-        {
-            return Err(DataError::TTLExceeded {
-                requested: explicit_ttl,
-                max: max_ttl,
-            });
-        }
-
-        // Calculate effective TTL using the helper function
-        let chrono_ttl = get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
+        let chrono_ttl = effective_ttl_chrono;
 
         let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
 
@@ -1036,14 +1044,20 @@ mod tests {
             memory_alert_threshold: -1.0,
             ..Default::default()
         };
-        assert!(config_negative.validate().is_err());
+        assert!(
+            matches!(config_negative.validate(), Err(_)),
+            "memory_alert_threshold = -1.0 should fail validation"
+        );
 
         // Invalid: over 100%
         let config_over = DataStoreConfig {
             memory_alert_threshold: 101.0,
             ..Default::default()
         };
-        assert!(config_over.validate().is_err());
+        assert!(
+            matches!(config_over.validate(), Err(_)),
+            "memory_alert_threshold = 101.0 should fail validation"
+        );
     }
 
     // ============================================================

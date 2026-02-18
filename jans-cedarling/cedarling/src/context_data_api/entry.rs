@@ -331,9 +331,10 @@ mod tests {
 
     #[test]
     fn test_data_entry_new() {
+        use test_utils::assert_eq;
         let entry = DataEntry::new("key1".to_string(), json!("value1"), None);
         assert_eq!(entry.key, "key1");
-        assert_eq!(entry.value, json!("value1"));
+        assert_eq!(&entry.value, &json!("value1"));
         assert_eq!(entry.data_type, CedarType::String);
         assert_eq!(entry.access_count, 0);
         assert!(entry.expires_at.is_none());

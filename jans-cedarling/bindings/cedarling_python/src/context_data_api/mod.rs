@@ -19,13 +19,13 @@ pub(crate) fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     errors::data_errors_module(&submodule)?;
     m.add_submodule(&submodule)?;
     
-    // Insert into sys.modules so it can be imported as cedarling.data_errors_ctx
-    // Note: PyO3 automatically handles sys.modules insertion when using add_submodule,
-    // but we explicitly set it here to ensure it's available for imports
+    // Insert into sys.modules so it can be imported as cedarling_python.data_errors_ctx
+    // Note: add_submodule only attaches the child as an attribute and does not insert it into sys.modules,
+    // so the explicit set_item call is required to enable package-qualified imports
     let py = m.py();
     let sys = py.import("sys")?;
     let modules = sys.getattr("modules")?;
-    modules.set_item("cedarling.data_errors_ctx", submodule.as_borrowed())?;
+    modules.set_item("cedarling_python.data_errors_ctx", submodule.as_borrowed())?;
 
     Ok(())
 }
