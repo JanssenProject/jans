@@ -5,7 +5,7 @@
 
 use cedarling::bindings::cedar_policy;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
+    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, CedarType, DataApi,
     DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, Request,
     RequestUnsigned,
 };
@@ -307,8 +307,8 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// await cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
-    /// await cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+    /// cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
+    /// cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
     /// ```
     pub fn push_data_ctx(
         &self,
@@ -333,7 +333,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const value = await cedarling.get_data_ctx("user:123");
+    /// const value = cedarling.get_data_ctx("user:123");
     /// if (value !== null) {
     ///     console.log(value.name); // "John"
     /// }
@@ -358,7 +358,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entry = await cedarling.get_data_entry_ctx("user:123");
+    /// const entry = cedarling.get_data_entry_ctx("user:123");
     /// if (entry !== null) {
     ///     console.log(entry.key); // "user:123"
     ///     console.log(entry.value); // { name: "John", age: 30 }
@@ -388,7 +388,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const removed = await cedarling.remove_data_ctx("user:123");
+    /// const removed = cedarling.remove_data_ctx("user:123");
     /// if (removed) {
     ///     console.log("Entry was successfully removed");
     /// }
@@ -402,7 +402,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// await cedarling.clear_data_ctx();
+    /// cedarling.clear_data_ctx();
     /// console.log("All data entries cleared");
     /// ```
     pub fn clear_data_ctx(&self) -> Result<(), Error> {
@@ -415,7 +415,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entries = await cedarling.list_data_ctx();
+    /// const entries = cedarling.list_data_ctx();
     /// entries.forEach(entry => {
     ///     console.log(`${entry.key}: ${entry.data_type} (accessed ${entry.access_count} times)`);
     /// });
@@ -436,7 +436,7 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const stats = await cedarling.get_stats_ctx();
+    /// const stats = cedarling.get_stats_ctx();
     /// console.log(`Entries: ${stats.entry_count}/${stats.max_entries || 'unlimited'}`);
     /// console.log(`Capacity: ${stats.capacity_usage_percent.toFixed(2)}%`);
     /// console.log(`Total size: ${stats.total_size_bytes} bytes`);
@@ -716,7 +716,10 @@ impl From<CedarDataEntry> for DataEntry {
         Self {
             key: value.key,
             value: value.value,
-            data_type: format!("{:?}", value.data_type).to_lowercase(),
+            data_type: serde_json::to_string(&value.data_type)
+                .unwrap_or_else(|_| "unknown".to_string())
+                .trim_matches('"')
+                .to_string(),
             created_at: value.created_at.to_rfc3339(),
             expires_at: value.expires_at.map(|dt| dt.to_rfc3339()),
             access_count: value.access_count,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var bootstrapConfig string = `
@@ -763,6 +764,37 @@ func TestDataAPIPushAndGetCtx(t *testing.T) {
 	}
 	if result == nil {
 		t.Fatal("Expected data to be present")
+	}
+
+	// Test TTL expiration
+	ttlValue := map[string]interface{}{
+		"temp": "data",
+	}
+	// Push with 1 second TTL (1_000_000_000 nanoseconds)
+	err = instance.PushDataCtx("temp_key", ttlValue, int64(1_000_000_000))
+	if err != nil {
+		t.Fatalf("Failed to push data with TTL: %v", err)
+	}
+
+	// Verify data exists immediately
+	result, err = instance.GetDataCtx("temp_key")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if result == nil {
+		t.Fatal("Expected data to be present immediately after push")
+	}
+
+	// Wait for TTL to expire (2 seconds)
+	time.Sleep(2 * time.Second)
+
+	// Verify data is expired
+	result, err = instance.GetDataCtx("temp_key")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if result != nil {
+		t.Fatal("Expected data to be expired after TTL")
 	}
 
 	// Verify value structure

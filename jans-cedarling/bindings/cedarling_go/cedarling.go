@@ -248,9 +248,16 @@ func (c *Cedarling) ListDataCtx() ([]DataEntry, error) {
 	}
 
 	var entries []DataEntry
-	err = json.Unmarshal([]byte(result.JsonValue()), &entries)
+	jsonValue := result.JsonValue()
+	if jsonValue == "null" {
+		return make([]DataEntry, 0), nil
+	}
+	err = json.Unmarshal([]byte(jsonValue), &entries)
 	if err != nil {
 		return nil, err
+	}
+	if entries == nil {
+		entries = make([]DataEntry, 0)
 	}
 
 	return entries, nil

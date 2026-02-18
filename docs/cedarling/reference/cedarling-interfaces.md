@@ -262,4 +262,4 @@ permit(
 };
 ```
 
-The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes. 
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.

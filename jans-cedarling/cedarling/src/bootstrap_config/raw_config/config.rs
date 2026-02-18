@@ -322,7 +322,7 @@ pub struct BootstrapConfigRaw {
     pub data_store_max_entry_size: Option<usize>,
 
     /// Default TTL for data entries in seconds.
-    /// If not set, entries effectively never expire (10 years).
+    /// If not set, entries do not expire.
     #[serde(rename = "CEDARLING_DATA_STORE_DEFAULT_TTL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub data_store_default_ttl: Option<u64>,

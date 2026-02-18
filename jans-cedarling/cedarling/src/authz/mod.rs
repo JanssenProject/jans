@@ -21,12 +21,12 @@ use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
-use smol_str::SmolStr;
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Context, Entities, Entity, EntityUid};
 use chrono::Utc;
 use request::{AuthorizeMultiIssuerRequest, Request, RequestUnsigned};
 use serde_json::json;
+use smol_str::SmolStr;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::str::FromStr;
@@ -127,14 +127,7 @@ impl Authz {
         let resource_uid = entities_data.resource.uid();
 
         // Capture pushed data info for logging before context is built
-        let pushed_data = self.config.data_store.get_all();
-        let pushed_data_info = if pushed_data.is_empty() {
-            None
-        } else {
-            Some(PushedDataInfo {
-                keys: pushed_data.keys().map(|k| SmolStr::from(k.as_str())).collect(),
-            })
-        };
+        let (pushed_data, pushed_data_info) = self.get_pushed_data();
 
         let context = build_context(
             &self.config,
@@ -251,6 +244,22 @@ impl Authz {
         Ok(result)
     }
 
+    /// Get pushed data and build PushedDataInfo for logging.
+    fn get_pushed_data(&self) -> (HashMap<String, serde_json::Value>, Option<PushedDataInfo>) {
+        let pushed_data = self.config.data_store.get_all();
+        let pushed_data_info = if pushed_data.is_empty() {
+            None
+        } else {
+            Some(PushedDataInfo {
+                keys: pushed_data
+                    .keys()
+                    .map(|k| SmolStr::from(k.as_str()))
+                    .collect(),
+            })
+        };
+        (pushed_data, pushed_data_info)
+    }
+
     /// Evaluate Multi-Issuer Authorization Request
     ///
     /// This implementation processes multiple JWT tokens from different issuers.
@@ -291,14 +300,7 @@ impl Authz {
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())?;
 
         // Capture pushed data info for logging before context is built
-        let pushed_data = self.config.data_store.get_all();
-        let pushed_data_info = if pushed_data.is_empty() {
-            None
-        } else {
-            Some(PushedDataInfo {
-                keys: pushed_data.keys().map(|k| SmolStr::from(k.as_str())).collect(),
-            })
-        };
+        let (pushed_data, pushed_data_info) = self.get_pushed_data();
 
         let context = build_multi_issuer_context(
             request.context.clone().unwrap_or(json!({})),
@@ -438,14 +440,7 @@ impl Authz {
         let resource_uid = resource.uid();
 
         // Capture pushed data info for logging before context is built
-        let pushed_data = self.config.data_store.get_all();
-        let pushed_data_info = if pushed_data.is_empty() {
-            None
-        } else {
-            Some(PushedDataInfo {
-                keys: pushed_data.keys().map(|k| SmolStr::from(k.as_str())).collect(),
-            })
-        };
+        let (pushed_data, pushed_data_info) = self.get_pushed_data();
 
         let context = build_context(
             &self.config,

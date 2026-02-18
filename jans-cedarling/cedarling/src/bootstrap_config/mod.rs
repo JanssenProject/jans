@@ -306,5 +306,10 @@ mod tests {
         // Verify entity builder configuration
         assert!(config.entity_builder_config.build_user);
         assert!(config.entity_builder_config.build_workload);
+
+        // Verify data store configuration
+        assert_eq!(config.data_store_config.max_entries, 10000);
+        assert_eq!(config.data_store_config.default_ttl, None);
+        assert_eq!(config.data_store_config.enable_metrics, true);
     }
 }

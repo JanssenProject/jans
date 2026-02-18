@@ -164,7 +164,8 @@ fn build_data_store_config(raw: &BootstrapConfigRaw) -> DataStoreConfig {
             .unwrap_or(defaults.max_entry_size),
         default_ttl: raw
             .data_store_default_ttl
-            .map(std::time::Duration::from_secs),
+            .map(std::time::Duration::from_secs)
+            .or(defaults.default_ttl),
         max_ttl: raw
             .data_store_max_ttl
             .map(std::time::Duration::from_secs)

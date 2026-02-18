@@ -518,6 +518,7 @@ if (value) {
 ### Get Data Entry with Metadata
 
 Get a data entry with full metadata including creation time, expiration, access count, and type:
+
 ```javascript
 const entry = await cedarling.get_data_entry_ctx("user:123");
 if (entry) {

@@ -42,7 +42,7 @@ def test_get_data_entry_ctx():
     assert entry.key == "test_key"
     assert entry.value() == {"foo": "bar"}
     assert entry.data_type is not None
-    assert entry.access_count >= 0
+    assert entry.access_count == 1
     assert entry.created_at is not None
 
     instance.shut_down()
@@ -121,8 +121,8 @@ def test_get_stats_ctx():
 
     stats = instance.get_stats_ctx()
     assert stats.entry_count == 2
-    assert stats.metrics_enabled is not None
-    assert stats.total_size_bytes >= 0
+    assert stats.metrics_enabled is True
+    assert stats.total_size_bytes > 0
 
     instance.shut_down()
 

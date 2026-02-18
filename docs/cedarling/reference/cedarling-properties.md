@@ -109,7 +109,7 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 
 - **`CEDARLING_DATA_STORE_DEFAULT_TTL`** : Default TTL (Time To Live) in seconds for entries that don't specify a TTL. Default value is `None` (entries will not expire). When set, entries without an explicit TTL will use this value.
 
-- **`CEDARLING_DATA_STORE_MAX_TTL`** : Maximum allowed TTL in seconds. Default value is `3600` (1 hour). Entries with TTL exceeding this value will be rejected. Set to `0` for unlimited TTL.
+- **`CEDARLING_DATA_STORE_MAX_TTL`** : Maximum allowed TTL in seconds. Default value is `3600` (1 hour). Entries with TTL exceeding this value will be rejected. Omit this property for unlimited TTL.
 
 - **`CEDARLING_DATA_STORE_ENABLE_METRICS`** : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is `true`.
 

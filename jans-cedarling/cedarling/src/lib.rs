@@ -352,6 +352,23 @@ impl LogStorage for Cedarling {
 }
 
 // implements DataApi for Cedarling
+// Helper function to calculate capacity usage and check memory alert threshold
+fn calculate_capacity_usage(
+    entry_count: usize,
+    max_entries: usize,
+    memory_alert_threshold: f64,
+) -> (f64, bool) {
+    // Precision loss is acceptable for percentage calculation
+    #[allow(clippy::cast_precision_loss)]
+    let capacity_usage_percent = if max_entries > 0 {
+        (entry_count as f64 / max_entries as f64) * 100.0
+    } else {
+        0.0 // Unlimited capacity, no percentage
+    };
+    let memory_alert_triggered = capacity_usage_percent >= memory_alert_threshold;
+    (capacity_usage_percent, memory_alert_triggered)
+}
+
 // provides public interface for pushing and retrieving data
 impl DataApi for Cedarling {
     fn push_data_ctx(
@@ -366,17 +383,16 @@ impl DataApi for Cedarling {
         let config = self.data.config();
         if config.max_entries > 0 {
             let entry_count = self.data.count();
-            // Precision loss is acceptable for percentage calculation
-            #[allow(clippy::cast_precision_loss)]
-            let usage_percent = (entry_count as f64 / config.max_entries as f64) * 100.0;
-            if usage_percent >= config.memory_alert_threshold {
+            let (capacity_usage_percent, memory_alert_triggered) =
+                calculate_capacity_usage(entry_count, config.max_entries, config.memory_alert_threshold);
+            if memory_alert_triggered {
                 let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                     LogLevel::WARN,
                     None,
                 ))
                 .set_message(format!(
                     "DataStore memory usage alert: {:.1}% capacity used ({}/{} entries), threshold: {:.1}%",
-                    usage_percent,
+                    capacity_usage_percent,
                     entry_count,
                     config.max_entries,
                     config.memory_alert_threshold
@@ -420,15 +436,8 @@ impl DataApi for Cedarling {
         };
 
         // Calculate capacity usage percentage
-        // Precision loss is acceptable for percentage calculation
-        #[allow(clippy::cast_precision_loss)]
-        let capacity_usage_percent = if config.max_entries > 0 {
-            (entry_count as f64 / config.max_entries as f64) * 100.0
-        } else {
-            0.0 // Unlimited capacity, no percentage
-        };
-
-        let memory_alert_triggered = capacity_usage_percent >= config.memory_alert_threshold;
+        let (capacity_usage_percent, memory_alert_triggered) =
+            calculate_capacity_usage(entry_count, config.max_entries, config.memory_alert_threshold);
 
         Ok(DataStoreStats {
             entry_count,

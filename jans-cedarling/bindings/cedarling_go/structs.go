@@ -257,9 +257,9 @@ type DataEntry struct {
 	Value       any    `json:"value"`
 	DataType    string `json:"data_type"`
 	CreatedAt   string `json:"created_at"`
-	ExpiresAt   string `json:"expires_at,omitempty"`
-	AccessCount uint64 `json:"access_count"`
-	LastAccess  string `json:"last_access,omitempty"`
+	ExpiresAt   *string `json:"expires_at,omitempty"`
+	AccessCount uint64  `json:"access_count"`
+	LastAccess  *string `json:"last_access,omitempty"`
 	SizeBytes   uint64 `json:"size_bytes"`
 }
 
