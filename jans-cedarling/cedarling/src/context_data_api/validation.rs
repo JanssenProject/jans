@@ -532,8 +532,7 @@ impl DataValidator {
                     path: path.into_owned(),
                 });
             },
-            Value::Bool(_) => {},
-            Value::Number(_) => {},
+            Value::Bool(_) | Value::Number(_) => {},
             Value::String(s) => self.validate_string_collecting(s, path.as_ref(), errors),
             Value::Array(arr) => self.validate_array_collecting(arr, path.as_ref(), depth, errors),
             Value::Object(obj) => {
@@ -757,9 +756,7 @@ impl DataValidator {
             }
 
             // Before decimal point: allow optional sign, then digits
-            let before_ok = if before_dot.is_empty() {
-                true
-            } else if before_dot == "+" || before_dot == "-" {
+            let before_ok = if before_dot.is_empty() || before_dot == "+" || before_dot == "-" {
                 true
             } else {
                 before_dot
@@ -781,7 +778,7 @@ impl DataValidator {
 
             // Parse as f64 to validate numeric format (but we've already rejected exponents)
             value.parse::<f64>()
-                .map(|n| n.is_finite()) // Reject NaN and infinity
+                .map(f64::is_finite) // Reject NaN and infinity
                 .unwrap_or(false)
         } else {
             false
@@ -1056,7 +1053,7 @@ mod tests {
         });
         assert!(!result.is_valid());
         assert!(
-            matches!(result.into_result(), Err(_)),
+            result.into_result().is_err(),
             "expected ValidationResult::into_result() to return Err(ValidationError::NullNotSupported {{ .. }})"
         );
     }

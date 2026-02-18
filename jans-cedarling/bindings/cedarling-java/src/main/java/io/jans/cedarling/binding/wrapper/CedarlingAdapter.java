@@ -77,11 +77,11 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushDataCtx(String key, JSONObject value, Long ttlSecs) throws DataException {
-        if (key == null) {
-            throw new DataException.DataOperationFailed("key cannot be null");
+        if (key == null || key.isEmpty()) {
+            throw new DataException.InvalidKey();
         }
         if (value == null) {
-            throw new DataException.DataOperationFailed("value cannot be null");
+            throw new DataException.SerializationException("value cannot be null");
         }
         cedarling.pushDataCtx(key, value.toString(), ttlSecs);
     }
@@ -97,11 +97,11 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public void pushDataCtx(String key, String value, Long ttlSecs) throws DataException {
-        if (key == null) {
-            throw new DataException.DataOperationFailed("key cannot be null");
+        if (key == null || key.isEmpty()) {
+            throw new DataException.InvalidKey();
         }
         if (value == null) {
-            throw new DataException.DataOperationFailed("value cannot be null");
+            throw new DataException.SerializationException("value cannot be null");
         }
         cedarling.pushDataCtx(key, value, ttlSecs);
     }
@@ -149,7 +149,7 @@ public class CedarlingAdapter implements AutoCloseable {
             }
             return value;
         } catch (org.json.JSONException e) {
-            throw new DataException.DataOperationFailed("Failed to parse JSON result: " + e.getMessage(), e);
+            throw new DataException.SerializationException("Failed to parse JSON result: " + e.getMessage());
         }
     }
 

@@ -166,7 +166,7 @@ mod tests {
             },
             policy_store_config: PolicyStoreConfig {
                 source: PolicyStoreSource::Yaml(
-                    "cedar_version: v4.0.0\npolicy_stores: {}\n".to_string(),
+                    "cedar_version: v4.0.0\npolicy_stores:\n  test_store:\n    cedar_version: v4.0.0\n    name: \"Test Store\"\n    schema:\n      encoding: none\n      content_type: cedar\n      body: |\n        namespace Test {\n          entity User;\n          entity Resource;\n          action \"read\" appliesTo {\n            principal: [User],\n            resource: [Resource]\n          };\n        }\n    policies:\n      test_policy:\n        description: \"Test policy\"\n        policy_content:\n          encoding: none\n          content_type: cedar\n          body: permit(principal, action, resource);\n".to_string(),
                 ),
             },
             jwt_config: JwtConfig::new_without_validation(),
@@ -250,14 +250,10 @@ mod tests {
 
         let result = cedarling.remove_data_ctx("remove_key");
         assert!(result.is_ok(), "remove_data_ctx should succeed");
-        assert_eq!(result.unwrap(), true, "should return true for existing key");
+        assert!(result.unwrap(), "should return true for existing key");
 
         let result2 = cedarling.remove_data_ctx("remove_key");
-        assert_eq!(
-            result2.unwrap(),
-            false,
-            "should return false for removed key"
-        );
+        assert!(!result2.unwrap(), "should return false for removed key");
     }
 
     #[test]

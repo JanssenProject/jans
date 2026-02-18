@@ -40,7 +40,7 @@ def test_get_data_entry_ctx():
 
     assert entry is not None
     assert entry.key == "test_key"
-    assert entry.value() == {"foo": "bar"}
+    assert entry.value == {"foo": "bar"}
     from cedarling_python import CedarType
     assert isinstance(entry.data_type, CedarType)
     assert entry.data_type == CedarType.Record

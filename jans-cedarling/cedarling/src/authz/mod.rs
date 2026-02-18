@@ -244,7 +244,7 @@ impl Authz {
         Ok(result)
     }
 
-    /// Get pushed data and build PushedDataInfo for logging.
+    /// Get pushed data and build `PushedDataInfo` for logging.
     fn get_pushed_data(&self) -> (HashMap<String, serde_json::Value>, Option<PushedDataInfo>) {
         let pushed_data = self.config.data_store.get_all();
         let pushed_data_info = if pushed_data.is_empty() {

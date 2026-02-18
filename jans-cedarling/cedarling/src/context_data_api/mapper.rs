@@ -279,17 +279,15 @@ impl CedarValueMapper {
             && value.chars().filter(|&c| c == '.').count() == 1
         {
             // Parse as f64 to validate numeric format, but ensure it's fixed-point
-            if let Ok(_) = value.parse::<f64>() {
+            if value.parse::<f64>().is_ok() {
                 // Additional check: ensure there's at least one digit before and after the decimal point
                 if let Some(dot_pos) = value.find('.') {
                     let before_dot = &value[..dot_pos];
                     let after_dot = &value[dot_pos + 1..];
                     // Require at least one ASCII digit in before_dot (optionally preceded by a single '+' or '-')
                     let before_has_digit = before_dot.chars().any(|c| c.is_ascii_digit());
-                    let before_valid = if before_dot.is_empty() {
-                        false
-                    } else if before_dot == "+" || before_dot == "-" {
-                        false // Must have at least one digit, not just sign
+                    let before_valid = if before_dot.is_empty() || before_dot == "+" || before_dot == "-" {
+                        false // Must have at least one digit, not just sign or empty
                     } else {
                         // Must have at least one digit, and all chars are digits or a single leading sign
                         let has_leading_sign = before_dot.starts_with('+') || before_dot.starts_with('-');
@@ -489,7 +487,7 @@ impl CedarValueMapper {
         } else if let Some(f) = n.as_f64() {
             // Convert floating point to decimal extension
             // Format to 4 decimal places to avoid scientific notation and ensure Cedar compatibility
-            let decimal_str = format!("{:.4}", f);
+            let decimal_str = format!("{f:.4}");
             Ok(RestrictedExpression::new_decimal(decimal_str))
         } else {
             Err(ValueMappingError::NumberNotRepresentable {
@@ -725,8 +723,7 @@ mod tests {
         let result = mapper.json_to_cedar(&json!(null));
         assert!(
             matches!(result, Err(ValueMappingError::NullNotSupported)),
-            "expected Err(ValueMappingError::NullNotSupported), got: {:?}",
-            result
+            "expected Err(ValueMappingError::NullNotSupported), got: {result:?}"
         );
     }
 

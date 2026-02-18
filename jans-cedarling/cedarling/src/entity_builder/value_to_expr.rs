@@ -22,7 +22,7 @@ pub(crate) fn value_to_expr(
                 RestrictedExpression::new_long(int)
             } else if let Some(float) = val.as_f64() {
                 // Format to 4 decimal places to avoid scientific notation and ensure Cedar compatibility
-                let decimal_str = format!("{:.4}", float);
+                let decimal_str = format!("{float:.4}");
                 RestrictedExpression::new_decimal(decimal_str)
             } else {
                 return Ok(None);
@@ -116,7 +116,7 @@ mod test {
         assert!(matches!(
             entity.attr("test_decimal").expect("entity should have a `test_decimal` attribute").expect("should be a valid value"),
             EvalResult::ExtensionValue(ref val)
-                if *val == "decimal(\"12.5\")",
+                if *val == "decimal(\"12.5000\")",
         ));
 
         assert!(matches!(

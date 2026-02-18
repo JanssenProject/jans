@@ -224,12 +224,30 @@ The data is injected into the evaluation context before policy evaluation, allow
 
 ### Error Handling
 
-The Context Data API methods throw `DataException`:
+The Context Data API methods throw `DataException` with specific variants:
+
+- `DataException.InvalidKey()` - Thrown when the key is empty or invalid
+- `DataException.KeyNotFound(String key)` - Thrown when attempting to access a non-existent key
+- `DataException.StorageLimitExceeded(Long max)` - Thrown when the storage limit is exceeded
+- `DataException.TtlExceeded(Long provided, Long max)` - Thrown when the provided TTL exceeds the maximum allowed TTL
+- `DataException.ValueTooLarge(Long size, Long max)` - Thrown when the value size exceeds the maximum allowed size
+- `DataException.SerializationException(String message)` - Thrown when serialization/deserialization fails
+
+Example error handling:
 
 ```java
 try {
     cedarling.pushDataCtx("", "{\"data\":\"value\"}", null); // Empty key
-} catch (DataException.DataOperationFailed e) {
-    System.out.println("Data operation failed: " + e.getMessage());
+} catch (DataException.InvalidKey e) {
+    System.out.println("Invalid key provided");
+} catch (DataException.StorageLimitExceeded e) {
+    System.out.println("Storage limit exceeded: max=" + e.getMax());
+} catch (DataException.SerializationException e) {
+    System.out.println("Serialization error: " + e.getMessage());
+} catch (DataException e) {
+    System.out.println("Data operation failed: " + e);
 }
+```
+
+Note: The `CedarlingAdapter` wrapper performs additional validation and may throw `DataException.InvalidKey()` for null or empty keys, or `DataException.SerializationException()` for null values before calling the underlying Rust implementation.
 ```

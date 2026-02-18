@@ -238,7 +238,7 @@ if entry is not None:
     print(f"Created at: {entry.created_at}")
     print(f"Access count: {entry.access_count}")
     print(f"Data type: {entry.data_type}")
-    print(f"Value: {entry.value()}")
+    print(f"Value: {entry.value}")
 ```
 
 ### Remove Data

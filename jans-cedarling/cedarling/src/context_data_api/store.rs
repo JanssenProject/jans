@@ -124,7 +124,7 @@ impl DataStore {
             get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
 
         // Convert back to StdDuration for DataEntry::new, preserving sub-second precision
-        let effective_ttl_std = effective_ttl_chrono.to_std().unwrap_or_else(|_| {
+        let effective_ttl_std = effective_ttl_chrono.to_std().unwrap_or({
             // Handle negative or out-of-range durations by clamping to zero
             StdDuration::ZERO
         });
@@ -259,7 +259,7 @@ impl DataStore {
 
     /// Get the number of entries currently in the store.
     /// Uses read lock for concurrent access.
-    /// Filters out expired entries to match get_all()/list_entries() behavior.
+    /// Filters out expired entries to match `get_all()/list_entries()` behavior.
     pub(crate) fn count(&self) -> usize {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         let now = chrono::Utc::now();
@@ -303,7 +303,7 @@ impl DataStore {
     /// Calculate the total size of all entries in bytes.
     ///
     /// Size is computed based on JSON serialization of each entry.
-    /// Filters out expired entries to match get_all()/list_entries() behavior.
+    /// Filters out expired entries to match `get_all()/list_entries()` behavior.
     pub(crate) fn total_size(&self) -> usize {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
         let now = chrono::Utc::now();
@@ -552,22 +552,25 @@ mod tests {
     #[test]
     fn test_max_entry_size() {
         let config = DataStoreConfig {
-            max_entry_size: 150,
+            max_entry_size: 200,
             ..Default::default()
         };
         let store = DataStore::new(config).expect("should create store");
 
-        // Small value should work (use a very short string to ensure it's under 150 bytes with metadata)
+        // Small value should work (use a very short string to ensure it's under 200 bytes with metadata)
         store
             .push("key1", json!("x"), None)
             .expect("failed to push small value for max_entry_size test");
 
         // Large value should fail
         let large_value = json!(
-            "this is a very long string that exceeds the limit and it needs to be even longer to exceed 150 bytes including metadata"
+            "this is a very long string that exceeds the limit and it needs to be even longer to exceed 200 bytes including metadata"
         );
         let result = store.push("key2", large_value, None);
-        assert!(matches!(result, Err(DataError::ValueTooLarge { .. })));
+        assert!(
+            matches!(result, Err(DataError::ValueTooLarge { .. })),
+            "push with value exceeding max_entry_size should fail with ValueTooLarge"
+        );
     }
 
     #[test]
@@ -1059,7 +1062,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config_negative.validate(), Err(_)),
+            config_negative.validate().is_err(),
             "memory_alert_threshold = -1.0 should fail validation"
         );
 
@@ -1069,7 +1072,7 @@ mod tests {
             ..Default::default()
         };
         assert!(
-            matches!(config_over.validate(), Err(_)),
+            config_over.validate().is_err(),
             "memory_alert_threshold = 101.0 should fail validation"
         );
     }

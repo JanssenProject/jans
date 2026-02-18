@@ -127,7 +127,10 @@ mod tests {
         assert_eq!(config.default_ttl, None);
         assert_eq!(config.max_ttl, Some(Duration::from_secs(3600)));
         assert!(config.enable_metrics);
-        assert_eq!(config.memory_alert_threshold, 80.0);
+        assert!(
+            (config.memory_alert_threshold - 80.0).abs() < f64::EPSILON,
+            "memory_alert_threshold should be 80.0"
+        );
     }
 
     #[test]

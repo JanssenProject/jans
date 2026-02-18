@@ -442,7 +442,9 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
             "authorization validation should return Allow decision"
         );
 
-        group.throughput(Throughput::Elements(call_count as u64));
+        group.throughput(Throughput::Elements(
+            u64::try_from(call_count).unwrap_or(0)
+        ));
         group.bench_with_input(BenchmarkId::new("calls", call_count), &runtime, |b, rt| {
             b.to_async(rt).iter(|| async {
                 for _ in 0..call_count {
