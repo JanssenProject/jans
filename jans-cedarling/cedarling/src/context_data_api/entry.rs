@@ -7,8 +7,6 @@ use super::store::std_duration_to_chrono_duration;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::net::IpAddr;
-use std::str::FromStr;
 use std::time::Duration as StdDuration;
 
 /// Helper module for serializing `DateTime`
@@ -100,7 +98,7 @@ pub enum CedarType {
 
 // Track which units are seen to prevent repeats and enforce order
 #[derive(PartialEq, PartialOrd)]
-enum UnitRank {
+pub(crate) enum UnitRank {
     Start,
     Days,
     Hours,
@@ -170,48 +168,22 @@ impl CedarType {
 
     /// Infer Cedar type from a string value by detecting extension patterns.
     fn from_string_value(s: &str) -> Self {
-        // Check for plain IP address (IPv4 or IPv6)
-        if IpAddr::from_str(s).is_ok() {
-            return Self::Ip;
-        }
+        use crate::context_data_api::mapper::CedarValueMapper;
+        use crate::context_data_api::mapper::ExtensionValue;
 
-        // Check for CIDR notation (e.g., "192.168.1.0/24", "fe80::/10")
-        if let Some((ip_part, prefix_part)) = s.split_once('/')
-            && let Ok(ip) = IpAddr::from_str(ip_part)
-            && let Ok(prefix_len) = prefix_part.parse::<u8>()
-        {
-            let max_prefix = if ip.is_ipv4() { 32 } else { 128 };
-            if prefix_len <= max_prefix {
-                return Self::Ip;
-            }
+        match CedarValueMapper::detect_extension(s) {
+            Some(ExtensionValue::IpAddr(_)) => Self::Ip,
+            Some(ExtensionValue::DateTime(_)) => Self::DateTime,
+            Some(ExtensionValue::Duration(_)) => Self::Duration,
+            Some(ExtensionValue::Decimal(_)) => Self::Decimal,
+            None => Self::String,
         }
-
-        // Check for datetime (ISO 8601 / RFC 3339 format)
-        if Self::is_datetime_format(s) {
-            return Self::DateTime;
-        }
-
-        // Check for duration format (e.g., "2h30m", "-1d12h", "500ms")
-        if Self::is_duration_format(s) {
-            return Self::Duration;
-        }
-
-        // Check for decimal format (contains decimal point and parseable as f64)
-        if s.contains('.')
-            && s.parse::<f64>().is_ok()
-            && !s.ends_with('.')
-            && s.chars().filter(|&c| c == '.').count() == 1
-        {
-            return Self::Decimal;
-        }
-
-        Self::String
     }
 
     /// Checks whether the value is either:
     /// - a valid RFC 3339 datetime, or
     /// - a valid ISO 8601 date-only string (YYYY-MM-DD)
-    fn is_datetime_format(value: &str) -> bool {
+    pub(crate) fn is_datetime_format(value: &str) -> bool {
         DateTime::parse_from_rfc3339(value).is_ok()
             || NaiveDate::parse_from_str(value, "%Y-%m-%d").is_ok()
     }
@@ -222,7 +194,7 @@ impl CedarType {
     /// - Units only d > h > m > s > ms (in that order)
     /// - No repeated units
     /// - Each segment: digits then unit
-    fn is_duration_format(value: &str) -> bool {
+    pub(crate) fn is_duration_format(value: &str) -> bool {
         if value.is_empty() {
             return false;
         }

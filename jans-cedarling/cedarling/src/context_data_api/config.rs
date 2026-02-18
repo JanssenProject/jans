@@ -125,6 +125,7 @@ mod tests {
         assert_eq!(config.default_ttl, None);
         assert_eq!(config.max_ttl, Some(Duration::from_secs(3600)));
         assert!(config.enable_metrics);
+        assert_eq!(config.memory_alert_threshold, 80.0);
     }
 
     #[test]
@@ -192,6 +193,63 @@ mod tests {
         assert!(
             matches!(config.validate(), Ok(())),
             "expected DataStoreConfig::validate() to succeed when only max_ttl is set"
+        );
+    }
+
+    #[test]
+    fn test_memory_alert_threshold_valid() {
+        let config = DataStoreConfig {
+            memory_alert_threshold: 0.0,
+            ..Default::default()
+        };
+        assert!(
+            matches!(config.validate(), Ok(())),
+            "expected DataStoreConfig::validate() to succeed when memory_alert_threshold is 0.0"
+        );
+
+        let config = DataStoreConfig {
+            memory_alert_threshold: 100.0,
+            ..Default::default()
+        };
+        assert!(
+            matches!(config.validate(), Ok(())),
+            "expected DataStoreConfig::validate() to succeed when memory_alert_threshold is 100.0"
+        );
+
+        let config = DataStoreConfig {
+            memory_alert_threshold: 50.0,
+            ..Default::default()
+        };
+        assert!(
+            matches!(config.validate(), Ok(())),
+            "expected DataStoreConfig::validate() to succeed when memory_alert_threshold is 50.0"
+        );
+    }
+
+    #[test]
+    fn test_memory_alert_threshold_invalid() {
+        let config = DataStoreConfig {
+            memory_alert_threshold: -1.0,
+            ..Default::default()
+        };
+        assert!(
+            matches!(
+                config.validate(),
+                Err(ConfigValidationError::InvalidMemoryAlertThreshold { .. })
+            ),
+            "expected DataStoreConfig::validate() to return InvalidMemoryAlertThreshold when memory_alert_threshold is < 0.0"
+        );
+
+        let config = DataStoreConfig {
+            memory_alert_threshold: 101.0,
+            ..Default::default()
+        };
+        assert!(
+            matches!(
+                config.validate(),
+                Err(ConfigValidationError::InvalidMemoryAlertThreshold { .. })
+            ),
+            "expected DataStoreConfig::validate() to return InvalidMemoryAlertThreshold when memory_alert_threshold is > 100.0"
         );
     }
 }

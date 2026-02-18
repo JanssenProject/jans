@@ -179,28 +179,21 @@ impl DataStore {
     ///
     /// Returns `None` if the key doesn't exist or the entry has expired.
     /// If metrics are enabled, increments the access count for the entry.
-    /// Uses read lock initially for better concurrency, upgrading to write lock only when metrics are enabled.
+    /// When metrics are enabled, uses write lock up-front to avoid TOCTOU issues.
     pub(crate) fn get_entry(&self, key: &str) -> Option<DataEntry> {
-        // First, try with read lock for better concurrency
-        let entry = {
-            let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
-            storage.get(key).cloned()
-        };
-
-        let mut entry = entry?;
-
-        // Check if entry has expired
-        if let Some(expires_at) = entry.expires_at
-            && chrono::Utc::now() > expires_at
-        {
-            // Entry is expired, optionally remove it from storage
-            let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
-            storage.pop(key);
-            return None;
-        }
-
-        // Only acquire write lock if metrics are enabled
         if self.config.enable_metrics {
+            // Acquire write lock up-front when metrics are enabled to avoid TOCTOU
+            let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
+            let mut entry = storage.get(key)?.clone();
+
+            // Check if entry has expired
+            if let Some(expires_at) = entry.expires_at
+                && chrono::Utc::now() > expires_at
+            {
+                storage.pop(key);
+                return None;
+            }
+
             entry.increment_access();
 
             // Calculate remaining TTL to preserve expiration
@@ -219,12 +212,22 @@ impl DataStore {
                 get_effective_ttl(None, self.config.default_ttl, self.config.max_ttl)
             };
 
-            // Acquire write lock to update the entry with incremented access count
-            let mut storage = self.storage.write().expect(RWLOCK_EXPECT_MESSAGE);
             let _ = storage.set_with_ttl(key, entry.clone(), remaining_ttl, &[]);
-        }
+            Some(entry)
+        } else {
+            // Fast path: use read lock when metrics are disabled
+            let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+            let entry = storage.get(key)?.clone();
 
-        Some(entry)
+            // Check if entry has expired
+            if let Some(expires_at) = entry.expires_at
+                && chrono::Utc::now() > expires_at
+            {
+                return None;
+            }
+
+            Some(entry)
+        }
     }
 
     /// Remove a value from the store by key.
@@ -254,10 +257,13 @@ impl DataStore {
     ///
     /// This is used for context injection during authorization.
     /// Returns only the values, not the metadata.
+    /// Filters out expired entries to prevent leaking expired items into authorization contexts.
     pub(crate) fn get_all(&self) -> HashMap<String, Value> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+        let now = chrono::Utc::now();
         storage
             .iter()
+            .filter(|(_, entry)| !entry.is_expired(now))
             .map(|(k, entry)| (k.clone(), entry.value.clone()))
             .collect()
     }

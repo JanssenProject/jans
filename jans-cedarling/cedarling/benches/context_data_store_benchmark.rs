@@ -442,14 +442,17 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
             "authorization validation should return Allow decision"
         );
 
+        group.throughput(Throughput::Elements(call_count as u64));
         group.bench_with_input(BenchmarkId::new("calls", call_count), &runtime, |b, rt| {
             b.to_async(rt).iter(|| async {
-                black_box(
-                    cedarling
-                        .authorize_unsigned(black_box(request.clone()))
-                        .await
-                        .expect("authorization should succeed"),
-                )
+                for _ in 0..call_count {
+                    black_box(
+                        cedarling
+                            .authorize_unsigned(black_box(request.clone()))
+                            .await
+                            .expect("authorization should succeed"),
+                    );
+                }
             });
         });
     }

@@ -327,10 +327,8 @@ pub(crate) struct DecisionLogEntry {
 /// Information about pushed data injected into the authorization context
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub(crate) struct PushedDataInfo {
-    /// Number of data entries that were injected into context.data
-    pub count: usize,
     /// Keys of the data entries that were injected
-    pub keys: Vec<String>,
+    pub keys: Vec<SmolStr>,
 }
 
 impl DecisionLogEntry {

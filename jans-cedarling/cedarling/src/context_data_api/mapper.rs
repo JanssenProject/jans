@@ -279,6 +279,7 @@ impl CedarValueMapper {
 
     /// Check if a string looks like an ISO 8601 / RFC 3339 datetime.
     ///
+    /// Uses real parsing to validate semantic correctness, not just byte patterns.
     /// Supported formats:
     /// - "2024-10-15" (date only)
     /// - "2024-10-15T11:35:00Z" (UTC)
@@ -286,54 +287,24 @@ impl CedarValueMapper {
     /// - "2024-10-15T11:35:00+0100" (with timezone offset)
     /// - "2024-10-15T11:35:00.000+0100" (with timezone and milliseconds)
     fn is_datetime_format(value: &str) -> bool {
-        // Quick length check - datetime strings are typically 10-29 chars
-        if value.len() < 10 || value.len() > 35 {
-            return false;
-        }
+        use chrono::{DateTime, NaiveDate};
 
-        // Must start with a 4-digit year
-        let bytes = value.as_bytes();
-        if bytes.len() < 10 {
-            return false;
-        }
-
-        // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(u8::is_ascii_digit)
-            || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(u8::is_ascii_digit)
-            || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(u8::is_ascii_digit)
-        {
-            return false;
-        }
-
-        // Date only format
-        if value.len() == 10 {
+        // Try RFC 3339 parsing first (handles full datetime with timezone)
+        if DateTime::parse_from_rfc3339(value).is_ok() {
             return true;
         }
 
-        // Must have 'T' separator for datetime
-        if bytes.len() > 10 && bytes[10] != b'T' {
-            return false;
+        // Try date-only format (YYYY-MM-DD)
+        if NaiveDate::parse_from_str(value, "%Y-%m-%d").is_ok() {
+            return true;
         }
 
-        // Check for time portion (HH:MM:SS)
-        if bytes.len() >= 19
-            && (!bytes[11..13].iter().all(u8::is_ascii_digit)
-                || bytes[13] != b':'
-                || !bytes[14..16].iter().all(u8::is_ascii_digit)
-                || bytes[16] != b':'
-                || !bytes[17..19].iter().all(u8::is_ascii_digit))
-        {
-            return false;
-        }
-
-        // Accept various valid suffixes (Z, +HHMM, -HHMM, .sss, etc.)
-        true
+        false
     }
 
     /// Check if a string looks like a Cedar duration format.
     ///
+    /// Enforces unit ordering: d > h > m > s > ms (descending rank order).
     /// Supported formats:
     /// - "2h30m" (hours and minutes)
     /// - "-1d12h" (negative, days and hours)
@@ -341,54 +312,55 @@ impl CedarValueMapper {
     /// - "500ms" (milliseconds only)
     /// - "1d" (days only)
     fn is_duration_format(value: &str) -> bool {
+        use crate::context_data_api::entry::UnitRank;
+
         if value.is_empty() {
             return false;
         }
 
-        let s = value.strip_prefix('-').unwrap_or(value);
-        if s.is_empty() {
-            return false;
-        }
+        let bytes = value.as_bytes();
+        let mut i = 0;
 
-        // Duration must contain at least one unit suffix (d, h, m, s, ms)
-        // and consist of digits followed by unit suffixes
-        let has_unit = s.contains('d')
-            || s.contains('h')
-            || s.ends_with('m')
-            || s.ends_with('s')
-            || s.ends_with("ms");
-
-        if !has_unit {
-            return false;
-        }
-
-        // Check that it follows the pattern: digits followed by units, repeated
-        // Valid: "1d2h3m4s", "500ms", "2h30m"
-        // Invalid: "abc", "1.5h" (no decimals in duration)
-        let mut chars = s.chars().peekable();
-        let mut has_digits = false;
-
-        while let Some(c) = chars.next() {
-            if c.is_ascii_digit() {
-                has_digits = true;
-            } else if c == 'd' || c == 'h' || c == 's' {
-                if !has_digits {
-                    return false;
-                }
-                has_digits = false;
-            } else if c == 'm' {
-                if !has_digits {
-                    return false;
-                }
-                // Could be 'm' (minutes) or 'ms' (milliseconds)
-                if chars.peek() == Some(&'s') {
-                    chars.next(); // consume 's'
-                }
-                has_digits = false;
-            } else {
-                // Invalid character
+        if bytes[i] == b'-' {
+            i += 1;
+            if i == bytes.len() {
                 return false;
             }
+        }
+
+        let mut last_rank = UnitRank::Start;
+
+        while i < bytes.len() {
+            let start = i;
+            while i < bytes.len() && bytes[i].is_ascii_digit() {
+                i += 1;
+            }
+            if start == i {
+                return false;
+            }
+
+            let (current_rank, consumed) = match bytes.get(i) {
+                Some(b'd') if last_rank < UnitRank::Days => (UnitRank::Days, 1),
+                Some(b'h') if last_rank < UnitRank::Hours => (UnitRank::Hours, 1),
+                Some(b's') if last_rank < UnitRank::Seconds => (UnitRank::Seconds, 1),
+                Some(b'm') => {
+                    if i + 1 < bytes.len() && bytes[i + 1] == b's' {
+                        if last_rank < UnitRank::Millis {
+                            (UnitRank::Millis, 2)
+                        } else {
+                            return false;
+                        }
+                    } else if last_rank < UnitRank::Minutes {
+                        (UnitRank::Minutes, 1)
+                    } else {
+                        return false;
+                    }
+                },
+                _ => return false,
+            };
+
+            last_rank = current_rank;
+            i += consumed;
         }
 
         true
@@ -498,10 +470,12 @@ impl CedarValueMapper {
         let mut exprs = Vec::with_capacity(arr.len());
 
         for item in arr {
-            let expr = self.convert_value(item)?;
-            // All code paths in convert_value now return Some or Err,
-            // so unwrap is safe here
-            exprs.push(expr.expect("convert_value should always return Some"));
+            match self.convert_value(item)? {
+                Some(expr) => exprs.push(expr),
+                None => {
+                    return Err(ValueMappingError::NullNotSupported);
+                },
+            }
         }
 
         Ok(RestrictedExpression::new_set(exprs))

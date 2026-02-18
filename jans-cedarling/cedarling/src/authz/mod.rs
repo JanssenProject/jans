@@ -21,6 +21,7 @@ use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, DecisionLogEntry, Diagnostics,
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
+use smol_str::SmolStr;
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Context, Entities, Entity, EntityUid};
 use chrono::Utc;
@@ -131,8 +132,7 @@ impl Authz {
             None
         } else {
             Some(PushedDataInfo {
-                count: pushed_data.len(),
-                keys: pushed_data.keys().cloned().collect(),
+                keys: pushed_data.keys().map(|k| SmolStr::from(k.as_str())).collect(),
             })
         };
 
@@ -296,8 +296,7 @@ impl Authz {
             None
         } else {
             Some(PushedDataInfo {
-                count: pushed_data.len(),
-                keys: pushed_data.keys().cloned().collect(),
+                keys: pushed_data.keys().map(|k| SmolStr::from(k.as_str())).collect(),
             })
         };
 
@@ -444,8 +443,7 @@ impl Authz {
             None
         } else {
             Some(PushedDataInfo {
-                count: pushed_data.len(),
-                keys: pushed_data.keys().cloned().collect(),
+                keys: pushed_data.keys().map(|k| SmolStr::from(k.as_str())).collect(),
             })
         };
 

@@ -250,7 +250,6 @@ impl DataValidator {
     }
 
     /// Validate an extension value format.
-    /// Validate an extension value format.
     ///
     /// Supports all Cedar extension types:
     /// - `ipaddr` / `ip`: IP addresses and CIDR ranges
@@ -714,96 +713,15 @@ impl DataValidator {
     }
 
     /// Check if a string is a valid ISO 8601 / RFC 3339 datetime.
+    /// Uses the canonical implementation from entry.rs for consistency.
     fn is_valid_datetime(value: &str) -> bool {
-        // Quick length check - datetime strings are typically 10-35 chars
-        if value.len() < 10 || value.len() > 35 {
-            return false;
-        }
-
-        let bytes = value.as_bytes();
-
-        // Check YYYY-MM-DD pattern
-        if !bytes[0..4].iter().all(u8::is_ascii_digit)
-            || bytes[4] != b'-'
-            || !bytes[5..7].iter().all(u8::is_ascii_digit)
-            || bytes[7] != b'-'
-            || !bytes[8..10].iter().all(u8::is_ascii_digit)
-        {
-            return false;
-        }
-
-        // Date only format
-        if value.len() == 10 {
-            return true;
-        }
-
-        // Must have 'T' separator for datetime
-        if bytes.len() > 10 && bytes[10] != b'T' {
-            return false;
-        }
-
-        // Check for time portion (HH:MM:SS)
-        if bytes.len() >= 19
-            && (!bytes[11..13].iter().all(u8::is_ascii_digit)
-                || bytes[13] != b':'
-                || !bytes[14..16].iter().all(u8::is_ascii_digit)
-                || bytes[16] != b':'
-                || !bytes[17..19].iter().all(u8::is_ascii_digit))
-        {
-            return false;
-        }
-
-        true
+        crate::context_data_api::entry::CedarType::is_datetime_format(value)
     }
 
     /// Check if a string is a valid Cedar duration format.
+    /// Uses the canonical implementation from entry.rs for consistency.
     fn is_valid_duration(value: &str) -> bool {
-        if value.is_empty() {
-            return false;
-        }
-
-        let s = value.strip_prefix('-').unwrap_or(value);
-        if s.is_empty() {
-            return false;
-        }
-
-        // Duration must contain at least one unit suffix
-        let has_unit = s.contains('d')
-            || s.contains('h')
-            || s.ends_with('m')
-            || s.ends_with('s')
-            || s.ends_with("ms");
-
-        if !has_unit {
-            return false;
-        }
-
-        // Check that it follows the pattern: digits followed by units, repeated
-        let mut chars = s.chars().peekable();
-        let mut has_digits = false;
-
-        while let Some(c) = chars.next() {
-            if c.is_ascii_digit() {
-                has_digits = true;
-            } else if c == 'd' || c == 'h' || c == 's' {
-                if !has_digits {
-                    return false;
-                }
-                has_digits = false;
-            } else if c == 'm' {
-                if !has_digits {
-                    return false;
-                }
-                if chars.peek() == Some(&'s') {
-                    chars.next();
-                }
-                has_digits = false;
-            } else {
-                return false;
-            }
-        }
-
-        true
+        crate::context_data_api::entry::CedarType::is_duration_format(value)
     }
 }
 

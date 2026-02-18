@@ -546,17 +546,15 @@ impl Cedarling {
             .transpose()?;
         self.inner
             .push_data_ctx(&key, json_value, ttl)
-            .map_err(Into::into)
+            .map_err(|e: core::DataError| DataError::from(e))
     }
 
     /// Get a value from the data store by key.
     /// Returns None if the key doesn't exist or the entry has expired.
     #[uniffi::method]
     pub fn get_data_ctx(&self, key: String) -> Result<Option<JsonValue>, DataError> {
-        match self
-            .inner
-            .get_data_ctx(&key)
-            .map_err(Into::into)? {
+        let result: Result<_, core::DataError> = self.inner.get_data_ctx(&key);
+        match result.map_err(DataError::from)? {
             Some(value) => Ok(Some(JsonValue(serde_json::to_string(&value).map_err(
                 |e| DataError::SerializationError(format!("Failed to serialize value: {}", e)),
             )?))),
@@ -568,10 +566,8 @@ impl Cedarling {
     /// Returns None if the key doesn't exist or the entry has expired.
     #[uniffi::method]
     pub fn get_data_entry_ctx(&self, key: String) -> Result<Option<DataEntry>, DataError> {
-        match self
-            .inner
-            .get_data_entry_ctx(&key)
-            .map_err(Into::into)? {
+        let result: Result<_, core::DataError> = self.inner.get_data_entry_ctx(&key);
+        match result.map_err(DataError::from)? {
             Some(entry) => Ok(Some(entry.try_into()?)),
             None => Ok(None),
         }
@@ -583,7 +579,7 @@ impl Cedarling {
     pub fn remove_data_ctx(&self, key: String) -> Result<bool, DataError> {
         self.inner
             .remove_data_ctx(&key)
-            .map_err(Into::into)
+            .map_err(|e: core::DataError| DataError::from(e))
     }
 
     /// Clear all entries from the data store.
@@ -591,16 +587,15 @@ impl Cedarling {
     pub fn clear_data_ctx(&self) -> Result<(), DataError> {
         self.inner
             .clear_data_ctx()
-            .map_err(Into::into)
+            .map_err(|e: core::DataError| DataError::from(e))
     }
 
     /// List all entries with their metadata.
     /// Returns a list of DataEntry objects.
     #[uniffi::method]
     pub fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
-        self.inner
-            .list_data_ctx()
-            .map_err(Into::into)?
+        let result: Result<_, core::DataError> = self.inner.list_data_ctx();
+        result.map_err(DataError::from)?
             .into_iter()
             .map(TryInto::try_into)
             .collect()
@@ -612,6 +607,6 @@ impl Cedarling {
         self.inner
             .get_stats_ctx()
             .map(Into::into)
-            .map_err(Into::into)
+            .map_err(|e: core::DataError| DataError::from(e))
     }
 }
