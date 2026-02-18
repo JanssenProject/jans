@@ -89,8 +89,8 @@ public class AuditLogResource extends ConfigBaseResource {
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(schema = @Schema(type = "string", description = "Start date/time for the log entries report. Accepted: `dd-MM-yyyy` or ISO-8601 date-time (e.g. `yyyy-MM-ddTHH:mm:ssZ`).")) @QueryParam(value = "start_date") String startDate,
-            @Parameter(schema = @Schema(type = "string", description = "End date/time for the log entries. Accepted: `dd-MM-yyyy` or ISO-8601 date-time (e.g. `yyyy-MM-ddTHH:mm:ssZ`).")) @QueryParam(value = "end_date") String endDate)
+            @Parameter(description = "Start date/time for the log entries report. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "start_date") String startDate,
+            @Parameter(description = "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "end_date") String endDate)
 
     {
         if (log.isInfoEnabled()) {
@@ -399,12 +399,8 @@ public class AuditLogResource extends ConfigBaseResource {
                 // continue
             }
         }
-        // Fallback to legacy dd-MM-yyyy (skip if already tried via fallbackFormatter)
-        DateTimeFormatter legacy = DateTimeFormatter.ofPattern(AUDIT_FILE_DATE_FORMAT);
-        if (legacy.equals(fallbackFormatter)) {
-            throw new DateTimeParseException("Text '" + trimmed + "' could not be parsed.", trimmed, 0);
-        }
-        return LocalDate.parse(trimmed, legacy);
+        // Fallback to legacy dd-MM-yyyy
+        return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(AUDIT_FILE_DATE_FORMAT));
     }
 
 }
