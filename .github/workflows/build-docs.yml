@@ -156,6 +156,12 @@ jobs:
 
          sudo rm -rf temp
 
+      - name: Enable Scarf and Reo tracking for versioned docs
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'published')
+        run: |
+          sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
+          sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
+
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
@@ -226,10 +232,7 @@ jobs:
               git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
             fi
           done
-          sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
-          sed -i -e "s/enable_reo_flag/True/g" ${STABLE}/overrides/main.html
-          git add ${STABLE}/overrides/main.html && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url and enable reo integration"
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: update version references"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"
