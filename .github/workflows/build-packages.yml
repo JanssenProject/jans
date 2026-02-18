@@ -74,7 +74,7 @@ jobs:
             build_files: deb/noble
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.11
           - name: ubuntu22
             os: ubuntu-22.04
@@ -82,7 +82,7 @@ jobs:
             build_files: deb/jammy
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.8
           - name: ubuntu20
             os: ubuntu-22.04
@@ -90,7 +90,7 @@ jobs:
             build_files: deb/focal
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.8
           - name: el8
             os: ubuntu-22.04
@@ -101,7 +101,7 @@ jobs:
             sign_cmd: rpm --addsign
             python_version: 3.8
           - name: suse15
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             asset_suffix: .suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
@@ -209,6 +209,16 @@ jobs:
         asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
+    - name: Upload cosign bundle to release
+      if: contains(matrix.sign_cmd, 'cosign')
+      id: upload_cosign_bundle
+      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      with:
+        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        file: ${{github.workspace}}/cosign.bundle
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sigstore.json
+        tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
 
   build_and_upload_python_packages:
     if: |
@@ -221,15 +231,15 @@ jobs:
         include:
           - name: ubuntu
             os: ubuntu-22.04
-            python_version: 3.8
+            python_version: '3.10'
           - name: suse
-            os: ubuntu-22.04
-            python_version: 3.8
+            os: ubuntu-24.04
+            python_version: '3.10'
             use_docker: true
             docker_image: opensuse/leap:15.4
           - name: macos
             os: macos-latest
-            python_version: 3.8
+            python_version: '3.10'
 
     steps:
     - name: Harden Runner
@@ -248,26 +258,18 @@ jobs:
 
     - name: Build with Docker (SUSE)
       if: matrix.use_docker
-      uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-      with:
-        image: ${{ matrix.docker_image }}
-        options: -v ${{ github.workspace }}:/workspace
-        run: |
-          zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.1/standard/openSUSE:Leap:15.1.repo
+      run: |
+        docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace ${{ matrix.docker_image }} bash -c '
           zypper --gpg-auto-import-keys refresh
-          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel openssl
-          zypper addrepo https://download.opensuse.org/repositories/home:smarty12:Python/RaspberryPi_Leap_15.2/home:smarty12:Python.repo
-          zypper --gpg-auto-import-keys refresh
-          zypper download python3-dev
-          rpm -i --nodeps /var/cache/zypp/packages/home_smarty12_Python/noarch/python3-dev-0.4.0-lp152.1.4.noarch.rpm
-          zypper --non-interactive install -y python3 python3-devel
-          pip install shiv
+          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool openssl python311 python311-pip python311-setuptools python311-wheel python311-devel
+          python3.11 -m pip install shiv
           cd /workspace/jans-linux-setup
-          make zipapp
+          python3.11 -m shiv --compressed -o jans-linux-setup.pyz -p "/usr/bin/env python3" -e jans_setup.jans_setup:main . --no-cache
           mv jans-linux-setup.pyz jans-linux-suse-X86-64-setup.pyz
           cd ../jans-cli-tui
-          make zipapp 
+          python3.11 -m shiv --compressed -o jans-cli-tui.pyz -p "/usr/bin/env python3" -e cli_tui.jans_cli_tui:run . --no-cache
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
+        '
 
     - name: Build with Ubuntu
       if: matrix.name == 'ubuntu'
@@ -372,6 +374,8 @@ jobs:
     - name: Build WASM build
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         rustup default stable
         rustup target add wasm32-unknown-unknown
@@ -406,7 +410,6 @@ jobs:
   
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
-        npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
           echo "npm publish failed (may already be published), continuing..."
           cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
