@@ -5,7 +5,7 @@
 
 use cedarling::bindings::cedar_policy;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, CedarType, DataApi,
+    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
     DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, Request,
     RequestUnsigned,
 };
