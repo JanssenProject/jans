@@ -283,16 +283,14 @@ impl DataStore {
         }
 
         let now = chrono::Utc::now();
-        // Pre-allocate HashMap with capacity to avoid reallocations
-        let mut result = HashMap::with_capacity(storage.len());
-
-        for (k, entry) in storage.iter() {
-            if !entry.is_expired(now) {
-                result.insert(k.clone(), entry.value.clone());
-            }
-        }
-
-        result
+        // Collect with size hint to reduce reallocations
+        // Note: We can't use with_capacity on the iterator, but collect() will
+        // use the size_hint from the iterator chain
+        storage
+            .iter()
+            .filter(|(_, entry)| !entry.is_expired(now))
+            .map(|(k, entry)| (k.clone(), entry.value.clone()))
+            .collect()
     }
 
     /// List all entries with their full metadata, excluding expired entries.
@@ -305,16 +303,12 @@ impl DataStore {
         }
 
         let now = Utc::now();
-        // Pre-allocate Vec with capacity to avoid reallocations
-        let mut result = Vec::with_capacity(storage.len());
-
-        for (_, entry) in storage.iter() {
-            if !entry.is_expired(now) {
-                result.push(entry.clone());
-            }
-        }
-
-        result
+        // Use iterator chain - compiler optimizes this well
+        storage
+            .iter()
+            .filter(|(_, entry)| !entry.is_expired(now))
+            .map(|(_, entry)| entry.clone())
+            .collect()
     }
 
     /// Get the configuration for this store.

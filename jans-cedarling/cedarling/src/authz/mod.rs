@@ -250,12 +250,13 @@ impl Authz {
         let pushed_data_info = if pushed_data.is_empty() {
             None
         } else {
-            // Pre-allocate Vec with capacity to avoid reallocations
-            let mut keys = Vec::with_capacity(pushed_data.len());
-            for k in pushed_data.keys() {
-                keys.push(SmolStr::from(k.as_str()));
-            }
-            Some(PushedDataInfo { keys })
+            // Use iterator chain - compiler optimizes this well
+            Some(PushedDataInfo {
+                keys: pushed_data
+                    .keys()
+                    .map(|k| SmolStr::from(k.as_str()))
+                    .collect(),
+            })
         };
         (pushed_data, pushed_data_info)
     }
