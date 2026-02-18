@@ -244,6 +244,8 @@ For complete configuration documentation, see [cedarling-properties.md](../../..
 
 The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
 
+**Note:** These Swift examples assume they are used inside a throwing context (e.g., within a function marked `throws`) or you can wrap calls in `do-catch` to handle errors. Methods like `getDataCtx`, `getDataEntryCtx`, `removeDataCtx`, `clearDataCtx`, `listDataCtx`, and `getStatsCtx` are throwing methods that can raise `DataException`.
+
 ### Push Data
 
 Store data with an optional TTL (Time To Live):
@@ -305,6 +307,7 @@ val entry = cedarling.getDataEntryCtx("user:123")
 if (entry != null) {
     println("Key: ${entry.key}")
     println("Created at: ${entry.createdAt}")
+    println("Expires at: ${entry.expiresAt}")
     println("Access count: ${entry.accessCount}")
     println("Data type: ${entry.dataType}")
 }
@@ -316,6 +319,7 @@ if (entry != null) {
 if let entry = try cedarling.getDataEntryCtx(key: "user:123") {
     print("Key: \(entry.key)")
     print("Created at: \(entry.createdAt)")
+    print("Expires at: \(entry.expiresAt)")
     print("Access count: \(entry.accessCount)")
     print("Data type: \(entry.dataType)")
 }
@@ -436,12 +440,15 @@ do {
 
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
 
+**Note:** The `context.data` symbol must be declared in your Cedar schema as a compatible map/record type for the example to validate. The schema should include an entry like a record/map keyed by resource identifiers (so expressions like `context.data["user:123"].role` are allowed). See the [Cedar schema documentation](https://docs.cedar-policy.com/schema/) for schema typing rules.
+
 ```cedar
 permit(
     principal,
-    action == Action::"read",
+    action == Jans::Action::"read",
     resource
 ) when {
+    has(context.data, "user:123") &&
     context.data["user:123"].role.contains("admin")
 };
 ```

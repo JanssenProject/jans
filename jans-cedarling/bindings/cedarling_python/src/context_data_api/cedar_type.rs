@@ -69,7 +69,19 @@ impl CedarType {
 
     /// Get the detailed type representation
     fn __repr__(&self) -> String {
-        format!("CedarType.{}", self.__str__().to_uppercase())
+        let variant_name = match self {
+            CedarType::String => "String",
+            CedarType::Long => "Long",
+            CedarType::Bool => "Bool",
+            CedarType::Set => "Set",
+            CedarType::Record => "Record",
+            CedarType::Entity => "Entity",
+            CedarType::Ip => "Ip",
+            CedarType::Decimal => "Decimal",
+            CedarType::DateTime => "DateTime",
+            CedarType::Duration => "Duration",
+        };
+        format!("CedarType.{}", variant_name)
     }
 }
 

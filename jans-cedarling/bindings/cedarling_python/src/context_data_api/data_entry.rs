@@ -42,6 +42,7 @@ impl DataEntry {
     }
 
     /// Get the value stored in this entry
+    #[getter]
     fn value(&self, py: Python) -> PyResult<Py<PyAny>> {
         to_pyobject(py, &self.inner.value)
             .map(|v| v.unbind())

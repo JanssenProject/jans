@@ -399,7 +399,7 @@ Data pushed via the Context Data API is automatically available in Cedar policie
 ```cedar
 permit(
     principal,
-    action == Action::"read",
+    action == Jans::Action::"read",
     resource
 ) when {
     context.data["user:123"].role.contains("admin")

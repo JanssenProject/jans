@@ -220,6 +220,7 @@ Retrieve stored data:
 
 ```python
 # Get data by key
+# Note: get_data_ctx returns None for missing keys, not KeyNotFound
 value = instance.get_data_ctx("user:123")
 if value is not None:
     print(f"User roles: {value['role']}")
@@ -230,6 +231,7 @@ if value is not None:
 Get a data entry with full metadata including creation time, expiration, access count, and type:
 
 ```python
+# Note: get_data_entry_ctx returns None for missing keys, not KeyNotFound
 entry = instance.get_data_entry_ctx("user:123")
 if entry is not None:
     print(f"Key: {entry.key}")
@@ -293,15 +295,16 @@ try:
 except data_errors.InvalidKey:
     print("Invalid key provided")
 
-try:
-    value = instance.get_data_ctx("nonexistent")
-except data_errors.KeyNotFound:
+# Note: get_data_ctx and get_data_entry_ctx return None for missing keys,
+# not KeyNotFound. KeyNotFound is only raised for operation failures.
+value = instance.get_data_ctx("nonexistent")
+if value is None:
     print("Key not found")
 ```
 
 Available exceptions:
 - `InvalidKey`: The provided key is invalid (e.g., empty)
-- `KeyNotFound`: The requested key does not exist
+- `KeyNotFound`: Raised for operation failures (not for missing keys - `get_data_ctx` and `get_data_entry_ctx` return `None` for missing keys)
 - `StorageLimitExceeded`: The data store has reached its capacity limit
 - `TTLExceeded`: The requested TTL exceeds the maximum allowed TTL
 - `ValueTooLarge`: The value exceeds the maximum entry size
@@ -314,9 +317,10 @@ Data pushed via the Context Data API is automatically available in Cedar policie
 ```cedar
 permit(
     principal,
-    action == Action::"read",
+    action == Jans::Action::"read",
     resource
 ) when {
+    has(context.data, "user:123") &&
     context.data["user:123"].role.contains("admin")
 };
 ```

@@ -411,7 +411,7 @@ authorization data with access token, action, resource, and context.
 
 Attributes
 ----------  
-:param tokens: A class containing the JWTs what will be used for the request.  
+:param tokens: A class containing the JWTs that will be used for the request.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `EntityData` object).  
 :param context: Python dictionary with additional context.
@@ -525,30 +525,44 @@ Error encountered while validating the entities to the schema
 ___
 
 # data_errors_ctx.DataErrorCtx
+
 Base exception for errors encountered during data operations in Cedarling context storage.
-___
+
+---
 
 # data_errors_ctx.InvalidKey
+
 Raised when an invalid (e.g., empty) key is provided to the context data store. This typically means the key argument was missing or empty.
-___
+
+---
 
 # data_errors_ctx.KeyNotFound
+
 Raised when a requested key is not found in the context data store. This usually means the key does not exist or has expired.
-___
+
+---
 
 # data_errors_ctx.SerializationError
+
 Raised when there is a failure serializing or deserializing data for storage or retrieval in the context data store.
-___
+
+---
 
 # data_errors_ctx.StorageLimitExceeded
+
 Raised when an operation would exceed the maximum allowed storage size for the context data store.
-___
+
+---
 
 # data_errors_ctx.TTLExceeded
+
 Raised when a requested time-to-live (TTL) value exceeds the maximum allowed by the context data store.
-___
+
+---
 
 # data_errors_ctx.ValueTooLarge
+
 Raised when a value is too large to be stored in the context data store, exceeding the allowed size limit.
-___
+
+---
 
