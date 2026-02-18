@@ -47,7 +47,31 @@ def test_get_data_entry_ctx():
     assert entry.access_count == 1
     from datetime import datetime
     # Verify created_at is a valid ISO 8601 timestamp
-    datetime.fromisoformat(entry.created_at.replace('Z', '+00:00'))
+    # Python 3.10's fromisoformat() only supports up to microseconds (6 digits),
+    # so truncate nanoseconds to microseconds if present
+    timestamp = entry.created_at.replace('Z', '+00:00')
+    # Truncate fractional seconds to 6 digits (microseconds) for Python 3.10 compatibility
+    if '.' in timestamp:
+        dot_idx = timestamp.index('.')
+        # Find timezone offset start (+ or -) after the dot
+        plus_idx = timestamp.find('+', dot_idx)
+        minus_idx = timestamp.find('-', dot_idx)
+        # Get the first timezone marker found (or -1 if neither found)
+        tz_idx = min(
+            plus_idx if plus_idx >= 0 else len(timestamp),
+            minus_idx if minus_idx >= 0 else len(timestamp)
+        )
+        if tz_idx < len(timestamp):
+            # Has timezone, truncate fractional part to 6 digits
+            fractional = timestamp[dot_idx + 1:tz_idx]
+            truncated_fractional = (fractional[:6] + '000000')[:6]  # Pad or truncate to 6
+            timestamp = timestamp[:dot_idx + 1] + truncated_fractional + timestamp[tz_idx:]
+        else:
+            # No timezone, just truncate fractional part
+            fractional = timestamp[dot_idx + 1:]
+            truncated_fractional = (fractional[:6] + '000000')[:6]  # Pad or truncate to 6
+            timestamp = timestamp[:dot_idx + 1] + truncated_fractional
+    datetime.fromisoformat(timestamp)
 
     instance.shut_down()
 
