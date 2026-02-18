@@ -161,6 +161,8 @@ jobs:
         run: |
           sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
           sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
+          echo "Tracking flags status:"
+          grep -E 'enable_scarf_pixel|enable_reo_flag' mkdocs.yml
 
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
