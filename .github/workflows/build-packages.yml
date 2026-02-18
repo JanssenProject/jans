@@ -374,6 +374,8 @@ jobs:
     - name: Build WASM build
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         rustup default stable
         rustup target add wasm32-unknown-unknown
@@ -408,7 +410,6 @@ jobs:
   
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
-        npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
           echo "npm publish failed (may already be published), continuing..."
           cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
