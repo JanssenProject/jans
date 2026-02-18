@@ -252,17 +252,15 @@ func (c *Cedarling) ListDataCtx() ([]DataEntry, error) {
 		return nil, err
 	}
 
-	var entries []DataEntry
-	jsonValue := result.JsonValue()
-	if jsonValue == "null" {
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
 		return make([]DataEntry, 0), nil
 	}
-	err = json.Unmarshal([]byte(jsonValue), &entries)
+
+	var entries []DataEntry
+	err = json.Unmarshal([]byte(json_value), &entries)
 	if err != nil {
 		return nil, err
-	}
-	if entries == nil {
-		entries = make([]DataEntry, 0)
 	}
 
 	return entries, nil
