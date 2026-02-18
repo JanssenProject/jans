@@ -276,23 +276,45 @@ impl DataStore {
     /// Filters out expired entries to prevent leaking expired items into authorization contexts.
     pub(crate) fn get_all(&self) -> HashMap<String, Value> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+
+        // Early return if storage is empty
+        if storage.is_empty() {
+            return HashMap::new();
+        }
+
         let now = chrono::Utc::now();
-        storage
-            .iter()
-            .filter(|(_, entry)| !entry.is_expired(now))
-            .map(|(k, entry)| (k.clone(), entry.value.clone()))
-            .collect()
+        // Pre-allocate HashMap with capacity to avoid reallocations
+        let mut result = HashMap::with_capacity(storage.len());
+
+        for (k, entry) in storage.iter() {
+            if !entry.is_expired(now) {
+                result.insert(k.clone(), entry.value.clone());
+            }
+        }
+
+        result
     }
 
     /// List all entries with their full metadata, excluding expired entries.
     pub(crate) fn list_entries(&self) -> Vec<DataEntry> {
         let storage = self.storage.read().expect(RWLOCK_EXPECT_MESSAGE);
+
+        // Early return if storage is empty
+        if storage.is_empty() {
+            return Vec::new();
+        }
+
         let now = Utc::now();
-        storage
-            .iter()
-            .filter(|(_, entry)| !entry.is_expired(now))
-            .map(|(_, entry)| entry.clone())
-            .collect()
+        // Pre-allocate Vec with capacity to avoid reallocations
+        let mut result = Vec::with_capacity(storage.len());
+
+        for (_, entry) in storage.iter() {
+            if !entry.is_expired(now) {
+                result.push(entry.clone());
+            }
+        }
+
+        result
     }
 
     /// Get the configuration for this store.
