@@ -44,12 +44,18 @@ pub enum ExtensionValue {
 /// Provides methods to convert between `serde_json::Value` and Cedar's
 /// `RestrictedExpression`, with support for all Cedar data types including
 /// extension types (IP addresses, decimals).
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct CedarValueMapper {
     /// Whether to auto-detect extension types from string patterns
     auto_detect_extensions: bool,
     /// Maximum allowed value size in bytes (0 = no limit)
     max_value_size: usize,
+}
+
+impl Default for CedarValueMapper {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CedarValueMapper {
@@ -278,13 +284,26 @@ impl CedarValueMapper {
                 if let Some(dot_pos) = value.find('.') {
                     let before_dot = &value[..dot_pos];
                     let after_dot = &value[dot_pos + 1..];
-                    // Allow optional leading sign, then require digits
-                    let before_ok = before_dot.is_empty()
-                        || before_dot == "+"
-                        || before_dot == "-"
-                        || before_dot.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-');
-                    let after_ok = !after_dot.is_empty() && after_dot.chars().all(|c| c.is_ascii_digit());
-                    if before_ok && after_ok && (before_dot.chars().any(|c| c.is_ascii_digit()) || after_dot.chars().any(|c| c.is_ascii_digit())) {
+                    // Require at least one ASCII digit in before_dot (optionally preceded by a single '+' or '-')
+                    let before_has_digit = before_dot.chars().any(|c| c.is_ascii_digit());
+                    let before_valid = if before_dot.is_empty() {
+                        false
+                    } else if before_dot == "+" || before_dot == "-" {
+                        false // Must have at least one digit, not just sign
+                    } else {
+                        // Must have at least one digit, and all chars are digits or a single leading sign
+                        let has_leading_sign = before_dot.starts_with('+') || before_dot.starts_with('-');
+                        let sign_count = before_dot.chars().filter(|c| *c == '+' || *c == '-').count();
+                        before_has_digit
+                            && before_dot.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-')
+                            && (!has_leading_sign || sign_count == 1)
+                    };
+                    // Require at least one ASCII digit in after_dot, and all chars are digits
+                    let after_ok = !after_dot.is_empty()
+                        && after_dot.chars().all(|c| c.is_ascii_digit())
+                        && after_dot.chars().any(|c| c.is_ascii_digit());
+                    // Both sides must have digits
+                    if before_valid && after_ok {
                         return Some(ExtensionValue::Decimal(value.to_string()));
                     }
                 }
@@ -308,6 +327,16 @@ impl CedarValueMapper {
 
         // Try RFC 3339 parsing first (handles full datetime with timezone)
         if DateTime::parse_from_rfc3339(value).is_ok() {
+            return true;
+        }
+
+        // Try ISO 8601 format with offset without colon (e.g., "+0100")
+        if DateTime::parse_from_str(value, "%Y-%m-%dT%H:%M:%S%z").is_ok() {
+            return true;
+        }
+
+        // Try ISO 8601 format with offset and fractional seconds
+        if DateTime::parse_from_str(value, "%Y-%m-%dT%H:%M:%S%.f%z").is_ok() {
             return true;
         }
 
@@ -459,7 +488,9 @@ impl CedarValueMapper {
             Ok(RestrictedExpression::new_long(i))
         } else if let Some(f) = n.as_f64() {
             // Convert floating point to decimal extension
-            Ok(RestrictedExpression::new_decimal(f.to_string()))
+            // Format to 4 decimal places to avoid scientific notation and ensure Cedar compatibility
+            let decimal_str = format!("{:.4}", f);
+            Ok(RestrictedExpression::new_decimal(decimal_str))
         } else {
             Err(ValueMappingError::NumberNotRepresentable {
                 value: n.to_string(),
@@ -763,10 +794,38 @@ mod tests {
         ));
 
         // Integer is not decimal
-        assert!(CedarValueMapper::detect_extension("42").is_none());
+        assert!(
+            CedarValueMapper::detect_extension("42").is_none(),
+            "integer should not be detected as decimal"
+        );
 
         // Multiple dots is not decimal (would be detected as IP first if valid)
-        assert!(CedarValueMapper::detect_extension("1.2.3.4.5").is_none());
+        assert!(
+            CedarValueMapper::detect_extension("1.2.3.4.5").is_none(),
+            "multiple dots should not be detected as decimal"
+        );
+
+        // Negative cases: should reject invalid decimal formats
+        assert!(
+            CedarValueMapper::detect_extension(".5").is_none(),
+            "decimal without digits before dot should be rejected"
+        );
+        assert!(
+            CedarValueMapper::detect_extension("-.5").is_none(),
+            "decimal with only sign before dot should be rejected"
+        );
+        assert!(
+            CedarValueMapper::detect_extension("5.").is_none(),
+            "decimal with trailing dot should be rejected"
+        );
+        assert!(
+            CedarValueMapper::detect_extension("1e5").is_none(),
+            "scientific notation should be rejected"
+        );
+        assert!(
+            CedarValueMapper::detect_extension("1.2e-3").is_none(),
+            "scientific notation with decimal should be rejected"
+        );
     }
 
     #[test]

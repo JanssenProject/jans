@@ -176,8 +176,16 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   Pushes a value into the data store with an optional TTL (Time To Live).
   
   - `key`: The key for the data entry (string)
-  - `value`: The value to store (any JSON-serializable value: dict, list, str, int, float, bool)
+  - `value`: The value to store (any JSON-serializable/Cedar value: object, array, string, number, boolean, or null)
   - `ttl_secs`: Optional TTL in seconds. If not provided, uses the default TTL from configuration.
+  
+  **Returns:** `None` on success (or a boolean success flag, depending on the binding).
+  
+  **Errors:** The method may raise the following errors:
+  - `InvalidKey`: When the key is empty
+  - `StorageLimitExceeded`: When the configured storage capacity (`max_entries`) is exceeded
+  - `ValueTooLarge`: When the entry size (including metadata) exceeds `max_entry_size`
+  - `TTLExceeded`: When the requested TTL exceeds the configured `max_ttl` limit
   
   If the key already exists, the value will be replaced.
 
@@ -250,7 +258,15 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
 ### Using Data in Cedar Policies
 
-Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace. The `context.data` values follow a three-tier resolution precedence:
+
+1. **Inline request context values** (highest precedence): Values provided directly in the authorization request context override all other sources.
+2. **Pushed data** (from the Context Data API): Data pushed via `push_data_ctx` overrides the default context.
+3. **Default context** (lowest precedence): Values from the default context configuration are used when not overridden by higher-precedence sources.
+
+When keys collide, higher-precedence values shadow lower-precedence ones. The `context.data` namespace combines values from all three sources, with inline values taking precedence over pushed data, and pushed data taking precedence over default context values.
+
+**Example with safe key and attribute checks:**
 
 ```cedar
 permit(
@@ -258,6 +274,8 @@ permit(
     action == Action::"read",
     resource
 ) when {
+    context.data has "user:123" &&
+    context.data["user:123"] has "role" &&
     context.data["user:123"].role.contains("admin")
 };
 ```

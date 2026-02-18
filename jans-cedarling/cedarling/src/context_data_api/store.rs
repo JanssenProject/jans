@@ -123,13 +123,11 @@ impl DataStore {
         let effective_ttl_chrono =
             get_effective_ttl(ttl, self.config.default_ttl, self.config.max_ttl);
 
-        // Convert back to StdDuration for DataEntry::new
-        // chrono::Duration can be converted to std::time::Duration via num_seconds
-        let effective_ttl_std = if effective_ttl_chrono.num_seconds() >= 0 {
-            StdDuration::from_secs(effective_ttl_chrono.num_seconds() as u64)
-        } else {
+        // Convert back to StdDuration for DataEntry::new, preserving sub-second precision
+        let effective_ttl_std = effective_ttl_chrono.to_std().unwrap_or_else(|_| {
+            // Handle negative or out-of-range durations by clamping to zero
             StdDuration::ZERO
-        };
+        });
 
         // Create DataEntry with metadata using effective TTL
         let entry = DataEntry::new(key.to_string(), value, Some(effective_ttl_std));

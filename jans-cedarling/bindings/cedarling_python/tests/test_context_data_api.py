@@ -2,7 +2,7 @@
 Tests for the Data API functionality in Cedarling Python bindings.
 """
 import pytest
-from cedarling_python import BootstrapConfig, Cedarling
+from cedarling_python import Cedarling
 from cedarling_python import data_errors_ctx
 from config import load_bootstrap_config
 

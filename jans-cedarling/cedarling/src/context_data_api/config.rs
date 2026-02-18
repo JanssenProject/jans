@@ -23,17 +23,18 @@ use std::time::Duration;
 /// use std::time::Duration;
 /// use cedarling::DataStoreConfig;
 ///
-/// // No expiration by default, but cap at 1 hour when explicitly set
+/// // No configured expiration (uses internal long sentinel TTL)
 /// let config = DataStoreConfig {
-///     default_ttl: None,  // No automatic expiration (10 years)
-///     max_ttl: Some(Duration::from_secs(3600)),  // But cap at 1 hour if specified
+///     default_ttl: None,  // No automatic expiration
+///     max_ttl: None,      // No user-configured upper limit
 ///     ..Default::default()
 /// };
 ///
 /// // All entries expire after 5 minutes by default, max 1 hour
+/// // When both are Some, max_ttl constrains the effective TTL
 /// let config = DataStoreConfig {
 ///     default_ttl: Some(Duration::from_secs(300)),  // 5 minutes
-///     max_ttl: Some(Duration::from_secs(3600)),  // 1 hour
+///     max_ttl: Some(Duration::from_secs(3600)),     // 1 hour (constrains effective TTL)
 ///     ..Default::default()
 /// };
 /// ```
@@ -94,11 +95,8 @@ pub enum ConfigValidationError {
 impl DataStoreConfig {
     /// Validate the configuration for consistency.
     ///
-    /// # Errors
-    ///
-    /// Returns `ConfigValidationError` if:
-    /// - `default_ttl` exceeds `max_ttl` (when both are Some)
-    /// - `memory_alert_threshold` is not between 0.0 and 100.0
+    /// Returns `ConfigValidationError` when `default_ttl` exceeds `max_ttl` (if both are set)
+    /// or when `memory_alert_threshold` is outside the range 0.0..=100.0.
     pub fn validate(&self) -> Result<(), ConfigValidationError> {
         // Check if default_ttl exceeds max_ttl
         if let (Some(default), Some(max)) = (self.default_ttl, self.max_ttl)
