@@ -295,10 +295,15 @@ mod tests {
         let result = cedarling.get_stats_ctx();
         assert!(result.is_ok(), "get_stats_ctx should succeed");
         let stats = result.unwrap();
-        assert!(
-            stats.entry_count == stats.entry_count,
-            "entry_count should be valid"
-        );
+        // Initially should have 0 entries
+        assert_eq!(stats.entry_count, 0, "entry_count should be 0 initially");
+        
+        // Push some data and verify count increases
+        cedarling
+            .push_data_ctx("test_key", json!("test_value"), None)
+            .unwrap();
+        let stats2 = cedarling.get_stats_ctx().unwrap();
+        assert_eq!(stats2.entry_count, 1, "entry_count should be 1 after push");
     }
 
     #[test]
