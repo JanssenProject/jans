@@ -215,8 +215,8 @@ permit(
     action == Action::"read",
     resource
 ) when {
-    context.data has "user:123" &&
-    context.data["user:123"].role.contains("admin")
+    context.data has principal.id &&
+    context.data[principal.id].role.contains("admin")
 };
 ```
 
