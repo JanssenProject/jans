@@ -2605,11 +2605,11 @@ In this guide, the following command is documented:</p>
 <p>Above command contains references to the release number at two places. <code>v1.1.4</code> in the URL and <code>1.1.4</code> as part of the file
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.</p>
-<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>0.0.0-nightly</code> instead
+<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>replace-janssen-version</code> instead
 of writing actual release numbers in the <code>head</code>(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the <code>head</code> version)
 so that it stays up-to-date release after release.</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -2993,15 +2993,13 @@ docs: no docs modification
         <script src="../javascripts/full-screen-sections.js"></script>
       
     
-<!--Release automation scripts should replace the placeholder with actual URL-->
-<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
-<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
-<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
-<!--nightly docs may be used extensively by development team and contributors-->
-<!--for testing purposes-->
+
 <img referrerpolicy="no-referrer-when-downgrade"
      src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
      width="0" height="0"/>
+
+
+  <script src="../assets/js/reo.js" defer></script>
 
 
   </body>
