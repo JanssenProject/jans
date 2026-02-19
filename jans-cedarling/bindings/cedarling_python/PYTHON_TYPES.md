@@ -299,22 +299,31 @@ Statistics about the DataStore.
 
 Attributes
 ----------
+
 entry_count : int
     Number of entries currently stored
+
 max_entries : int
     Maximum number of entries allowed (0 = unlimited)
+
 max_entry_size : int
     Maximum size per entry in bytes (0 = unlimited)
+
 metrics_enabled : bool
     Whether metrics tracking is enabled
+
 total_size_bytes : int
     Total size of all entries in bytes (approximate, based on JSON serialization)
+
 avg_entry_size_bytes : int
     Average size per entry in bytes (0 if no entries)
+
 capacity_usage_percent : float
     Percentage of capacity used (0.0-100.0, based on entry count)
+
 memory_alert_threshold : float
     Memory usage threshold percentage (from config)
+
 memory_alert_triggered : bool
     Whether memory usage exceeds the alert threshold
 ___
