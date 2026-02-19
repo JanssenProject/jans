@@ -11,19 +11,27 @@ use reqwest::Client;
 use serde_json::Value;
 use url::Url;
 
-use crate::lock::transport::{AuditTransport, SerializedLogEntry, TransportError, TransportResult};
+use crate::{
+    lock::{
+        LockLogEntry,
+        transport::{AuditTransport, SerializedLogEntry, TransportError, TransportResult},
+    },
+    log::{LogWriter, Logger},
+};
 
 pub(crate) struct RestTransport {
     client: Arc<Client>,
     log_endpoint: Url,
+    logger: Option<Logger>,
 }
 
 impl RestTransport {
     /// Construct a new [`RestTransport`]
-    pub(crate) fn new(client: Arc<Client>, log_endpoint: Url) -> Self {
+    pub(crate) fn new(client: Arc<Client>, log_endpoint: Url, logger: Option<Logger>) -> Self {
         Self {
             client,
             log_endpoint,
+            logger,
         }
     }
 }
@@ -46,6 +54,12 @@ impl AuditTransport for RestTransport {
                 }
             })
             .collect();
+
+        if skipped > 0 {
+            self.logger.log_any(LockLogEntry::warn(format!(
+                "skipped {skipped} entries because they were malformed"
+            )));
+        }
 
         if logs.is_empty() {
             return Err(TransportError::Serialization(format!(
@@ -89,7 +103,7 @@ mod test {
         let mock = mock_log_endpoint(&mut server);
 
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
             json!({"level": "INFO", "message": "test1"})
@@ -111,7 +125,7 @@ mod test {
     async fn test_send_logs_empty() {
         let server = Server::new_async().await;
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         transport
             .send_logs(&[])
@@ -129,7 +143,7 @@ mod test {
             .create();
 
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
             json!({"level": "INFO", "message": "test"})
@@ -158,7 +172,7 @@ mod test {
             .create();
 
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
             json!({"level": "INFO", "message": "test"})
@@ -180,7 +194,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_network_failure() {
         let endpoint: Url = "http://localhost:1/invalid".parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
             json!({"level": "INFO", "message": "test"})
@@ -201,7 +215,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_malformed_json() {
         let endpoint: Url = "http://localhost:8080/audit/log/bulk".parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         let entries = vec![
             "not valid json".to_string().into_boxed_str(),
@@ -221,7 +235,7 @@ mod test {
         let mock = mock_log_endpoint(&mut server);
 
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
-        let transport = RestTransport::new(create_test_client(), endpoint);
+        let transport = RestTransport::new(create_test_client(), endpoint, None);
 
         // Send 1000 entries
         let entries: Vec<_> = (0..1000)

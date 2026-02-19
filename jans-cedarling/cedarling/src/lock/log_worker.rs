@@ -68,12 +68,12 @@ where
 
                 // Send logs to the server
                 () = sleep(self.log_interval) => {
-                    self.flush_logs().await;
+                    self.flush_logs(&cancel_tkn).await;
                 },
 
                 () = cancel_tkn.cancelled() => {
                     let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
-                    self.flush_logs().await;
+                    self.flush_logs(&cancel_tkn).await;
                     logger.log_any(LockLogEntry::info(
                         "gracefully shutting down lock log worker",
                     ));
@@ -83,7 +83,7 @@ where
         }
     }
 
-    async fn flush_logs(&mut self) {
+    async fn flush_logs(&mut self, cancel_tkn: &CancellationToken) {
         // save the length at the time the function is called
         let batch_size = self.log_buffer.len();
         if batch_size == 0 {
@@ -106,7 +106,15 @@ where
                     logger.log_any(LockLogEntry::error(format!(
                         "failed to send logs to lock server: {err}"
                     )));
-                    sleep(WORKER_HTTP_RETRY_DUR).await;
+                    tokio::select! {
+                        () = sleep(WORKER_HTTP_RETRY_DUR) => {},
+                        () = cancel_tkn.cancelled() => {
+                            logger.log_any(LockLogEntry::info(
+                                "cancellation requested during retry; dropping batch"
+                            ));
+                            break;
+                        }
+                    }
                 },
             }
         }

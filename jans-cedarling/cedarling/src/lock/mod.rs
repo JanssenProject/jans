@@ -272,7 +272,11 @@ fn create_log_worker(
                 bootstrap_conf.accept_invalid_certs,
             )?);
 
-            let transport = Arc::new(RestTransport::new(http_client, log_endpoint.0));
+            let transport = Arc::new(RestTransport::new(
+                http_client,
+                log_endpoint.0,
+                logger.as_ref().and_then(std::sync::Weak::upgrade),
+            ));
 
             let mut log_worker = LogWorker::new(log_interval, transport, logger);
             let handle =
@@ -292,7 +296,11 @@ fn create_log_worker(
                 .as_ref()
                 .ok_or(InitLockServiceError::MissingGrpcEndpoint)?;
 
-            let transport = Arc::new(GrpcTransport::new(grpc_endpoint, access_token)?);
+            let transport = Arc::new(GrpcTransport::new(
+                grpc_endpoint,
+                access_token,
+                logger.as_ref().and_then(std::sync::Weak::upgrade),
+            )?);
             let mut log_worker = LogWorker::new(log_interval, transport, logger);
             let handle =
                 crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
