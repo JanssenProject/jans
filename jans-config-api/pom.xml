@@ -55,7 +55,7 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
 		<swagger-maven-plugin-jakarta>2.2.34</swagger-maven-plugin-jakarta>
-		<swagger-models-jakarta>2.2.34</swagger-models-jakarta>
+		<swagger-models-jakarta>2.2.43</swagger-models-jakarta>
 		
         <apache.james.version>0.8.10</apache.james.version>
 	</properties>
