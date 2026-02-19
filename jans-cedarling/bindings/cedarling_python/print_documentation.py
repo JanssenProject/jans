@@ -67,6 +67,8 @@ def print_doc(type_value: any, module_name: str | None = None):
 
     # Handle missing or empty docstring
     if not type_value.__doc__ or not type_value.__doc__.strip():
+        import sys
+        print(f"Warning: Missing docstring for {type_value.__name__}", file=sys.stderr)
         return
 
     message = fix_newlines(type_value.__doc__)
