@@ -19,7 +19,7 @@ jobs:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
     - name: Run Tests
       working-directory: jans-cedarling
       run: |
@@ -38,7 +38,7 @@ jobs:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust Nightly
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9
       with:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
@@ -51,7 +51,7 @@ jobs:
       working-directory: jans-cedarling/custom-lints
       run: cargo test
     - name: Install Rust Stable (for workspace)
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
@@ -65,7 +65,7 @@ jobs:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
     - name: Run benchmarks
       working-directory: jans-cedarling
       run: |
@@ -88,7 +88,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install chromium-chromedriver
 
     - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
@@ -147,7 +147,7 @@ jobs:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
     - name: Install Golang dependencies
       uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:

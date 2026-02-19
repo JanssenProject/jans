@@ -13,6 +13,10 @@
 		<version>0.0.0-nightly</version>
 	</parent>
 
+    <properties>
+        <antlr4.version>4.13.2</antlr4.version>
+    </properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -46,6 +50,21 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>${antlr4.version}</version>      
+                <configuration>
+                    <visitor>true</visitor>
+                </configuration>              
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
@@ -121,11 +140,11 @@
 			<artifactId>bcpkix-jdk18on</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr4-runtime</artifactId>
-			<version>4.7.1</version>
-		</dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr4.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.wordnik</groupId>
