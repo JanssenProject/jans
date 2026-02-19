@@ -770,8 +770,8 @@ func TestDataAPIPushAndGetCtx(t *testing.T) {
 	ttlValue := map[string]interface{}{
 		"temp": "data",
 	}
-	// Push with 1 second TTL
-	d := time.Second
+	// Push with 100ms TTL
+	d := 100 * time.Millisecond
 	err = instance.PushDataCtx("temp_key", ttlValue, &d)
 	if err != nil {
 		t.Fatalf("Failed to push data with TTL: %v", err)
@@ -786,8 +786,8 @@ func TestDataAPIPushAndGetCtx(t *testing.T) {
 		t.Fatal("Expected data to be present immediately after push")
 	}
 
-	// Wait for TTL to expire (2 seconds)
-	time.Sleep(2 * time.Second)
+	// Wait for TTL to expire (200ms)
+	time.Sleep(200 * time.Millisecond)
 
 	// Verify data is expired
 	resultTemp, errTemp = instance.GetDataCtx("temp_key")
@@ -831,7 +831,7 @@ func TestDataAPIGetDataEntryCtx(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get data entry: %v", err)
 	}
-	if entry == nil {
+	if entry.Key == "" {
 		t.Fatal("Expected entry to be present")
 	}
 
