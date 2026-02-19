@@ -1,11 +1,3 @@
-/*
- * ScimFilter.g4
- * Created by jgomer on 2017-12-19
- *
- * Issue the following command to (re)generate Java classes in package org.gluu.oxtrust.service.antlr.scimFilter.antlr4
- * java -cp antlr-4.5.3-complete.jar org.antlr.v4.Tool -visitor -package org.gluu.oxtrust.service.antlr.scimFilter.antlr4 ScimFilter.g4
- */
-
 grammar ScimFilter;
 
 /*
@@ -42,7 +34,7 @@ WHITESPACE : [\t ]+ -> skip ;
 
 ALPHA : LOWERCASE | UPPERCASE ;
 
-NUMBER : '-'? DIGIT+ ([\.] DIGIT+)? ;
+NUMBER : '-'? DIGIT+ ('.' DIGIT+)? ;
 
 BOOLEAN : 'false' | 'true' ;
 
