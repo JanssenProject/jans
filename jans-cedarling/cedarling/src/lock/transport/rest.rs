@@ -13,7 +13,6 @@ use url::Url;
 
 use crate::lock::transport::{AuditTransport, SerializedLogEntry, TransportError, TransportResult};
 
-#[derive(Debug)]
 pub(crate) struct RestTransport {
     client: Arc<Client>,
     log_endpoint: Url,

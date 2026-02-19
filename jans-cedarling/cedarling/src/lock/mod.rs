@@ -25,8 +25,7 @@
 //! - **[`LockService`]**: Main service that manages communication with the Lock Server
 //! - **[`LogWorker`]**: Background worker that sends logs to the Lock Server
 //! - **[`LockTransport`]**: Transport protocol selection (REST or gRPC)
-//! - **Transport Layer**: Abstraction for sending logs via
-//!   [`RestTransport`](transport::rest::RestTransport) or [`GrpcTransport`](transport::grpc::GrpcTransport)
+//! - **Transport Layer**: Abstraction for sending logs via [`RestTransport`] or [`GrpcTransport`]
 //! - **SSA Validation**: Validates Software Statement Assertion JWTs
 //! - **Client Registration**: Handles Dynamic Client Registration with the IDP
 //!

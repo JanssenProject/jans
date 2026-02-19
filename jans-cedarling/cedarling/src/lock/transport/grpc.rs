@@ -47,7 +47,6 @@ struct JsonLogEntry {
     context_information: HashMap<String, String>,
 }
 
-#[derive(Debug, Clone)]
 pub(crate) struct GrpcTransport {
     client: AuditServiceClient<Channel>,
     access_token: String,

@@ -8,7 +8,7 @@
 //! This module provides a unified interface for sending audit data to the Lock Server,
 //! supporting both REST and gRPC transports.
 
-use std::{fmt::Debug, future::Future};
+use std::future::Future;
 
 #[cfg(feature = "grpc")]
 pub(super) mod grpc;
@@ -23,7 +23,7 @@ pub(super) type SerializedLogEntry = Box<str>;
 pub(super) type TransportResult<T> = Result<T, TransportError>;
 
 /// Trait for transports that can send audit logs to the Lock Server.
-pub(super) trait AuditTransport: Send + Sync + Debug {
+pub(super) trait AuditTransport: Send + Sync {
     /// Sends a batch of serialized log entries to the Lock Server.
     ///
     /// The entries are JSON-serialized strings that will be sent as a batch.
