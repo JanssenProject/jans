@@ -18,6 +18,10 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "25.2"
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
     - name: Run Tests
@@ -37,6 +41,10 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "25.2"
     - name: Install Rust Nightly
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3
       with:
@@ -64,6 +72,10 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "25.2"
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
     - name: Run benchmarks
@@ -126,6 +138,10 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "25.2"
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
@@ -146,6 +162,10 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: "25.2"
     - name: Install Rust
       uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
     - name: Install Golang dependencies
