@@ -3,7 +3,6 @@ tags:
   - administration
   - configuration
   - agama project
-subtitle: Learn how to manage and change Agama project configuration 
 ---
 
 # Agama project configuration
