@@ -1852,16 +1852,16 @@ paths:
           default: 50
       - name: start_date
         in: query
+        description: "Start date/time for the log entries report. Accepted: dd-MM-yyyy\
+          \ or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
         schema:
           type: string
-          description: "Start date/time for the log entries report. Accepted: `dd-MM-yyyy`\
-            \ or ISO-8601 date-time (e.g. `yyyy-MM-ddTHH:mm:ssZ`)."
       - name: end_date
         in: query
+        description: "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601\
+          \ date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
         schema:
           type: string
-          description: "End date/time for the log entries. Accepted: `dd-MM-yyyy`\
-            \ or ISO-8601 date-time (e.g. `yyyy-MM-ddTHH:mm:ssZ`)."
       responses:
         "200":
           description: Ok
@@ -15691,19 +15691,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16620,8 +16620,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16631,6 +16629,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18522,6 +18522,8 @@ components:
           type: string
         accessToken:
           type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18532,8 +18534,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
