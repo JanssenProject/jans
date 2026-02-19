@@ -468,6 +468,11 @@ mod tests {
                 JsonRule::default(),
                 "Default user-workload boolean operator should default"
             );
+            assert_eq!(
+                config.lock_transport,
+                LockTransport::Rest,
+                "Default transport should be REST"
+            );
         });
     }
 

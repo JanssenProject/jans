@@ -14,6 +14,11 @@
 //! For example, why display form fields that a user is not authorized to see?
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
+#[cfg(all(feature = "grpc", target_arch = "wasm32"))]
+compile_error!(
+    "The `grpc` feature is not supported for WASM targets. Disable it with `default-features = false`."
+);
+
 mod authz;
 mod bootstrap_config;
 mod common;

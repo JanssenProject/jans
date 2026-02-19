@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 use prost_types::Timestamp;
 use serde::Deserialize;
-use tonic::{Request, transport::Channel};
+use tonic::{Request, metadata::MetadataValue, transport::Channel};
 
 use crate::lock::{
     proto::{BulkLogRequest, LogEntry, audit_service_client::AuditServiceClient},
@@ -50,16 +50,21 @@ struct JsonLogEntry {
 #[derive(Debug, Clone)]
 pub(crate) struct GrpcTransport {
     client: AuditServiceClient<Channel>,
+    access_token: String,
 }
 
 impl GrpcTransport {
-    pub(crate) fn new(endpoint: impl Into<String>) -> Result<Self, TransportError> {
+    pub(crate) fn new(
+        endpoint: impl Into<String>,
+        access_token: &str,
+    ) -> Result<Self, TransportError> {
         let channel = Channel::from_shared(endpoint.into())
             .map_err(|_| TransportError::InvalidUri)?
             .connect_lazy();
 
         Ok(Self {
             client: AuditServiceClient::new(channel),
+            access_token: access_token.into(),
         })
     }
 }
@@ -89,9 +94,11 @@ impl AuditTransport for GrpcTransport {
             )));
         }
 
-        let request = Request::new(BulkLogRequest {
+        let mut request = Request::new(BulkLogRequest {
             entries: proto_entries,
         });
+        let token: MetadataValue<_> = format!("Bearer {}", self.access_token).parse()?;
+        request.metadata_mut().insert("authorization", token);
 
         let mut client = self.client.clone();
         let response = client.process_bulk_log(request).await?;
@@ -310,7 +317,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_success() {
         let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries = vec![
             r#"{
@@ -350,7 +357,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_empty() {
         let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         transport
             .send_logs(&[])
@@ -364,7 +371,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_malformed_json() {
         let (addr, _rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries = vec!["not valid json".to_string().into_boxed_str()];
 
@@ -381,7 +388,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_server_error() {
         let (addr, _) = start_mock_server(true).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries = vec![
             r#"{
@@ -407,7 +414,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_multiple_entries() {
         let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries = vec![
             r#"{
@@ -445,7 +452,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_with_all_fields() {
         let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries = vec![
             r#"{
@@ -498,7 +505,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_with_missing_optional_fields() {
         let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries = vec![r#"{ "service": "minimal" }"#.to_string().into_boxed_str()];
 
@@ -516,7 +523,7 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_large_batch() {
         let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}")).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token").unwrap();
 
         let entries: Vec<_> = (0..100)
             .map(|i| {

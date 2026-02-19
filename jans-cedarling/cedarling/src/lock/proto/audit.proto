@@ -5,7 +5,7 @@
 
 syntax = "proto3";
 
-package jans.lock.audit;
+package io.jans.lock.audit;
 
 import "google/protobuf/timestamp.proto";
 

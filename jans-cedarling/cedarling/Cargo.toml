@@ -54,7 +54,7 @@ vfs = "0.12"
 hex = "0.4.3"
 sha2 = "0.10.8"
 zip = "7.0.0"
-tonic = { version = "0.14.3", optional = true, features = ["tls-native-roots"] }
+tonic = { version = "0.14.3", optional = true }
 prost = { version = "0.14.3", optional = true }
 prost-types = { version = "0.14.3", optional = true }
 tonic-prost = { version = "0.14.3", optional = true }

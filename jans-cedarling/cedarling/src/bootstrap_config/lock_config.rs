@@ -1,3 +1,8 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use crate::log::LogLevel;
 use crate::{BootstrapConfigLoadingError, BootstrapConfigRaw};
 use serde::{Deserialize, Serialize};
@@ -11,7 +16,7 @@ pub enum LockTransport {
     /// REST/HTTP transport
     #[default]
     Rest,
-    /// gRPC transport (default when `grpc` feature is enabled)
+    /// gRPC transport (only available when the `grpc` feature is enabled)
     #[cfg(feature = "grpc")]
     Grpc,
 }

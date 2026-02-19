@@ -7,6 +7,7 @@
 //!
 //! This module provides integration with the Lock Server for centralized logging and monitoring.
 //! It includes support for Software Statement Assertion (SSA) JWT validation for secure client registration.
+//! The module supports both REST and gRPC transport protocols for communicating with the Lock Server.
 //!
 //! ## Overview
 //!
@@ -15,6 +16,7 @@
 //! - Register as a client using Dynamic Client Registration (DCR)
 //! - Validate SSA JWTs for enhanced security
 //! - Handle authentication and authorization with the Lock Server
+//! - Choose between REST and gRPC transport protocols
 //!
 //! ## Architecture
 //!
@@ -22,8 +24,20 @@
 //!
 //! - **[`LockService`]**: Main service that manages communication with the Lock Server
 //! - **[`LogWorker`]**: Background worker that sends logs to the Lock Server
+//! - **[`LockTransport`]**: Transport protocol selection (REST or gRPC)
+//! - **Transport Layer**: Abstraction for sending logs via
+//!   [`RestTransport`](transport::rest::RestTransport) or [`GrpcTransport`](transport::grpc::GrpcTransport)
 //! - **SSA Validation**: Validates Software Statement Assertion JWTs
 //! - **Client Registration**: Handles Dynamic Client Registration with the IDP
+//!
+//! ### Transport Protocols
+//!
+//! The module supports two transport protocols:
+//!
+//! - **REST**: HTTP-based transport using JSON payloads
+//! - **gRPC**: Protocol Buffers-based transport (requires `grpc` feature)
+//!
+//! The transport is selected via [`LockServiceConfig.transport`](crate::LockServiceConfig::transport).
 //!
 //! ### Flow
 //!
@@ -31,7 +45,8 @@
 //! 2. **SSA Validation**: If SSA JWT is provided, it's validated against the IDP's JWKS
 //! 3. **Client Registration**: DCR request is sent to the IDP (with SSA JWT if available)
 //! 4. **Access Token**: Client credentials are obtained for Lock Server communication
-//! 5. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
+//! 5. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
+//! 6. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
 //!
 //! ## SSA JWT Validation
 //!
@@ -68,6 +83,9 @@
 //! - **`GetLockConfig`**: Failed to retrieve Lock Server configuration
 //! - **`ClientRegistration`**: Failed to register client with IDP
 //! - **`InitHttpClient`**: Failed to initialize HTTP client
+//! - **`TransportError`**: Transport layer error (REST or gRPC)
+//! - **`MissingGrpcEndpoint`**: gRPC endpoint not configured when using gRPC transport
+//! - **`InvalidAccessToken`**: Failed to parse access token
 //!
 //! ## Integration with IDP
 //!
@@ -98,7 +116,7 @@ mod proto {
     // These lints are disabled because they are triggered by the generated code
     #![allow(unreachable_pub)]
     #![allow(clippy::pedantic)]
-    tonic::include_proto!("jans.lock.audit");
+    tonic::include_proto!("io.jans.lock.audit");
 }
 
 use crate::app_types::PdpID;
@@ -245,8 +263,8 @@ fn create_log_worker(
         LockTransport::Rest => {
             // Build a default http client that already has the access_token in the headers
             let mut headers = HeaderMap::new();
-            let mut auth_header =
-                HeaderValue::from_str(&format!("Bearer {access_token}",)).expect("build header");
+            let mut auth_header = HeaderValue::from_str(&format!("Bearer {access_token}"))
+                .map_err(|e| InitLockServiceError::InvalidAccessToken(e.to_string()))?;
             auth_header.set_sensitive(true);
             headers.insert("Authorization", auth_header);
 
@@ -275,7 +293,7 @@ fn create_log_worker(
                 .as_ref()
                 .ok_or(InitLockServiceError::MissingGrpcEndpoint)?;
 
-            let transport = Arc::new(GrpcTransport::new(grpc_endpoint)?);
+            let transport = Arc::new(GrpcTransport::new(grpc_endpoint, access_token)?);
             let mut log_worker = LogWorker::new(log_interval, transport, logger);
             let handle =
                 crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
@@ -342,8 +360,8 @@ pub enum InitLockServiceError {
     TransportError(#[from] transport::TransportError),
     #[error("gRPC endpoint is not configured for the lock server")]
     MissingGrpcEndpoint,
-    #[error("the feature 'grpc' is not enabled")]
-    MissingGrpcFeature,
+    #[error("failed to parse access token: {0}")]
+    InvalidAccessToken(String),
 }
 
 #[cfg(test)]

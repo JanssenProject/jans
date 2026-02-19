@@ -52,9 +52,13 @@ pub enum TransportError {
     #[cfg(feature = "grpc")]
     GrpcServer(String),
 
-    #[error("infalid gRPC endpoint URL")]
+    #[error("invalid gRPC endpoint URL")]
     #[cfg(feature = "grpc")]
     InvalidUri,
+
+    #[error("failed to parse access token: {0}")]
+    #[cfg(feature = "grpc")]
+    InvalidAccessToken(#[from] tonic::metadata::errors::InvalidMetadataValue),
 
     #[error("serialization error: {0}")]
     Serialization(String),
