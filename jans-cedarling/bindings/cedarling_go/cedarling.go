@@ -193,26 +193,27 @@ func (c *Cedarling) GetDataCtx(key string) (any, error) {
 }
 
 // GetDataEntryCtx retrieves a data entry with full metadata by key.
-// Returns nil if the key doesn't exist or the entry has expired.
-func (c *Cedarling) GetDataEntryCtx(key string) (*DataEntry, error) {
+// Returns a zero value DataEntry if the key doesn't exist or the entry has expired.
+// Check if entry.Key is empty to determine if the entry was found.
+func (c *Cedarling) GetDataEntryCtx(key string) (DataEntry, error) {
 	result := internal.CallGetDataEntryCtx(c.instance_id, key)
 	err := result.Error()
 	if err != nil {
-		return nil, err
+		return DataEntry{}, err
 	}
 
 	json_value := result.JsonValue()
 	if json_value == "" || json_value == "null" {
-		return nil, nil
+		return DataEntry{}, nil
 	}
 
 	var entry DataEntry
 	err = json.Unmarshal([]byte(json_value), &entry)
 	if err != nil {
-		return nil, err
+		return DataEntry{}, err
 	}
 
-	return &entry, nil
+	return entry, nil
 }
 
 // RemoveDataCtx removes a value from the data store by key.
