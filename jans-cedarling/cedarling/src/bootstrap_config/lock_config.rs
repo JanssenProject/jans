@@ -6,6 +6,7 @@ use url::Url;
 
 /// Transport protocol for Lock Server communication
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum LockTransport {
     /// REST/HTTP transport
     #[default]
