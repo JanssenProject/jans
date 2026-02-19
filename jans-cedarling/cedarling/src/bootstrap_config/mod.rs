@@ -233,6 +233,12 @@ pub enum BootstrapConfigLoadingError {
         "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
     )]
     MissingCjarUrl,
+
+    /// Error returned when transport is set to gRPC but no gRPC endpoint is configured.
+    #[error(
+        "`CEDARLING_LOCK_TRANSPORT` is set to `grpc` but `CEDARLING_LOCK_GRPC_ENDPOINT` is not set."
+    )]
+    MissingGrpcEndpoint,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {

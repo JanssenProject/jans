@@ -21,6 +21,34 @@ pub enum LockTransport {
     Grpc,
 }
 
+#[cfg(feature = "grpc")]
+const PARSE_LOCK_TRANSPORT_ERR: &str = "Invalid lock transport. Must be `rest` or `grpc`";
+#[cfg(not(feature = "grpc"))]
+const PARSE_LOCK_TRANSPORT_ERR: &str = "Invalid lock transport. Must be `rest`";
+
+impl std::str::FromStr for LockTransport {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "rest" => Ok(Self::Rest),
+            #[cfg(feature = "grpc")]
+            "grpc" => Ok(Self::Grpc),
+            _ => Err(PARSE_LOCK_TRANSPORT_ERR.to_string()),
+        }
+    }
+}
+
+impl std::fmt::Display for LockTransport {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LockTransport::Rest => write!(f, "rest"),
+            #[cfg(feature = "grpc")]
+            LockTransport::Grpc => write!(f, "grpc"),
+        }
+    }
+}
+
 /// Lock service config
 #[derive(Debug, Clone, PartialEq)]
 pub struct LockServiceConfig {
@@ -142,6 +170,11 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .then(|| Duration::from_secs(raw.audit_telemetry_interval));
 
         let listen_sse = raw.listen_sse.into();
+
+        #[cfg(feature = "grpc")]
+        if raw.lock_transport == LockTransport::Grpc && raw.grpc_endpoint.is_none() {
+            return Err(BootstrapConfigLoadingError::MissingGrpcEndpoint);
+        }
 
         Ok(LockServiceConfig {
             config_uri,
