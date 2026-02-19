@@ -2301,30 +2301,30 @@ needed for OpenID and FIDO.</li>
 <li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/v1.16.0/jans-1.16.0-stable.suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse15.x86_64.rpm
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <ul>
 <li>
-<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans-1.16.0-stable.suse15.x86_64.rpm</code> file:</p>
+<p>Go to the <a href="https://github.com/JanssenProject/jans/releases/latest">Janssen Project Releases page</a> and copy the <code>sha256sum</code> value for the <code>jans-replace-janssen-version-stable.suse15.x86_64.rpm</code> file:</p>
 </li>
 <li>
 <p>Replace <code>paste-release-sha256sum</code> in the command below with the actual checksum you copied from the release page, and run the following command:</p>
 </li>
 </ul>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans-1.16.0-stable.suse15.x86_64.rpm&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans-1.16.0-stable.suse15.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-1.16.0-stable.suse15.x86_64.rpm.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans-replace-janssen-version-stable.suse15.x86_64.rpm&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>jans-replace-janssen-version-stable.suse15.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-1.16.0-stable.el8.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable.el8.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-1.16.0-stable.suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-replace-janssen-version-stable.suse15.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -2550,15 +2550,13 @@ Removing /etc/apache2/sites-available/https_jans.conf
         <script src="../../../../javascripts/full-screen-sections.js"></script>
       
     
-<!--Release automation scripts should replace the placeholder with actual URL-->
-<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
-<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
-<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
-<!--nightly docs may be used extensively by development team and contributors-->
-<!--for testing purposes-->
+
 <img referrerpolicy="no-referrer-when-downgrade"
      src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
      width="0" height="0"/>
+
+
+  <script src="../../../../assets/js/reo.js" defer></script>
 
 
   </body>

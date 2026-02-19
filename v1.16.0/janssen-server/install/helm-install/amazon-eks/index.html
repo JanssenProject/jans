@@ -1295,7 +1295,7 @@ helm install nginx ingress-nginx/ingress-nginx
 <p>PostgreSQL for persistence storage</p>
 <p>In a production environment, a production-grade PostgreSQL server should be used such as <code>Amazon RDS</code></p>
 <p>For testing purposes, you can deploy it on the EKS cluster using the following commands:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.16.0/automation/pgsql.yaml
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
@@ -1314,7 +1314,7 @@ kubectl apply -f pgsql.yaml
 <p>MySQL for persistence storage</p>
 <p>In a production environment, a production-grade MySQL server should be used such as <code>Amazon RDS</code></p>
 <p>For testing purposes, you can deploy it on the EKS cluster using the following commands:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.16.0/automation/mysql.yaml
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 </code></pre></div>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
@@ -1492,15 +1492,13 @@ helm install janssen janssen/janssen -n jans -f override.yaml
         <script src="../../../../javascripts/full-screen-sections.js"></script>
       
     
-<!--Release automation scripts should replace the placeholder with actual URL-->
-<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
-<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
-<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
-<!--nightly docs may be used extensively by development team and contributors-->
-<!--for testing purposes-->
+
 <img referrerpolicy="no-referrer-when-downgrade"
      src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
      width="0" height="0"/>
+
+
+  <script src="../../../../assets/js/reo.js" defer></script>
 
 
   </body>

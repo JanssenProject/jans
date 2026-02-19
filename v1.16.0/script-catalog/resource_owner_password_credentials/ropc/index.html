@@ -3338,7 +3338,7 @@
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/v1.16.0/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -3388,7 +3388,7 @@
 <tbody>
 <tr>
 <td style="text-align: left;"><code>customScript</code></td>
-<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/v1.16.0/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>configurationAttributes</code></td>
@@ -3396,11 +3396,11 @@
 </tr>
 <tr>
 <td style="text-align: left;"><code>SimpleCustomProperty</code></td>
-<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/v1.16.0/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>context</code></td>
-<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/v1.16.0/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
@@ -3676,15 +3676,13 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
         <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
-<!--Release automation scripts should replace the placeholder with actual URL-->
-<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
-<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
-<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
-<!--nightly docs may be used extensively by development team and contributors-->
-<!--for testing purposes-->
+
 <img referrerpolicy="no-referrer-when-downgrade"
      src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
      width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
 
 
   </body>

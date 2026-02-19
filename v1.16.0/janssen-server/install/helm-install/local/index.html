@@ -1170,7 +1170,7 @@
 <p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> VM with ports <code>443</code> and <code>80</code> open. Then execute the following:</p>
 <p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su<span class="w"> </span>-
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/v1.16.0/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
 </code></pre></div></p>
 <p>This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside <a href="https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml">values.yaml</a>.</p>
 <p>The installer will automatically add a record to your hosts record in the VM but if you want to access the endpoints outside the VM you must map the <code>ip</code> of the instance running Ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>
@@ -1325,15 +1325,13 @@
         <script src="../../../../javascripts/full-screen-sections.js"></script>
       
     
-<!--Release automation scripts should replace the placeholder with actual URL-->
-<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
-<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
-<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
-<!--nightly docs may be used extensively by development team and contributors-->
-<!--for testing purposes-->
+
 <img referrerpolicy="no-referrer-when-downgrade"
      src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
      width="0" height="0"/>
+
+
+  <script src="../../../../assets/js/reo.js" defer></script>
 
 
   </body>
