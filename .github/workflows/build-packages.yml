@@ -367,7 +367,7 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
 
     - name: Install latest stable Rust
-      uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
         toolchain: stable
 
@@ -605,7 +605,7 @@ jobs:
             go-version: '1.24'
 
       - name: Install latest stable Rust
-        uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561 # stable
+        uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
         with:
           toolchain: stable
 
@@ -776,7 +776,7 @@ jobs:
         git_commit_gpgsign: true
 
     - name: Install latest stable Rust
-      uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
         toolchain: stable
 

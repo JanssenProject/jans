@@ -208,7 +208,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: docker/setup-qemu-action@737ba1e397ec2caff0d098f75e1136f9a926dc0a # master
+        uses: docker/setup-qemu-action@7e10951aea186e886cef2f1a25a7bbf4e593d710 # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all
@@ -216,7 +216,7 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Login to ghcr
         if: github.event_name != 'pull_request'
