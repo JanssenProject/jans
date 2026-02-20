@@ -343,11 +343,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public void fillPayloadOfAccessTokenJwt(JwtClaims claims, AccessToken accessToken, ExecutionContext context) {
-        final User user = getUser();
-
         claims.setClaim("scope", Lists.newArrayList(getScopes()));
         claims.setClaim("client_id", getClientId());
-        claims.setClaim("username", user != null ? user.getAttribute("displayName") : null);
         claims.setClaim("token_type", accessToken.getTokenType().getName());
         claims.setClaim("acr", getAcrValues());
         claims.setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));

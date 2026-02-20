@@ -404,6 +404,16 @@ public enum RegisterRequestParam {
     LOGOUT_STATUS_JWT_SCRIPT_DNS("logout_status_jwt_script_dns"),
 
     /**
+     * list of par script dns
+     */
+    PAR_SCRIPT_DNS("par_script_dns"),
+
+    /**
+     * list of tx token script dns
+     */
+    TX_TOKEN_SCRIPT_DNS("tx_token_script_dns"),
+
+    /**
      * list of post authn script dns
      */
     POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),

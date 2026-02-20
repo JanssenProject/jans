@@ -167,7 +167,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
         Config.install_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
-        Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
 
         # jans-idp config
         jans_idp_config_result = dbUtils.dn_exists("ou=jans-idp,ou=configuration,o=jans")

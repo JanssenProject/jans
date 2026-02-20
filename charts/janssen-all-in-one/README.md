@@ -1,6 +1,6 @@
 # janssen-all-in-one
 
-![Version: 1.11.0](https://img.shields.io/badge/Version-1.11.0-informational?style=flat-square) ![AppVersion: 1.11.0](https://img.shields.io/badge/AppVersion-1.11.0-informational?style=flat-square)
+![Version: 0.0.0-nightly](https://img.shields.io/badge/Version-0.0.0--nightly-informational?style=flat-square) ![AppVersion: 0.0.0-nightly](https://img.shields.io/badge/AppVersion-0.0.0--nightly-informational?style=flat-square)
 
 Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
 
@@ -19,7 +19,7 @@ Janssen Access and Identity Management All-in-One Chart. This chart deploys the 
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 ## Values
 
@@ -30,7 +30,7 @@ Kubernetes: `>=v1.22.0-0`
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
 | alb.ingress | bool | `false` | switches the service to Nodeport for ALB ingress |
 | auth-server | object | `{"appLoggers":{"auditStatsLogLevel":"INFO","auditStatsLogTarget":"FILE","authLogLevel":"INFO","authLogTarget":"STDOUT","enableStdoutLogPrefix":"true","httpLogLevel":"INFO","httpLogTarget":"FILE","persistenceDurationLogLevel":"INFO","persistenceDurationLogTarget":"FILE","persistenceLogLevel":"INFO","persistenceLogTarget":"FILE","scriptLogLevel":"INFO","scriptLogTarget":"FILE"},"authEncKeys":"RSA1_5 RSA-OAEP","authSigKeys":"RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512","cnCustomJavaOptions":"","enabled":true,"ingress":{"authServerAdditionalAnnotations":{},"authServerEnabled":true,"authServerLabels":{},"authzenAdditionalAnnotations":{},"authzenConfigEnabled":true,"authzenConfigLabels":{},"deviceCodeAdditionalAnnotations":{},"deviceCodeEnabled":true,"deviceCodeLabels":{},"firebaseMessagingAdditionalAnnotations":{},"firebaseMessagingEnabled":true,"firebaseMessagingLabels":{},"lockAdditionalAnnotations":{},"lockConfigAdditionalAnnotations":{},"lockConfigEnabled":false,"lockConfigLabels":{},"lockEnabled":false,"lockLabels":{},"openidAdditionalAnnotations":{},"openidConfigEnabled":true,"openidConfigLabels":{},"u2fAdditionalAnnotations":{},"u2fConfigEnabled":true,"u2fConfigLabels":{},"uma2AdditionalAnnotations":{},"uma2ConfigEnabled":true,"uma2ConfigLabels":{},"webdiscoveryAdditionalAnnotations":{},"webdiscoveryEnabled":true,"webdiscoveryLabels":{},"webfingerAdditionalAnnotations":{},"webfingerEnabled":true,"webfingerLabels":{}},"lockEnabled":false}` | Parameters used globally across all services helm charts. |
-| auth-server-key-rotation | object | `{"additionalAnnotations":{},"additionalLabels":{},"cronJobSchedule":"","customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"1.11.0-1"},"initKeysLife":48,"keysLife":48,"keysPushDelay":0,"keysPushStrategy":"NEWER","keysStrategy":"NEWER","lifecycle":{},"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for regenerating auth-keys per x hours |
+| auth-server-key-rotation | object | `{"additionalAnnotations":{},"additionalLabels":{},"cronJobSchedule":"","customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"initKeysLife":48,"keysLife":48,"keysPushDelay":0,"keysPushStrategy":"NEWER","keysStrategy":"NEWER","lifecycle":{},"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for regenerating auth-keys per x hours |
 | auth-server-key-rotation.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | auth-server-key-rotation.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | auth-server-key-rotation.cronJobSchedule | string | `""` | Auth server key rotation job schedule. It accepts any Cron syntax supported by Kubernetes. If empty, the schedule will run based on keysLife value. |
@@ -42,7 +42,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server-key-rotation.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | auth-server-key-rotation.image.pullSecrets | list | `[]` | Image Pull Secrets |
 | auth-server-key-rotation.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
-| auth-server-key-rotation.image.tag | string | `"1.11.0-1"` | Image  tag to use for deploying. |
+| auth-server-key-rotation.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | auth-server-key-rotation.initKeysLife | int | `48` | The initial auth server key rotation keys life in hours |
 | auth-server-key-rotation.keysLife | int | `48` | Auth server key rotation keys life in hours |
 | auth-server-key-rotation.keysPushDelay | int | `0` | Delay (in seconds) before pushing private keys to Auth server |
@@ -112,6 +112,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server.ingress.webfingerEnabled | bool | `true` | Enable endpoint /.well-known/webfinger |
 | auth-server.ingress.webfingerLabels | object | `{}` | webfinger ingress resource labels. key app is taken |
 | auth-server.lockEnabled | bool | `false` | Enable jans-lock as service running inside auth-server |
+| casa.adminEnabled | bool | `true` | Boolean flag to enable/disable the casa admin console. |
 | casa.appLoggers | object | `{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | casa.appLoggers.casaLogLevel | string | `"INFO"` | casa.log level |
 | casa.appLoggers.casaLogTarget | string | `"STDOUT"` | casa.log target |
@@ -123,7 +124,7 @@ Kubernetes: `>=v1.22.0-0`
 | casa.enabled | bool | `true` | Boolean flag to enable/disable the casa chart. |
 | casa.ingress | object | `{"casaAdditionalAnnotations":{},"casaEnabled":false,"casaLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | casa.ingress.casaAdditionalAnnotations | object | `{}` | Casa ingress resource additional annotations. |
-| casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /casa |
+| casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /jans-casa |
 | casa.ingress.casaLabels | object | `{}` | Casa ingress resource labels. key app is taken |
 | certManager.certificate.enabled | bool | `false` |  |
 | certManager.certificate.issuerGroup | string | `"cert-manager.io"` |  |
@@ -131,7 +132,7 @@ Kubernetes: `>=v1.22.0-0`
 | certManager.certificate.issuerName | string | `""` |  |
 | certManager.certificate.tlsSecretName | string | `"tls-certificate"` |  |
 | city | string | `"Austin"` | City. Used for certificate creation. |
-| cleanup | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"1.11.0-1"},"interval":60,"lifecycle":{},"limit":1000,"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Cleanup expired entries in persistence |
+| cleanup | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":true,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"interval":60,"lifecycle":{},"limit":1000,"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Cleanup expired entries in persistence |
 | cleanup.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | cleanup.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | cleanup.customCommand | list | `[]` | Add custom job's command. If passed, it will override the default conditional command. |
@@ -142,7 +143,7 @@ Kubernetes: `>=v1.22.0-0`
 | cleanup.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | cleanup.image.pullSecrets | list | `[]` | Image Pull Secrets |
 | cleanup.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
-| cleanup.image.tag | string | `"1.11.0-1"` | Image  tag to use for deploying. |
+| cleanup.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | cleanup.interval | int | `60` | Interval of running the cleanup process (in minutes) |
 | cleanup.limit | int | `1000` | Max. numbers of entries to cleanup |
 | cleanup.nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
@@ -186,7 +187,7 @@ Kubernetes: `>=v1.22.0-0`
 | config-api.ingress | object | `{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | config-api.ingress.configApiAdditionalAnnotations | object | `{}` | ConfigAPI ingress resource additional annotations. |
 | config-api.ingress.configApiLabels | object | `{}` | configAPI ingress resource labels. key app is taken |
-| config-api.plugins | string | `"admin-ui,fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
+| config-api.plugins | string | `"fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
 | config.enabled | bool | `true` | Boolean flag to enable/disable the configuration job. This normally should never be false |
 | configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
 | configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes |
@@ -220,6 +221,11 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbSchema | string | `""` | Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`). |
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
+| configmap.cnSqlSslCaCert | string | `""` | Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication. |
+| configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
+| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml. |
+| configmap.cnSqlSslEnabled | bool | `false` | Enable SSL connection to SQL database. |
+| configmap.cnSqlSslMode | string | `""` | Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
@@ -288,13 +294,23 @@ Kubernetes: `>=v1.22.0-0`
 | fido2.ingress.fido2WebauthnLabels | object | `{}` | fido2 webauthn ingress resource labels. key app is taken |
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
+| gatewayApi.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
+| gatewayApi.gatewayAnnotations | object | `{}` | Specific annotations for the Gateway resource |
+| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
+| gatewayApi.gatewayLabels | object | `{}` | Specific labels for the Gateway resource |
+| gatewayApi.httpPort | int | `80` | Gateway http port number |
+| gatewayApi.httpsPort | int | `443` | Gateway https port number |
+| gatewayApi.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
+| gatewayApi.routeAnnotations | object | `{}` | Specific annotations for the HTTPRoute resource |
+| gatewayApi.routeLabels | object | `{}` | Specific labels for the HTTPRoute resource |
+| gatewayApi.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |
 | hpa.behavior | object | `{}` | Scaling Policies |
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"ghcr.io/janssenproject/jans/all-in-one"` | Image  to use for deploying. |
-| image.tag | string | `"1.11.0-1"` | Image  tag to use for deploying. |
+| image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | isFqdnRegistered | bool | `false` | Boolean flag to enable mapping lbIp  to fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically. |
 | istio.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | istio.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
@@ -303,7 +319,7 @@ Kubernetes: `>=v1.22.0-0`
 | istio.ingress | bool | `false` | Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available. |
 | istio.namespace | string | `"istio-system"` | The namespace istio is deployed in. The is normally istio-system. |
 | istio.tlsSecretName | string | `"tls-certificate"` |  |
-| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":false,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"1.11.0-1"},"interval":10,"lifecycle":{},"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
+| kc-scheduler | object | `{"additionalAnnotations":{},"additionalLabels":{},"customCommand":[],"customScripts":[],"dnsConfig":{},"dnsPolicy":"","enabled":false,"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/cloudtools","tag":"0.0.0-nightly"},"interval":10,"lifecycle":{},"nodeSelector":{},"resources":{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Responsible for synchronizing Keycloak SAML clients |
 | kc-scheduler.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | kc-scheduler.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | kc-scheduler.customCommand | list | `[]` | Add custom job's command. If passed, it will override the default conditional command. |
@@ -314,7 +330,7 @@ Kubernetes: `>=v1.22.0-0`
 | kc-scheduler.image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | kc-scheduler.image.pullSecrets | list | `[]` | Image Pull Secrets |
 | kc-scheduler.image.repository | string | `"ghcr.io/janssenproject/jans/cloudtools"` | Image  to use for deploying. |
-| kc-scheduler.image.tag | string | `"1.11.0-1"` | Image  tag to use for deploying. |
+| kc-scheduler.image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | kc-scheduler.interval | int | `10` | Interval of running the scheduler (in minutes) |
 | kc-scheduler.nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | kc-scheduler.resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |
@@ -377,8 +393,8 @@ Kubernetes: `>=v1.22.0-0`
 | scim.ingress.scimEnabled | bool | `false` | Enable SCIM endpoints /jans-scim |
 | scim.ingress.scimLabels | object | `{}` | SCIM ingress resource labels. key app is taken |
 | scim.scimServiceName | string | `"scim"` | Name of the scim service. Please keep it as default. |
-| service.name | string | `"http-aio"` | The name of the aio port within the aio service. Please keep it as default. |
-| service.port | int | `8080` | Port of the fido2 service. Please keep it as default. |
+| service.name | string | `"http-aio"` | The name of the Kubernetes Service resource. |
+| service.port | int | `8080` | The port number exposed by the All-in-One service. |
 | service.sessionAffinity | string | `"None"` | Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP |
 | service.sessionAffinityConfig | object | `{"clientIP":{"timeoutSeconds":10800}}` | the maximum session sticky time if sessionAffinity is ClientIP |
 | serviceAccountName | string | `"default"` | service account used by Kubernetes resources |

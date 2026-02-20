@@ -27,6 +27,9 @@ spec:
         APP_NAME: configurator
         app: {{ .Release.Name }}-{{ include "config.name" . }}-init-load
     spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -50,6 +53,30 @@ spec:
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
+        {{- if .Values.configmap.cnSqlSslEnabled }}
+        - name: {{ .Release.Name }}-sql-ssl-ca-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            items:
+              - key: sql_cacert.pem
+                path: sql_cacert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-cert
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            items:
+              - key: sql_client_cert.pem
+                path: sql_client_cert.pem
+        - name: {{ .Release.Name }}-sql-ssl-client-key
+          secret:
+            secretName: {{ .Release.Name }}-sql-ssl
+            optional: true
+            defaultMode: 0440
+            items:
+              - key: sql_client_key.pem
+                path: sql_client_key.pem
+        {{- end }}
       serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
       - name: {{ include "config.name" . }}
@@ -72,6 +99,20 @@ spec:
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py
+          {{- if .Values.configmap.cnSqlSslEnabled }}
+          - name: {{ .Release.Name }}-sql-ssl-ca-cert
+            mountPath: /etc/certs/sql_cacert.pem
+            subPath: sql_cacert.pem
+            readOnly: true
+          - name: {{ .Release.Name }}-sql-ssl-client-cert
+            mountPath: /etc/certs/sql_client_cert.pem
+            subPath: sql_client_cert.pem
+            readOnly: true
+          - name: {{ .Release.Name }}-sql-ssl-client-key
+            mountPath: /etc/certs/sql_client_key.pem
+            subPath: sql_client_key.pem
+            readOnly: true
+          {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm

@@ -1,0 +1,11 @@
+@id("lock_stat_query")
+permit(
+  principal is Jans::Workload,
+  action in Jans::Action::"GET",
+  resource == Jans::HTTP_Request::"lock_stat_query"
+)
+when {
+  principal has access_token.scope &&
+  principal.access_token.scope.contains("https://jans.io/oauth/lock/stat.readonly") &&
+  resource has url && resource.url has path && resource.url.path == "/internal/stat"
+};

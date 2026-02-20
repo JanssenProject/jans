@@ -153,8 +153,8 @@
                 "inum=1800.01.70,ou=scopes,o=jans",
                 "inum=1800.03.5,ou=scopes,o=jans",
                 "inum=1800.03.4,ou=scopes,o=jans",
-                "inum=1800.03.7,ou=scopes,o=jans",
-                "inum=1800.03.6,ou=scopes,o=jans",
+                "inum=1800.01.79,ou=scopes,o=jans",
+                "inum=1800.01.78,ou=scopes,o=jans",
                 "inum=1800.01.10,ou=scopes,o=jans",
                 "inum=1800.01.11,ou=scopes,o=jans",
                 "inum=1800.01.12,ou=scopes,o=jans",
@@ -632,7 +632,7 @@
             ],
             "applicationType": "web",
             "contacts": [],
-            "clientName": "kc_saml_openid",
+            "clientName": "saml_openid",
             "clientNameLocalized": {},
             "logoUriLocalized": {},
             "clientUriLocalized": {},
@@ -692,7 +692,7 @@
                 "minimumAcrLevel": -1
             },
             "description": "Keycloak OpenID client used for SAML authentication",
-            "displayName": "kc_saml_openid",
+            "displayName": "saml_openid",
             "allAuthenticationMethods": [
                 "client_secret_basic"
             ],
@@ -718,7 +718,7 @@
             ],
             "applicationType": "web",
             "contacts": [],
-            "clientName": "kc_scheduler_api",
+            "clientName": "scheduler_api",
             "clientNameLocalized": {},
             "logoUriLocalized": {},
             "clientUriLocalized": {},
@@ -779,8 +779,8 @@
                 "jansDefaultPromptLogin": false,
                 "minimumAcrLevel": -1
             },
-            "description": "keycloak scheduler openid client used to obtain API keys to invoke the config-api",
-            "displayName": "kc_scheduler_api",
+            "description": "scheduler openid client used to obtain API keys to invoke the config-api",
+            "displayName": "scheduler_api",
             "allAuthenticationMethods": [
                 "client_secret_basic"
             ],
@@ -807,7 +807,7 @@
             ],
             "applicationType": "web",
             "contacts": [],
-            "clientName": "kc_master_auth",
+            "clientName": "master_auth",
             "clientNameLocalized": {},
             "logoUriLocalized": {},
             "clientUriLocalized": {},
@@ -866,8 +866,8 @@
                 "jansDefaultPromptLogin": false,
                 "minimumAcrLevel": -1
             },
-            "description": "keycloak master realm client used to authenticate administrators",
-            "displayName": "kc_master_auth",
+            "description": "master realm client used to authenticate administrators",
+            "displayName": "master_auth",
             "allAuthenticationMethods": [
                 "client_secret_basic"
             ],

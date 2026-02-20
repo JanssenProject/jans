@@ -21,7 +21,7 @@ parser.add_argument('--version', action='version', version='%(prog)s ' + __versi
 parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
 parser.add_argument('-d', help="Installation directory")
 parser.add_argument('-f', help="Specify setup.properties file")
-parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
+parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')
 parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
 parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
 parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
@@ -44,6 +44,7 @@ parser.add_argument('-rdbm-port', help="RDBM port")
 parser.add_argument('-rdbm-db', help="RDBM database")
 parser.add_argument('-rdbm-host', help="RDBM host")
 parser.add_argument('-rdbm-schema', help="Jans Database Schema")
+parser.add_argument('-remote-rdbm-ssl-cert-fn', help="To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server")
 
 parser.add_argument('--reset-rdbm-db', help="Deletes all tables on target database. Warning! You will lose all data on target database.", action='store_true')
 
@@ -73,7 +74,6 @@ parser.add_argument('-java-version', help="Version of Amazon Corretto", choices=
 
 if PROFILE != OPENBANKING_PROFILE:
 
-    parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
@@ -87,12 +87,11 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-link', help="Install Link Server", action='store_true')
-    parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
     parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')
-    parser.add_argument('--install-jans-saml', help="Install Jans KC", action='store_true')
     parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
     parser.add_argument('--install-opa', help="Install OPA", action='store_true')
+    parser.add_argument('--install-jans-shib', help="Install Jans Shibboleth", action='store_true')
 
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 

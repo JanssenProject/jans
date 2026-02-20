@@ -16,6 +16,7 @@ from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import override_simple_json_property
+from jans.pycloudlib.persistence.sql import override_sql_ssl_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
@@ -50,14 +51,17 @@ def main():
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
 
+    sql_prop = "/etc/jans/conf/jans-sql.properties"
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        sql_prop = "/etc/jans/conf/jans-sql.properties"
         if not os.path.exists(sql_prop):
             render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
-    override_simple_json_property("/etc/jans/conf/jans-sql.properties")
+    override_simple_json_property(sql_prop)
+
+    if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+        override_sql_ssl_property(sql_prop)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
@@ -404,7 +408,12 @@ class PersistenceSetup:
         logger.info("Missing scopes creation is enabled!")
         self.generate_scopes_ldif()
 
-        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
+        # Upsert scopes separately to ensure template changes are reflected in existing scopes
+        scope_file = "/app/templates/jans-config-api/scopes.ldif"
+        logger.info(f"Importing {scope_file}")
+        self.client.upsert_from_file(scope_file, self.ctx)
+
+        files = ["config.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:

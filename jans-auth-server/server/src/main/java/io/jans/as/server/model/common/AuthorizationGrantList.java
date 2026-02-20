@@ -138,6 +138,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
+    public JwtBearerGrant createJwtBearerGrant(User user, Client client) {
+        JwtBearerGrant grant = grantInstance.select(JwtBearerGrant.class).get();
+        grant.init(user, client);
+        return grant;
+    }
+
+    @Override
     public CIBAGrant createCIBAGrant(CibaRequestCacheControl request) {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
         grant.init(request);
@@ -345,6 +352,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                         tokenExchangeGrant.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, tokenEntity.getCreationDate());
 
                         result = tokenExchangeGrant;
+                        break;
+                    case JWT_BEARER:
+                        JwtBearerGrant jwtBearerGrant = grantInstance.select(JwtBearerGrant.class).get();
+                        jwtBearerGrant.init(user, AuthorizationGrantType.JWT_BEARER, client, tokenEntity.getCreationDate());
+
+                        result = jwtBearerGrant;
                         break;
                     default:
                         return null;

@@ -3,7 +3,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-core-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.11.0</version>
+	<version>0.0.0-nightly</version>
 	<name>jans-core</name>
 
     <distributionManagement>
@@ -152,7 +152,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.3.4</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

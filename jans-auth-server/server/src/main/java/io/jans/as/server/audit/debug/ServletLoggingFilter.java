@@ -36,6 +36,7 @@ import java.util.Set;
  * @author Yuriy Movchan Date: 06/09/2019
  */
 @WebFilter(filterName = "ServletLoggingFilter",
+		asyncSupported = true,
         urlPatterns = {"/*"})
 public class ServletLoggingFilter implements Filter {
 

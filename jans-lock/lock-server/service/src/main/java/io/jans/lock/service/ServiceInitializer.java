@@ -19,7 +19,7 @@ package io.jans.lock.service;
 import org.slf4j.Logger;
 
 import io.jans.lock.service.config.ConfigurationFactory;
-import io.jans.lock.service.ws.rs.sse.LockSseBroadcaster;
+import io.jans.lock.service.grpc.server.GrpcServerStarter;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -39,15 +39,15 @@ public class ServiceInitializer {
 
 	@Inject
     private ConfigurationFactory configurationFactory;
-    
-    @Inject
-    private LockSseBroadcaster lockSseBroadcaster;
+
+	@Inject
+    private GrpcServerStarter grpcServerStarter;
 
 	public void applicationInitialized(@Observes ApplicationInitializedEvent applicationInitializedEvent) {
 		log.info("Initializing Lock service module services");
 
 		configurationFactory.initTimer();
-		lockSseBroadcaster.initTimer();
+		grpcServerStarter.initGrpcServer();
 
 		log.debug("Initializing Lock service module services complete");
 	}

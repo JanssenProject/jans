@@ -1,4 +1,4 @@
-In order to exceute the custom registration workflow, 
+In order to execute the custom registration workflow,
 
 1. Add the following custom property(key:value) in the script properties:
 

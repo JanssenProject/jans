@@ -22,7 +22,7 @@ if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; the
   exit 1
 fi
 if [[ -z $JANS_VERSION ]]; then
-  JANS_VERSION="1.11.0"
+  JANS_VERSION="0.0.0-nightly"
 fi
 LOG_TARGET="FILE"
 LOG_LEVEL="TRACE"
@@ -62,10 +62,9 @@ if [[ $INSTALL_ISTIO == "true" ]]; then
   cd ..
 fi
 
-PERSISTENCE_TYPE="sql"
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql --kubeconfig="$KUBECONFIG"
+  sudo wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+  sudo microk8s.kubectl apply -f mysql.yaml --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
   countryCode: US
@@ -76,15 +75,15 @@ config:
     cnSqlDbName: jans
     cnSqlDbPort: 3306
     cnSqlDbDialect: mysql
-    cnSqlDbHost: my-release-mysql.jans.svc
+    cnSqlDbHost: mysql.jans.svc
     cnSqlDbUser: root
     cnSqlDbTimezone: UTC
     cnSqldbUserPassword: Test1234#
 EOF
-fi
-if [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
-  sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-  sudo helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql --kubeconfig="$KUBECONFIG"
+
+else
+  sudo wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+  sudo microk8s.kubectl apply -f pgsql.yaml --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
   countryCode: US
@@ -95,7 +94,7 @@ config:
     cnSqlDbName: jans
     cnSqlDbPort: 5432
     cnSqlDbDialect: pgsql
-    cnSqlDbHost: my-release-postgresql.jans.svc
+    cnSqlDbHost: postgresql.jans.svc
     cnSqlDbUser: postgres
     cnSqlDbTimezone: UTC
     cnSqldbUserPassword: Test1234#
@@ -108,7 +107,6 @@ global:
     testEnviroment: true
   istio:
     enable: $INSTALL_ISTIO
-  cnPersistenceType: $PERSISTENCE_TYPE
   auth-server-key-rotation:
     enabled: true
   auth-server:

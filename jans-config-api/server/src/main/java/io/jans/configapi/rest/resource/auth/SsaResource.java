@@ -6,29 +6,23 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.SsaService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import static io.jans.as.model.util.Util.escapeLog;
-
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.SSA)
@@ -41,31 +35,40 @@ public class SsaResource extends ConfigBaseResource {
 
     @Inject
     SsaService ssaService;
-   
+
+    /**
+     * Revoke an active Software Statement Assertion (SSA) identified by its JWT ID (`jti`).
+     *
+     * @param jti the JWT ID of the SSA to revoke
+     * @return an HTTP 200 OK response with no body when the revocation is processed
+     */
     @Operation(summary = "Revoke existing active SSA based on `jti` or `org_id`", description = "Revoke existing active SSA based on `jti` or `org_id`", operationId = "revoke-ssa", tags = {
-            "Software Statement Assertion (SSA)" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SSA_DELETE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Success"),
+            "Software Statement Assertion (SSA)" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SSA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SSA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Success"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "422", description = "Unprocessable Entity"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.SSA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SSA_DELETE_ACCESS, ApiAccessConstants.AUTH_SSA_ADMIN_ACCESS }, groupScopes = {
+            ApiAccessConstants.SSA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SSA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response revokeSsa(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
             @Parameter(description = "JWT ID - unique identifier for the JWT") @QueryParam(value = ApiConstants.JTI) String jti) {
         if (log.isInfoEnabled()) {
             log.info("Delete SSA - jti:{}", escapeLog(jti));
         }
-        
-        JsonNode jsonNode = null;
+        checkNotEmpty(jti, ApiConstants.JTI);
+        JSONObject jsonObject = null;
         try {
-            jsonNode = ssaService.revokeSsa(authorization, jti);
-            log.info("SSA search parameters - jsonNode:{}",jsonNode);
+            jsonObject = ssaService.revokeSsa(authorization, jti);
+            log.info("SSA search parameters - jsonObject:{}", jsonObject);
         } catch (Exception ex) {
-             throwInternalServerException(ex);
+            throwInternalServerException(ex);
         }
         return Response.ok().build();
     }

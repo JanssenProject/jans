@@ -16,7 +16,7 @@ The `config` job creates a set of configurations (contains `secrets` and `config
 
 ## Configmaps
 
-The `configmaps` store non-sensitive data as key-value pairs. 
+The `configmaps` store non-sensitive data as key-value pairs.
 
 To check the values of the configmaps on the current deployment run:
 
@@ -222,7 +222,7 @@ Note that each key in configmaps is based on the schema below:
 
 ## Secrets
 
-The `secrets` store sensitive data as key-value pairs. 
+The `secrets` store sensitive data as key-value pairs.
 
 To check the values of the secrets on the current deployment run :
 
@@ -498,6 +498,21 @@ Note that each key in secrets is based on the schema below:
     "type": "string",
     "default": "",
     "description": "Password for Redis user"
+  },
+  "sql_ssl_ca_cert": {
+    "type": "string",
+    "default": "",
+    "description": "SSL root (CA) certificate for the SQL persistence"
+  },
+  "sql_ssl_client_cert": {
+    "type": "string",
+    "default": "",
+    "description": "SSL client certificate for the SQL persistence"
+  },
+  "sql_ssl_client_key": {
+    "type": "string",
+    "default": "",
+    "description": "SSL client key for the SQL persistence"
   }
 }
 ```
@@ -603,7 +618,7 @@ Note that `_secret` may contain other keys depending on the persistence used, 
 The default configuration schema is sufficient for most of the time. However, if there's a requirement to use a custom configuration or reusing an existing configuration, you can create a Kubernetes secret with the custom configuration schema.
 
 !!! Warning
-    The custom configuration schema is a BETA feature. 
+    The custom configuration schema is a BETA feature.
 
 1.  Prepare the YAML file containing the custom configuration schema. We will name it `custom-configuration-schema.yaml`:
 

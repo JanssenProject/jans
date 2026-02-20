@@ -5,7 +5,12 @@
 
 // run this example using `cargo run --example lock_integration`
 
-use cedarling::*;
+use cedarling::log_config::StdOutLoggerMode;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LockServiceConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+};
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use std::time::Duration;
@@ -36,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -47,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -71,8 +77,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let principals = vec![EntityData {
         cedar_mapping: CedarEntityMapping {
-        entity_type: "Jans::User".to_string(),
-        id: "some_user".to_string(),
+            entity_type: "Jans::User".to_string(),
+            id: "some_user".to_string(),
         },
         attributes: HashMap::from([
             ("sub".to_string(), json!("some_sub")),
@@ -91,7 +97,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                id: "random_id".to_string(),
+                    id: "random_id".to_string(),
                 },
                 attributes: HashMap::from_iter([
                     (
@@ -111,7 +117,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(result) => {
             println!("\n\nis allowed: {}", result.decision);
         },
-        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
+        Err(e) => eprintln!("Error while authorizing: {e}\n {e:?}\n\n"),
     }
 
     // we sleep for a bit so we don't exit before any logs are sent

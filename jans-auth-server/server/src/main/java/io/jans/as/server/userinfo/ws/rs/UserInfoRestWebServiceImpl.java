@@ -227,6 +227,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     private Response response(int status, UserInfoErrorResponseType errorResponseType, String reason) {
+        log.error("Status: {}, Reason: {}", status, reason);
         return Response
                 .status(status)
                 .entity(errorResponseFactory.errorAsJson(errorResponseType, reason))

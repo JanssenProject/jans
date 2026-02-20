@@ -8,7 +8,7 @@ tags:
 # BioID plugin
 
 
-This plugin allows users to enroll their BioID facial biometrics. 
+This plugin allows users to enroll their BioID facial biometrics.
 
 ## Requirements
 - A Janssen server installation with Casa installed

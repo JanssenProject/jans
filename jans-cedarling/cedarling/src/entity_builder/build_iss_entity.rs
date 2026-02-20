@@ -14,7 +14,7 @@ use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
 use url::Origin;
 
-pub fn build_iss_entity(
+pub(super) fn build_iss_entity(
     iss_type_name: &str,
     id: &str,
     iss: &TrustedIssuer,
@@ -39,7 +39,6 @@ pub fn build_iss_entity(
     .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 
     let entity = build_cedar_entity(iss_type_name, id, attrs, HashSet::new())?;
-
     Ok((origin, entity))
 }
 
@@ -90,7 +89,7 @@ mod test {
 
         assert_entity_eq(
             &iss_entity,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::TrustedIssuer", "id": "some_iss"},
                 "attrs": {
                     "issuer_entity_id": {
@@ -121,7 +120,7 @@ mod test {
 
         assert_entity_eq(
             &iss_entity,
-            json!({
+            &json!({
                 "uid": {"type": "TrustedIssuer", "id": "some_iss"},
                 "attrs": {
                     "issuer_entity_id": {

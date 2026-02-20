@@ -25,6 +25,7 @@ public class ResteasyInitializer extends Application {
 		classes.add(ScimConfigurationWS.class);
 		classes.add(SchemaWebService.class);
 		classes.add(UserWebService.class);
+		classes.add(TokenManagementWebService.class);
 		classes.add(GroupWebService.class);
 		classes.add(ResourceTypeWS.class);
 		classes.add(SearchResourcesWebService.class);

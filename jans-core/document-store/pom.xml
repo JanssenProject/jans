@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-core-parent</artifactId>
-		<version>1.11.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<prerequisites>
@@ -87,6 +87,12 @@
 		<dependency>
 			<groupId>org.apache.jackrabbit</groupId>
 			<artifactId>jackrabbit-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tika</groupId>
+					<artifactId>tika-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jackrabbit</groupId>

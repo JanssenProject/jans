@@ -5,7 +5,7 @@
 
     <groupId>io.jans.casa.plugins</groupId>
     <artifactId>${plugin.id}</artifactId>
-    <version>1.11.0</version>
+    <version>0.0.0-nightly</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.8.0</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -60,7 +60,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.2.0</version>
+                <version>4.9.8.2</version>
             </plugin>
         </plugins>
     </build>

@@ -21,6 +21,7 @@ import io.jans.scim.model.scim2.annotations.Attribute;
 import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.provider.schema.SchemaResource;
 import io.jans.scim.model.scim2.user.UserResource;
+import io.jans.scim.model.scim2.TokenResource;
 
 import javax.lang.model.type.NullType;
 import java.beans.Introspector;
@@ -41,6 +42,10 @@ import java.util.*;
 public class IntrospectUtil {
 
     private static Logger log = LogManager.getLogger(IntrospectUtil.class);
+    
+    public static List<Class<? extends BaseScimResource>> resourceClasses = List.of( 
+            UserResource.class, GroupResource.class, Fido2DeviceResource.class, TokenResource.class,
+            ServiceProviderConfig.class, ResourceType.class, SchemaResource.class);
 
     private IntrospectUtil() {}
 
@@ -433,9 +438,6 @@ public class IntrospectUtil {
         try {
             List<Field> basicFields=Arrays.asList(BaseScimResource.class.getDeclaredFields());
             resetMaps();
-
-            List<Class<? extends BaseScimResource>> resourceClasses=Arrays.asList(UserResource.class, GroupResource.class,
-                    Fido2DeviceResource.class, ServiceProviderConfig.class, ResourceType.class, SchemaResource.class);
 
             //Perform initializations needed for all resource types
             for (Class<? extends BaseScimResource> aClass : resourceClasses){

@@ -199,6 +199,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         ldif_files = (ox_auth_test_ldif, scim_test_ldif, ox_auth_test_user_ldif, scim_test_user_ldif)
         self.dbUtils.import_ldif(ldif_files)
 
+        # add password grant type to scim testing client
+        scim_client_dn = f'inum={Config.scim_client_id},ou=clients,o=jans'
+        scim_client = self.dbUtils.dn_exists(scim_client_dn)
+        scim_client_grand_types = scim_client["jansGrantTyp"]
+        if 'password' not in scim_client_grand_types:
+            scim_client_grand_types.append('password')
+            self.dbUtils.set_configuration('jansGrantTyp', scim_client_grand_types, scim_client_dn)
+
         # Client keys deployment
         target_jwks_fn = os.path.join(base.current_app.HttpdInstaller.server_root, 'jans_test_client_keys.zip')
         base.download('https://github.com/JanssenProject/jans/raw/main/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', target_jwks_fn)

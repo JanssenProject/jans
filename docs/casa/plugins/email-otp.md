@@ -10,9 +10,9 @@ tags:
 
 With this plugin, administrators can onboard a new type of authentication factor consisting of one-time passcodes (OTP) delivered to the user's inbox.
 
-This plugin simply shows a list of the already registered e-mail addresses of the user in the UI of Casa, however the accompanying Agama project contributes a new option in the authentication experience where the user is prompted to enter an OTP delivered to one of his e-mail addresses, if any. 
+This plugin simply shows a list of the already registered e-mail addresses of the user in the UI of Casa, however the accompanying Agama project contributes a new option in the authentication experience where the user is prompted to enter an OTP delivered to one of his e-mail addresses, if any.
 
-By adding the plugin and the corresponding Agama project to your server, all users having at least one e-mail address in his profile (database attribute `mail`) will be given the option to get a passcode delivered and then prompted for such as a form of 2FA. 
+By adding the plugin and the corresponding Agama project to your server, all users having at least one e-mail address in his profile (database attribute `mail`) will be given the option to get a passcode delivered and then prompted for such as a form of 2FA.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 1. Create one or more testing users with real e-mail addresses associated to their accounts
 
-1. Log into casa with such users and enroll some credential, like a passkey, SuperGluu, etc. Then turn 2fA for them.
+1. Log into casa with such users and enroll some credential, like a passkey. Then turn 2fA for them.
 
 1. Logout and login again. A new option for receiving OTPs via e-mail will be presented
 

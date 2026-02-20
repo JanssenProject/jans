@@ -1,55 +1,36 @@
 {
-  "baseEndpoint": "https://%(hostname)s/%(base_endpoint)s/api/v1",
-  "openIdIssuer": "https://%(hostname)s",
-  "tokenChannels": [
-    "jans_token"
-  ],
-  "clientId": "%(lock_client_id)s",
-  "clientPassword": "%(lock_client_encoded_pw)s",
-  "tokenUrl": "%(jans_auth_token_endpoint)s",
-  "endpointGroups": {
-    "audit": [
-      "telemetry",
-      "telemetry/bulk",
-      "health",
-      "health/bulk",
-      "log",
-      "log/bulk"
-    ]
-  },
-  "endpointDetails": {
-    "jans-config-api/lock/audit/telemetry": [
-      "https://jans.io/oauth/lock/telemetry.readonly",
-      "https://jans.io/oauth/lock/telemetry.write"
-    ],
-    "jans-config-api/lock/audit/telemetry/bulk": [
-      "https://jans.io/oauth/lock/telemetry.readonly",
-      "https://jans.io/oauth/lock/telemetry.write"
-    ],
-    "jans-config-api/lock/audit/log": [
-      "https://jans.io/oauth/lock/log.write"
-    ],
-    "jans-config-api/lock/audit/log/bulk": [
-      "https://jans.io/oauth/lock/log.write"
-    ],
-    "jans-config-api/lock/audit/health": [
-      "https://jans.io/oauth/lock/health.readonly",
-      "https://jans.io/oauth/lock/health.write"
-    ],
-    "jans-config-api/lock/audit/health/bulk": [
-      "https://jans.io/oauth/lock/health.readonly",
-      "https://jans.io/oauth/lock/health.write"
-    ]
-  },
-  "cleanServiceInterval": 60,
-  "cleanServiceBatchChunkSize": 10000,
-  "disableJdkLogger": true,
-  "loggingLevel": "INFO",
-  "loggingLayout": "text",
-  "externalLoggerConfiguration": "",
-  "metricReporterInterval": 300,
-  "metricReporterKeepDataDays": 15,
-  "metricReporterEnabled": true,
-  "statEnabled": true,
-  "errorReasonEnabled": false
+	"baseEndpoint": "https://%(hostname)s/%(base_endpoint)s/api/v1",
+	"openIdIssuer": "https://%(hostname)s",
+	"protectionMode": "oauth",
+	"auditPersistenceMode": "internal",
+	"cedarlingConfiguration": {
+		"enabled": true,
+		"policySources": [
+			{
+				"enabled": false,
+				"authorizationToken": "",
+				"policyStoreUri": ""
+			}
+		],
+		"logType": "STD_OUT",
+		"logLevel": "INFO",
+		"externalPolicyStoreUri": ""
+	},
+	"clientId": "%(lock_client_id)s",
+	"clientPassword": "%(lock_client_encoded_pw)s",
+	"tokenUrl": "%(jans_auth_token_endpoint)s",
+	"cleanServiceInterval": 60,
+	"cleanServiceBatchChunkSize": 10000,
+	"disableJdkLogger": true,
+	"loggingLevel": "INFO",
+	"loggingLayout": "text",
+	"externalLoggerConfiguration": "",
+	"metricReporterInterval": 300,
+	"metricReporterKeepDataDays": 15,
+	"metricReporterEnabled": true,
+	"statEnabled": true,
+	"errorReasonEnabled": false,
+	"grpcConfiguration": {
+		"serverMode": "bridge"
+	}
 }

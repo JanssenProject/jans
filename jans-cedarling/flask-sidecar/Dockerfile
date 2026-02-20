@@ -1,5 +1,4 @@
-FROM python:3.10.16-slim-bookworm
-
+FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
 # ===============
 # Debian packages
 # ===============
@@ -31,7 +30,7 @@ RUN pip3 install "poetry==$POETRY_VERSION" gunicorn \
 # ===============
 # Project setup
 # ===============
-ENV JANS_SOURCE_VERSION=e6c0dc926a89e5a4f5db0fb1cf9c776e9da0e523
+ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -53,9 +52,9 @@ RUN git clone --filter blob:none --no-checkout https://github.com/JanssenProject
         && cp -r ../../flask-sidecar/* /api \
         && version=$(sed -n 's/.*version = "\([0-9].[0-9].[0-9]\)"/\1/p' Cargo.toml) \
         && echo "${version}" > /api/cedarling_version \
-        && release_version="${version}" \
+        && release_version="v${version}" \
         && if [ "$version" = "0.0.0" ]; then release_version="nightly"; fi \
-        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl -O /api/cedarling_python-"${version}"-cp310-cp310-manylinux_2_31_x86_64.whl \
+        && wget -q https://github.com/JanssenProject/jans/releases/download/"${release_version}"/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl -O /api/cedarling_python-"${version}"-cp311-cp311-manylinux_2_34_x86_64.whl \
         && rm -rf /tmp/jans
 
 # Setting up proper permissions:
@@ -63,7 +62,7 @@ RUN chmod -R g=u /api \
     && chown -R 1000:1000 /api
 
 # Project initialization:
-RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-manylinux_2_31_x86_64.whl \
+RUN poetry add /api/cedarling_python-"$(cat /api/cedarling_version)"-cp311-cp311-manylinux_2_34_x86_64.whl \
     && poetry install --no-dev --no-root --no-interaction --no-ansi \
     # Cleaning poetry installation's cache for production:
     && rm -rf "$POETRY_CACHE_DIR"
@@ -71,13 +70,14 @@ RUN poetry add /api/cedarling_python-$(cat /api/cedarling_version)-cp310-cp310-m
 ENV FLASK_APP=main.core:app \
     GUNICORN_LOG_LEVEL=${GUNICORN_LOG_LEVEL:-debug} \
     CEDARLING_BOOTSTRAP_CONFIG_FILE=${CEDARLING_BOOTSTRAP_CONFIG_FILE:-None} \
-    SIDECAR_DEBUG_RESPOSE=${SIDECAR_DEBUG_RESPONSE:-False}
+    SIDECAR_DEBUG_RESPONSE=${SIDECAR_DEBUG_RESPONSE:-False} \
+    DISABLE_HASH_CHECK=${DISABLE_HASH_CHECK:-False}
 
 EXPOSE 5000
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cedarling-flask-sidecar" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.11.0-1" \
+    org.opencontainers.image.version="0.0.0-nightly" \
     org.opencontainers.image.title="AuthZen Flask API" \
     org.opencontainers.image.description="Flask API that implements the [AuthZen](https://openid.github.io/authzen/) specification with the [cedarling](../) python binding."
 

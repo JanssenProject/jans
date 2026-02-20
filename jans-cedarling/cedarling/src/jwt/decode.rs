@@ -13,7 +13,7 @@ use serde_json::Value;
 /// We need to decode the header and the `iss` claim in order to fetch the right
 /// validation key.
 #[derive(Debug, PartialEq)]
-pub struct DecodedJwt {
+pub(crate) struct DecodedJwt {
     pub header: DecodedJwtHeader,
     pub claims: DecodedJwtClaims,
 }
@@ -22,7 +22,7 @@ pub struct DecodedJwt {
 ///
 /// [`RFC 7515 Section 4.1`]: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1
 #[derive(Debug, Deserialize, PartialEq)]
-pub struct DecodedJwtHeader {
+pub(crate) struct DecodedJwtHeader {
     pub typ: Option<String>,
     pub cty: Option<String>,
     pub kid: Option<String>,
@@ -33,13 +33,13 @@ pub struct DecodedJwtHeader {
 ///
 /// [`RFC 7515 Section 4.1`]: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
 #[derive(Debug, Deserialize, PartialEq)]
-pub struct DecodedJwtClaims {
+pub(crate) struct DecodedJwtClaims {
     #[serde(flatten)]
     pub inner: Value,
 }
 
-pub fn decode_jwt(jwt: &str) -> Result<DecodedJwt, DecodeJwtError> {
-    let split = jwt.split(".").collect::<Vec<&str>>();
+pub(crate) fn decode_jwt(jwt: &str) -> Result<DecodedJwt, DecodeJwtError> {
+    let split = jwt.split('.').collect::<Vec<&str>>();
     if split.len() != 3 {
         return Err(DecodeJwtError::InvalidJwtFormat);
     }
@@ -98,7 +98,7 @@ mod test {
                     inner: json!({
                         "sub": "1234567890",
                         "name": "John Doe",
-                        "iat": 1516239022,
+                        "iat": 1_516_239_022,
                     })
                 }
             }
