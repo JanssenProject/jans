@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "jans-cedarling/**"
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -24,6 +25,8 @@ jobs:
         version: "25.2"
     - name: Install Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Run Tests
       working-directory: jans-cedarling
       run: |
@@ -60,6 +63,8 @@ jobs:
       run: cargo test
     - name: Install Rust Stable (for workspace)
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
@@ -78,6 +83,8 @@ jobs:
         version: "25.2"
     - name: Install Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Run benchmarks
       working-directory: jans-cedarling
       run: |
@@ -101,6 +108,8 @@ jobs:
 
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
@@ -168,6 +177,8 @@ jobs:
         version: "25.2"
     - name: Install Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Install Golang dependencies
       uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
