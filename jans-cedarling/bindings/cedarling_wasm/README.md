@@ -161,11 +161,11 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * await cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
-   * await cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+   * cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
+   * cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
    * ```
    */
-  push_data_ctx(key: string, value: any, ttl_secs?: number): Promise<void>;
+  push_data_ctx(key: string, value: any, ttl_secs?: number): void;
   /**
    * Get a value from the data store by key.
    * Returns null if the key doesn't exist or the entry has expired.
@@ -175,13 +175,13 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const value = await cedarling.get_data_ctx("user:123");
+   * const value = cedarling.get_data_ctx("user:123");
    * if (value) {
    *   console.log(value.name);
    * }
    * ```
    */
-  get_data_ctx(key: string): Promise<any>;
+  get_data_ctx(key: string): any;
   /**
    * Get a data entry with full metadata by key.
    * Returns null if the key doesn't exist or the entry has expired.
@@ -192,13 +192,13 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const entry = await cedarling.get_data_entry_ctx("user:123");
+   * const entry = cedarling.get_data_entry_ctx("user:123");
    * if (entry) {
    *   console.log(`Created: ${entry.created_at}, Access count: ${entry.access_count}`);
    * }
    * ```
    */
-  get_data_entry_ctx(key: string): Promise<any>;
+  get_data_entry_ctx(key: string): any;
   /**
    * Remove a value from the data store by key.
    * Returns true if the key existed and was removed, false otherwise.
@@ -208,43 +208,43 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const removed = await cedarling.remove_data_ctx("user:123");
+   * const removed = cedarling.remove_data_ctx("user:123");
    * ```
    */
-  remove_data_ctx(key: string): Promise<boolean>;
+  remove_data_ctx(key: string): boolean;
   /**
    * Clear all entries from the data store.
    *
    * # Example
    * ```javascript
-   * await cedarling.clear_data_ctx();
+   * cedarling.clear_data_ctx();
    * ```
    */
-  clear_data_ctx(): Promise<void>;
+  clear_data_ctx(): void;
   /**
    * List all entries with their metadata.
    * Returns an array of data entries containing key, value, type, and timing metadata.
    *
    * # Example
    * ```javascript
-   * const entries = await cedarling.list_data_ctx();
+   * const entries = cedarling.list_data_ctx();
    * entries.forEach(entry => {
    *   console.log(`Key: ${entry.key}, Type: ${entry.data_type}`);
    * });
    * ```
    */
-  list_data_ctx(): Promise<any[]>;
+  list_data_ctx(): any[];
   /**
    * Get statistics about the data store.
    * Returns current entry count, capacity limits, and configuration state.
    *
    * # Example
    * ```javascript
-   * const stats = await cedarling.get_stats_ctx();
+   * const stats = cedarling.get_stats_ctx();
    * console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
    * ```
    */
-  get_stats_ctx(): Promise<DataStoreStats>;
+  get_stats_ctx(): DataStoreStats;
 }
 
 /**
@@ -488,19 +488,19 @@ Store data with an optional TTL (Time To Live):
 
 ```javascript
 // Push data without TTL (uses default from config)
-await cedarling.push_data_ctx("user:123", {
+cedarling.push_data_ctx("user:123", {
   role: ["admin", "editor"],
   country: "US"
 });
 
 // Push data with TTL (5 minutes = 300 seconds)
-await cedarling.push_data_ctx("config:app", { setting: "value" }, 300);
+cedarling.push_data_ctx("config:app", { setting: "value" }, 300);
 
 // Push different data types
-await cedarling.push_data_ctx("key1", "string_value");
-await cedarling.push_data_ctx("key2", 42);
-await cedarling.push_data_ctx("key3", [1, 2, 3]);
-await cedarling.push_data_ctx("key4", { nested: "data" });
+cedarling.push_data_ctx("key1", "string_value");
+cedarling.push_data_ctx("key2", 42);
+cedarling.push_data_ctx("key3", [1, 2, 3]);
+cedarling.push_data_ctx("key4", { nested: "data" });
 ```
 
 ### Get Data
@@ -509,7 +509,7 @@ Retrieve stored data:
 
 ```javascript
 // Get data by key
-const value = await cedarling.get_data_ctx("user:123");
+const value = cedarling.get_data_ctx("user:123");
 if (value) {
   console.log(`User roles: ${value.role}`);
 }
@@ -520,7 +520,7 @@ if (value) {
 Get a data entry with full metadata including creation time, expiration, access count, and type:
 
 ```javascript
-const entry = await cedarling.get_data_entry_ctx("user:123");
+const entry = cedarling.get_data_entry_ctx("user:123");
 if (entry) {
   console.log(`Key: ${entry.key}`);
   console.log(`Created at: ${entry.created_at}`);
@@ -536,7 +536,7 @@ Remove a specific entry:
 
 ```javascript
 // Remove data by key
-const removed = await cedarling.remove_data_ctx("user:123");
+const removed = cedarling.remove_data_ctx("user:123");
 if (removed) {
   console.log("Entry was removed");
 } else {
@@ -549,7 +549,7 @@ if (removed) {
 Remove all entries from the data store:
 
 ```javascript
-await cedarling.clear_data_ctx();
+cedarling.clear_data_ctx();
 ```
 
 ### List All Data
@@ -557,7 +557,7 @@ await cedarling.clear_data_ctx();
 List all entries with their metadata:
 
 ```javascript
-const entries = await cedarling.list_data_ctx();
+const entries = cedarling.list_data_ctx();
 entries.forEach(entry => {
   console.log(`Key: ${entry.key}, Type: ${entry.data_type}, Created: ${entry.created_at}`);
 });
@@ -568,7 +568,7 @@ entries.forEach(entry => {
 Get statistics about the data store:
 
 ```javascript
-const stats = await cedarling.get_stats_ctx();
+const stats = cedarling.get_stats_ctx();
 console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
 console.log(`Total size: ${stats.total_size_bytes} bytes`);
 console.log(`Capacity usage: ${stats.capacity_usage_percent}%`);
@@ -580,14 +580,14 @@ The Context Data API methods throw errors for different error conditions:
 
 ```javascript
 try {
-  await cedarling.push_data_ctx("", { data: "value" }); // Empty key
+  cedarling.push_data_ctx("", { data: "value" }); // Empty key
 } catch (error) {
   if (error.message.includes("InvalidKey")) {
     console.log("Invalid key provided");
   }
 }
 
-const value = await cedarling.get_data_ctx("nonexistent");
+const value = cedarling.get_data_ctx("nonexistent");
 if (value === null) {
   console.log("Key not found");
 }
