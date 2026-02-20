@@ -268,23 +268,23 @@ func (c *Cedarling) ListDataCtx() ([]DataEntry, error) {
 }
 
 // GetStatsCtx returns statistics about the data store.
-func (c *Cedarling) GetStatsCtx() (*DataStoreStats, error) {
+func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	result := internal.CallGetStatsCtx(c.instance_id)
 	err := result.Error()
 	if err != nil {
-		return nil, err
+		return DataStoreStats{}, err
 	}
 
 	json_value := result.JsonValue()
 	if json_value == "" || json_value == "null" {
-		return nil, nil
+		return DataStoreStats{}, nil
 	}
 
 	var stats DataStoreStats
 	err = json.Unmarshal([]byte(json_value), &stats)
 	if err != nil {
-		return nil, err
+		return DataStoreStats{}, err
 	}
 
-	return &stats, nil
+	return stats, nil
 }
