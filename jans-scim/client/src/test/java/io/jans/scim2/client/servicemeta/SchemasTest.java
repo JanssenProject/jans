@@ -2,6 +2,7 @@ package io.jans.scim2.client.servicemeta;
 
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ListResponse;
+import io.jans.scim.model.scim2.TokenResource;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
 import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.provider.schema.SchemaAttribute;
@@ -39,9 +40,9 @@ public class SchemasTest extends BaseTest {
         List<String> schemas = new ArrayList<>();
         schemas.add(USER_EXT_SCHEMA_ID);
 
-        List<Class<? extends BaseScimResource>> classes = Arrays.asList(UserResource.class, GroupResource.class, Fido2DeviceResource.class);
+        List<Class<? extends BaseScimResource>> classes = Arrays.asList(UserResource.class, GroupResource.class, 
+                Fido2DeviceResource.class, TokenResource.class);
         classes.forEach(cls -> schemas.add(ScimResourceUtil.getSchemaAnnotation(cls).id()));
-        //Verifies default schemas for the 3 main SCIM resources + user extension are part of /Schemas endpoint
         listResponse.getResources().forEach(res -> assertTrue(schemas.contains(res.getId())));
 
     }
