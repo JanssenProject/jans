@@ -101,10 +101,6 @@ impl ValidationResult {
     /// Returns `Ok(())` if validation passed, or an error with validation failures.
     /// When there's exactly one error, it returns that error directly.
     /// When there are multiple errors, they are wrapped in `ValidationError::Multiple`.
-    ///
-    /// # Panics
-    ///
-    /// This function will not panic. The `expect` call is guarded by a length check.
     pub fn into_result(mut self) -> Result<(), ValidationError> {
         if self.is_valid {
             Ok(())
