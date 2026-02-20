@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "jans-cedarling/**"
+  workflow_dispatch:
 permissions:
   contents: read
 
