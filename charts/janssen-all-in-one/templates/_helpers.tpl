@@ -140,6 +140,9 @@ Create aio enabled list
 {{- if .Values.saml.enabled}}
 {{ $newList = append $newList ("jans-saml") }}
 {{- end}}
+{{- if .Values.shibboleth.enabled}}
+{{ $newList = append $newList ("jans-shibboleth") }}
+{{- end}}
 {{ toJson $newList }}
 {{- end }}
 
@@ -277,6 +280,19 @@ Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 {{- end }}
 
 {{/*
+Create JAVA_OPTIONS ENV for Shibboleth IDP
+*/}}
+{{- define "shibboleth.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.shibboleth.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
 Obfuscate configuration schema (only if configuration key is available)
 */}}
 {{- define "janssen-all-in-one.config.prepareSchema" }}
@@ -301,6 +317,9 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "redis_password" .Values.redisPassword }}
 {{- if or ( eq .Values.cnPersistenceType "sql" ) ( eq .Values.cnPersistenceType "hybrid" ) }}
 {{- $_ := set $secretSchema "sql_password" .Values.configmap.cnSqldbUserPassword }}
+{{- $_ := set $secretSchema "sql_ssl_ca_cert" .Values.configmap.cnSqlSslCaCert }}
+{{- $_ := set $secretSchema "sql_ssl_client_cert" .Values.configmap.cnSqlSslClientCert }}
+{{- $_ := set $secretSchema "sql_ssl_client_key" .Values.configmap.cnSqlSslClientKey }}
 {{- end }}
 {{- if eq .Values.configSecretAdapter "vault" }}
 {{- $_ := set $secretSchema "vault_role_id" .Values.configmap.cnVaultRoleId }}

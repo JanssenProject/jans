@@ -97,8 +97,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
         widget = JansLabelWidget(
                         title = _(title),
                         values = values,
-                        data = [],
-                        label_width=100,
+                        data = data,
+                        label_width=int(common_data.app.dialog_width*1.1) - 28,
                         add_handler=add_handler,
                         jans_name = jans_name
                         )
@@ -220,7 +220,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
             if claim.get('status') == 'active':
                 claims_list.append((claim['name'], claim['displayName']))
 
-        claims_checkbox = CheckboxList(values=claims_list)
+        claims_checkbox = CheckboxList(
+            values=sorted(claims_list, key=lambda c: c[1].lower())
+        )
 
         def add_claim(dialog) -> None:
             for claim_ in claims_checkbox.current_values:

@@ -70,7 +70,11 @@ public class ScimResourceSerializer {
 
     private void buildIncludeSet(SortedSet<String> include, Class<? extends BaseScimResource> resourceClass,
                                  List<String> schemas, String attributes, String exclussions) {
-
+    
+        if (!IntrospectUtil.resourceClasses.contains(resourceClass)) {
+            log.error("Unknown class {}. Please add the class in field IntrospectUtil.resourceClasses", resourceClass.getName());
+        }
+    
         Set<String> tempSet;
         Set<String> alwaysSet = IntrospectUtil.alwaysCoreAttrs.get(resourceClass).keySet();
         Set<String> neverSet = IntrospectUtil.neverCoreAttrs.get(resourceClass).keySet();

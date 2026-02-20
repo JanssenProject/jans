@@ -4,6 +4,7 @@ import os
 from uuid import uuid4
 from string import Template
 from functools import cached_property
+from pathlib import Path
 
 from ldif import LDIFWriter
 
@@ -14,6 +15,7 @@ from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import override_simple_json_property
+from jans.pycloudlib.persistence.sql import override_sql_ssl_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
@@ -120,14 +122,17 @@ def main():
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
+    sql_prop = "/etc/jans/conf/jans-sql.properties"
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        sql_prop = "/etc/jans/conf/jans-sql.properties"
         if not os.path.exists(sql_prop):
             render_sql_properties(manager, f"/app/templates/jans-{db_dialect}.properties", sql_prop)
 
     wait_for_persistence(manager)
-    override_simple_json_property("/etc/jans/conf/jans-sql.properties")
+    override_simple_json_property(sql_prop)
+
+    if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
+        override_sql_ssl_property(sql_prop)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
@@ -149,6 +154,22 @@ def main():
     with manager.create_lock("casa-setup"):
         persistence_setup = PersistenceSetup(manager)
         persistence_setup.import_ldif_files()
+
+        # enable/disable admin console via environment variable check; by default the admin console
+        # should be enabled (see https://github.com/JanssenProject/jans/issues/5806)
+        lock_file = os.environ.get("CN_CASA_ADMIN_LOCK_FILE", "/opt/jans/jetty/jans-casa/resources/.administrable")
+        lock_path = Path(lock_file)
+
+        if as_boolean(os.environ.get("CN_CASA_ADMIN_ENABLED", "true")):
+            logger.info(f"Detected CN_CASA_ADMIN_ENABLED=true; creating or updating {lock_file} to enable the admin console")
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            lock_path.touch(exist_ok=True)
+        else:
+            logger.info(f"Detected CN_CASA_ADMIN_ENABLED=false; removing {lock_file} (if exists) to disable the admin console")
+            try:
+                lock_path.unlink(missing_ok=True)
+            except Exception as exc:
+                logger.warning(f"Unable to remove {lock_file}; reason={exc}")
 
     try:
         manager.secret.to_file(

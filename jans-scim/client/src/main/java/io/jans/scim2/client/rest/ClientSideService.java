@@ -8,6 +8,7 @@ package io.jans.scim2.client.rest;
 
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.bulk.BulkRequest;
+import io.jans.scim.ws.rs.scim2.ITokenWebService;
 
 import static io.jans.scim.model.scim2.Constants.*;
 
@@ -27,7 +28,8 @@ import jakarta.ws.rs.core.Response;
 /*
  * Created by jgomer on 2017-09-04.
  */
-public interface ClientSideService extends ClientSideUserService, ClientSideGroupService, ClientSideFido2DeviceService {
+public interface ClientSideService extends ClientSideUserService, ClientSideGroupService,
+        ClientSideFido2DeviceService, ITokenWebService {
 
     /**
      * Performs a GET to the <code>/ServiceProviderConfig</code> endpoint that returns a JSON structure that describes

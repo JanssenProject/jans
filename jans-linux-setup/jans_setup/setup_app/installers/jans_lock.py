@@ -1,6 +1,10 @@
 import os
 import glob
+import json
 import shutil
+import datetime
+import tempfile
+
 from pathlib import Path
 
 from setup_app import paths
@@ -24,6 +28,9 @@ class JansLockInstaller(JettyInstaller):
 
                 (os.path.join(Config.dist_jans_dir, 'lock-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/lock-plugin/{0}/lock-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'jans-lock-model.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-model/{0}/jans-lock-model-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-cedarling.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-cedarling/{0}/jans-lock-cedarling-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'cedarling-java.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/cedarling-java/{0}/cedarling-java-{0}.jar'.format(base.current_app.app_info['jans_version']))),
+                (os.path.join(Config.dist_jans_dir, 'jans-lock-server-service-deps-pack.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-lock-server/{0}/jans-lock-server-{0}-service-deps-pack.zip'.format(base.current_app.app_info['jans_version']))),
                 ]
 
     def __init__(self):
@@ -46,8 +53,12 @@ class JansLockInstaller(JettyInstaller):
         self.config_ldif = os.path.join(self.output_dir, 'config.ldif')
         self.base_endpoint = 'jans-lock' if Config.get('install_jans_lock_as_server') else 'jans-auth'
         self.clients_ldif_fn = os.path.join(self.output_dir, 'clients.ldif')
+        self.policy_conf_tmp_fn = os.path.join(self.template_dir, 'policy_conf_tmp.json')
+        self.policy_conf_json = os.path.join(self.output_dir, 'jans_policy_conf.json')
+
 
     def install(self):
+
         if Config.get('install_jans_lock_as_server'):
             self.install_as_server()
             self.systemd_units.append('jans-lock')
@@ -58,8 +69,6 @@ class JansLockInstaller(JettyInstaller):
 
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
             Config.lock_message_provider_type = 'POSTGRES'
-
-        self.apache_lock_config()
 
     def create_client(self):
 
@@ -98,20 +107,56 @@ class JansLockInstaller(JettyInstaller):
         self.enable()
 
     def install_as_service(self):
-        for plugin in (self.source_files[1][0], self.source_files[3][0]):
+        service_plugins = [
+            self.source_files[1][0],  # jans-lock-service.jar
+            self.source_files[3][0],  # jans-lock-model.jar
+            self.source_files[4][0],  # jans-lock-cedarling.jar
+            self.source_files[5][0],  # cedarling-java.jar
+        ]
+        for plugin in service_plugins:
             plugin_name = os.path.basename(plugin)
             self.logIt(f"Adding plugin {plugin_name} to jans-auth")
             self.copyFile(plugin, base.current_app.JansAuthInstaller.custom_lib_dir)
-            plugin_class_path = os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, plugin_name)
-            self.chown(plugin_class_path, Config.jetty_user, Config.jetty_group)
+
+        # extract grpc dependencies to custom libs directory
+        base.unpack_zip(self.source_files[6][0], base.current_app.JansAuthInstaller.custom_lib_dir)
+
+        # chown all files under custom libs to jetty
+        self.chown(base.current_app.JansAuthInstaller.custom_lib_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
+    def create_policy_template(self):
+        Config.templateRenderingDict['local_trusted_issuer_id'] = os.urandom(22).hex()
+        Config.templateRenderingDict['policy_store_id'] = self.getPW(21)
+
+        output_tmp_fn = os.path.join(self.template_dir, os.path.basename(self.policy_conf_json))
+        policy_tmp = base.readJsonFile(self.policy_conf_tmp_fn)
+
+        policies = {}
+        #extract policies to temporary directory
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            base.extract_from_zip(base.current_app.jans_zip, 'jans-lock/lock-server/service/src/main/policy', tmpdirname)
+            for policy_fn in glob.glob(os.path.join(tmpdirname, '**/*.json')):
+                policy_id = os.urandom(22).hex()
+                policies[policy_id] = {
+                    'description': os.path.splitext(os.path.basename(policy_fn))[0],
+                    'creation_date': datetime.datetime.utcnow().isoformat(),
+                    'policy_content': self.generate_base64_file(policy_fn)
+                }
+            schema_fn = base.extract_file(base.current_app.jans_zip, 'jans-cedarling/schema/cedarling_core.json', tmpdirname)
+            policy_tmp['policy_stores']['%(policy_store_id)s']['schema'] = self.generate_base64_file(schema_fn)
+
+        policy_tmp['policy_stores']['%(policy_store_id)s']['policies'] = policies
+        self.writeFile(output_tmp_fn, json.dumps(policy_tmp, indent=2))
 
     def render_import_templates(self):
-        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json):
+        self.create_policy_template()
+        for tmp in (self.dynamic_conf_json, self.error_json, self.static_conf_json, self.policy_conf_json):
             self.renderTemplateInOut(tmp, self.template_dir, self.output_dir)
 
         Config.templateRenderingDict['lock_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         Config.templateRenderingDict['lock_error_base64'] = self.generate_base64_file(self.error_json, 1)
         Config.templateRenderingDict['lock_static_conf_base64'] = self.generate_base64_file(self.static_conf_json, 1)
+        Config.templateRenderingDict['lock_policy_conf_base64'] = self.generate_base64_file(self.policy_conf_json, 1)
 
         self.renderTemplateInOut(self.config_ldif, self.template_dir, self.output_dir)
 
@@ -129,31 +174,9 @@ class JansLockInstaller(JettyInstaller):
         message_conf_json = self.readFile(self.message_conf_json)
         self.dbUtils.set_configuration('jansMessageConf', message_conf_json)
 
-    def apache_lock_config(self):
-        apache_config = self.readFile(base.current_app.HttpdInstaller.https_jans_fn).splitlines()
-        if Config.get('install_jans_lock_as_server'):
-            proxy_context = 'jans-lock'
-            proxy_port = Config.jans_lock_port
-        else:
-            proxy_port = Config.jans_auth_port
-            proxy_context = 'jans-auth'
-
-        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/api/v1/configuration'
-        jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
-
-
-        proyx_pass_n = 0
-        for i, l in enumerate(apache_config):
-            if l.strip().startswith('ProxyErrorOverride') and l.strip().endswith('On'):
-                proyx_pass_n = i
-
-        apache_config.insert(proyx_pass_n-1, jans_lock_well_known_proxy_pass)
-        self.writeFile(base.current_app.HttpdInstaller.https_jans_fn, '\n'.join(apache_config), backup=False)
-
 
     def installed(self):
         return os.path.exists(self.jetty_service_webapps) or os.path.exists(os.path.join(base.current_app.JansAuthInstaller.custom_lib_dir, os.path.basename(self.source_files[1][0])))
-
 
     def service_post_install_tasks(self):
         base.current_app.ConfigApiInstaller.install_plugin('lock')

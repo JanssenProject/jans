@@ -7,7 +7,9 @@ import sqlalchemy
 import shutil
 import random
 import glob
+import tempfile
 
+from pathlib import Path
 from string import Template
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -41,8 +43,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def install(self):
 
         self.local_install()
-        if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
-            self.reset_rdbm_db()
+        if Config.rdbm_install_type == InstallTypes.REMOTE:
+            if base.argsp.reset_rdbm_db:
+                self.reset_rdbm_db()
 
         self.prepare_jans_attributes()
         self.create_tables(Config.schema_files)
@@ -86,8 +89,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def get_rdbm_pw(self):
-        return str(random.randint(10,99)) + random.choice('*_.<->') + self.getPW()
-
+        pws =  str(random.randint(10,99)) + random.choice('*_.<->') + self.getPW()
+        pwsl = [s for s in pws]
+        random.shuffle(pwsl)
+        return ''.join(pwsl)
 
     def local_install(self):
         if not Config.rdbm_password:
@@ -132,12 +137,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     for cmd in sql_cmd_list:
                         self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)
 
+                self.mysql_config()
+
+                self.stop(Config.backend_service)
+                self.start(Config.backend_service)
+                self.enable(Config.backend_service)
+
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
                     self.run(['postgresql-setup', 'initdb'])
                     Config.backend_service = 'postgresql.service'
                 elif base.clone_type == 'deb':
-                    self.run([paths.cmd_chmod, '640', '/etc/ssl/private/ssl-cert-snakeoil.key'])
                     Config.backend_service = 'postgresql.service'
 
                 self.restart('postgresql')
@@ -150,20 +160,110 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages, cmd_alter_db):
                     self.run(cmd, shell=True)
 
-                if base.clone_type == 'rpm':
-                    hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
-                    if hba_file_path_query and hba_file_path_query.strip():
-                        self.stop('postgresql')
-                        hba_file_path = hba_file_path_query.strip()
-                        hba_file_content = self.readFile(hba_file_path)
-                        hba_file_content = 'host\t{0}\t{1}\t127.0.0.1/32\tmd5\nhost\t{0}\t{1}\t::1/128\tmd5\n'.format(Config.rdbm_db, Config.rdbm_user) + hba_file_content
-                        self.writeFile(hba_file_path, hba_file_content)
-                        self.start('postgresql')
+                self.postgresql_config()
 
+                self.stop('postgresql')
+                self.start('postgresql')
                 self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
 
+    def mysql_config(self):
+        if base.os_type == 'suse':
+            conf_file = '/etc/my.cnf'
+        elif base.clone_type == 'rpm':
+            conf_file = '/etc/my.cnf.d/mysql-server.cnf'
+        else:
+            conf_file = '/etc/mysql/mysql.conf.d/mysqld.cnf'
+
+        # enforce SSL
+        conf_file_s = self.readFile(conf_file)
+        conf_file_content = conf_file_s.splitlines()
+        ssl_key_s = 'require_secure_transport'
+        for i, l in enumerate(conf_file_content):
+            if l.strip().startswith(ssl_key_s):
+                conf_file_content[i] = f'{ssl_key_s} = ON'
+                break
+        else:
+            conf_file_content.append(f'{ssl_key_s} = ON')
+
+        self.writeFile(conf_file, '\n'.join(conf_file_content))
+
+        mysql_data1_dir = '/var/lib/mysql'
+        cert_fn = os.path.join(mysql_data1_dir, 'ca.pem')
+        self.import_rootcert(cert_fn)
+
+
+    def postgresql_config(self):
+
+        hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
+        if hba_file_path_query and hba_file_path_query.strip():
+            hba_file_path = hba_file_path_query.strip()
+
+            # Allow SSL connection from localhost
+            hba_file_content_s = self.readFile(hba_file_path)
+            hba_file_content = hba_file_content_s.splitlines()
+
+            host_ssl_config = False
+            for i, l in enumerate(hba_file_content):
+                ls = l.strip()
+                if ls.startswith('#'):
+                    continue
+                method_list = ls.split()
+                if method_list:
+                    if method_list[0] in ('host', 'hostssl'):
+                        if method_list[1] == Config.rdbm_db and method_list[2] == Config.rdbm_user and method_list[4] == 'scram-sha-256':
+                            host_ssl_config = True
+                            continue
+                        if method_list[1] in ('all', Config.rdbm_db):
+                            hba_file_content[i] = '#' + ls
+
+            if not host_ssl_config:
+                # get password encryption type
+                cmd_pwd_enc = '''su - postgres -c "psql -U postgres -d postgres -At -c \\"SHOW password_encryption;\\""'''
+                std_out = self.run(cmd_pwd_enc, shell=True)
+                password_encryption_type = std_out.strip()
+                hba_file_content.append('\n# Added by Janssen setup')
+                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    127.0.0.1/32    {password_encryption_type}')
+                hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    ::1/128    {password_encryption_type}')
+
+            hba_file_content.append('')
+
+            self.writeFile(hba_file_path, '\n'.join(hba_file_content))
+
+            path_obj = Path(hba_file_path)
+            conf_dir = path_obj.parent.as_posix()
+            key_fn, crt_fn = self.gen_ca(ca_suffix='postgresql', cert_dir=conf_dir)
+            self.import_rootcert(crt_fn)
+
+            for fn in (key_fn, crt_fn):
+                self.chown(fn, 'postgres', 'postgres')
+                self.run([paths.cmd_chmod, '600', fn])
+
+            conf_file = os.path.join(conf_dir, 'postgresql.conf')
+            conf_file_s = self.readFile(conf_file)
+            conf_file_content = conf_file_s.splitlines()
+            key_value_dict = {'ssl': 'on', 'ssl_cert_file': crt_fn, 'ssl_key_file': key_fn}
+            conf_status =  {k: False for k in key_value_dict}
+
+            for i, l in enumerate(conf_file_content):
+                if l.strip().startswith('#'):
+                    continue
+                n = l.find('=')
+                if n > -1:
+                    skey = l[:n-1].strip()
+                    if skey in key_value_dict:
+                        conf_file_content[i] = f"{skey} = '{key_value_dict[skey]}'"
+                        conf_status[skey] = True
+
+            for skey in conf_status:
+                if not conf_status[skey]:
+                    conf_file_content.append(f"{skey} = '{key_value_dict[skey]}'")
+
+            self.writeFile(conf_file, '\n'.join(conf_file_content))
+
+    def import_rootcert(self, cert_fn):
+        self.import_cert_into_keystore(cert_fn, f'jans_{Config.rdbm_type}')
 
     def get_sql_col_type(self, attrname, table=None):
 
@@ -417,6 +517,39 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.import_ldif(ldif_files)
 
     def rdbmProperties(self):
+
+        pgsql_mysql_ssl_modes_mapping = {
+            'disable': 'DISABLED',
+            'require': 'REQUIRED',
+            'verify-ca': 'VERIFY_CA',
+            'verify-full': 'VERIFY_IDENTITY',
+            }
+
+        def set_sslmode(mode='verify-ca'):
+
+            if mode in ('verify-ca', 'verify-full'):
+                Config.rdbm_sslfactory = 'org.postgresql.ssl.DefaultJavaSSLFactory'
+
+            if Config.rdbm_type == 'pgsql':
+                Config.rdbm_sslmode = mode
+            elif Config.rdbm_type == 'mysql':
+                Config.rdbm_sslmode = pgsql_mysql_ssl_modes_mapping[mode]
+
+        if Config.rdbm_install_type == InstallTypes.LOCAL:
+            set_sslmode()
+
+        if Config.rdbm_install_type == InstallTypes.REMOTE:
+            if Config.get('rdbm_sslrootcert'):
+                with tempfile.NamedTemporaryFile('w') as tmpfo:
+                    tmpfo.write(Config.rdbm_sslrootcert)
+                    tmpfo.flush()
+                    self.import_rootcert(tmpfo.name)
+                set_sslmode()
+            else:
+                set_sslmode('disable')
+
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
+
         Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)

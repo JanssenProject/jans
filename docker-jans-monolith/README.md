@@ -58,7 +58,7 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-mono
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
 ```
 
-Download the script files 
+Download the script files
 
 ```bash
 

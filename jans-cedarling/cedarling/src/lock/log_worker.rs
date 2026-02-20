@@ -7,8 +7,8 @@
 //! logs to the lock server's `/audit/log` endpoint.
 
 use super::log_entry::LockLogEntry;
-use crate::log::{LogStrategy, LoggerWeak};
 use crate::LogWriter;
+use crate::log::{LogStrategy, LoggerWeak};
 
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
@@ -22,10 +22,10 @@ use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
-pub type SerializedLogEntry = Box<str>;
+pub(super) type SerializedLogEntry = Box<str>;
 
 /// Responsible for sending logs to the lock server
-pub struct LogWorker {
+pub(super) struct LogWorker {
     // it would be nice to store a struct here but we can't really store
     // `VecDeque<dyn Loggable>` so we just serialize the logs before storing them in the
     // buffer. We use `Box<str>`s to save some memory.
@@ -40,7 +40,7 @@ pub struct LogWorker {
 }
 
 impl LogWorker {
-    pub fn new(
+    pub(super) fn new(
         log_interval: Duration,
         http_client: Arc<Client>,
         log_endpoint: Url,
@@ -55,7 +55,7 @@ impl LogWorker {
         }
     }
 
-    pub async fn run(
+    pub(super) async fn run(
         &mut self,
         mut log_rx: mpsc::Receiver<SerializedLogEntry>,
         cancel_tkn: CancellationToken,
@@ -71,14 +71,14 @@ impl LogWorker {
                 },
 
                 // Send logs to the server
-                _ = sleep(self.log_interval) => {
-                    let logger = self.logger.as_ref().and_then(|logger| logger.upgrade());
-                    post_logs(&mut self.log_buffer, &logger, self.http_client.clone(), &self.log_endpoint).await;
+                () = sleep(self.log_interval) => {
+                    let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
+                    post_logs(&mut self.log_buffer, logger.as_ref(), self.http_client.clone(), &self.log_endpoint).await;
                 },
 
-                _ = cancel_tkn.cancelled() => {
-                    let logger = self.logger.as_ref().and_then(|logger| logger.upgrade());
-                    post_logs(&mut self.log_buffer, &logger, self.http_client.clone(), &self.log_endpoint).await;
+                () = cancel_tkn.cancelled() => {
+                    let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
+                    post_logs(&mut self.log_buffer, logger.as_ref(), self.http_client.clone(), &self.log_endpoint).await;
                     logger.log_any(LockLogEntry::info(
                         "gracefully shutting down lock log worker",
                     ));
@@ -91,7 +91,7 @@ impl LogWorker {
 
 async fn post_logs(
     log_buf: &mut VecDeque<Box<str>>,
-    logger: &Option<Arc<LogStrategy>>,
+    logger: Option<&Arc<LogStrategy>>,
     http_client: Arc<Client>,
     log_endpoint: &Url,
 ) {
@@ -117,8 +117,7 @@ async fn post_logs(
         logger.log_any(LockLogEntry::error(format!(
             // This probably wouldn't happen as we define the log entries
             // internally and they should always be serializable
-            "skipping {} log entries that couldn't be serialized",
-            failed_serializations
+            "skipping {failed_serializations} log entries that couldn't be serialized"
         )));
     }
 
@@ -128,7 +127,7 @@ async fn post_logs(
             .body(logs.to_string())
             .send()
             .await
-            .and_then(|resp| resp.error_for_status());
+            .and_then(reqwest::Response::error_for_status);
 
         match resp {
             Ok(_) => {
@@ -155,7 +154,7 @@ async fn post_logs(
 
 impl Drop for LogWorker {
     fn drop(&mut self) {
-        let logger = self.logger.as_ref().and_then(|logger| logger.upgrade());
+        let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
 
         if !self.log_buffer.is_empty() {
             logger.log_any(LockLogEntry::warn(

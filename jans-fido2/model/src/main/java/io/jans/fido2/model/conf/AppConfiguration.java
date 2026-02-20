@@ -49,7 +49,10 @@ public class AppConfiguration implements Configuration, Serializable {
 	
 	@DocProperty(description = "Boolean value specifying whether to enable JDK Loggers")
     private boolean disableJdkLogger = true;
-	
+
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
+
 	@DocProperty(description = "Logging level for Fido2 logger")
     private String loggingLevel;
 	
@@ -83,15 +86,19 @@ public class AppConfiguration implements Configuration, Serializable {
 	@DocProperty(description = "Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations", defaultValue = "true")
     private boolean fido2PerformanceMetrics = true;
 	
+	@DocProperty(description = "Boolean value specifying whether FIDO2 metrics aggregation is enabled", defaultValue = "true")
+    private boolean fido2MetricsAggregationEnabled = true;
+	
+	@DocProperty(description = "Interval in minutes for FIDO2 metrics aggregation", defaultValue = "60")
+    private int fido2MetricsAggregationInterval = 60;
+	
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
 	
 	
-    @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
-    private Boolean sessionIdPersistInCache = false;
+
 	
-	@DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from Fido2. Default value is false", defaultValue = "false")
-	private Boolean errorReasonEnabled = false;
+
 
     private Fido2Configuration fido2Configuration;
 
@@ -141,6 +148,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setDisableJdkLogger(Boolean disableJdkLogger) {
 		this.disableJdkLogger = disableJdkLogger;
+	}
+
+	public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
 	}
 
 	public String getLoggingLevel() {
@@ -231,6 +246,22 @@ public class AppConfiguration implements Configuration, Serializable {
 		this.fido2PerformanceMetrics = fido2PerformanceMetrics;
 	}
 
+	public boolean isFido2MetricsAggregationEnabled() {
+		return fido2MetricsAggregationEnabled;
+	}
+
+	public void setFido2MetricsAggregationEnabled(boolean fido2MetricsAggregationEnabled) {
+		this.fido2MetricsAggregationEnabled = fido2MetricsAggregationEnabled;
+	}
+
+	public int getFido2MetricsAggregationInterval() {
+		return fido2MetricsAggregationInterval;
+	}
+
+	public void setFido2MetricsAggregationInterval(int fido2MetricsAggregationInterval) {
+		this.fido2MetricsAggregationInterval = fido2MetricsAggregationInterval;
+	}
+
 	public List<String> getPersonCustomObjectClassList() {
 		return personCustomObjectClassList;
 	}
@@ -248,20 +279,7 @@ public class AppConfiguration implements Configuration, Serializable {
 	}
 
 	
-    public Boolean getSessionIdPersistInCache() {
-        if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
-        return sessionIdPersistInCache;
-    }
 
-    public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
-        this.sessionIdPersistInCache = sessionIdPersistInCache;
-    }
 
-	public Boolean getErrorReasonEnabled() {
-		return errorReasonEnabled;
-	}
 
-	public void setErrorReasonEnabled(Boolean errorReasonEnabled) {
-		this.errorReasonEnabled = errorReasonEnabled;
-	}
 }

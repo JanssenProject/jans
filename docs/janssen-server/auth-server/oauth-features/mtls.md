@@ -237,7 +237,7 @@ Above command will create the file: `example.crt` for 365 days.
 ```
 root@jans:/etc/certs/mtlscert# ls
 example-ca.crt  example-ca.key  example.crt  example.csr  example.key
-``` 
+```
 
 #### 7. Configure Apache2.
 
@@ -263,7 +263,7 @@ certificate forward to `jans-auth` application. `jans-auth` (AS) expects certifi
     # Forward certificate to destination server (oxauth)
     RequestHeader set X-ClientCert %{SSL_CLIENT_CERT}s
 </LocationMatch>
-``` 
+```
 
 Now we must restart the Apache2 server.
 

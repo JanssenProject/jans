@@ -34,7 +34,7 @@ Content of the allowList is as follows, note that we are not storing usernames o
  [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]
  
  ```
- 
+
 Python code for the same can be noted in the Person Authentication Script - https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py
 
 3. **Authentication** :
@@ -45,17 +45,17 @@ assertionRequest = AssertionOptions()
 assertionRequest.setRpId(domain)
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))
 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-```                
-				
+```
+
 4. In the **login web page**, here is an .xhtml sample
 ```
  <h:inputText placeholder="#{msgs['login.username']}" id="username" name="username" required="true" value="#{credentials.username}" >
     <f:passThroughAttribute name="autocomplete" value="username webauthn"/>
  </h:inputText>
  
-```																
+```
 on submit, do the following:
-javascript code : 
+javascript code :
 ```
 
 if ( window.PublicKeyCredential &amp;&amp; PublicKeyCredential.isConditionalMediationAvailable)
@@ -67,4 +67,4 @@ if ( window.PublicKeyCredential &amp;&amp; PublicKeyCredential.isConditionalMedi
 }
 
 ```
-				
+

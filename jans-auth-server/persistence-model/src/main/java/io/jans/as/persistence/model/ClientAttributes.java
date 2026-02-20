@@ -53,6 +53,12 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("logoutStatusJwtScriptDns")
     private List<String> logoutStatusJwtScriptDns = Lists.newArrayList();
 
+    @JsonProperty("parScriptDns")
+    private List<String> parScriptDns = Lists.newArrayList();
+
+    @JsonProperty("txTokenScriptDns")
+    private List<String> txTokenScriptDns = Lists.newArrayList();
+
     @JsonProperty("backchannelLogoutUri")
     private List<String> backchannelLogoutUri;
 
@@ -462,6 +468,26 @@ public class ClientAttributes implements Serializable {
         return this;
     }
 
+    public List<String> getParScriptDns() {
+        if (parScriptDns == null) parScriptDns = Lists.newArrayList();
+        return parScriptDns;
+    }
+
+    public ClientAttributes setParScriptDns(List<String> parScriptDns) {
+        this.parScriptDns = parScriptDns;
+        return this;
+    }
+
+    public List<String> getTxTokenScriptDns() {
+        if (txTokenScriptDns == null) txTokenScriptDns = Lists.newArrayList();
+        return txTokenScriptDns;
+    }
+
+    public ClientAttributes setTxTokenScriptDns(List<String> txTokenScriptDns) {
+        this.txTokenScriptDns = txTokenScriptDns;
+        return this;
+    }
+
     public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
         if (runIntrospectionScriptBeforeJwtCreation == null) {
             runIntrospectionScriptBeforeJwtCreation = false;
@@ -588,6 +614,8 @@ public class ClientAttributes implements Serializable {
                 ", spontaneousScopeScriptDns=" + spontaneousScopeScriptDns +
                 ", updateTokenScriptDns=" + updateTokenScriptDns +
                 ", logoutStatusJwtScriptDns=" + logoutStatusJwtScriptDns +
+                ", parScriptDns=" + parScriptDns +
+                ", txTokenScriptDns=" + txTokenScriptDns +
                 ", backchannelLogoutUri=" + backchannelLogoutUri +
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 ", additionalAudience=" + additionalAudience +

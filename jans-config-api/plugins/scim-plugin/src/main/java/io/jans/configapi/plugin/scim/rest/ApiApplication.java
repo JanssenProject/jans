@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.tags.*;
 import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.annotations.servers.*;
 
+import io.jans.configapi.util.ApiAccessConstants;
+import io.jans.configapi.plugin.scim.util.Constants;
+
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
@@ -22,8 +25,13 @@ tags = { @Tag(name = "SCIM - Config Management") },
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = "https://jans.io/scim/config.readonly", description = "View SCIM configuration related information"),
-@OAuthScope(name = "https://jans.io/scim/config.write", description = "Manage SCIM configuration related information")}
+@OAuthScope(name = Constants.SCIM_READ_ACCESS, description = "View SCIM configuration related information"),
+@OAuthScope(name = Constants.SCIM_WRITE_ACCESS, description = "Manage SCIM configuration related information"),
+@OAuthScope(name = Constants.SCIM_ADMIN_ACCESS, description = "Admin to manage SCIM configuration related information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
+}
 )))
 public class ApiApplication extends Application {
 

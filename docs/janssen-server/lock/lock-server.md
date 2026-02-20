@@ -587,7 +587,7 @@ The Text-based User Interface provides an interactive way to manage Lock Server:
 
 #### Policy Store Not Loading
 **Symptoms**: Cedarling clients cannot retrieve policy stores
-**Causes**: 
+**Causes**:
 - Invalid policy store source configuration
 - Network connectivity issues
 - Authentication failures with external sources

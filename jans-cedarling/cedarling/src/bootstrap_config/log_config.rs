@@ -5,12 +5,14 @@
 
 use super::{BootstrapConfigLoadingError, BootstrapConfigRaw};
 use crate::log::LogLevel;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use url::Url;
-use serde::{Deserialize, Serialize};
+
+pub use crate::log::StdOutLoggerMode;
 
 /// A set of properties used to configure logging in the `Cedarling` application.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LogConfig {
     /// `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub log_type: LogTypeConfig,
@@ -23,18 +25,18 @@ pub struct LogConfig {
 ///  Log type configuration.
 ///  `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
 ///   Current type represent this value.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LogTypeConfig {
     /// Logger do nothing. It means that all logs will be ignored.
     Off,
     /// Logger holds all logs in database (in memory) with eviction policy.
     Memory(MemoryLogConfig),
     /// Logger writes log information to std output stream.
-    StdOut,
+    StdOut(StdOutLoggerMode),
 }
 
 /// Configuration for memory log.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_TTL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum time to live (in seconds) of the log entries.
@@ -47,6 +49,48 @@ pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_MAX_ITEM_SIZE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum size of a log entry in bytes.
     pub max_item_size: Option<usize>,
+}
+
+/// Mode for stdout logging.
+/// Is used in [`BootstrapConfigRaw`]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum StdOutMode {
+    /// Asynchronous logging with configurable timeout and buffer.
+    #[cfg(not(target_arch = "wasm32"))]
+    Async,
+    /// Immediate synchronous logging (no buffering).
+    #[default]
+    Immediate,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+const PARSE_STDOUT_MODE_ERR: &str = "Invalid stdout mode. Must be 'async' or 'immediate'";
+
+#[cfg(target_arch = "wasm32")]
+const PARSE_STDOUT_MODE_ERR: &str = "Invalid stdout mode. Must be 'immediate'";
+
+impl std::str::FromStr for StdOutMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            #[cfg(not(target_arch = "wasm32"))]
+            "async" => Ok(StdOutMode::Async),
+            "immediate" => Ok(StdOutMode::Immediate),
+            _ => Err(PARSE_STDOUT_MODE_ERR.to_string()),
+        }
+    }
+}
+
+impl std::fmt::Display for StdOutMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            #[cfg(not(target_arch = "wasm32"))]
+            StdOutMode::Async => write!(f, "async"),
+            StdOutMode::Immediate => write!(f, "immediate"),
+        }
+    }
 }
 
 /// Config for the lock logger that are set using the bootstrap configs.
@@ -130,14 +174,6 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
     }
 }
 
-/// Raw log config
-pub struct LogConfigRaw {
-    /// Log type
-    pub log_type: String,
-    /// Log level
-    pub log_level: String,
-}
-
 /// Raw memory log config
 pub struct MemoryLogConfigRaw {
     /// Log TTL
@@ -146,29 +182,4 @@ pub struct MemoryLogConfigRaw {
     pub max_item_size: Option<usize>,
     /// Max items
     pub max_items: Option<usize>,
-}
-
-impl From<LogConfigRaw> for LogConfig {
-    fn from(raw: LogConfigRaw) -> Self {
-        Self {
-            log_type: match raw.log_type.as_str() {
-                "off" => LogTypeConfig::Off,
-                "memory" => LogTypeConfig::Memory(MemoryLogConfig {
-                    log_ttl: 60,
-                    max_item_size: None,
-                    max_items: None,
-                }),
-                "stdout" => LogTypeConfig::StdOut,
-                _ => LogTypeConfig::StdOut,
-            },
-            log_level: match raw.log_level.as_str() {
-                "TRACE" => LogLevel::TRACE,
-                "DEBUG" => LogLevel::DEBUG,
-                "INFO" => LogLevel::INFO,
-                "WARN" => LogLevel::WARN,
-                "ERROR" => LogLevel::ERROR,
-                _ => LogLevel::INFO,
-            },
-        }
-    }
 }

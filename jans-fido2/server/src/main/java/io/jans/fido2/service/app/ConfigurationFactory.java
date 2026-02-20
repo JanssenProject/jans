@@ -25,7 +25,6 @@ import io.jans.fido2.model.conf.Conf;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.Configuration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -94,7 +93,7 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String APP_PROPERTIES_FILE = DIR + "fido2.properties";
+	private static final String APP_PROPERTIES_FILE = DIR + "jans-fido2.properties";
 
 	private final String SALT_FILE_NAME = "salt";
 
@@ -326,7 +325,7 @@ public class ConfigurationFactory {
 			staticConf = conf.getStaticConf();
 		}
 		if (conf.getErrors() != null) {
-			errorResponseFactory = new ErrorResponseFactory(conf.getErrors(), conf.getDynamicConf());
+			errorResponseFactory = new ErrorResponseFactory(conf.getErrors());
 		}
 	}
 

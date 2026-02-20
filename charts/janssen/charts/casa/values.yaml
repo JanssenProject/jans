@@ -25,9 +25,9 @@ image:
   # -- Image pullPolicy to use for deploying.
   pullPolicy: IfNotPresent
   # -- Image  to use for deploying.
-  repository: janssenproject/casa
+  repository: ghcr.io/janssenproject/jans/casa
   # -- Image  tag to use for deploying.
-  tag: 1.11.0-1
+  tag: 0.0.0-nightly
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.

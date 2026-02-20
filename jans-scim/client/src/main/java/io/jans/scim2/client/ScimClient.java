@@ -51,7 +51,8 @@ public class ScimClient<T> extends AbstractScimClient<T> {
 		"https://jans.io/scim/fido2.read",
 		"https://jans.io/scim/fido2.write",
 		"https://jans.io/scim/all-resources.search",
-		"https://jans.io/scim/bulk")
+		"https://jans.io/scim/bulk",
+		"https://jans.io/scim/tokens")
 	        .collect(Collectors.joining(" "));
 
     private Logger logger = LogManager.getLogger(getClass());

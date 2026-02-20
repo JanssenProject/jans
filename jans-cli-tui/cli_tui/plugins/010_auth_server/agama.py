@@ -571,7 +571,7 @@ class Agama(DialogUtils):
             result = response.json()
             
 
-            for repo in result['payload']['repositoriesPageRoute']['repositories']:
+            for repo in result['payload']['orgReposPageRoute']['repositories']:
                 repo_name = repo["name"]
                 response = requests.get(f'https://api.github.com/repos/GluuFederation/{repo_name}/releases/latest', headers={'Accept': 'application/json'})
                 if response.ok:

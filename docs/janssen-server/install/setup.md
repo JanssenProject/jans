@@ -9,20 +9,20 @@ tags:
 
 ## Running Setup
 
- After installation, executing `setup.py` will launch the SETUP Command Line by default. 
- 
+ After installation, executing `setup.py` will launch the SETUP Command Line by default.
+
  To run the script, run the following command:
- 
+
  ```bash
  python3 /opt/jans/jans-setup/setup.py
  ```
- 
+
  A warning will pop up if the free disk space is less than the recommended 40 GB. The installer will check that all dependant packages are installed or not, and if missing it will ask to install. When prompted Y/y at the command prompt will install all required packages.
-   
+
 1. The installer will detect which operating system, init type, and Apache version are currently on the server.
-  
+
 2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Janssen Authorization Server. Hit Enter to accept the default values.
-  
+
   ```bash
   Enter IP Address:
   Enter hostname:
@@ -34,9 +34,9 @@ tags:
   Enter maximum RAM for applications in MB:
   Enter Password for Admin User:
   ```
-  
+
 3. Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely.
-    
+
 4. Next, pick which services should be installed for this deployment:
 
   ```bash
@@ -45,7 +45,7 @@ Install Scim Server? [Yes] :
 Install Fido2 Server? [Yes] :
 Install Gluu Casa? [No] :
   ```
-   
+
 5. Finally, review the summary screen that gives an overview of the selections made during the setup process.
 
 Note! After setup completed, you will be prompted to remove setup files (directories `/opt/dist` and `/opt/jans/jans-setup`).
@@ -65,8 +65,8 @@ Avoid setup issues by acknowledging the following:
    - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
      
    - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Janssen Authorization Server.
-  
-!!! Warning    
+
+!!! Warning
     Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
 
 ## Script Command Line Options
@@ -81,15 +81,15 @@ usage: jans_setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [
                      [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
                      [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE]
                      [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
-                     [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [-rdbm-schema RDBM_SCHEMA] [--reset-rdbm-db] [--shell] [--dump-config-on-error]
-                     [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
+                     [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [-rdbm-schema RDBM_SCHEMA] [-remote-rdbm-ssl-cert-fn REMOTE_RDBM_SSL_CERT_FN] 
+                     [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
                      [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download]
                      [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
                      [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
                      [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
-                     [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
+                     [-java-version {11,17}] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
                      [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-link]
-                     [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock]
+                     [--with-casa] [--install-jans-saml] [--install-jans-lock]
                      [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
                      [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
                      [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
@@ -118,13 +118,15 @@ Below are the optional arguments:
 | -email EMAIL | Email address for support at your organization used for generating X.509 certificates |
 | -city CITY | City field used for generating X.509 certificates |
 | -state STATE | State field used for generating X.509 certificates |
-| -country COUNTRY | Two letters country coude used for generating X.509 certificates |
+| -country COUNTRY | Two letters country code used for generating X.509 certificates |
 | -rdbm-user RDBM_USER | RDBM username |
-| -rdbm-password RDBM_PASSWORD | RDBM password | 
+| -rdbm-password RDBM_PASSWORD | RDBM password |
 | -rdbm-port RDBM_PORT | RDBM port |
 | -rdbm-db RDBM_DB | RDBM database |
 | -rdbm-host RDBM_HOST | RDBM host |
 | -rdbm-schema | Jans Database Schema |
+| -remote-rdbm-ssl-cert-fn REMOTE_RDBM_SSL_CERT_FN | To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server |
+
 | --reset-rdbm-db | Deletes all tables on target database. Warning! You will lose all data on target database. |
 | --shell | Drop into interactive shell before starting installation |
 | --dump-config-on-error | Dump configuration on error |
@@ -144,7 +146,6 @@ Below are the optional arguments:
 | -enable-script ENABLE_SCRIPT | inum of script to enable |
 | -disable-script DISABLE_SCRIPT | inum of script to disable |
 | -disable-selinux | Disable SELinux |
-| -stm, --enable-scim-test-mode | Enable Scim Test Mode |
 | -w | Get the development head war files |
 | -t | Load test data |
 | -x | Load test data and exit |

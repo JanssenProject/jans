@@ -66,6 +66,8 @@ data:
   CN_SQL_DB_NAME: {{ .Values.configmap.cnSqlDbName }}
   CN_SQL_DB_USER: {{ .Values.configmap.cnSqlDbUser }}
   CN_SQL_DB_TIMEZONE: {{ .Values.configmap.cnSqlDbTimezone }}
+  CN_SQL_SSL_ENABLED: {{ .Values.configmap.cnSqlSslEnabled | quote }}
+  CN_SQL_SSL_MODE: {{ .Values.configmap.cnSqlSslMode }}
   CN_CONFIG_ADAPTER: {{ .Values.configAdapterName }}
   CN_SECRET_ADAPTER: {{ .Values.configSecretAdapter }}
   CN_CONFIG_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
@@ -176,6 +178,7 @@ data:
   | squote
   }}
   {{- end }}
+  CN_CASA_ADMIN_ENABLED: {{ .Values.casa.adminEnabled | quote }}
   CN_SQL_PASSWORD_FILE: {{ .Values.cnSqlPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}

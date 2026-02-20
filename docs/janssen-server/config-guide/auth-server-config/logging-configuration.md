@@ -37,9 +37,9 @@ configured differently when it comes to logging.
 
 ##  Using Command Line
 
-In the Janssen Server, you can deploy and customize the Logging Configuration 
-using the command line. To get the details of Janssen command line operations 
-relevant to Logging configuration, you can check the operations under 
+In the Janssen Server, you can deploy and customize the Logging Configuration
+using the command line. To get the details of Janssen command line operations
+relevant to Logging configuration, you can check the operations under
 `ConfigurationLogging` task using the
 command below:
 
@@ -144,10 +144,10 @@ document](./../../reference/openapi.md).
 
 On a VM installation, logs for `jans-auth` module are generated at
 `/opt/jans/jetty/jans-auth/logs/`. Similarly, logs for FIDO2 and SCIM modules
-are generated under `/opt/jans/jetty/jans-fido2/logs/` and 
+are generated under `/opt/jans/jetty/jans-fido2/logs/` and
 `/opt/jans/jetty/jans-scim/logs/` respectively.
 
 ## Cloud-Native Deployments
 
-Logging configuration for a cloud-native deployment is 
+Logging configuration for a cloud-native deployment is
 [detailed here](../../kubernetes-ops/logs.md)

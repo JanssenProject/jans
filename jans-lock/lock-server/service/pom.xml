@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>jans-lock-server-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.11.0</version>
+		<version>0.0.0-nightly</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -62,6 +62,41 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- Protobuf Maven Plugin -->
+	        <plugin>
+	            <groupId>org.xolstice.maven.plugins</groupId>
+	            <artifactId>protobuf-maven-plugin</artifactId>
+	            <configuration>
+	                <protocArtifact>com.google.protobuf:protoc:4.33.2:exe:${os.detected.classifier}</protocArtifact>
+	                <pluginId>grpc-java</pluginId>
+	                <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.78.0:exe:${os.detected.classifier}</pluginArtifact>
+	            </configuration>
+	            <executions>
+	                <execution>
+                        <id>compile_proto</id>
+                        <phase>process-sources</phase>
+	                    <goals>
+	                        <goal>compile</goal>
+	                        <goal>compile-custom</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+	        </plugin>
+
+			<!-- OS Maven Plugin for platform detection -->
+	        <plugin>
+	            <groupId>kr.motd.maven</groupId>
+	            <artifactId>os-maven-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <phase>initialize</phase>
+	                    <goals>
+	                        <goal>detect</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+	        </plugin>
 		</plugins>
 	</build>
 
@@ -70,6 +105,11 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-model</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-cedarling</artifactId>
 		</dependency>
 
 		<dependency>
@@ -86,7 +126,7 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-model</artifactId>
@@ -121,9 +161,14 @@
 		</dependency>
 
 		<!-- Servlet -->
+		<!-- Note: using javax.servlet-api for compatibility with grpc-servlet; avoid mixing Jakarta and javax servlet APIs -->
+
+		<!-- Compatibility: some gRPC/servlet libs compiled against javax.servlet -->
 		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Commons libs -->
@@ -178,6 +223,30 @@
 			<artifactId>resteasy-jackson2-provider</artifactId>
 		</dependency>
 
+		<!-- gRPC -->
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty-shaded</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-servlet-jakarta</artifactId>
+		</dependency>
+
+		<!-- RESTEasy gRPC Bridge -->
+		<dependency>
+			<groupId>dev.resteasy.grpc</groupId>
+			<artifactId>grpc-bridge</artifactId>
+		</dependency>
+
 		<!-- Swagger -->
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
@@ -200,8 +269,30 @@
 
 		<!-- Test -->
 		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.jboss.weld</groupId>
 			<artifactId>weld-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

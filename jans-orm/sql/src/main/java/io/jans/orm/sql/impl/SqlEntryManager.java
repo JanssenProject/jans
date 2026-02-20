@@ -75,11 +75,14 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 	private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter(false);
 
     private List<DeleteNotifier> subscribers;
+    
+    private boolean validateAfterUpdate;
 
     protected SqlEntryManager(SqlOperationService operationService) {
         this.operationService = operationService;
         this.filterConverter = new SqlFilterConverter(operationService);
         subscribers = new LinkedList<DeleteNotifier>();
+        this.validateAfterUpdate = operationService.getConnectionProvider().isValidateAfterUpdate();
     }
 
     @Override
@@ -1043,6 +1046,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		}
 		
 		return objectClasses[0];
+	}
+
+	@Override
+	protected boolean isValidateAfterUpdate() {
+		return validateAfterUpdate;
 	}
 
 }
