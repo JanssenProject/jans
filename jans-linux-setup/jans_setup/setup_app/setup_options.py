@@ -18,7 +18,7 @@ def get_setup_options():
         'install_fido2': True,
         'install_link': False,
         'install_casa': False,
-        'install_jans_saml': False,
+        'install_jans_shib': False,
         'install_jans_lock': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
@@ -76,8 +76,8 @@ def get_setup_options():
 
         if base.argsp.with_casa:
             setupOptions['install_casa'] = True
-        if base.argsp.install_jans_saml:
-            setupOptions['install_jans_saml'] = True
+        if base.argsp.install_jans_shib:
+            setupOptions['install_jans_shib'] = True
         if base.argsp.install_jans_lock:
             setupOptions['install_jans_lock'] = True
 

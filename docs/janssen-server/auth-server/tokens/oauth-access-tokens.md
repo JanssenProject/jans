@@ -76,8 +76,8 @@ default, Jans Auth Server access tokens expire after 5 minutes.
 
 It is possible to add additional claims to an access token via the
 Auth Server interception scripts. The preferred script is the
-[update token script](../../developer/scripts/update-token.md). You can
-also use the [introspection script](../../developer/scripts/introspection.md).
+[update token script](../../../script-catalog/update_token/update-token.md). You can
+also use the [introspection script](../../../script-catalog/introspection/introspection.md).
 
 ### Access Token Crypto (JWT)
 

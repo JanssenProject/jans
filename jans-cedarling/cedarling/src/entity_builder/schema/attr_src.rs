@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedar_policy_core::validator::types::{EntityRecordKind, Primitive, Type};
+use cedar_policy_core::validator::types::{EntityKind, Primitive, Type};
 use derive_more::derive::Deref;
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::HashMap;
@@ -80,8 +80,21 @@ impl AttrSrc {
                     AttrSrc::EntityRefSet(type_name) => Self::EntityRefSet(type_name),
                 }
             },
-            Type::EntityOrRecord(entity_record_kind) => {
-                Self::from_entity_record_kind(attr_name, entity_record_kind)?
+            Type::Entity(entity_kind) => Self::from_entity_kind(attr_name, entity_kind)?,
+            Type::Record { attrs, .. } => {
+                let attrs = attrs
+                    .iter()
+                    .map(|(name, attr_kind)| {
+                        (
+                            name.clone(),
+                            ExpectedClaimType::from(attr_kind.attr_type.as_ref()),
+                        )
+                    })
+                    .collect::<HashMap<SmolStr, ExpectedClaimType>>();
+                Self::JwtClaim(TknClaimAttrSrc {
+                    claim: attr_name.to_string(),
+                    expected_type: ExpectedClaimType::Object(attrs),
+                })
             },
             Type::ExtensionType { name } => Self::JwtClaim(TknClaimAttrSrc {
                 claim: attr_name.to_string(),
@@ -109,41 +122,23 @@ impl AttrSrc {
         }
     }
 
-    fn from_entity_record_kind(
+    fn from_entity_kind(
         attr_name: &str,
-        value: &EntityRecordKind,
+        entity_kind: &EntityKind,
     ) -> Result<Self, BuildAttrSrcError> {
-        let src = match value {
-            EntityRecordKind::Record { attrs, .. } => {
-                let attrs = attrs
-                    .iter()
-                    .map(|(name, attr_kind)| {
-                        (
-                            name.clone(),
-                            ExpectedClaimType::from(attr_kind.attr_type.as_ref()),
-                        )
-                    })
-                    .collect::<HashMap<SmolStr, ExpectedClaimType>>();
-                Self::JwtClaim(TknClaimAttrSrc {
-                    claim: attr_name.to_string(),
-                    expected_type: ExpectedClaimType::Object(attrs),
-                })
+        match entity_kind {
+            EntityKind::AnyEntity => {
+                Err(BuildAttrSrcErrorKind::MissingEntityTypeName.while_building(attr_name))
             },
-            EntityRecordKind::AnyEntity => {
-                return Err(
-                    BuildAttrSrcErrorKind::InvalidEntityRecordKind(value.clone())
-                        .while_building(attr_name),
-                );
+            EntityKind::Entity(entity_lub) => {
+                let entity = entity_lub.get_single_entity().ok_or_else(|| {
+                    BuildAttrSrcErrorKind::MissingEntityTypeName.while_building(attr_name)
+                })?;
+                Ok(Self::EntityRef(EntityRefAttrSrc(
+                    entity.name().to_smolstr(),
+                )))
             },
-            EntityRecordKind::Entity(entity_lub) => {
-                let entity = entity_lub.get_single_entity().ok_or(
-                    BuildAttrSrcErrorKind::MissingEntityTypeName.while_building(attr_name),
-                )?;
-                Self::EntityRef(EntityRefAttrSrc(entity.name().to_smolstr()))
-            },
-        };
-
-        Ok(src)
+        }
     }
 }
 
@@ -160,8 +155,6 @@ pub(super) enum BuildAttrSrcErrorKind {
     InvalidType(Type),
     #[error("the type of the elements of a Set was not defined")]
     SetElementTypeNotDefined,
-    #[error("can't use {0:?} as an entity or record attribute source")]
-    InvalidEntityRecordKind(EntityRecordKind),
     #[error("the entity type name was not defined")]
     MissingEntityTypeName,
 }
@@ -186,7 +179,23 @@ impl From<&Type> for ExpectedClaimType {
                 .map(|t| Self::from(&**t))
                 // see: https://docs.rs/cedar-policy-core/latest/cedar_policy_core/validator/types/enum.Type.html#variant.Set
                 .expect("cedar-policy-core type `Type::Set` should always be `Some`, according to the documentation"),
-            Type::EntityOrRecord(entity_record_kind) => entity_record_kind.into(),
+            Type::Entity(entity_kind) => {
+                // We will not build entities using single claims
+                // ... should we use TryFrom instead of returning null?
+                match entity_kind {
+                    EntityKind::AnyEntity => ExpectedClaimType::Null,
+                    EntityKind::Entity(_entity_lub) => ExpectedClaimType::Null,
+                }
+            },
+            Type::Record { attrs, .. } => {
+                let attrs = attrs
+                    .iter()
+                    .map(|(name, attr_kind)| {
+                        (name.clone(), Self::from(attr_kind.attr_type.as_ref()))
+                    })
+                    .collect::<HashMap<SmolStr, Self>>();
+                Self::Object(attrs)
+            },
             Type::ExtensionType { name } => Self::Extension(name.to_smolstr()),
         }
     }
@@ -198,26 +207,6 @@ impl From<&Primitive> for ExpectedClaimType {
             Primitive::Bool => Self::Bool,
             Primitive::Long => Self::Number,
             Primitive::String => Self::String,
-        }
-    }
-}
-
-impl From<&EntityRecordKind> for ExpectedClaimType {
-    fn from(value: &EntityRecordKind) -> Self {
-        match value {
-            EntityRecordKind::Record { attrs, .. } => {
-                let attrs = attrs
-                    .iter()
-                    .map(|(name, attr_kind)| {
-                        (name.clone(), Self::from(attr_kind.attr_type.as_ref()))
-                    })
-                    .collect::<HashMap<SmolStr, Self>>();
-                Self::Object(attrs)
-            },
-            // We will not build entities using single claims
-            // ... should we use TryFrom instead of returning null?
-            EntityRecordKind::AnyEntity => Self::Null,
-            EntityRecordKind::Entity(_entity_lub) => Self::Null,
         }
     }
 }
