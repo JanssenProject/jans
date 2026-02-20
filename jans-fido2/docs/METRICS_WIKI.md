@@ -2,7 +2,7 @@
 
 **Understand, configure, and use the FIDO2 Metrics API for dashboards, monitoring, and reporting.**
 
-This guide explains everything about FIDO2 metrics: what is tracked, how data is stored and aggregated, how to call the API, and how to interpret the results. Whether you are integrating a dashboard, setting up alerts, or troubleshooting, you’ll find the answers here.
+This guide explains everything about FIDO2 metrics: what is tracked, how data is stored and aggregated, how to call the API, and how to interpret the results. Whether you are integrating a dashboard, setting up alerts, or troubleshooting, you'll find the answers here.
 
 ---
 
@@ -21,7 +21,6 @@ This guide explains everything about FIDO2 metrics: what is tracked, how data is
 - [Configuration reference](#configuration-reference)
 - [How aggregations work (schedule and period IDs)](#how-aggregations-work-schedule-and-period-ids)
 - [Understanding response fields](#understanding-response-fields)
-- [Examples and use cases](#examples-and-use-cases)
 - [Troubleshooting](#troubleshooting)
 - [Metrics and formulas reference](#metrics-and-formulas-reference)
 - [Additional resources](#additional-resources)
@@ -161,7 +160,7 @@ The metrics API has **13 GET endpoints**, grouped as follows.
 - **Path parameters:**  
   - `aggregationType`: one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`  
   - `operationType`: one of `REGISTRATION`, `AUTHENTICATION`  
-  - `userId`: the user’s internal ID (inum), not the username.
+  - `userId`: the user's internal ID (inum), not the username.
 
 ---
 
@@ -180,18 +179,34 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/entries?startTim
   -H "Accept: application/json"
 ```
 
-**Example response:** An array of entry objects. Fields that are null are omitted. Typical fields include:
+**Example response:** An array of entry objects. Fields that are null are omitted.
 
-- `id` – Unique identifier for the entry  
-- `timestamp` – Event time in **milliseconds since epoch** (UTC)  
-- `userId` – User’s internal ID (inum)  
-- `username` – Username at time of the operation  
-- `operationType` – `REGISTRATION`, `AUTHENTICATION`, or `FALLBACK`  
-- `status` – `SUCCESS`, `FAILURE`, or `ATTEMPT`  
-- `durationMs` – Operation duration in **milliseconds**  
-- `authenticatorType` – e.g. `cross-platform`, `platform`, `security-key`  
-- `nodeId` – Cluster node identifier (when running in a cluster)  
-- When available: `ipAddress`, `userAgent`, `deviceInfo`, `errorReason`, `errorCategory`, `sessionId`, `applicationType`
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier (UUID) for this specific metric entry. Use this to reference individual events. |
+| `timestamp` | integer | Event time in **milliseconds since epoch** (UTC). Convert to date: `new Date(timestamp)` in JavaScript or similar. Example: `1766767235681` = 2026-01-26T12:00:35.681Z. |
+| `userId` | string | User's internal ID (inum). This is a stable identifier for correlating user activity across entries. Not the username. |
+| `username` | string | Human-readable username at time of the operation. May change if user renames account; use `userId` for stable tracking. |
+| `operationType` | string | Type of operation: `REGISTRATION` (passkey enrollment), `AUTHENTICATION` (passkey sign-in), or `FALLBACK` (user chose alternative method). |
+| `status` | string | Operation outcome: `ATTEMPT` (user started but hasn't finished yet), `SUCCESS` (completed successfully), or `FAILURE` (completed with an error). See note below about how these relate. |
+| `durationMs` | integer | Time from operation start to completion in **milliseconds**. Typical values: 200–800ms for authentication, 400–2000ms for registration. Only set for SUCCESS/FAILURE entries, not ATTEMPT. High values (>3000ms) may indicate network issues. |
+| `authenticatorType` | string | Type of authenticator used: `platform` (built-in like TouchID, FaceID, Windows Hello), `cross-platform` (external like YubiKey, USB security key), or `security-key`. |
+| `nodeId` | string | Identifier of the cluster node that processed this request (e.g. MAC address). Useful for debugging in multi-node deployments. |
+| `ipAddress` | string | Client's IP address. Useful for geo-analysis or detecting suspicious patterns. Present when available from request headers. |
+| `userAgent` | string | Full browser user-agent string. Used to derive `deviceInfo`. Example: `Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0...` |
+| `deviceInfo` | object | Parsed device details containing `browser` (e.g. "Chrome"), `os` (e.g. "Windows"), `deviceType` (e.g. "desktop"). Only present when `deviceInfoCollection` is enabled. |
+| `errorReason` | string | Human-readable error message explaining why the operation failed. Only present when `status` is `FAILURE`. Example: "User cancelled the operation". |
+| `errorCategory` | string | Categorized error type for grouping failures. Common values: `USER_CANCELLED`, `TIMEOUT`, `INVALID_CREDENTIAL`, `NETWORK_ERROR`, `NOT_ALLOWED`, `SECURITY_ERROR`. Only present when `status` is `FAILURE`. |
+| `sessionId` | string | Session identifier linking this operation to a user session. Useful for correlating multiple operations in the same session. |
+| `applicationType` | string | Application or relying party identifier. Useful when multiple applications share the same FIDO2 server. |
+
+**Note on status:** Each FIDO2 operation generates **separate entries**:
+1. An `ATTEMPT` entry is created when the user **starts** the operation (clicks "Register" or "Sign in")
+2. A `SUCCESS` or `FAILURE` entry is created when the operation **completes**
+
+This means: if you see an `ATTEMPT` without a matching `SUCCESS`/`FAILURE` for the same user and session, the user **dropped off** (started but never finished). You can calculate drop-off by comparing ATTEMPT count vs (SUCCESS + FAILURE) count.
 
 ```json
 [
@@ -213,9 +228,27 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/entries?startTim
 
 Returns entries for a **single user** (by `userId`, i.e. inum). Useful for user-specific dashboards or support. Requires `startTime` and `endTime`.
 
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/entries/user/4a8f6f63-1306-4e2f-82bb-1c85da0284cc?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
+
+**Response format:** Same as `/metrics/entries` (array of entry objects), filtered to only include entries for the specified user.
+
 ### GET /metrics/entries/operation/{operationType}
 
 Returns entries filtered by **operation type**: `REGISTRATION` or `AUTHENTICATION`. Requires `startTime` and `endTime`.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/entries/operation/REGISTRATION?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
+
+**Response format:** Same as `/metrics/entries` (array of entry objects), filtered to only include entries matching the specified operation type.
 
 ---
 
@@ -256,9 +289,37 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/aggregations/HOU
 ]
 ```
 
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier combining type and period. Format: `{TYPE}_{PERIOD}`. Examples: `HOURLY_2026-01-01-12`, `DAILY_2026-01-01`, `WEEKLY_2026-W07`, `MONTHLY_2026-01`. Use this to reference specific aggregations. |
+| `aggregationType` | string | Granularity of this aggregation: `HOURLY` (1 hour), `DAILY` (24 hours), `WEEKLY` (7 days, ISO week Mon-Sun), or `MONTHLY` (calendar month). |
+| `startTime` | integer | Period start time in **milliseconds since epoch** (UTC). Inclusive. Example: `1767268800000` = 2026-01-01T12:00:00Z. |
+| `endTime` | integer | Period end time in **milliseconds since epoch** (UTC). Exclusive (end of period). Duration = endTime - startTime. |
+| `period` | string | Human-readable period identifier. Format varies by type: `2026-01-01-12` (hour 12 on Jan 1), `2026-01-01` (day), `2026-W07` (ISO week 7), `2026-01` (January). |
+| `uniqueUsers` | integer | Count of **distinct users** (by userId) who had any FIDO2 activity in this period. Use this to track active user counts over time. |
+| `registrationAttempts` | integer | Total number of registration operations that reached SUCCESS or FAILURE status. Does not include in-progress ATTEMPTs. |
+| `registrationSuccesses` | integer | Number of registrations that completed successfully. New passkeys created. |
+| `registrationFailures` | integer | Number of registrations that failed. Calculated as `registrationAttempts - registrationSuccesses`. |
+| `registrationSuccessRate` | number | Success rate for registrations (0.0–1.0). Calculated as `registrationSuccesses / registrationAttempts`. **Healthy range:** >0.80. Example: 0.85 = 85% of registration attempts succeeded. |
+| `authenticationAttempts` | integer | Total number of authentication operations that reached SUCCESS or FAILURE status. |
+| `authenticationSuccesses` | integer | Number of authentications that completed successfully. Successful passkey sign-ins. |
+| `authenticationFailures` | integer | Number of authentications that failed. |
+| `authenticationSuccessRate` | number | Success rate for authentications (0.0–1.0). **Healthy range:** >0.90. Authentication typically has higher success rates than registration. |
+| `deviceTypes` | object | Count of operations by authenticator type. Keys: `platform` (built-in authenticators), `cross-platform` (external security keys). Example: `{"platform": 45, "cross-platform": 12}`. |
+| `errorCounts` | object | Count of errors by category. Keys are error categories (e.g. `USER_CANCELLED`, `TIMEOUT`), values are counts. Empty `{}` means no errors—good! |
+
 ### GET /metrics/aggregations/{aggregationType}/summary
 
-Returns a **single summary** over all aggregations in the time range: total registrations, total authentications, total operations, total fallbacks, and average success rates. Useful for “last 24 hours” or “last month” KPIs.
+Returns a **single summary** over all aggregations in the time range: total registrations, total authentications, total operations, total fallbacks, and average success rates. Useful for "last 24 hours" or "last month" KPIs.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/aggregations/DAILY/summary?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
 
 **Example response:**
 
@@ -273,15 +334,38 @@ Returns a **single summary** over all aggregations in the time range: total regi
 }
 ```
 
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `totalRegistrations` | integer | Total count of registration operations across all aggregation periods in the time range. Use this for "X passkeys registered this month" metrics. |
+| `totalAuthentications` | integer | Total count of authentication operations. Use this for "X passkey sign-ins this month" metrics. Typically much higher than registrations in mature deployments. |
+| `totalOperations` | integer | Sum of `totalRegistrations + totalAuthentications`. Use this as your overall "FIDO2 activity" metric. |
+| `totalFallbacks` | integer | Count of times users chose an alternative authentication method instead of using their passkey. High numbers may indicate passkey UX issues or users forgetting they have passkeys. |
+| `avgRegistrationSuccessRate` | number | Average of registration success rates across all periods (0.0–1.0). **Healthy range:** >0.80. Note: This is an average of rates, not a single rate across all operations. |
+| `avgAuthenticationSuccessRate` | number | Average of authentication success rates across all periods (0.0–1.0). **Healthy range:** >0.90. Authentication typically has higher success rates than registration. |
+
+**Interpreting the summary:**
+- **Mature deployment:** High `totalAuthentications` relative to `totalRegistrations` (10:1 or higher ratio). Users are actively using their passkeys.
+- **Rollout phase:** `totalRegistrations` may equal or exceed `totalAuthentications` as users are onboarding.
+- **Concerning signals:** High `totalFallbacks` or low success rates (<0.70) warrant investigation.
+
 ---
 
 ## Analytics endpoints
 
-These endpoints provide **analyzed insights** rather than raw or pre-aggregated data. They answer questions like “How is adoption?” or “What is the error rate?”
+These endpoints provide **analyzed insights** rather than raw or pre-aggregated data. They answer questions like "How is adoption?" or "What is the error rate?"
 
 ### GET /metrics/analytics/adoption
 
 Returns **user adoption** metrics: how many new users (first registration in the period), how many returning users, total unique users, and adoption rate (new users / total unique users). Helps measure rollout and engagement.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/adoption?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
 
 **Example response:**
 
@@ -294,25 +378,273 @@ Returns **user adoption** metrics: how many new users (first registration in the
 }
 ```
 
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `newUsers` | integer | Count of users who registered a passkey **for the first time ever** during this period. These are users who had never used FIDO2 before. High numbers indicate successful onboarding/rollout. |
+| `returningUsers` | integer | Count of users who **already had** a passkey before this period and used FIDO2 again (authentication or additional registration). High numbers indicate good retention and continued passkey usage. |
+| `totalUniqueUsers` | integer | Total distinct users with **any** FIDO2 activity in the period. Equals the unique count of userIds across all entries. Use this as your "active FIDO2 users" metric. |
+| `adoptionRate` | number | Ratio of new users to total unique users (0.0–1.0). **Interpretation:** 1.0 = all users are new (initial rollout phase); 0.0 = all users are returning (mature deployment); 0.3 = 30% are first-time users. **Typical progression:** High during rollout (0.6–0.9), decreasing over time as user base matures (0.1–0.3). |
+
+**Understanding adoption metrics:**
+- **During rollout:** Expect high `newUsers` and high `adoptionRate` (0.7+). This is good—users are onboarding.
+- **Mature deployment:** Expect high `returningUsers`, low `adoptionRate` (0.1–0.3). Most activity is from existing passkey users.
+- **Stalled adoption:** If `newUsers` drops to near zero but `totalUniqueUsers` is low, your rollout may have stalled.
+
 ### GET /metrics/analytics/performance
 
 Returns **performance statistics**: average, minimum, and maximum duration (**in milliseconds**) for registration and authentication. Use this to monitor latency and spot slow operations.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/performance?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
+
+**Example response:**
+
+```json
+{
+  "registrationAvgDuration": 523.4,
+  "registrationMinDuration": 312,
+  "registrationMaxDuration": 1842,
+  "authenticationAvgDuration": 287.6,
+  "authenticationMinDuration": 156,
+  "authenticationMaxDuration": 892
+}
+```
+
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `registrationAvgDuration` | number | Average time (ms) to complete a passkey registration. **Typical range: 400–1500ms.** Values >2000ms may indicate slow authenticators or network latency. Lower is better for user experience. |
+| `registrationMinDuration` | integer | Fastest registration observed (ms). Represents best-case performance. **Typical: 300–600ms.** Use as baseline for what's achievable. |
+| `registrationMaxDuration` | integer | Slowest registration observed (ms). **Alert threshold suggestion: >5000ms.** High values may indicate: slow authenticators, network timeouts, or users taking time to complete biometric prompts. |
+| `authenticationAvgDuration` | number | Average time (ms) to complete a passkey authentication. **Typical range: 150–500ms.** Authentication is usually faster than registration since no key generation is needed. |
+| `authenticationMinDuration` | integer | Fastest authentication observed (ms). **Typical: 100–250ms.** Platform authenticators (TouchID, Windows Hello) are usually fastest. |
+| `authenticationMaxDuration` | integer | Slowest authentication observed (ms). **Alert threshold suggestion: >3000ms.** High values may indicate network issues or users struggling with their authenticator. |
+
+**Notes:**
+- All durations are in **milliseconds** (1000ms = 1 second).
+- Fields are **omitted entirely** if there are no operations of that type in the time range. For example, if no registrations occurred, all `registration*` fields will be absent from the response.
+- **Baseline guidance:** Monitor average durations over time. A sudden increase (e.g., avg jumps from 400ms to 1200ms) may indicate infrastructure problems.
+- **Alerting suggestion:** Set alerts when `maxDuration` exceeds 5000ms or when `avgDuration` increases by more than 50% from baseline.
 
 ### GET /metrics/analytics/devices
 
 Returns **device analytics**: counts or distributions by device type, operating system, browser, and authenticator type. Device types are derived from authenticator type (e.g. **platform**, **cross-platform**, and optionally **security-key**). Helps understand which platforms and clients are in use.
 
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/devices?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
+
+**Example response:**
+
+```json
+{
+  "deviceTypes": {
+    "desktop": 45,
+    "mobile": 32,
+    "tablet": 8
+  },
+  "authenticatorTypes": {
+    "platform": 52,
+    "cross-platform": 33
+  },
+  "browsers": {
+    "Chrome": 48,
+    "Safari": 22,
+    "Firefox": 10,
+    "Edge": 5
+  },
+  "operatingSystems": {
+    "Windows": 38,
+    "macOS": 25,
+    "iOS": 12,
+    "Android": 10
+  }
+}
+```
+
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `deviceTypes` | object | Count of operations by device type (desktop, mobile, tablet). Based on user-agent parsing. |
+| `authenticatorTypes` | object | Count by authenticator type: **platform** (built-in like TouchID, Windows Hello) vs **cross-platform** (roaming like USB security keys). |
+| `browsers` | object | Count by browser (Chrome, Safari, Firefox, Edge, etc.). |
+| `operatingSystems` | object | Count by OS (Windows, macOS, iOS, Android, Linux, etc.). |
+
+**Notes:**
+- Fields with no data are returned as empty objects `{}`.
+- Device info depends on `deviceInfoCollection` being enabled in configuration.
+
 ### GET /metrics/analytics/errors
 
 Returns **error analysis**: error counts by category, top error reasons, overall success rate, and failure rate. Use for troubleshooting and alerting on high failure rates.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/errors?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
+
+**Example response:**
+
+```json
+{
+  "errorCategories": {
+    "USER_CANCELLED": 12,
+    "TIMEOUT": 8,
+    "INVALID_CREDENTIAL": 5,
+    "NETWORK_ERROR": 3
+  },
+  "topErrors": {
+    "User cancelled the operation": 12,
+    "Operation timed out": 8,
+    "Credential not recognized": 5
+  },
+  "successRate": 0.72,
+  "failureRate": 0.28
+}
+```
+
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `errorCategories` | object | Count of errors grouped by category. Keys are category codes, values are counts. **Common categories:** `USER_CANCELLED` (user clicked cancel), `TIMEOUT` (operation timed out), `INVALID_CREDENTIAL` (credential not recognized), `NETWORK_ERROR` (connectivity issues), `NOT_ALLOWED` (browser/security policy blocked), `SECURITY_ERROR` (security constraint violation). |
+| `topErrors` | object | Count of errors by specific error message. Keys are the actual error messages, values are counts. Use this to identify the most frequent specific issues users encounter. Example: `"User cancelled the operation": 12` means 12 users clicked cancel. |
+| `successRate` | number | Ratio of successful operations to total completed operations (0.0–1.0). **Interpretation:** 0.72 = 72% of operations succeeded. **Healthy range:** >0.85 (85%) is typical for mature deployments. <0.70 may indicate UX issues or technical problems. |
+| `failureRate` | number | Ratio of failed operations to total (0.0–1.0). Always equals `1 - successRate`. **Alert threshold suggestion:** Set alerts if failureRate exceeds 0.15 (15%). |
+
+**Notes:**
+- `successRate + failureRate = 1.0` (100% of completed operations). These rates are calculated from operations that reached a final state (SUCCESS or FAILURE), not from ATTEMPT entries.
+- Empty `errorCategories` and `topErrors` (`{}`) indicate no failures occurred in the time range—this is good!
+- **Actionable insights:** High `USER_CANCELLED` counts may indicate confusing UX. High `TIMEOUT` counts may indicate slow network or authenticator issues. High `INVALID_CREDENTIAL` may indicate users trying wrong passkeys.
+- Error categorization depends on `errorCategorization` being enabled in configuration.
 
 ### GET /metrics/analytics/trends/{aggregationType}
 
 Returns **trend data** over time for the chosen aggregation granularity (HOURLY, DAILY, etc.), including data points, trend direction (e.g. INCREASING, STABLE), growth rate, and insights (e.g. peak usage period).
 
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/trends/DAILY?startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59" \
+  -H "Accept: application/json"
+```
+
+**Example response:**
+
+```json
+{
+  "dataPoints": [
+    {
+      "timestamp": 1735689600000,
+      "period": "2026-01-01",
+      "metrics": {
+        "registrationAttempts": 15,
+        "registrationSuccesses": 12,
+        "authenticationAttempts": 45,
+        "authenticationSuccesses": 42
+      }
+    },
+    {
+      "timestamp": 1735776000000,
+      "period": "2026-01-02",
+      "metrics": {
+        "registrationAttempts": 18,
+        "registrationSuccesses": 16,
+        "authenticationAttempts": 52,
+        "authenticationSuccesses": 50
+      }
+    }
+  ],
+  "growthRate": 0.15,
+  "trendDirection": "INCREASING",
+  "insights": {
+    "peakPeriod": "2026-01-15",
+    "peakOperations": 95,
+    "averageOperations": 62
+  }
+}
+```
+
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dataPoints` | array | Array of data points, **one per aggregation period** in chronological order. Each contains: `timestamp` (period start in epoch ms), `period` (human-readable ID like "2026-01-01"), and `metrics` (object with registrationAttempts, registrationSuccesses, authenticationAttempts, authenticationSuccesses, etc.). Use this to plot charts over time. |
+| `growthRate` | number | Overall growth rate comparing first period to last period. **Interpretation:** 0.15 = 15% growth, -0.10 = 10% decline, 0.0 = flat. Calculated as `(last - first) / first`. Use this for "month-over-month growth" metrics. |
+| `trendDirection` | string | Simplified trend indicator: `INCREASING` (sustained growth), `DECREASING` (sustained decline), or `STABLE` (relatively flat, <5% change). Use this for quick dashboard indicators (green/red/yellow). |
+| `insights` | object | Computed insights including: `peakPeriod` (period ID with highest activity—useful for identifying busy times), `peakOperations` (count at peak), `averageOperations` (mean across all periods—use as baseline). |
+
+**Using trend data:**
+- **Dashboard charts:** Plot `dataPoints` over time to visualize adoption curves.
+- **Quick status:** Use `trendDirection` for at-a-glance health indicators.
+- **Capacity planning:** Use `peakOperations` to understand maximum load and `averageOperations` for typical load.
+
 ### GET /metrics/analytics/comparison/{aggregationType}
 
 Compares the **current period** with previous periods (e.g. this month vs last month). Optional query parameter `periods` (2–12, default 2) controls how many periods to compare. Response includes current and previous period metrics and percentage changes.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/comparison/MONTHLY?periods=2" \
+  -H "Accept: application/json"
+```
+
+**Example response:**
+
+```json
+{
+  "currentPeriod": {
+    "totalRegistrations": 156,
+    "totalAuthentications": 892,
+    "totalFallbacks": 12,
+    "totalOperations": 1048,
+    "avgRegistrationSuccessRate": 0.85,
+    "avgAuthenticationSuccessRate": 0.94
+  },
+  "previousPeriod": {
+    "totalRegistrations": 134,
+    "totalAuthentications": 756,
+    "totalFallbacks": 18,
+    "totalOperations": 890,
+    "avgRegistrationSuccessRate": 0.82,
+    "avgAuthenticationSuccessRate": 0.91
+  },
+  "comparison": {
+    "totalOperationsChange": 17.75
+  }
+}
+```
+
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `currentPeriod` | object | Summary metrics for the **most recent** period(s). Contains: `totalRegistrations`, `totalAuthentications`, `totalFallbacks`, `totalOperations`, `avgRegistrationSuccessRate`, `avgAuthenticationSuccessRate`. This represents your "current" performance. |
+| `previousPeriod` | object | Summary metrics for the **preceding** period(s), same structure as `currentPeriod`. This is your comparison baseline. Use to answer "how are we doing compared to last month?" |
+| `comparison` | object | Calculated percentage changes between periods. `totalOperationsChange` shows growth/decline as a percentage. **Interpretation:** 17.75 = 17.75% more operations than previous period (growth). Negative values indicate decline. |
+
+**Using comparison data:**
+- **Executive reporting:** "FIDO2 usage grew 17.75% month-over-month"
+- **Alerting:** Set alerts if `totalOperationsChange` is negative for consecutive periods (declining usage)
+- **Success tracking:** Compare `avgRegistrationSuccessRate` between periods to see if UX improvements are working
+
+**Notes:**
+- The `periods` parameter controls how many consecutive periods to include in each summary (default 2). Higher values give broader comparisons but may dilute recent trends.
+- Time ranges are **automatically aligned** to period boundaries (e.g. start of month for MONTHLY, start of week for WEEKLY). You don't need to calculate exact boundaries.
 
 ---
 
@@ -321,6 +653,13 @@ Compares the **current period** with previous periods (e.g. this month vs last m
 ### GET /metrics/config
 
 Returns the **current metrics configuration** as seen by the server: whether metrics and aggregation are enabled, retention days, device info collection, error categorization, performance metrics, and the list of supported aggregation types. Use this to verify configuration without checking config files.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/config" \
+  -H "Accept: application/json"
+```
 
 **Example response:**
 
@@ -336,9 +675,62 @@ Returns the **current metrics configuration** as seen by the server: whether met
 }
 ```
 
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `metricsEnabled` | boolean | Whether metrics collection is enabled. |
+| `aggregationEnabled` | boolean | Whether automatic aggregation jobs are enabled. |
+| `retentionDays` | integer | Number of days metrics data is retained before cleanup. |
+| `deviceInfoCollection` | boolean | Whether device info (browser, OS) is collected. |
+| `errorCategorization` | boolean | Whether errors are categorized for analytics. |
+| `performanceMetrics` | boolean | Whether durations are tracked. |
+| `supportedAggregationTypes` | array | List of available aggregation granularities. |
+
 ### GET /metrics/health
 
 Returns the **health status** of the metrics service. HTTP 200 when the service is UP, HTTP 503 when it is DOWN (e.g. DB unavailable). Response body includes `status`, `metricsEnabled`, `aggregationEnabled`, and a timestamp.
+
+**Example request:**
+
+```bash
+curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/health" \
+  -H "Accept: application/json"
+```
+
+**Example response (healthy):**
+
+```json
+{
+  "status": "UP",
+  "metricsEnabled": true,
+  "aggregationEnabled": true,
+  "serviceAvailable": true,
+  "timestamp": "2026-01-15T10:30:00"
+}
+```
+
+**Example response (unhealthy - HTTP 503):**
+
+```json
+{
+  "status": "DOWN",
+  "metricsEnabled": true,
+  "aggregationEnabled": true,
+  "serviceAvailable": false,
+  "timestamp": "2026-01-15T10:30:00"
+}
+```
+
+**Response fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Overall health: `UP` (HTTP 200) or `DOWN` (HTTP 503). |
+| `metricsEnabled` | boolean | Whether metrics collection is enabled in configuration. |
+| `aggregationEnabled` | boolean | Whether automatic aggregation is enabled. |
+| `serviceAvailable` | boolean | Whether the metrics backend (database) is reachable. False triggers `DOWN` status. |
+| `timestamp` | string | Current server time (ISO format, UTC). |
 
 ---
 
@@ -396,64 +788,6 @@ Data for the **current** hour may appear only a few minutes after the hour, once
 
 ---
 
-## Examples and use cases
-
-### Dashboard integration
-
-You can call the analytics endpoints from a web dashboard to show adoption and performance. Example in JavaScript:
-
-```javascript
-const adoptionResponse = await fetch(
-  'https://your-jans-server/jans-fido2/restv1/metrics/analytics/adoption?' +
-  'startTime=2026-01-01T00:00:00&endTime=2026-01-01T23:59:59'
-);
-const adoption = await adoptionResponse.json();
-
-console.log('New users:', adoption.newUsers);
-console.log('Adoption rate:', (adoption.adoptionRate * 100).toFixed(2) + '%');
-console.log('Total unique users:', adoption.totalUniqueUsers);
-```
-
-### Monitoring and alerting
-
-Use the error analysis endpoint to monitor failure rate and trigger alerts when it exceeds a threshold. Example in Bash (requires `jq` and `bc`):
-
-```bash
-ERROR_RESPONSE=$(curl -s "https://your-jans-server/jans-fido2/restv1/metrics/analytics/errors?startTime=2026-01-01T00:00:00&endTime=2026-01-01T23:59:59")
-FAILURE_RATE=$(echo "$ERROR_RESPONSE" | jq -r '.failureRate')
-
-if (( $(echo "$FAILURE_RATE > 0.1" | bc -l) )); then
-  echo "ALERT: High failure rate detected: $FAILURE_RATE"
-  # Send notification (email, Slack, etc.)
-fi
-```
-
-### Reporting
-
-Use the aggregation summary to build monthly or weekly reports. Example in Python:
-
-```python
-import requests
-from datetime import datetime, timedelta
-
-end_date = datetime.now()
-start_date = end_date - timedelta(days=30)
-start_time = start_date.strftime('%Y-%m-%dT00:00:00')
-end_time = end_date.strftime('%Y-%m-%dT23:59:59')
-
-response = requests.get(
-    'https://your-jans-server/jans-fido2/restv1/metrics/aggregations/MONTHLY/summary',
-    params={'startTime': start_time, 'endTime': end_time}
-)
-summary = response.json()
-
-print('Total registrations:', summary['totalRegistrations'])
-print('Total authentications:', summary['totalAuthentications'])
-print('Avg registration success rate:', f"{summary['avgRegistrationSuccessRate'] * 100:.2f}%")
-```
-
----
-
 ## Troubleshooting
 
 ### Empty results ([])
@@ -490,7 +824,7 @@ print('Avg registration success rate:', f"{summary['avgRegistrationSuccessRate']
 
 **What to check:**
 
-- Application logs for a message like “FIDO2 metrics aggregation scheduler initialized” to confirm the scheduler is running.  
+- Application logs for a message like "FIDO2 metrics aggregation scheduler initialized" to confirm the scheduler is running.  
 - Configuration for aggregation cron expressions if you have customized them.  
 - If running in a cluster, verify that the distributed lock or cluster configuration for the aggregation jobs is correct. If the lock is unavailable, the job should still run in single-node fallback mode (check logs).
 
