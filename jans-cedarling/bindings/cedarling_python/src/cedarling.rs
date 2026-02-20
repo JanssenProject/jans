@@ -11,7 +11,9 @@ use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
 use crate::authorize::errors::authorize_error_to_py;
+use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
 use crate::authorize::request::Request;
+use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
@@ -39,6 +41,17 @@ use serde_pyobject::to_pyobject;
 ///
 ///     Execute authorize request
 ///     :param request: Request struct for authorize.
+///
+/// .. method:: authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult
+///
+///     Authorize request with unsigned data.
+///     :param request: RequestUnsigned struct for authorize.
+///
+/// .. method:: authorize_multi_issuer(self, request: AuthorizeMultiIssuerRequest) -> MultiIssuerAuthorizeResult
+///
+///     Authorize multi-issuer request.
+///     Makes authorization decision based on multiple JWT tokens from different issuers.
+///     :param request: AuthorizeMultiIssuerRequest struct for authorize.
 ///
 /// .. method:: pop_logs(self) -> List[dict]
 ///
@@ -121,23 +134,36 @@ impl Cedarling {
         Ok(cedarling_instance.into())
     }
 
+    /// Authorize multi-issuer request.
+    /// Makes authorization decision based on multiple JWT tokens from different issuers.
+    fn authorize_multi_issuer(
+        &self,
+        request: Bound<'_, AuthorizeMultiIssuerRequest>,
+    ) -> Result<MultiIssuerAuthorizeResult, PyErr> {
+        let cedarling_instance = self
+            .inner
+            .authorize_multi_issuer(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Ok(cedarling_instance.into())
+    }
+
     /// Return logs and remove them from the storage
-    fn pop_logs(&self) -> PyResult<Vec<PyObject>> {
+    fn pop_logs(&self) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.pop_logs();
-        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
-                .collect::<PyResult<Vec<PyObject>>>()
+                .collect::<PyResult<Vec<Py<PyAny>>>>()
         })
     }
 
     /// Get specific log entry
-    fn get_log_by_id(&self, id: &str) -> PyResult<Option<PyObject>> {
+    fn get_log_by_id(&self, id: &str) -> PyResult<Option<Py<PyAny>>> {
         // It doesn't follow a functional approach because handling all types properly challenging
         // and this code easy to read
         if let Some(entry) = self.inner.get_log_by_id(id) {
             let py_obj =
-                Python::with_gil(|py| -> PyResult<PyObject> { log_entry_to_py(py, &entry) })?;
+                Python::attach(|py| -> PyResult<Py<PyAny>> { log_entry_to_py(py, &entry) })?;
             Ok(Some(py_obj))
         } else {
             Ok(None)
@@ -151,35 +177,35 @@ impl Cedarling {
 
     /// Returns a list of log entries by tag.
     /// Tag can be `log_kind`, `log_level`.
-    fn get_logs_by_tag(&self, tag: &str) -> PyResult<Vec<PyObject>> {
+    fn get_logs_by_tag(&self, tag: &str) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.get_logs_by_tag(tag);
 
-        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
-                .collect::<PyResult<Vec<PyObject>>>()
+                .collect::<PyResult<Vec<Py<PyAny>>>>()
         })
     }
 
     /// Returns a list of log entries by request id.
-    fn get_logs_by_request_id(&self, request_id: &str) -> PyResult<Vec<PyObject>> {
+    fn get_logs_by_request_id(&self, request_id: &str) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.get_logs_by_request_id(request_id);
-        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
-                .collect::<PyResult<Vec<PyObject>>>()
+                .collect::<PyResult<Vec<Py<PyAny>>>>()
         })
     }
 
     /// Returns a list of all log entries by request id and tag.
     /// Tag can be `log_kind`, `log_level`.
-    fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<PyObject>> {
+    fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> PyResult<Vec<Py<PyAny>>> {
         let logs = self.inner.get_logs_by_request_id_and_tag(id, tag);
 
-        Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
+        Python::attach(|py| -> PyResult<Vec<Py<PyAny>>> {
             logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
-                .collect::<PyResult<Vec<PyObject>>>()
+                .collect::<PyResult<Vec<Py<PyAny>>>>()
         })
     }
 
@@ -189,7 +215,7 @@ impl Cedarling {
     }
 }
 
-fn log_entry_to_py(gil: Python, entry: &serde_json::Value) -> PyResult<PyObject> {
+fn log_entry_to_py(gil: Python, entry: &serde_json::Value) -> PyResult<Py<PyAny>> {
     to_pyobject(gil, entry)
         .map(|v| v.unbind())
         .map_err(|err| err.0)

@@ -3830,18 +3830,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Webhook identifier",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "webhookId"
-      ],
-      "rdbm_json_column": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "HTTP request method",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3872,17 +3860,6 @@
       ],
       "oid": "jansAttr",
       "json": true,
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Admin UI feature identifier",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "auiFeatureId"
-      ],
-      "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
@@ -4078,10 +4055,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "severetyLevel",
+      "desc": "severityLevel",
       "equality": "caseIgnoreMatch",
       "names": [
-        "severetyLevel"
+        "severityLevel"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4708,6 +4685,16 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "jansAdoptionStage"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Access type for Flex adminUI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAccessType"
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -6084,12 +6071,13 @@
         "jansService",
         "jansNodeName",
         "eventType",
-        "severetyLevel",
+        "severityLevel",
         "actionName",
         "decisionResult",
         "requestedResource",
         "principalId",
         "clientId",
+        "jti",
         "contextInformation"
       ],
       "must": [
@@ -6127,50 +6115,6 @@
       ],
       "names": [
         "jansTelemetryEntry"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "auiFeatureId",
-        "displayName",
-        "jansScope",
-        "webhookId"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "auiFeatures"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "inum",
-        "displayName",
-        "description",
-        "url",
-        "httpMethod",
-        "httpRequestBody",
-        "jansEnabled",
-        "httpHeaders"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "auiWebhooks"
       ],
       "oid": "jansObjClass",
       "sup": [

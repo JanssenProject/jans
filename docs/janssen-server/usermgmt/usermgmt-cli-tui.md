@@ -20,41 +20,41 @@ We can easily add a user using Jans TUI. To do that, run the TUI using `jans tui
 
 Let's see at a glance user attributes.
 
-|Attributes|Description|
-|---|---|
-|Username|...| 
-|Password |...|
-|First Name|...|
-|Middle Name|...|
-|Last Name|...|
-|Display Name|...|
-|Email |...|
-|Active|...|
-|Nickname|...|
-|CIBA Device Registration Token|...|
-|CIBA User code|...|
-|Locale|...|      
-|Website URL|...| 
-|IMAP Data|...|   
-|jansAdminUIRole|...|
-|Enrollment code|...|
-|User Permission|...|
-|Preferred Language|...|
-|Profile URL|...|
-|Secret Question|...|
-|Email Verified|...|
-|Birthdate|...|   
-|Time zone info|...|
-|Phone Number verified|...|
-|Preferred Username|...|
-|TransientId|...| 
-|PersistentId|...|
-|Country|...|     
-|Secret Answer|...|
-|OpenID Connect JSON formatted address|...|
-|User certificate|...|
-|Organization|...|
-|Picture URL|...| 
+|Attributes|
+|---|
+|Username|
+|Password |
+|First Name|
+|Middle Name|
+|Last Name|
+|Display Name|
+|Email |
+|Active|
+|Nickname|
+|CIBA Device Registration Token|
+|CIBA User code|
+|Locale|
+|Website URL|
+|IMAP Data|
+|jansAdminUIRole|
+|Enrollment code|
+|User Permission|
+|Preferred Language|
+|Profile URL|
+|Secret Question|
+|Email Verified|
+|Birthdate|
+|Time zone info|
+|Phone Number verified|
+|Preferred Username|
+|TransientId|
+|PersistentId|
+|Country|
+|Secret Answer|
+|OpenID Connect JSON formatted address|
+|User certificate|
+|Organization|
+|Picture URL|
 
 
 Let's add an user by selecting `Add Users` tab. Initially we can provide bellow attributes value,

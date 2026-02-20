@@ -49,6 +49,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private Boolean metricReporterEnabled;
     @DocProperty(description = "Boolean value specifying whether to enable JDK Loggers")
     private Boolean disableJdkLogger = true;
+    @DocProperty(description = "Choose whether to disable external log4j configuration override", defaultValue = "true")
+    private Boolean disableExternalLoggerConfiguration = true;
     @DocProperty(description = "Boolean value specifying whether to enable the logger refresh timer")
     private boolean disableLoggerTimer;
     @DocProperty(description = "Boolean value specifying whether to enable local in-memory cache")
@@ -193,7 +195,15 @@ public class AppConfiguration implements Configuration, Serializable {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-    public boolean isDisableLoggerTimer() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public boolean isDisableLoggerTimer() {
         return disableLoggerTimer;
     }
 

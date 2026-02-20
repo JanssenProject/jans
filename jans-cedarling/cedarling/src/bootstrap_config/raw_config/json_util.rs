@@ -7,7 +7,7 @@ use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
-pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+pub(super) fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -32,7 +32,7 @@ fn to_json(s: &str) -> Option<Value> {
 
 /// Attempts to deserialize a value, falling back to JSON parsing if the value is a string.
 /// Returns the deserialized value or the original error if both attempts fail.
-pub fn deserialize_or_parse_string_as_json<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+pub(super) fn deserialize_or_parse_string_as_json<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
     T: Deserialize<'de>,
@@ -43,9 +43,10 @@ where
     // If it's a string, try to parse it as JSON
     if let Value::String(s) = &value
         && let Some(parsed_value) = to_json(s)
-            && let Ok(result) = T::deserialize(parsed_value) {
-                return Ok(result);
-            }
+        && let Ok(result) = T::deserialize(parsed_value)
+    {
+        return Ok(result);
+    }
 
     // Try normal deserialization
     T::deserialize(value).map_err(serde::de::Error::custom)
@@ -57,7 +58,7 @@ mod tests {
     use serde::Deserialize;
     use test_utils::assert_eq;
 
-    /// Test structure used to verify fallback_deserialize functionality
+    /// Test structure used to verify `fallback_deserialize` functionality
     /// Contains fields of different types to test various scenarios:
     /// - value: i32 - tests number deserialization
     /// - optional: Option<String> - tests optional string handling
@@ -253,7 +254,7 @@ mod tests {
 
         for (json, error_desc) in test_cases {
             let result: Result<TestStruct, _> = serde_json::from_str(json);
-            result.expect_err(&format!("should fail to parse {}", error_desc));
+            result.expect_err(&format!("should fail to parse {error_desc}"));
         }
     }
 }

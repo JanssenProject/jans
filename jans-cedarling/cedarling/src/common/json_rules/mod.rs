@@ -7,4 +7,4 @@ mod rule;
 pub use self::rule::*;
 
 mod rule_applier;
-pub use self::rule_applier::*;
+pub(crate) use self::rule_applier::*;

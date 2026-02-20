@@ -10,10 +10,10 @@ tags:
 
 In Casa, administrators can supply their own logo and favicon to better match the organization's look and feel. If you want to apply more advanced customizations, adding the custom branding plugin is the way to go.
 
-!!! Note  
-    This page covers customizations available through the [custom branding plugin](../plugins/custom-branding.md). It is assumed you have already added it to your Casa installation.  
+!!! Note
+    This page covers customizations available through the [custom branding plugin](../plugins/custom-branding.md). It is assumed you have already added it to your Casa installation.
 
-The plugin allows administrators to easily alter the appearance of Casa. There are two ways to tweak the design: a quick point-and-click set of changes that you can preview immediately, or a lower-level approach that allows you to supply your own CSS file and images (this is known as external assets directory usage). 
+The plugin allows administrators to easily alter the appearance of Casa. There are two ways to tweak the design: a quick point-and-click set of changes that you can preview immediately, or a lower-level approach that allows you to supply your own CSS file and images (this is known as external assets directory usage).
 
 ## Quick design customization
 
@@ -34,8 +34,8 @@ You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](
 
 ## Using the external assets directory
 
-!!! Note  
-    Intermediate-level knowledge of CSS is required for this task.  
+!!! Note
+    Intermediate-level knowledge of CSS is required for this task.
 
 ### Background
 
@@ -70,9 +70,9 @@ $ chown -R jetty:jetty /opt/jans/jetty/jans-casa/static/
 
 In the admin console, navigate to `Custom branding` > `Use Casa external assets directory`. From that point on, your installation is reading relevant files from the `static` directory.
 
-!!! Note  
-    In CSS, the rules' order of appearance is important. For all Casa pages, style.css is loaded first, then tachyons.css. This means rules for Tachyons have higher priority unless `!important` is used.  
-    
+!!! Note
+    In CSS, the rules' order of appearance is important. For all Casa pages, style.css is loaded first, then tachyons.css. This means rules for Tachyons have higher priority unless `!important` is used.
+
 The main stylesheet (`style.css`) is located at `/opt/jans/jetty/jans-casa/static/styles/gluu` if you have followed the instructions above.
 
 Here are some tips for applying your customizations:
@@ -99,7 +99,7 @@ Here are some tips for applying your customizations:
     - cust-misc-button  
     - cust-text-input  
     - cust-progress-bar  
-   
+
 ![Hints custom classes](../../assets/casa/admin-console/branding/hint-cust-classes-1.png)
 
 ![Hints custom classes](../../assets/casa/admin-console/branding/hint-cust-classes-2.png)

@@ -3,12 +3,15 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::entity_id_getters::*;
-use super::*;
+use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
+use super::{
+    BuildEntityError, BuiltEntities, Entity, EntityBuilder, EntityUid, HashSet,
+    RestrictedExpression, Token, TokenPrincipalMapping, TokenPrincipalMappings,
+};
 use derive_more::derive::Deref;
 
 impl EntityBuilder {
-    pub fn build_tkn_entity(
+    pub(super) fn build_tkn_entity(
         &self,
         tkn_type_name: &str,
         token: &Token,
@@ -31,7 +34,7 @@ impl EntityBuilder {
         // Record the principal mappings for later use
         if let Some(metadata) = token.get_metadata() {
             let expr = RestrictedExpression::new_entity_uid(tkn_entity.uid());
-            for principal in metadata.principal_mapping.iter() {
+            for principal in &metadata.principal_mapping {
                 tkn_principal_mappings.insert(TokenPrincipalMapping {
                     principal: principal.clone(),
                     attr_name: token.name.clone(),
@@ -58,7 +61,7 @@ impl<'a> TokenIdSrcs<'a> {
 
         let mut eid_srcs = Vec::with_capacity(DEFAULT_TKN_ID_SRCS.len());
 
-        for src in DEFAULT_TKN_ID_SRCS.iter() {
+        for src in DEFAULT_TKN_ID_SRCS {
             // if a `token_id` is availble in the token's entity metadata
             let claim = if let Some(claim) = token.get_metadata().and_then(|m| m.user_id.as_ref()) {
                 eid_srcs.push(EntityIdSrc::Token { token, claim });
@@ -68,7 +71,7 @@ impl<'a> TokenIdSrcs<'a> {
             };
 
             // then we add the fallbacks in-case the token does not have the claims.
-            if claim.map(|claim| claim == src.claim).unwrap_or(false) {
+            if claim.is_some_and(|claim| claim == src.claim) {
                 continue;
             }
             eid_srcs.push(EntityIdSrc::Token {
@@ -86,14 +89,13 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
 
     #[test]
     fn can_build_tkn_entity_with_schema() {
-        let schema_src = r#"
+        let schema_src = r"
         namespace Jans {
             entity TrustedIssuer;
             entity Role;
@@ -103,7 +105,7 @@ mod test {
                 jti: String,
             };
         }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build ValidatorSchema");
@@ -112,11 +114,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let access_token = Token::new(
@@ -144,7 +144,7 @@ mod test {
 
         assert_entity_eq(
             &entity,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Access_token", "id": "some_jti"},
                 "attrs": {
                     "iss": {"__entity": {
@@ -166,11 +166,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             None,
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let access_token = Token::new(
@@ -198,7 +196,7 @@ mod test {
 
         assert_entity_eq(
             &entity,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Access_token", "id": "some_jti"},
                 "attrs": {
                     "iss": "https://test.jans.org/",

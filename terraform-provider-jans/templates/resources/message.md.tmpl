@@ -1,0 +1,33 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Resource for managing Message.
+---
+
+# {{.Name}} ({{.Type}})
+
+Resource for managing messages in the Janssen Server. Messages are used for
+internationalization and localization of user-facing text.
+
+## Example Usage
+
+```terraform
+resource "jans_message" "example" {
+  key         = "login.welcome"
+  value       = "Welcome to the login page"
+  language    = "en"
+  application = "auth-server"
+}
+```
+
+### Minimal Example
+
+```terraform
+resource "jans_message" "minimal" {
+  key   = "error.invalid_credentials"
+  value = "Invalid username or password"
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

@@ -42,8 +42,9 @@ pub struct AuthorizeResult {
     pub request_id: String,
 }
 
-/// Custom serializer for an Option<cedar_policy::Response> which converts `None` to an empty string and vice versa.
-pub fn serialize_opt_response<S>(
+/// Custom serializer for an Option<`cedar_policy::Response`> which converts `None` to an empty string and vice versa.
+#[allow(clippy::ref_option)]
+fn serialize_opt_response<S>(
     value: &Option<cedar_policy::Response>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -56,8 +57,8 @@ where
     }
 }
 
-/// Custom serializer for an Option<cedar_policy::Response> which converts `None` to an empty string and vice versa.
-pub fn serialize_hashmap_response<S>(
+/// Custom serializer for an Option<`cedar_policy::Response`> which converts `None` to an empty string and vice versa.
+fn serialize_hashmap_response<S>(
     value: &HashMap<SmolStr, cedar_policy::Response>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -65,7 +66,7 @@ where
     S: Serializer,
 {
     let mut map = serializer.serialize_map(Some(value.len()))?;
-    for (key, value) in value.iter() {
+    for (key, value) in value {
         map.serialize_entry(key, &CedarResponse(value))?;
     }
 
@@ -88,11 +89,11 @@ impl Serialize for CedarResponse<'_> {
         let diagnostics = response.diagnostics();
         let reason = diagnostics
             .reason()
-            .map(|r| r.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<HashSet<String>>();
         let errors = diagnostics
             .errors()
-            .map(|e| e.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<HashSet<String>>();
 
         let mut state = serializer.serialize_struct("Response", 3)?;
@@ -103,13 +104,53 @@ impl Serialize for CedarResponse<'_> {
     }
 }
 
+/// Result of multi-issuer authorization
+/// This is a simpler result structure that doesn't deal with workload/user principals
+#[derive(Debug, Clone, Serialize)]
+pub struct MultiIssuerAuthorizeResult {
+    /// Result of authorization from Cedar policy evaluation
+    #[serde(serialize_with = "serialize_response")]
+    pub response: cedar_policy::Response,
+
+    /// Result of authorization
+    /// true means `ALLOW`
+    /// false means `Deny`
+    ///
+    /// this field is [`bool`] type to be compatible with [authzen Access Evaluation Decision](https://openid.github.io/authzen/#section-6.2.1).
+    pub decision: bool,
+
+    /// Request ID, generated per each request call, is used to get logs from memory logger
+    pub request_id: String,
+}
+
+/// Custom serializer for `cedar_policy::Response`
+fn serialize_response<S>(value: &cedar_policy::Response, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    CedarResponse(value).serialize(serializer)
+}
+
+impl MultiIssuerAuthorizeResult {
+    /// Create a new `MultiIssuerAuthorizeResult`
+    pub(crate) fn new(response: cedar_policy::Response, request_id: Uuid) -> Self {
+        let decision = response.decision() == Decision::Allow;
+
+        Self {
+            response,
+            decision,
+            request_id: request_id.to_string(),
+        }
+    }
+}
+
 impl AuthorizeResult {
-    /// Builder function for AuthorizeResult
+    /// Builder function for `AuthorizeResult`
     pub(crate) fn new(
         principal_bool_operator: &JsonRule,
 
-        workload_uid: Option<EntityUid>,
-        person_uid: Option<EntityUid>,
+        workload_uid: Option<&EntityUid>,
+        person_uid: Option<&EntityUid>,
 
         workload: Option<cedar_policy::Response>,
         person: Option<cedar_policy::Response>,
@@ -118,19 +159,17 @@ impl AuthorizeResult {
         let mut principal_responses: HashMap<EntityUid, cedar_policy::Response> = HashMap::new();
 
         workload_uid
-            .clone()
             .into_iter()
             .zip(workload)
             .for_each(|(typename, response)| {
-                principal_responses.insert(typename.to_owned(), response.to_owned());
+                principal_responses.insert(typename.clone(), response.clone());
             });
 
         person_uid
-            .clone()
             .into_iter()
             .zip(person)
             .for_each(|(typename, response)| {
-                principal_responses.insert(typename.to_owned(), response.to_owned());
+                principal_responses.insert(typename.clone(), response.clone());
             });
 
         Self::new_for_many_principals(
@@ -142,12 +181,12 @@ impl AuthorizeResult {
         )
     }
 
-    /// Builder function for AuthorizeResult
+    /// Builder function for [`AuthorizeResult`]
     pub(crate) fn new_for_many_principals(
         principal_bool_operator: &JsonRule,
         principal_responses: HashMap<EntityUid, cedar_policy::Response>,
-        workload_uid: Option<EntityUid>,
-        person_uid: Option<EntityUid>,
+        workload_uid: Option<&EntityUid>,
+        person_uid: Option<&EntityUid>,
         request_id: Uuid,
     ) -> Result<Self, ApplyRuleError> {
         let mut principals_decision_info = HashMap::new();
@@ -156,15 +195,17 @@ impl AuthorizeResult {
         let mut workload_result: Option<Response> = None;
         let mut person_result: Option<Response> = None;
 
-        for (principal_uid, response) in principal_responses.into_iter() {
-            if let Some(uid) = &workload_uid
-                && uid == &principal_uid {
-                    workload_result = Some(response.to_owned());
-                }
-            if let Some(uid) = &person_uid
-                && uid == &principal_uid {
-                    person_result = Some(response.to_owned());
-                }
+        for (principal_uid, response) in principal_responses {
+            if let Some(uid) = workload_uid
+                && uid == &principal_uid
+            {
+                workload_result = Some(response.clone());
+            }
+            if let Some(uid) = person_uid
+                && uid == &principal_uid
+            {
+                person_result = Some(response.clone());
+            }
 
             let principal_typename = principal_uid.type_name().to_smolstr();
             let principal_id = principal_uid.to_smolstr();
@@ -178,7 +219,7 @@ impl AuthorizeResult {
         }
 
         let decision =
-            RuleApplier::new(principal_bool_operator, principals_decision_info).apply()?;
+            RuleApplier::new(principal_bool_operator, &principals_decision_info).apply()?;
 
         Ok(Self {
             decision,
@@ -191,6 +232,7 @@ impl AuthorizeResult {
 
     /// Decision of result
     /// works based on [`AuthorizeResult::is_allowed`]
+    #[must_use]
     pub fn cedar_decision(&self) -> Decision {
         if self.decision {
             Decision::Allow

@@ -184,7 +184,7 @@ class Config:
         self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.install_jans_saml = False
+        self.install_jans_shib = False
         self.install_jans_lock = False
         self.install_opa = False
 

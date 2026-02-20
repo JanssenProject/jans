@@ -5,7 +5,7 @@
 
 use std::sync::RwLock;
 
-use super::InitLockServiceError;
+use super::LogLevel;
 use super::interface::{Indexed, LogStorage, LogWriter, Loggable};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
@@ -13,6 +13,8 @@ use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
 use crate::lock::LockService;
+use crate::log::BaseLogEntry;
+use crate::log::loggable_fn::LoggableFn;
 use serde::Serialize;
 
 pub(crate) struct LogStrategy {
@@ -20,46 +22,46 @@ pub(crate) struct LogStrategy {
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
     lock_service: RwLock<Option<LockService>>,
+    log_level: Option<LogLevel>,
 }
 
-/// LogStrategy implements strategy pattern for logging.
+/// [`LogStrategy`] implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.
-#[allow(clippy::large_enum_variant)]
 pub(crate) enum LogStrategyLogger {
     Off(NopLogger),
-    MemoryLogger(MemoryLogger),
+    MemoryLogger(Box<MemoryLogger>),
     StdOut(StdOutLogger),
 }
 
 impl LogStrategy {
-    /// Creates a new `LogStrategy` based on the provided configuration.
+    /// Creates a new [`LogStrategy`] based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(
+    pub(crate) fn new(
         config: &LogConfig,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
-    ) -> Result<Self, InitLockServiceError> {
+    ) -> Self {
         let logger = match &config.log_type {
             LogTypeConfig::Off => LogStrategyLogger::Off(NopLogger),
-            LogTypeConfig::Memory(memory_config) => {
-                LogStrategyLogger::MemoryLogger(MemoryLogger::new(
-                    memory_config.clone(),
-                    config.log_level,
-                    pdp_id,
-                    app_name.clone(),
-                ))
+            LogTypeConfig::Memory(memory_config) => LogStrategyLogger::MemoryLogger(Box::new(
+                MemoryLogger::new(*memory_config, config.log_level, pdp_id, app_name.clone()),
+            )),
+            LogTypeConfig::StdOut(stdout_config) => {
+                let logger = StdOutLogger::new(config.log_level, *stdout_config);
+                LogStrategyLogger::StdOut(logger)
             },
-            LogTypeConfig::StdOut => LogStrategyLogger::StdOut(StdOutLogger::new(config.log_level)),
         };
-        Ok(Self {
+        Self {
             logger,
             pdp_id,
             app_name,
             lock_service: RwLock::new(None),
-        })
+            log_level: Some(config.log_level),
+        }
     }
 
-    pub fn new_with_logger(
+    // is used as fallback for memory logger if error happens
+    pub(super) fn new_with_logger(
         logger: LogStrategyLogger,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
@@ -70,21 +72,58 @@ impl LogStrategy {
             pdp_id,
             app_name,
             lock_service: RwLock::new(lock_service),
+            log_level: None,
         }
     }
 
-    pub(crate) fn logger(&self) -> &LogStrategyLogger {
+    #[cfg(test)]
+    pub(super) fn logger(&self) -> &LogStrategyLogger {
         &self.logger
     }
 
-    pub fn set_lock_service(&self, lock_service: LockService) {
+    fn log_entry<T: Loggable>(&self, entry: T) {
+        let entry =
+            LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
+        if let Some(lock_service) = self
+            .lock_service
+            .read()
+            .expect("obtain lock_service read lock")
+            .as_ref()
+        {
+            lock_service.log_any(entry.clone());
+        }
+        match &self.logger {
+            LogStrategyLogger::Off(log) => log.log_any(entry),
+            LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
+            LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
+        }
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable + Indexed,
+        for<'a> F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(logger_level) = &self.log_level {
+            if log_fn.can_log(*logger_level) {
+                let entry = log_fn.build();
+                self.log_entry(entry);
+            }
+        } else {
+            // this case happens only when call `new_with_logger` method
+            let entry = log_fn.build();
+            self.log_entry(entry);
+        }
+    }
+
+    pub(crate) fn set_lock_service(&self, lock_service: LockService) {
         *self
             .lock_service
             .write()
             .expect("obtain lock_service write lock") = Some(lock_service);
     }
 
-    pub async fn shut_down(&self) {
+    pub(crate) async fn shut_down(&self) {
         let lock = self
             .lock_service
             .write()
@@ -92,7 +131,7 @@ impl LogStrategy {
             .take();
 
         if let Some(mut lock_service) = lock {
-            lock_service.shut_down().await
+            lock_service.shut_down().await;
         }
     }
 }
@@ -129,26 +168,24 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
 // Implementation of LogWriter
 impl LogWriter for LogStrategy {
     fn log_any<T: Loggable>(&self, entry: T) {
-        let entry =
-            LogEntryWithClientInfo::from_loggable(entry, self.pdp_id, self.app_name.clone());
-        if let Some(lock_service) = self
-            .lock_service
-            .read()
-            .expect("obtain lock_service read lock")
-            .as_ref()
-        {
-            lock_service.log_any(entry.clone());
-        }
-        match &self.logger {
-            LogStrategyLogger::Off(log) => log.log_any(entry),
-            LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
-            LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
-        }
+        self.log_entry(entry);
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(super::BaseLogEntry) -> R,
+    {
+        self.log_fn(log_fn);
     }
 }
 
 impl<E: Loggable> LogEntryWithClientInfo<E> {
-    pub fn from_loggable(entry: E, pdp_id: PdpID, app_name: Option<ApplicationName>) -> Self {
+    pub(crate) fn from_loggable(
+        entry: E,
+        pdp_id: PdpID,
+        app_name: Option<ApplicationName>,
+    ) -> Self {
         Self {
             entry,
             pdp_id,

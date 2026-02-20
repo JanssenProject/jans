@@ -15,6 +15,7 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
 use smol_str::{SmolStr, ToSmolStr};
 use uuid7::Uuid;
@@ -23,7 +24,7 @@ use uuid7::Uuid;
 /// example: 2024-11-27T10:10:50.654Z
 pub(crate) const ISO8601: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
-/// LogEntry is a struct that encapsulates all relevant data for logging events.
+/// [`LogEntry`] is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct LogEntry {
     /// base information of entry
@@ -48,9 +49,9 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_data(log_type: LogType, request_id: Option<Uuid>) -> LogEntry {
+    pub(crate) fn new(base: BaseLogEntry) -> LogEntry {
         Self {
-            base: BaseLogEntry::new_opt_request_id(log_type, request_id),
+            base,
             auth_info: None,
             msg: String::new(),
             error_msg: None,
@@ -77,11 +78,6 @@ impl LogEntry {
     pub(crate) fn set_cedar_version(mut self) -> Self {
         self.cedar_lang_version = Some(cedar_policy::get_lang_version());
         self.cedar_sdk_version = Some(cedar_policy::get_sdk_version());
-        self
-    }
-
-    pub(crate) fn set_level(mut self, level: LogLevel) -> Self {
-        self.base.level = Some(level);
         self
     }
 }
@@ -222,34 +218,25 @@ pub struct Diagnostics {
     pub errors: Vec<PolicyEvaluationError>,
 }
 
-/// DiagnosticsRefs structure actually same as Diagnostics but hold reference on data
-/// And allows to not clone data.
-/// Usefull for logging.
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize)]
-pub struct DiagnosticsRefs<'a> {
+pub(crate) struct DiagnosticsSummary {
     /// `PolicyId`s of the policies that contributed to the decision.
-    /// If no policies applied to the request, this set will be empty.
-    pub reason: HashSet<&'a PolicyInfo>,
-    /// Errors that occurred during authorization. The errors should be
-    /// treated as unordered, since policies may be evaluated in any order.
-    pub errors: Vec<&'a PolicyEvaluationError>,
+    pub reason: HashSet<PolicyInfo>,
+    /// Errors that occurred during authorization.
+    pub errors: Vec<PolicyEvaluationError>,
 }
 
-impl DiagnosticsRefs<'_> {
-    pub fn new<'a>(diagnostics: &'a [Option<&'a Diagnostics>]) -> DiagnosticsRefs<'a> {
-        let policy_info_iter = diagnostics
-            .iter()
-            .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.reason))
-            .flatten();
-        let diagnostic_err_iter = diagnostics
-            .iter()
-            .filter_map(|diagnostic_opt| diagnostic_opt.map(|diagnostic| &diagnostic.errors))
-            .flatten();
+impl DiagnosticsSummary {
+    pub(crate) fn from_diagnostics(diagnostics: &[Diagnostics]) -> Self {
+        let mut reason: HashSet<PolicyInfo> = HashSet::new();
+        let mut errors = Vec::new();
 
-        DiagnosticsRefs {
-            reason: HashSet::from_iter(policy_info_iter),
-            errors: diagnostic_err_iter.collect(),
+        for diagnostic in diagnostics {
+            reason.extend(diagnostic.reason.iter().cloned());
+            errors.extend(diagnostic.errors.iter().cloned());
         }
+
+        Self { reason, errors }
     }
 }
 
@@ -272,18 +259,24 @@ impl Diagnostics {
         cedar_diagnostic: &cedar_policy::Diagnostics,
         policies: &PoliciesContainer,
     ) -> Self {
-        let errors = cedar_diagnostic.errors().map(|err| err.into()).collect();
+        let errors = cedar_diagnostic
+            .errors()
+            .map(std::convert::Into::into)
+            .collect();
 
-        let reason = HashSet::from_iter(cedar_diagnostic.reason().map(|policy_id| {
-            let id = policy_id.to_string();
+        let reason = cedar_diagnostic
+            .reason()
+            .map(|policy_id| {
+                let id = policy_id.to_string();
 
-            PolicyInfo {
-                description: policies
-                    .get_policy_description(id.as_str())
-                    .map(|v| v.to_string()),
-                id: policy_id.to_string(),
-            }
-        }));
+                PolicyInfo {
+                    description: policies
+                        .get_policy_description(id.as_str())
+                        .map(std::string::ToString::to_string),
+                    id: policy_id.to_string(),
+                }
+            })
+            .collect::<HashSet<_>>();
 
         Self { reason, errors }
     }
@@ -291,30 +284,30 @@ impl Diagnostics {
 
 /// log entry for decision
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct DecisionLogEntry<'a> {
+pub(crate) struct DecisionLogEntry {
     /// base information of entry
     /// it is unwrap to flatten structure
     #[serde(flatten)]
     pub base: BaseLogEntry,
     /// id of policy store
-    pub policystore_id: &'a str,
+    pub policystore_id: SmolStr,
     /// version of policy store
-    pub policystore_version: &'a str,
+    pub policystore_version: SmolStr,
     /// describe what principal was active on authorization request
     pub principal: Vec<SmolStr>,
-    /// A list of claims, specified by the CEDARLING_DECISION_LOG_USER_CLAIMS property, that must be present in the Cedar User entity
+    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_USER_CLAIMS` property, that must be present in the Cedar User entity
     #[serde(rename = "User")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<HashMap<String, serde_json::Value>>,
-    /// A list of claims, specified by the CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS property, that must be present in the Cedar Workload entity
+    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` property, that must be present in the Cedar Workload entity
     #[serde(rename = "Workload")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workload: Option<HashMap<String, serde_json::Value>>,
-    /// If this Cedarling has registered with a Lock Server, what is the client_id it received
+    /// If this Cedarling has registered with a Lock Server, what is the `client_id` it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
     /// diagnostic info about policy and errors as result of cedarling
-    pub diagnostics: DiagnosticsRefs<'a>,
+    pub diagnostics: DiagnosticsSummary,
     /// action UID for request
     pub action: String,
     /// resource UID for request
@@ -323,13 +316,13 @@ pub struct DecisionLogEntry<'a> {
     pub decision: Decision,
     /// Dictionary with the token type and claims which should be included in the log
     #[serde(skip_serializing_if = "LogTokensInfo::is_empty")]
-    pub tokens: LogTokensInfo<'a>,
+    pub tokens: LogTokensInfo,
     /// time in micro-seconds spent for decision
     pub decision_time_micro_sec: i64,
 }
 
-impl DecisionLogEntry<'_> {
-    pub fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
+impl DecisionLogEntry {
+    pub(crate) fn principal(user: bool, workload: bool) -> Vec<SmolStr> {
         let mut tags = Vec::with_capacity(2);
         if user {
             tags.push("User".into());
@@ -340,7 +333,7 @@ impl DecisionLogEntry<'_> {
         tags
     }
 
-    pub fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
+    pub(crate) fn all_principals(principals: &[EntityUid]) -> Vec<SmolStr> {
         principals
             .iter()
             .map(|uid| uid.type_name().to_smolstr())
@@ -348,7 +341,7 @@ impl DecisionLogEntry<'_> {
     }
 }
 
-impl Indexed for &DecisionLogEntry<'_> {
+impl Indexed for DecisionLogEntry {
     fn get_id(&self) -> Uuid {
         self.base.get_id()
     }
@@ -362,18 +355,18 @@ impl Indexed for &DecisionLogEntry<'_> {
     }
 }
 
-impl Loggable for &DecisionLogEntry<'_> {
+impl Loggable for DecisionLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
 }
 
-/// Custom uuid generation function to avoid using std::time because it makes panic in WASM
+/// Custom uuid generation function to avoid using [`std::time`] because it makes panic in WASM
 //
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
 // Static variable initialize only once at start of program and available during all program live cycle.
 // Import inside function guarantee that it is used only inside function.
-pub fn gen_uuid7() -> Uuid {
+pub(crate) fn gen_uuid7() -> Uuid {
     use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
@@ -381,14 +374,16 @@ pub fn gen_uuid7() -> Uuid {
         Mutex<V7Generator<uuid7::generator::with_rand08::Adapter<rand::rngs::OsRng>>>,
     > = LazyLock::new(|| Mutex::new(V7Generator::with_rand08(rand::rngs::OsRng)));
 
-    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
-
-    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
-
     // from docs
     // The rollback_allowance parameter specifies the amount of unix_ts_ms rollback that is considered significant.
     // A suggested value is 10_000 (milliseconds).
     const ROLLBACK_ALLOWANCE: u64 = 10_000;
+
+    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
+
+    let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
+
+    #[allow(clippy::cast_sign_loss)]
     g.generate_or_reset_core(custom_unix_ts_ms as u64, ROLLBACK_ALLOWANCE)
 }
 
@@ -412,29 +407,51 @@ pub struct BaseLogEntry {
 }
 
 impl BaseLogEntry {
-    pub(crate) fn new(log_type: LogType, request_id: Uuid) -> Self {
-        let local_time_string = chrono::Local::now().format(ISO8601).to_string();
-
-        let default_log_level = if log_type == LogType::System {
-            Some(LogLevel::TRACE)
-        } else {
-            None
-        };
-
-        Self {
-            id: gen_uuid7(),
-            request_id: Some(request_id),
-            timestamp: Some(local_time_string),
-            log_kind: log_type,
-            level: default_log_level,
-        }
+    /// Create new [`BaseLogEntry`] for System log with required `request_id`
+    pub(crate) fn new_system(log_level: LogLevel, request_id: Uuid) -> Self {
+        Self::new_system_opt_request_id(log_level, Some(request_id))
     }
 
-    pub(crate) fn new_opt_request_id(log_type: LogType, request_id: Option<Uuid>) -> Self {
+    /// Create new [`BaseLogEntry`] for Decision log with required `request_id`
+    pub(crate) fn new_decision(request_id: Uuid) -> Self {
+        Self::new_decision_opt_request_id(Some(request_id))
+    }
+
+    #[allow(dead_code)]
+    /// Create new [`BaseLogEntry`] for Metric log with required `request_id`
+    pub(crate) fn new_metric(request_id: Uuid) -> Self {
+        Self::new_metric_opt_request_id(Some(request_id))
+    }
+
+    /// Create new [`BaseLogEntry`] for System log with optional `request_id`
+    /// Only System log can have log level
+    pub(crate) fn new_system_opt_request_id(log_level: LogLevel, request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::System, Some(log_level), request_id)
+    }
+
+    /// Create new [`BaseLogEntry`] for Decision log with optional `request_id`
+    pub(crate) fn new_decision_opt_request_id(request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::Decision, None, request_id)
+    }
+
+    /// Create new [`BaseLogEntry`] for Metric log with optional `request_id`
+    pub(crate) fn new_metric_opt_request_id(request_id: Option<Uuid>) -> Self {
+        Self::new_opt_request_id(LogType::Metric, None, request_id)
+    }
+
+    fn new_opt_request_id(
+        log_type: LogType,
+        log_level: Option<LogLevel>,
+        request_id: Option<Uuid>,
+    ) -> Self {
         let local_time_string = chrono::Local::now().format(ISO8601).to_string();
 
         let default_log_level = if log_type == LogType::System {
-            Some(LogLevel::TRACE)
+            Some(if let Some(log_level_val) = log_level {
+                log_level_val
+            } else {
+                LogLevel::TRACE
+            })
         } else {
             None
         };
@@ -446,6 +463,15 @@ impl BaseLogEntry {
             log_kind: log_type,
             level: default_log_level,
         }
+    }
+
+    /// Create [`LoggableFn`] from [`BaseLogEntry`]
+    pub(crate) fn with_fn<F, R>(self, builder: F) -> LoggableFn<F>
+    where
+        R: Loggable + Indexed,
+        for<'a> F: Fn(BaseLogEntry) -> R,
+    {
+        LoggableFn::new(self, builder)
     }
 }
 
@@ -478,14 +504,14 @@ impl Loggable for BaseLogEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
-pub struct LogTokensInfo<'a>(pub HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>);
+pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
 
-impl<'a> LogTokensInfo<'a> {
-    pub fn new(tokens: &'a HashMap<String, Arc<Token>>, decision_log_jwt_id: &'a str) -> Self {
+impl LogTokensInfo {
+    pub(crate) fn new(tokens: &HashMap<String, Arc<Token>>, decision_log_jwt_id: &str) -> Self {
         let tokens_logging_info = tokens
             .iter()
-            .map(|(tkn_name, tkn)| (tkn_name.as_str(), tkn.logging_info(decision_log_jwt_id)))
-            .collect::<HashMap<&'a str, HashMap<&'a str, &'a serde_json::Value>>>();
+            .map(|(tkn_name, tkn)| (tkn_name.clone(), tkn.logging_info(decision_log_jwt_id)))
+            .collect::<HashMap<String, HashMap<String, serde_json::Value>>>();
 
         Self(tokens_logging_info)
     }
@@ -494,7 +520,7 @@ impl<'a> LogTokensInfo<'a> {
         Self(HashMap::new())
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }

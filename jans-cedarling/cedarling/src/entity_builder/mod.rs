@@ -10,6 +10,7 @@
 mod build_entity_attrs;
 mod build_expr;
 mod build_iss_entity;
+mod build_multi_issuer_entity;
 mod build_principal_entity;
 mod build_resource_entity;
 mod build_role_entity;
@@ -18,22 +19,30 @@ mod built_entities;
 mod entity_id_getters;
 mod error;
 mod schema;
-mod value_to_expr;
+mod trusted_issuer_index;
+pub(crate) mod value_to_expr;
 
 use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
+use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::normalize_issuer;
-use crate::common::policy_store::{ClaimMappings, TrustedIssuer};
+use crate::common::policy_store::ClaimMappings;
+#[cfg(test)]
+use crate::common::policy_store::TrustedIssuer;
 use crate::entity_builder::build_principal_entity::BuiltPrincipalUnsigned;
 use crate::jwt::Token;
-use crate::log::interface::LogWriter;
-use crate::log::{LogEntry, LogType, Logger};
-use crate::{LogLevel, RequestUnsigned, entity_builder_config::*};
-use build_entity_attrs::*;
+use crate::{
+    RequestUnsigned,
+    entity_builder_config::{
+        DEFAULT_ACCESS_TKN_ENTITY_NAME, DEFAULT_ENTITY_TYPE_NAME, DEFAULT_ID_TKN_ENTITY_NAME,
+        DEFAULT_USERINFO_TKN_ENTITY_NAME, EntityBuilderConfig,
+    },
+};
+use build_entity_attrs::build_entity_attrs;
 use build_iss_entity::build_iss_entity;
-use cedar_policy::{Entity, EntityUid, RestrictedExpression};
-use cedar_policy_validator::ValidatorSchema;
+use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
+use cedar_policy_core::validator::ValidatorSchema;
 use schema::MappingSchema;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -41,272 +50,36 @@ use std::str::FromStr;
 use std::sync::Arc;
 use url::Origin;
 
+pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
+pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
 pub(crate) use built_entities::BuiltEntities;
-pub use error::*;
 
-/// Constant for unknown entity type in error messages
-const UNKNOWN_ENTITY_TYPE: &str = "Unknown";
+pub(crate) use error::*;
 
-/// Helper function to parse entity attributes from a key-value iterator
-fn parse_entity_attrs<'a>(
-    attrs_iter: impl Iterator<Item = (&'a String, &'a Value)>,
-    entity_type: &str,
-    entity_id: &str,
-) -> Result<HashMap<String, RestrictedExpression>, BuildEntityError> {
-    let mut cedar_attrs = HashMap::new();
-    for (key, value) in attrs_iter {
-        match value_to_expr::value_to_expr(value) {
-            Ok(Some(expr)) => {
-                cedar_attrs.insert(key.clone(), expr);
-            },
-            Ok(None) => {
-                continue;
-            },
-            Err(errors) => {
-                return Err(BuildEntityError::new(
-                    entity_type.to_string(),
-                    BuildEntityErrorKind::InvalidEntityData(format!(
-                        "Failed to convert attribute '{}' for entity '{}': {:?}",
-                        key, entity_id, errors
-                    )),
-                ));
-            },
-        }
-    }
-    Ok(cedar_attrs)
-}
-
-/// Parse default entities from the provided configuration
-fn parse_default_entities(
-    default_entities_data: &HashMap<String, Value>,
-    namespace: Option<&str>,
-    logger: Logger,
-) -> Result<HashMap<String, Entity>, BuildEntityError> {
-    let mut default_entities = HashMap::new();
-
-    for (entity_id, entity_data) in default_entities_data {
-        // Validate entity ID to prevent injection attacks
-        if entity_id.trim().is_empty() {
-            return Err(BuildEntityError::new(
-                "DefaultEntity".to_string(),
-                BuildEntityErrorKind::InvalidEntityData(
-                    "Entity ID cannot be empty or whitespace-only".to_string(),
-                ),
-            ));
-        }
-
-        // Basic security validation - prevent obvious injection patterns
-        // Check for potentially dangerous characters while allowing valid Cedar entity ID formats
-        let dangerous_patterns = [
-            "<script",
-            "javascript:",
-            "data:",
-            "vbscript:",
-            "onload=",
-            "onerror=",
-        ];
-        let entity_id_lower = entity_id.to_lowercase();
-        for pattern in &dangerous_patterns {
-            if entity_id_lower.contains(pattern) {
-                return Err(BuildEntityError::new(
-                    "DefaultEntity".to_string(),
-                    BuildEntityErrorKind::InvalidEntityData(format!(
-                        "Entity ID '{}' contains potentially dangerous content",
-                        entity_id
-                    )),
-                ));
-            }
-        }
-
-        // Parse the entity data as a JSON object
-        let entity_obj = if let Value::Object(obj) = entity_data {
-            obj
-        } else {
-            return Err(BuildEntityError::new(
-                UNKNOWN_ENTITY_TYPE.to_string(),
-                BuildEntityErrorKind::InvalidEntityData(format!(
-                    "Default entity data for '{}' must be a JSON object",
-                    entity_id
-                )),
-            ));
-        };
-
-        // Check if this is the new Cedar entity format (with uid, attrs, parents fields)
-        let (entity_type, cedar_attrs, parents) = if entity_obj.contains_key("uid") {
-            // New Cedar entity format: {"uid": {"type": "...", "id": "..."}, "attrs": {}, "parents": [...]}
-            let uid_obj = entity_obj
-                .get("uid")
-                .and_then(|v| v.as_object())
-                .ok_or_else(|| {
-                    BuildEntityError::new(
-                        UNKNOWN_ENTITY_TYPE.to_string(),
-                        BuildEntityErrorKind::InvalidEntityData(format!(
-                            "Default entity '{}' has invalid uid field",
-                            entity_id
-                        )),
-                    )
-                })?;
-
-            let entity_type_from_uid =
-                uid_obj
-                    .get("type")
-                    .and_then(|v| v.as_str())
-                    .ok_or_else(|| {
-                        BuildEntityError::new(
-                            UNKNOWN_ENTITY_TYPE.to_string(),
-                            BuildEntityErrorKind::InvalidEntityData(format!(
-                                "Default entity '{}' has invalid uid.type field",
-                                entity_id
-                            )),
-                        )
-                    })?;
-
-            // Add namespace prefix if not already present
-            let full_entity_type = build_entity_type_name(entity_type_from_uid, &namespace);
-
-            // Get the entity ID from uid.id if present
-            let entity_id_from_uid = uid_obj.get("id")
-                .and_then(|v| v.as_str())
-                // Fall back to the HashMap key if uid.id is not specified
-                .unwrap_or(entity_id);
-
-            // Parse attributes from attrs field
-            let empty_map = serde_json::Map::new();
-            let attrs_obj = entity_obj
-                .get("attrs")
-                .and_then(|v| v.as_object())
-                .unwrap_or(&empty_map);
-
-            let cedar_attrs =
-                parse_entity_attrs(attrs_obj.iter(), &full_entity_type, entity_id_from_uid)?;
-
-            // Parse parents from parents field
-            let empty_vec: Vec<Value> = vec![];
-            let parents_array = entity_obj
-                .get("parents")
-                .and_then(|v| v.as_array())
-                .unwrap_or(&empty_vec);
-
-            let mut parents_set = HashSet::new();
-            for parent in parents_array {
-                if let Value::Object(parent_obj) = parent
-                    && let (Some(type_v), Some(id_v)) = (
-                        parent_obj.get("type").and_then(|v| v.as_str()),
-                        parent_obj.get("id").and_then(|v| v.as_str()),
-                    )
-                {
-                    // Add namespace if not present
-                    let full_parent_entity_type = build_entity_type_name(type_v, &namespace);
-                    let parent_uid_str = format!("{}::\"{}\"", full_parent_entity_type, id_v);
-                    match EntityUid::from_str(&parent_uid_str) {
-                        Ok(parent_uid) => {
-                            parents_set.insert(parent_uid);
-                        },
-                        Err(e) => {
-                            // log warn that we could not parse uid
-                            let log_entry = LogEntry::new_with_data(LogType::System, None)
-                                .set_level(LogLevel::WARN)
-                                .set_message(format!(
-                                    "Could not parse parent UID '{}' for default entity '{}': {}",
-                                    parent_uid_str, entity_id, e
-                                ));
-
-                            logger.log_any(log_entry);
-                        },
-                    }
-                } else {
-                    // log warn that we skip value because it is not object
-                    let log_entry = LogEntry::new_with_data(LogType::System, None)
-                        .set_level(LogLevel::WARN)
-                        .set_message(format!(
-                            "In default entity parent array json value should be object, skip: {}",
-                            parent
-                        ));
-
-                    logger.log_any(log_entry);
-                }
-            }
-
-            (full_entity_type, cedar_attrs, parents_set)
-        } else if entity_obj.contains_key("entity_type") {
-            // Old format with entity_type field
-            let entity_type = entity_obj
-                .get("entity_type")
-                .and_then(|v| v.as_str())
-                .ok_or_else(|| {
-                    BuildEntityError::new(
-                        UNKNOWN_ENTITY_TYPE.to_string(),
-                        BuildEntityErrorKind::InvalidEntityData(format!(
-                            "Default entity '{}' has invalid entity_type field",
-                            entity_id
-                        )),
-                    )
-                })?;
-
-            // Convert JSON attributes to Cedar expressions
-            let cedar_attrs = parse_entity_attrs(
-                entity_obj
-                    .iter()
-                    .filter(|(key, _)| key != &"entity_type" && key != &"entity_id"),
-                entity_type,
-                entity_id,
-            )?;
-
-            (entity_type.to_string(), cedar_attrs, HashSet::new())
-        } else {
-            return Err(BuildEntityError::new(
-                UNKNOWN_ENTITY_TYPE.to_string(),
-                BuildEntityErrorKind::InvalidEntityData(format!(
-                    "Default entity '{}' must have either uid field (Cedar format) or entity_type field (legacy format)",
-                    entity_id
-                )),
-            ));
-        };
-
-        // Build the Cedar entity
-        let entity = build_cedar_entity(&entity_type, entity_id, cedar_attrs, parents)?;
-
-        default_entities.insert(entity_id.clone(), entity);
-    }
-
-    Ok(default_entities)
-}
-
-fn build_entity_type_name(entity_type_from_uid: &str, namespace: &Option<&str>) -> String {
-    if entity_type_from_uid.contains("::") {
-        entity_type_from_uid.to_string()
-    } else if let Some(ns) = namespace
-        && !ns.is_empty()
-    {
-        format!("{}::{}", ns, entity_type_from_uid)
-    } else {
-        entity_type_from_uid.to_string()
-    }
-}
-
-pub struct EntityBuilder {
+pub(crate) struct EntityBuilder {
     config: EntityBuilderConfig,
     iss_entities: HashMap<Origin, Entity>,
     schema: Option<MappingSchema>,
-    default_entities: HashMap<String, Entity>,
+    default_entities: DefaultEntities,
+    issuers_index: TrustedIssuerIndex,
 }
 
 impl EntityBuilder {
-    pub fn new(
+    pub(super) fn new(
         config: EntityBuilderConfig,
-        trusted_issuers: &HashMap<String, TrustedIssuer>,
+        issuers_index: TrustedIssuerIndex,
         schema: Option<&ValidatorSchema>,
-        default_entities_data: Option<&HashMap<String, Value>>,
-        namespace: Option<&str>,
-        logger: Logger,
+        default_entities: DefaultEntities,
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
-        let (ok, errs) = trusted_issuers
+        let (ok, errs) = issuers_index
             .values()
             .map(|iss| {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
-                build_iss_entity(&config.entity_names.iss, &iss_id, iss, schema.as_ref())
+
+                let iss_type_name = Self::trusted_issuer_typename(&iss.name);
+                build_iss_entity(&iss_type_name.to_string(), &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 
@@ -316,32 +89,25 @@ impl EntityBuilder {
 
         let iss_entities = ok.into_iter().collect::<HashMap<Origin, Entity>>();
 
-        // Parse default entities if provided
-        let default_entities = if let Some(entities_data) = default_entities_data {
-            parse_default_entities(entities_data, namespace, logger)
-                .map_err(|e| InitEntityBuilderError::BuildIssEntities(vec![e].into()))?
-        } else {
-            HashMap::new()
-        };
-
         Ok(Self {
             config,
             iss_entities,
             schema,
             default_entities,
+            issuers_index,
         })
     }
 
-    pub fn build_entities(
+    pub(super) fn build_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
-        resource: &EntityData,
+        resource_data: &EntityData,
     ) -> Result<AuthorizeEntitiesData, BuildEntityError> {
         let mut tkn_principal_mappings = TokenPrincipalMappings::default();
         let mut built_entities = BuiltEntities::from(&self.iss_entities);
 
         let mut token_entities = HashMap::new();
-        for (tkn_name, tkn) in tokens.iter() {
+        for (tkn_name, tkn) in tokens {
             let entity_name = tkn
                 .iss
                 .as_ref()
@@ -374,7 +140,7 @@ impl EntityBuilder {
 
         let (user, roles) = if self.config.build_user {
             let roles = self.build_role_entities(tokens)?;
-            let role_uids = roles.iter().map(|e| e.uid()).collect();
+            let role_uids = roles.iter().map(Entity::uid).collect();
             let user = self.build_user_entity(
                 tokens,
                 &tkn_principal_mappings,
@@ -386,7 +152,7 @@ impl EntityBuilder {
             (None, Vec::new())
         };
 
-        let resource = self.build_resource_entity(resource)?;
+        let resource = self.build_resource_entity(resource_data)?;
 
         let issuers = self.iss_entities.values().cloned().collect();
         Ok(AuthorizeEntitiesData {
@@ -401,7 +167,7 @@ impl EntityBuilder {
     }
 
     /// Builds the entities using the unsigned interface
-    pub fn build_entities_unsigned(
+    pub(super) fn build_entities_unsigned(
         &self,
         request: &RequestUnsigned,
     ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
@@ -409,12 +175,12 @@ impl EntityBuilder {
 
         let mut principals = Vec::with_capacity(request.principals.len());
         let mut roles = Vec::<Entity>::new();
-        for principal in request.principals.iter() {
+        for principal in &request.principals {
             let BuiltPrincipalUnsigned { principal, parents } =
                 self.build_principal_unsigned(principal, &built_entities)?;
 
             built_entities.insert(&principal.uid());
-            for role in roles.iter() {
+            for role in &roles {
                 built_entities.insert(&role.uid());
             }
 
@@ -434,7 +200,7 @@ impl EntityBuilder {
         })
     }
 
-    pub fn build_entity(
+    pub(super) fn build_entity(
         &self,
         type_name: &str,
         id: &str,
@@ -452,23 +218,52 @@ impl EntityBuilder {
 
         build_cedar_entity(type_name, id, attrs, parents)
     }
+
+    pub(super) fn trusted_issuer_typename(namespace: &str) -> String {
+        format!("{namespace}::TrustedIssuer")
+    }
+
+    pub(super) fn trusted_issuer_cedar_uid(
+        namespace: &str,
+        iss_url: &str,
+    ) -> Result<EntityUid, BuildEntityError> {
+        let iss_id = normalize_issuer(iss_url);
+        build_cedar_uid(&format!("{namespace}::TrustedIssuer"), &iss_id)
+    }
+
+    #[cfg(test)]
+    // is used only for testing to get trusted issuer
+    fn find_trusted_issuer_by_iss(&self, issuer: &str) -> Option<Arc<TrustedIssuer>> {
+        self.issuers_index.find(issuer).cloned()
+    }
 }
 
-pub struct BuiltEntitiesUnsigned {
+pub(super) struct BuiltEntitiesUnsigned {
     pub principals: Vec<Entity>,
     pub roles: Vec<Entity>,
     pub resource: Entity,
     pub built_entities: BuiltEntities,
 }
 
-pub fn build_cedar_entity(
+fn build_cedar_uid(type_name: &str, id: &str) -> Result<EntityUid, BuildEntityError> {
+    let entity_type_name = EntityTypeName::from_str(type_name)
+        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
+    // EntityId::from_str returns Result<_, Infallible>, so parsing never fails
+    let entity_id = EntityId::from_str(id).unwrap_or_else(|e| match e {});
+
+    Ok(EntityUid::from_type_name_and_id(
+        entity_type_name,
+        entity_id,
+    ))
+}
+
+pub(super) fn build_cedar_entity(
     type_name: &str,
     id: &str,
     attrs: HashMap<String, RestrictedExpression>,
     parents: HashSet<EntityUid>,
 ) -> Result<Entity, BuildEntityError> {
-    let uid = EntityUid::from_str(&format!("{}::\"{}\"", type_name, id))
-        .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
+    let uid = build_cedar_uid(type_name, id)?;
     let entity = Entity::new(uid, attrs, parents)
         .map_err(|e| BuildEntityErrorKind::from(Box::new(e)).while_building(type_name))?;
 
@@ -485,7 +280,7 @@ fn default_tkn_entity_name(tkn_name: &str) -> Option<&'static str> {
 }
 
 #[derive(Default)]
-pub struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
+pub(super) struct TokenPrincipalMappings(HashMap<String, Vec<(String, RestrictedExpression)>>);
 
 impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
     fn from(value: Vec<TokenPrincipalMapping>) -> Self {
@@ -500,30 +295,26 @@ impl From<Vec<TokenPrincipalMapping>> for TokenPrincipalMappings {
 
 /// Represents a token and it's UID
 #[derive(Clone)]
-pub struct TokenPrincipalMapping {
+pub(super) struct TokenPrincipalMapping {
     /// The principal where token will be inserted
     principal: String,
     /// The name of the attribute of the token
     attr_name: String,
-    /// An EntityUID reference to the token
+    /// An `EntityUID` reference to the token
     expr: RestrictedExpression,
 }
 
 impl TokenPrincipalMappings {
-    pub fn insert(&mut self, value: TokenPrincipalMapping) {
+    fn insert(&mut self, value: TokenPrincipalMapping) {
         let entry = self.0.entry(value.principal).or_default();
         entry.push((value.attr_name, value.expr));
     }
 
-    pub fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
+    fn get(&self, principal: &str) -> Option<&Vec<(String, RestrictedExpression)>> {
         self.0.get(principal)
     }
 
-    pub fn apply(
-        &self,
-        principal_type: &str,
-        attributes: &mut HashMap<String, RestrictedExpression>,
-    ) {
+    fn apply(&self, principal_type: &str, attributes: &mut HashMap<String, RestrictedExpression>) {
         let Some(mappings) = self.get(principal_type) else {
             return;
         };
@@ -537,26 +328,25 @@ mod test {
     use super::*;
     use crate::CedarEntityMapping;
     use crate::common::policy_store::TokenEntityMetadata;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::{Entities, Schema};
     use serde_json::{Value, json};
     use std::collections::HashMap;
     use std::sync::LazyLock;
     use test_utils::assert_eq;
 
-    pub static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
+    pub(super) static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
         ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
             .expect("should be a valid Cedar validator schema")
     });
 
-    pub static CEDARLING_API_SCHEMA: LazyLock<Schema> = LazyLock::new(|| {
+    pub(super) static CEDARLING_API_SCHEMA: LazyLock<Schema> = LazyLock::new(|| {
         Schema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
             .expect("should be a valid Cedar schema")
     });
 
     /// Helper function for asserting entities for better error readability
     #[track_caller]
-    pub fn assert_entity_eq(entity: &Entity, expected: Value, schema: Option<&Schema>) {
+    pub(super) fn assert_entity_eq(entity: &Entity, expected: &Value, schema: Option<&Schema>) {
         let entity_json = entity
             .clone()
             .to_json_value()
@@ -571,7 +361,7 @@ mod test {
         // Check if the entity has the correct attributes
         let expected_attrs =
             serde_json::from_value::<HashMap<String, Value>>(expected["attrs"].clone()).unwrap();
-        for (name, expected_val) in expected_attrs.iter() {
+        for (name, expected_val) in &expected_attrs {
             assert_eq!(
                 &entity_json["attrs"][name],
                 expected_val,
@@ -603,7 +393,7 @@ mod test {
 
     #[test]
     fn can_build_principals_with_custom_types() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity Resource;
@@ -616,7 +406,7 @@ mod test {
             namespace AnotherNamespace {
                 entity CustomToken;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("parse schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("parse validation schema");
@@ -669,14 +459,13 @@ mod test {
                 )),
             ),
         ]);
+        let issuers_index = TrustedIssuerIndex::new(&issuers, None);
 
         let entity_builder = EntityBuilder::new(
             config,
-            &issuers,
+            issuers_index,
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("init entity builder");
 
@@ -695,7 +484,7 @@ mod test {
 
         assert_entity_eq(
             &entities.workload.expect("has workload entity"),
-            json!({
+            &json!({
                 "uid": {"type": "Jans::CustomWorkload", "id": "some_aud"},
                 "attrs": {
                     "access_token": {"__entity": {
@@ -714,37 +503,7 @@ mod test {
     }
 
     #[test]
-    fn can_parse_default_entities() {
-        // Test the parse_default_entities function directly
-        // We don't need the schema for this test since we're not validating the entities
-
-        // Create test default entities
-        let default_entities = HashMap::from([(
-            "1694c954f8d9".to_string(),
-            json!({
-                "entity_id": "1694c954f8d9",
-                "entity_type": "Jans::DefaultEntity",
-                "o": "Acme Dolphins Division",
-                "org_id": "100129"
-            }),
-        )]);
-
-        // Test that parse_default_entities works
-        let parsed_entities =
-            parse_default_entities(&default_entities, Some("Test"), TEST_LOGGER.clone())
-                .expect("should parse default entities");
-
-        assert_eq!(parsed_entities.len(), 1, "should have 1 default entity");
-
-        // Verify the entity
-        let entity = parsed_entities
-            .get("1694c954f8d9")
-            .expect("should have entity");
-        assert_eq!(entity.uid().type_name().to_string(), "Jans::DefaultEntity");
-        assert_eq!(entity.uid().id().as_ref() as &str, "1694c954f8d9");
-    }
-
-    #[test]
+    #[allow(clippy::too_many_lines)]
     fn can_build_entities_with_default_entities() {
         // Test that default entities are properly included in the authorization flow
         use crate::authz::request::EntityData;
@@ -754,19 +513,19 @@ mod test {
         use url::Url;
 
         // Create a simple schema
-        let schema_src = r#"
+        let schema_src = r"
         namespace Jans {
           entity DefaultEntity;
           entity User;
           entity Issue;
           entity TrustedIssuer;
         }
-        "#;
+        ";
 
         let schema = ValidatorSchema::from_str(schema_src).expect("should parse schema");
 
         // Create default entities data
-        let default_entities_data = HashMap::from([
+        let default_entities_data: HashMap<String, Value> = HashMap::from([
             (
                 "1694c954f8d9".to_string(),
                 json!({
@@ -791,7 +550,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -805,9 +564,10 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create tokens
-        let tokens = HashMap::from([(
+        let tokens: HashMap<String, Arc<Token>> = HashMap::from([(
             "id_token".to_string(),
             Arc::new(Token::new(
                 "id_token",
@@ -825,17 +585,17 @@ mod test {
         )]);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = true;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: true,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&schema),
-            Some(&default_entities_data),
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::from_hashmap(&default_entities_data),
         )
         .expect("should create entity builder");
 
@@ -863,7 +623,7 @@ mod test {
         // Verify specific default entity
         let default_entity = entities_data
             .default_entities
-            .get("1694c954f8d9")
+            .get(&EntityUid::from_str("Jans::DefaultEntity::\"1694c954f8d9\"").unwrap())
             .expect("should have default entity 1694c954f8d9");
 
         assert_eq!(
@@ -916,10 +676,11 @@ mod test {
             "should have 2 default entities"
         );
 
+        let uid = EntityUid::from_str("Jans::DefaultEntity::\"74d109b20248\"").unwrap();
         // Verify the second default entity is also present
         let second_default_entity = entities_data
             .default_entities
-            .get("74d109b20248")
+            .get(&uid)
             .expect("should have default entity 74d109b20248");
         assert_eq!(
             second_default_entity.uid().type_name().to_string(),
@@ -946,8 +707,14 @@ mod test {
             .get("products")
             .and_then(|v| v.as_object())
             .expect("should have products");
-        assert_eq!(products.get("15020").and_then(|v| v.as_i64()), Some(995));
-        assert_eq!(products.get("15050").and_then(|v| v.as_i64()), Some(1495));
+        assert_eq!(
+            products.get("15020").and_then(serde_json::Value::as_i64),
+            Some(995)
+        );
+        assert_eq!(
+            products.get("15050").and_then(serde_json::Value::as_i64),
+            Some(1495)
+        );
     }
 
     #[test]
@@ -957,7 +724,7 @@ mod test {
         // Test that request entities override default entities when there are UID conflicts
 
         // Create a schema
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity DefaultEntity;
@@ -967,7 +734,10 @@ mod test {
                     description: String
                 };
             }
-        "#;
+            namespace Jans2 {
+                entity TrustedIssuer;
+            }   
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -985,7 +755,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans2".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -993,19 +763,20 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
-            Some(&default_entities_data),
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::from_hashmap(&default_entities_data),
         )
         .expect("should create entity builder");
 
@@ -1072,6 +843,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_default_entities_affect_authorization() {
         use url::Url;
 
@@ -1079,7 +851,7 @@ mod test {
         // This demonstrates that default entities are not just merged but actively used
 
         // Create a schema with a policy that references default entities
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity User;
@@ -1093,7 +865,7 @@ mod test {
                     is_active: Bool
                 };
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -1133,7 +905,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -1141,19 +913,20 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
-            Some(&default_entities_data),
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::from_hashmap(&default_entities_data),
         )
         .expect("should create entity builder");
 
@@ -1194,7 +967,9 @@ mod test {
             Some("Organization 1")
         );
         assert_eq!(
-            org_attrs.get("is_active").and_then(|v| v.as_bool()),
+            org_attrs
+                .get("is_active")
+                .and_then(serde_json::Value::as_bool),
             Some(true)
         );
 
@@ -1260,6 +1035,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_default_entity_as_principal() {
         use url::Url;
 
@@ -1267,7 +1043,7 @@ mod test {
         // This demonstrates a key use case where default entities represent system actors
 
         // Create a schema with entities that can act as principals
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity User = {
@@ -1285,7 +1061,7 @@ mod test {
                     access_level: String
                 };
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -1325,7 +1101,7 @@ mod test {
 
         // Create trusted issuer
         let trusted_issuer = TrustedIssuer {
-            name: "Test Issuer".to_string(),
+            name: "Jans".to_string(),
             description: "Test".to_string(),
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .expect("valid url"),
@@ -1333,19 +1109,20 @@ mod test {
         };
 
         let trusted_issuers = HashMap::from([("test_issuer".to_string(), trusted_issuer)]);
+        let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let mut config = EntityBuilderConfig::default();
-        config.build_workload = false;
-        config.build_user = false;
+        let config = EntityBuilderConfig {
+            build_workload: false,
+            build_user: false,
+            ..Default::default()
+        };
 
         let entity_builder = EntityBuilder::new(
             config,
-            &trusted_issuers,
+            issuers_index,
             Some(&validator_schema),
-            Some(&default_entities_data),
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::from_hashmap(&default_entities_data),
         )
         .expect("should create entity builder");
 
@@ -1398,7 +1175,9 @@ mod test {
             Some("Backup Service")
         );
         assert_eq!(
-            sa1_attrs.get("is_active").and_then(|v| v.as_bool()),
+            sa1_attrs
+                .get("is_active")
+                .and_then(serde_json::Value::as_bool),
             Some(true)
         );
 
@@ -1478,176 +1257,6 @@ mod test {
                 .iter()
                 .any(|p| p.as_str() == Some("restore")),
             "should have restore permission"
-        );
-    }
-
-    #[test]
-    fn test_parse_cedar_entity_format_with_admin_ui_namespace() {
-        // Test with the exact entity format from the reported issue
-        // This tests the Cedar entity JSON format with uid, attrs, and parents fields
-        let entity_data = json!({
-            "uid": {
-                "type": "Features",
-                "id": "License"
-            },
-            "attrs": {},
-            "parents": [
-                {
-                    "type": "ParentResource",
-                    "id": "AuthServerAndConfiguration"
-                }
-            ]
-        });
-
-        let default_entities_data = HashMap::from([("2694c954f8d8".to_string(), entity_data)]);
-
-        // Use the namespace from the policy store name
-        let namespace = Some("Gluu::Flex::AdminUI::Resources");
-        let parsed_entities =
-            parse_default_entities(&default_entities_data, namespace, TEST_LOGGER.clone())
-                .expect("should parse default entities");
-
-        assert_eq!(parsed_entities.len(), 1, "should have 1 entity");
-
-        let entity = parsed_entities
-            .get("2694c954f8d8")
-            .expect("should have entity");
-        let uid_str = entity.uid().to_string();
-
-        // Verify the namespace was added correctly to both the entity type and parent type
-        println!("Parsed entity UID: {}", uid_str);
-        assert!(
-            uid_str.contains("Features"),
-            "Entity should contain Features type"
-        );
-
-        // Check that entity has correct namespace prefix
-        assert!(
-            uid_str.contains("Gluu::Flex::AdminUI::Resources::Features"),
-            "Entity should have correct namespace, got: {}",
-            uid_str
-        );
-
-        println!(
-            "✓ Successfully parsed Cedar entity format with namespace: {}",
-            uid_str
-        );
-    }
-
-    #[test]
-    fn test_parse_entity_with_existing_namespace() {
-        // Test that entity with uid.type already containing "::" does not get double-prefixed
-        let entity_data = json!({
-            "uid": {
-                "type": "Existing::Namespace::Features",
-                "id": "TestFeature"
-            },
-            "attrs": {
-                "attribute": "value"
-            }
-        });
-
-        let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
-
-        let parsed_entities = parse_default_entities(
-            &default_entities_data,
-            Some("NewNamespace"),
-            TEST_LOGGER.clone(),
-        )
-        .expect("should parse default entities");
-
-        let entity = parsed_entities.get("test123").expect("should have entity");
-        assert_eq!(
-            entity.uid().type_name().to_string(),
-            "Existing::Namespace::Features",
-            "Existing namespace should not be double-prefixed"
-        );
-    }
-
-    #[test]
-    fn test_parse_error_missing_uid() {
-        // Test entity missing uid field
-        let entity_data = json!({
-            "attrs": {
-                "attribute": "value"
-            }
-        });
-
-        let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
-
-        let result =
-            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
-        assert!(
-            result.is_err(),
-            "Should return error when uid field is missing"
-        );
-    }
-
-    #[test]
-    fn test_parse_error_invalid_uid_structure() {
-        // Test entity with uid that is not an object
-        let entity_data = json!({
-            "uid": "not-an-object",
-            "attrs": {}
-        });
-
-        let default_entities_data = HashMap::from([("test123".to_string(), entity_data)]);
-
-        let result =
-            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
-        assert!(
-            result.is_err(),
-            "Should return error when uid is not an object"
-        );
-
-        // Test entity with uid missing type field
-        let entity_data_no_type = json!({
-            "uid": {
-                "id": "test"
-            },
-            "attrs": {}
-        });
-
-        let default_entities_data = HashMap::from([("test456".to_string(), entity_data_no_type)]);
-
-        let result =
-            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone());
-        assert!(
-            result.is_err(),
-            "Should return error when uid.type is missing"
-        );
-    }
-
-    #[test]
-    fn test_parse_entity_with_empty_attrs_and_parents() {
-        // Test entity with empty attrs and empty parents
-        let entity_data = json!({
-            "uid": {
-                "type": "EmptyTest",
-                "id": "test789"
-            },
-            "attrs": {},
-            "parents": []
-        });
-
-        let default_entities_data = HashMap::from([("test789".to_string(), entity_data)]);
-
-        let parsed_entities =
-            parse_default_entities(&default_entities_data, Some("Test"), TEST_LOGGER.clone())
-                .expect("should parse with empty attrs and parents");
-
-        let entity = parsed_entities.get("test789").expect("should have entity");
-        assert_eq!(
-            entity.uid().type_name().to_string(),
-            "Test::EmptyTest",
-            "Entity type should have namespace prefix"
-        );
-        let entity_json = entity.to_json_value().expect("should convert to JSON");
-        let attrs = entity_json.get("attrs").expect("should have attrs");
-        assert_eq!(
-            attrs.as_object().unwrap().len(),
-            0,
-            "Entity should have empty attrs"
         );
     }
 }

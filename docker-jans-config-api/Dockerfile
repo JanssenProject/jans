@@ -1,4 +1,7 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
+# =================================
+# Main Image
+# =================================
+FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
 
 # ===============
 # Alpine packages
@@ -29,8 +32,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Jython
 # ======
 
-ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
+ARG JYTHON_VERSION=2.7.4
+ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
@@ -41,7 +44,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-10-06 08:28'
+ENV CN_BUILD_DATE='2025-12-18 09:49'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -54,8 +57,9 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # Plugins
 # =======
 
+# @TODO: add shibboleth as plugin when artifact is ready
 RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt kc-saml lock jans-link kc-link; \
+    && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/${plugin}-plugin/${CN_VERSION}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar"; \
     done
@@ -64,21 +68,6 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=81b0ea05fabcef7d2c6dab6f665e9627d105094c
-ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
-
-# note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the assets
-ARG GIT_CLONE_DEPTH=100
-RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
-    && cd /tmp/jans \
-    && git sparse-checkout init --cone \
-    && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
-    && git sparse-checkout add jans-pycloudlib
-
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
@@ -86,8 +75,21 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-# sync static files from linux-setup
-RUN cd /tmp/jans \
+ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the assets
+ARG GIT_CLONE_DEPTH=100
+WORKDIR /tmp/jans
+
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
+    && git sparse-checkout init --cone \
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
+    && git sparse-checkout add jans-pycloudlib \
+    && git checkout ${JANS_SOURCE_VERSION} \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -108,6 +110,18 @@ RUN cd /tmp/jans \
     && chmod +x /usr/bin/facter \
     && cp ${JANS_SETUP_DIR}/static/scripts/get_agama_lab_projects.py /opt/jans/bin/get_agama_lab_projects.py \
     && chmod +x /opt/jans/bin/get_agama_lab_projects.py
+
+WORKDIR /
+
+# add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
+# commit hash from GluuFlexAdminUIPolicyStore
+ARG AUI_POLICY_VERSION=320707351b6cdd53de986f278da5c91e8f772552
+# policy store filename
+ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
+
+# download policy store file and replace placeholder with parametrized variable
+RUN wget -nv https://raw.githubusercontent.com/GluuFederation/GluuFlexAdminUIPolicyStore/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O /app/templates/jans-config-api/adminui-policy-store.json \
+    && sed -i 's/your-openid-provider.server/%(hostname)s/g' /app/templates/jans-config-api/adminui-policy-store.json
 
 # ======
 # Python
@@ -222,10 +236,15 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
+# ===========
+# Custom libs
+# ===========
+
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-config-api/custom/libs \
-    ${JETTY_BASE}/jans-config-api/custom/config \
+    ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
+    ${JETTY_BASE}/jans-config-api/custom/libs \
+    ${JETTY_BASE}/jans-config-api/etc/jetty/security \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
@@ -250,6 +269,9 @@ RUN sed -i 's/\${sys:log.base}\/logs/\/var\/log\/adminui/g' /app/templates/jans-
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
+# extra java.security (activated when admin-ui plugin is enabled)
+COPY contrib/java.security ${JETTY_BASE}/jans-config-api/etc/jetty/security/java.security
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
@@ -262,10 +284,14 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod 664 /etc/hosts.back \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chmod -R g=u /app/templates/jans-config-api \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/etc \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/custom/libs \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/custom/libs \
     && chown -R 1000:0 /usr/share/java \
     && chown -R 1000:0 /opt/prometheus \
     && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/_plugins \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/etc \
     && chown 1000:0 ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
     && chown -R 1000:0 /var/log/adminui

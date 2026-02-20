@@ -9,7 +9,7 @@ tags:
 
 Janssen Server modules run as Java processes. Hence, like any other Java process
 the JVM running the module can be configured to open a debug port where a remote
-debugger can be attached. The steps below will show how to configure 
+debugger can be attached. The steps below will show how to configure
 `auth-server` module for remote debugging.
 
 1. Pass the command-line options to the JVM
@@ -52,4 +52,4 @@ debugger can be attached. The steps below will show how to configure
 
    For IntelliJIdea, create a debug configuration as below:
 
-   ![](../assets/image-jans-remote-debug-intellij.png)
+   ![IntelliJ IDEA Remote Debug Configuration](../assets/image-jans-remote-debug-intellij.png)

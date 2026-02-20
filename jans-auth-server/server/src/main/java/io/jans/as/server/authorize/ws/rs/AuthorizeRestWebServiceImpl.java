@@ -678,12 +678,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void addPromptLoginIfNeeded(AuthzRequest authzRequest, Client client) {
-        if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
-                && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
-                && identity.getSessionId().getAuthenticationTime() != null
-                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 500) {
+        if (identity != null && identity.getSessionId() != null &&
+                identity.getSessionId().getState() == SessionIdState.AUTHENTICATED &&
+                Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin()) &&
+                isSessionAuthnTimeOldForPromptLogin(identity.getSessionId())) {
             authzRequest.addPrompt(Prompt.LOGIN);
         }
+    }
+
+    public boolean isSessionAuthnTimeOldForPromptLogin(SessionId sessionId) {
+        if (appConfiguration.getSkipSessionAuthnTimeCheckDuringPromptLogin() || sessionId.getAuthenticationTime() == null)
+            return false;
+        return new Date().getTime() - sessionId.getAuthenticationTime().getTime() > appConfiguration.getSessionAuthnTimeCheckDuringPromptLoginThresholdMs();
     }
 
     private Pair<ClientAuthorization, Boolean> grantAccessOrFetchClientAuthorization(AuthzRequest authzRequest, Client client, SessionId sessionUser, User user, Set<String> scopes) {

@@ -16,7 +16,8 @@ serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
 uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }
-cedar-policy = { version = "4.3.2", features = ["partial-eval"] }
+cedar-policy = { version = "4.9.0", features = ["partial-eval"] }
+cedar-policy-core = "4.9.0"
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
@@ -39,8 +40,6 @@ tokio-util = { workspace = true }
 rand = "0.8.5"
 smol_str = "0.3.2"
 strum = { version = "0.26", features = ["derive"] }
-cedar-policy-validator = "4.3.3"
-cedar-policy-core = "4.3.3"
 datalogic-rs = "2.1.2"
 flate2 = "1.1.1"
 async-trait = "0.1.88"
@@ -48,6 +47,10 @@ futures = "0.3.31"
 wasm-bindgen-futures = { workspace = true }
 config = "0.15.11"
 ahash = { version = "0.8.12", default-features = false, features = ["no-rng"] }
+vfs = "0.12"
+hex = "0.4.3"
+sha2 = "0.10.8"
+zip = "7.0.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
@@ -58,14 +61,17 @@ web-sys = { workspace = true, features = ["console"] }
 test_utils = { workspace = true }
 rand = "0.8.5"
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
-mockito = "1.5.0"
+mockito = { workspace = true }
 criterion = { version = "0.5.1", features = ["async_tokio"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 stats_alloc = "0.1.10"
+tempfile = "3.8"
 
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]
 pprof = { version = "0.14.0", features = ["flamegraph"] }
 
+[lints]
+workspace = true
 
 [[bench]]
 name = "authz_authorize_benchmark"
@@ -73,4 +79,12 @@ harness = false
 
 [[bench]]
 name = "startup_benchmark"
+harness = false
+
+[[bench]]
+name = "authz_authorize_multi_issuer_benchmark"
+harness = false
+
+[[bench]]
+name = "policy_store_benchmark"
 harness = false

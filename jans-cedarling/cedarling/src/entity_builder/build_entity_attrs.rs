@@ -18,30 +18,35 @@ use super::{BuildAttrsError, BuildAttrsErrorVec};
 /// Builds Cedar entity attributes using the given attribute source
 ///
 /// This function will *JOIN* the token attributes built from each token
-pub fn build_entity_attrs(
+pub(super) fn build_entity_attrs(
     attrs_src: &HashMap<String, Value>,
     entities: &BuiltEntities,
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
     claim_mappings: Option<&ClaimMappings>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     if let Some(attrs_shape) = attrs_shape {
-        build_entity_attrs_with_shape(attrs_src, entities, attrs_shape, claim_mappings)
+        Ok(build_entity_attrs_with_shape(
+            attrs_src,
+            entities,
+            attrs_shape,
+            claim_mappings,
+        ))
     } else {
         build_entity_attrs_without_schema(attrs_src, claim_mappings)
     }
 }
 
 /// Uses the schema as guide in building the attributes
-pub fn build_entity_attrs_with_shape(
+fn build_entity_attrs_with_shape(
     attrs_src: &HashMap<String, Value>,
     entities: &BuiltEntities,
     attrs_shape: &HashMap<SmolStr, AttrsShape>,
     claim_mappings: Option<&ClaimMappings>,
-) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
+) -> HashMap<String, RestrictedExpression> {
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
 
-    for (attr_name, attr_shape) in attrs_shape.iter() {
+    for (attr_name, attr_shape) in attrs_shape {
         match attr_shape.src() {
             AttrSrc::JwtClaim(claim_src) => {
                 let mut required_missing_claims: Vec<SmolStr> = Vec::new();
@@ -151,18 +156,18 @@ pub fn build_entity_attrs_with_shape(
         }
     }
 
-    Ok(attrs)
+    attrs
 }
 
 /// Will do it's best to create the entity without a schema
-pub fn build_entity_attrs_without_schema(
+fn build_entity_attrs_without_schema(
     attrs_src: &HashMap<String, Value>,
     claim_mappings: Option<&ClaimMappings>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
 
-    for (name, src) in attrs_src.iter() {
+    for (name, src) in attrs_src {
         let Some(mappings) = claim_mappings.and_then(|m| m.mapping(name)) else {
             // without claim mapping
             match value_to_expr(src) {
@@ -205,13 +210,13 @@ mod test {
     use super::*;
     use crate::{common::policy_store::ClaimMappings, entity_builder::schema::MappingSchema};
     use cedar_policy::{Entity, Schema};
-    use cedar_policy_validator::ValidatorSchema;
+    use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
     use std::{collections::HashSet, str::FromStr};
 
     #[test]
     fn can_build_entity_with_schema() {
-        let schema_src = r#"
+        let schema_src = r"
         namespace SomeNamespace {
             entity AnotherEntity;
             entity SomeEntity {
@@ -234,7 +239,7 @@ mod test {
                 optional_attr?: Bool,
             };
         }
-        "#;
+        ";
         let cedar_schema = Schema::from_str(schema_src).expect("builds cedar Schema");
         let mapping_schema: MappingSchema = (&ValidatorSchema::from_str(schema_src)
             .expect("builds ValidatorSchema"))
@@ -279,7 +284,7 @@ mod test {
 
         assert_entity_eq(
             &dummy_entity,
-            json!({
+            &json!({
                 "uid": {"type": "SomeNamespace::SomeEntity", "id": "some_id"},
                 "attrs": {
                     "bool_attr": true,
@@ -341,7 +346,7 @@ mod test {
             "url_attr": {
                 "parser": "regex",
                 "type": "Jans::Url",
-                "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
+                "regex_expression": r"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$",
                 "SCHEME": {"attr": "scheme", "type": "String"},
                 "DOMAIN": {"attr": "domain", "type": "String"},
                 "PATH": {"attr": "path", "type": "String"}
@@ -384,7 +389,7 @@ mod test {
 
         assert_entity_eq(
             &dummy_entity,
-            json!({
+            &json!({
                 "uid": {"type": "SomeEntity", "id": "some_id"},
                 "attrs": {
                     "email_attr": {
@@ -416,7 +421,7 @@ mod test {
             "url_attr": {
                 "parser": "regex",
                 "type": "Jans::Url",
-                "regex_expression": r#"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$"#,
+                "regex_expression": r"^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/(?P<DOMAIN>[^\/]+)(?P<PATH>\/.*)?$",
                 "SCHEME": {"attr": "scheme", "type": "String"},
                 "DOMAIN": {"attr": "domain", "type": "String"},
                 "PATH": {"attr": "path", "type": "String"}
@@ -445,7 +450,7 @@ mod test {
 
         assert_entity_eq(
             &dummy_entity,
-            json!({
+            &json!({
                 "uid": {"type": "SomeEntity", "id": "some_id"},
                 "attrs": {
                     "email_attr": {

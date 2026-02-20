@@ -380,39 +380,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/policy.readonly
-  /api/v1/sse:
-    get:
-      tags:
-      - Lock - SSE
-      summary: Subscribe to SSE events
-      description: Subscribe to SSE events
-      operationId: subscribe
-      responses:
-        "200":
-          description: Ok
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/sse.readonly
   /api/v1/internal/stat:
     get:
       tags:
@@ -545,106 +512,193 @@ components:
       properties:
         dn:
           type: string
-        creationDate:
-          type: string
-          format: date-time
-        eventTime:
-          type: string
-          format: date-time
-        service:
-          type: string
-        nodeName:
-          type: string
-        status:
-          type: string
         engineStatus:
-          type: string
+          type: object
+          additionalProperties:
+            type: string
         baseDn:
           type: string
         inum:
           type: string
+        creationDate:
+          type: string
+          description: Creation date of the entry
+          format: date-time
+          example: 2024-04-21T17:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        service:
+          type: string
+          description: Service name
+          example: jans-auth
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: "1"
+        status:
+          type: string
+          description: Health status
+          example: ok
+          enum:
+          - ok
+          - warning
+          - error
+      description: Health audit entry
     LogEntry:
       type: object
       properties:
         dn:
           type: string
-        creationDate:
-          type: string
-          format: date-time
-        eventTime:
-          type: string
-          format: date-time
-        service:
-          type: string
-        nodeName:
-          type: string
-        eventType:
-          type: string
-        severetyLevel:
-          type: string
-        action:
-          type: string
-        decisionResult:
-          type: string
-        requestedResource:
-          type: string
-        princiaplId:
-          type: string
-        clientId:
-          type: string
-        contextInformation:
-          type: object
-          additionalProperties:
-            type: string
         baseDn:
           type: string
         inum:
           type: string
+        creationDate:
+          type: string
+          description: Creation date of the entry
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        service:
+          type: string
+          description: Service name
+          example: jans-auth
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: "1"
+        eventType:
+          type: string
+          description: Type of event
+          example: registration
+        severityLevel:
+          type: string
+          description: Severity level
+          example: warning
+          enum:
+          - info
+          - warning
+          - error
+          - critical
+        action:
+          type: string
+          description: Action performed
+          example: ACTION_NAME_3
+        decisionResult:
+          type: string
+          description: Decision result
+          example: allow
+          enum:
+          - allow
+          - deny
+        requestedResource:
+          type: string
+          description: Requested resource as JSON string
+          example: "{\"t1\":\"value1\",\"t2\":\"value2\"}"
+        principalId:
+          type: string
+          description: Principal (user) identifier
+          example: ACC0001
+        clientId:
+          type: string
+          description: Client identifier
+          example: CLI001
+        jti:
+          type: string
+          description: JWT ID - unique identifier for the token
+          example: 550e8400-e29b-41d4-a716-446655440000
+        contextInformation:
+          type: object
+          additionalProperties:
+            type: string
+            description: Additional context information as key-value pairs
+          description: Additional context information as key-value pairs
+      description: Log audit entry
     TelemetryEntry:
       type: object
       properties:
         dn:
           type: string
-        creationDate:
-          type: string
-          format: date-time
-        eventTime:
-          type: string
-          format: date-time
-        service:
-          type: string
-        nodeName:
-          type: string
-        status:
-          type: string
-        lastPolicyLoadSize:
-          type: integer
-          format: int32
-        policySuccessLoadCounter:
-          type: integer
-          format: int64
-        policyFailedLoadCounter:
-          type: integer
-          format: int64
-        lastPolicyEvaluationTimeNs:
-          type: integer
-          format: int32
-        avgPolicyEvaluationTimeNs:
-          type: integer
-          format: int32
-        evaluationRequestsCount:
-          type: integer
-          format: int64
-        policyStats:
-          type: object
-          additionalProperties:
-            type: string
         baseDn:
           type: string
         inum:
           type: string
-        memoryUsage:
+        creationDate:
           type: string
+          description: Creation date of the entry
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
+        service:
+          type: string
+          description: Service name
+          example: jans-auth
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: "1"
+        status:
+          type: string
+          description: Service status
+          example: ok
+          enum:
+          - ok
+          - warning
+          - error
+        lastPolicyLoadSize:
+          type: integer
+          description: Size of the last policy load in bytes
+          format: int64
+          example: 1024
+        policySuccessLoadCounter:
+          type: integer
+          description: Number of successful policy loads
+          format: int64
+          example: 100
+        policyFailedLoadCounter:
+          type: integer
+          description: Number of failed policy loads
+          format: int64
+          example: 3
+        lastPolicyEvaluationTimeNs:
+          type: integer
+          description: Last policy evaluation time in nanoseconds
+          format: int64
+          example: 100
+        avgPolicyEvaluationTimeNs:
+          type: integer
+          description: Average policy evaluation time in nanoseconds
+          format: int64
+          example: 75
+        memoryUsage:
+          type: integer
+          description: Memory usage in bytes
+          format: int64
+          example: 2097152
+        evaluationRequestsCount:
+          type: integer
+          description: Total number of evaluation requests
+          format: int64
+          example: 100
+        policyStats:
+          type: object
+          additionalProperties:
+            type: integer
+            description: Additional policy statistics as key-value pairs
+            format: int64
+          description: Additional policy statistics as key-value pairs
+      description: Telemetry audit entry
     FlatStatResponse:
       type: object
       properties:

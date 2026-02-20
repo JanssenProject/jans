@@ -3,14 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::entity_id_getters::*;
-use super::*;
+use super::entity_id_getters::{EntityIdSrc, collect_all_valid_entity_ids};
+use super::{Arc, BuildEntityError, EntityBuilder, HashMap, Token, build_cedar_entity};
 use cedar_policy::Entity;
 use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 impl EntityBuilder {
-    pub fn build_role_entities(
+    pub(super) fn build_role_entities(
         &self,
         tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<Vec<Entity>, BuildEntityError> {
@@ -75,9 +75,7 @@ impl<'a> RoleIdSrcs<'a> {
 mod test {
     use super::super::test::*;
     use super::super::*;
-    use super::*;
     use crate::common::policy_store::TrustedIssuer;
-    use crate::log::TEST_LOGGER;
     use cedar_policy::Schema;
     use serde_json::json;
     use std::collections::HashMap;
@@ -85,11 +83,11 @@ mod test {
 
     #[test]
     fn can_build_role_entity_from_str() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity Role;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -97,11 +95,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -120,7 +116,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[0],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "some_role"},
                 "attrs": {},
                 "parents": [],
@@ -131,11 +127,11 @@ mod test {
 
     #[test]
     fn can_build_role_entities_from_vec() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity Role;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -143,11 +139,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -166,7 +160,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[0],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "some_role"},
                 "attrs": {},
                 "parents": [],
@@ -176,7 +170,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[1],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "another_role"},
                 "attrs": {},
                 "parents": [],
@@ -187,11 +181,11 @@ mod test {
 
     #[test]
     fn builds_role_entities_from_multiple_tokens() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity Role;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -199,11 +193,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -230,7 +222,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[0],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "another_role"},
                 "attrs": {},
                 "parents": [],
@@ -240,7 +232,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[1],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "some_role"},
                 "attrs": {},
                 "parents": [],

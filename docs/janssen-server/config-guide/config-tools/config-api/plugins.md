@@ -13,7 +13,7 @@ tags:
 ## Jans Config API Plugins
 Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
 
-The plugin architecture implemented in Jans Config API allows the deployer to add/remove new rest APIs (plugin) without changing the core application. 
+The plugin architecture implemented in Jans Config API allows the deployer to add/remove new rest APIs (plugin) without changing the core application.
 A plugin contains one or more Rest API(s) packaged in a Java ARchive (jar file). It is added to Jans Config API by adding the plugin jar file path in the external **extraClasspath** of the jetty context file.
 
 ## Pre-requisites
@@ -53,7 +53,7 @@ We need to register our extension as a service provider by creating a file named
 
 The `com.spl.plugin.helloworld.rest.HelloWorldApplication.java` class is annotated with the `@ApplicationPath` annotation which identifies the application path that serves as the base URI for all resources of the plugin and is used to register JAX-RS resources and providers.
 
-#### HelloWorldResource.java 
+#### HelloWorldResource.java
 
 This is a sample JAX-RS resource with an endpoint returning `Hello World!` string as http response.
 

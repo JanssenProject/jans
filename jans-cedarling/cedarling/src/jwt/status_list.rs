@@ -5,19 +5,19 @@
 
 //! The JWT status list validation is implemented as described in this [IETF spec](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-02.html#name-referenced-token).
 //!
-//! Status lists are stored on the [`StatusList`] struct and initialized using the 
+//! Status lists are stored on the [`StatusList`] struct and initialized using the
 //! [`StatusList::parse`] function.
 //!
 //! To retrieve a status of a JWT, use the [`StatusList::get_status`] function and pass
-//! in the JWT's status index (`idx`). 
+//! in the JWT's status index (`idx`).
 
 mod cache;
 mod error;
 #[cfg(test)]
 mod ietf_test_samples;
 
-pub use cache::*;
-pub use error::*;
+pub(super) use cache::*;
+pub(super) use error::*;
 
 use super::validation::ValidatedJwt;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
@@ -27,7 +27,7 @@ use std::fmt::Display;
 use std::io::Read;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct StatusList {
+pub(super) struct StatusList {
     /// The number of bits used to encode a single status
     pub bit_size: StatusBitSize,
     /// The status list
@@ -35,7 +35,7 @@ pub struct StatusList {
 }
 
 impl StatusList {
-    pub fn parse(encoded: &str, bits: u8) -> Result<Self, ParseStatusListError> {
+    pub(super) fn parse(encoded: &str, bits: u8) -> Result<Self, ParseStatusListError> {
         let list = BASE64_URL_SAFE_NO_PAD.decode(encoded)?;
         let mut decoder = ZlibDecoder::new(list.as_slice());
         let mut list = Vec::new();
@@ -51,7 +51,7 @@ impl StatusList {
     /// Validation rules can be found in [`IETF Status List Spec. sec. 8.3 v10`]
     ///
     /// [`IETF Status List Spec. sec. 8.3 v10`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#section-8.3
-    pub fn get_status(&self, index: usize) -> Result<JwtStatus, JwtStatusError> {
+    pub(super) fn get_status(&self, index: usize) -> Result<JwtStatus, JwtStatusError> {
         let scale = (8 / self.bit_size.0) as usize;
 
         let byte_idx = index / scale;
@@ -60,7 +60,7 @@ impl StatusList {
             .get(byte_idx)
             .ok_or(JwtStatusError::StatusListIdxOutOfBounds)?;
 
-        let bit_idx = (index % scale) as u8;
+        let bit_idx = u8::try_from(index % scale)?;
 
         let status = get_status_from_byte(*byte, self.bit_size, bit_idx);
 
@@ -70,17 +70,17 @@ impl StatusList {
 
 /// Status list JWT from an IDP's status list endpoint
 #[derive(Debug, Deserialize, PartialEq)]
-pub struct StatusListJwtStr(pub String);
+pub(super) struct StatusListJwtStr(pub String);
 
 impl StatusListJwtStr {
-    pub fn new(jwt_str: String) -> Self {
+    pub(super) fn new(jwt_str: String) -> Self {
         Self(jwt_str)
     }
 }
 
 /// Status list JWT from an IDP's status list endpoint
 #[derive(Debug, Deserialize, PartialEq)]
-pub struct StatusListJwt {
+pub(super) struct StatusListJwt {
     sub: String,
     iat: u32,
     #[serde(default)]
@@ -134,7 +134,7 @@ impl TryFrom<ValidatedJwt> for StatusList {
             .as_u64()
             .ok_or(ParseStatusListError::JwtInvalidBitsType(bits.clone()))?;
 
-        Self::parse(&list, bits as u8)
+        Self::parse(&list, u8::try_from(bits)?)
     }
 }
 
@@ -161,7 +161,7 @@ fn get_status_from_byte(byte: u8, bit_size: StatusBitSize, bit_idx: u8) -> u8 {
     (byte >> offset) & mask
 }
 
-/// See: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types
+/// See: <https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types>
 #[derive(Debug, PartialEq)]
 pub enum JwtStatus {
     Valid,
@@ -234,7 +234,7 @@ impl TryFrom<u8> for StatusBitSize {
 ///
 /// [`status list spec sec. 5.1 v10`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#section-5.1
 #[cfg(test)]
-pub fn compress_and_encode(status_list: &[u8]) -> String {
+pub(super) fn compress_and_encode(status_list: &[u8]) -> String {
     use flate2::{Compression, write::ZlibEncoder};
     use std::io::Write;
 
@@ -256,16 +256,16 @@ mod test {
         let cases = [
             (
                 vec![
-                    0b10111001, // 0xb9
-                    0b10100011, // 0xa3
+                    0b1011_1001, // 0xb9
+                    0b1010_0011, // 0xa3
                 ],
                 "eNrbuRgAAhcBXQ",
             ),
             (
                 vec![
-                    0b11001001, // 0xc9
-                    0b01000100, // 0x44
-                    0b11111001, // 0xf9
+                    0b1100_1001, // 0xc9
+                    0b0100_0100, // 0x44
+                    0b1111_1001, // 0xf9
                 ],
                 "eNo76fITAAPfAgc",
             ),
@@ -331,7 +331,7 @@ mod test {
             status_list.sub,
             server.status_list_endpoint().unwrap().to_string()
         );
-        assert_eq!(status_list.ttl, Some(600));
+        assert_eq!(status_list.ttl, Some(300));
         assert_eq!(
             status_list.status_list,
             StatusListClaim {
