@@ -2,6 +2,8 @@ copyright: Copyright &copy; 2026, The Janssen Project
 docs_dir: ./docs
 edit_uri: edit/main/docs/
 extra:
+  enable_scarf_pixel: false
+  enable_reo_flag: false
   generator: false
   social:
   - icon: fontawesome/brands/github

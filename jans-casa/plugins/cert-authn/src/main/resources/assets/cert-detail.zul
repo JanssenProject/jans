@@ -10,7 +10,7 @@
         <z:include src="/back-home.zul" />
 
         <div class="ph4 mb2">
-            <div class="alert alert-success dn" id="feedback-cert-edit" role="alert" />
+            <div class="alert alert-success dn" id="feedback-cert-delete" role="alert" />
         </div>
 
         <div class="${css['sectionsWrapper']}">
@@ -61,7 +61,12 @@
                                 </p>
                             </div>
                             <div class="pl2 pt2">
-                                <h:button class="${css.deleteButton} mb2" w:onClick="alertRef = $('#feedback-cert-edit')"
+                                <h:button class="${css.editButton} mb2 mr2" visible="${each.pemContent ne null}"
+                                          onClick="@('download', each)"
+                                          data-original-title="${labels.usercert.download}" data-toggle="tooltip" data-placement="top">
+                                    <i class="fas fa-download" />
+                                </h:button>
+                                <h:button class="${css.deleteButton} mb2" w:onClick="alertRef = $('#feedback-cert-delete')"
                                           onClick="@('delete', each)"
                                           data-original-title="${labels.general.delete}" data-toggle="tooltip" data-placement="top">
                                     <i class="fas fa-trash-alt" />

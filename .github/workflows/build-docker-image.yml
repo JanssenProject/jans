@@ -53,7 +53,7 @@ jobs:
         docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar"]
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
@@ -61,7 +61,7 @@ jobs:
         uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           sparse-checkout: |
@@ -165,7 +165,7 @@ jobs:
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.10
         if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.10"
 
@@ -208,7 +208,7 @@ jobs:
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: docker/setup-qemu-action@737ba1e397ec2caff0d098f75e1136f9a926dc0a # master
+        uses: docker/setup-qemu-action@7e10951aea186e886cef2f1a25a7bbf4e593d710 # master
         with:
           image: tonistiigi/binfmt:master
           platforms: all
@@ -216,11 +216,11 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Login to ghcr
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -229,7 +229,7 @@ jobs:
       - name: Build and push
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: docker_build
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: ${{ steps.prep.outputs.dockerfilelocation }}
