@@ -7,11 +7,13 @@
 package io.jans.ca.plugin.adminui.rest;
 
 import io.jans.ca.plugin.adminui.rest.adminui.AdminUIResource;
+import io.jans.ca.plugin.adminui.rest.adminui.AdminUISecurityResource;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.rest.logging.AuditLoggerResource;
 
 import io.jans.ca.plugin.adminui.rest.webhook.WebhookResource;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;
@@ -37,19 +39,35 @@ tags = { @Tag(name = "Admin UI - Role"),
         @Tag(name = "Admin UI - Permission"),
         @Tag(name = "Admin UI - Role-Permissions Mapping"),
         @Tag(name = "Admin UI - License"),
-        @Tag(name = "Admin UI - Webhooks")},
+        @Tag(name = "Admin UI - Webhooks"),
+        @Tag(name = "Admin UI - Cedarling")},
 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read", description = "View admin user role related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly", description = "View admin user role related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write", description = "Manage admin user role related information"),
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read", description = "View admin permission related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete", description = "Delete admin user role related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly", description = "View admin permission related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write", description = "Manage admin permission related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete", description = "Delete admin permission related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly", description = "View role-permission mapping related information"),
 @OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write", description = "Manage role-permission mapping related information"),
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly", description = "Delete admin-ui license related information"),
-@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write", description = "View admin-ui license related information")}
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete", description = "Delete role-permission mapping related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly", description = "View admin-ui license related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write", description = "Manage admin-ui license related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/license.admin", description = "Full administrative access to license related information (super-user level)"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly", description = "View Admin UI security related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write", description = "Manage Admin UI security related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly", description = "View Admin UI configuration properties related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/properties.write", description = "Manage Admin UI configuration properties related information"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin", description = "Full administrative access to admin user roles (super-user level)"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin", description = "Full administrative access to admin permissions (super-user level)"),
+@OAuthScope(name = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin", description = "Full administrative access to role-permission mappings (super-user level)"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin read access to all configuration resources"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin write access to all configuration resources"),
+@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin delete access to all configuration resources"),
+}
 )))
 public class ApiApplication extends Application {
 
@@ -63,6 +81,7 @@ public class ApiApplication extends Application {
         classes.add(LicenseResource.class);
         classes.add(AdminUIResource.class);
         classes.add(WebhookResource.class);
+        classes.add(AdminUISecurityResource.class);
         return classes;
     }
 }

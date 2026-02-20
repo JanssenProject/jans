@@ -67,7 +67,7 @@ Download the compose file of your chosen persistence from mysql or postgres.
     wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
     ```
 
-Download the script files 
+Download the script files
 
 ```bash
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh /
@@ -76,18 +76,21 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-mono
 ```
 
 Give execute permission to the scripts
-`chmod u+x up.sh down.sh clean.sh`
+
+```bash
+    chmod u+x up.sh down.sh clean.sh
+```
 
 ## Create and Start Containers
 
-`up.sh` script invokes the appropriate compose file based on parameter passed. 
+`up.sh` script invokes the appropriate compose file based on parameter passed.
 You can pass `mysql` or `postgres` as an argument to the script. If you don't pass any, it will default to mysql.
 
-It creates two containers, a janssen monolith container and a container for 
+It creates two containers, a janssen monolith container and a container for
 persistence.
 
 !!! Troubleshooting Tip
-    Sometimes the command below runs into an error regarding TLS handshake 
+    Sometimes the command below runs into an error regarding TLS handshake
     timeout while trying to connect
     to docker registry. Try restarting docker services. Root-cause of this error
     is not known.
@@ -104,7 +107,7 @@ persistence.
 === "PostgreSQL"
 
     ```bash
-    ./up.sh pgsql
+    ./up.sh postgres
     ```
 
 
@@ -131,14 +134,24 @@ To stop the containers.
 
 ## Configure Janssen Server
 
-1. Access the Docker container shell using:
-    ```bash
+- Access the Docker container shell using:
 
-    docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
-    ```
-2. You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+    === "MySQL"
 
-3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
+        ```bash
+        docker compose -f jans-mysql-compose.yml exec jans /bin/bash 
+        ```
+
+    === "PostgreSQL"
+
+        ```bash
+        docker compose -f jans-postgres-compose.yml exec jans /bin/bash
+        ```
+
+- You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+
+- Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
+
     ```bash
     python3 /opt/jans/jans-cli/config-cli-tui.py
     ```

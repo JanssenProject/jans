@@ -37,12 +37,14 @@ class Crypto64:
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
 
-    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit'):
+    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit', cert_dir=None):
+        if not cert_dir:
+            cert_dir = Config.certFolder
         self.logIt('Generating Certificate for %s' % suffix)
-        key_with_password = '%s/%s.key.orig' % (Config.certFolder, suffix)
-        key = '%s/%s.key' % (Config.certFolder, suffix)
-        csr = '%s/%s.csr' % (Config.certFolder, suffix)
-        public_certificate = '%s/%s.crt' % (Config.certFolder, suffix)
+        key_with_password = '%s/%s.key.orig' % (cert_dir, suffix)
+        key = os.path.join(cert_dir, suffix) + '.key'
+        csr = os.path.join(cert_dir, suffix) + '.csr'
+        public_certificate = os.path.join(cert_dir, suffix) + '.crt'
         if not truststore_fn:
             truststore_fn = Config.defaultTrustStoreFN
 
@@ -96,20 +98,36 @@ class Crypto64:
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
 
-        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (Config.hostname, suffix), \
-                  "-file", public_certificate, "-keystore", truststore_fn, \
-                  "-storepass", truststore_pw, "-noprompt"])
+        self.import_cert_into_keystore(cert_fn=public_certificate, alias=f'{Config.hostname}_{suffix}')
 
         return key, csr, public_certificate
 
-    def gen_ca(self, ca_suffix='ca'):
+
+    def import_cert_into_keystore(self, cert_fn, alias, truststore_fn=None, truststore_pw='changeit'):
+        if not truststore_fn:
+            truststore_fn = Config.defaultTrustStoreFN
+
+        self.run([
+                Config.cmd_keytool,
+                "-import",
+                "-trustcacerts",
+                "-alias", alias,
+                "-file", cert_fn,
+                "-keystore", truststore_fn,
+                "-storepass", truststore_pw,
+                "-noprompt"
+                ])
+
+
+    def gen_ca(self, ca_suffix='ca', cert_dir=None):
         self.logIt('Generating CA Certificate')
 
-        out_dir = os.path.join(Config.output_dir, 'CA')
-        self.run([paths.cmd_mkdir, '-p', out_dir])
+        if not cert_dir:
+            cert_dir = os.path.join(Config.output_dir, 'CA')
+            self.run([paths.cmd_mkdir, '-p', cert_dir])
 
-        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
-        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+        ca_key_fn = os.path.join(cert_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(cert_dir, ca_suffix+'.crt')
 
         self.run([paths.cmd_openssl, 'req',
                   '-newkey', 'rsa:2048', '-nodes',
@@ -175,7 +193,7 @@ class Crypto64:
                     Config.templateRenderingDict[extension_script_name] = base64_script_file
 
 
-    def generate_base64_file(self, fn, num_spaces):
+    def generate_base64_file(self, fn, num_spaces=0):
         self.logIt('Loading file %s' % fn)
         plain_file_b64encoded_text = None
         try:

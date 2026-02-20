@@ -17,9 +17,8 @@ def get_setup_options():
         'install_scim_server': True if base.current_app.profile == 'jans' else False,
         'install_fido2': True,
         'install_link': False,
-        'install_jans_keycloak_link': False,
         'install_casa': False,
-        'install_jans_saml': False,
+        'install_jans_shib': False,
         'install_jans_lock': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
@@ -34,6 +33,9 @@ def get_setup_options():
         setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
         setupOptions['rdbm_type'] = base.argsp.remote_rdbm
         setupOptions['rdbm_host'] = base.argsp.rdbm_host
+        if base.argsp.remote_rdbm_ssl_cert_fn:
+            with open(base.argsp.remote_rdbm_ssl_cert_fn) as f:
+                setupOptions['rdbm_sslrootcert'] = f.read()
 
     else:
         setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
@@ -72,13 +74,10 @@ def get_setup_options():
         if base.argsp.install_link:
             setupOptions['install_link'] = True
 
-        if base.argsp.install_jans_keycloak_link:
-            setupOptions['install_jans_keycloak_link'] = True
-
         if base.argsp.with_casa:
             setupOptions['install_casa'] = True
-        if base.argsp.install_jans_saml:
-            setupOptions['install_jans_saml'] = True
+        if base.argsp.install_jans_shib:
+            setupOptions['install_jans_shib'] = True
         if base.argsp.install_jans_lock:
             setupOptions['install_jans_lock'] = True
 

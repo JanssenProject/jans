@@ -15,5 +15,10 @@ public class Constants {
     public static final String SCIM = "/scim";
     public static final String SCIM_CONFIG = "/scim-config";
     public static final String USER = "/user"; 
+    
+    
+    public static final String SCIM_READ_ACCESS = "https://jans.io/scim/config.readonly";
+    public static final String SCIM_WRITE_ACCESS = "https://jans.io/scim/config.write";
+    public static final String SCIM_ADMIN_ACCESS = "https://jans.io/oauth/config/scim.admin";
 
 }

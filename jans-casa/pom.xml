@@ -26,14 +26,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.6.3</maven.min-version>
         <weld.version>4.0.3.Final</weld.version>
-        <pf4j.version>3.10.0</pf4j.version>
-        <log4j.version>2.24.1</log4j.version>
-        <jackson.version>2.18.1</jackson.version>
-        <zk.version>10.0.0-jakarta</zk.version>
-        <ldapsdk.version>6.0.8</ldapsdk.version>
+        <pf4j.version>3.13.0</pf4j.version>
+        <log4j.version>2.25.3</log4j.version>
+        <jackson.version>2.21.0</jackson.version>
+        <zk.version>10.1.0-jakarta</zk.version>
+        <ldapsdk.version>7.0.3</ldapsdk.version>
         <resteasy.version>6.2.12.Final</resteasy.version>
-        <tika.version>3.0.0</tika.version>
-        <bc.version>1.80</bc.version>
+        <tika.version>3.2.3</tika.version>
+        <bc.version>1.82</bc.version>
         <!-- SonarCloud integration properties -->
         <sonar.projectKey>JanssenProject_jans-casa</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -55,7 +55,7 @@
         <repository>
             <id>ZK CE</id>
             <name>ZK CE Repository</name>
-            <url>http://mavensync.zkoss.org/maven2</url>
+            <url>https://mavensync.zkoss.org/maven2</url>
         </repository>
         <repository>
             <id>jboss</id>
@@ -77,6 +77,8 @@
         <module>app-fips</module>
         <module>plugins/acct-linking</module>
         <module>plugins/acct-linking/agama</module>
+        <module>plugins/cert-authn</module>
+        <module>plugins/cert-authn/agama</module>
         <module>plugins/client-authorizations</module>
         <module>plugins/custom-branding</module>
         <module>plugins/strong-authn-settings</module>
@@ -92,7 +94,7 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.74.0</version>
+                <version>1.76.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -186,7 +188,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>                    
+                    <version>3.15.0</version>                    
                     <configuration>
                         <annotationProcessors>
                             <annotationProcessor>
@@ -206,7 +208,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -244,7 +246,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.9.4.0</version>
+                    <version>4.9.8.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

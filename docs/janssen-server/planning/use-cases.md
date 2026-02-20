@@ -86,7 +86,7 @@ may vary if you actually want SSO.  Recently, OpenID has published a new
 specification draft for [Native SSO for Mobile Apps](https://openid.net/specs/openid-connect-native-sso-1_0.html),
 that is on the [roadmap](https://github.com/JanssenProject/jans/issues/2518).
 There are some other hacky ways you can implement mobile authentication, for
-example, using the OAuth `password` grant--but this is possible only for first-party 
+example, using the OAuth `password` grant--but this is possible only for first-party
 applications, and is generally discouraged because there is no way to
 securely store a client secret in the mobile application, which hackers can
 easily decompile.
@@ -143,7 +143,7 @@ a policy decision point. And one more caveat... the "authorization" in an OAuth
 "authorization server", was originally meant to convey the authorization of the
 person who was trying to access something. Whether a person consented to share
 information, or grant a client the ability to act on their behalf, is another
-important consideration. So does "Auth Server" provide authorization? It depends!  
+important consideration. So does "Auth Server" provide authorization? It depends!
 
 ## Consent Gathering
 

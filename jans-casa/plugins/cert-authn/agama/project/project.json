@@ -1,0 +1,20 @@
+{
+    "projectName": "cert-authn",
+    "version": "0.0.0-nightly",
+    "author": "jgomer2001",
+    "description": "This project bundles flows for certificate authentication and enrollment",
+    "noDirectLaunch": [ "io.jans.casa.authn.cert", "io.jans.casa.cert.promptAndValidate" ],
+    "configs": {
+        "io.jans.casa.cert.promptAndValidate": {
+            "certPickupUrl": "https://...",
+            "certChainPEM": "-----BEGIN CERTIFICATE-----\n your certificate chain, see the docs. \n-----END CERTIFICATE-----\n",
+            "roundTripMaxTime": 45
+        },
+        "io.jans.casa.cert.oneStepAuthn": {
+            "useAcctLinking": false
+        },
+        "io.jans.casa.cert.standaloneOneStepAuthn": {
+            "mappingClassField": "STRAIGHT"
+        }
+    }
+}

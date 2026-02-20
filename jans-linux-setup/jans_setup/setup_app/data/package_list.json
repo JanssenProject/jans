@@ -31,7 +31,6 @@
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
       "certifi": "python-certifi",
-      "Crypto": "python-cryptography",
       "psycopg2": "python-psycopg2"
     }
   },
@@ -64,7 +63,6 @@
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
       "certifi": "python-certifi",
-      "Crypto": "python-cryptography",
       "psycopg2": "python-psycopg2"
     }
   },

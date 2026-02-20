@@ -222,8 +222,6 @@ def uninstall_jans():
     print("Uninstalling Jannsen Server...")
 
     service_list = os.listdir(jetty_home)
-    if os.path.exists('/opt/keycloak'):
-        service_list.append('kc')
 
     if os.path.exists('/opt/opa'):
         service_list.append('opa')
@@ -255,11 +253,8 @@ def uninstall_jans():
         '/opt/node*',
         '/opt/jetty*',
         '/opt/jython*',
-        '/opt/keycloak',
         '/opt/idp',
         '/opt/opa',
-        '/opt/kc-scheduler',
-        '/etc/cron.d/kc-scheduler-cron',
         '/etc/cron.d/jans-session',
         '/usr/local/bin/jans',
         ]

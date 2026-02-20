@@ -1,0 +1,29 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Data source for retrieving database schema configuration
+---
+
+# {{.Name}} ({{.Type}})
+
+Data source for retrieving the database schema configuration from the Janssen server.
+This provides information about all database tables and their field definitions,
+useful for understanding the data model of non-LDAP database backends.
+
+## Example Usage
+
+```terraform
+data "jans_database_configuration" "all" {
+}
+
+output "table_count" {
+  value = length(data.jans_database_configuration.all.tables)
+}
+
+output "schema_json" {
+  value = data.jans_database_configuration.all.schema_json
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

@@ -36,31 +36,7 @@ This script has been adapted from the Gluu Server [sample revoke token script](h
 
 ### Script Type: Python
 ```python
-from io.jans.model.custom.script.type.revoke import RevokeTokenType
-from java.lang import String
-
-class RevokeToken(RevokeTokenType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "Revoke Token script. Initializing ..."
-        print "Revoke Token script. Initialized successfully"
-
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "Revoke Token script. Destroying ..."
-        print "Revoke Token script. Destroyed successfully"
-        return True
-
-    def getApiVersion(self):
-        return 11
-
-    # This method is called during Revoke Token call.
-    # If True is returned, token is revoked. If False is returned, revoking is skipped.
-    def revoke(self, context):
-        return True
+--8<-- "script-catalog/revoke_token/revoke-token/revoke_token.py"
 ```
 
 ### Script Type: Java
@@ -80,30 +56,30 @@ public class RevokeToken implements RevokeTokenType {
     private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
 
     @Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("Token Revoke. Initializing...");
         log.info("Token Revoke. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("Token Revoke. Initializing...");
         log.info("Token Revoke. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("Token Revoke. Destroying...");
         log.info("Token Revoke. Destroyed.");
         return true;
-	}
+        }
 
-	@Override
-	public int getApiVersion() {
-		return 11;
-	}
+        @Override
+        public int getApiVersion() {
+                return 11;
+        }
 
     @Override
     public boolean revoke(Object context) {
@@ -118,7 +94,7 @@ The Janssen Project documentation is currently in development. Topic pages are b
 
 ## Have questions in the meantime?
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 

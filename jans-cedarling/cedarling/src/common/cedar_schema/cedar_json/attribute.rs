@@ -3,13 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::deserialize::*;
-use super::*;
+use super::deserialize::deserialize_record_attrs;
+use super::{AttributeName, EntityName, EntityOrCommonName, ExtensionName};
 use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum Attribute {
     String {
         required: bool,
@@ -120,14 +121,14 @@ impl<'de> Deserialize<'de> for Attribute {
 impl Attribute {
     pub fn is_required(&self) -> bool {
         *match self {
-            Attribute::String { required } => required,
-            Attribute::Long { required } => required,
-            Attribute::Boolean { required } => required,
-            Attribute::Record { required, .. } => required,
-            Attribute::Set { required, .. } => required,
-            Attribute::Entity { required, .. } => required,
-            Attribute::Extension { required, .. } => required,
-            Attribute::EntityOrCommon { required, .. } => required,
+            Attribute::String { required }
+            | Attribute::Long { required }
+            | Attribute::Boolean { required }
+            | Attribute::Record { required, .. }
+            | Attribute::Set { required, .. }
+            | Attribute::Entity { required, .. }
+            | Attribute::Extension { required, .. }
+            | Attribute::EntityOrCommon { required, .. } => required,
         }
     }
 }

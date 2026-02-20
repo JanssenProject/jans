@@ -31,6 +31,16 @@ configmap:
   cnSqlDbTimezone: UTC
   # -- SQL password  injected in the secrets.
   cnSqldbUserPassword: Test1234#
+  # -- Enable SSL connection to SQL database.
+  cnSqlSslEnabled: false
+  # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
+  cnSqlSslMode: ""
+  # -- Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication.
+  cnSqlSslCaCert: ""
+  # -- Base64-encoded string of client certificate signed by CA. Required if using client cert authentication.
+  cnSqlSslClientCert: ""
+  # -- Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml.
+  cnSqlSslClientKey: ""
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
   containerMetadataName: kubernetes
@@ -116,24 +126,6 @@ configmap:
   lbAddr: ""
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
-  # -- Keycloak logging level
-  kcLogLevel: INFO
-  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
-  kcDbVendor: mysql
-  # -- Keycloak database username
-  kcDbUsername: keycloak
-  # -- Password for Keycloak database access
-  kcDbPassword: Test1234#
-  # -- Keycloak database schema name (note that PostgreSQL may using "public" schema).
-  kcDbSchema: keycloak
-  # -- Keycloak database host
-  kcDbUrlHost: mysql.kc.svc.cluster.local
-  # -- Keycloak database port (default to port 3306 for mysql).
-  kcDbUrlPort: 3306
-  # -- Keycloak database name
-  kcDbUrlDatabase: keycloak
-  # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
-  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 # -- Country code. Used for certificate creation.
@@ -142,7 +134,7 @@ countryCode: US
 email: support@jans.io
 image:
   # -- Image  to use for deploying.
-  repository: janssenproject/configurator
+  repository: ghcr.io/janssenproject/jans/configurator
   # -- Image  tag to use for deploying.
   tag: 0.0.0-nightly
   # -- Image Pull Secrets

@@ -1,0 +1,27 @@
+{
+  "name": "janssen-tarp-mcp-server",
+  "version": "1.15.0",
+  "description": "The MCP server of Janssen-Tarp for addressing handling requests from AI Agents (inside Janssen Tarp)",
+  "main": "dist/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "^4.1.1",
+    "@modelcontextprotocol/sdk": "^1.23.0",
+    "axios": "^1.13.2",
+    "express": "^5.1.0",
+    "lowdb": "^7.0.1",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "license": "Apache-2.0"
+}

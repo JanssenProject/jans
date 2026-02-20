@@ -33,10 +33,9 @@ public class Fido2Configuration {
 	private boolean userAutoEnrollment = false;
 	@DocProperty(description = "Expiration time in seconds for pending enrollment/authentication requests")
 	private int unfinishedRequestExpiration = 120; // 120 seconds
-    @DocProperty(description = "Authentication History Expiration time in seconds for pending enrollment/authentication requests")
-    private int authenticationHistoryExpiration;
 	@DocProperty(description = "Expiration time in seconds for approved authentication requests")
-	private int metadataRefreshInterval = 15 * 24 * 3600; // 15 days
+	private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
+
 	@DocProperty(description = "Authenticators metadata in json format")
 	private String serverMetadataFolder;
 	@DocProperty(description = "List of Requested Credential Types")
@@ -86,16 +85,8 @@ public class Fido2Configuration {
 	public void setUnfinishedRequestExpiration(int unfinishedRequestExpiration) {
 		this.unfinishedRequestExpiration = unfinishedRequestExpiration;
 	}
-	
-	public int getAuthenticationHistoryExpiration() {
-        return authenticationHistoryExpiration;
-    }
 
-    public void setAuthenticationHistoryExpiration(int authenticationHistoryExpiration) {
-        this.authenticationHistoryExpiration = authenticationHistoryExpiration;
-    }
-
-    public String getServerMetadataFolder() {
+	public String getServerMetadataFolder() {
 		return serverMetadataFolder;
 	}
 
@@ -127,12 +118,14 @@ public class Fido2Configuration {
 		this.enterpriseAttestation = enterpriseOnly;
 	}
 
-	public int getMetadataRefreshInterval() {
-		return metadataRefreshInterval;
+
+
+	public int getAuthenticationHistoryExpiration() {
+		return authenticationHistoryExpiration;
 	}
 
-	public void setMetadataRefreshInterval(int metadataRefreshInterval) {
-		this.metadataRefreshInterval = metadataRefreshInterval;
+	public void setAuthenticationHistoryExpiration(int authenticationHistoryExpiration) {
+		this.authenticationHistoryExpiration = authenticationHistoryExpiration;
 	}
 
 	
@@ -179,7 +172,7 @@ public class Fido2Configuration {
 
 	public Fido2Configuration(String authenticatorCertsFolder, String mdsAccessToken, String mdsCertsFolder,
 			String mdsTocsFolder, boolean checkU2fAttestations, boolean debugUserAutoEnrollment,
-			int unfinishedRequestExpiration, int metadataRefreshInterval, String serverMetadataFolder,
+			int unfinishedRequestExpiration, int authenticationHistoryExpiration, String serverMetadataFolder,
 			List<String> enabledFidoAlgorithms, List<RequestedParty> requestedParties,
 			List<MetadataServer> metadataServers, boolean disableMetadataService, String attestationMode,
 			List<String> hints, boolean enterpriseAttestation) {
@@ -191,7 +184,7 @@ public class Fido2Configuration {
 
 		this.userAutoEnrollment = debugUserAutoEnrollment;
 		this.unfinishedRequestExpiration = unfinishedRequestExpiration;
-		this.metadataRefreshInterval = metadataRefreshInterval;
+		this.authenticationHistoryExpiration = authenticationHistoryExpiration;
 		this.serverMetadataFolder = serverMetadataFolder;
 		this.enabledFidoAlgorithms = enabledFidoAlgorithms;
 		this.requestedParties = requestedParties;
@@ -205,16 +198,16 @@ public class Fido2Configuration {
 	public Fido2Configuration() {
 	}
 
-    @Override
-    public String toString() {
-        return "Fido2Configuration [authenticatorCertsFolder=" + authenticatorCertsFolder + ", mdsCertsFolder="
-                + mdsCertsFolder + ", mdsTocsFolder=" + mdsTocsFolder + ", userAutoEnrollment=" + userAutoEnrollment
-                + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration + ", authenticationHistoryExpiration="
-                + authenticationHistoryExpiration + ", metadataRefreshInterval=" + metadataRefreshInterval
-                + ", serverMetadataFolder=" + serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms
-                + ", requestedParties=" + requestedParties + ", metadataServers=" + metadataServers
-                + ", disableMetadataService=" + disableMetadataService + ", hints=" + hints + ", enterpriseAttestation="
-                + enterpriseAttestation + ", attestationMode=" + attestationMode + "]";
-    }
+	@Override
+	public String toString() {
+		return "Fido2Configuration [authenticatorCertsFolder=" + authenticatorCertsFolder + ", mdsCertsFolder="
+				+ mdsCertsFolder + ", mdsTocsFolder=" + mdsTocsFolder + ", userAutoEnrollment="
+				+ userAutoEnrollment + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration
+				+ ", authenticationHistoryExpiration=" + authenticationHistoryExpiration + ", serverMetadataFolder="
+				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
+				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
+				+ disableMetadataService + ", hints=" + hints + ", enterpriseAttestation=" + enterpriseAttestation
+				+ ", attestationMode=" + attestationMode + "]";
+	}
 
 }

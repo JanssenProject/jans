@@ -9,9 +9,9 @@ In order to use this authentication mechanism users will need to install a mobil
 Use following group id and artifact id in maven
 a. <groupId>com.lochbridge.oath</groupId>
   <artifactId>oath-otp</artifactId>
-  
+
 b.  <groupId>com.lochbridge.oath</groupId>
   <artifactId>oath-otp-keyprovisioning</artifactId>
-  
+
 c. <groupId>com.lochbridge.oath</groupId>
   <artifactId>oath-parent</artifactId>

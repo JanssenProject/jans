@@ -10,7 +10,7 @@ tags:
 
 ### Template overrides
 
-[Template overrides](../../../agama/language-reference.md#template-overrides) is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience. 
+[Template overrides](../../../agama/language-reference.md#template-overrides) is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience.
 
 To start, use [`Trigger`](../../../agama/language-reference.md#subflows) to play around with the existing flow - as is - from the flow you are creating. Collect the URLs of the pages you are not comfortable with: grab them directly from the browser's address bar. Then proceed as follows with every URL to locate the actual templates physically:
 
@@ -84,7 +84,7 @@ myproject.salutation = ciao!
 
 ```
 
-When leaving `salutation` alone, it is likely other projects added to the server in the future may contain their own version of `salutation` leading to unexpected results. 
+When leaving `salutation` alone, it is likely other projects added to the server in the future may contain their own version of `salutation` leading to unexpected results.
 
 Additional notes:
 
@@ -107,13 +107,13 @@ Agama already makes use of macros for this purpose. Take a look at the `ftlh` fi
 
 **Example:**
 
-Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page. 
+Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page.
 
 !!! Note
     FreeMarker comments are of the form `<#-- This won't be printed in the output -->`
 
 One way to structure the solution is the following:
-    
+
 ```
 <#-- aside.ftlh -->
 
@@ -196,7 +196,7 @@ One way to structure the solution is the following:
 </@com.main>
 ```
 
-`index.ftlh` is the homepage: 
+`index.ftlh` is the homepage:
 
 - Template `commons.ftlh` is imported and its macro `main` called passing `true` for `useSidebar`
 
@@ -225,7 +225,7 @@ One way to structure the solution is the following:
 
 This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
 
-Clearly a page at flow A can be overriden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
+Clearly a page at flow A can be overridden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
 
 POSTing this way will provoke the associated `Trigger` call to return a value like `{ aborted: true, data: ..., url: ... }` where `data` is a _map_ consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The `url` property will hold the URL where cancellation took place relative to `https://your-server/jans-auth/fl/`.
 
@@ -250,7 +250,7 @@ Finish result
 
 ```
 
-The overriden template `cust_enter_otp.ftlh` would have a form like:
+The overridden template `cust_enter_otp.ftlh` would have a form like:
 
 ```
 ...
@@ -260,13 +260,13 @@ The overriden template `cust_enter_otp.ftlh` would have a form like:
 </form>
 ```
 
-Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an `RRF` directive is in execution. When a flow is aborted and the control returned back to a parent, there is no way to "resume" execution of the flow target of the cancellation. 
+Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an `RRF` directive is in execution. When a flow is aborted and the control returned to a parent, there is no way to "resume" execution of the flow target of the cancellation.
 
 ### Cancellation bubble-up
 
-In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is `Trigger`ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of `Trigger` invocations. 
+In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is `Trigger`ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of `Trigger` invocations.
 
-As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overriden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process. 
+As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overridden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process.
 
 Note that even flow B (as is) may also be overriding C's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:
 
@@ -290,11 +290,11 @@ There is a clear correspondence of the "current URL" with the physical path of t
 
 Note however URLs are not manipulable: an attempt to set the browser location to a URL corresponding to a different template will not make that template be rendered or provoke any unexpected jump in the flow control. Instead, an error page is shown that allows users to re-take where they left off or to restart from scratch. In other words, navigation honors the "current flow URL" avoiding attempts to re-visit past stages or make unexpected moves to future ones.
 
-Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages. 
+Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages.
 
 ### Code transpilation
 
-The engine has some timers running in the background. One of them [transpiles code](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java) when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through [Mozilla Rhino](https://github.com/mozilla/rhino) by using a transformation chain like  (DSL) flow code -> (ANTLR4) parse tree -> (XML) abstract syntax tree -> JS. 
+The engine has some timers running in the background. One of them [transpiles code](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java) when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through [Mozilla Rhino](https://github.com/mozilla/rhino) by using a transformation chain like  (DSL) flow code -> (ANTLR4) parse tree -> (XML) abstract syntax tree -> JS.
 
 The transformation chain guarantees that a flow written in Agama DSL cannot:
 

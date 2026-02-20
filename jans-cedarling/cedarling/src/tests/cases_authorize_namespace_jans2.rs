@@ -15,7 +15,8 @@ static POLICY_STORE_RAW_YAML: &str =
 
 /// We check if application support non standart namespace
 /// In previous we hardcoded creating entities in namespace `Jans`
-/// in `POLICY_STORE_RAW_YAML` is used namespace `Jans2`
+/// in `POLICY_STORE_RAW_YAML` is used namespace `Jans2` for all entities
+/// We use Trusted issuer with name `Jans` it means namespace `Jans` for `TrustedIssuer` entity.
 #[test]
 async fn test_namespace_jans2() {
     let policy_src = PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string());

@@ -10,7 +10,7 @@ policy_stores:
     description: A test policy store where everything is fine.
     trusted_issuers:
       Jans123123:
-        name: "Jans2"
+        name: "Jans"
         description: "A Test IDP"
         openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
         token_metadata:

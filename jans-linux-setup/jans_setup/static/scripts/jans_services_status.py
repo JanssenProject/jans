@@ -11,7 +11,6 @@ class Status:
     RUNNING = 'Running'
 
 _JANS_LOCK_SERVICE_ = 'jans-lock'
-_KEYCLOAK_ = 'keycloak'
 JANS_JETTY_DIR = '/opt/jans/jetty'
 
 HEALTH_ENDPOINTS = {
@@ -59,7 +58,6 @@ def get_service_status():
     for jservice in HEALTH_ENDPOINTS:
         service_list += HEALTH_ENDPOINTS[jservice][1]
     service_list.append(_JANS_LOCK_SERVICE_)
-    service_list.append(_KEYCLOAK_)
 
     check_services = [sys.argv[1]] if len(sys.argv) > 1 and sys.argv[1] in service_list else []
 
@@ -78,12 +76,6 @@ def get_service_status():
             services_status[jservice] = check_jans_service_health(HEALTH_ENDPOINTS[jservice])
         else:
             services_status[jservice] = Status.NOT_PRESENT
-
-    if (check_services and _KEYCLOAK_ in check_services) or not check_services:
-        if os.path.exists('/opt/keycloak'):
-            services_status[_KEYCLOAK_] = check_jans_service_health(['http://localhost:8083/kc/admin/master/console/', []], True)
-        else:
-             services_status[_KEYCLOAK_] = Status.NOT_PRESENT
 
 if __name__ == '__main__':
     get_service_status()

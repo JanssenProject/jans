@@ -33,7 +33,7 @@ public class TokenManagementWebService extends BaseScimWebService implements ITo
     @Path("{id}")
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
-    //@ProtectedApi(scopes = { "https://jans.io/scim/tokens" })
+    @ProtectedApi(scopes = { "https://jans.io/scim/tokens" })
     public Response getTokensMetadata(
             @PathParam("id") String id,
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
@@ -67,7 +67,7 @@ public class TokenManagementWebService extends BaseScimWebService implements ITo
     @Path("{id}")
     @DELETE
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
-    //@ProtectedApi(scopes = { "https://jans.io/scim/tokens" })
+    @ProtectedApi(scopes = { "https://jans.io/scim/tokens" })
     public Response revokeTokens(@PathParam("id") String id, @QueryParam("tokenHash") String hash) {
 
         Response response;
