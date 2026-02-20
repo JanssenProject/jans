@@ -39,7 +39,16 @@ impl Display for BuildEntityErrors {
 #[error("failed to build \"{entity_type_name}\" entity: {error}")]
 pub struct BuildEntityError {
     pub entity_type_name: String,
-    pub error: BuildEntityErrorKind,
+    pub error: Box<BuildEntityErrorKind>,
+}
+
+impl BuildEntityError {
+    pub fn new(entity_type_name: String, error: BuildEntityErrorKind) -> BuildEntityError {
+        BuildEntityError {
+            entity_type_name,
+            error: Box::new(error),
+        }
+    }
 }
 
 #[derive(Debug, Error)]
@@ -47,9 +56,9 @@ pub enum BuildEntityErrorKind {
     #[error("unable to find a valid entity id, tried the following: {0}")]
     MissingEntityId(GetEntityIdErrors),
     #[error("failed to parse entity uid: {0}")]
-    FailedToParseUid(#[from] cedar_policy::ParseErrors),
+    FailedToParseUid(#[from] Box<cedar_policy::ParseErrors>),
     #[error("failed to evaluate entity attribute or tag: {0}")]
-    EntityAttrEval(#[from] cedar_policy::EntityAttrEvaluationError),
+    EntityAttrEval(#[from] Box<cedar_policy::EntityAttrEvaluationError>),
     #[error("invalid issuer URL: {0}")]
     InvalidIssUrl(#[from] url::ParseError),
     #[error("failed to build entity attributes: {0}")]
@@ -85,7 +94,7 @@ impl From<BuildAttrsError> for BuildEntityErrorKind {
 
 impl Display for BuildAttrsErrorVec {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
+        write!(f, "[{}]", collect_errors_to_str(&self.0))
     }
 }
 
@@ -111,8 +120,8 @@ impl From<Vec<ExpressionConstructionError>> for BuildAttrsErrorVec {
     }
 }
 
-impl From<BuildExprError> for BuildAttrsError {
-    fn from(err: BuildExprError) -> Self {
+impl From<Box<BuildExprError>> for BuildAttrsError {
+    fn from(err: Box<BuildExprError>) -> Self {
         Self::BuildRestrictedExpressions(BuildExprErrorVec::from(Vec::from([err])))
     }
 }
@@ -121,7 +130,7 @@ impl BuildEntityErrorKind {
     pub fn while_building(self, entity_type_name: &str) -> BuildEntityError {
         BuildEntityError {
             entity_type_name: entity_type_name.to_string(),
-            error: self,
+            error: Box::new(self),
         }
     }
 }
@@ -129,7 +138,7 @@ impl BuildEntityErrorKind {
 fn collect_errors_to_str<T: Display>(errors: &[T]) -> String {
     errors
         .iter()
-        .map(|e| e.to_string())
+        .map(ToString::to_string)
         .collect::<Vec<_>>()
         .join(", ")
 }
@@ -139,5 +148,5 @@ pub enum BuildUnsignedEntityError {
     #[error("the role entity must be either a String or an Array of strings but got: {0:?}")]
     InvalidType(serde_json::Value),
     #[error(transparent)]
-    BuildEntity(#[from] BuildEntityError),
+    BuildEntity(#[from] Box<BuildEntityError>),
 }

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -46,14 +47,28 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     
     private ObjectMapper mapper;
 
+    /**
+     * Retrieve a paged list of currently deployed Agama projects.
+     *
+     * @param start the zero-based start index for the returned page
+     * @param count the maximum number of results to return; when less than or equal to zero a server-configured default is used
+     * @return a Response whose entity is a PagedResult<Deployment> containing the requested page of deployments; returned Deployment entries have internal folder details removed
+     */
     @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-prj", tags = {
-    "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS}))
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama projects", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-all.json"))),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "200", description = "Agama projects", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-all.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDeployments(@Parameter(description = "Start index for the result")  @QueryParam("start") int start, @Parameter(description = "Search size - count of the results to return") @QueryParam("count") int count) {
         
@@ -65,16 +80,29 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
     
-    @Operation(summary = "Fetches deployed Agama project based on name.", description = "Fetches deployed Agama project based on name.", operationId = "get-agama-prj-by-name", tags = {
-    "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS} ))
+    /**
+     * Retrieve details of a single Agama deployment by project name.
+     *
+     * @param projectName the Agama project name
+     * @return a Response containing HTTP 200 with the Deployment when found; HTTP 204 when the deployment exists but is not yet finished; HTTP 404 when the project is unknown
+     */
+    @Operation(summary = "Retrieve details of a single deployment by name.", description = "Retrieve details of a single deployment by name.", operationId = "get-agama-prj-by-name", tags = {
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get.json"))),
-    @ApiResponse(responseCode = "204", description = "No Content"),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "404", description = "Not Found"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get.json"))),
+            @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response getDeployment(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
@@ -90,18 +118,32 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Deploy an Agama project.", description = "Deploy an Agama project.", operationId = "post-agama-prj", tags = {
-    "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
+    /**
+     * Uploads an Agama project ZIP and queues a deployment task, adding or replacing the project on the server.
+     *
+     * @param projectName   the name of the Agama project
+     * @param autoconfigure a string parsable as boolean; `"true"` enables automatic post-deployment configuration
+     * @param gamaBinary    the raw bytes of the project ZIP (application/zip)
+     * @return a Response with:
+     *         - 202 Accepted when a deployment task was queued,
+     *         - 400 Bad Request when project name or binary data is missing,
+     *         - 409 Conflict when there is an active deployment task for the project
+     */
+    @Operation(summary = "Add or replace an Agama project to the server.", description = "Add or replace an Agama project to the server.", operationId = "post-agama-prj", tags = {
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
-    @ApiResponse(responseCode = "400", description = "Bad Request"),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "409", description = "Conflict"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "409", description = "Conflict"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Consumes("application/zip")
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {},
-            superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AGAMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME)
                 String projectName, @Parameter(description = "Boolean value to indicating to auto configure the project ") @QueryParam("autoconfigure") String autoconfigure, @Parameter(description = "Agama gama file") byte[] gamaBinary) {
@@ -122,18 +164,25 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Delete a deployed Agama project.", description = "Delete a deployed Agama project.", operationId = "delete-agama-prj", tags = {
-    "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            ApiAccessConstants.AGAMA_DELETE_ACCESS }))
-    @ApiResponses(value = {
-    @ApiResponse(responseCode = "204", description = "No Content"),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "404", description = "Not Found"),
-    @ApiResponse(responseCode = "409", description = "Conflict"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    /**
+     * Undeploys the named Agama project from the server.
+     *
+     * @param projectName the name of the Agama project to undeploy
+     * @return `204 No Content` if undeployment succeeded; `404 Not Found` if the project does not exist; `409 Conflict` if the project is currently being deployed; `500 Internal Server Error` for unexpected server errors
+     */
+    @Operation(summary = "Undeploy an Agama project from the server.", description = "Undeploy an Agama project from the server.", operationId = "delete-agama-prj", tags = {
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "409", description = "Conflict"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, groupScopes = {},
-            superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AGAMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
     public Response undeploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
         if (logger.isInfoEnabled()) {
@@ -153,14 +202,30 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         
     }
 
-    @Operation(summary = "Retrieve the list of configs based on name.", description = "Retrieve the list of configs based on name.", operationId = "get-agama-prj-configs", tags = {
-    "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS}))
+    /**
+     * Retrieve configurations for flows that belong to the specified project.
+     *
+     * The project must be fully processed. The response body is a JSON string that maps each flow's
+     * qualified name to its configuration properties; flows that do not exist or have no properties are omitted.
+     *
+     * @param projectName the Agama project name
+     * @return a JSON string representing a mapping from flow qualified names to their configuration property maps
+     */
+    @Operation(summary = "Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully.", description = "Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully.", operationId = "get-agama-prj-configs", tags = {
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama projects configs", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-configs-all.json"))),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "200", description = "Agama projects configs", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-configs-all.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
     public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
         if (logger.isInfoEnabled()) {
@@ -198,18 +263,29 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Update an Agama project.", description = "Update an Agama project.", operationId = "put-agama-prj", tags = {
-    "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
+    /**
+     * Replace configurations for flows that belong to the specified Agama project.
+     *
+     * @param projectName   the Agama project name
+     * @param flowsConfigs  a mapping from flow qualified name to a map of configuration properties (property name -> value)
+     * @return a map from flow qualified name to `true` if that flow's configuration was successfully updated, `false` otherwise
+     */
+    @Operation(summary = "Set or replace the configurations associated to flows that belong to the project. The project must have been already processed fully.", description = "Set or replace the configurations associated to flows that belong to the project. The project must have been already processed fully.", operationId = "put-agama-prj", tags = {
+            "Agama" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AGAMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @RequestBody(description = "JSON object with configurations associated to flows ", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HashMap.class), examples = @ExampleObject(name = "Request example", value = "example/agama/put-agama-prj-config.json")))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama project accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
-    @ApiResponse(responseCode = "400", description = "Bad Request"),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "409", description = "Conflict"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "200", description = "JSON object with properties values correspond to a boolean indicating the success of the update for the given flow.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/put-agama-prj-config-response.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "409", description = "Conflict"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {},
-            superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.AGAMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
     public Response setConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName,
             @Parameter(description = "Agama flow config, key is `name` of config property and `value` is the property value. ") Map<String, Map<String, Object>> flowsConfigs) {

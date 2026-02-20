@@ -24,7 +24,7 @@
             "dn": "inum=9d2f39f5-a910-4a03-a888-6f0f1ee03445,ou=document,o=jans",
             "selected": false,
             "inum": "9d2f39f5-a910-4a03-a888-6f0f1ee03445",
-            "displayName": "kc-saml-plugin.jar",
+            "displayName": "saml-plugin.jar",
             "description": "/opt/jans/jetty/jans-config-api/",
             "creationDate": "2024-03-14T12:53:00",
             "jansModuleProperty": [

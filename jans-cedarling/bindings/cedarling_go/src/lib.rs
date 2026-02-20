@@ -3,8 +3,8 @@
 use std::{
     collections::HashMap,
     sync::{
-        Arc, LazyLock, Mutex,
         atomic::{AtomicUsize, Ordering},
+        Arc, LazyLock, Mutex,
     },
 };
 use tokio::runtime::Runtime;
@@ -154,6 +154,12 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         let request = from_json_str!(request_json);
         let instance = get_instance!(instance_id);
         execute_in_runtime!(instance.authorize_unsigned(request))
+    }
+
+    fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result {
+        let request = from_json_str!(request_json);
+        let instance = get_instance!(instance_id);
+        execute_in_runtime!(instance.authorize_multi_issuer(request))
     }
 
     fn pop_logs(instance_id: usize) -> Vec<String> {

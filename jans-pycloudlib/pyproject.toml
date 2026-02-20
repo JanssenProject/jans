@@ -2,8 +2,8 @@
 requires = [
     # The minimum setuptools version is specific to the PEP 517 backend,
     # and may be stricter than the version required in `setup.cfg`
-    "setuptools>=40.6.0,!=60.9.0",
-    "wheel",
+    "setuptools>=78.1.1",
+    "wheel>=0.46.2",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -30,6 +30,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
+    # handle CVE-2025-50181 and CVE-2025-50182
+    "urllib3>=2.5.0",
+
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
@@ -46,11 +49,10 @@ dependencies = [
 
     "backoff>=2.1.2",
     "docker>=3.7.2",
-    "requests-toolbelt>=0.9.1",
     "cryptography>=2.8",
     "google-cloud-secret-manager>=2.2.0",
     "pymysql>=1.0.2",
-    "sqlalchemy>=1.3,<1.4",
+    "sqlalchemy>=2.0",
     "psycopg2>=2.8.6",
     "Click>=6.7",
     "ldif>=4.1.1",
@@ -60,7 +62,7 @@ dependencies = [
 
     "boto3",
     "sprig-aes>=0.4.0",
-    "marshmallow>=3.21.2",
+    "marshmallow>=3.26.2",
     "apispec[marshmallow]>=6.6.1",
     "fqdn>=1.5.1",
     "pem>=23.1.0",
@@ -69,6 +71,10 @@ dependencies = [
     "grpc-interceptor>=0.15.4",
 
     "javaproperties>=0.8.2",
+
+    # Cloud SQL Python Connector for Cloud Run to Cloud SQL connections
+    "cloud-sql-python-connector[pg8000]>=1.0.0",
+    "pg8000>=1.30.0",
 ]
 requires-python = ">=3.9"
 
@@ -117,7 +123,6 @@ module = [
     "ldap3.*",
     "ldif",
     "sqlalchemy.*",
-    "requests_toolbelt.*",
     "boto3",
     "botocore.*",
 ]

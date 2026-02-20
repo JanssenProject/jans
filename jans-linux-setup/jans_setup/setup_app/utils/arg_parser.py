@@ -74,7 +74,6 @@ parser.add_argument('-java-version', help="Version of Amazon Corretto", choices=
 
 if PROFILE != OPENBANKING_PROFILE:
 
-    parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
@@ -88,12 +87,11 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-link', help="Install Link Server", action='store_true')
-    parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
     parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')
-    parser.add_argument('--install-jans-saml', help="Install Jans KC", action='store_true')
     parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
     parser.add_argument('--install-opa', help="Install OPA", action='store_true')
+    parser.add_argument('--install-jans-shib', help="Install Jans Shibboleth", action='store_true')
 
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 

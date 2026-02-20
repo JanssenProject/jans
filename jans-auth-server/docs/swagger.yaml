@@ -1739,6 +1739,21 @@ paths:
                   description: Spontaneous scope script dns
                   items:
                     type: string
+                par_script_dns:
+                  type: array
+                  description: PAR script dns
+                  items:
+                    type: string
+                tx_token_script_dns:
+                  type: array
+                  description: Transaction Token script dns
+                  items:
+                    type: string
+                logout_status_jwt_script_dns:
+                  type: array
+                  description: Logout status jwt script dns
+                  items:
+                    type: string
                 update_token_script_dns:
                   type: array
                   description: Update token script dns
@@ -2183,6 +2198,21 @@ paths:
                 spontaneous_scope_script_dns:
                   type: array
                   description: Spontaneous scope script dns
+                  items:
+                    type: string
+                logout_status_jwt_script_dns:
+                  type: array
+                  description: Logout status jwt script dns
+                  items:
+                    type: string
+                par_script_dns:
+                  type: array
+                  description: PAR script dns
+                  items:
+                    type: string
+                tx_token_script_dns:
+                  type: array
+                  description: Transaction Token script dns
                   items:
                     type: string
                 update_token_script_dns:
@@ -2779,6 +2809,44 @@ paths:
                     example: 100000000
                   custom_state:
                     type: string
+
+  /status_list_aggregation:
+    get:
+      tags:
+        - Status List Aggregation
+      summary: The Status List Aggregatiojn Endpoint.
+      description: The Status List Aggregation Endpoint.
+      operationId: get-status-list-aggregation
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          description: Indicates the requested response type. Possible value is application/json.
+          schema:
+            type: string
+          example: application/json
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: StatusListAggregationResponseJson
+                description: Status list aggregation response as JSON Array.
+                type: object
+                required:
+                  - status_lists
+                properties:
+                  status_lists:
+                    type: array
+                    description: List of URIs linking to Status List Tokens issued by this issuer.
+                    items:
+                      type: string
+                      format: uri
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
   /status_list:
     get:

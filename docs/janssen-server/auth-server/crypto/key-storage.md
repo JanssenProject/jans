@@ -1018,7 +1018,7 @@ ExtendedKeyUsages [
 *******************************************
 ```
 
-All keys are saved in aliases. Every alias has follow format:  
+All keys are saved in aliases. Every alias has follow format:
 **KeyOpsType + GUID + Use + Algorithm**.
 
 Where:

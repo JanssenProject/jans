@@ -156,14 +156,14 @@
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
-            <version>1.7.14</version>
+            <version>1.7.14.1</version>
         </dependency>
         
         <!-- Groovy -->
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>4.0.15</version>
+            <version>4.0.30</version>
         </dependency>
         
         <!-- JANS -->

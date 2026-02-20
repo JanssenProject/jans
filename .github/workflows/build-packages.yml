@@ -74,7 +74,7 @@ jobs:
             build_files: deb/noble
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.11
           - name: ubuntu22
             os: ubuntu-22.04
@@ -82,7 +82,7 @@ jobs:
             build_files: deb/jammy
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.8
           - name: ubuntu20
             os: ubuntu-22.04
@@ -90,7 +90,7 @@ jobs:
             build_files: deb/focal
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --output-certificate cert.pem --output-signature sig
+            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.8
           - name: el8
             os: ubuntu-22.04
@@ -101,7 +101,7 @@ jobs:
             sign_cmd: rpm --addsign
             python_version: 3.8
           - name: suse15
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             asset_suffix: .suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
@@ -111,12 +111,12 @@ jobs:
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         path: temp-jans
 
@@ -182,7 +182,7 @@ jobs:
          sudo ./run-build.sh
 
     - name: Install Cosign
-      uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - name: Sign package
       id: sign_package
@@ -193,7 +193,7 @@ jobs:
 
     - name: Upload binaries to release
       id: upload_binaries
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
@@ -202,11 +202,21 @@ jobs:
         overwrite: true
     - name: Upload sig to release
       id: upload_sigs
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
         asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
+        tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
+    - name: Upload cosign bundle to release
+      if: contains(matrix.sign_cmd, 'cosign')
+      id: upload_cosign_bundle
+      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      with:
+        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        file: ${{github.workspace}}/cosign.bundle
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sigstore.json
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
 
@@ -221,53 +231,45 @@ jobs:
         include:
           - name: ubuntu
             os: ubuntu-22.04
-            python_version: 3.8
+            python_version: '3.10'
           - name: suse
-            os: ubuntu-22.04
-            python_version: 3.8
+            os: ubuntu-24.04
+            python_version: '3.10'
             use_docker: true
             docker_image: opensuse/leap:15.4
           - name: macos
             os: macos-latest
-            python_version: 3.8
+            python_version: '3.10'
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Set up Python
       if: matrix.name != 'suse'
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python_version }}
 
     - name: Build with Docker (SUSE)
       if: matrix.use_docker
-      uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-      with:
-        image: ${{ matrix.docker_image }}
-        options: -v ${{ github.workspace }}:/workspace
-        run: |
-          zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.1/standard/openSUSE:Leap:15.1.repo
+      run: |
+        docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace ${{ matrix.docker_image }} bash -c '
           zypper --gpg-auto-import-keys refresh
-          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel openssl
-          zypper addrepo https://download.opensuse.org/repositories/home:smarty12:Python/RaspberryPi_Leap_15.2/home:smarty12:Python.repo
-          zypper --gpg-auto-import-keys refresh
-          zypper download python3-dev
-          rpm -i --nodeps /var/cache/zypp/packages/home_smarty12_Python/noarch/python3-dev-0.4.0-lp152.1.4.noarch.rpm
-          zypper --non-interactive install -y python3 python3-devel
-          pip install shiv
+          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool openssl python311 python311-pip python311-setuptools python311-wheel python311-devel
+          python3.11 -m pip install shiv
           cd /workspace/jans-linux-setup
-          make zipapp
+          python3.11 -m shiv --compressed -o jans-linux-setup.pyz -p "/usr/bin/env python3" -e jans_setup.jans_setup:main . --no-cache
           mv jans-linux-setup.pyz jans-linux-suse-X86-64-setup.pyz
           cd ../jans-cli-tui
-          make zipapp 
+          python3.11 -m shiv --compressed -o jans-cli-tui.pyz -p "/usr/bin/env python3" -e cli_tui.jans_cli_tui:run . --no-cache
           mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
+        '
 
     - name: Build with Ubuntu
       if: matrix.name == 'ubuntu'
@@ -316,7 +318,7 @@ jobs:
 
     - name: Upload setup binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
@@ -326,7 +328,7 @@ jobs:
 
     - name: Upload CLI binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
@@ -343,12 +345,12 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -359,18 +361,33 @@ jobs:
         git_user_signingkey: true
         git_commit_gpgsign: true
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: '20.x'
         registry-url: 'https://registry.npmjs.org'
+
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+
     - name: Build WASM build
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
-        rustup update stable && rustup default stable
+        rustup default stable
+        rustup target add wasm32-unknown-unknown
         cargo install wasm-pack
+        echo "--- rustc version ---"
+        rustc --version
+        echo "--- cargo version ---"
+        cargo --version
+        echo "--- wasm-pack version ---"
+        wasm-pack --version
+        echo "---------------------"
+  
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="${{ inputs.target_tag }}"
         else
@@ -379,32 +396,36 @@ jobs:
         
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
         NPM_TAG=latest
+        VERSION_TO_PUBLISH="${TAG}"
+        
         if [ "${TAG}" == "nightly" ]; then
           NPM_TAG=nightly
-          TAG="0.0.0"
           LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || echo "Failed to get last nightly version"
-          NEW_NPM_VERSION=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
-          sed -i "s/^version = \".*\"/version = \"${NEW_NPM_VERSION}\"/" Cargo.toml
-          echo "Replaced  $NEW_NPM_VERSION in Cargo.toml"
+          VERSION_TO_PUBLISH=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
         fi
-
-        # Build for web target
+        
+        # Update Cargo.toml with the version to publish
+        sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
+        echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
+  
         wasm-pack build --release --target web --scope janssenproject
         cd pkg
-        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-        npm login --registry https://registry.npmjs.org --scope=janssenproject --access=public --always-auth
-        npm publish --provenance --access=public --tag "${NPM_TAG}"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}" || {
+          echo "npm publish failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
         cd ..
-
+  
         # Build for Node.js target with modified version
-        NODEJS_VERSION="${TAG}-nodejs"
-        if [ "${TAG}" == "0.0.0" ]; then
-          NODEJS_VERSION="${NEW_NPM_VERSION}-nodejs"
-        fi
+        NODEJS_VERSION="${VERSION_TO_PUBLISH}-nodejs"
         sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
+        echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
-        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs"   || cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1)
+        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
+          echo "npm publish (nodejs) failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
 
     - name: Archive and sign pkg contents
       id: archive_pkg
@@ -425,7 +446,9 @@ jobs:
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" *.tar.gz *.asc
+        gh release upload "${VERSION}" *.tar.gz *.asc --clobber || {
+          echo "gh release upload failed (assets may already exist), continuing..."
+        }
 
   build_demo_packages:
     if: |
@@ -435,12 +458,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Build with Ubuntu
       continue-on-error: true
       run: |
@@ -456,15 +479,22 @@ jobs:
 
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i; done
         sudo rm demo-janssen-tarp-$VER-source.zip || echo "No such file or directory"
-        cd janssen-tarp
+        cd janssen-tarp/browser-extension
         
         TAG=$(echo "${VER}" | sed 's/^v//')
+        VERSION_TO_SET="${TAG}"
+        
         if [ "${TAG}" == "nightly" ]; then
           TAG="0.0.0"
           RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
-          jq --arg version "0.0.$RANDOM_NUMBER" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
-          echo "Replaced  $RANDOM_NUMBER in manifest.json"
+          VERSION_TO_SET="0.0.${RANDOM_NUMBER}"
         fi
+        
+        # Update version in all manifest and package files
+        echo "Setting extension version to ${VERSION_TO_SET}"
+        jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
+        jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/chrome/manifest.json > temp.json && mv temp.json src/static/chrome/manifest.json
+        jq --arg version "${VERSION_TO_SET}" '.version = $version' package.json > temp.json && mv temp.json package.json
         
         wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
         mkdir -p wasm
@@ -494,12 +524,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -510,12 +540,12 @@ jobs:
         git_user_signingkey: true
         git_commit_gpgsign: true
 
-    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-    - uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1.45.0
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
         command: build
-        args: --release -i python3.10 python3.11
+        args: --release -i python3.11
 
     - name: Sign and upload Cedarling Python wheels
       id: sign-cedarling
@@ -533,7 +563,6 @@ jobs:
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
         gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp310-cp310-manylinux_2_34_x86_64.whl || echo "Failed to sign"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.asc
 
@@ -557,10 +586,10 @@ jobs:
             os: windows-2025
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Import GPG key
         id: import_gpg
         continue-on-error: true
@@ -571,21 +600,19 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
       - name: Install Golang dependencies
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
             go-version: '1.24'
+
+      - name: Install latest stable Rust
+        uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+        with:
+          toolchain: stable
+
       - name: Build rust artifacts
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
         run: |
-          if [[ "${{ runner.os }}" == "macOS" ]]; then
-            brew install rustup-init
-            rustup-init -y
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            choco install rustup.install
-          fi
-          rustup update stable && rustup default stable
-          
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
           else
@@ -627,7 +654,7 @@ jobs:
           if [ "${TAG}" == "nightly" ]; then
             TAG="0.0.0"
           fi
-
+  
           FILE_LIB=""
           case "${{ matrix.name }}" in
             ubuntu22)
@@ -644,12 +671,12 @@ jobs:
               FILE_LIB="cedarling_go-${TAG}.lib"
               ;;
           esac
-
+  
           gpg --armor --detach-sign $FILE || echo "Failed to sign $FILE"
           if [ -n "$FILE_LIB" ]; then
             gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign $FILE_LIB"
           fi
-
+  
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           gh release upload "${VERSION}" $FILE $FILE.asc --clobber
           if [ -n "$FILE_LIB" ]; then
@@ -667,12 +694,12 @@ jobs:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -732,12 +759,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -747,10 +774,16 @@ jobs:
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
         git_user_signingkey: true
         git_commit_gpgsign: true
+
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
-        rustup update stable && rustup default stable
+        rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
@@ -765,13 +798,12 @@ jobs:
         cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
         FILE="libcedarling_uniffi-${TAG}.so"
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
-
+  
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" $FILE $FILE.asc
     - name: Build kotlin binding in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
-        rustup update stable && rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
         else
@@ -787,6 +819,6 @@ jobs:
         zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         gpg --armor --detach-sign $FILE || echo "Failed to sign"
-
+  
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" $FILE $FILE.asc

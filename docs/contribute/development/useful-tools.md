@@ -5,10 +5,10 @@ tags:
 - tools
 ---
 
-# Useful Tools 
+# Useful Tools
 
 While working with Janssen Server, either as developer or administrator,
-following tools can come in handy. 
+following tools can be helpful.
 
 1. [jsonbin.io](https://jsonbin.io/)
 2. [jwt.io](https://jwt.io/)

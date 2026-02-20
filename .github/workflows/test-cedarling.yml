@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "jans-cedarling/**"
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -14,12 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Run Tests
       working-directory: jans-cedarling
       run: |
@@ -28,17 +31,48 @@ jobs:
       working-directory: jans-cedarling
       run: |
         rustup component add clippy
-        cargo clippy -- -Dwarnings
+        cargo clippy --workspace --all-targets -- -D warnings
+  custom_lints:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Rust Nightly
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9
+      with:
+        toolchain: nightly-2025-09-18
+        components: llvm-tools-preview, rustc-dev
+    - uses: cargo-bins/cargo-binstall@v1.17.4
+    - name: Install dylint
+      run: |
+        cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
+        cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
+    - name: Run Tests
+      working-directory: jans-cedarling/custom-lints
+      run: cargo test
+    - name: Install Rust Stable (for workspace)
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+    - name: Run custom lints on workspace
+      working-directory: jans-cedarling
+      run: |
+        RUSTFLAGS="-Dwarnings" cargo dylint --all --workspace --path custom-lints
   rust_benchmarks:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Run benchmarks
       working-directory: jans-cedarling
       run: |
@@ -51,17 +85,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
 
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install chromium
       run: sudo apt-get update && sudo apt-get install chromium-chromedriver
 
     - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
@@ -86,13 +122,8 @@ jobs:
       working-directory: jans-cedarling
       run: |
         rustup component add clippy
-        cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
-
-    - name: Run Clippy on WASM target
-      working-directory: jans-cedarling
-      run: |
-        rustup component add clippy
-        cargo clippy --target wasm32-unknown-unknown -- -Dwarnings
+        rustup target add wasm32-unknown-unknown
+        cargo clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
   python_tests:
     runs-on: ubuntu-latest
     strategy:
@@ -100,12 +131,12 @@ jobs:
         python-version: ["3.10", "3.11"]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -120,14 +151,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
       with:
         egress-policy: audit
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Install Golang dependencies
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
           go-version: '1.24'
     - name: Run build rust artifacts

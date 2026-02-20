@@ -39,7 +39,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
             }
         }
 
-        return null;
+        return ScriptTokenExchangeControl.ok();
     }
 
     public ScriptTokenExchangeControl externalValidate(CustomScriptConfiguration script, ExecutionContext context) {
@@ -47,7 +47,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
         log.trace("Executing external 'validate' method, script name: {}, clientId: {}",
                 script.getName(), client.getClientId());
 
-        ScriptTokenExchangeControl result = null;
+        ScriptTokenExchangeControl result = ScriptTokenExchangeControl.ok();
         try {
             final ExternalScriptContext scriptContext = new ExternalScriptContext(context);
             TokenExchangeType tokenExchangeType = (TokenExchangeType) script.getExternalType();
@@ -66,7 +66,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
 
         log.trace("Finished 'validate' method, script name: {}, clientId: {}, result: {}", script.getName(), client.getClientId(), result);
 
-        return null;
+        return result;
     }
 
     public boolean externalModifyResponse(JSONObject response, ExecutionContext context) {

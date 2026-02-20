@@ -3,11 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::bootstrap_config::jwt_config::TokenValidationConfig;
 use super::super::authorization_config::TokenEntityNames;
 use super::FeatureToggle;
+use crate::bootstrap_config::jwt_config::TokenValidationConfig;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::hash::BuildHasher;
 
 /// Configuration for token-based entities, mapping token names to their
 /// respective settings.
@@ -53,20 +54,30 @@ pub struct ClaimsValidationConfig {
 
 impl TokenConfigs {
     /// Create a config without validation
+    #[must_use]
     pub fn without_validation() -> Self {
         Self(HashMap::from([
-            ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Access_token".to_string(),
-                claims: ClaimsValidationConfig::default(),
-            }),
-            ("id_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Id_token".to_string(),
-                claims: ClaimsValidationConfig::default(),
-            }),
-            ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Userinfo_token".to_string(),
-                claims: ClaimsValidationConfig::default(),
-            }),
+            (
+                "access_token".to_string(),
+                TokenConfig {
+                    entity_type_name: "Jans::Access_token".to_string(),
+                    claims: ClaimsValidationConfig::default(),
+                },
+            ),
+            (
+                "id_token".to_string(),
+                TokenConfig {
+                    entity_type_name: "Jans::Id_token".to_string(),
+                    claims: ClaimsValidationConfig::default(),
+                },
+            ),
+            (
+                "userinfo_token".to_string(),
+                TokenConfig {
+                    entity_type_name: "Jans::Userinfo_token".to_string(),
+                    claims: ClaimsValidationConfig::default(),
+                },
+            ),
         ]))
     }
 }
@@ -76,42 +87,51 @@ impl Default for TokenConfigs {
         // we need define namespace for each token type, so default will be `Jans`
         // If we avoid define namespace for each token type, the namespace would be empty string ("")
         Self(HashMap::from([
-            ("access_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Access_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Disabled,
-                    aud: FeatureToggle::Disabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Enabled,
+            (
+                "access_token".to_string(),
+                TokenConfig {
+                    entity_type_name: "Jans::Access_token".to_string(),
+                    claims: ClaimsValidationConfig {
+                        iss: FeatureToggle::Enabled,
+                        sub: FeatureToggle::Disabled,
+                        aud: FeatureToggle::Disabled,
+                        exp: FeatureToggle::Enabled,
+                        nbf: FeatureToggle::Disabled,
+                        iat: FeatureToggle::Disabled,
+                        jti: FeatureToggle::Enabled,
+                    },
                 },
-            }),
-            ("id_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Id_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Enabled,
-                    aud: FeatureToggle::Enabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Disabled,
+            ),
+            (
+                "id_token".to_string(),
+                TokenConfig {
+                    entity_type_name: "Jans::Id_token".to_string(),
+                    claims: ClaimsValidationConfig {
+                        iss: FeatureToggle::Enabled,
+                        sub: FeatureToggle::Enabled,
+                        aud: FeatureToggle::Enabled,
+                        exp: FeatureToggle::Enabled,
+                        nbf: FeatureToggle::Disabled,
+                        iat: FeatureToggle::Disabled,
+                        jti: FeatureToggle::Disabled,
+                    },
                 },
-            }),
-            ("userinfo_token".to_string(), TokenConfig {
-                entity_type_name: "Jans::Userinfo_token".to_string(),
-                claims: ClaimsValidationConfig {
-                    iss: FeatureToggle::Enabled,
-                    sub: FeatureToggle::Enabled,
-                    aud: FeatureToggle::Enabled,
-                    exp: FeatureToggle::Enabled,
-                    nbf: FeatureToggle::Disabled,
-                    iat: FeatureToggle::Disabled,
-                    jti: FeatureToggle::Disabled,
+            ),
+            (
+                "userinfo_token".to_string(),
+                TokenConfig {
+                    entity_type_name: "Jans::Userinfo_token".to_string(),
+                    claims: ClaimsValidationConfig {
+                        iss: FeatureToggle::Enabled,
+                        sub: FeatureToggle::Enabled,
+                        aud: FeatureToggle::Enabled,
+                        exp: FeatureToggle::Enabled,
+                        nbf: FeatureToggle::Disabled,
+                        iat: FeatureToggle::Disabled,
+                        jti: FeatureToggle::Disabled,
+                    },
                 },
-            }),
+            ),
         ]))
     }
 }
@@ -130,7 +150,7 @@ impl From<TokenConfig> for TokenValidationConfig {
     }
 }
 
-impl From<TokenConfigs> for HashMap<String, TokenConfig> {
+impl<S: BuildHasher + Default> From<TokenConfigs> for HashMap<String, TokenConfig, S> {
     fn from(value: TokenConfigs) -> Self {
         HashMap::from_iter(value.0)
     }
@@ -138,19 +158,22 @@ impl From<TokenConfigs> for HashMap<String, TokenConfig> {
 
 impl From<TokenConfigs> for TokenEntityNames {
     fn from(value: TokenConfigs) -> Self {
-        Self(HashMap::from_iter(value.0.into_iter().map(
-            |(tkn_name, config)| (tkn_name, config.entity_type_name),
-        )))
-    }
-}
-
-impl From<TokenConfigs> for HashMap<String, TokenValidationConfig> {
-    fn from(value: TokenConfigs) -> Self {
-        HashMap::from_iter(
+        Self(
             value
                 .0
                 .into_iter()
-                .map(|(tkn_name, config)| (tkn_name, config.into())),
+                .map(|(tkn_name, config)| (tkn_name, config.entity_type_name))
+                .collect::<HashMap<_, _>>(),
         )
+    }
+}
+
+impl<S: BuildHasher + Default> From<TokenConfigs> for HashMap<String, TokenValidationConfig, S> {
+    fn from(value: TokenConfigs) -> Self {
+        value
+            .0
+            .into_iter()
+            .map(|(tkn_name, config)| (tkn_name, config.into()))
+            .collect::<HashMap<_, _, S>>()
     }
 }

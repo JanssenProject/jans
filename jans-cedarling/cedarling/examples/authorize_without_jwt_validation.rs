@@ -3,7 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, Request, log_config::StdOutLoggerMode,
+};
 use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
@@ -13,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -24,6 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -46,7 +51,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await?;
 
@@ -160,7 +164,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(result) => {
             println!("\n\nis allowed: {}", result.decision);
         },
-        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
+        Err(e) => eprintln!("Error while authorizing: {e}\n {e:?}\n\n"),
     }
 
     Ok(())

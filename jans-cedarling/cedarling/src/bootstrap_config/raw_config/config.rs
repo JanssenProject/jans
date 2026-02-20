@@ -6,9 +6,12 @@
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
-use super::default_values::*;
-use super::feature_types::*;
-use super::json_util::*;
+use super::super::log_config::StdOutMode;
+use super::default_values::{default_jti, default_token_cache_capacity, default_true};
+#[cfg(not(target_arch = "wasm32"))]
+use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
+use super::feature_types::{FeatureToggle, LoggerType};
+use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
 use crate::log::LogLevel;
@@ -20,7 +23,7 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug, Default)]
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
@@ -70,12 +73,38 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub log_max_item_size: Option<usize>,
 
+    /// Logging mode for stdout logger: "async" or "immediate (default)".
+    /// Only applicable for native targets (not WASM).
+    #[serde(rename = "CEDARLING_STDOUT_MODE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_mode: StdOutMode,
+
+    /// Flush timeout in milliseconds for async stdout logging.
+    /// Only applicable for native targets (not WASM).
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_STDOUT_TIMEOUT_MILLIS",
+        default = "default_stdout_timeout_millis"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_timeout_millis: u64,
+
+    /// Buffer size limit in bytes for async stdout logging.
+    /// Only applicable for native targets (not WASM).
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(
+        rename = "CEDARLING_STDOUT_BUFFER_LIMIT",
+        default = "default_stdout_buffer_limit"
+    )]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub stdout_buffer_limit: usize,
+
     /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub decision_log_user_claims: Vec<String>,
 
-    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub decision_log_workload_claims: Vec<String>,
@@ -114,7 +143,7 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
-    /// Mapping name of cedar schema TrustedIssuer entity
+    /// Mapping name of cedar schema `TrustedIssuer` entity
     #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_iss: Option<String>,
@@ -159,7 +188,7 @@ pub struct BootstrapConfigRaw {
     pub policy_store_local_fn: Option<String>,
 
     /// Maximum number of default entities allowed in a policy store.
-    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     /// If value is 0, there is no limit. But if None, default value is applied.
     #[serde(rename = "CEDARLING_MAX_DEFAULT_ENTITIES", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -200,9 +229,9 @@ pub struct BootstrapConfigRaw {
     /// # Strict Mode
     ///
     /// Strict mode requires:
-    ///     1. id_token aud matches the access_token client_id;
-    ///     2. if a Userinfo token is present, the sub matches the id_token, and that
-    ///         the aud matches the access token client_id.
+    ///     1. `id_token` aud matches the `access_token` `client_id`;
+    ///     2. if a Userinfo token is present, the sub matches the `id_token`, and that
+    ///         the aud matches the access token `client_id`.
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
 
@@ -259,6 +288,30 @@ pub struct BootstrapConfigRaw {
     /// Zero means no token cache TTL limit.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
+    /// Maximum number of tokens the cache can store.
+    /// Default value is 100.
+    /// 0 means no limit.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_CAPACITY",
+        default = "default_token_cache_capacity"
+    )]
+    pub token_cache_capacity: usize,
+    /// Enables eviction policy based on the earliest expiration time.
+    ///
+    /// When the cache reaches its capacity, the entry with the nearest
+    /// expiration timestamp will be removed to make room for a new one.
+    #[serde(
+        rename = "CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION",
+        default = "default_true"
+    )]
+    pub token_cache_earliest_expiration_eviction: bool,
+}
+
+impl Default for BootstrapConfigRaw {
+    fn default() -> Self {
+        serde_json::from_value(serde_json::json!({"CEDARLING_APPLICATION_NAME":""}))
+            .expect("BootstrapConfigRaw should be deserialized from empty json object")
+    }
 }
 
 impl BootstrapConfigRaw {
@@ -273,13 +326,13 @@ impl BootstrapConfigRaw {
     ) -> Result<Self, BootstrapConfigLoadingError> {
         let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
             .as_object()
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .unwrap_or_default();
 
-        get_cedarling_env_vars().into_iter().for_each(|(k, v)| {
+        for (k, v) in get_cedarling_env_vars() {
             // update map with values from env variables
             json_config_params.insert(k, v);
-        });
+        }
 
         Ok(BootstrapConfigRaw::deserialize(json_config_params)?)
     }
@@ -307,7 +360,7 @@ mod tests {
 
     static ENV_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
-    fn with_env_vars<F>(vars: Vec<(&str, &str)>, test: F)
+    fn with_env_vars<F>(vars: &[(&str, &str)], test: F)
     where
         F: FnOnce(),
     {
@@ -319,24 +372,32 @@ mod tests {
         for (key, value) in env::vars() {
             let key_clone = key.clone();
             all_vars.push((key, value));
-            env::remove_var(&key_clone);
+            unsafe {
+                env::remove_var(&key_clone);
+            }
         }
 
         // Set new env vars
-        for (key, value) in &vars {
-            env::set_var(key, value);
+        for (key, value) in vars {
+            unsafe {
+                env::set_var(key, value);
+            }
         }
 
         test();
 
         // Clean up
-        for (key, _) in &vars {
-            env::remove_var(key);
+        for (key, _) in vars {
+            unsafe {
+                env::remove_var(key);
+            }
         }
 
         // Restore original environment
         for (key, value) in all_vars {
-            env::set_var(&key, value);
+            unsafe {
+                env::set_var(&key, value);
+            }
         }
     }
 
@@ -344,7 +405,7 @@ mod tests {
     /// or raw config is provided.
     #[test]
     fn test_from_raw_config_and_env_defaults() {
-        with_env_vars(vec![], || {
+        with_env_vars(&[], || {
             let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
             assert_eq!(
                 config.application_name, "",
@@ -378,8 +439,8 @@ mod tests {
                 "Decision log workload claims should be empty by default"
             );
             assert_eq!(
-                config.decision_log_default_jwt_id, "",
-                "Default JWT ID for decision logging should be ''"
+                config.decision_log_default_jwt_id, "jti",
+                "Default JWT ID for decision logging should be 'jti'"
             );
             assert_eq!(
                 config.user_authz,
@@ -402,7 +463,7 @@ mod tests {
     /// Tests that configuration values are correctly set when only a raw config is provided.
     #[test]
     fn test_from_raw_config_and_env() {
-        with_env_vars(vec![], || {
+        with_env_vars(&[], || {
             let raw = BootstrapConfigRaw {
                 application_name: "test-app".to_string(),
                 log_type: LoggerType::Memory,
@@ -422,7 +483,7 @@ mod tests {
     #[test]
     fn test_from_raw_config_and_env_with_env_vars() {
         with_env_vars(
-            vec![
+            &[
                 ("CEDARLING_APPLICATION_NAME", "env-app"),
                 ("CEDARLING_LOG_TYPE", "memory"),
                 ("CEDARLING_LOG_LEVEL", "DEBUG"),
@@ -441,7 +502,7 @@ mod tests {
     #[test]
     fn test_from_raw_config_and_env_vars_override() {
         with_env_vars(
-            vec![
+            &[
                 ("CEDARLING_APPLICATION_NAME", "env-app"),
                 ("CEDARLING_LOG_TYPE", "memory"),
             ],
@@ -468,7 +529,7 @@ mod tests {
     /// Tests that an error is returned when an invalid environment variable value is provided.
     #[test]
     fn test_from_raw_config_and_env_invalid_env_var() {
-        with_env_vars(vec![("CEDARLING_LOG_TYPE", "invalid")], || {
+        with_env_vars(&[("CEDARLING_LOG_TYPE", "invalid")], || {
             let result = BootstrapConfigRaw::from_raw_config_and_env(None);
             assert!(result.is_err());
         });
@@ -478,7 +539,7 @@ mod tests {
     #[test]
     fn test_from_raw_config_and_env_empty_strings() {
         with_env_vars(
-            vec![
+            &[
                 ("CEDARLING_APPLICATION_NAME", ""),
                 ("CEDARLING_POLICY_STORE_URI", ""),
             ],

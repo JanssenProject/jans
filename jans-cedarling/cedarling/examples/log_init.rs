@@ -9,7 +9,11 @@
 // and `use std::env` prevents that compilation.
 #![cfg(not(target_family = "wasm"))]
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, JsonRule, JwtConfig,
+    LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    PolicyStoreSource, log_config::StdOutLoggerMode,
+};
 use std::env;
 
 // The human-readable policy and schema file is located in next folder:
@@ -32,16 +36,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let log_type_arg = &args[1];
     let log_type = match log_type_arg.as_str() {
         "off" => LogTypeConfig::Off,
-        "stdout" => LogTypeConfig::StdOut,
+        "stdout" => LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
         "lock" => unimplemented!(),
-        "memory" => extract_memory_config(args),
+        "memory" => extract_memory_config(&args),
         _ => {
             eprintln!("Invalid log type, defaulting to StdOut.");
-            LogTypeConfig::StdOut
+            LogTypeConfig::StdOut(StdOutLoggerMode::Immediate)
         },
     };
 
-    println!("Cedarling initialized with log type: {:?}", log_type);
+    println!("Cedarling initialized with log type: {log_type:?}");
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -62,7 +66,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
-        token_cache_max_ttl_secs: 60,
     })
     .await?;
 
@@ -77,12 +80,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let entry = cedarling
             .get_log_by_id(&id)
             .map(|v| serde_json::json!(v).to_string());
-        println!("\nkey:{}\nvalue:{:?}", id, entry);
+        println!("\nkey:{id}\nvalue:{entry:?}");
     }
 
     println!("\n\n Stage 3:\nShow result of pop_logs");
     for (i, entry) in cedarling.pop_logs().iter().enumerate() {
-        println!("entry n:{i}\nvalue: {}", serde_json::json!(entry))
+        println!("entry n:{i}\nvalue: {}", serde_json::json!(entry));
     }
 
     println!("\n\n Stage 4:\nShow len of keys left using get_log_ids");
@@ -91,7 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn extract_memory_config(args: Vec<String>) -> LogTypeConfig {
+fn extract_memory_config(args: &[String]) -> LogTypeConfig {
     if args.len() < 3 {
         eprintln!("Memory log type requires two additional arguments: ttl value in seconds");
         std::process::exit(1);

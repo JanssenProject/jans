@@ -1,18 +1,9 @@
 /*
- * Copyright [2024] [Janssen Project]
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2024, Janssen Project
  */
+
 
 package io.jans.lock.model.config;
 
@@ -36,7 +27,13 @@ public class BaseDnConfiguration {
 	private String scripts;
 	private String metric;
 	private String stat;
+	private String audit;
 
+	/**
+	 * Gets the base DN for configuration entries.
+	 *
+	 * @return the configuration base DN, or null if not set
+	 */
 	public String getConfiguration() {
 		return configuration;
 	}
@@ -97,8 +94,31 @@ public class BaseDnConfiguration {
 		return stat;
 	}
 
+	/**
+	 * Sets the base DN for statistics entries.
+	 *
+	 * @param stat the base DN to use for statistics
+	 */
 	public void setStat(String stat) {
 		this.stat = stat;
+	}
+
+	/**
+	 * Gets the base DN for audit entries.
+	 *
+	 * @return the audit base DN, or {@code null} if not set
+	 */
+	public String getAudit() {
+		return audit;
+	}
+
+	/**
+	 * Sets the audit base DN.
+	 *
+	 * @param audit the base DN for audit entries
+	 */
+	public void setAudit(String audit) {
+		this.audit = audit;
 	}
 
 }

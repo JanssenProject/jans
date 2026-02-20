@@ -209,3 +209,44 @@ func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 
 }
+
+// TokenInput represents a JWT token with explicit type mapping
+type TokenInput struct {
+	Mapping string `json:"mapping"`
+	Payload string `json:"payload"`
+}
+
+// AuthorizeMultiIssuerRequest represents a multi-issuer authorization request
+type AuthorizeMultiIssuerRequest struct {
+	Tokens   []TokenInput `json:"tokens"`
+	Resource EntityData   `json:"resource"`
+	Action   string       `json:"action"`
+	Context  any          `json:"context,omitempty"`
+}
+
+func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
+	context := r.Context
+	if context == nil {
+		context = json.RawMessage(`{}`)
+	}
+
+	aux := struct {
+		Tokens   []TokenInput `json:"tokens"`
+		Resource EntityData   `json:"resource"`
+		Action   string       `json:"action"`
+		Context  any          `json:"context"`
+	}{
+		Tokens:   r.Tokens,
+		Resource: r.Resource,
+		Action:   r.Action,
+		Context:  context,
+	}
+	return json.Marshal(aux)
+}
+
+// MultiIssuerAuthorizeResult represents the result of a multi-issuer authorization request
+type MultiIssuerAuthorizeResult struct {
+	Response  CedarResponse `json:"response"`
+	Decision  bool          `json:"decision"`
+	RequestID string        `json:"request_id"`
+}

@@ -7,6 +7,63 @@
 
 mod sort_json;
 pub mod token_claims;
-
+#[cfg(not(target_arch = "wasm32"))]
+use mockito::{Mock, Server};
 pub use pretty_assertions::*;
+#[cfg(not(target_arch = "wasm32"))]
+use serde_json::json;
 pub use sort_json::SortedJson;
+
+#[cfg(not(target_arch = "wasm32"))]
+use crate::token_claims::{generate_jwks, generate_keypair_hs256, KeyPair};
+
+#[cfg(not(target_arch = "wasm32"))]
+pub struct MockServer {
+    pub keys: KeyPair,
+    pub oidc_endpoint: Mock,
+    pub jwks_endpoint: Mock,
+    pub base_idp_url: String,
+    // we need to store server to avoid drop
+    #[allow(dead_code)]
+    mock_server: Server,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn gen_mock_server() -> MockServer {
+    // only when we define `mockito::ServerOpts` it different
+    // by default it gets random port
+    let mut mock_server = mockito::Server::new_with_opts(mockito::ServerOpts {
+        ..Default::default()
+    });
+
+    // Setup OpenId config endpoint
+    let oidc = json!({
+        "issuer": mock_server.url(),
+        "jwks_uri": &format!("{}/jwks", mock_server.url()),
+    });
+    let oidc_endpoint = mock_server
+        .mock("GET", "/.well-known/openid-configuration")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(oidc.to_string())
+        .expect_at_least(1)
+        .create();
+
+    // Setup JWKS endpoint
+    let keys = generate_keypair_hs256(Some("some_hs256_key"));
+    let jwks_endpoint = mock_server
+        .mock("GET", "/jwks")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(json!({"keys": generate_jwks(&vec![keys.clone()]).keys}).to_string())
+        .expect_at_least(1)
+        .create();
+
+    MockServer {
+        keys,
+        oidc_endpoint,
+        jwks_endpoint,
+        base_idp_url: mock_server.url(),
+        mock_server,
+    }
+}
