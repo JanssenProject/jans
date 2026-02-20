@@ -87,6 +87,12 @@
 		<dependency>
 			<groupId>org.apache.jackrabbit</groupId>
 			<artifactId>jackrabbit-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tika</groupId>
+					<artifactId>tika-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jackrabbit</groupId>

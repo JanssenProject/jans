@@ -53,15 +53,15 @@ configmap:
   cnSqlDbTimezone: UTC
   # -- SQL password  injected the secrets .
   cnSqldbUserPassword: Test1234#
-  # -- Enforce connection to SQL database using SSL.
+  # -- Enable SSL connection to SQL database.
   cnSqlSslEnabled: false
-  # -- Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
+  # -- Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`.
   cnSqlSslMode: ""
   # -- Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication.
   cnSqlSslCaCert: ""
   # -- Base64-encoded string of client certificate signed by CA. Required if using client cert authentication.
   cnSqlSslClientCert: ""
-  # -- Base64-encoded string of client key signed by CA. Required if using client cert authentication.
+  # -- Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml.
   cnSqlSslClientKey: ""
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
@@ -140,28 +140,6 @@ configmap:
   lbAddr: ""
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
-  # -- Keycloak  admin UI password
-  kcAdminPassword: Test1234#
-  # -- Keycloak admin UI username
-  kcAdminUsername: admin
-  # -- Keycloak logging level
-  kcLogLevel: INFO
-  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
-  kcDbVendor: mysql
-  # -- Keycloak database username
-  kcDbUsername: keycloak
-  # -- Password for Keycloak database access
-  kcDbPassword: Test1234#
-  # -- Keycloak database schema name (note that PostgreSQL may using "public" schema).
-  kcDbSchema: keycloak
-  # -- Keycloak database host
-  kcDbUrlHost: mysql.kc.svc.cluster.local
-  # -- Keycloak database port (default to port 3306 for mysql).
-  kcDbUrlPort: 3306
-  # -- Keycloak database name
-  kcDbUrlDatabase: keycloak
-  # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
-  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
   # -- Message type (one of POSTGRES, REDIS, or DISABLED)
   cnMessageType: DISABLED
 nameOverride: ""
@@ -376,11 +354,13 @@ casa:
   casaServiceName: casa
   # -- Boolean flag to enable/disable the casa chart.
   enabled: true
+  # -- Boolean flag to enable/disable the casa admin console.
+  adminEnabled: true
   # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
   cnCustomJavaOptions: ""
   # -- Enable endpoints in either istio or nginx ingress depending on users choice
   ingress:
-    # -- Enable casa endpoints /casa
+    # -- Enable casa endpoints /jans-casa
     casaEnabled: false
     # -- Casa ingress resource labels. key app is taken
     casaLabels: { }
@@ -421,8 +401,8 @@ config-api:
     configApiLabels: { }
     # -- ConfigAPI ingress resource additional annotations.
     configApiAdditionalAnnotations: { }
-  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml")
-  plugins: "admin-ui,fido2,scim,user-mgt"
+  # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt")
+  plugins: "fido2,scim,user-mgt"
 fido2:
   # -- Name of the fido2 service. Please keep it as default.
   fido2ServiceName: fido2
@@ -527,6 +507,42 @@ saml:
     # -- SAML ingress resource additional annotations.
     samlAdditionalAnnotations: { }
 
+shibboleth:
+  # -- Name of the shibboleth service. Please keep it as default.
+  shibbolethServiceName: shibboleth-idp
+  # -- Boolean flag to enable/disable the Shibboleth IDP.
+  enabled: false
+  # -- passing custom java options to Shibboleth IDP. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+  cnCustomJavaOptions: ""
+  # -- Shibboleth IDP HTTP host
+  httpHost: "127.0.0.1"
+  # -- Shibboleth IDP HTTP port
+  httpPort: 8086
+  # -- Application loggers settings
+  appLoggers:
+    # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e shibboleth ===> 2022-12-20 17:49:55,744 INFO
+    enableStdoutLogPrefix: "true"
+    # -- shibboleth.log target
+    shibbolethLogTarget: "STDOUT"
+    # -- shibboleth.log level
+    shibbolethLogLevel: "INFO"
+  # -- IDP entity ID (defaults to https://<hostname>/idp/shibboleth)
+  entityId: ""
+  # -- IDP scope for attribute release
+  scope: ""
+  # -- Enable authentication via Janssen Auth Server
+  jansAuthEnabled: true
+  # -- OAuth scopes for Janssen Auth Server authentication
+  jansAuthScopes: "openid,profile,email"
+  # -- Enable endpoints in either istio or nginx ingress depending on users choice
+  ingress:
+    # -- Enable Shibboleth IDP endpoints /idp
+    shibbolethEnabled: false
+    # -- Shibboleth IDP ingress resource labels. key app is taken
+    shibbolethLabels: {}
+    # -- Shibboleth IDP ingress resource additional annotations.
+    shibbolethAdditionalAnnotations: {}
+
 # Global properties
 # -- Boolean flag to enable mapping lbIp  to fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
 isFqdnRegistered: false
@@ -589,6 +605,27 @@ certManager:
     issuerName: ""
     issuerGroup: cert-manager.io
     tlsSecretName: tls-certificate
+gatewayApi:
+  # -- Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources.
+  enabled: false
+  # -- Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant
+  gatewayClassName: nginx
+  # -- The name of the Gateway resource to be created
+  name: jans-gateway
+  # -- Gateway http port number
+  httpPort: 80 
+  # -- Gateway https port number
+  httpsPort: 443
+  # -- Secret containing the TLS certificate for the Gateway
+  tlsSecretName: tls-certificate
+  # -- Specific labels for the Gateway resource
+  gatewayLabels: {}
+  # -- Specific annotations for the Gateway resource
+  gatewayAnnotations: {}
+  # -- Specific labels for the HTTPRoute resource
+  routeLabels: {}
+  # -- Specific annotations for the HTTPRoute resource
+  routeAnnotations: {}
 nginx-ingress:
   # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
   enabled: true
@@ -612,9 +649,9 @@ nginx-ingress:
     tlsSecretName: tls-certificate
 # Service manifest properties
 service:
-  # -- The name of the aio port within the aio service. Please keep it as default.
+  # -- The name of the Kubernetes Service resource.
   name: http-aio
-  # -- Port of the fido2 service. Please keep it as default.
+  # -- The port number exposed by the All-in-One service.
   port: 8080
   # -- Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP
   sessionAffinity: None

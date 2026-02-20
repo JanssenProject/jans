@@ -9,8 +9,8 @@ tags:
 
 # Jans Command Overview
 
-The `jans` command is a top-level wrapper script for managing the Janssen Server. 
-This guide provides an overview of its usage and available commands. List of 
+The `jans` command is a top-level wrapper script for managing the Janssen Server.
+This guide provides an overview of its usage and available commands. List of
 available commands may change as more commands are added. To see the current
 list of commands available in your installation, run following command at the
 Janssen Server:
@@ -23,7 +23,7 @@ jans
 
 ### Version and build information
 
-Displays the version and build information of the currently installed 
+Displays the version and build information of the currently installed
 Janssen Server.
 
 ```bash title="Command"
@@ -47,10 +47,10 @@ Launches the text-based user interface for Janssen.
 ```bash title="Command"
 jans tui
 ```
-     
+
 ### Logs
 
-Shows the log file paths for various Janssen Server modules. 
+Shows the log file paths for various Janssen Server modules.
 
 ```bash title="Command"
 jans logs
@@ -68,7 +68,7 @@ jans status
 ![](../../assets/jans_status.png)
 
 
-### Start 
+### Start
 
 Starts services for the Janssen Server.
 
@@ -109,7 +109,7 @@ Executing sudo systemctl stop jans-config-api
 
 
 
-### Restart 
+### Restart
 
 Restart services for the Janssen Server.
 

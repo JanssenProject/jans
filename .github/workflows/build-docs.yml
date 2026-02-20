@@ -8,6 +8,7 @@ on:
       - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
+      - 'CHANGELOG.md'
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
+      - 'CHANGELOG.md'
   release:
     types:
       - published
@@ -42,25 +44,25 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 
       - name: Set up JDK 17
-        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.10"
           cache: pip
@@ -71,12 +73,12 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
-          cp mkdocs.yml ../
+          cp mkdocs.yml CHANGELOG.md ../
 
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: '${{ github.event.inputs.version }}'
           fetch-depth: 0
@@ -87,6 +89,12 @@ jobs:
           github.event_name == 'workflow_dispatch'
         run: |
           mv ../mkdocs.yml mkdocs.yml
+          cp ../CHANGELOG.md docs/CHANGELOG.md
+
+      - name: Sync CHANGELOG to docs
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          cp CHANGELOG.md docs/CHANGELOG.md
 
       - name: Copy generated chart from main
         run: |
@@ -148,11 +156,24 @@ jobs:
 
          sudo rm -rf temp
 
+      - name: Use latest template overrides from main
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+        run: |
+          git show origin/main:docs/overrides/main.html > docs/overrides/main.html
+
+      - name: Enable Reo and Scarf tracking for versioned docs
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'published')
+        run: |
+          sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
+          sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
+          echo "Tracking flags status:"
+          grep -E 'enable_scarf_pixel|enable_reo_flag' mkdocs.yml
+
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
         run: |
-          poetry run mike deploy --push --force ${{ github.event.inputs.version }}
+          poetry run mike deploy --push --update-aliases ${{ github.event.inputs.version }}
 
       - name: mike deploy head
         if: contains(github.ref, 'refs/heads/main') && github.event_name != 'workflow_dispatch'
@@ -218,9 +239,7 @@ jobs:
               git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
             fi
           done
-          sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
-          git add ${STABLE}/overrides/main.html && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url"
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: update version references"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

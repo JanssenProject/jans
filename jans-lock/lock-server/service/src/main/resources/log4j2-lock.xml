@@ -9,11 +9,25 @@
 			</Policies>
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
+
+		<RollingFile name="JANS_LOCK_APP_AUDIT_FILE" fileName="${sys:log.base}/logs/jans-lock_audit.log" filePattern="${sys:log.base}/logs/jans-lock_audit-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
     </Appenders>
 
     <Loggers>
 		<Logger name="io.jans.lock" level="${log4j.default.log.level}">
 			<AppenderRef ref="JANS_LOCK_FILE" />
+		</Logger>
+
+		<Logger name="io.jans.lock.service.app.audit" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="JANS_LOCK_APP_AUDIT_FILE" />
 		</Logger>
     </Loggers>
 

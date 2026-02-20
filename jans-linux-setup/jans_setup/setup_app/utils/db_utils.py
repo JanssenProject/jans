@@ -83,9 +83,12 @@ class DBUtils:
 
         if Config.rdbm_type == 'mysql':
             bind_uri += '?charset=utf8mb4'
+            connect_args = {'ssl':{'verify_mode': None}}
+        else:
+            connect_args = {}
 
         try:
-            self.engine = sqlalchemy.create_engine(bind_uri)
+            self.engine = sqlalchemy.create_engine(bind_uri, connect_args=connect_args)
             logging.basicConfig(filename=os.path.join(Config.install_dir, 'logs/sqlalchemy.log'))
             logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
             self.local_session = sqlalchemy.orm.sessionmaker(bind=self.engine)
@@ -134,6 +137,12 @@ class DBUtils:
         for attr in attribDataTypes.listAttributes:
             if not attr in self.sql_data_types:
                 self.sql_data_types[attr] = self.rdbm_json_types
+
+        for attr in self.jans_attributes:
+            if 'names' in attr and len(attr['names']) > 0:
+                attr_name = attr['names'][0]
+                if attr_name and 'sql_types' in attr and attr_name not in self.sql_data_types:
+                    self.sql_data_types[attr_name] = attr.pop('sql_types')
 
     def exec_rdbm_query(self, query, getresult=False):
         base.logIt("Executing {} Query: {}".format(Config.rdbm_type, query))

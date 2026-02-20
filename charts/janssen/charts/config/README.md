@@ -60,9 +60,9 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
 | configmap.cnSqlSslCaCert | string | `""` | Base64-encoded string of CA certificate used to sign client/server certificate of MySQL/PostgreSQL server. Required if using client cert authentication. |
 | configmap.cnSqlSslClientCert | string | `""` | Base64-encoded string of client certificate signed by CA. Required if using client cert authentication. |
-| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded string of client key signed by CA. Required if using client cert authentication. |
-| configmap.cnSqlSslEnabled | bool | `false` | Enforce connection to SQL database using SSL. |
-| configmap.cnSqlSslMode | string | `""` | Mode when connecting to SQL database using SSL. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
+| configmap.cnSqlSslClientKey | string | `""` | Base64-encoded client private key corresponding to the client certificate. Required if using client cert authentication. We advise to not commit real private keys in values.yaml. |
+| configmap.cnSqlSslEnabled | bool | `false` | Enable SSL connection to SQL database. |
+| configmap.cnSqlSslMode | string | `""` | Mode used to connect to SQL database using SSL if cnSqlSslEnabled is set to true. If using MySQL, choose one of `PREFERRED`, `REQUIRED`, `VERIFY_CA`, or `VERIFY_IDENTITY`. If using PostgreSQL, choose one of `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected in the secrets. |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |
@@ -75,15 +75,6 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
 | configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
-| configmap.kcDbPassword | string | `"Test1234#"` | Password for Keycloak database access |
-| configmap.kcDbSchema | string | `"keycloak"` | Keycloak database schema name (note that PostgreSQL may using "public" schema). |
-| configmap.kcDbUrlDatabase | string | `"keycloak"` | Keycloak database name |
-| configmap.kcDbUrlHost | string | `"mysql.kc.svc.cluster.local"` | Keycloak database host |
-| configmap.kcDbUrlPort | int | `3306` | Keycloak database port (default to port 3306 for mysql). |
-| configmap.kcDbUrlProperties | string | `"?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"` | Keycloak database connection properties. If using postgresql, the value can be set to empty string. |
-| configmap.kcDbUsername | string | `"keycloak"` | Keycloak database username |
-| configmap.kcDbVendor | string | `"mysql"` | Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres. |
-| configmap.kcLogLevel | string | `"INFO"` | Keycloak logging level |
 | configmap.lbAddr | string | `""` | Loadbalancer address for AWS if the FQDN is not registered. |
 | configmap.quarkusTransactionEnableRecovery | bool | `true` | Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details. |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |
@@ -94,7 +85,7 @@ Kubernetes: `>=v1.22.0-0`
 | email | string | `"support@jans.io"` | Email address of the administrator usually. Used for certificate creation. |
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
+| image.repository | string | `"ghcr.io/janssenproject/jans/configurator"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |

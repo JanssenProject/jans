@@ -1,0 +1,22 @@
+# Example terraform.tfvars file
+# Copy this file to terraform.tfvars and fill in your values
+
+# Janssen server configuration
+jans_url        = "https://your-janssen-server.com"
+client_id       = "your-client-id-here"
+client_secret   = "your-client-secret-here"
+insecure_client = false  # Set to true for self-signed certificates
+
+# Optional: Enable revocation operations (be careful - these are destructive!)
+enable_session_revocation = false
+revoke_user_dn           = ""
+
+enable_token_revocation = false
+revoke_token_code      = ""
+
+enable_ssa_revocation = false
+ssa_jti               = ""
+
+# Optional: Statistics configuration
+export_stats  = false
+specific_month = ""  # Format: YYYYMM (e.g., "202410")

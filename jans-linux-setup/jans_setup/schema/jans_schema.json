@@ -534,6 +534,18 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "jans Policy Conf",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansConfPolicy"
+      ],
+      "json": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "jans Errors Conf",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3818,18 +3830,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Webhook identifier",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "webhookId"
-      ],
-      "rdbm_json_column": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "HTTP request method",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3860,17 +3860,6 @@
       ],
       "oid": "jansAttr",
       "json": true,
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Admin UI feature identifier",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "auiFeatureId"
-      ],
-      "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
@@ -4066,10 +4055,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "severetyLevel",
+      "desc": "severityLevel",
       "equality": "caseIgnoreMatch",
       "names": [
-        "severetyLevel"
+        "severityLevel"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4163,6 +4152,552 @@
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Entry ID",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Timestamp",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansFido2MetricsTimestamp"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Operation Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsOperationType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Status",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsStatus"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Duration in Milliseconds",
+      "equality": "integerMatch",
+      "names": [
+        "jansFido2MetricsDuration"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Authenticator Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsAuthenticatorType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Device Info",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsDeviceInfo"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Error Reason",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsErrorReason"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Error Category",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsErrorCategory"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Fallback Method",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsFallbackMethod"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Fallback Reason",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsFallbackReason"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics User Agent",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsUserAgent"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics IP Address",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsIpAddress"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Session ID",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsSessionId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Additional Data",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsAdditionalData"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Node ID",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsNodeId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Application Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsApplicationType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Aggregation Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAggregationType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Start Time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansStartTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 End Time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansEndTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Unique Users Count",
+      "equality": "integerMatch",
+      "names": [
+        "jansUniqueUsers"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Data JSON",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansMetricsData"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column": true,
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Display Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "displayName"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User ID",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansUserId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Username",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansUsername"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics User ID Reference",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsUserId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Metrics Username Reference",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFido2MetricsUsername"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 Last Updated Timestamp",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansLastUpdated"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User First Registration Date",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansFirstRegistrationDate"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Last Activity Date",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansLastActivityDate"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Total Registrations",
+      "equality": "integerMatch",
+      "names": [
+        "jansTotalRegistrations"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Total Authentications",
+      "equality": "integerMatch",
+      "names": [
+        "jansTotalAuthentications"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Successful Registrations",
+      "equality": "integerMatch",
+      "names": [
+        "jansSuccessfulRegistrations"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Successful Authentications",
+      "equality": "integerMatch",
+      "names": [
+        "jansSuccessfulAuthentications"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Failed Registrations",
+      "equality": "integerMatch",
+      "names": [
+        "jansFailedRegistrations"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Failed Authentications",
+      "equality": "integerMatch",
+      "names": [
+        "jansFailedAuthentications"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Fallback Events",
+      "equality": "integerMatch",
+      "names": [
+        "jansFallbackEvents"
+      ],
+      "oid": "jansAttr",
+      "ordering": "integerOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Preferred Authenticator Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPreferredAuthenticatorType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Preferred Device Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPreferredDeviceType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Preferred Browser",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPreferredBrowser"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Preferred OS",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPreferredOs"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Average Registration Duration",
+      "equality": "numericStringMatch",
+      "names": [
+        "jansAvgRegistrationDuration"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.36",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Average Authentication Duration",
+      "equality": "numericStringMatch",
+      "names": [
+        "jansAvgAuthenticationDuration"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.36",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Last IP Address",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLastIpAddress"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Last User Agent",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLastUserAgent"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Is Active",
+      "equality": "booleanMatch",
+      "names": [
+        "jansIsActive"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Segments JSON",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansUserSegments"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Behavior Patterns JSON",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansBehaviorPatterns"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Risk Score",
+      "equality": "numericStringMatch",
+      "names": [
+        "jansRiskScore"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.36",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Engagement Level",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansEngagementLevel"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "FIDO2 User Adoption Stage",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAdoptionStage"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Access type for Flex adminUI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAccessType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     }
   ],
@@ -4417,6 +4952,7 @@
         "jansSoftVer",
         "userPassword",
         "jansConfDyn",
+        "jansConfPolicy",
         "jansConfErrors",
         "jansConfStatic",
         "jansConfWebKeys",
@@ -5535,12 +6071,13 @@
         "jansService",
         "jansNodeName",
         "eventType",
-        "severetyLevel",
+        "severityLevel",
         "actionName",
         "decisionResult",
         "requestedResource",
         "principalId",
         "clientId",
+        "jti",
         "contextInformation"
       ],
       "must": [
@@ -5578,50 +6115,6 @@
       ],
       "names": [
         "jansTelemetryEntry"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "auiFeatureId",
-        "displayName",
-        "jansScope",
-        "webhookId"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "auiFeatures"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "inum",
-        "displayName",
-        "description",
-        "url",
-        "httpMethod",
-        "httpRequestBody",
-        "jansEnabled",
-        "httpHeaders"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "auiWebhooks"
       ],
       "oid": "jansObjClass",
       "sup": [
@@ -5687,6 +6180,108 @@
       ],
       "names": [
         "jansSessionStatusIdxPool"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansFido2MetricsId",
+        "jansFido2MetricsType",
+        "jansFido2MetricsTimestamp",
+        "jansFido2MetricsUserId",
+        "jansFido2MetricsUsername",
+        "jansFido2MetricsOperationType",
+        "jansFido2MetricsStatus",
+        "jansFido2MetricsDuration",
+        "jansFido2MetricsAuthenticatorType",
+        "jansFido2MetricsDeviceInfo",
+        "jansFido2MetricsErrorReason",
+        "jansFido2MetricsErrorCategory",
+        "jansFido2MetricsFallbackMethod",
+        "jansFido2MetricsFallbackReason",
+        "jansFido2MetricsUserAgent",
+        "jansFido2MetricsIpAddress",
+        "jansFido2MetricsSessionId",
+        "jansFido2MetricsAdditionalData",
+        "jansFido2MetricsNodeId",
+        "jansFido2MetricsApplicationType"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansFido2MetricsEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansAggregationType",
+        "jansStartTime",
+        "jansEndTime",
+        "jansUniqueUsers",
+        "jansLastUpdated",
+        "jansMetricsData"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansFido2MetricsAggregation"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansUserId",
+        "jansUsername",
+        "jansFirstRegistrationDate",
+        "jansLastActivityDate",
+        "jansTotalRegistrations",
+        "jansTotalAuthentications",
+        "jansSuccessfulRegistrations",
+        "jansSuccessfulAuthentications",
+        "jansFailedRegistrations",
+        "jansFailedAuthentications",
+        "jansFallbackEvents",
+        "jansPreferredAuthenticatorType",
+        "jansPreferredDeviceType",
+        "jansPreferredBrowser",
+        "jansPreferredOs",
+        "jansAvgRegistrationDuration",
+        "jansAvgAuthenticationDuration",
+        "jansLastIpAddress",
+        "jansLastUserAgent",
+        "jansIsActive",
+        "jansUserSegments",
+        "jansBehaviorPatterns",
+        "jansRiskScore",
+        "jansEngagementLevel",
+        "jansAdoptionStage",
+        "jansLastUpdated"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansFido2UserMetrics"
       ],
       "oid": "jansObjClass",
       "sup": [

@@ -14,14 +14,14 @@ pub mod authorization_config;
 pub mod entity_builder_config;
 /// JWT config module
 pub mod jwt_config;
+/// Lock config module
+pub mod lock_config;
 /// Log config module
 pub mod log_config;
 /// Policy store config module
 pub mod policy_store_config;
 /// Raw config module
 pub mod raw_config;
-/// Lock config module
-pub mod lock_config;
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
@@ -30,12 +30,14 @@ use config::{Config, File};
 
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
-pub use entity_builder_config::{EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc};
-pub use jwt_config::{JwtConfig, JwtConfigRaw};
-pub use log_config::{LogConfig, LogConfigRaw, LogTypeConfig, MemoryLogConfig};
+pub use entity_builder_config::{
+    EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc,
+};
+pub use jwt_config::JwtConfig;
+pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
+pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
-pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -58,7 +60,7 @@ pub struct BootstrapConfig {
     /// If `None` then lock service is disabled.
     pub lock_config: Option<LockServiceConfig>,
     /// Maximum number of default entities allowed in a policy store.
-    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     pub max_default_entities: Option<usize>,
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
@@ -87,12 +89,13 @@ impl BootstrapConfig {
             .build()
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
 
-        let raw: BootstrapConfigRaw = config.try_deserialize()
+        let raw: BootstrapConfigRaw = config
+            .try_deserialize()
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
         raw.try_into()
     }
 
-    /// Loads a `BootstrapConfig` from a JSON string
+    /// Loads a [`BootstrapConfig`] from a JSON string
     pub fn load_from_json(json: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw: BootstrapConfigRaw = serde_json::from_str(json)
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
@@ -108,7 +111,8 @@ impl BootstrapConfig {
             .build()
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
 
-        let raw: BootstrapConfigRaw = config.try_deserialize()
+        let raw: BootstrapConfigRaw = config
+            .try_deserialize()
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
 
         raw.try_into()
@@ -116,25 +120,26 @@ impl BootstrapConfig {
 
     /// Loads the default configuration bundled with the library.
     /// This configuration provides sensible defaults for all components.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use cedarling::BootstrapConfig;
-    /// 
+    ///
     /// let config = BootstrapConfig::load_default().unwrap();
     /// ```
     pub fn load_default() -> Result<Self, BootstrapConfigLoadingError> {
         const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.yaml");
-        
+
         let config = Config::builder()
             .add_source(File::from_str(DEFAULT_CONFIG, config::FileFormat::Yaml))
             .build()
             .map_err(|e| BootstrapConfigLoadingError::DecodingYAML(e.to_string()))?;
 
-        let raw: BootstrapConfigRaw = config.try_deserialize()
+        let raw: BootstrapConfigRaw = config
+            .try_deserialize()
             .map_err(|e| BootstrapConfigLoadingError::DecodingYAML(e.to_string()))?;
-        
+
         raw.try_into()
     }
 }
@@ -222,6 +227,12 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when the lock server configuration URI is invalid.
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
+
+    /// Error returned when `cjar_url` is missing or empty.
+    #[error(
+        "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
+    )]
+    MissingCjarUrl,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {
@@ -236,12 +247,6 @@ impl From<serde_json::Error> for BootstrapConfigLoadingError {
     }
 }
 
-impl From<std::convert::Infallible> for BootstrapConfigLoadingError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!("Infallible cannot be instantiated")
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use jsonwebtoken::Algorithm;
@@ -253,28 +258,47 @@ mod tests {
     #[test]
     fn test_load_default_config() {
         let config = BootstrapConfig::load_default().unwrap();
-        
+
         // Verify basic configuration
         assert_eq!(config.application_name, "My App");
-        
+
         // Verify log configuration
-        assert!(matches!(config.log_config.log_type, LogTypeConfig::Memory(_)));
+        assert!(matches!(
+            config.log_config.log_type,
+            LogTypeConfig::Memory(_)
+        ));
         assert_eq!(config.log_config.log_level, LogLevel::DEBUG);
-        
+
         // Verify policy store configuration
-        assert!(matches!(config.policy_store_config.source, PolicyStoreSource::FileJson(_)));
-        
+        assert!(matches!(
+            config.policy_store_config.source,
+            PolicyStoreSource::FileJson(_)
+        ));
+
         // Verify JWT configuration
         assert!(config.jwt_config.jwt_sig_validation);
         assert!(!config.jwt_config.jwt_status_validation);
-        assert!(config.jwt_config.signature_algorithms_supported.contains(&Algorithm::HS256));
-        assert!(config.jwt_config.signature_algorithms_supported.contains(&Algorithm::RS256));
-        
+        assert!(
+            config
+                .jwt_config
+                .signature_algorithms_supported
+                .contains(&Algorithm::HS256)
+        );
+        assert!(
+            config
+                .jwt_config
+                .signature_algorithms_supported
+                .contains(&Algorithm::RS256)
+        );
+
         // Verify authorization configuration
         assert!(config.authorization_config.use_user_principal);
         assert!(config.authorization_config.use_workload_principal);
-        assert_eq!(config.authorization_config.decision_log_default_jwt_id, "jti");
-        
+        assert_eq!(
+            config.authorization_config.decision_log_default_jwt_id,
+            "jti"
+        );
+
         // Verify entity builder configuration
         assert!(config.entity_builder_config.build_user);
         assert!(config.entity_builder_config.build_workload);

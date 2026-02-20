@@ -7,7 +7,7 @@ tags:
 ---
 
 # Dynamic Scope
-The dynamic scope custom script allows the authorization server to generate a list of claims (and their values) on the fly, depending on circumstances such as the ID of the client requesting it, authenticated user's session parameters, values of other users' attributes, results of some calculations implementing specific business logic and/or requests to remote APIs or databases. Claims are then returned the usual way in a response to a call to the `/userinfo` endpoint. 
+The dynamic scope custom script allows the authorization server to generate a list of claims (and their values) on the fly, depending on circumstances such as the ID of the client requesting it, authenticated user's session parameters, values of other users' attributes, results of some calculations implementing specific business logic and/or requests to remote APIs or databases. Claims are then returned the usual way in a response to a call to the `/userinfo` endpoint.
 
 ## Interface
 The dynamic scope script implements the [DynamicScopeType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/scope/DynamicScopeType.java) interface. This extends methods from the base script type in addition to adding new methods:
@@ -39,51 +39,7 @@ This script has been adapted from the Gluu Server [sample dynamic scope script](
 
 ### Script Type: Python
 ```python
-from java.util import Arrays, ArrayList
-from io.jans.model.custom.script.type.scope import DynamicScopeType
-
-
-class DynamicScope(DynamicScopeType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, configurationAttributes):
-        print "Dynamic scope. Initialization"
-
-        print "Dynamic scope. Initialized successfully"
-
-        return True   
-
-    def destroy(self, configurationAttributes):
-        print "Dynamic scope. Destroy"
-        print "Dynamic scope. Destroyed successfully"
-        return True   
-
-    def update(self, dynamicScopeContext, configurationAttributes):
-        print "Dynamic scope. Update method"
-
-        dynamicScopes = dynamicScopeContext.getDynamicScopes()
-        user = dynamicScopeContext.getUser()
-        jsonToken = dynamicScopeContext.getJsonToken()
-        claims = jsonToken.getClaims()
-
-        # Iterate through list of dynamic scopes in order to add custom scopes if needed
-        print "Dynamic scope. Dynamic scopes:", dynamicScopes
-        for dynamicScope in dynamicScopes:
-            # Add organization name if there is scope = org_name
-            if (StringHelper.equalsIgnoreCase(dynamicScope, "org_name")):
-                claims.setClaim("org_name", "Test Value")
-                continue
-
-            # Add work phone if there is scope = work_phone
-
-        return True
-
-    def getApiVersion(self):
-        return 1
-
-    def getSupportedClaims(self, configurationAttributes):
-        return Arrays.asList("org_name")
+--8<-- "script-catalog/dynamic_scope/org-name/org_name.py"
 ```
 
 ### Script Type: Java
@@ -111,8 +67,8 @@ import org.slf4j.LoggerFactory;
 
 public class DynamicScope implements DynamicScopeType {
 
-  private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
-	
+  private static final Logger log = LoggerFactory.getLogger(DynamicScope.class);
+        
     @Override
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
       log.info("Dynamic Scope. Initializing...");

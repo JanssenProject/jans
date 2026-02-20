@@ -106,18 +106,20 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
-<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Dnet.bytebuddy.experimental=true</argLine>
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>org.junit.jupiter</groupId>
 						<artifactId>junit-jupiter-engine</artifactId>
+						<version>5.9.2</version>
 					</dependency>
 				</dependencies>
 			</plugin>
--->
 		</plugins>
 	</build>
 

@@ -1,0 +1,44 @@
+# Janssen Shibboleth IDP Properties
+
+idp.entityID=${idp_entity_id}
+idp.scope=${idp_scope}
+
+idp.home=/opt/shibboleth-idp
+idp.sealer.storePassword=${idp_sealer_password}
+idp.sealer.keyPassword=${idp_sealer_password}
+
+idp.signing.key=/opt/shibboleth-idp/credentials/idp-signing.key
+idp.signing.cert=/opt/shibboleth-idp/credentials/idp-signing.crt
+idp.encryption.key=/opt/shibboleth-idp/credentials/idp-encryption.key
+idp.encryption.cert=/opt/shibboleth-idp/credentials/idp-encryption.crt
+
+# Janssen Auth Server Integration
+jans.auth.server.url=${jans_auth_server_url}
+jans.auth.client.id=${jans_auth_client_id}
+jans.auth.client.secret=${jans_auth_client_secret}
+jans.auth.redirect.uri=${jans_auth_server_url}/idp/Authn/Jans/callback
+
+# SAML settings
+idp.authn.flows=Jans
+idp.authn.favorSSO=true
+
+# Session settings
+idp.session.enabled=true
+idp.session.StorageService=shibboleth.ClientSessionStorageService
+idp.session.slop=PT0S
+idp.session.timeout=PT60M
+idp.session.consistentAddress=true
+idp.session.secondaryServiceIndex=true
+
+# Consent settings
+idp.consent.enabled=false
+idp.consent.StorageService=shibboleth.ClientPersistentStorageService
+
+# Logging
+idp.loglevel.idp=INFO
+idp.loglevel.ldap=WARN
+idp.loglevel.messages=INFO
+idp.loglevel.opensaml=WARN
+idp.loglevel.props=INFO
+idp.loglevel.spring=ERROR
+idp.loglevel.container=ERROR

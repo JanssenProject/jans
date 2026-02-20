@@ -104,6 +104,9 @@ public class TokenRestWebServiceImplTest {
     @Mock
     private TxTokenService txTokenService;
 
+    @Mock
+    private JwtGrantService jwtGrantService;
+
     @InjectMocks
     private TokenRestWebServiceImpl tokenRestWebServiceImpl;
 

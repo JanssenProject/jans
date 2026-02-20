@@ -27,8 +27,8 @@
     <div class="container">
         <!-- div to make init cedarling -->
         <div class="row">
-            <h1>It is Cedarling example WASM page</h2>
-                Result is written to the js console log.
+            <h1>Cedarling WASM Example</h1>
+            <p>This example demonstrates both standard and multi-issuer authorization. Results are written to the browser console.</p>
         </div>
 
         <br><br>
@@ -45,8 +45,39 @@
             await initWasm(); // Initialize the WebAssembly module
 
             let instance = await init(BOOTSTRAP_CONFIG);
+            
+            // Standard authorization
             let result = await instance.authorize(REQUEST);
-            console.log("result:", result);
+            console.log("Standard authorization result:", result);
+            
+            // Multi-issuer authorization example
+            const multiIssuerRequest = {
+                tokens: [
+                    {
+                        mapping: "Jans::Access_Token",
+                        payload: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    {
+                        mapping: "Acme::DolphinToken", 
+                        payload: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                ],
+                resource: {
+                    entity_type: "Jans::Resource",
+                    entity_id: "resource123"
+                },
+                action: "Read",
+                context: {
+                    location: "miami"
+                }
+            };
+            
+            try {
+                let multiResult = await instance.authorize_multi_issuer(multiIssuerRequest);
+                console.log("Multi-issuer authorization result:", multiResult);
+            } catch (error) {
+                console.log("Multi-issuer authorization failed (expected with test data):", error);
+            }
         }
         main().catch(console.error);
     </script>

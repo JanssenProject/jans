@@ -14,11 +14,9 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
-ARG JANS_SAML_IMAGE=ghcr.io/janssenproject/jans/saml:${BASE_VERSION}
-
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+ARG JANS_SHIBBOLETH_IMAGE=ghcr.io/janssenproject/jans/shibboleth:${BASE_VERSION}
+# @NOTE: jans-link is temporarily disabled
 # ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
-# ARG JANS_KEYCLOAK_LINK_IMAGE=ghcr.io/janssenproject/jans/keycloak-link:${BASE_VERSION}
 
 # -----------
 # base images
@@ -38,17 +36,16 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
-FROM ${JANS_SAML_IMAGE} AS jans-saml-src
+FROM ${JANS_SHIBBOLETH_IMAGE} AS jans-shibboleth-src
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# @NOTE: jans-link support is temporarily disabled
 # FROM ${JANS_LINK_IMAGE} AS jans-link-src
-# FROM ${JANS_KEYCLOAK_LINK_IMAGE} AS jans-keycloak-link-src
 
 # ===
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:83719ee0075de03ecc7a99db489fd72a022e49f09c0e6e6350bcc05310c3caf6
+FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -60,16 +57,19 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=a9bbd274ab49b24e22f4adbdb606152e59da9699
+ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
 ARG GIT_CLONE_DEPTH=100
-RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
-    && cd /tmp/jans \
+WORKDIR /tmp/jans
+
+RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add jans-pycloudlib
+    && git sparse-checkout add jans-pycloudlib \
+    && git checkout ${JANS_SOURCE_VERSION}
+
+WORKDIR /
 
 # ------
 # Python
@@ -150,36 +150,32 @@ COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
 COPY --from=jans-casa-src /usr/share/java/casa-agama-project.zip /usr/share/java
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
-COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
-COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
-COPY --from=jans-saml-src /opt/idp /opt/idp
-COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
-RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
+# @NOTE: jans-saml (Keycloak-based) has been replaced by jans-shibboleth
+# COPY --from=jans-saml-src /app/templates/jans-saml /app/templates/jans-saml
+# COPY --from=jans-saml-src /app/scripts /app/jans_aio/jans_saml
+# COPY --from=jans-saml-src /opt/idp /opt/idp
+# COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
+# RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+COPY --from=jans-shibboleth-src /app/templates /app/templates/jans-shibboleth
+COPY --from=jans-shibboleth-src /app/scripts /app/jans_aio/jans_shibboleth
+COPY --from=jans-shibboleth-src /opt/shibboleth-idp /opt/shibboleth-idp
+COPY --from=jans-shibboleth-src /opt/jetty /opt/shibboleth-jetty
+RUN ln -sf /app/jans_aio/jans_shibboleth/entrypoint.sh /app/bin/jans-shibboleth-entrypoint.sh
+
+# @NOTE: jans-link support is temporarily disabled
 # COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
 # COPY --from=jans-link-src /app/templates/jans-link /app/templates/jans-link
 # COPY --from=jans-link-src /app/scripts /app/jans_aio/jans_link
 # COPY --from=jans-link-src /var/jans/link-snapshots /var/jans/link-snapshots
 # RUN ln -sf /app/jans_aio/jans_link/entrypoint.sh /app/bin/jans-link-entrypoint.sh
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
-# COPY --from=jans-keycloak-link-src /opt/jans/jetty/jans-keycloak-link /opt/jans/jetty/jans-keycloak-link
-# COPY --from=jans-keycloak-link-src /app/templates/jans-keycloak-link /app/templates/jans-keycloak-link
-# COPY --from=jans-keycloak-link-src /app/scripts /app/jans_aio/jans_keycloak_link
-# COPY --from=jans-keycloak-link-src /var/jans/keycloak-link-snapshots /var/jans/keycloak-link-snapshots
-# RUN ln -sf /app/jans_aio/jans_keycloak_link/entrypoint.sh /app/bin/jans-keycloak-link-entrypoint.sh
-
 # ----
 # misc
 # ----
 
-RUN ln -sf /usr/lib/jvm/jdk /opt/java
-
-RUN mkdir -p /opt/jans/configurator/db \
-    /opt/jans/configurator/certs \
-    /opt/jetty/temp \
-    /etc/nginx/jans-aio
+RUN ln -sf /usr/lib/jvm/jdk /opt/java \
+    && mkdir -p /opt/jans/configurator/db /opt/jans/configurator/certs /opt/jetty/temp /etc/nginx/jans-aio
 
 COPY app /app
 
@@ -189,13 +185,10 @@ ENV CN_VERSION=0.0.0-nightly
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# @NOTE: jans-link support is temporarily disabled
 # CN_LINK_JETTY_HOST=127.0.0.1 \
 # CN_LINK_JETTY_PORT=9091 \
 # CN_LINK_JAVA_OPTIONS="" \
-# CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
-# CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
-# CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
 
 ENV JETTY_BASE=/opt/jans/jetty \
     JETTY_HOME=/opt/jetty \
@@ -225,20 +218,10 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_CASA_JAVA_OPTIONS="" \
     CN_SHARE_AUTH_CONF=false \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
-    CN_SAML_HTTP_HOST=127.0.0.1 \
-    CN_SAML_HTTP_PORT=8083 \
-    CN_SAML_JAVA_OPTIONS="" \
-    CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
-    CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
-    KC_LOG_LEVEL=INFO \
-    KC_DB=mysql \
-    KC_DB_USERNAME=keycloak \
-    KC_DB_SCHEMA=keycloak \
-    KC_DB_URL_HOST=localhost \
-    KC_DB_URL_PORT=3306 \
-    KC_DB_URL_DATABASE=keycloak \
-    KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
-    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
+    CN_SHIBBOLETH_HTTP_HOST=127.0.0.1 \
+    CN_SHIBBOLETH_HTTP_PORT=8086 \
+    CN_SHIBBOLETH_JAVA_OPTIONS="" \
+    SHIBBOLETH_HOME=/opt/shibboleth-idp
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
@@ -262,13 +245,10 @@ RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \
 
 RUN chmod +x /app/bin/entrypoint.sh
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# @NOTE: jans-link support is temporarily disabled
 # ${JETTY_BASE}/jans-link/resources \
 # ${JETTY_BASE}/jans-link/logs \
-# ${JETTY_BASE}/jans-keycloak-link/resources \
-# ${JETTY_BASE}/jans-keycloak-link/logs \
 # /var/jans/link-snapshots \
-# /var/jans/keycloak-link-snapshots
 
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
@@ -306,13 +286,10 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /opt/keycloak/logs \
     /opt/keycloak/conf
 
-# @NOTE: jans-link and jans-keycloak-link support is temporarily disabled
+# @NOTE: jans-link is temporarily disabled
 # ${JETTY_BASE}/jans-link/resources \
 # ${JETTY_BASE}/jans-link/logs \
-# ${JETTY_BASE}/jans-keycloak-link/resources \
-# ${JETTY_BASE}/jans-keycloak-link/logs \
 # /var/jans/link-snapshots \
-# /var/jans/keycloak-link-snapshots
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \

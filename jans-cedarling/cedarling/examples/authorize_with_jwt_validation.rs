@@ -3,9 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
+
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
+    EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource, Request, log_config::StdOutLoggerMode,
+};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
@@ -20,6 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_sig_validation: true,
         jwt_status_validation: false,
         signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
+        ..Default::default()
     };
 
     // You must change this with your own tokens
@@ -33,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cedarling = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -75,7 +81,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             resource: EntityData {
                 cedar_mapping: CedarEntityMapping {
                     entity_type: "Jans::Issue".to_string(),
-                id: "random_id".to_string(),
+                    id: "random_id".to_string(),
                 },
                 attributes: HashMap::from_iter([(
                     "org_id".to_string(),
@@ -86,8 +92,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await;
 
     // Handle authorization result. If there's an error, print it.
-    if let Err(ref e) = &result {
-        eprintln!("Error while authorizing: {:?}\n\n", e)
+    if let Err(e) = &result {
+        eprintln!("Error while authorizing: {e:?}\n\n");
     }
 
     Ok(())

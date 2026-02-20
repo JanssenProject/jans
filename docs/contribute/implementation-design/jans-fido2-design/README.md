@@ -17,9 +17,9 @@ Janssen's FIDO2 server - a component inside the Janssen project enables users of
 ### Components of the FIDO2 ecosystem in Janssen
 
 
-![FIDO2 ecosystem](../../assets/fido2-components.png)
+![FIDO2 ecosystem](../../../assets/fido2-components.png)
 
-[Diagram reference](../../assets/fido2-components.xml)
+[Diagram reference](../../../assets/fido2-components.xml)
 
  1. **User**: User of an application, the one who possesses the Authenticator and who's role is to pass the Test of User Presence (TUP) (touch device, look, speak etc.).
 
@@ -66,7 +66,7 @@ Response:
     2. Assertion
     The authenticator credentials obtained after querying the WebAuthn API is forwarded to the FIDO2 server for attestation or assertion.
 
-7. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
+7. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
 
 
 ### Attestation formats supported by Janssen's FIDO server

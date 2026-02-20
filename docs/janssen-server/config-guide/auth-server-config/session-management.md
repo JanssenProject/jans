@@ -13,7 +13,7 @@ command line an rest-api
 
 ## Use Command-line
 
-In the Janssen Server, you can search, delete, view sessions under 
+In the Janssen Server, you can search, delete, view sessions under
 `ConfigurationLogging` task using the
 command below:
 

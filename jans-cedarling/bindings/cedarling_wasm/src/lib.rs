@@ -4,14 +4,17 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::bindings::cedar_policy;
-use cedarling::{BootstrapConfig, BootstrapConfigRaw, LogStorage, Request, RequestUnsigned};
+use cedarling::{
+    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, LogStorage, Request,
+    RequestUnsigned,
+};
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
 use serde_wasm_bindgen::Error;
 use std::collections::HashMap;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::js_sys::{Array, Map, Object, Reflect};
+use wasm_bindgen_futures::js_sys::{self, Array, Map, Object, Reflect};
 
 #[cfg(test)]
 mod tests;
@@ -21,6 +24,45 @@ mod tests;
 #[derive(Clone)]
 pub struct Cedarling {
     instance: cedarling::Cedarling,
+}
+
+/// A WASM wrapper for the Rust `cedarling::MultiIssuerAuthorizeResult` struct.
+/// Represents the result of a multi-issuer authorization request.
+#[wasm_bindgen]
+#[derive(serde::Serialize)]
+pub struct MultiIssuerAuthorizeResult {
+    /// Result of Cedar policy authorization
+    #[wasm_bindgen(getter_with_clone)]
+    pub response: AuthorizeResultResponse,
+
+    /// Result of authorization
+    /// true means `ALLOW`
+    /// false means `Deny`
+    pub decision: bool,
+
+    /// Request ID of the authorization request
+    #[wasm_bindgen(getter_with_clone)]
+    pub request_id: String,
+}
+
+#[wasm_bindgen]
+impl MultiIssuerAuthorizeResult {
+    /// Convert `MultiIssuerAuthorizeResult` to json string value
+    pub fn json_string(&self) -> String {
+        json!(self).to_string()
+    }
+}
+
+impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
+    fn from(value: cedarling::MultiIssuerAuthorizeResult) -> Self {
+        Self {
+            response: AuthorizeResultResponse {
+                inner: Rc::new(value.response),
+            },
+            decision: value.decision,
+            request_id: value.request_id,
+        }
+    }
 }
 
 /// Create a new instance of the Cedarling application.
@@ -36,6 +78,61 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
     } else {
         Err(Error::new("config should be Map or Object"))
     }
+}
+
+/// Create a new instance of the Cedarling application from archive bytes.
+///
+/// This function allows loading a policy store from a Cedar Archive (.cjar)
+/// that was fetched with custom logic (e.g., with authentication headers).
+///
+/// # Arguments
+/// * `config` - Bootstrap configuration (Map or Object). Policy store config is ignored.
+/// * `archive_bytes` - The .cjar archive bytes (Uint8Array)
+///
+/// # Example
+/// ```javascript
+/// const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
+/// const bytes = new Uint8Array(await response.arrayBuffer());
+/// const cedarling = await init_from_archive_bytes(config, bytes);
+/// ```
+#[wasm_bindgen]
+pub async fn init_from_archive_bytes(
+    config: JsValue,
+    archive_bytes: js_sys::Uint8Array,
+) -> Result<Cedarling, Error> {
+    use cedarling::PolicyStoreSource;
+
+    // Convert Uint8Array to Vec<u8>
+    let bytes: Vec<u8> = archive_bytes.to_vec();
+
+    // Parse the config
+    let config_object = if config.is_instance_of::<Map>() {
+        let config_map: Map = config.unchecked_into();
+        Object::from_entries(&config_map.unchecked_into())?
+    } else if let Some(obj) = Object::try_from(&config) {
+        obj.clone()
+    } else {
+        return Err(Error::new("config should be Map or Object"));
+    };
+
+    let mut raw_config: BootstrapConfigRaw = serde_wasm_bindgen::from_value(config_object.into())?;
+
+    // Clear any existing policy store sources to avoid conflicts
+    // We'll set a dummy source temporarily to satisfy validation, then override with ArchiveBytes
+    raw_config.local_policy_store = None;
+    raw_config.policy_store_uri = None;
+    // Set a dummy .cjar file path to satisfy validation (will be overridden below)
+    raw_config.policy_store_local_fn = Some("dummy.cjar".to_string());
+
+    let mut bootstrap_config = BootstrapConfig::from_raw_config(&raw_config).map_err(Error::new)?;
+
+    // Override the policy store source with the archive bytes
+    bootstrap_config.policy_store_config.source = PolicyStoreSource::ArchiveBytes(bytes);
+
+    cedarling::Cedarling::new(&bootstrap_config)
+        .await
+        .map(|instance| Cedarling { instance })
+        .map_err(Error::new)
 }
 
 #[wasm_bindgen]
@@ -95,6 +192,28 @@ impl Cedarling {
         let result = self
             .instance
             .authorize_unsigned(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(result.into())
+    }
+
+    /// Authorize multi-issuer request.
+    /// Makes authorization decision based on multiple JWT tokens from different issuers
+    pub async fn authorize_multi_issuer(
+        &self,
+        request: JsValue,
+    ) -> Result<MultiIssuerAuthorizeResult, Error> {
+        // if `request` is map convert to object
+        let request_object: JsValue = if request.is_instance_of::<Map>() {
+            Object::from_entries(&request)?.into()
+        } else {
+            request
+        };
+        let cedar_request: AuthorizeMultiIssuerRequest =
+            serde_wasm_bindgen::from_value(request_object)?;
+        let result = self
+            .instance
+            .authorize_multi_issuer(cedar_request)
             .await
             .map_err(Error::new)?;
         Ok(result.into())

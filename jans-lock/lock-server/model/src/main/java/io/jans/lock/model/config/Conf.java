@@ -1,21 +1,13 @@
-/*
- * Copyright [2024] [Janssen Project]
+/*/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2024, Janssen Project
  */
+
 
 package io.jans.lock.model.config;
 
+import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
@@ -37,6 +29,10 @@ public class Conf {
 	@JsonObject
 	@AttributeName(name = "jansConfDyn")
 	private AppConfiguration dynamic;
+
+	@JsonObject
+	@AttributeName(name = "jansConfPolicy")
+	private CedarlingPolicyConfiguration policyConfiguration;
 
 	@JsonObject
 	@AttributeName(name = "jansConfStatic")
@@ -65,6 +61,14 @@ public class Conf {
 		this.dynamic = dynamic;
 	}
 
+	public CedarlingPolicyConfiguration getPolicyConfiguration() {
+		return policyConfiguration;
+	}
+
+	public void setPolicyConfiguration(CedarlingPolicyConfiguration policyConfiguration) {
+		this.policyConfiguration = policyConfiguration;
+	}
+
 	public StaticConfiguration getStatics() {
 		return statics;
 	}
@@ -91,12 +95,7 @@ public class Conf {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		sb.append("Conf");
-		sb.append("{dn='").append(dn).append('\'');
-		sb.append(", dynamic='").append(dynamic).append('\'');
-		sb.append(", static='").append(statics).append('\'');
-		sb.append('}');
-		return sb.toString();
+		return "Conf [dn=" + dn + ", dynamic=" + dynamic + ", policyConfiguration=" + policyConfiguration + ", statics="
+				+ statics + ", errors=" + errors + ", revision=" + revision + "]";
 	}
 }
