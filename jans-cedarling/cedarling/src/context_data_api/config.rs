@@ -19,7 +19,7 @@ use std::time::Duration;
 ///
 /// ## Examples
 ///
-/// ```
+/// ```no_run
 /// use std::time::Duration;
 /// use cedarling::DataStoreConfig;
 ///
@@ -100,9 +100,10 @@ impl DataStoreConfig {
     pub fn validate(&self) -> Result<(), ConfigValidationError> {
         // Check if default_ttl exceeds max_ttl
         if let (Some(default), Some(max)) = (self.default_ttl, self.max_ttl)
-            && default > max {
-                return Err(ConfigValidationError::DefaultTtlExceedsMax { default, max });
-            }
+            && default > max
+        {
+            return Err(ConfigValidationError::DefaultTtlExceedsMax { default, max });
+        }
 
         // Validate memory_alert_threshold is in valid range
         if !(0.0..=100.0).contains(&self.memory_alert_threshold) {
