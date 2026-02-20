@@ -86,7 +86,7 @@ pub enum ConfigValidationError {
     },
     /// `memory_alert_threshold` is outside valid range
     #[error("memory_alert_threshold ({value}) must be between 0.0 and 100.0")]
-    InvalidMemoryAlertThreshold {
+    MemoryAlertThreshold {
         /// The invalid threshold value
         value: f64,
     },
@@ -107,7 +107,7 @@ impl DataStoreConfig {
 
         // Validate memory_alert_threshold is in valid range
         if !(0.0..=100.0).contains(&self.memory_alert_threshold) {
-            return Err(ConfigValidationError::InvalidMemoryAlertThreshold {
+            return Err(ConfigValidationError::MemoryAlertThreshold {
                 value: self.memory_alert_threshold,
             });
         }
@@ -241,9 +241,9 @@ mod tests {
         assert!(
             matches!(
                 config.validate(),
-                Err(ConfigValidationError::InvalidMemoryAlertThreshold { .. })
+                Err(ConfigValidationError::MemoryAlertThreshold { .. })
             ),
-            "expected DataStoreConfig::validate() to return InvalidMemoryAlertThreshold when memory_alert_threshold is < 0.0"
+            "expected DataStoreConfig::validate() to return MemoryAlertThreshold when memory_alert_threshold is < 0.0"
         );
 
         let config = DataStoreConfig {
@@ -253,9 +253,9 @@ mod tests {
         assert!(
             matches!(
                 config.validate(),
-                Err(ConfigValidationError::InvalidMemoryAlertThreshold { .. })
+                Err(ConfigValidationError::MemoryAlertThreshold { .. })
             ),
-            "expected DataStoreConfig::validate() to return InvalidMemoryAlertThreshold when memory_alert_threshold is > 100.0"
+            "expected DataStoreConfig::validate() to return MemoryAlertThreshold when memory_alert_threshold is > 100.0"
         );
     }
 }
