@@ -481,7 +481,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            principal_bool_operator: Default::default(),
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
@@ -499,7 +499,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         .await
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)))
+    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)));
 }
 
 /// Check if action executes when principal user can't be applied
@@ -528,9 +528,8 @@ async fn test_where_principal_user_cant_be_applied() {
 
     assert!(
         matches!(result, crate::AuthorizeError::InvalidPrincipal(_)),
-        "expected error InvalidPrincipal, got: {}",
-        result
-    )
+        "expected error InvalidPrincipal, got: {result}"
+    );
 }
 
 /// Test policy evaluation errors are logged for signed authorization
@@ -591,8 +590,7 @@ async fn test_policy_evaluation_errors_logging() {
         let log_kind = log.get("log_kind").unwrap();
         assert!(
             log_kind == "Decision" || log_kind == "System",
-            "Log kind should be Decision or System, got: {:?}",
-            log_kind
+            "Log kind should be Decision or System, got: {log_kind:?}"
         );
 
         // For Decision logs, verify they have required fields

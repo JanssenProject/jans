@@ -4,7 +4,6 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-#![allow(unexpected_cfgs)]
 
 use cedarling::AuthorizeError as CedarlingAuthorizeError;
 use pyo3::{create_exception, prelude::*};
@@ -15,13 +14,6 @@ create_exception!(
     AuthorizeError,
     pyo3::exceptions::PyException,
     "Exception raised by authorize_errors"
-);
-
-create_exception!(
-    authorize_errors,
-    DecodeTokens,
-    AuthorizeError,
-    "Error encountered while decoding JWT token data"
 );
 
 create_exception!(
@@ -84,7 +76,7 @@ create_exception!(
     authorize_errors,
     BuildEntityError,
     AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
+    "Error encountered while building Cedar entities"
 );
 
 create_exception!(
@@ -101,8 +93,28 @@ create_exception!(
     "Error building Role entity for unsigned request"
 );
 
+create_exception!(
+    authorize_errors,
+    MultiIssuerValidationError,
+    AuthorizeError,
+    "Error encountered during multi-issuer token validation"
+);
+
+create_exception!(
+    authorize_errors,
+    MultiIssuerEntityError,
+    AuthorizeError,
+    "Error encountered while building multi-issuer entities"
+);
+
+create_exception!(
+    authorize_errors,
+    RequestValidationError,
+    AuthorizeError,
+    "Error encountered while validating the request"
+);
+
 #[pyclass]
-#[derive()]
 pub struct ErrorPayload(CedarlingAuthorizeError);
 
 #[pymethods]
@@ -116,10 +128,11 @@ impl ErrorPayload {
 macro_rules! errors_functions {
     ($($case_name:ident => $error_class:ident),*) => {
         // is used to map CedarlingAuthorizeError to python error
-        pub fn authorize_error_to_py(err: CedarlingAuthorizeError) -> PyErr {
-                match err {
+        #[allow(clippy::boxed_local)]
+        pub fn authorize_error_to_py(err: Box<CedarlingAuthorizeError>) -> PyErr {
+                let err_args = ErrorPayload(*err);
+                match err_args.0 {
                     $(CedarlingAuthorizeError::$case_name(_) => {
-                        let err_args = ErrorPayload(err);
                         PyErr::new::<$error_class, _>(err_args)
                     },)*
                 }
@@ -128,7 +141,7 @@ macro_rules! errors_functions {
         // is used to register errors in py module
         pub fn register_errors(m: &Bound<'_, PyModule>) -> PyResult<()> {
             $(
-                m.add(stringify!($error_class), m.py().get_type_bound::<$error_class>())?;
+                m.add(stringify!($error_class), m.py().get_type::<$error_class>())?;
             )*
             Ok(())
         }
@@ -149,11 +162,14 @@ errors_functions! {
     IdTokenTrustMode => IdTokenTrustModeError,
     BuildEntity => BuildEntityError,
     ExecuteRule => ExecuteRuleError,
-    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError
+    BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,
+    MultiIssuerValidation => MultiIssuerValidationError,
+    MultiIssuerEntity => MultiIssuerEntityError,
+    RequestValidation => RequestValidationError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("AuthorizeError", m.py().get_type_bound::<AuthorizeError>())?;
+    m.add("AuthorizeError", m.py().get_type::<AuthorizeError>())?;
     register_errors(m)?;
     Ok(())
 }

@@ -7,7 +7,7 @@ tags:
 ---
 
 # OpenID Connect Provider (OP)
-The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server) has core OAuth 2.0 support as well as many other related specs: 
+The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server) has core OAuth 2.0 support as well as many other related specs:
 
 - The OAuth 2.0 Authorization Framework [(spec)](https://datatracker.ietf.org/doc/html/rfc6749)
 - The OAuth 2.0 Authorization Framework: Bearer Token Usage [(spec)](https://datatracker.ietf.org/doc/html/rfc6750)
@@ -35,28 +35,28 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 
 ## Protocol Overview
 
-OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity providing specific authorization flows for different applications (e.g. web applications, desktop applications, mobile phones, and other devices). 
+OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity providing specific authorization flows for different applications (e.g. web applications, desktop applications, mobile phones, and other devices).
 
 It's handy to know some OAuth 2.0 terminology:
 
 - **resource owner** - An entity capable of granting access to a protected resource.
                        When the resource owner is a person, it is referred to as an end-user.
-  
+
 - **resource server** - The server hosting the protected resources, capable of accepting
                         and responding to protected resource requests using access tokens.
-  
+
 - **client** - An application making protected resource requests on behalf of the
                resource owner and with its authorization.  The term "client" does
                not imply any particular implementation characteristics (e.g.,
                whether the application executes on a server, a desktop, or other devices).
-  
+
 - **authorization server** - The server issuing access tokens to the client after successfully
                              authenticating the resource owner and obtaining authorization.
 
 ## Have questions in the meantime?
 
-You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

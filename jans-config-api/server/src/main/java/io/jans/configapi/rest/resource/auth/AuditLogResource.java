@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.format.DateTimeFormatter;
 
@@ -58,22 +60,37 @@ public class AuditLogResource extends ConfigBaseResource {
     @Inject
     AuthUtil authUtil;
 
+    /**
+     * Searches and returns paginated audit log entries filtered by an optional pattern and date range.
+     *
+     * @param pattern   a substring or regex to filter log lines; blank returns all entries
+     * @param startIndex the 1-based index of the first result to return
+     * @param limit     maximum number of results to return
+     * @param startDate optional start date (dd-MM-yyyy) to include entries on or after this date
+     * @param endDate   optional end date (dd-MM-yyyy) to include entries on or before this date
+     * @return          a HTTP 200 Response containing a LogPagedResult with the matching log lines and pagination metadata
+     */
     @Operation(summary = "Get audit details.", description = "Get audit details.", operationId = "get-audit-data", tags = {
-            "Logs" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.LOGGING_READ_ACCESS }))
+            "Logs" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogPagedResult.class), examples = @ExampleObject(name = "Response example"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.LOGGING_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getLogsEnteries(
             @Parameter(description = "Search pattern") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(schema = @Schema(type = "string", format = "date", description = "Start-Date for which the log entries report is to be fetched in `dd-MM-yyyy` format")) @QueryParam(value = "start_date") String startDate,
-            @Parameter(schema = @Schema(type = "string", format = "date", description = "End-Date for which the log entries is to be fetched in `dd-MM-yyyy` format")) @QueryParam(value = "end_date") String endDate)
+            @Parameter(description = "Start date/time for the log entries report. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "start_date") String startDate,
+            @Parameter(description = "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "end_date") String endDate)
 
     {
         if (log.isInfoEnabled()) {
@@ -251,27 +268,32 @@ public class AuditLogResource extends ConfigBaseResource {
         }
 
         StringBuilder sb = new StringBuilder();
+        LocalDate startLocal = null;
+        LocalDate endLocal = null;
+
         // validate startDate
         if (StringUtils.isNotBlank(startDate)) {
             try {
-                parseDate(startDate, formatter);
+                startLocal = parseUserDate(startDate, formatter);
             } catch (DateTimeParseException dtpe) {
-                sb.append("Start date is not valid, date:{" + startDate + "} whereas valid format is:{"
-                        + formatter.toString() + "}");
+                sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
             }
         }
 
         // validate endDate
         if (StringUtils.isNotBlank(endDate)) {
             try {
-                parseDate(endDate, formatter);
+                endLocal = parseUserDate(endDate, formatter);
             } catch (DateTimeParseException dtpe) {
-                sb.append("End date is not valid, date:{" + startDate + "} whereas valid format is:{"
-                        + formatter.toString() + "}");
+                sb.append("End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).");
             }
         }
 
-        if (sb.toString().length() > 0) {
+        if (startLocal != null && endLocal != null && startLocal.isAfter(endLocal)) {
+            sb.append("Start date must be before or equal to end date.");
+        }
+
+        if (sb.length() > 0) {
             throwBadRequestException(sb.toString(), "INVALID_DATE");
         }
     }
@@ -288,16 +310,16 @@ public class AuditLogResource extends ConfigBaseResource {
         // validate date
         validateDate(startDate, endDate, formatter);
 
-        // startDate
+        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g. yyyy-MM-ddTHH:mm:ssZ)
         LocalDate startLocalDate = null;
         if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            startLocalDate = parseUserDate(startDate, formatter);
         }
 
-        // endDate
+        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g. yyyy-MM-ddTHH:mm:ssZ)
         LocalDate endLocalDate = null;
         if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
+            endLocalDate = parseUserDate(endDate, formatter);
         }
 
         if (logEntryLocalDate != null) {
@@ -333,6 +355,52 @@ public class AuditLogResource extends ConfigBaseResource {
     private LocalDate parseDate(String date, DateTimeFormatter formatter) throws DateTimeParseException {
         log.debug(" Parse Date date:{}, formatter:{}", date, formatter);
         return LocalDate.parse(date, formatter);
+    }
+
+    /**
+     * Parses a user-supplied date string in either ISO-8601 date-time format (e.g. yyyy-MM-ddTHH:mm:ssZ)
+     * or legacy dd-MM-yyyy format. Returns the date part as LocalDate for range comparison.
+     *
+     * @param dateStr the date or date-time string from the API request
+     * @param fallbackFormatter optional configured audit log date format (e.g. dd-MM-yyyy)
+     * @return LocalDate for the given string, or null if dateStr is blank
+     * @throws DateTimeParseException if the string cannot be parsed with any supported format
+     */
+    private LocalDate parseUserDate(String dateStr, DateTimeFormatter fallbackFormatter) throws DateTimeParseException {
+        if (StringUtils.isBlank(dateStr)) {
+            return null;
+        }
+        String trimmed = dateStr.trim();
+        // Try ISO-8601 offset date-time (e.g. 2024-02-13T10:30:00Z, 2024-02-13T10:30:00+01:00)
+        try {
+            ZonedDateTime zdt = ZonedDateTime.parse(trimmed, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            return zdt.toLocalDate();
+        } catch (DateTimeParseException ignored) {
+            // continue
+        }
+        // Try ISO local date-time (e.g. 2024-02-13T10:30:00)
+        try {
+            LocalDateTime ldt = LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            return ldt.toLocalDate();
+        } catch (DateTimeParseException ignored) {
+            // continue
+        }
+        // Try ISO date only (e.g. 2024-02-13)
+        try {
+            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException ignored) {
+            // continue
+        }
+        // Try configured audit format (e.g. dd-MM-yyyy)
+        if (fallbackFormatter != null) {
+            try {
+                return LocalDate.parse(trimmed, fallbackFormatter);
+            } catch (DateTimeParseException ignored) {
+                // continue
+            }
+        }
+        // Fallback to legacy dd-MM-yyyy
+        return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(AUDIT_FILE_DATE_FORMAT));
     }
 
 }

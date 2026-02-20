@@ -34,7 +34,7 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
-    private final PersistenceEntryManager persistenceEntryManager;
+    private PersistenceEntryManager persistenceEntryManager;
 
     private ExecutionContext executionContext;
 
@@ -51,7 +51,6 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     public ExternalScriptContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         super(httpRequest, httpResponse);
-        this.persistenceEntryManager = ServerUtil.getLdapManager();
     }
 
     public static ExternalScriptContext of(ExecutionContext executionContext) {
@@ -75,6 +74,13 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {
+        if (persistenceEntryManager == null) {
+            synchronized (this) {
+                if (persistenceEntryManager == null) {
+                    persistenceEntryManager = ServerUtil.getLdapManager();
+                }
+            }
+        }
         return persistenceEntryManager;
     }
 
@@ -89,7 +95,7 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     protected CustomEntry getEntryByDn(String dn, String... ldapReturnAttributes) {
         try {
-            return persistenceEntryManager.find(dn, CustomEntry.class, ldapReturnAttributes);
+            return getPersistenceEntryManager().find(dn, CustomEntry.class, ldapReturnAttributes);
         } catch (EntryPersistenceException epe) {
             log.error("Failed to find entry '{}'", dn);
         }

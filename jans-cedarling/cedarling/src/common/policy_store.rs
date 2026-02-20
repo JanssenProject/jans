@@ -3,78 +3,59 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#[cfg(test)]
+mod archive_security_tests;
 mod claim_mapping;
+pub(crate) mod log_entry;
 #[cfg(test)]
 mod test;
+#[cfg(test)]
+pub(crate) mod test_utils;
 mod token_entity_metadata;
+
+use crate::common::{
+    default_entities::DefaultEntitiesWithWarns,
+    default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
+    issuer_utils::normalize_issuer,
+};
+
+pub(crate) mod archive_handler;
+pub(crate) mod entity_parser;
+pub(crate) mod errors;
+pub(crate) mod issuer_parser;
+pub(crate) mod loader;
+pub(crate) mod manager;
+pub(crate) mod manifest_validator;
+pub(crate) mod metadata;
+pub(crate) mod policy_parser;
+pub(crate) mod schema_parser;
+pub(crate) mod validator;
+pub(crate) mod vfs_adapter;
 
 use super::{PartitionResult, cedar_schema::CedarSchema};
 use cedar_policy::{Policy, PolicyId};
 use semver::Version;
-use serde::{Deserialize, Deserializer, de};
+use serde::{Deserialize, Deserializer, de, de::Error};
 use std::collections::HashMap;
 use url::Url;
 
 pub(crate) use claim_mapping::ClaimMappings;
-pub use token_entity_metadata::TokenEntityMetadata;
+pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
-/// Default maximum number of entities allowed
-const DEFAULT_MAX_ENTITIES: usize = 1000;
-/// Default maximum size of base64-encoded strings in bytes
-const DEFAULT_MAX_BASE64_SIZE: usize = 1024 * 1024;
-
-/// Configuration for limiting default entities to prevent DoS and memory exhaustion attacks
-#[derive(Debug, Clone)]
-pub struct DefaultEntitiesLimits {
-    /// Maximum number of default entities allowed
-    pub max_entities: usize,
-    /// Maximum size of base64-encoded strings in bytes
-    pub max_base64_size: usize,
-}
-
-impl Default for DefaultEntitiesLimits {
-    fn default() -> Self {
-        Self {
-            max_entities: DEFAULT_MAX_ENTITIES,
-            max_base64_size: DEFAULT_MAX_BASE64_SIZE,
-        }
-    }
-}
-
-/// Validates default entities against size and count limits
-fn validate_default_entities(
-    entities: &HashMap<String, serde_json::Value>,
-    limits: &DefaultEntitiesLimits,
-) -> Result<(), String> {
-    // Check entity count limit
-    if entities.len() > limits.max_entities {
-        return Err(format!(
-            "Maximum number of default entities ({}) exceeded, found {}",
-            limits.max_entities,
-            entities.len()
-        ));
-    }
-
-    // Check base64 size limit for each entity
-    for (entity_id, entity_data) in entities {
-        if let Some(entity_str) = entity_data.as_str()
-            && entity_str.len() > limits.max_base64_size {
-                return Err(format!(
-                    "Base64 string size ({}) for entity '{}' exceeds maximum allowed size ({})",
-                    entity_str.len(),
-                    entity_id,
-                    limits.max_base64_size
-                ));
-            }
-    }
-
-    Ok(())
-}
-
+// Re-export types used by init/policy_store.rs and external consumers
+pub(crate) use manager::ConversionError;
+pub(crate) use metadata::PolicyStoreMetadata;
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
-#[derive(Debug, Clone, PartialEq)]
-pub struct AgamaPolicyStore {
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+pub(crate) struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
+    ///
+    /// **Note**: This field is currently unused after deserialization but is kept for:
+    /// 1. Input validation - ensures policy store files specify a valid version format
+    /// 2. Format compatibility - maintains the Agama Lab Policy Designer format specification
+    /// 3. Future use - may be needed for version-specific parsing logic as Cedar evolves
+    #[allow(dead_code)]
     pub cedar_version: Version,
     pub policy_stores: HashMap<String, PolicyStore>,
 }
@@ -86,11 +67,11 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
     {
         // First try to deserialize into a Value to get better error messages
         let value = serde_json::Value::deserialize(deserializer)?;
-        
+
         // Check for required fields
-        let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("policy store must be a JSON object")
-        })?;
+        let obj = value
+            .as_object()
+            .ok_or_else(|| de::Error::custom("policy store must be a JSON object"))?;
 
         // Check cedar_version field
         let cedar_version = obj.get("cedar_version").ok_or_else(|| {
@@ -104,23 +85,19 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 
         // Now deserialize the actual struct
         let mut store = AgamaPolicyStore {
-            cedar_version: parse_cedar_version(cedar_version).map_err(|e| {
-                de::Error::custom(format!("invalid cedar_version format: {}", e))
-            })?,
+            cedar_version: parse_cedar_version(cedar_version)
+                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?,
             policy_stores: HashMap::new(),
         };
 
         // Deserialize policy stores
-        let stores_obj = policy_stores.as_object().ok_or_else(|| {
-            de::Error::custom("'policy_stores' must be a JSON object")
-        })?;
+        let stores_obj = policy_stores
+            .as_object()
+            .ok_or_else(|| de::Error::custom("'policy_stores' must be a JSON object"))?;
 
         for (key, value) in stores_obj {
             let policy_store = PolicyStore::deserialize(value).map_err(|e| {
-                de::Error::custom(format!(
-                    "error parsing policy store '{}': {}",
-                    key, e
-                ))
+                de::Error::custom(format!("error parsing policy store '{key}': {e}"))
             })?;
             store.policy_stores.insert(key.clone(), policy_store);
         }
@@ -133,7 +110,8 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct PolicyStore {
     /// version of policy store
     //
@@ -155,17 +133,14 @@ pub struct PolicyStore {
     /// Cedar policy set
     pub policies: PoliciesContainer,
 
-    /// An optional HashMap of trusted issuers.
+    /// An optional `HashMap` of trusted issuers.
     ///
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
 
     /// Default entities for the policy store.
-    ///
-    /// This optional field can be used to specify default entities that should be included
-    /// in the policy evaluation context.
-    pub default_entities: Option<HashMap<String, serde_json::Value>>,
+    pub default_entities: DefaultEntitiesWithWarns,
 }
 
 impl PolicyStore {
@@ -174,45 +149,74 @@ impl PolicyStore {
     }
 
     /// Apply configuration limits to default entities
+    // TODO: add bootstrap configuration parameters and use it for check
     pub fn apply_default_entities_limits(
         &mut self,
         max_entities: Option<usize>,
         max_base64_size: Option<usize>,
-    ) -> Result<(), String> {
-        if let Some(ref default_entities) = self.default_entities {
-            let limits = DefaultEntitiesLimits {
-                max_entities: max_entities.unwrap_or(DEFAULT_MAX_ENTITIES),
-                max_base64_size: max_base64_size.unwrap_or(DEFAULT_MAX_BASE64_SIZE),
-            };
-            
-            validate_default_entities(default_entities, &limits)?;
+    ) -> Result<(), DefaultEntitiesLimitsError> {
+        let limits = DefaultEntitiesLimits {
+            max_entities: max_entities.unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITIES),
+            max_entity_size: max_base64_size
+                .unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITY_SIZE),
+        };
+        limits.validate_default_entities(self.default_entities.entities())
+    }
+
+    pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
+        // check if iss already present in other policy store
+        let mut oidc_to_trusted_issuer: HashMap<String, String> = HashMap::new();
+
+        for (issuer_name, trusted_issuer) in self.trusted_issuers.iter().flatten() {
+            let oidc_url = trusted_issuer.oidc_endpoint.to_string();
+            if let Some(_previous_issuer_name) = oidc_to_trusted_issuer.get(&oidc_url) {
+                return Err(TrustedIssuersValidationError {
+                    oidc_url: format!(
+                        "openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer"
+                    ),
+                });
+            }
+            oidc_to_trusted_issuer.insert(oidc_url, issuer_name.to_owned());
         }
-        
+
         Ok(())
     }
 }
 
-/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store
+#[derive(Debug, derive_more::Display, derive_more::Error)]
+#[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
+pub struct TrustedIssuersValidationError {
+    oidc_url: String,
+}
+
+/// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
+///
+/// When loaded from the new directory/archive format, includes optional metadata
+/// containing version, description, and other policy store information.
 #[derive(Clone, derive_more::Deref)]
 pub struct PolicyStoreWithID {
     /// ID of policy store
-    pub id: String,
+    pub(crate) id: String,
     /// Policy store value
     #[deref]
-    pub store: PolicyStore,
+    pub(crate) store: PolicyStore,
+    /// Optional metadata from new format policy stores.
+    /// Contains `cedar_version`, `policy_store` info (name, version, description, etc.)
+    pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
 ///
-/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
+/// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
 /// for discovering issuer-related information.
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
+    /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub name: String,
     /// A brief description of the trusted issuer.
     pub description: String,
-    /// The OpenID configuration endpoint for the issuer.
+    /// The `OpenID` configuration endpoint for the issuer.
     ///
     /// This endpoint is used to obtain information about the issuer's capabilities.
     #[serde(
@@ -241,7 +245,7 @@ impl Default for TrustedIssuer {
     fn default() -> Self {
         Self {
             name: "Jans".to_string(),
-            description: Default::default(),
+            description: String::default(),
             // This will only really be called during testing so we just put this test value
             oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
                 .unwrap(),
@@ -290,6 +294,11 @@ impl TrustedIssuer {
     pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
         self.token_metadata.get(token_name)
     }
+
+    pub fn normalized_issuer(&self) -> String {
+        let issuer_url = self.oidc_endpoint.origin().ascii_serialization();
+        normalize_issuer(&issuer_url)
+    }
 }
 
 /// Parses the `cedar_version` field.
@@ -307,7 +316,7 @@ where
     let version = version.strip_prefix('v').unwrap_or(&version);
 
     let version = Version::parse(version)
-        .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+        .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{e}")))?;
 
     Ok(version)
 }
@@ -329,7 +338,7 @@ where
             let version = version.strip_prefix('v').unwrap_or(&version);
 
             let version = Version::parse(version).map_err(|e| {
-                serde::de::Error::custom(format!("error parsing cedar version :{}", e))
+                serde::de::Error::custom(format!("error parsing cedar version :{e}"))
             })?;
 
             Ok(Some(version))
@@ -361,13 +370,13 @@ enum ParsePolicySetMessage {
     CreatePolicySet,
 }
 
-/// content_type for the policy_content field.
+/// `content_type` for the `policy_content` field.
 ///
 /// Only contains a single member, because as of 31-Oct-2024, cedar-policy 4.2.1
-/// cedar_policy::Policy:from_json does not work with a single policy.
+/// `cedar_policy::Policy::from_json` does not work with a single policy.
 ///
-/// NOTE if/when cedar_policy::Policy:from_json gains this ability, this type
-/// can be replaced by super::ContentType
+/// NOTE if/when `cedar_policy::Policy::from_json` gains this ability, this type
+/// can be replaced by `super::ContentType`
 #[derive(Debug, Copy, Clone, PartialEq, serde::Deserialize)]
 enum PolicyContentType {
     /// indicates that the related value is in the cedar policy / schema language
@@ -375,10 +384,10 @@ enum PolicyContentType {
     Cedar,
 }
 
-/// policy_content value which specifies both encoding and content_type
+/// `policy_content` value which specifies both encoding and `content_type`
 ///
 /// encoding is one of none or base64
-/// content_type is one of cedar or cedar-json
+/// `content_type` is one of cedar or cedar-json
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 struct EncodedPolicy {
     pub encoding: super::Encoding,
@@ -386,22 +395,32 @@ struct EncodedPolicy {
     pub body: String,
 }
 
-/// Intermediate struct to handler both kinds of policy_content values.
+/// Intermediate struct to handle both kinds of `policy_content` values.
 ///
 /// Either
+/// ```json
 ///   "policy_content": "cGVybWl0KA..."
+/// ```
 /// OR
-///   "policy_content": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
+/// ```json
+/// "policy_content": {
+///   "encoding": "...",
+///   "content_type": "...",
+///   "body": "permit(...)"
+/// }
+/// ```
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 #[serde(untagged)]
 enum MaybeEncoded {
     Plain(String),
     Tagged(EncodedPolicy),
 }
-
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
+// TODO: We only use the `description` field at runtime. The raw `policy_content`
+//       is not needed once policies are compiled into a `PolicySet`. Refactor
+//       to remove `RawPolicy` (and stored raw content) and keep only descriptions.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 struct RawPolicy {
     /// Base64-encoded content of the policy.
@@ -414,18 +433,81 @@ struct RawPolicy {
 /// Container to decode policy stores into container
 ///
 /// Contain compiled [`cedar_policy::PolicySet`] and raw policy info to get description or other information.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct PoliciesContainer {
-    /// HasMap to store raw policy info
+    /// `HashMap` to store raw policy info
     /// Is used to get policy description by ID
-    // In HasMap ID is ID of policy
+    // In HashMap ID is ID of policy
     raw_policy_info: HashMap<String, RawPolicy>,
 
-    /// compiled `cedar_policy`` Policy set
+    /// compiled `cedar_policy` Policy set
     policy_set: cedar_policy::PolicySet,
 }
 
+#[cfg(test)]
+impl PartialEq for PoliciesContainer {
+    fn eq(&self, other: &Self) -> bool {
+        // Compare only the compiled policy_set, ignoring:
+        // 1. Order of policies (using BTreeMap for deterministic comparison)
+        // 2. raw_policy_info (auxiliary data like descriptions)
+        // The policy_set is the canonical representation; if policies are equal,
+        // the containers are semantically equal for testing purposes.
+        use std::collections::BTreeMap;
+
+        let self_policies: BTreeMap<_, _> = self
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        let other_policies: BTreeMap<_, _> = other
+            .policy_set
+            .policies()
+            .map(|p| (p.id().clone(), p))
+            .collect();
+        self_policies == other_policies
+    }
+}
+
 impl PoliciesContainer {
+    /// Create a new `PoliciesContainer` from a policy set and description map.
+    ///
+    /// This constructor is used by the policy store manager when converting
+    /// from the new directory/archive format to the legacy format.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_set` - The compiled Cedar policy set
+    /// * `descriptions` - Map of policy ID to description (typically filename)
+    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+        let raw_policy_info = descriptions
+            .into_iter()
+            .map(|(id, desc)| {
+                (
+                    id,
+                    RawPolicy {
+                        policy_content: MaybeEncoded::Plain(String::new()),
+                        description: desc,
+                    },
+                )
+            })
+            .collect();
+
+        Self {
+            raw_policy_info,
+            policy_set,
+        }
+    }
+
+    /// Create an empty `PoliciesContainer` with the given policy set.
+    ///
+    /// Used when there are no policy descriptions available.
+    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+        Self {
+            policy_set,
+            raw_policy_info: HashMap::new(),
+        }
+    }
+
     /// Get [`cedar_policy::PolicySet`]
     pub fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set
@@ -435,8 +517,6 @@ impl PoliciesContainer {
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.raw_policy_info.get(id).map(|v| v.description.as_str())
     }
-
-
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -468,8 +548,7 @@ impl<'de> serde::Deserialize<'de> for PoliciesContainer {
             let error_messages: Vec<D::Error> = errs.into_iter().collect();
 
             return Err(serde::de::Error::custom(format!(
-                "Errors encountered while parsing policies: {:?}",
-                error_messages
+                "Errors encountered while parsing policies: {error_messages:?}"
             )));
         }
 
@@ -534,7 +613,7 @@ where
 }
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
-pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -543,7 +622,7 @@ where
     Ok(value.filter(|s| !s.is_empty()))
 }
 
-/// Custom deserializer for PolicyStore that provides better error messages
+/// Custom deserializer for `PolicyStore` that provides better error messages
 impl<'de> Deserialize<'de> for PolicyStore {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -551,161 +630,82 @@ impl<'de> Deserialize<'de> for PolicyStore {
     {
         // First try to deserialize into a Value to get better error messages
         let value = serde_json::Value::deserialize(deserializer)?;
-        
+
         // Check for required fields
-        let obj = value.as_object().ok_or_else(|| {
-            de::Error::custom("policy store entry must be a JSON object")
-        })?;
+        let obj = value
+            .as_object()
+            .ok_or_else(|| de::Error::custom("policy store entry must be a JSON object"))?;
 
         // Check name field
         let name = obj.get("name").ok_or_else(|| {
             de::Error::custom("missing required field 'name' in policy store entry")
         })?;
-        let name = name.as_str().ok_or_else(|| {
-            de::Error::custom("'name' must be a string")
-        })?;
+        let name = name
+            .as_str()
+            .ok_or_else(|| de::Error::custom("'name' must be a string"))?;
 
         // Check schema field
-        let schema = obj.get("schema").or_else(|| obj.get("cedar_schema")).ok_or_else(|| {
-            de::Error::custom("missing required field 'schema' or 'cedar_schema' in policy store entry")
-        })?;
+        let schema = obj
+            .get("schema")
+            .or_else(|| obj.get("cedar_schema"))
+            .ok_or_else(|| {
+                de::Error::custom(
+                    "missing required field 'schema' or 'cedar_schema' in policy store entry",
+                )
+            })?;
 
         // Check policies field
-        let policies = obj.get("policies").or_else(|| obj.get("cedar_policies")).ok_or_else(|| {
-            de::Error::custom("missing required field 'policies' or 'cedar_policies' in policy store entry")
-        })?;
+        let policies = obj
+            .get("policies")
+            .or_else(|| obj.get("cedar_policies"))
+            .ok_or_else(|| {
+                de::Error::custom(
+                    "missing required field 'policies' or 'cedar_policies' in policy store entry",
+                )
+            })?;
 
         // Now deserialize the actual struct
         let store = PolicyStore {
-            version: obj.get("version")
+            version: obj
+                .get("version")
                 .or_else(|| obj.get("policy_store_version"))
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
             name: name.to_string(),
-            description: obj.get("description")
+            description: obj
+                .get("description")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
-            cedar_version: obj.get("cedar_version")
+                .map(std::string::ToString::to_string),
+            cedar_version: obj
+                .get("cedar_version")
                 .map(parse_maybe_cedar_version)
                 .transpose()
-                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {}", e)))?
+                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?
                 .flatten(),
-            schema: CedarSchema::deserialize(schema).map_err(|e| {
-                de::Error::custom(format!("error parsing schema: {}", e))
-            })?,
-            policies: PoliciesContainer::deserialize(policies).map_err(|e| {
-                de::Error::custom(format!("error parsing policies: {}", e))
-            })?,
-            trusted_issuers: obj.get("trusted_issuers")
+            schema: CedarSchema::deserialize(schema)
+                .map_err(|e| de::Error::custom(format!("error parsing schema: {e}")))?,
+            policies: PoliciesContainer::deserialize(policies)
+                .map_err(|e| de::Error::custom(format!("error parsing policies: {e}")))?,
+            trusted_issuers: obj
+                .get("trusted_issuers")
                 .map(|v| {
-                    HashMap::<String, TrustedIssuer>::deserialize(v)
-                        .map_err(|e| de::Error::custom(format!("error parsing trusted issuers: {}", e)))
+                    HashMap::<String, TrustedIssuer>::deserialize(v).map_err(|e| {
+                        de::Error::custom(format!("error parsing trusted issuers: {e}"))
+                    })
                 })
                 .transpose()?,
             default_entities: obj
                 .get("default_entities")
                 .map(|v| {
                     // Expect an object mapping entity_id -> base64 string
-                    let map = v.as_object().ok_or_else(|| {
-                        de::Error::custom("'default_entities' must be a JSON object")
-                    })?;
-
-                    let mut decoded: HashMap<String, serde_json::Value> = HashMap::new();
-
-                    for (entity_id, raw_value) in map.iter() {
-                        let b64 = raw_value.as_str().ok_or_else(|| {
-                            de::Error::custom(format!(
-                                "error parsing default entities: entity '{}' must be a base64-encoded JSON string",
-                                entity_id
-                            ))
-                        })?;
-
-                        // Decode base64 string into UTF-8 JSON
-                        use base64::prelude::*;
-                        let buf = BASE64_STANDARD.decode(b64).map_err(|err| {
-                            de::Error::custom(format!(
-                                "error parsing default entities: failed to decode base64 for '{}': {}",
-                                entity_id, err
-                            ))
-                        })?;
-
-                        let json_str = String::from_utf8(buf).map_err(|err| {
-                            de::Error::custom(format!(
-                                "error parsing default entities: failed to decode utf8 for '{}': {}",
-                                entity_id, err
-                            ))
-                        })?;
-
-                        let value: serde_json::Value = serde_json::from_str(&json_str).map_err(|err| {
-                            de::Error::custom(format!(
-                                "error parsing default entities: invalid JSON for '{}': {}",
-                                entity_id, err
-                            ))
-                        })?;
-
-                        // Require an object for each entity
-                        if !value.is_object() {
-                            return Err(de::Error::custom(format!(
-                                "error parsing default entities: entity '{}' must decode to a JSON object",
-                                entity_id
-                            )));
-                        }
-
-                        decoded.insert(entity_id.clone(), value);
-                    }
-
-                    // Validate against limits (using default limits for deserialization)
-                    // Note: Configuration limits will be applied later when the policy store is initialized
-                    let limits = DefaultEntitiesLimits::default();
-                    validate_default_entities(&decoded, &limits).map_err(|e| {
-                        de::Error::custom(format!("error validating default entities: {}", e))
-                    })?;
-
-                    Ok(decoded)
+                    DefaultEntitiesWithWarns::deserialize(v).map_err(|e| {
+                        D::Error::custom(format!("could not deserialize `default entities`: {e}"))
+                    })
                 })
-                .transpose()?,
+                .transpose()?
+                .unwrap_or_default(),
         };
 
         Ok(store)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use serde_json::json;
-
-    #[test]
-    fn test_validate_default_entities_limits() {
-        let limits = DefaultEntitiesLimits {
-            max_entities: 2,
-            max_base64_size: 100,
-        };
-
-        // Test valid entities
-        let valid_entities = HashMap::from([
-            ("entity1".to_string(), json!("dGVzdA=="),),
-            ("entity2".to_string(), json!("dGVzdDI="),),
-        ]);
-        assert!(validate_default_entities(&valid_entities, &limits).is_ok());
-
-        // Test entity count limit
-        let too_many_entities = HashMap::from([
-            ("entity1".to_string(), json!("dGVzdA=="),),
-            ("entity2".to_string(), json!("dGVzdDI="),),
-            ("entity3".to_string(), json!("dGVzdDM="),),
-        ]);
-        let result = validate_default_entities(&too_many_entities, &limits);
-        assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Maximum number of default entities (2) exceeded"));
-
-        // Test base64 size limit
-        let large_base64 = "dGVzdA==".repeat(20); // Much larger than 100 bytes
-        let large_entities = HashMap::from([
-            ("entity1".to_string(), json!(large_base64),),
-        ]);
-        let result = validate_default_entities(&large_entities, &limits);
-        assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Base64 string size"));
     }
 }

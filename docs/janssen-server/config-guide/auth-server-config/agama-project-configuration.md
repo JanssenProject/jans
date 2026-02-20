@@ -3,13 +3,12 @@ tags:
   - administration
   - configuration
   - agama project
-subtitle: Learn how to manage and change Agama project configuration 
 ---
 
 # Agama project configuration
 
-Agama project configuration involves adding and removing Agama projects to 
-Janssen Server along with configuring and troubleshooting these project 
+Agama project configuration involves adding and removing Agama projects to
+Janssen Server along with configuring and troubleshooting these project
 deployments.
 
 The Janssen Server provides multiple configuration tools to perform these
@@ -244,7 +243,7 @@ jans cli --operation-id=post-agama-prj \
 --url-suffix="name:Agama Lab Journey" --data /tmp/journey.zip
 ```
 
-```json title="Sample Output" 
+```json title="Sample Output"
 {
   "message": "A deployment task for project Agama Lab Journey has been queued. Use the GET endpoint to poll status"
 }
@@ -355,7 +354,7 @@ jans tui
 
 ### Agama Project Screen
 
-Navigate to `Auth Server` -> `Agama` to open the Agama projects screen as shown 
+Navigate to `Auth Server` -> `Agama` to open the Agama projects screen as shown
 in the image below.
 
 ![image](../../../assets/tui-agama-project-list.png)
@@ -411,7 +410,7 @@ pressing the `View Configuration` button.
 ### Agama Project Configuration Screen
 
 Use the appropriate key-press command from [help screen](#agama-project-help-menu)
-to bring up the Agama project configuration screen which is shown in the image 
+to bring up the Agama project configuration screen which is shown in the image
 below.
 
 * The screen allows the export and import of the configuration.

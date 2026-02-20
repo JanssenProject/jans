@@ -14,8 +14,10 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -40,21 +42,24 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     private String aggregationType; // HOURLY, DAILY, WEEKLY, MONTHLY
 
     @AttributeName(name = "jansStartTime")
-    private LocalDateTime startTime;
+    private Date startTime;
 
     @AttributeName(name = "jansEndTime")
-    private LocalDateTime endTime;
+    private Date endTime;
 
     @AttributeName(name = "jansUniqueUsers")
     private Long uniqueUsers;
 
     @AttributeName(name = "jansLastUpdated")
-    private LocalDateTime lastUpdated;
+    private Date lastUpdated;
 
     /**
      * All metrics data stored as JSON for flexibility
      * Contains: registrationAttempts, registrationSuccesses, authenticationAttempts, 
      * authenticationSuccesses, deviceTypes, errorCounts, performanceMetrics, etc.
+     * 
+     * Note: 'transient' prevents Java serialization, while '@JsonObject' enables ORM JSON persistence.
+     * This is a valid Janssen ORM pattern for storing complex objects as JSON in the database.
      */
     @AttributeName(name = "jansMetricsData")
     @JsonObject
@@ -65,13 +70,14 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.metricsData = new HashMap<>();
     }
 
-    public Fido2MetricsAggregation(String aggregationType, String period, LocalDateTime startTime, LocalDateTime endTime) {
+    public Fido2MetricsAggregation(String aggregationType, String period, Date startTime, Date endTime) {
         this();
         this.aggregationType = aggregationType;
         this.id = aggregationType + "_" + period;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.lastUpdated = LocalDateTime.now();
+        // Use UTC timezone to align with FIDO2 services
+        this.lastUpdated = Date.from(ZonedDateTime.now(ZoneId.of("UTC")).toInstant());
     }
 
     // Core getters and setters
@@ -91,19 +97,30 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.aggregationType = aggregationType;
     }
 
-    public LocalDateTime getStartTime() {
+    /**
+     * Get period identifier (derived from ID)
+     * For example: "DAILY_2024-01-15" returns "2024-01-15"
+     */
+    public String getPeriod() {
+        if (id != null && id.contains("_")) {
+            return id.substring(id.indexOf("_") + 1);
+        }
+        return id;
+    }
+
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
@@ -115,11 +132,11 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         this.uniqueUsers = uniqueUsers;
     }
 
-    public LocalDateTime getLastUpdated() {
+    public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 
@@ -237,7 +254,8 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
     }
 
     // Generic helper methods for metrics access
-    private Long getLongMetric(String key) {
+    // Made public to support trend analysis and external metric calculations
+    public Long getLongMetric(String key) {
         if (metricsData == null) {
             return null;
         }
@@ -248,7 +266,7 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         return null;
     }
 
-    private Double getDoubleMetric(String key) {
+    public Double getDoubleMetric(String key) {
         if (metricsData == null) {
             return null;
         }
@@ -266,7 +284,16 @@ public class Fido2MetricsAggregation extends Entry implements Serializable {
         }
         Object value = metricsData.get(key);
         if (value instanceof Map) {
-            return (Map<String, Long>) value;
+            Map<String, Object> rawMap = (Map<String, Object>) value;
+            // Convert Integer values to Long for JSON serialization compatibility
+            Map<String, Long> resultMap = new HashMap<>();
+            for (Map.Entry<String, Object> entry : rawMap.entrySet()) {
+                Object val = entry.getValue();
+                if (val instanceof Number) {
+                    resultMap.put(entry.getKey(), ((Number) val).longValue());
+                }
+            }
+            return resultMap;
         }
         return Collections.emptyMap();
     }

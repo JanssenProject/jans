@@ -14,6 +14,8 @@ use super::err_log_entry::ErrorLogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
+use crate::log::BaseLogEntry;
+use crate::log::loggable_fn::LoggableFn;
 
 mod memory_calc;
 use memory_calc::calculate_memory_usage;
@@ -29,13 +31,13 @@ pub(crate) struct MemoryLogger {
 }
 
 impl MemoryLogger {
-    pub fn new(
+    pub(crate) fn new(
         config: MemoryLogConfig,
         log_level: LogLevel,
         pdp_id: PdpID,
         app_name: Option<ApplicationName>,
     ) -> Self {
-        let default_config: ConfigSparKV = Default::default();
+        let default_config: ConfigSparKV = ConfigSparKV::default();
 
         let sparkv_config = ConfigSparKV {
             default_ttl: Duration::new(
@@ -58,21 +60,62 @@ impl MemoryLogger {
             app_name,
         }
     }
+
+    fn log_entry<T: Loggable>(&self, entry: &T) {
+        let entry_id = entry.get_id().to_string();
+        let index_keys = entry.get_index_keys();
+        let json = to_json_value(entry);
+        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
+        let err = match set_result {
+            Ok(()) => return,
+            Err(Error::CapacityExceeded) => {
+                // remove oldest key and try again
+
+                let key_to_delete = storage
+                    .get_oldest_key_by_expiration()
+                    .map(|exp_entry| exp_entry.key.clone());
+
+                if let Some(key) = key_to_delete {
+                    storage.pop(&key);
+                }
+
+                // It should be rare case, so instead of cloning the whole entry,
+                // in success case we convert raw value to json (here).
+                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
+                let json = to_json_value(entry);
+
+                // set_again
+                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
+                    err
+                } else {
+                    return;
+                }
+            },
+            Err(err) => err,
+        };
+        fallback::log(
+            &format!("could not store LogEntry to memory: {err:?}"),
+            &self.pdp_id,
+            self.app_name.as_ref(),
+        );
+    }
 }
 
-/// In case of failure in MemoryLogger, log to stderr where supported.
+/// In case of failure in [`MemoryLogger`], log to stderr where supported.
 /// On WASM, stderr is not supported, so log to whatever the wasm logger uses.
 mod fallback {
     use crate::LogLevel;
     use crate::app_types::{ApplicationName, PdpID};
+    use crate::log::StdOutLoggerMode;
     use crate::log::log_strategy::LogStrategyLogger;
     use crate::log::stdout_logger::StdOutLogger;
 
-    /// conform to Loggable requirement imposed by LogStrategy
+    /// conform to Loggable requirement imposed by [`LogStrategy`]
     #[derive(serde::Serialize, Clone)]
-    struct StrWrap<'a>(&'a str);
+    struct StrWrap(String);
 
-    impl crate::log::interface::Indexed for StrWrap<'_> {
+    impl crate::log::interface::Indexed for StrWrap {
         fn get_id(&self) -> uuid7::Uuid {
             crate::log::log_entry::gen_uuid7()
         }
@@ -86,7 +129,7 @@ mod fallback {
         }
     }
 
-    impl crate::log::interface::Loggable for StrWrap<'_> {
+    impl crate::log::interface::Loggable for StrWrap {
         fn get_log_level(&self) -> Option<LogLevel> {
             // These must always be logged.
             Some(LogLevel::TRACE)
@@ -101,23 +144,24 @@ mod fallback {
     /// # Panics
     ///
     /// Panics when:
-    /// - A runtime to initialize a new LogStrategy could not be built.
+    /// - A runtime to initialize a new [`LogStrategy`] could not be built.
     /// - A fallback logger could not be initialized.
-    pub fn log(msg: &str, pdp_id: &PdpID, app_name: &Option<ApplicationName>) {
+    pub(super) fn log(msg: &str, pdp_id: &PdpID, app_name: Option<&ApplicationName>) {
+        use crate::log::interface::LogWriter;
+
         // level is so that all messages passed here are logged.
-        let logger = StdOutLogger::new(LogLevel::TRACE);
+        let logger = StdOutLogger::new(LogLevel::TRACE, StdOutLoggerMode::Immediate);
 
         // This should always be a LogStrategy::StdOut(StdOutLogger)
         let log_strategy = crate::log::LogStrategy::new_with_logger(
             LogStrategyLogger::StdOut(logger),
             *pdp_id,
-            app_name.clone(),
+            app_name.cloned(),
             None,
         );
 
-        use crate::log::interface::LogWriter;
         // a string is always serializable
-        log_strategy.log_any(StrWrap(msg))
+        log_strategy.log_any(StrWrap(msg.to_string()));
     }
 }
 
@@ -140,47 +184,18 @@ impl LogWriter for MemoryLogger {
             return;
         }
 
-        let entry_id = entry.get_id().to_string();
-        let index_keys = entry.get_index_keys();
-        let json = to_json_value(&entry);
+        self.log_entry(&entry);
+    }
 
-        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
-
-        let set_result = storage.set(&entry_id, json, index_keys.as_slice());
-
-        let err = match set_result {
-            Ok(_) => return,
-            Err(Error::CapacityExceeded) => {
-                // remove oldest key and try again
-
-                let key_to_delete = storage
-                    .get_oldest_key_by_expiration()
-                    .map(|exp_entry| exp_entry.key.clone());
-
-                if let Some(key) = key_to_delete {
-                    storage.pop(&key);
-                }
-
-                // It should be rare case, so instead of cloning the whole entry,
-                // in success case we convert raw value to json (here).
-                // Or we should use Rc<LogEntry> and use Rc::clone() instead.
-                let json = to_json_value(&entry);
-
-                // set_again
-                if let Err(err) = storage.set(&entry_id, json, index_keys.as_slice()) {
-                    err
-                } else {
-                    return;
-                }
-            },
-            Err(err) => err,
-        };
-
-        fallback::log(
-            &format!("could not store LogEntry to memory: {err:?}"),
-            &self.pdp_id,
-            &self.app_name,
-        );
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if log_fn.can_log(self.log_level) {
+            let entry = log_fn.build();
+            self.log_entry(&entry);
+        }
     }
 }
 
@@ -215,7 +230,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_by_index_key(tag)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 
@@ -224,7 +239,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_by_index_key(request_id)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 
@@ -239,7 +254,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get_by_index_key(&key)
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 }
@@ -269,18 +284,21 @@ mod tests {
         let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(LogType::Decision, None)
+        let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
             .set_message("some message".to_string())
             .set_auth_info(AuthorizationLogInfo {
                 action: "test_action".to_string(),
                 resource: "test_resource".to_string(),
                 context: serde_json::json!({}),
-                authorize_info: Default::default(),
+                authorize_info: Vec::default(),
                 authorized: true,
                 entities: serde_json::json!({}),
             });
 
-        let entry2 = LogEntry::new_with_data(LogType::System, None);
+        let entry2 = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            None,
+        ));
 
         assert!(
             entry1.base.id < entry2.base.id,
@@ -327,8 +345,8 @@ mod tests {
         let logger = create_memory_logger(pdp_id, app_name.clone());
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(LogType::Decision, None);
-        let entry2 = LogEntry::new_with_data(LogType::Metric, None);
+        let entry1 = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
+        let entry2 = LogEntry::new(BaseLogEntry::new_metric_opt_request_id(None));
 
         // log entries
         logger.log_any(entry1.clone());
@@ -365,23 +383,29 @@ mod tests {
             None,
         );
 
-        let entry_decision = LogEntry::new_with_data(LogType::Decision, None);
+        let entry_decision = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None));
         logger.log_any(entry_decision);
 
-        let entry_system_info =
-            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::INFO);
+        let entry_system_info = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::INFO,
+            Some(request_id),
+        ));
         logger.log_any(entry_system_info);
 
-        let entry_system_debug =
-            LogEntry::new_with_data(LogType::System, Some(request_id)).set_level(LogLevel::DEBUG);
+        let entry_system_debug = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::DEBUG,
+            Some(request_id),
+        ));
         logger.log_any(entry_system_debug);
 
-        let entry_metric = LogEntry::new_with_data(LogType::Metric, None);
+        let entry_metric = LogEntry::new(BaseLogEntry::new_metric_opt_request_id(None));
         logger.log_any(entry_metric);
 
         // without request id
-        let entry_system_warn =
-            LogEntry::new_with_data(LogType::System, None).set_level(LogLevel::WARN);
+        let entry_system_warn = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ));
         logger.log_any(entry_system_warn);
 
         assert!(
@@ -422,7 +446,7 @@ mod tests {
 
     #[test]
     fn test_max_items_config() {
-        let default_config: ConfigSparKV = Default::default();
+        let default_config: ConfigSparKV = ConfigSparKV::default();
 
         // Test default value when None
         let logger = MemoryLogger::new(
@@ -469,7 +493,7 @@ mod tests {
 
     #[test]
     fn test_max_item_size_config() {
-        let default_config: ConfigSparKV = Default::default();
+        let default_config: ConfigSparKV = ConfigSparKV::default();
 
         // Test default value when None
         let logger = MemoryLogger::new(

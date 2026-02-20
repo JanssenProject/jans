@@ -25,6 +25,8 @@
 		<httpclient.version>4.5.14</httpclient.version>
 
 		<resteasy.version>6.2.12.Final</resteasy.version>
+		<grpc.version>1.78.0</grpc.version>
+		<grpc-bridge.version>1.0.0.Final</grpc-bridge.version>
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		<weld.version>4.0.3.Final</weld.version>
 	
@@ -43,14 +45,18 @@
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
 		<jakarta.el.api.version>6.0.1</jakarta.el.api.version>
 		<jakarta.servlet.jsp-api.version>4.0.0</jakarta.servlet.jsp-api.version>
-		
+
+		<mysql.version>9.5.0</mysql.version>
+		<mysql-socket.version>1.27.1</mysql-socket.version>
+		<postgresql.version>42.7.8</postgresql.version>
+		<postgresql-socket.version>1.27.1</postgresql-socket.version>
 
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.15.0</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
 		<json.version>20231013</json.version>
 
-		<log4j.version>2.23.1</log4j.version>
+		<log4j.version>2.25.3</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>32.1.1-jre</guava.version>
@@ -681,8 +687,26 @@
 			    <groupId>org.jboss.resteasy</groupId>
 			    <artifactId>resteasy-bom</artifactId>
 			    <version>${resteasy.version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- gRPC -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-bom</artifactId>
+				<version>${grpc.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- RESTEasy gRPC Bridge -->
+			<dependency>
+				<groupId>dev.resteasy.grpc</groupId>
+				<artifactId>resteasy-grpc-bom</artifactId>
+				<version>${grpc-bridge.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<!-- JSON -->
@@ -779,17 +803,28 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.4.0</version>
+				<version>${mysql.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java</artifactId>
-				<version>3.25.5</version>
+			    <groupId>com.google.cloud.sql</groupId>
+			    <artifactId>mysql-socket-factory-connector-j-8</artifactId>
+			    <version>${mysql-socket.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.7.7</version>
+			    <version>${postgresql.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.google.cloud.sql</groupId>
+			    <artifactId>postgres-socket-factory</artifactId>
+			    <version>${postgresql-socket.version}</version>
+			</dependency>
+			
+			<dependency>
+			    <groupId>com.google.protobuf</groupId>
+			    <artifactId>protobuf-java</artifactId>
+			    <version>4.33.2</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -1072,7 +1107,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.3.4</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -1083,6 +1118,16 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.xolstice.maven.plugins</groupId>
+					<artifactId>protobuf-maven-plugin</artifactId>
+					<version>0.6.1</version>
+				</plugin>
+				<plugin>
+					<groupId>kr.motd.maven</groupId>
+					<artifactId>os-maven-plugin</artifactId>
+					<version>1.7.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

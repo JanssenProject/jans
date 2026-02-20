@@ -3,31 +3,43 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::*;
+use super::{
+    BuildEntityError, BuildEntityErrorKind, BuiltEntities, Entity, EntityBuilder, HashSet,
+    build_cedar_entity, build_entity_attrs,
+};
 use crate::EntityData;
 
 impl EntityBuilder {
-    pub fn build_resource_entity(&self, resource: &EntityData) -> Result<Entity, BuildEntityError> {
-        let resource_type_name = &resource.cedar_mapping.entity_type;
+    pub(super) fn build_resource_entity(
+        &self,
+        resource_data: &EntityData,
+    ) -> Result<Entity, BuildEntityError> {
+        let resource_type_name = &resource_data.cedar_mapping.entity_type;
 
         let attrs_shape = self
             .schema
             .as_ref()
             .and_then(|s| s.get_entity_shape(resource_type_name));
         let attrs = build_entity_attrs(
-            &resource.attributes,
+            &resource_data.attributes,
             &BuiltEntities::default(),
             attrs_shape,
             None,
         )
         .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        let resource = build_cedar_entity(
+        let mut resource = build_cedar_entity(
             resource_type_name,
-            &resource.cedar_mapping.id,
+            &resource_data.cedar_mapping.id,
             attrs,
             HashSet::new(),
         )?;
+
+        if let Some(resource_default_entity) = self.default_entities.get(&resource.uid())
+            && resource_data.attributes.is_empty()
+        {
+            resource = resource_default_entity.clone();
+        }
 
         Ok(resource)
     }
@@ -37,20 +49,16 @@ impl EntityBuilder {
 mod test {
     use super::super::test::*;
     use super::super::*;
-    use super::*;
     use crate::CedarEntityMapping;
-    use crate::log::TEST_LOGGER;
     use serde_json::json;
 
     #[test]
     fn can_build_entity() {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {
@@ -72,7 +80,7 @@ mod test {
 
         assert_entity_eq(
             &entity,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::HTTP_Request", "id": "some_request"},
                 "attrs": {
                     "url": {
@@ -94,11 +102,9 @@ mod test {
     fn can_build_entity_with_optional_attr() {
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
-            None,
-            None,
-            TEST_LOGGER.clone(),
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let resource_data = EntityData {

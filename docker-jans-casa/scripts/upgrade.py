@@ -1,6 +1,5 @@
 import json
 import logging.config
-import os
 from collections import namedtuple
 from contextlib import suppress
 from urllib.parse import urlparse
@@ -15,7 +14,6 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 from utils import get_ads_project_base64
 from utils import get_ads_project_md5sum
-from utils import generalized_time_utc
 from utils import utcnow
 from utils import CASA_AGAMA_DEPLOYMENT_ID
 from utils import CASA_AGAMA_ARCHIVE
@@ -48,7 +46,6 @@ class SQLBackend:
     def delete_entry(self, key, **kwargs):
         table_name = kwargs.get("table_name")
         return self.client.delete(table_name, key)
-
 
 
 BACKEND_CLASSES = {
@@ -201,13 +198,10 @@ class Upgrade:
         # marker to determine whether we need to update persistence if asset is changed
         if entry and assets_md5 != self.manager.config.get("casa_agama_md5sum"):
             logger.info(f"Detected changes of casa-agama-project assets; synchronizing changes from {proj_archive} to persistence.")
-
-            entry.attrs["adsPrjDeplDetails"] = json.dumps({"projectMetadata": {"projectName": "casa"}})
+            # overwrite the project assets
             entry.attrs["adsPrjAssets"] = get_ads_project_base64(proj_archive)
-            entry.attrs["jansActive"] = False
-            start_date = utcnow()
-
-            entry.attrs["jansStartDate"] = start_date
+            # mark entry is updated at specified time
+            entry.attrs["jansStartDate"] = utcnow()
             entry.attrs["jansEndDate"] = None
 
             if self.backend.modify_entry(entry.id, entry.attrs, **kwargs):

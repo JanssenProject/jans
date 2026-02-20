@@ -28,7 +28,7 @@ are more commercial products in this space.
 
 Although Jans Auth Server may not be a complete RBAC solution, there are still
 some RBAC capabilities to consider. When a person authenticates using a web
-browser, the client can obtain user claims via OpenID Connect. It may make sense  
+browser, the client can obtain user claims via OpenID Connect. It may make sense
 to send the `role` role claim to the client. You may also send the `memberOf`
 claim, if your organization uses group membership to manage roles.
 

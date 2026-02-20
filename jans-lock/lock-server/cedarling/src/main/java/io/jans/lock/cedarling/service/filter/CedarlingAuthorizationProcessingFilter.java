@@ -2,14 +2,21 @@ package io.jans.lock.cedarling.service.filter;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import io.jans.lock.cedarling.service.CedarlingProtection;
+import io.jans.lock.cedarling.service.app.audit.ApplicationCedarlingAuditLogger;
 import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
+import io.jans.net.InetAddressUtility;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -35,12 +42,18 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 
 	@Inject
 	private CedarlingProtection protectionService;
+	
+	@Inject
+	private ApplicationCedarlingAuditLogger applicationCedarlingAuditLogger;
 
 	@Context
 	private HttpHeaders httpHeaders;
 
 	@Context
 	private ResourceInfo resourceInfo;
+
+	@Context
+    private HttpServletRequest httpRequest;
 
 	/**
 	 * This method performs the protection check of service invocations: it provokes
@@ -59,8 +72,13 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		log.debug("REST call to '{}' intercepted", path);
 		
 		if (LockProtectionMode.CEDARLING.equals(appConfiguration.getProtectionMode())) {
-			Response authorizationResponse = protectionService.processAuthorization(requestContext, httpHeaders, resourceInfo);
-			if (authorizationResponse == null) {
+            Response authorizationResponse = protectionService.processAuthorization(extractBearerToken(), resourceInfo);
+			boolean success = authorizationResponse == null;
+
+	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.CEDARLING_AUTHZ_FILTER);
+			applicationCedarlingAuditLogger.log(auditLogEntry, success);
+
+	        if (success) {
 				// Actual processing of request proceeds
 				log.debug("Authorization passed");
 			} else {
@@ -69,14 +87,14 @@ public class CedarlingAuthorizationProcessingFilter implements ContainerRequestF
 		}
 	}
 
-    private Response unprotectedApiResponse(String name) {
-        return Response.status(Response.Status.UNAUTHORIZED).entity(name + " API not protected")
-                .build();
-    }
+    private String extractBearerToken() {
+        String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);
+        
+        if (StringUtils.isEmpty(authHeader)) {
+            return null;
+        }
 
-    private Response disabledApiResponse(String name) {
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(name + " API is disabled")
-                .build();
+        return authHeader.replaceFirst("(?i)Bearer\\s+", "");
     }
 
 }

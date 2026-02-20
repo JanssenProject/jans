@@ -6,7 +6,7 @@ tags:
 # Script Debugging
 ## Setup
 
-For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you trough a setup using Minikube with docker driver, and [ksync](https://ksync.github.io/ksync/) for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.  
+For development the kubernetes setup must be local and accessible to the debug server address. The following steps will walk you through a setup using Minikube with docker driver, and [ksync](https://ksync.github.io/ksync/) for syncing the files between local, and the container. The following instructions assume a fresh ubuntu 20.04, however the setup can be done on a different operating systems such as macOS or Windows.
 
 ### System Requirements
 
@@ -25,19 +25,19 @@ The minimum system requirement for running all jans services are `8GB RAM`, `4 C
     ```bash
     minikube start --driver=docker
     ```
-        
+
 1. If not automatically set configure `kubectl` to use the cluster:
 
     ```bash
     kubectl config use-context minikube
     ```
-        
+
 1. Enable ingress on minikube
 
     ```bash
     minikube addons enable ingress
     ```
-    
+
 ### Install Janssen
 
 1. Install [Helm3](https://helm.sh/docs/using_helm/)
@@ -60,21 +60,21 @@ Once Janssen is fully running we want to create an active sync between a local f
     JANS_NAMESPACE=<jans-namespace>
     for pod in $(kubectl get pods -n $JANS_NAMESPACE --selector=APP_NAME=auth-server --output=jsonpath={.items..metadata.name}); do
         kubectl exec -ti $pod -n $JANS_NAMESPACE -- mkdir -p /deploy/interception-scripts-ksync
-    done        
+    done
     ```
-    
+
 1. Install ksync
 
     ```bash
     curl https://ksync.github.io/gimme-that/gimme.sh | bash
     ```
-    
+
 1. Initialize ksync
 
     ```bash
     ksync init -n <jans-namespace>
     ```
-    
+
 1. Start ksync.
 
     ```bash
@@ -93,7 +93,7 @@ Once Janssen is fully running we want to create an active sync between a local f
     ksync create --selector=APP_NAME=auth-server $(pwd)/interception-scripts-ksync /deploy/interception-scripts-ksync -n <jans-namespace>
     ```
 
-1. Check the status. Also check the terminal where the `watch` command is running. 
+1. Check the status. Also check the terminal where the `watch` command is running.
 
     ```bash
     ksync get
@@ -106,15 +106,15 @@ Once Janssen is fully running we want to create an active sync between a local f
     #
     # Author: Yuriy Movchan
     #
-    
+
     from io.jans.service.cdi.util import CdiUtil
     from io.jans.as.server.security import Identity
     from io.jans.model.custom.script.type.auth import PersonAuthenticationType
     from io.jans.as.server.service import AuthenticationService
     from io.jans.util import StringHelper
-    
+
     import java
-    
+
     class PersonAuthentication(PersonAuthenticationType):
         def __init__(self, currentTimeMillis):
             self.currentTimeMillis = currentTimeMillis
@@ -122,8 +122,8 @@ Once Janssen is fully running we want to create an active sync between a local f
         def init(self, customScript,  configurationAttributes):
             print "Basic. Initialization"
             print "Basic. Initialized successfully"
-            return True   
-    
+            return True
+
         def destroy(self, configurationAttributes):
             print "Basic. Destroy"
             print "Basic. Destroyed successfully"
@@ -156,14 +156,14 @@ Once Janssen is fully running we want to create an active sync between a local f
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                     logged_in = authenticationService.authenticate(user_name, user_password)
-    
+
                 if (not logged_in):
                     return False
-    
+
                 return True
             else:
                 return False
-    
+
         def prepareForStep(self, configurationAttributes, requestParameters, step):
             if (step == 1):
                 print "Basic. Prepare for Step 1"
@@ -194,7 +194,7 @@ Once Janssen is fully running we want to create an active sync between a local f
 
 ### Install an IDE
 
-The IDE can be of choice but must contain PyDev. We chose [Liclipse](https://www.liclipse.com/download.html) for this demonstration. 
+The IDE can be of choice but must contain PyDev. We chose [Liclipse](https://www.liclipse.com/download.html) for this demonstration.
 
 Once complete, start the PyDev debug server:
 
@@ -208,18 +208,18 @@ Once complete, start the PyDev debug server:
 
 1. From the menu: go to `File` -> `Open File` and choose the interception script that will be debugged in `$(pwd)/interception-scripts-ksync`.
 
- 
+
 1. When opening the Python file for the first time, we need to instruct Liclipse to use a specific interpreter. Follow these steps:
-  
+
     - Press the "Manual Config" button in the dialog box after opening the Python file
-    
+
     - Open "PyDev->Interpreters->Jython Interpreters"
-    
+
     - Click the "New..." button in the right panel. Name it "Jython" and specify the interpreter executable that was downloaded previously "jython-standalone-2.7.2.jar"
-    
+
     - Click "OK", then confirm the settings by clicking "OK" again, then "Apply and Close"
-    
-    - In the final dialog, confirm the settings by clicking "OK" 
+
+    - In the final dialog, confirm the settings by clicking "OK"
 
 1. From the menu: go to `Window` -> `Perspective` -> `Open Perspective` -> `Other..` -> `Debug`
 
@@ -280,7 +280,7 @@ This will cause your local host's port 5005 to listen on the remote server's por
 For Jython scripts, we need additional steps to enable breakpoints.
 
 1. After the import section, add:   
-  
+
     ```
     REMOTE_DEBUG = True
     
@@ -292,9 +292,9 @@ For Jython scripts, we need additional steps to enable breakpoints.
             print "Failed to import pydevd: %s" % ex
             raise
     ```     
-      
+
 1. Add the following lines wherever breakpoints are needed:   
-  
+
     ```
     if REMOTE_DEBUG:
         pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
@@ -397,7 +397,7 @@ For Jython scripts, we need additional steps to enable breakpoints.
     ```
 
 1. Make sure to have an LDAP browser available. We recommend [Apache Directory Studio](https://directory.apache.org/studio/).
-    
+
 1. Port forward the opendj pod. 
 
     ```bash
@@ -406,21 +406,21 @@ For Jython scripts, we need additional steps to enable breakpoints.
 
 1. Create a connection to the ldap browser. The default password will be `Test1234#` if not changed in the helm install command.
  
-    ![LDAP browser connection](../../../assets/ldap_browser_connection.png)
+    ![LDAP browser connection](../../assets/ldap_browser_connection.png)
 
 1. Inside the browser navigate to `o=jans, ou=scripts`. Right click on `ou=scripts` and click on `Quick Search`. Inside the pop up box that appears fill `Returning Attributes` with `displayName`, and press `Apply and Close`
 
 1. In the results that appear click on the `Dn` that has a `displayName` of `basic`.
 
-    ![LDAP basic script ](../../../assets/basic_script.png)
-   
+    ![LDAP basic script ](../../assets/basic_script.png)
+
 1. Choose to load the script from file instead of db. Inside the browser change `jansModuleProperty` with value `{"value1":"location_type","value2":"db","description":""}` to `{"value1":"location_type","value2":"file","description":""}`
 
-1. Specify the `Script Path` location to the location of the folder inside auth server pods: `/deploy/interception-scripts-ksync/basic.py`. Right click the upper `jansModuleProperty` and click `New Value`. A new entry for `jansModuleProperty` will be created. Insert the following for the value: `{"value1":"location_path","value2":"/deploy/interception-scripts-ksync/basic.py","description":""}`
-  
+1. Specify the `Script Path` location to the location of the folder inside auth server pods: `/deploy/interception-scripts-ksync/basic.py`. Right-click the upper `jansModuleProperty` and click `New Value`. A new entry for `jansModuleProperty` will be created. Insert the following for the value: `{"value1":"location_path","value2":"/deploy/interception-scripts-ksync/basic.py","description":""}`
+
 1. Enable the script by settings `jansEnabled` to `true`. The following is an example of how the basic script entry should look.  
 
-    ![LDAP basic script ](../../../assets/basic_script_enabled.png)
+    ![LDAP basic script ](../../assets/basic_script_enabled.png)
 
 1. Check the following log inside the the auth-server container to verify that auth server loaded the script properly: `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`. It should look like this:    
 
@@ -430,7 +430,7 @@ For Jython scripts, we need additional steps to enable breakpoints.
     ```
     
     You should find the following in the log:
-    
+
     ```
     ... (PythonService.java:239) - Basic. Initialization
 
@@ -444,20 +444,20 @@ For Jython scripts, we need additional steps to enable breakpoints.
     ```
     wget https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.2/jython-standalone-2.7.2.jar
     ```
-    
+
 1. From the IDE (Liclipse) menu: navigate  to `File` -> `Open File` and choose the interception script that will be debugged in `$(pwd)/interception-scripts-ksync/basic.py`
- 
+
 1. When opening the Python file for the first time, we need to instruct Liclipse to use a specific interpreter. Follow these steps:
-  
+
     - Press the "Manual Config" button in the dialog box after opening the Python file
-    
+
     - Open "PyDev->Interpreters->Jython Interpreters"
-    
+
     - Click the "New..." button in the right panel. Name it "Jython" and specify the interpreter executable that was downloaded previously "jython-standalone-2.7.2.jar"
-    
+
     - Click "OK", then confirm the settings by clicking "OK" again, then "Apply and Close"
-    
-    - In the final dialog, confirm the settings by clicking "OK" 
+
+    - In the final dialog, confirm the settings by clicking "OK"
 
 1. Open basic.py in a file editor. After the import section, add the following lines to load the PyDev libraries:
 
@@ -484,9 +484,9 @@ For Jython scripts, we need additional steps to enable breakpoints.
 1. Save `basic.py`
 
 1. Within one minute, the auth server should load the changed file. Check the following log file again to make sure there are no load errors: `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`
-    
+
 1. To check if the script works, update the default authentication method to Basic Authentication. Preform this in the LDAP browser. Navigate to `o=jans,ou=configuration`. Change the `jansAuthMode` to `basic` instead of `simple_password_auth`.
-     
+
 1. After executing `pydevd.settrace` the script will transfer execution control to the PyDev server in Liclipse. You can use any debug commands. For example: Step Over (F6), Resume (F8), etc
-     
+
 1. After debugging is finished, resume script execution to transfer execution control back to the auth server. 

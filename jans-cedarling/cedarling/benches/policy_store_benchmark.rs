@@ -1,0 +1,304 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+//! Policy store loading and validation benchmarks.
+//!
+//! Run with: `cargo bench --bench policy_store_benchmark`
+
+use std::hint::black_box as bb;
+use std::io::{Cursor, Write};
+
+use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
+use tempfile::TempDir;
+use zip::write::{ExtendedFileOptions, FileOptions};
+use zip::{CompressionMethod, ZipWriter};
+
+// Constants for archive content
+const METADATA_JSON: &[u8] = br#"{
+        "cedar_version": "4.4.0",
+        "policy_store": {
+            "id": "bench123456789",
+            "name": "Benchmark Policy Store",
+            "version": "1.0.0"
+        }
+    }"#;
+
+const SCHEMA_CEDARSCHEMA_BASIC: &[u8] = br#"namespace TestApp {
+    entity User;
+    entity Resource;
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}"#;
+
+const SCHEMA_CEDARSCHEMA_WITH_ATTRS: &[u8] = br#"namespace TestApp {
+    entity User {
+        name: String,
+        email: String,
+    };
+    entity Resource;
+    action "read" appliesTo {
+        principal: [User],
+        resource: [Resource]
+    };
+}"#;
+
+const POLICY_STORE_JSON: &str =
+    r#"{"cedar_version":"4.4.0","policy_store":{"id":"bench","name":"Bench","version":"1.0.0"}}"#;
+
+/// Helper function to start a policy store archive with common bootstrap setup.
+/// Creates the buffer, cursor, [`ZipWriter`], sets up [`FileOptions`], and writes
+/// metadata.json and schema.cedarschema. Returns the [`ZipWriter`] and [`FileOptions`]
+/// for the caller to append additional content.
+fn start_policy_store_archive(metadata: &[u8], schema: &[u8]) -> ZipWriter<Cursor<Vec<u8>>> {
+    let buffer = Vec::new();
+    let cursor = Cursor::new(buffer);
+    let mut zip = ZipWriter::new(cursor);
+    let options = FileOptions::<ExtendedFileOptions>::default()
+        .compression_method(CompressionMethod::Deflated);
+
+    // metadata.json
+    zip.start_file("metadata.json", options.clone()).unwrap();
+    zip.write_all(metadata).unwrap();
+
+    // schema.cedarschema
+    zip.start_file("schema.cedarschema", options.clone())
+        .unwrap();
+    zip.write_all(schema).unwrap();
+
+    zip
+}
+
+/// Helper function to parse an archive and read all files.
+/// This simulates the loading process for benchmarking.
+fn parse_archive(archive: &[u8]) -> u64 {
+    let cursor = Cursor::new(bb(archive));
+    let mut zip = zip::ZipArchive::new(cursor).unwrap();
+
+    // Read all files to simulate loading
+    let mut total_size = 0;
+    for i in 0..zip.len() {
+        let mut file = zip.by_index(i).unwrap();
+        let bytes_read = std::io::copy(&mut file, &mut std::io::sink()).unwrap();
+        total_size += bytes_read;
+    }
+    total_size
+}
+
+/// Create a minimal valid policy store archive for benchmarking.
+fn create_minimal_archive() -> Vec<u8> {
+    create_archive_with_policies(1)
+}
+
+/// Create a policy store archive with the specified number of policies.
+fn create_archive_with_policies(policy_count: usize) -> Vec<u8> {
+    let mut zip = start_policy_store_archive(METADATA_JSON, SCHEMA_CEDARSCHEMA_BASIC);
+    let options = FileOptions::<ExtendedFileOptions>::default()
+        .compression_method(CompressionMethod::Deflated);
+
+    // policies
+    for i in 0..policy_count {
+        let filename = format!("policies/policy{i}.cedar");
+        zip.start_file(&filename, options.clone()).unwrap();
+        let policy = format!(
+            r#"@id("policy{i}")
+permit(
+    principal == TestApp::User::"user{i}",
+    action == TestApp::Action::"read",
+    resource == TestApp::Resource::"res{i}"
+);"#
+        );
+        zip.write_all(policy.as_bytes()).unwrap();
+    }
+
+    zip.finish().unwrap().into_inner()
+}
+
+/// Create a policy store archive with the specified number of entities.
+fn create_archive_with_entities(entity_count: usize) -> Vec<u8> {
+    let mut zip = start_policy_store_archive(METADATA_JSON, SCHEMA_CEDARSCHEMA_WITH_ATTRS);
+    let options = FileOptions::<ExtendedFileOptions>::default()
+        .compression_method(CompressionMethod::Deflated);
+
+    // One policy
+    zip.start_file("policies/allow.cedar", options.clone())
+        .unwrap();
+    zip.write_all(br#"@id("allow") permit(principal, action, resource);"#)
+        .unwrap();
+
+    // Entities in batches
+    let batch_size = 500;
+    let batches = entity_count.div_ceil(batch_size);
+
+    for batch in 0..batches {
+        let start = batch * batch_size;
+        let end = ((batch + 1) * batch_size).min(entity_count);
+
+        let mut entities = Vec::new();
+        for i in start..end {
+            // Format string split across lines for readability (under 100 chars per line)
+            entities.push(format!(
+                concat!(
+                    r#"{{"uid":{{"type":"TestApp::User","id":"user{}"}},"#,
+                    r#""attrs":{{"name":"User {}","email":"user{}@example.com"}},"#,
+                    r#""parents":[]}}"#
+                ),
+                i, i, i
+            ));
+        }
+
+        let filename = format!("entities/users_batch{batch}.json");
+        zip.start_file(&filename, options.clone()).unwrap();
+        let content = format!("[{}]", entities.join(","));
+        zip.write_all(content.as_bytes()).unwrap();
+    }
+
+    zip.finish().unwrap().into_inner()
+}
+
+/// Benchmark loading a minimal policy store.
+///
+/// Note: This benchmark measures archive decompression and parsing overhead,
+/// not the full Cedarling initialization which involves more complex setup.
+fn bench_archive_parsing(c: &mut Criterion) {
+    let archive = create_minimal_archive();
+
+    c.bench_function("archive_parse_minimal", |b| {
+        b.iter_batched(
+            || archive.clone(),
+            |archive_bytes| {
+                // Measure ZIP parsing overhead (clone is done in setup, not measured)
+                let cursor = Cursor::new(bb(archive_bytes));
+                let archive = zip::ZipArchive::new(cursor).unwrap();
+                bb(archive.len())
+            },
+            BatchSize::PerIteration,
+        );
+    });
+}
+
+/// Benchmark archive creation with varying policy counts.
+fn bench_archive_creation(c: &mut Criterion) {
+    let mut group = c.benchmark_group("archive_creation");
+
+    // Keep policy counts low to stay under 1ms threshold
+    for policy_count in &[5, 10] {
+        group.bench_with_input(
+            BenchmarkId::new("policies", policy_count),
+            policy_count,
+            |b, &count| b.iter(|| bb(create_archive_with_policies(count))),
+        );
+    }
+
+    group.finish();
+}
+
+/// Benchmark archive parsing with varying policy counts.
+fn bench_archive_parsing_policies(c: &mut Criterion) {
+    let mut group = c.benchmark_group("archive_parse_policies");
+
+    // Keep policy counts low to stay under 1ms threshold
+    for policy_count in &[10, 50, 100] {
+        let archive = create_archive_with_policies(*policy_count);
+
+        group.bench_with_input(
+            BenchmarkId::new("parse", policy_count),
+            &archive,
+            |b, archive| {
+                b.iter(|| {
+                    let total_size = parse_archive(archive);
+                    bb(total_size)
+                });
+            },
+        );
+    }
+
+    group.finish();
+}
+
+/// Benchmark archive parsing with varying entity counts.
+fn bench_archive_parsing_entities(c: &mut Criterion) {
+    let mut group = c.benchmark_group("archive_parse_entities");
+
+    for entity_count in &[100, 500, 1000, 5000] {
+        let archive = create_archive_with_entities(*entity_count);
+
+        group.bench_with_input(
+            BenchmarkId::new("parse", entity_count),
+            &archive,
+            |b, archive| {
+                b.iter(|| {
+                    let total_size = parse_archive(archive);
+                    bb(total_size)
+                });
+            },
+        );
+    }
+
+    group.finish();
+}
+
+/// Benchmark directory creation (native only).
+#[cfg(not(target_arch = "wasm32"))]
+fn bench_directory_creation(c: &mut Criterion) {
+    use std::fs;
+
+    let mut group = c.benchmark_group("directory_creation");
+
+    // Keep policy counts low to stay under 1ms threshold
+    for policy_count in &[5, 10] {
+        group.bench_with_input(
+            BenchmarkId::new("policies", policy_count),
+            policy_count,
+            |b, &count| {
+                b.iter(|| {
+                    let temp_dir = TempDir::new().unwrap();
+                    let dir = temp_dir.path();
+
+                    // Create metadata.json
+                    fs::write(dir.join("metadata.json"), POLICY_STORE_JSON).unwrap();
+
+                    // Create schema
+                    fs::write(
+                        dir.join("schema.cedarschema"),
+                        "namespace TestApp { entity User; entity Resource; }",
+                    )
+                    .unwrap();
+
+                    // Create policies directory
+                    fs::create_dir(dir.join("policies")).unwrap();
+
+                    for i in 0..count {
+                        let policy =
+                            format!(r#"@id("policy{i}") permit(principal, action, resource);"#);
+                        fs::write(dir.join(format!("policies/policy{i}.cedar")), policy).unwrap();
+                    }
+
+                    bb(temp_dir)
+                });
+            },
+        );
+    }
+
+    group.finish();
+}
+
+criterion_group!(
+    benches,
+    bench_archive_parsing,
+    bench_archive_creation,
+    bench_archive_parsing_policies,
+    bench_archive_parsing_entities,
+);
+
+#[cfg(not(target_arch = "wasm32"))]
+criterion_group!(directory_benches, bench_directory_creation,);
+
+#[cfg(not(target_arch = "wasm32"))]
+criterion_main!(benches, directory_benches);
+
+#[cfg(target_arch = "wasm32")]
+criterion_main!(benches);

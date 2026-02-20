@@ -23,6 +23,10 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
 
 		<!-- CDI -->
 		<dependency>

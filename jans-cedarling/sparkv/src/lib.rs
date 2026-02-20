@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2024 U-Zyn Chua
  */
-use std::collections::{BTreeMap, BinaryHeap, btree_map};
+use std::collections::{btree_map, BTreeMap, BinaryHeap};
 
 mod config;
 mod error;
@@ -18,8 +18,8 @@ pub use expentry::ExpEntry;
 use index::HashMapIndex;
 pub use kventry::KvEntry;
 
-use chrono::Duration;
 use chrono::prelude::*;
+use chrono::Duration;
 
 pub struct SparKV<T> {
     pub config: Config,
@@ -114,9 +114,20 @@ impl<T> SparKV<T> {
         index_keys: &[String],
     ) -> Result<(), Error> {
         self.clear_expired_if_auto();
-        self.ensure_capacity_ignore_key(key)?;
         self.ensure_item_size(&value)?;
         self.ensure_max_ttl(ttl)?;
+
+        if let Err(err) = self.ensure_capacity_ignore_key(key) {
+            // check if we have no capacity and config parameter is active
+            // we remove last element, like lru cache
+            if err == Error::CapacityExceeded && self.config.earliest_expiration_eviction {
+                self.remove_last();
+                // If nothing could be evicted (or invariants are broken), keep signaling capacity error.
+                self.ensure_capacity_ignore_key(key)?;
+            } else {
+                return Err(err);
+            }
+        };
 
         let item: KvEntry<T> = KvEntry::new(key, value, ttl);
         let exp_item: ExpEntry = ExpEntry::from_kv_entry(&item);
@@ -171,7 +182,6 @@ impl<T> SparKV<T> {
     }
 
     pub fn pop(&mut self, key: &str) -> Option<T> {
-        self.clear_expired_if_auto();
         let item = self.data.remove(key)?;
         self.index.remove_value_key(&index::ValueKey(item.key));
 
@@ -191,19 +201,35 @@ impl<T> SparKV<T> {
         self.data.contains_key(key)
     }
 
+    /// Removes only last element from expires BinaryHeap, even if value is not expired.
+    /// Is used when [Config::earliest_expiration_eviction] is true
+    fn remove_last(&mut self) {
+        while let Some(exp_item) = self.expiries.pop() {
+            if let Some(kv_entry) = self.data.get(&exp_item.key) {
+                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
+                    self.pop(&exp_item.key);
+                    return;
+                }
+            }
+        }
+    }
+
     pub fn clear_expired(&mut self) -> usize {
         let mut cleared_count: usize = 0;
         while let Some(exp_item) = self.expiries.peek().cloned() {
             if exp_item.is_expired() {
-                let Some(kv_entry) = self.data.get(&exp_item.key) else {
-                    // workaround to avoid unwrap
-                    continue;
+                let should_pop = match self.data.get(&exp_item.key) {
+                    Some(kv_entry) => {
+                        kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at
+                    },
+                    None => false,
                 };
-                if kv_entry.key == exp_item.key && kv_entry.expired_at == exp_item.expired_at {
+
+                if should_pop {
                     cleared_count += 1;
                     self.pop(&exp_item.key);
                 }
-                // remove current item
+                // remove current item from expiries
                 self.expiries.pop();
             } else {
                 break;
@@ -234,6 +260,18 @@ impl<T> SparKV<T> {
 
         keys.into_iter()
             .filter_map(move |value_key| self.data.get(&value_key.0).map(|entry| &entry.value))
+    }
+
+    /// Remove all values in database by index key
+    pub fn remove_by_index<'a>(&'a mut self, index_key: &'a str) -> usize {
+        // keys is cloned to avoid borrowing issues of mutable `self`
+        let keys: Vec<_> = self
+            .index
+            .get_by_index_key(&index::IndexKey(index_key.into()))
+            .cloned()
+            .collect();
+
+        keys.into_iter().filter_map(|key| self.pop(&key.0)).count()
     }
 
     /// Empty the container. That is, remove all key-values and expiries.

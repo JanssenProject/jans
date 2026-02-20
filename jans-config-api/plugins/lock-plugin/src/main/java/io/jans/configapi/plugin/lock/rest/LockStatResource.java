@@ -50,17 +50,31 @@ public class LockStatResource extends BaseResource {
     @Inject
     LockService lockService;
 
+    /**
+     * Provides basic lock statistics for the configured issuer.
+     *
+     * @param authorization the Authorization header value (bearer token) used to authenticate the request
+     * @param month the month for which the report should be fetched; required if both startMonth and endMonth are not provided
+     * @param startMonth the start month for a ranged report (inclusive)
+     * @param endMonth the end month for a ranged report (inclusive)
+     * @param format optional report format; empty string selects the default JSON response
+     * @return HTTP 200 response containing the statistics as a JSON payload (JsonNode)
+     */
     @Operation(summary = "Provides basic statistic", description = "Provides basic statistic", operationId = "get-lock-stat", tags = {
-            "Statistics" }, security = @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS,
-                    ApiAccessConstants.JANS_STAT }))
+            "Statistics" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_READ_ACCESS,
+                            ApiAccessConstants.JANS_STAT }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.LOCK_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stats", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonNode.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.LOCK_READ_ACCESS,
-            ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = { Constants.LOCK_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(
             @Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,

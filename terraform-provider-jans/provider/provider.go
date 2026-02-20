@@ -82,9 +82,6 @@ func Provider() *schema.Provider {
                         "jans_fido2_device":                  resourceFido2Device(),
                         "jans_group":                         resourceGroup(),
                         "jans_json_web_key":                  resourceJsonWebKey(),
-                        "jans_kc_saml_configuration":         resourceKCSamlConfiguration(),
-                        "jans_kc_saml_identity_provider":     resourceKCSamlIDP(),
-                        "jans_kc_saml_trust_relationship":    resourceKCSamlTR(),
                         "jans_ldap_database_configuration":   resourceLDAPDatabaseConfiguration(),
                         "jans_logging_configuration":         resourceLoggingConfiguration(),
                         "jans_message":                       resourceMessage(),
@@ -99,6 +96,8 @@ func Provider() *schema.Provider {
                         "jans_token_revocation":              resourceTokenRevocation(),
                         "jans_uma_resource":                  resourceUMAResource(),
                         "jans_user":                          resourceUser(),
+                        "jans_shibboleth_configuration":      jans.ResourceShibbolethConfiguration(),
+                        "jans_shibboleth_trusted_sp":         jans.ResourceShibbolethTrustedSP(),
                 },
 
                 // DataSourcesMap is the collection of available data sources that
@@ -108,8 +107,12 @@ func Provider() *schema.Provider {
                 // Resource instances for data sources must have a Read function
                 // and must *not* implement Create, Update or Delete.
                 DataSourcesMap: map[string]*schema.Resource{
+                        "jans_agama_repository":        dataSourceAgamaRepository(),
+                        "jans_agama_syntax_check":      dataSourceAgamaSyntaxCheck(),
                         "jans_audit_logs":              dataSourceAuditLogs(),
                         "jans_custom_script_types":     dataSourceCustomScriptTypes(),
+                        "jans_database_configuration":  dataSourceDatabaseConfiguration(),
+                        "jans_feature_flags":           dataSourceFeatureFlags(),
                         "jans_fido2_configuration":     dataSourceFido2Configuration(),
                         "jans_health_status":           dataSourceHealthStatus(),
                         "jans_persistence_config":      dataSourcePersistenceConfiguration(),
@@ -117,6 +120,7 @@ func Provider() *schema.Provider {
                         "jans_schema":                  dataSourceSchema(),
                         "jans_server_stats":            dataSourceServerStats(),
                         "jans_service_provider_config": dataSourceServiceProviderConfig(),
+                        "jans_service_status":          dataSourceServiceStatus(),
                         "jans_sessions":                dataSourceSessions(),
                         "jans_statistics":              dataSourceStatistics(),
                         "jans_tokens":                  dataSourceTokens(),

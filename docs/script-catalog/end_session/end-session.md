@@ -33,7 +33,7 @@ The end session script implements the [EndSessionType](https://github.com/Jansse
 
 
 ## Use case: Dummy Logout Page
-This script has been adapted from the Gluu Server [sample end session script](https://github.com/GluuFederation/community-edition-setup/blob/version_4.4.0/static/extension/end_session/end_session.py). 
+This script has been adapted from the Gluu Server [sample end session script](https://github.com/GluuFederation/community-edition-setup/blob/version_4.4.0/static/extension/end_session/end_session.py).
 
 !!! Note
 
@@ -41,30 +41,7 @@ This script has been adapted from the Gluu Server [sample end session script](ht
 
 ### Script Type: Python
 ```python
-from io.jans.model.custom.script.type.logout import EndSessionType
-from java.lang import String
-
-class EndSession(EndSessionType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "EndSession script. Initializing ..."
-        print "EndSession script. Initialized successfully"
-
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "EndSession script. Destroying ..."
-        print "EndSession script. Destroyed successfully"
-        return True
-
-    def getApiVersion(self):
-        return 11
-
-    # Must return an HTML string
-    def getFrontchannelHtml(self, context):
-        return ""
+--8<-- "script-catalog/end_session/end-session/end_session.py"
 ```
 
 ### Script Type: Java
@@ -82,41 +59,41 @@ import org.slf4j.LoggerFactory;
 
 
 public class EndSession implements EndSessionType {
-	
-	private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
-	
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        
+        private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+        
+        @Override
+        public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ROPC Script. Initializing...");
         log.info("ROPC Script. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ROPC Script. Initializing...");
         log.info("ROPC Script. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ROPC Script. Destroying...");
         log.info("ROPC Script. Destroyed.");
         return true;
-	}
+        }
 
-	@Override
-	public int getApiVersion() {
-		return 11;
-	}
+        @Override
+        public int getApiVersion() {
+                return 11;
+        }
 
-	@Override
-	public String getFrontchannelHtml(Object context) {
-		EndSessionContext endSessionContext = (EndSessionContext) context;
-		// Must return a real HTML string as per OIDC front channel logout spec
-		return "";
-	}
+        @Override
+        public String getFrontchannelHtml(Object context) {
+                EndSessionContext endSessionContext = (EndSessionContext) context;
+                // Must return a real HTML string as per OIDC front channel logout spec
+                return "";
+        }
 
 }
 

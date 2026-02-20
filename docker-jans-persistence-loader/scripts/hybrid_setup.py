@@ -19,3 +19,7 @@ class HybridBackend:
     def initialize(self):
         for backend in self.backends:
             backend(self.manager).initialize()
+
+    def customize(self):
+        for backend in self.backends:
+            backend(self.manager).customize()

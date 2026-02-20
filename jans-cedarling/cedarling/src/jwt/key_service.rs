@@ -9,13 +9,13 @@ use crate::LogWriter;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
-use super::http_utils::*;
+use super::http_utils::{GetFromUrl, HttpError, OpenIdConfig};
 use jsonwebtoken::jwk::{Jwk, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
-pub struct DecodingKeyInfo {
+pub(crate) struct DecodingKeyInfo {
     pub issuer: Option<String>,
     pub kid: Option<String>,
     pub algorithm: Algorithm,
@@ -36,13 +36,13 @@ pub struct DecodingKeyInfo {
 ///
 /// [`RFC 7517 v41`]: https://datatracker.ietf.org/doc/html/draft-ietf-jose-json-web-key-41
 #[derive(Default)]
-pub struct KeyService {
+pub(super) struct KeyService {
     keys: HashMap<DecodingKeyInfo, DecodingKey>,
 }
 
 impl KeyService {
-    pub fn new() -> Self {
-        Default::default()
+    pub(super) fn new() -> Self {
+        KeyService::default()
     }
 
     /// Loads JWK stores from a string.
@@ -64,12 +64,12 @@ impl KeyService {
     /// - and the values contains the JSON Web Keys as defined in [`RFC 7517`].
     ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
-    pub fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), KeyServiceError> {
+    pub(super) fn insert_keys_from_str(&mut self, key_stores: &str) -> Result<(), KeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Vec<Jwk>>>(key_stores)
             .map_err(InsertKeysError::DeserializeJwkStores)?;
 
-        for (issuer, keys) in parsed_stores.into_iter() {
-            for jwk in keys.into_iter() {
+        for (issuer, keys) in parsed_stores {
+            for jwk in keys {
                 let decoding_key =
                     DecodingKey::from_jwk(&jwk).map_err(InsertKeysError::BuildDecodingKey)?;
                 let algorithm = jwk
@@ -92,26 +92,25 @@ impl KeyService {
         Ok(())
     }
 
-    pub async fn get_keys_using_oidc(
+    pub(super) async fn get_keys_using_oidc(
         &mut self,
         openid_config: &OpenIdConfig,
-        logger: &Option<Logger>,
+        logger: Option<&Logger>,
     ) -> Result<(), KeyServiceError> {
         let jwks = JwkSet::get_from_url(&openid_config.jwks_uri)
             .await
             .map_err(KeyServiceError::GetJwks)?;
 
         let (keys, errs) = jwks.unwrap_keys();
-        for err in errs.into_iter() {
+        for err in errs {
             let err_msg = format!(
                 "failed to deserialize a JWK from '{}': {}",
                 openid_config.issuer, err,
             );
             logger.log_any(JwtLogEntry::new(err_msg, Some(crate::LogLevel::WARN)));
-            continue;
         }
 
-        for key in keys.into_iter() {
+        for key in keys {
             // We will no support keys with unspecified algorithms
             let Some(key_algorithm) = key.common.key_algorithm else {
                 let err_msg = format!(
@@ -150,30 +149,30 @@ impl KeyService {
         Ok(())
     }
 
-    pub fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<&DecodingKey> {
+    pub(super) fn get_key(&self, key_info: &DecodingKeyInfo) -> Option<&DecodingKey> {
         self.keys.get(key_info)
     }
 
-    pub fn has_keys(&self) -> bool {
+    pub(super) fn has_keys(&self) -> bool {
         !self.keys.is_empty()
     }
 }
 
 /// An alternative implementation of [`jsonwebtoken::jwk::JwkSet`].
 ///
-/// This struct allows us to iterate over each in in the JwkSet and handle deserializing
+/// This struct allows us to iterate over each item in the [`JwkSet`] and handle deserializing
 /// each one independently.
 #[derive(Deserialize)]
-pub struct JwkSet {
+pub(super) struct JwkSet {
     keys: Vec<serde_json::Value>,
 }
 
 impl JwkSet {
-    pub fn unwrap_keys(self) -> (Vec<Jwk>, Vec<serde_json::Error>) {
+    fn unwrap_keys(self) -> (Vec<Jwk>, Vec<serde_json::Error>) {
         let mut keys = Vec::new();
         let mut errs = Vec::new();
 
-        for key in self.keys.into_iter() {
+        for key in self.keys {
             let result = serde_json::from_value::<Jwk>(key);
             match result {
                 Ok(jwk) => keys.push(jwk),
@@ -344,11 +343,11 @@ mod test {
         let mut key_service = KeyService::default();
 
         key_service
-            .get_keys_using_oidc(&server1.openid_config(), &None)
+            .get_keys_using_oidc(&server1.openid_config(), None)
             .await
             .expect("fetch keys for issuer 1");
         key_service
-            .get_keys_using_oidc(&server2.openid_config(), &None)
+            .get_keys_using_oidc(&server2.openid_config(), None)
             .await
             .expect("fetch keys for issuer 2");
 

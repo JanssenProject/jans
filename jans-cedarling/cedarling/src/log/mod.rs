@@ -9,12 +9,12 @@
 //! ## Cedarling log types
 //!
 //!  In [Cedarling-Nativity-Plan Bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) we have variable `CEDARLING_LOG_TYPE`
-//!  and config type [LogType](`crate::models::log_config::LogType`) that may contain next values:
+//!  and config type [`LogType`](`crate::models::log_config::LogType`) that may contain next values:
 //!
-//!  * off
-//!  * memory
-//!  * std_out
-//!  * lock
+//!  * `off`
+//!  * `memory`
+//!  * `std_out`
+//!  * `lock`
 //!  
 //!  #### Log type `off`
 //!  
@@ -47,20 +47,25 @@
 //!
 //!  * [`LogStorage`] is used to gettting logs from log storage.
 //!
-//!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
+//!  Currently only [`MemoryLogger`](`memory_logger::MemoryLogger`) implement this.
 
 mod err_log_entry;
-pub mod interface;
+pub(crate) mod interface;
 
 mod log_entry;
 mod log_level;
 pub(crate) mod log_strategy;
+pub(crate) mod loggable_fn;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
 
 pub use log_entry::*;
 pub use log_level::*;
+pub use stdout_logger::StdOutLoggerMode;
+
+#[cfg(test)]
+pub(crate) use nop_logger::NopLogger;
 
 #[cfg(test)]
 mod test;
@@ -70,6 +75,7 @@ use std::sync::LazyLock;
 use std::sync::{Arc, Weak};
 
 pub use interface::LogStorage;
+pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
 
 use crate::LockServiceConfig;
@@ -81,8 +87,9 @@ use crate::lock::{InitLockServiceError, LockService};
 pub(crate) type Logger = Arc<LogStrategy>;
 pub(crate) type LoggerWeak = Weak<LogStrategy>;
 
+#[allow(dead_code)]
 #[cfg(test)]
-pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(|| init_test_logger());
+pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(init_test_logger);
 
 /// Initialize logger.
 /// entry point for initialize logger
@@ -92,7 +99,7 @@ pub(crate) async fn init_logger(
     app_name: Option<ApplicationName>,
     lock_config: Option<&LockServiceConfig>,
 ) -> Result<Logger, InitLockServiceError> {
-    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name)?);
+    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name));
     let logger_weak = Arc::downgrade(&logger);
     if let Some(lock_config) = lock_config {
         let lock_service = LockService::new(pdp_id, lock_config, Some(logger_weak)).await?;
@@ -101,17 +108,15 @@ pub(crate) async fn init_logger(
     Ok(logger)
 }
 
+#[allow(dead_code)]
 #[cfg(test)]
 pub(crate) fn init_test_logger() -> Logger {
-    Arc::new(
-        LogStrategy::new(
-            &LogConfig {
-                log_level: LogLevel::DEBUG,
-                log_type: crate::LogTypeConfig::StdOut,
-            },
-            PdpID::new(),
-            Some("test".to_string().into()),
-        )
-        .unwrap(),
-    )
+    Arc::new(LogStrategy::new(
+        &LogConfig {
+            log_level: LogLevel::DEBUG,
+            log_type: crate::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
+        },
+        PdpID::new(),
+        Some("test".to_string().into()),
+    ))
 }

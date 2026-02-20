@@ -112,6 +112,7 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server.ingress.webfingerEnabled | bool | `true` | Enable endpoint /.well-known/webfinger |
 | auth-server.ingress.webfingerLabels | object | `{}` | webfinger ingress resource labels. key app is taken |
 | auth-server.lockEnabled | bool | `false` | Enable jans-lock as service running inside auth-server |
+| casa.adminEnabled | bool | `true` | Boolean flag to enable/disable the casa admin console. |
 | casa.appLoggers | object | `{"casaLogLevel":"INFO","casaLogTarget":"STDOUT","enableStdoutLogPrefix":"true","timerLogLevel":"INFO","timerLogTarget":"FILE"}` | App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed. |
 | casa.appLoggers.casaLogLevel | string | `"INFO"` | casa.log level |
 | casa.appLoggers.casaLogTarget | string | `"STDOUT"` | casa.log target |
@@ -123,7 +124,7 @@ Kubernetes: `>=v1.23.0-0`
 | casa.enabled | bool | `true` | Boolean flag to enable/disable the casa chart. |
 | casa.ingress | object | `{"casaAdditionalAnnotations":{},"casaEnabled":false,"casaLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | casa.ingress.casaAdditionalAnnotations | object | `{}` | Casa ingress resource additional annotations. |
-| casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /casa |
+| casa.ingress.casaEnabled | bool | `false` | Enable casa endpoints /jans-casa |
 | casa.ingress.casaLabels | object | `{}` | Casa ingress resource labels. key app is taken |
 | certManager.certificate.enabled | bool | `false` |  |
 | certManager.certificate.issuerGroup | string | `"cert-manager.io"` |  |
@@ -186,7 +187,7 @@ Kubernetes: `>=v1.23.0-0`
 | config-api.ingress | object | `{"configApiAdditionalAnnotations":{},"configApiEnabled":true,"configApiLabels":{}}` | Enable endpoints in either istio or nginx ingress depending on users choice |
 | config-api.ingress.configApiAdditionalAnnotations | object | `{}` | ConfigAPI ingress resource additional annotations. |
 | config-api.ingress.configApiLabels | object | `{}` | configAPI ingress resource labels. key app is taken |
-| config-api.plugins | string | `"admin-ui,fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
+| config-api.plugins | string | `"fido2,scim,user-mgt"` | Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","kc-saml") |
 | config.enabled | bool | `true` | Boolean flag to enable/disable the configuration job. This normally should never be false |
 | configAdapterName | string | `"kubernetes"` | The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes |
 | configSecretAdapter | string | `"kubernetes"` | The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes |
@@ -293,6 +294,16 @@ Kubernetes: `>=v1.23.0-0`
 | fido2.ingress.fido2WebauthnLabels | object | `{}` | fido2 webauthn ingress resource labels. key app is taken |
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
+| gatewayApi.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
+| gatewayApi.gatewayAnnotations | object | `{}` | Specific annotations for the Gateway resource |
+| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
+| gatewayApi.gatewayLabels | object | `{}` | Specific labels for the Gateway resource |
+| gatewayApi.httpPort | int | `80` | Gateway http port number |
+| gatewayApi.httpsPort | int | `443` | Gateway https port number |
+| gatewayApi.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
+| gatewayApi.routeAnnotations | object | `{}` | Specific annotations for the HTTPRoute resource |
+| gatewayApi.routeLabels | object | `{}` | Specific labels for the HTTPRoute resource |
+| gatewayApi.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |
 | hpa.behavior | object | `{}` | Scaling Policies |
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |
@@ -382,8 +393,8 @@ Kubernetes: `>=v1.23.0-0`
 | scim.ingress.scimEnabled | bool | `false` | Enable SCIM endpoints /jans-scim |
 | scim.ingress.scimLabels | object | `{}` | SCIM ingress resource labels. key app is taken |
 | scim.scimServiceName | string | `"scim"` | Name of the scim service. Please keep it as default. |
-| service.name | string | `"http-aio"` | The name of the aio port within the aio service. Please keep it as default. |
-| service.port | int | `8080` | Port of the fido2 service. Please keep it as default. |
+| service.name | string | `"http-aio"` | The name of the Kubernetes Service resource. |
+| service.port | int | `8080` | The port number exposed by the All-in-One service. |
 | service.sessionAffinity | string | `"None"` | Default set to None If you want to make sure that connections from a particular client are passed to the same Pod each time, you can select the session affinity based on the client's IP addresses by setting this to ClientIP |
 | service.sessionAffinityConfig | object | `{"clientIP":{"timeoutSeconds":10800}}` | the maximum session sticky time if sessionAffinity is ClientIP |
 | serviceAccountName | string | `"default"` | service account used by Kubernetes resources |
