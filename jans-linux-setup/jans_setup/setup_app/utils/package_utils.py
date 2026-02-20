@@ -60,12 +60,7 @@ class PackageUtils(SetupUtils):
 
         if not Config.installed_instance:
             if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-                if base.os_type == 'suse':
-                    self.run(['rpm', '-i', f'https://dev.mysql.com/get/mysql80-community-release-sl{base.os_version}-{base.os_subversion}.noarch.rpm'])
-                    self.run(['rpm', '--import', '/etc/RPM-GPG-KEY-mysql'])
-                    self.run(['zypper', '--no-gpg-checks', '--gpg-auto-import-keys', 'refresh'])
-                    package_list[os_type_version]['mandatory'] += ' mysql-community-server-8.0.39'
-                elif base.os_type == 'debian' and base.os_version in ('12', '13'):
+                if base.os_type == 'debian' and base.os_version in ('12', '13'):
                     with tempfile.TemporaryDirectory() as tmpdirname:
                         libaio1_url = 'http://ftp.de.debian.org/debian/pool/main/liba/libaio/libaio1_0.3.113-4_amd64.deb'
                         base.download(libaio1_url, os.path.join(tmpdirname, os.path.basename(libaio1_url)))

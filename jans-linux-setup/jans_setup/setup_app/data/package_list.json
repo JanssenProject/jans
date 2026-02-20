@@ -19,7 +19,7 @@
       "psycopg2": "python-psycopg2"
     }
   },
-  "suse tumbleweed": {
+  "suse 16": {
     "optional": "",
     "mandatory": "apache2 apache2-mod_auth_openidc  rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
