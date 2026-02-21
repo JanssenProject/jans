@@ -251,14 +251,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
 
-        if base.clone_type == 'rpm':
-            for service in Config.redhat_services:
-                self.run(["/sbin/chkconfig", service, "on"])
-        elif not base.snap:
-            for service in Config.debian_services:
-                self.run([paths.cmd_update_rc , service, 'defaults'])
-                self.run([paths.cmd_update_rc, service, 'enable'])
-
 
     def copy_scripts(self):
         self.logIt("Copying script files")
@@ -476,6 +468,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if base.os_type == 'suse':
             self.run_service_command('start', 'cron')
             self.run_service_command('enable', 'cron')
+
+        # enable and start rsyslog
+        self.run_service_command('start', 'rsyslog')
+        self.run_service_command('enable', 'rsyslog')
+
 
         if base.snap:
             #write post-install.py script
