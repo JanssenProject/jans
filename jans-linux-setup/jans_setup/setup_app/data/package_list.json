@@ -21,7 +21,7 @@
   },
   "suse 16": {
     "optional": "",
-    "mandatory": "apache2 apache2-mod_auth_openidc  rsyslog openssl postgresql postgresql-server postgresql-contrib",
+    "mandatory": "apache2 apache2-mod_auth_openidc cron rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
       "more_itertools": "python3-more-itertools",
       "zipp": "python3-zipp",

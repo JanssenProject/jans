@@ -472,6 +472,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if base.argsp.import_ldif:
             self.import_custom_ldif_dir(base.argsp.import_ldif)
 
+        # start and enable crontab for SuSE
+        if base.os_type == 'suse':
+            self.run_service_command('start', 'cron')
+            self.run_service_command('enable', 'cron')
+
         if base.snap:
             #write post-install.py script
             self.logIt("Writing snap-post-setup.py", pbar='post-setup')
