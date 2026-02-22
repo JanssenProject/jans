@@ -7,9 +7,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
+import uniffi.cedarling_uniffi.EntityException;
 
 import java.util.List;
 import java.util.Map;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,40 +25,15 @@ public class ToolHandler {
     private final AuthorizationService authorizationService;
     private final ObjectMapper objectMapper;
 
-    String principalJsonStr = """
+    private String principalJsonStr;
 
-            {
-            "cedar_entity_mapping": {
-            "entity_type": "Jans::User",
-            "id": "some_id"
-            },
-            "role": [
-            "Teacher"
-            ],
-            "sub": "some_sub"
-            }
-            """;
+    private String actionString;
 
-    String actionString = "Jans::Action::\"Read\"";
-    String resourceString = """
-                {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::SecretDocument",
-                    "id": "some_id"
-                }
-                }
-            """;
-    String contextString = """
-            {
-                  "device_health": ["Healthy"],
-                  "fraud_indicators": ["Allowed"],
-                  "geolocation": ["America"],
-                  "network": "127.0.0.1",
-                  "network_type": "Local",
-                  "operating_system": "Linux",
-                  "user_agent": "Linux"
-                }
-            """;
+    private String resourceString;
+
+    private String contextString;
+    
+    private boolean signedAuthz;
 
     Map<String, String> tokens = null;
 
@@ -62,13 +41,44 @@ public class ToolHandler {
         this.apiClient = apiClient;
         this.authorizationService = authorizationService;
         this.objectMapper = new ObjectMapper();
+        // Load configured tool handler strings from properties on the classpath
+        Properties props = new Properties();
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("toolhandler.properties")) {
+            if (is != null) {
+                props.load(is);
+                this.principalJsonStr = props.getProperty("principalJsonStr");
+                this.actionString = props.getProperty("actionString");
+                this.resourceString = props.getProperty("resourceString");
+                this.contextString = props.getProperty("contextString");
+                this.signedAuthz = Boolean.parseBoolean(props.getProperty("signed-authz", "false"));
+                // Initialize tokens map from properties
+                    tokens = Map.of(
+                        "access_token", props.getProperty("access-token", ""),
+                        "id_token", props.getProperty("id-token", ""),
+                        "userinfo_token", props.getProperty("userinfo-token", "")
+                    );
+
+            } else {
+                throw new RuntimeException("toolhandler.properties not found on classpath");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load toolhandler.properties", e);
+        }
+    }
+
+    private boolean isAuthorized(String principal, String action, String resource, String context)
+            throws UnauthorizedException, EntityException {
+        if (signedAuthz) {
+            return authorizationService.checkAuthorization(tokens, action, resource, context);
+        } else {
+            return authorizationService.checkAuthorizationUnsigned(principal, action, resource, context);
+        }
     }
 
     public CallToolResult handleListClients(Map<String, Object> arguments) {
         try {
             // Authorization checkpoint: Check if user has permission to read clients
-            if (!authorizationService.checkAuthorizationUnsigned(principalJsonStr, actionString, resourceString,
-                    contextString)) {
+            if (!isAuthorized(principalJsonStr, actionString, resourceString, contextString)) {
                 throw new UnauthorizedException("Unauthorized access!");
             }
 
@@ -128,8 +138,7 @@ public class ToolHandler {
     public CallToolResult handleCreateClient(Map<String, Object> arguments) {
         try {
             // Authorization checkpoint: Check if user has permission to read clients
-            if (!authorizationService.checkAuthorizationUnsigned(principalJsonStr, actionString, resourceString,
-                    contextString)) {
+            if (!isAuthorized(principalJsonStr, actionString, resourceString, contextString)) {
                 throw new UnauthorizedException("Unauthorized access!");
             }
 
@@ -169,8 +178,7 @@ public class ToolHandler {
     public CallToolResult handleGetHealth(Map<String, Object> arguments) {
         try {
             // Authorization checkpoint: Check if user has permission to read clients
-            if (!authorizationService.checkAuthorizationUnsigned(principalJsonStr, actionString, resourceString,
-                    contextString)) {
+            if (!isAuthorized(principalJsonStr, actionString, resourceString, contextString)) {
                 throw new UnauthorizedException("Unauthorized access!");
             }
 

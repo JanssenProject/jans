@@ -26,28 +26,22 @@ public class AuthorizationService {
         String bootstrapJsonStr = """
                     {
                         "CEDARLING_APPLICATION_NAME": "My App",
-                        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
-                        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
-                            "HS256",
-                            "RS256"
-                        ],
-                        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-                        "CEDARLING_LOG_LEVEL": "INFO",
+                        "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/ossdhaval/agama-lab-policy-stores/refs/heads/agama-lab-policy-designer/0afdb850b4fcdb3cce5de896559cdc865f2f49648bdb.json",
                         "CEDARLING_LOG_TYPE": "std_out",
-                        "CEDARLING_MAPPING_USER": "Jans::User",
-                        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
-                        "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327.json",
-                        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
-                            "===": [
-                            {
-                                "var": "Jans::User"
-                            },
-                            "ALLOW"
-                            ]
-                        },
+                        "CEDARLING_LOG_LEVEL": "INFO",
                         "CEDARLING_USER_AUTHZ": "enabled",
                         "CEDARLING_WORKLOAD_AUTHZ": "disabled",
-                        "id": "97ef28fb-58a4-4a1c-9b05-e948e2c3be4f"
+                        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
+                        "===": [{"var": "Jans::User"}, "ALLOW"]
+                        },
+                        "CEDARLING_JWT_SIG_VALIDATION": "enabled",
+                        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+                        "CEDARLING_MAPPING_USER": "Jans::User",
+                        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
+                        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+                        "HS256", "RS256"
+                        ],
+                        "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
                     }
                 """;
 
