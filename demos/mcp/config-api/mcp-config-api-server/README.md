@@ -60,6 +60,13 @@ when running MCP server against a Janssen server with self-signed certificate.
     java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
     ```
 
+### Janssen server setup
+
+- Two clients 
+    - one that you created for MCP server to connect with config API. You use this client to get a the access token. Provide this access token to the MCP server via command-line arg. When debugging this token is updated in the debug profile in (.vscode/launch.json). Configuration of this client is as given in [this section](#mcp-client-config).
+    - Second created by tarp dynamically. You will use tarp to obtain tokens for your user. These tokens (access, id and userinfo) are passed to the server through the toolhandler.properties. Server uses these tokens to extract the user information. Specifically the `role`. Remember that this client, you need to update on the jans, so that it has the `role` scope along with the `openid` default scope.
+    - Create a user on Jans that has `role` claim added with value `ops`.
+
 ## Architectural Decision Records (ADRs)
 
 ### Use JsonNode instead of custom model classes
@@ -80,3 +87,56 @@ the Janssen server. Using `JsonNode` provides a simple and flexible way to repre
 #### Consequences
 
 Type safety is not provided at the MCP server level.
+
+## Jans configs
+
+### MCP client config
+
+```
+dn: "inum=d458f14b-fd20-4c02-90ff-9e466047cc92,ou=clients,o=jans"
+deletable: false
+frontChannelLogoutUri: ""
+frontChannelLogoutSessionRequired: false
+redirectUris: ["https://google.com"]
+responseTypes: ["token", "code", "id_token"]
+grantTypes: ["authorization_code", "implicit", "refresh_token", "client_credentials"]
+applicationType: "web"
+idTokenTokenBindingCnf: ""
+clientName: "mcpclient"
+logoUri: ""
+clientUri: ""
+policyUri: ""
+clientNameLocalized: {}
+logoUriLocalized: {}
+clientUriLocalized: {}
+policyUriLocalized: {}
+tosUriLocalized: {}
+jwksUri: ""
+jwks: ""
+sectorIdentifierUri: ""
+subjectType: "pairwise"
+tokenEndpointAuthMethod: "client_secret_basic"
+initiateLoginUri: ""
+scopes: ["https://jans.io/oauth/config/openid/clients.delete", "https://jans.io/oauth/config/openid/clients.readonly", "https://jans.io/oauth/config/openid/clients.write"]
+trustedClient: false
+persistClientAuthorizations: false
+includeClaimsInIdToken: true
+accessTokenLifetime: 30000
+customAttributes: [{"name": "displayNameLocalized", "multiValued": true, "values": ["{}"], "value": "{}", "displayValue": "{}"}, {"name": "jansClntURILocalized", "multiValued": true, "values": ["{}"], "value": "{}", "displayValue": "{}"}, {"name": "jansLogoURILocalized", "multiValued": true, "values": ["{}"], "value": "{}", "displayValue": "{}"}, {"name": "jansPolicyURILocalized", "multiValued": true, "values": ["{}"], "value": "{}", "displayValue": "{}"}, {"name": "jansTosURILocalized", "multiValued": true, "values": ["{}"], "value": "{}", "displayValue": "{}"}]
+rptAsJwt: false
+accessTokenAsJwt: true
+disabled: false
+softwareId: ""
+softwareVersion: ""
+softwareStatement: ""
+attributes: {"runIntrospectionScriptBeforeJwtCreation": false, "keepClientAuthorizationAfterExpiration": false, "allowSpontaneousScopes": false, "backchannelLogoutSessionRequired": false, "parLifetime": 600, "requirePar": false, "dpopBoundAccessToken": false, "jansDefaultPromptLogin": false, "requirePkce": false, "minimumAcrLevel": -1}
+backchannelTokenDeliveryMode: "poll"
+backchannelClientNotificationEndpoint: ""
+backchannelUserCodeParameter: false
+description: ""
+displayName: "mcpclient"
+allAuthenticationMethods: ["client_secret_basic"]
+authenticationMethod: "client_secret_basic"
+baseDn: "inum=d458f14b-fd20-4c02-90ff-9e466047cc92,ou=clients,o=jans"
+inum: "d458f14b-fd20-4c02-90ff-9e466047cc92"
+```
