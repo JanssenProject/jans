@@ -212,6 +212,16 @@ mod test {
                 }));
             }
 
+            let auth = request
+                .metadata()
+                .get("authorization")
+                .and_then(|v| v.to_str().ok());
+
+            assert!(
+                matches!(auth, Some(token) if token.starts_with("Bearer ")),
+                "expected Bearer token in authorization header, got {auth:?}"
+            );
+
             let entries = request.into_inner().entries;
             self.log_sender.send(entries).unwrap();
 
@@ -261,6 +271,8 @@ mod test {
 
     #[test]
     fn test_json_to_proto_conversion() {
+        use test_utils::assert_eq;
+
         let json_str = r#"{
             "creation_date": 1771092901,
             "event_time": 1771092951,
@@ -463,6 +475,40 @@ mod test {
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 3);
+    }
+
+    #[tokio::test]
+    async fn test_send_logs_partial_malformed() {
+        let (addr, mut rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![
+            r#"{
+                "service": "valid-service-1",
+                "node_name": "node-1",
+                "event_type": "event-1"
+            }"#
+            .to_string()
+            .into_boxed_str(),
+            "not valid json".to_string().into_boxed_str(),
+            r#"{
+                "service": "valid-service-2",
+                "node_name": "node-2",
+                "event_type": "event-2"
+            }"#
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        transport
+            .send_logs(&entries)
+            .await
+            .expect("logs should be sent successfully despite malformed entries");
+
+        let received = rx.try_recv().unwrap();
+        assert_eq!(received.len(), 2, "only valid entries should be forwarded");
+        assert_eq!(received[0].service, "valid-service-1");
+        assert_eq!(received[1].service, "valid-service-2");
     }
 
     #[tokio::test]

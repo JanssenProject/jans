@@ -24,7 +24,7 @@ use tokio_util::sync::CancellationToken;
 pub(super) struct LogWorker<T: AuditTransport> {
     // it would be nice to store a struct here but we can't really store
     // `VecDeque<dyn Loggable>` so we just serialize the logs before storing them in the
-    // buffer. We use `Box<str>`s to save some memory.
+    // buffer.
     //
     // TODO: should we cap the capacity? what to do with the excess logs if the buffer
     // becomes full?
