@@ -90,7 +90,7 @@ where
             return;
         }
 
-        // TODO: logs can be lost if the process crashes duiring retry
+        // TODO: logs can be lost if the process crashes during retry
         let entries: Vec<SerializedLogEntry> = self.log_buffer.drain(0..batch_size).collect();
 
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);

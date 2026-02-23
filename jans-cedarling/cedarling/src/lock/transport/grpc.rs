@@ -132,6 +132,14 @@ impl AuditTransport for GrpcTransport {
 }
 
 /// Convert a [`JsonLogEntry`] to a protobuf [`LogEntry`]
+///
+/// The current implementation assumes [`JsonLogEntry`] carries only whole-second
+/// timestamps (Unix epoch seconds) in `creation_date` and `event_time`. Therefore,
+/// [`Timestamp::nanos`] is set to 0 for both fields.
+///
+/// If future changes introduce sub-second precision in `JsonLogEntry` (e.g., by
+/// adding separate nanosecond fields or encoding fractional seconds), the conversion
+/// should be updated to preserve those nanoseconds instead of hardcoding 0.
 fn json_to_proto(json_entry: JsonLogEntry) -> LogEntry {
     LogEntry {
         creation_date: json_entry.creation_date.map(|secs| Timestamp {
