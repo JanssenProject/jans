@@ -75,7 +75,7 @@ All of this is exposed through **REST APIs** with clear query parameters and JSO
 
 **Base URL for all metrics endpoints:**
 
-```
+```text
 https://your-jans-server/jans-fido2/restv1/metrics
 ```
 
@@ -86,7 +86,8 @@ Replace `your-jans-server` with your actual Janssen server host.
 - `yyyy-MM-ddTHH:mm:ss` (e.g. `2026-01-01T00:00:00`) – treated as UTC  
 - With timezone: `2026-01-01T12:00:00Z` or `2026-01-01T12:00:00+00:00`
 
-**Authentication and security:** The metrics API does not enforce authentication by itself. **Protection should be applied at the infrastructure level** (e.g. API gateway with OAuth 2.0 or API keys, reverse proxy with auth, or network/firewall rules). Endpoints that return data for a **specific user** (e.g. `/metrics/entries/user/{userId}`) are sensitive and should be restricted to authorized administrators or the user themselves.
+> **Warning — Security**
+> The metrics API **does not enforce authentication by itself**. These endpoints can expose PII (userId, username, ipAddress, userAgent, sessionId) and operational data. **Protection must be applied at the infrastructure level** (e.g. API gateway with OAuth 2.0 or API keys, reverse proxy with auth, or network/firewall rules). Endpoints that return data for a **specific user** (e.g. `/metrics/entries/user/{userId}`) are sensitive and should be restricted to authorized administrators or the user themselves.
 
 ---
 
@@ -125,6 +126,7 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/health" \
   "metricsEnabled": true,
   "aggregationEnabled": true,
   "status": "UP",
+  "serviceAvailable": true,
   "timestamp": "2026-01-01T12:00:00"
 }
 ```
@@ -159,7 +161,7 @@ The metrics API has **13 GET endpoints**, grouped as follows.
 - **Endpoint 11:** Optionally accepts `periods` (2–12, default 2) to compare that many consecutive periods.  
 - **Path parameters:**  
   - `aggregationType`: one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`  
-  - `operationType`: one of `REGISTRATION`, `AUTHENTICATION`  
+  - `operationType`: one of `REGISTRATION`, `AUTHENTICATION` (FALLBACK is not accepted here; query fallback events via the general `/metrics/entries` endpoint with no operation filter.)  
   - `userId`: the user's internal ID (inum), not the username.
 
 ---
@@ -186,7 +188,7 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/entries?startTim
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Unique identifier (UUID) for this specific metric entry. Use this to reference individual events. |
-| `timestamp` | integer | Event time in **milliseconds since epoch** (UTC). Convert to date: `new Date(timestamp)` in JavaScript or similar. Example: `1766767235681` = 2026-01-26T12:00:35.681Z. |
+| `timestamp` | integer | Event time in **milliseconds since epoch** (UTC). Convert to date: `new Date(timestamp)` in JavaScript or similar. Example: `1769428835681` = 2026-01-26T12:00:35.681Z. |
 | `userId` | string | User's internal ID (inum). This is a stable identifier for correlating user activity across entries. Not the username. |
 | `username` | string | Human-readable username at time of the operation. May change if user renames account; use `userId` for stable tracking. |
 | `operationType` | string | Type of operation: `REGISTRATION` (passkey enrollment), `AUTHENTICATION` (passkey sign-in), or `FALLBACK` (user chose alternative method). |
@@ -212,7 +214,7 @@ This means: if you see an `ATTEMPT` without a matching `SUCCESS`/`FAILURE` for t
 [
   {
     "id": "8092ad93-6d13-46aa-a288-c828741a0941",
-    "timestamp": 1766767235681,
+    "timestamp": 1769428835681,
     "userId": "4a8f6f63-1306-4e2f-82bb-1c85da0284cc",
     "username": "admin",
     "operationType": "REGISTRATION",
@@ -235,7 +237,7 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/entries/user/4a8
   -H "Accept: application/json"
 ```
 
-**Response format:** Same as `/metrics/entries` (array of entry objects), filtered to only include entries for the specified user.
+**Response format:** Same as `/metrics/entries` (array of entry objects), filtered to only include entries for the specified user. Unknown or invalid `userId` returns 200 with an empty array (404 is not used).
 
 ### GET /metrics/entries/operation/{operationType}
 
@@ -548,7 +550,7 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/trends
 {
   "dataPoints": [
     {
-      "timestamp": 1735689600000,
+      "timestamp": 1767225600000,
       "period": "2026-01-01",
       "metrics": {
         "registrationAttempts": 15,
@@ -558,7 +560,7 @@ curl -X GET "https://your-jans-server/jans-fido2/restv1/metrics/analytics/trends
       }
     },
     {
-      "timestamp": 1735776000000,
+      "timestamp": 1767312000000,
       "period": "2026-01-02",
       "metrics": {
         "registrationAttempts": 18,

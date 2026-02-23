@@ -581,7 +581,7 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get metrics entries for a user
-      description: Returns metric entries for a single user (by userId/inum) in the given time range.
+      description: Returns metric entries for a single user (by userId/inum) in the given time range. Unknown or invalid userId returns 200 with an empty array (consistent with other metrics endpoints); 404 is not used.
       operationId: get-metrics-entries-by-user
       parameters:
         - name: userId
@@ -919,7 +919,7 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get period-over-period comparison
-      description: Compares current period with previous periods (e.g. this month vs last). Optional query parameter periods (2–12, default 2).
+      description: Compares the current period with previous periods (e.g. this month vs last). The time range is calculated internally from the aligned current period boundary (UTC) and the number of periods; API consumers do not provide startTime or endTime. Optional query parameter periods (2–12, default 2) specifies how many consecutive periods to compare.
       operationId: get-metrics-analytics-comparison
       parameters:
         - name: aggregationType
@@ -1090,18 +1090,25 @@ components:
           description: Cluster node identifier (when in cluster).
         ipAddress:
           type: string
+          description: Client IP address (when available from request headers). Useful for geo-analysis or security.
         userAgent:
           type: string
+          description: Full browser user-agent string; used to derive deviceInfo.
         deviceInfo:
           type: object
+          description: Parsed device details (browser, os, deviceType). Present when deviceInfoCollection is enabled.
         errorReason:
           type: string
+          description: Human-readable error message. Present only when status is FAILURE.
         errorCategory:
           type: string
+          description: Categorized error type (e.g. USER_CANCELLED, TIMEOUT, INVALID_CREDENTIAL). Present only when status is FAILURE.
         sessionId:
           type: string
+          description: Session identifier linking this operation to a user session.
         applicationType:
           type: string
+          description: Application or relying party identifier (when multiple apps share the FIDO2 server).
     MetricsAggregation:
       type: object
       description: Pre-computed aggregation for one period (e.g. one hour or one day).
@@ -1159,6 +1166,7 @@ components:
           type: object
           additionalProperties:
             type: integer
+          description: Counts by error category (e.g. USER_CANCELLED, TIMEOUT).
     MetricsAggregationSummary:
       type: object
       description: Summary over all aggregations in a time range.
@@ -1177,6 +1185,7 @@ components:
           type: number
     MetricsAdoption:
       type: object
+      description: User adoption metrics (new users, returning users, adoption rate) for the given time range.
       properties:
         newUsers:
           type: integer
