@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - "jans-cedarling/**"
-  workflow_dispatch:
 permissions:
   contents: read
 
@@ -23,15 +22,18 @@ jobs:
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
         toolchain: stable
+        components: clippy
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+      with:
+        workspaces: jans-cedarling
     - name: Run Tests
       working-directory: jans-cedarling
-      run: |
-        cargo test --workspace
+      run: cargo test --workspace
     - name: Run Clippy on native target
       working-directory: jans-cedarling
-      run: |
-        rustup component add clippy
-        cargo clippy --workspace --all-targets -- -D warnings
+      run: cargo clippy --workspace --all-targets -- -D warnings
+
   custom_lints:
     runs-on: ubuntu-latest
     steps:
@@ -45,6 +47,10 @@ jobs:
       with:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+      with:
+        workspaces: jans-cedarling
     - uses: cargo-bins/cargo-binstall@v1.17.4
     - name: Install dylint
       run: |
@@ -61,6 +67,7 @@ jobs:
       working-directory: jans-cedarling
       run: |
         RUSTFLAGS="-Dwarnings" cargo dylint --all --workspace --path custom-lints
+
   rust_benchmarks:
     runs-on: ubuntu-latest
     steps:
@@ -73,14 +80,17 @@ jobs:
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
         toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+      with:
+        workspaces: jans-cedarling
     - name: Run benchmarks
       working-directory: jans-cedarling
-      run: |
-        cargo bench --profile release
+      run: cargo bench --profile release
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
-      run: |
-        python3 scripts/check_benchmarks.py
+      run: python3 scripts/check_benchmarks.py
+
   wasm_tests:
     runs-on: ubuntu-latest
     steps:
@@ -98,32 +108,31 @@ jobs:
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
         toolchain: stable
+        components: clippy
+        targets: wasm32-unknown-unknown
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+      with:
+        workspaces: jans-cedarling
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
         curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
         wasm-pack --version
 
-    - name: Clean project
-      working-directory: jans-cedarling
-      run: cargo clean
-
     - name: Run WASM tests using chrome
       working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: |
-        wasm-pack test --headless --chrome
+      run: wasm-pack test --headless --chrome
 
     - name: Run WASM tests using firefox
       working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: |
-        wasm-pack test --headless --firefox
+      run: wasm-pack test --headless --firefox
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
-      run: |
-        rustup component add clippy
-        rustup target add wasm32-unknown-unknown
-        cargo clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
+      run: cargo clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
+
   python_tests:
     runs-on: ubuntu-latest
     strategy:
@@ -145,8 +154,8 @@ jobs:
         python3 -m pip install tox
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
-      run: |
-        tox
+      run: tox
+
   golang_tests:
     runs-on: ubuntu-latest
     steps:
@@ -159,20 +168,22 @@ jobs:
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
         toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+      with:
+        workspaces: jans-cedarling
     - name: Install Golang dependencies
       uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
           go-version: '1.24'
-    - name: Run build rust artifacts
+    - name: Build Rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
-        rustup component add clippy
         cargo build -r -p cedarling_go
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
       working-directory: jans-cedarling/bindings/cedarling_go
-      run: |
-        go mod download && go mod tidy
+      run: go mod download && go mod tidy
     - name: Run golang tests
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |

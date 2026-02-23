@@ -35,14 +35,7 @@ jobs:
       - name: Wait for 25 seconds so that GH can attach issue to the PR if already mentioned by author
         run: sleep 25s
         shell: bash
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-          sudo apt-get update
-          sudo apt-get -y install gh
+
       - name: Add a comment to a PR and create an issue if the PR does not reference an open issue
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -51,8 +44,6 @@ jobs:
           PR_USER: ${{ github.event.pull_request.user.login }}
           REPO_FULL_NAME: ${{ github.event.pull_request.base.repo.full_name }}
         run: |
-          git config --global user.name "mo-auto"
-          git config --global user.email "54212639+mo-auto@users.noreply.github.com"
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
 
           issue_found=""
@@ -101,7 +92,5 @@ jobs:
             printf "%b" "$PR_BODY\nCloses #$ISSUE_NUMBER, " | gh pr edit "$PR_NUMBER" \
               --body-file - \
               --repo "$REPO_FULL_NAME"
-            # Report bad practice
-            curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: It seems like @${{github.actor}} did not follow the structure flow in GH Issue --> PR. Hi @${{github.actor}} . You did not reference an open issue in your [PR](https://github.com/${{github.repository}}/pull/${{ github.event.pull_request.number }}) body before opening it. :x: ","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue","text":"We are not too happy with your PR practices. Always open a detailed issue before opening a PR. Make sure to reference that PR.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
             exit 0
           fi
