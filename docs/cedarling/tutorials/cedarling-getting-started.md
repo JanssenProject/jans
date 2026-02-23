@@ -498,19 +498,19 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
     ```js
     // Push data with optional TTL (5 minutes = 300 seconds)
-    await cedarling.push_data_ctx("user:123", {
+    cedarling.push_data_ctx("user:123", {
       role: ["admin", "editor"],
       country: "US"
     }, 300);
 
     // Get data
-    const value = await cedarling.get_data_ctx("user:123");
+    const value = cedarling.get_data_ctx("user:123");
     if (value) {
       console.log(`User roles: ${value.role}`);
     }
 
     // Get statistics
-    const stats = await cedarling.get_stats_ctx();
+    const stats = cedarling.get_stats_ctx();
     console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
     ```
 
