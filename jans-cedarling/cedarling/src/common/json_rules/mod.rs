@@ -13,4 +13,4 @@ pub use self::rule::*;
 mod rule_applier;
 pub(crate) use self::rule_applier::*;
 
-static ENGINE: LazyLock<DataLogic> = LazyLock::new(|| DataLogic::new());
+static ENGINE: LazyLock<DataLogic> = LazyLock::new(DataLogic::new);

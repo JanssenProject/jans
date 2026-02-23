@@ -400,10 +400,9 @@ pub(crate) fn gen_uuid7() -> Uuid {
     g.generate_or_reset_with_ts(custom_unix_ts_ms as u64)
 }
 
-/// Generates a new UUIDv4 object utilizing the random number generator inside.
+/// Generates a new `UUIDv4` object utilizing the random number generator inside.
 ///
-/// The implementation is based on the uuid7::uuid4 function.
-/// But in this
+/// The implementation is based on the `uuid7::uuid4` function.
 pub(crate) fn gen_uuid4() -> Uuid {
     static RND_UUID4: LazyLock<Mutex<StdRng>> = LazyLock::new(|| Mutex::new(get_std_rng()));
 
