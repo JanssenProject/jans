@@ -60,7 +60,7 @@ class PackageUtils(SetupUtils):
 
         if not Config.installed_instance:
             if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-                if base.os_type == 'debian' and base.os_version in ('12', '13'):
+                if base.os_type == 'debian' and base.os_version == '13':
                     with tempfile.TemporaryDirectory() as tmpdirname:
                         libaio1_url = 'http://ftp.de.debian.org/debian/pool/main/liba/libaio/libaio1_0.3.113-4_amd64.deb'
                         base.download(libaio1_url, os.path.join(tmpdirname, os.path.basename(libaio1_url)))
