@@ -19,6 +19,16 @@
       "psycopg2": "python-psycopg2"
     }
   },
+  "centos 10": {
+    "optional": "",
+    "mandatory": "openssl httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
+    "python": {
+      "requests": "python-requests",
+      "ruamel.yaml": "python-ruamel-yaml",
+      "certifi": "python-certifi",
+      "psycopg2": "python-psycopg2"
+    }
+  },
   "suse 16": {
     "optional": "",
     "mandatory": "apache2 apache2-mod_auth_openidc cron rsyslog openssl postgresql postgresql-server postgresql-contrib",

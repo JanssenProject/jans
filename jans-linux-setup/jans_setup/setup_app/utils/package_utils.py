@@ -74,7 +74,8 @@ class PackageUtils(SetupUtils):
                                         ):
                             base.download(f'https://downloads.mysql.com/archives/get/p/23/file/{deb_fn}', os.path.join(tmpdirname, deb_fn))
                         self.run([install_command.format(os.path.join(tmpdirname, '*.deb'))],  shell=True)
-
+                elif base.os_type in ('centos', 'red') and base.os_version == '10':
+                    package_list[os_type_version]['mandatory'] += ' mysql8.4-server'
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
 
