@@ -58,7 +58,13 @@ zip = "7.0.0"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
 # override getrandom to use `wasm_js` feature
-getrandom = { version = "0.4", features = ["wasm_js"] }
+getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
+getrandom_03 = { package = "getrandom", version = "0.3", features = [
+    "wasm_js",
+] }
+getrandom_04 = { package = "getrandom", version = "0.4", features = [
+    "wasm_js",
+] }
 
 
 [dev-dependencies]
