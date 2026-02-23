@@ -349,12 +349,20 @@ fn test_using_eq_operator() {
     }))
     .unwrap();
 
-    let _ = get_result(None, Some(true), &rule)
-        .expect_err("should throw an error when workload is None because throw Nan");
+    let result =
+        get_result(None, Some(true), &rule).expect("should not throw error with missing variable");
+    assert_eq!(
+        result.decision, true,
+        "Decision should be ALLOW because user is ALLOW"
+    );
 
-    // we should get error in this case, but looks like it is not throwing error because we use OR operator and first condition is true
-    let _ = get_result(Some(true), None, &rule)
-        .expect("we don't expect error because we use OR operator and first condition is true");
+    // when workload is ALLOW and user missing, workload clause true, OR true
+    let result =
+        get_result(Some(true), None, &rule).expect("should not throw error with missing variable");
+    assert_eq!(
+        result.decision, true,
+        "Decision should be ALLOW because workload is ALLOW"
+    );
 }
 
 /// Test with only workload principal.
@@ -424,8 +432,12 @@ fn test_where_compare_op_eq_with_bool() {
     }))
     .unwrap();
 
-    let _ = get_result(Some(true), Some(true), &rule)
-        .expect_err("should fail when comparing using `==` operator with bool");
+    let result = get_result(Some(true), Some(true), &rule)
+        .expect("should not fail when comparing using `==` operator with bool");
+    assert_eq!(
+        result.decision, false,
+        "Decision should be DENY because string 'ALLOW' does not equal true"
+    );
 }
 
 #[test]
