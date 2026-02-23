@@ -7,6 +7,7 @@ exclude = ["bindings/cedarling-java", "custom-lints"]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2.0"
+derive_more="2.1.1"
 sparkv = { path = "sparkv" }
 jsonwebtoken = { version = "10.3.0", features = [
     "rust_crypto",

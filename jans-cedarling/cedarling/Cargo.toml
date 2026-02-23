@@ -29,7 +29,7 @@ jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
 typed-builder = "0.23.2"
 semver = { version = "1.0.23", features = ["serde"] }
-derive_more = { version = "2.1.1", features = [
+derive_more = { workspace = true, features = [
     "deref",
     "from",
     "display",

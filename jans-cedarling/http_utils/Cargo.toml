@@ -10,9 +10,9 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 reqwest = { workspace = true }
-tokio = { version = "1.42.0", features = ["rt"] }
-derive_more = { version = "2.0.1", features = ["display"] }
+tokio = { workspace = true, features = ["rt"] }
+derive_more = { workspace = true, features = ["display"] }
 
 [dev-dependencies]
-mockito = "1.5.0"
-pretty_assertions = "1.4.1"
+mockito = "1.7.2"
+pretty_assertions = "1"
