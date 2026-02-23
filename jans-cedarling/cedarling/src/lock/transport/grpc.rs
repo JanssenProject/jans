@@ -5,7 +5,7 @@
 
 //! gRPC transport implementation for Lock Server communication.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use prost_types::Timestamp;
 use serde::Deserialize;
@@ -19,6 +19,9 @@ use crate::{
     },
     log::{LogWriter, Logger},
 };
+
+/// Duration to wait for each gRPC request
+const GRPC_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// JSON structure matching the serialized log entries
 #[derive(Debug, Deserialize)]
@@ -65,6 +68,7 @@ impl GrpcTransport {
     ) -> Result<Self, TransportError> {
         let channel = Channel::from_shared(endpoint.into())
             .map_err(|_| TransportError::InvalidUri)?
+            .timeout(GRPC_REQUEST_TIMEOUT)
             .connect_lazy();
 
         Ok(Self {

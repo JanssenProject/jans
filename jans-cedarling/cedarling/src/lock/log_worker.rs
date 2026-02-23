@@ -109,7 +109,7 @@ where
                     tokio::select! {
                         () = sleep(WORKER_HTTP_RETRY_DUR) => {},
                         () = cancel_tkn.cancelled() => {
-                            logger.log_any(LockLogEntry::info(
+                            logger.log_any(LockLogEntry::warn(
                                 "cancellation requested during retry; dropping batch"
                             ));
                             break;
