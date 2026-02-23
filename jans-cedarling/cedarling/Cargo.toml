@@ -15,7 +15,11 @@ serde_json = { workspace = true, features = ["raw_value"] }
 serde_yml = "0.0.12"
 thiserror = { workspace = true }
 sparkv = { workspace = true }
-uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }
+uuid7 = { version = "1.6.0", features = [
+    "serde",
+    "uuid",
+    "rand010",
+], default-features = false }
 cedar-policy = { version = "4.9.0", features = ["partial-eval"] }
 cedar-policy-core = "4.9.0"
 base64 = "0.22.1"
@@ -37,7 +41,7 @@ regex = "1.11.1"
 chrono = { workspace = true }
 tokio = { workspace = true, features = ["macros", "time"] }
 tokio-util = { workspace = true }
-rand = "0.8.5"
+rand = "0.10.0"
 smol_str = "0.3.2"
 strum = { version = "0.26", features = ["derive"] }
 datalogic-rs = "2.1.2"
@@ -54,12 +58,13 @@ zip = "7.0.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
+# override getrandom to use `wasm_js` feature
+getrandom = { version = "0.4", features = ["wasm_js"] }
 
 
 [dev-dependencies]
 # is used in testing
 test_utils = { workspace = true }
-rand = "0.8.5"
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = { workspace = true }
 criterion = { version = "0.5.1", features = ["async_tokio"] }

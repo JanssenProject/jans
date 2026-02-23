@@ -11,10 +11,10 @@ use std::str::FromStr;
 use std::sync::LazyLock;
 
 use crate::common::json_rules::ApplyRuleError;
+use crate::log::gen_uuid4;
 use cedar_policy::{Decision, EntityUid, Response};
 use serde_json::json;
 use test_utils::assert_eq;
-use uuid7::uuid4;
 
 use crate::{AuthorizeResult, JsonRule};
 
@@ -78,7 +78,7 @@ fn get_result(
         workload_response,
         person_response,
         // just randomly generated UUID
-        uuid4(),
+        gen_uuid4(),
     )
 }
 
@@ -456,9 +456,14 @@ fn test_with_multiple_principals() {
         ),
     ]);
 
-    let result =
-        AuthorizeResult::new_for_many_principals(&rule, principal_responses, None, None, uuid4())
-            .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
+    let result = AuthorizeResult::new_for_many_principals(
+        &rule,
+        principal_responses,
+        None,
+        None,
+        gen_uuid4(),
+    )
+    .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
 
     assert_eq!(result.decision, true, "Decision should be ALLOW");
 
