@@ -47,13 +47,13 @@ jobs:
           else
             echo "Activated by a PR event"
             issue_or_pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-            gh pr view $issue_or_pull_number --json files --jq '.files.[].path' > changed_files
+            gh pr view "$issue_or_pull_number" --json files --jq '.files.[].path' > changed_files
             changed_files=$(paste -s -d, changed_files)
             operation="pr"
             branch=${{github.base_ref}}
             title=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
           fi
-          python3 ./automation/github-labels/label.py ${issue_or_pull_number} ${changed_files} ${branch} ${operation} ${title}
+          python3 ./automation/github-labels/label.py "${issue_or_pull_number}" "${changed_files}" "${branch}" "${operation}" "${title}"
 
       - name: Add issue to project
         if: github.event_name != 'pull_request'

@@ -241,20 +241,52 @@ jobs:
         DEPLOYMENTS=$(kubectl get deploy -n jans -o jsonpath='{.items[*].metadata.name}')
         for deploy in $DEPLOYMENTS; do
           echo "Waiting for $deploy..."
-          kubectl -n jans wait --for=condition=available --timeout=600s "deploy/$deploy" || echo "WARNING: $deploy not ready"
+          kubectl -n jans wait --for=condition=available --timeout=600s "deploy/$deploy" || { echo "FATAL: $deploy not ready"; exit 1; }
         done
 
     - name: Verify endpoints
       run: |
         echo "Testing openid-configuration endpoint..."
-        curl -sk "https://${JANS_FQDN}/.well-known/openid-configuration" | head -c 500
-        echo ""
+        HTTP_STATUS=$(curl -sk -o /tmp/openid-response.json -w "%{http_code}" "https://${JANS_FQDN}/.well-known/openid-configuration")
+        if [[ "$HTTP_STATUS" != "200" ]]; then
+          echo "FATAL: openid-configuration returned HTTP $HTTP_STATUS"
+          cat /tmp/openid-response.json 2>/dev/null || true
+          exit 1
+        fi
+        if ! jq -e '.issuer' /tmp/openid-response.json > /dev/null 2>&1; then
+          echo "FATAL: openid-configuration response missing 'issuer' key"
+          cat /tmp/openid-response.json
+          exit 1
+        fi
+        echo "openid-configuration OK (issuer: $(jq -r '.issuer' /tmp/openid-response.json))"
+
         echo "Testing scim-configuration endpoint..."
-        curl -sk "https://${JANS_FQDN}/.well-known/scim-configuration" | head -c 500
-        echo ""
+        HTTP_STATUS=$(curl -sk -o /tmp/scim-response.json -w "%{http_code}" "https://${JANS_FQDN}/.well-known/scim-configuration")
+        if [[ "$HTTP_STATUS" != "200" ]]; then
+          echo "FATAL: scim-configuration returned HTTP $HTTP_STATUS"
+          cat /tmp/scim-response.json 2>/dev/null || true
+          exit 1
+        fi
+        if ! jq -e '.' /tmp/scim-response.json > /dev/null 2>&1; then
+          echo "FATAL: scim-configuration response is not valid JSON"
+          cat /tmp/scim-response.json
+          exit 1
+        fi
+        echo "scim-configuration OK"
+
         echo "Testing fido2-configuration endpoint..."
-        curl -sk "https://${JANS_FQDN}/.well-known/fido2-configuration" | head -c 500
-        echo ""
+        HTTP_STATUS=$(curl -sk -o /tmp/fido2-response.json -w "%{http_code}" "https://${JANS_FQDN}/.well-known/fido2-configuration")
+        if [[ "$HTTP_STATUS" != "200" ]]; then
+          echo "FATAL: fido2-configuration returned HTTP $HTTP_STATUS"
+          cat /tmp/fido2-response.json 2>/dev/null || true
+          exit 1
+        fi
+        if ! jq -e '.' /tmp/fido2-response.json > /dev/null 2>&1; then
+          echo "FATAL: fido2-configuration response is not valid JSON"
+          cat /tmp/fido2-response.json
+          exit 1
+        fi
+        echo "fido2-configuration OK"
 
     - name: Extract credentials and create test client
       id: credentials
@@ -358,9 +390,9 @@ jobs:
           exit 0
         fi
 
-        PASSED=$(grep -c '"Test":.*"Action":"pass"' "$RESULTS_FILE" 2>/dev/null || echo 0)
-        FAILED=$(grep -c '"Test":.*"Action":"fail"' "$RESULTS_FILE" 2>/dev/null || echo 0)
-        SKIPPED=$(grep -c '"Test":.*"Action":"skip"' "$RESULTS_FILE" 2>/dev/null || echo 0)
+        PASSED=$(jq -s '[.[] | select(.Test != null and .Action == "pass")] | length' "$RESULTS_FILE")
+        FAILED=$(jq -s '[.[] | select(.Test != null and .Action == "fail")] | length' "$RESULTS_FILE")
+        SKIPPED=$(jq -s '[.[] | select(.Test != null and .Action == "skip")] | length' "$RESULTS_FILE")
         TOTAL=$((PASSED + FAILED + SKIPPED))
 
         FAILED_TESTS=$(jq -r 'select(.Test != null and .Action == "fail") | .Test' "$RESULTS_FILE" 2>/dev/null | sort -u)

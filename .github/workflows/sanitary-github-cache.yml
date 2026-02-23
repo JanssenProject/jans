@@ -5,6 +5,7 @@ on:
       - closed
   workflow_dispatch:
 permissions:
+  actions: write
   contents: read
 jobs:
   cleanup:
@@ -21,13 +22,13 @@ jobs:
           BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
 
           echo "Fetching list of cache keys"
-          cacheKeysForPR=$(gh cache list -R $REPO -B $BRANCH | cut -f 1)
+          cacheKeysForPR=$(gh cache list -R "$REPO" --ref "$BRANCH" | cut -f 1)
 
           set +e
           echo "Deleting caches..."
           for cacheKey in $cacheKeysForPR
           do
-              gh cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+              gh cache delete "$cacheKey" -R "$REPO"
           done
           echo "Done"
         env:

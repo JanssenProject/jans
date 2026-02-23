@@ -30,8 +30,9 @@ jobs:
       - name: Check commit message
         continue-on-error: false
         id: check_message
+        env:
+          PULL_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          PULL_NUMBER=${{ github.event.pull_request.number }}
           echo "Parsing commits from PR $PULL_NUMBER"
           MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq -r '.commits[].messageHeadline' | grep "^docs" || echo "")
           echo "$MESSAGE"
@@ -63,8 +64,9 @@ jobs:
 
       - name: Check if docs changed
         id: check
+        env:
+          PULL_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          PULL_NUMBER=${{ github.event.pull_request.number }}
           DOCS_FILES=$(gh pr view "$PULL_NUMBER" --repo "${{ github.repository }}" --json files --jq '.files.[].path' | grep '^docs/' || echo "")
           if [[ -n "$DOCS_FILES" ]]; then
             echo "docs_changed=true" >> $GITHUB_OUTPUT
@@ -76,6 +78,8 @@ jobs:
     needs: detect_docs_changes
     if: needs.detect_docs_changes.outputs.docs_changed == 'true'
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
@@ -88,18 +92,18 @@ jobs:
           fetch-depth: 0
 
       - name: Auto-merge inhouse doc prs
+        env:
+          PULL_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-          PULL_NUMBER=${{ github.event.pull_request.number }}
-          NUMBER_OF_FOLDERS_CHANGED=$(gh pr view $PULL_NUMBER --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
+          NUMBER_OF_FOLDERS_CHANGED=$(gh pr view "$PULL_NUMBER" --repo "${GITHUB_REPOSITORY}" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
           echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"
           IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/${{ github.repository_owner }}/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
           echo "checking if ${{ github.actor }} belongs to the ${{ github.repository_owner }}. Found $IS_USER_ORG_MEMBER."
           if [[ $NUMBER_OF_FOLDERS_CHANGED == "1" ]] && [[ ! -z "$IS_USER_ORG_MEMBER" ]]; then
             echo "Approving PR $PULL_NUMBER"
-            gh pr review --approve $PULL_NUMBER
+            gh pr review --approve "$PULL_NUMBER"
             echo "Merging PR $PULL_NUMBER"
-            gh pr merge --squash --auto $PULL_NUMBER
+            gh pr merge --squash --auto "$PULL_NUMBER"
           else
             echo "Bot will not merge this as it does not meet the requirements."
             echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."

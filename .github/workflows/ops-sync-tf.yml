@@ -43,6 +43,8 @@ jobs:
         SPLIT_BRANCH="terraform-split"
         git subtree split --prefix=terraform-provider-jans -b "$SPLIT_BRANCH"
 
-        DOWNSTREAM="https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/terraform-provider-jans.git"
+        DOWNSTREAM="https://github.com/JanssenProject/terraform-provider-jans.git"
         git remote add downstream "$DOWNSTREAM"
-        git push downstream "${SPLIT_BRANCH}:main" --force
+        git -c http.extraheader="AUTHORIZATION: bearer ${TOKEN}" push downstream "${SPLIT_BRANCH}:main" --force-with-lease
+      env:
+        TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}

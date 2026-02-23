@@ -38,13 +38,13 @@ jobs:
 
       - name: Add a comment to a PR and create an issue if the PR does not reference an open issue
         env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_USER: ${{ github.event.pull_request.user.login }}
           REPO_FULL_NAME: ${{ github.event.pull_request.base.repo.full_name }}
         run: |
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
 
           issue_found=""
 
@@ -78,7 +78,7 @@ jobs:
             fi
 
             echo "Creating a comment..."
-            printf "%b" "Error: Hi @$PR_USER, You did not reference an open issue in your [PR]($PR_NUMBER). I attempted to create an [issue](#$ISSUE_NUMBER) for you.\
+            printf "%s" "Error: Hi @$PR_USER, You did not reference an open issue in your [PR]($PR_NUMBER). I attempted to create an [issue](#$ISSUE_NUMBER) for you.\
               \n Please update that [issues'](#$ISSUE_NUMBER) title and body and make sure I correctly referenced it in the above PRs body." \
               | gh issue comment "$PR_NUMBER" \
               --body-file - \
@@ -89,7 +89,7 @@ jobs:
             fi
 
             echo "Editing PR $PR_NUMBER..."
-            printf "%b" "$PR_BODY\nCloses #$ISSUE_NUMBER, " | gh pr edit "$PR_NUMBER" \
+            printf "%s" "$PR_BODY\nCloses #$ISSUE_NUMBER, " | gh pr edit "$PR_NUMBER" \
               --body-file - \
               --repo "$REPO_FULL_NAME"
             exit 0

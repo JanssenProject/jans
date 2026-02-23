@@ -95,12 +95,14 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   docker:
     permissions:
       packages: write
       id-token: write
+      pull-requests: read
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -127,6 +129,8 @@ jobs:
             jans-cedarling
       - name: Check docker directories that changed
         id: build_docker_image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILD=true
           ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar"
@@ -151,14 +155,32 @@ jobs:
               [[ "${{ inputs.shibboleth }}" == "true" ]] && SELECTED="$SELECTED shibboleth"
               [[ "${{ inputs.cedarling_flask_sidecar }}" == "true" ]] && SELECTED="$SELECTED cedarling-flask-sidecar"
             fi
-            if [[ "$SELECTED" =~ "${{ matrix.docker-images }}" ]]; then
+            MATCH=false
+            for svc in $SELECTED; do
+              if [[ "$svc" == "${{ matrix.docker-images }}" ]]; then
+                MATCH=true
+                break
+              fi
+            done
+            if [[ "$MATCH" == "true" ]]; then
               echo "Image ${{ matrix.docker-images }} selected for build"
               echo "build=${BUILD}" >> $GITHUB_OUTPUT
             fi
           else
             pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-            DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$ALL_SERVICES")
-            if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
+            if [[ -z "$pull_number" || "$pull_number" == "null" ]]; then
+              DIRECTORIES_CHANGED="$ALL_SERVICES"
+            else
+              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$ALL_SERVICES")
+            fi
+            MATCH=false
+            for dir in $DIRECTORIES_CHANGED; do
+              if [[ "$dir" == "docker-jans-${{ matrix.docker-images }}" || "$dir" == "${{ matrix.docker-images }}" ]]; then
+                MATCH=true
+                break
+              fi
+            done
+            if [[ "$MATCH" == "true" ]]; then
               echo "A change in this images directory has occurred"
               echo "build=${BUILD}" >> $GITHUB_OUTPUT
             fi

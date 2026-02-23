@@ -184,7 +184,7 @@ jobs:
         overwrite: true
     - name: Upload cosign bundle to release
       id: upload_cosign_bundle
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/cosign.bundle
@@ -522,8 +522,13 @@ jobs:
         fi
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        WHL="cedarling_python-${TAG}-cp311-cp311-manylinux_2_34_x86_64.whl"
-        cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}" || echo "Failed to sign"
+        WHLS=(*.whl)
+        if [ "${#WHLS[@]}" -ne 1 ]; then
+          echo "Expected exactly one .whl file, found ${#WHLS[@]}: ${WHLS[*]}"
+          exit 1
+        fi
+        WHL="${WHLS[0]}"
+        cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.bundle
 

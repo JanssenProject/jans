@@ -92,14 +92,20 @@ jobs:
               fi
             done
           else
-            git fetch origin "${{ github.event.before }}" --depth=1
-            CHANGED_DIRS=$(git diff --name-only "${{ github.event.before }}" "$GITHUB_SHA" | cut -d/ -f1 | sort -u)
-            CHANGED_MODULES=""
-            for mod in $ALL_MODULES; do
-              if echo "$CHANGED_DIRS" | grep -qx "$mod"; then
-                CHANGED_MODULES="$CHANGED_MODULES $mod"
-              fi
-            done
+            BEFORE_SHA="${{ github.event.before }}"
+            if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BEFORE_SHA" ]; then
+              echo "Null SHA detected (force push or new branch). Scanning all modules."
+              CHANGED_MODULES="$ALL_MODULES"
+            else
+              git fetch origin "$BEFORE_SHA" --depth=1
+              CHANGED_DIRS=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" | cut -d/ -f1 | sort -u)
+              CHANGED_MODULES=""
+              for mod in $ALL_MODULES; do
+                if echo "$CHANGED_DIRS" | grep -qx "$mod"; then
+                  CHANGED_MODULES="$CHANGED_MODULES $mod"
+                fi
+              done
+            fi
           fi
 
           CHANGED_MODULES=$(echo "$CHANGED_MODULES" | xargs)
