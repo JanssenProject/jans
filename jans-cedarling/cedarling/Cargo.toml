@@ -53,7 +53,7 @@ ahash = { version = "0.8.12", default-features = false, features = ["no-rng"] }
 vfs = "0.12"
 hex = "0.4.3"
 sha2 = "0.10.8"
-zip = "7.0.0"
+zip = "8.1.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
