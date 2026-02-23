@@ -730,11 +730,13 @@ paths:
           required: true
           schema:
             type: string
+          description: Start time (ISO 8601, UTC).
         - name: endTime
           in: query
           required: true
           schema:
             type: string
+          description: End time (ISO 8601, UTC).
       responses:
         200:
           description: Summary statistics.
@@ -761,11 +763,13 @@ paths:
           required: true
           schema:
             type: string
+          description: Start time (ISO 8601, UTC).
         - name: endTime
           in: query
           required: true
           schema:
             type: string
+          description: End time (ISO 8601, UTC).
       responses:
         200:
           description: Adoption analytics.
@@ -792,19 +796,20 @@ paths:
           required: true
           schema:
             type: string
+          description: Start time (ISO 8601, UTC).
         - name: endTime
           in: query
           required: true
           schema:
             type: string
+          description: End time (ISO 8601, UTC).
       responses:
         200:
           description: Performance analytics.
           content:
             application/json:
               schema:
-                type: object
-                description: Contains registration/authentication avg/min/max durations (milliseconds).
+                $ref: '#/components/schemas/MetricsPerformance'
         400:
           $ref: '#/components/responses/InvalidRequest'
         403:
@@ -824,18 +829,20 @@ paths:
           required: true
           schema:
             type: string
+          description: Start time (ISO 8601, UTC).
         - name: endTime
           in: query
           required: true
           schema:
             type: string
+          description: End time (ISO 8601, UTC).
       responses:
         200:
           description: Device analytics.
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/MetricsDeviceAnalytics'
         400:
           $ref: '#/components/responses/InvalidRequest'
         403:
@@ -855,18 +862,20 @@ paths:
           required: true
           schema:
             type: string
+          description: Start time (ISO 8601, UTC).
         - name: endTime
           in: query
           required: true
           schema:
             type: string
+          description: End time (ISO 8601, UTC).
       responses:
         200:
           description: Error analytics.
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/MetricsErrorAnalytics'
         400:
           $ref: '#/components/responses/InvalidRequest'
         403:
@@ -896,18 +905,20 @@ paths:
           required: true
           schema:
             type: string
+          description: Start time (ISO 8601, UTC).
         - name: endTime
           in: query
           required: true
           schema:
             type: string
+          description: End time (ISO 8601, UTC).
       responses:
         200:
           description: Trend analysis.
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/MetricsTrends'
         400:
           $ref: '#/components/responses/InvalidRequest'
         403:
@@ -947,7 +958,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/MetricsPeriodComparison'
         400:
           $ref: '#/components/responses/InvalidRequest'
         403:
@@ -1067,18 +1078,21 @@ components:
           description: User internal ID (inum).
         username:
           type: string
+          description: Human-readable username at time of operation; use userId for stable tracking.
         operationType:
           type: string
           enum:
             - REGISTRATION
             - AUTHENTICATION
             - FALLBACK
+          description: REGISTRATION (passkey enrollment), AUTHENTICATION (sign-in), or FALLBACK (alternative method).
         status:
           type: string
           enum:
             - SUCCESS
             - FAILURE
             - ATTEMPT
+          description: ATTEMPT (started), SUCCESS (completed), or FAILURE (completed with error).
         durationMs:
           type: integer
           description: Operation duration in milliseconds.
@@ -1126,34 +1140,45 @@ components:
         startTime:
           type: integer
           format: int64
+          description: Period start in milliseconds since epoch (UTC), inclusive.
         endTime:
           type: integer
           format: int64
+          description: Period end in milliseconds since epoch (UTC), exclusive.
         period:
           type: string
           description: Period identifier (e.g. 2026-01-01-12 for hour, 2026-W07 for week).
         uniqueUsers:
           type: integer
+          description: Count of distinct users with activity in this period.
         registrationAttempts:
           type: integer
+          description: Total registration operations (SUCCESS or FAILURE) in this period.
         registrationSuccesses:
           type: integer
+          description: Successful registrations in this period.
         registrationFailures:
           type: integer
+          description: Failed registrations in this period.
         registrationSuccessRate:
           type: number
           format: double
+          description: registrationSuccesses / registrationAttempts (0.0–1.0).
         registrationAvgDuration:
           type: number
           description: Milliseconds.
         authenticationAttempts:
           type: integer
+          description: Total authentication operations (SUCCESS or FAILURE) in this period.
         authenticationSuccesses:
           type: integer
+          description: Successful authentications in this period.
         authenticationFailures:
           type: integer
+          description: Failed authentications in this period.
         authenticationSuccessRate:
           type: number
+          description: authenticationSuccesses / authenticationAttempts (0.0–1.0).
         authenticationAvgDuration:
           type: number
           description: Milliseconds.
@@ -1173,16 +1198,22 @@ components:
       properties:
         totalRegistrations:
           type: integer
+          description: Total registration operations across all periods in the range.
         totalAuthentications:
           type: integer
+          description: Total authentication operations across all periods in the range.
         totalOperations:
           type: integer
+          description: Sum of totalRegistrations and totalAuthentications.
         totalFallbacks:
           type: integer
+          description: Count of fallback events (user chose alternative to passkey) in the range.
         avgRegistrationSuccessRate:
           type: number
+          description: Average of registration success rates across periods (0.0–1.0).
         avgAuthenticationSuccessRate:
           type: number
+          description: Average of authentication success rates across periods (0.0–1.0).
     MetricsAdoption:
       type: object
       description: User adoption metrics (new users, returning users, adoption rate) for the given time range.
@@ -1196,41 +1227,148 @@ components:
         adoptionRate:
           type: number
           description: newUsers / totalUniqueUsers (0.0–1.0).
+    MetricsPerformance:
+      type: object
+      description: Performance statistics (avg/min/max durations in milliseconds for registration and authentication).
+      properties:
+        registrationAvgDuration:
+          type: number
+          description: Average registration duration (ms).
+        registrationMinDuration:
+          type: integer
+          description: Minimum registration duration (ms).
+        registrationMaxDuration:
+          type: integer
+          description: Maximum registration duration (ms).
+        authenticationAvgDuration:
+          type: number
+          description: Average authentication duration (ms).
+        authenticationMinDuration:
+          type: integer
+          description: Minimum authentication duration (ms).
+        authenticationMaxDuration:
+          type: integer
+          description: Maximum authentication duration (ms).
+    MetricsDeviceAnalytics:
+      type: object
+      description: Device analytics (device types, OS, browsers, authenticator types).
+      properties:
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by device type (e.g. desktop, mobile).
+        authenticatorTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by authenticator type (platform, cross-platform).
+        browsers:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by browser.
+        operatingSystems:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by operating system.
+    MetricsErrorAnalytics:
+      type: object
+      description: Error analysis (categories, top errors, success/failure rates).
+      properties:
+        errorCategories:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of errors by category.
+        topErrors:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of errors by message.
+        successRate:
+          type: number
+          description: Ratio of successful operations (0.0–1.0).
+        failureRate:
+          type: number
+          description: Ratio of failed operations (0.0–1.0).
+    MetricsTrends:
+      type: object
+      description: Trend analysis over time with data points, growth rate, direction, and insights.
+      properties:
+        dataPoints:
+          type: array
+          description: One data point per aggregation period (timestamp, period, metrics).
+        growthRate:
+          type: number
+          description: Overall growth rate (e.g. 0.15 = 15% growth).
+        trendDirection:
+          type: string
+          description: INCREASING, DECREASING, or STABLE.
+        insights:
+          type: object
+          description: Peak period, peak operations, average operations.
+    MetricsPeriodComparison:
+      type: object
+      description: Period-over-period comparison (current vs previous period metrics and percentage change).
+      properties:
+        currentPeriod:
+          type: object
+          description: Summary for the most recent period(s).
+        previousPeriod:
+          type: object
+          description: Summary for the preceding period(s).
+        comparison:
+          type: object
+          description: Percentage changes between periods (e.g. totalOperationsChange).
     MetricsConfig:
       type: object
+      description: Current metrics configuration as seen by the server.
       properties:
         metricsEnabled:
           type: boolean
+          description: Whether metrics collection is enabled.
         aggregationEnabled:
           type: boolean
+          description: Whether automatic aggregation jobs are enabled.
         retentionDays:
           type: integer
+          description: Number of days metrics data is retained before cleanup.
         deviceInfoCollection:
           type: boolean
+          description: Whether device info (browser, OS) is collected.
         errorCategorization:
           type: boolean
+          description: Whether errors are categorized for analytics.
         performanceMetrics:
           type: boolean
+          description: Whether durations are tracked.
         supportedAggregationTypes:
           type: array
           items:
             type: string
           example: ["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]
+          description: List of available aggregation granularities.
     MetricsHealth:
       type: object
+      description: Health status of the metrics service (200 = UP, 503 = DOWN).
       properties:
         status:
           type: string
           enum:
             - UP
             - DOWN
+          description: Overall health; UP returns 200, DOWN returns 503.
         metricsEnabled:
           type: boolean
+          description: Whether metrics collection is enabled in configuration.
         aggregationEnabled:
           type: boolean
+          description: Whether automatic aggregation is enabled.
         timestamp:
           type: string
-          description: ISO format (UTC).
+          description: Current server time (ISO format, UTC).
         serviceAvailable:
           type: boolean
           description: True if metrics backend (e.g. DB) is reachable.
