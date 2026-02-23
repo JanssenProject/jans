@@ -42,7 +42,7 @@ tokio = { workspace = true, features = ["macros", "time"] }
 tokio-util = { workspace = true }
 rand = "0.10.0"
 smol_str = "0.3.2"
-strum = { version = "0.26", features = ["derive"] }
+strum = { version = "0.28.0", features = ["derive"] }
 datalogic-rs = "2.1.2"
 flate2 = "1.1.1"
 async-trait = "0.1.88"
