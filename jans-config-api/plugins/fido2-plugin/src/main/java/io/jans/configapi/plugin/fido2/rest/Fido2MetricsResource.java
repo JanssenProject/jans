@@ -1,6 +1,7 @@
 package io.jans.configapi.plugin.fido2.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
+import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -41,11 +42,11 @@ public class Fido2MetricsResource extends BaseResource {
     @Inject
     Fido2MetricsService fido2MetricsService;
 
-    private class Fido2RegistrationEntryPagedResult extends PagedResult<Fido2RegistrationEntry> {
+    private class Fido2MetricsEntryPagedResult extends PagedResult<Fido2MetricsEntry> {
     };
 
     /**
-     * Retrieve a paged list of FIDO2 registration entries matching the provided search criteria.
+     * Retrieve a paged list of FIDO2 metrics entries matching the provided search criteria.
      *
      * @param limit          maximum number of results to return
      * @param pattern        search pattern to match entry attributes
@@ -53,35 +54,31 @@ public class Fido2MetricsResource extends BaseResource {
      * @param sortBy         attribute used to order results
      * @param sortOrder      order direction applied to {@code sortBy}; allowed values are "ascending" and "descending"
      * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. {@code mail=abc@mail.com,jansStatus=true})
-     * @return               a Response containing a Fido2RegistrationEntryPagedResult with the matching entries
+     * @return               a Response containing a Fido2MetricsEntryPagedResult with the matching entries
      */
-    @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "search-fido2-registration-data", tags = {
-            "Fido2 - Registration" }, security = {
+    @Operation(summary = "Get a list of Fido2MetricsEntry.", description = "Get a list of Fido2MetricsEntry.", operationId = "search-metrics-data", tags = {
+            "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getFido2RegistrationEntry(
+   // @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+      //      Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                   // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getFido2MetricsEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Data whose value will be used to order the returned response") @DefaultValue(Constants.JANSID) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "mail=abc@mail.com,jansStatus=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
+            @Parameter(description = "Start date/time for the log entries report. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "start_date") String startDate,
+            @Parameter(description = "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "end_date") String endDate){
 
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "Fido2RegistrationEntry search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
-                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                    escapeLog(sortOrder), escapeLog(fieldValuePair));
+                    "Fido2MetricsEntry search param - limit:{}, startDate:{}, endDate:{}",
+                    escapeLog(limit), escapeLog(startDate), escapeLog(endDate));
         }
 
        // SearchRequest searchReq = createSearchRequest(
@@ -92,28 +89,28 @@ public class Fido2MetricsResource extends BaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
     
-    private Fido2RegistrationEntryPagedResult doSearch(SearchRequest searchReq) {
+    private Fido2MetricsEntryPagedResult doSearch(SearchRequest searchReq) {
         if (logger.isInfoEnabled()) {
-            logger.info("User search params - searchReq:{}", escapeLog(searchReq));
+            logger.info("Fido2 Metrics search params - searchReq:{}", escapeLog(searchReq));
         }
 
         //PagedResult<Fido2RegistrationEntry> pagedResult = fido2RegistrationService.searchFido2Registration(searchReq);
-        PagedResult<Fido2RegistrationEntry> pagedResult =null;
+        PagedResult<Fido2MetricsEntry> pagedResult =null;
         if (logger.isDebugEnabled()) {
             logger.debug("Fido2RegistrationEntry  - pagedResult:{}", pagedResult);
         }
 
-        Fido2RegistrationEntryPagedResult pagedFido2Registration = new Fido2RegistrationEntryPagedResult();
+        Fido2MetricsEntryPagedResult pagedFido2MetricsEntry = new Fido2MetricsEntryPagedResult();
         if (pagedResult != null) {
             logger.debug("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-            pagedFido2Registration.setStart(pagedResult.getStart());
-            pagedFido2Registration.setEntriesCount(pagedResult.getEntriesCount());
-            pagedFido2Registration.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-            pagedFido2Registration.setEntries(pagedResult.getEntries());
+            pagedFido2MetricsEntry.setStart(pagedResult.getStart());
+            pagedFido2MetricsEntry.setEntriesCount(pagedResult.getEntriesCount());
+            pagedFido2MetricsEntry.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+            pagedFido2MetricsEntry.setEntries(pagedResult.getEntries());
         }
 
-        logger.info("Fido2RegistrationEntry pagedFido2Registration:{}", pagedFido2Registration);
-        return pagedFido2Registration;
+        logger.info("Fido2MetricsEntry pagedFido2MetricsEntry:{}", pagedFido2MetricsEntry);
+        return pagedFido2MetricsEntry;
 
     }
 }

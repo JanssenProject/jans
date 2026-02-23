@@ -42,6 +42,7 @@ public class ApiApplication extends Application {
 
         classes.add(Fido2ConfigResource.class);
         classes.add(Fido2RegistrationResource.class);
+        classes.add(Fido2MetricsResource.class);
         
         return classes;
     }

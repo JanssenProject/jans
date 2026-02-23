@@ -79,7 +79,7 @@ paths:
       - Fido2 - Registration
       summary: Get a list of Fido2RegistrationEntry.
       description: Get a list of Fido2RegistrationEntry.
-      operationId: search-fido2-registration-data_1
+      operationId: search-fido2-registration-data
       parameters:
       - name: limit
         in: query
@@ -669,6 +669,99 @@ components:
           type: array
           items:
             type: string
+    DeviceInfo:
+      type: object
+      properties:
+        browser:
+          type: string
+        browser_version:
+          type: string
+        os:
+          type: string
+        os_version:
+          type: string
+        device_type:
+          type: string
+        platform:
+          type: string
+        user_agent:
+          type: string
+    Fido2MetricsEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        id:
+          type: string
+        metricType:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        userId:
+          type: string
+        username:
+          type: string
+        operationType:
+          type: string
+        status:
+          type: string
+        durationMs:
+          type: integer
+          format: int64
+        authenticatorType:
+          type: string
+        deviceInfo:
+          $ref: "#/components/schemas/DeviceInfo"
+        errorReason:
+          type: string
+        errorCategory:
+          type: string
+        fallbackMethod:
+          type: string
+        fallbackReason:
+          type: string
+        userAgent:
+          type: string
+        ipAddress:
+          type: string
+        sessionId:
+          type: string
+        nodeId:
+          type: string
+        applicationType:
+          type: string
+        additionalData:
+          type: object
+          additionalProperties:
+            type: object
+        baseDn:
+          type: string
+    Fido2MetricsEntryPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Fido2MetricsEntry"
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
     Fido2DeviceData:
       type: object
       properties:
@@ -846,15 +939,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Fido2RegistrationEntry"
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        description:
-          type: string
   securitySchemes:
     oauth2:
       type: oauth2
