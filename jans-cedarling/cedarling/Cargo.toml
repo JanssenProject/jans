@@ -72,13 +72,13 @@ getrandom_04 = { package = "getrandom", version = "0.4", features = [
 test_utils = { workspace = true }
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = { workspace = true }
-criterion = { version = "0.5.1", features = ["async_tokio"] }
+criterion = { version = "0.8.2", features = ["async_tokio"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 stats_alloc = "0.1.10"
 tempfile = "3.8"
 
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "windows")))'.dev-dependencies]
-pprof = { version = "0.14.0", features = ["flamegraph"] }
+pprof = { version = "0.15.0", features = ["flamegraph"] }
 
 [lints]
 workspace = true
