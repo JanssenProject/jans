@@ -21,7 +21,9 @@ pub(crate) fn value_to_expr(
             if let Some(int) = val.as_i64() {
                 RestrictedExpression::new_long(int)
             } else if let Some(float) = val.as_f64() {
-                // Format to 4 decimal places to avoid scientific notation and ensure Cedar compatibility
+                // Format to 4 decimal places to avoid scientific notation and ensure Cedar compatibility.
+                // Cedar allows no more than 4 digits after the decimal separator.
+                // See https://docs.cedarpolicy.com/policies/syntax-operators.html#function-decimal
                 let decimal_str = format!("{float:.4}");
                 RestrictedExpression::new_decimal(decimal_str)
             } else {
