@@ -66,8 +66,9 @@ jobs:
         id: check
         env:
           PULL_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
-          DOCS_FILES=$(gh pr view "$PULL_NUMBER" --repo "${{ github.repository }}" --json files --jq '.files.[].path' | grep '^docs/' || echo "")
+          DOCS_FILES=$(gh pr view "$PULL_NUMBER" --repo "$REPO" --json files --jq '.files.[].path' | grep '^docs/' || echo "")
           if [[ -n "$DOCS_FILES" ]]; then
             echo "docs_changed=true" >> $GITHUB_OUTPUT
           else
@@ -75,7 +76,7 @@ jobs:
           fi
 
   docs:
-    needs: detect_docs_changes
+    needs: [detect_docs_changes, check_pr_for_docs]
     if: needs.detect_docs_changes.outputs.docs_changed == 'true'
     runs-on: ubuntu-latest
     env:
@@ -94,12 +95,17 @@ jobs:
       - name: Auto-merge inhouse doc prs
         env:
           PULL_NUMBER: ${{ github.event.pull_request.number }}
+          ORG_OWNER: ${{ github.repository_owner }}
+          ACTOR: ${{ github.actor }}
         run: |
           NUMBER_OF_FOLDERS_CHANGED=$(gh pr view "$PULL_NUMBER" --repo "${GITHUB_REPOSITORY}" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
           echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"
-          IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/${{ github.repository_owner }}/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
-          echo "checking if ${{ github.actor }} belongs to the ${{ github.repository_owner }}. Found $IS_USER_ORG_MEMBER."
-          if [[ $NUMBER_OF_FOLDERS_CHANGED == "1" ]] && [[ ! -z "$IS_USER_ORG_MEMBER" ]]; then
+          IS_USER_ORG_MEMBER=false
+          if gh api --silent "/orgs/${ORG_OWNER}/members/${ACTOR}" 2>/dev/null; then
+            IS_USER_ORG_MEMBER=true
+          fi
+          echo "checking if ${ACTOR} belongs to ${ORG_OWNER}. Member: $IS_USER_ORG_MEMBER"
+          if [[ $NUMBER_OF_FOLDERS_CHANGED == "1" ]] && [[ "$IS_USER_ORG_MEMBER" == "true" ]]; then
             echo "Approving PR $PULL_NUMBER"
             gh pr review --approve "$PULL_NUMBER"
             echo "Merging PR $PULL_NUMBER"

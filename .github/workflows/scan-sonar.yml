@@ -83,7 +83,6 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             CHANGED_MODULES="$ALL_MODULES"
           elif [ "$GITHUB_BASE_REF" ]; then
-            git fetch origin "$GITHUB_BASE_REF" --depth=1
             CHANGED_DIRS=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" | cut -d/ -f1 | sort -u)
             CHANGED_MODULES=""
             for mod in $ALL_MODULES; do
@@ -97,7 +96,6 @@ jobs:
               echo "Null SHA detected (force push or new branch). Scanning all modules."
               CHANGED_MODULES="$ALL_MODULES"
             else
-              git fetch origin "$BEFORE_SHA" --depth=1
               CHANGED_DIRS=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" | cut -d/ -f1 | sort -u)
               CHANGED_MODULES=""
               for mod in $ALL_MODULES; do
@@ -130,10 +128,9 @@ jobs:
       matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
     env:
       JVM_PROJECTS: "jans-link jans-auth-server jans-lock jans-orm jans-config-api jans-scim jans-core jans-fido2 jans-casa agama jans-shibboleth-idp"
-      NON_JVM_PROJECTS: "jans-linux-setup jans-cli-tui jans-pycloudlib"
     permissions:
         contents: read
-        pull-requests: read
+        pull-requests: write
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
@@ -147,8 +144,9 @@ jobs:
 
       - name: Determine project type
         id: project-type
+        env:
+          MODULE: ${{ matrix.module }}
         run: |
-          MODULE="${{ matrix.module }}"
           if echo "$JVM_PROJECTS" | tr ' ' '\n' | grep -qx "$MODULE"; then
             echo "is_jvm=true" >> "$GITHUB_OUTPUT"
           else
@@ -175,9 +173,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          MODULE: ${{ matrix.module }}
         run: |
-          cd ${{ matrix.module }}
-          case ${{ matrix.module }} in
+          cd "$MODULE"
+          case "$MODULE" in
             "jans-auth-server"|"jans-lock"|"jans-scim"|"jans-config-api")
                   echo "Run Sonar analysis without test execution"
                   mvn -B -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar

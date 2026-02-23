@@ -24,7 +24,7 @@ jobs:
         toolchain: stable
         components: clippy
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
       with:
         workspaces: jans-cedarling
     - name: Run Tests
@@ -42,17 +42,17 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Rust Stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Install Rust Nightly
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9
       with:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
-    - name: Install Rust Stable (for workspace)
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
-      with:
-        toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
       with:
         workspaces: jans-cedarling
     - uses: cargo-bins/cargo-binstall@v1.17.4
@@ -66,7 +66,7 @@ jobs:
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
-        RUSTFLAGS="-Dwarnings" cargo dylint --all --workspace --path custom-lints
+        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --path custom-lints
 
   rust_benchmarks:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
       with:
         toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
       with:
         workspaces: jans-cedarling
     - name: Run benchmarks
@@ -112,7 +112,7 @@ jobs:
         targets: wasm32-unknown-unknown
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
       with:
         workspaces: jans-cedarling
 
@@ -169,7 +169,7 @@ jobs:
       with:
         toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
       with:
         workspaces: jans-cedarling
     - name: Install Golang dependencies

@@ -35,8 +35,9 @@ jobs:
             automation/github-labels
 
       - name: Update labels
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           if [[ "${{github.event_name}}" == "issues" ]]; then
             echo "Activated by an issue event"
             issue_or_pull_number=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
@@ -57,6 +58,7 @@ jobs:
 
       - name: Add issue to project
         if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           gh issue edit $(jq --raw-output .issue.number "$GITHUB_EVENT_PATH") --add-project janssen-issue-dashboard

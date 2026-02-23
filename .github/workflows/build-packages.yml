@@ -409,7 +409,7 @@ jobs:
         
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
-        cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
+        cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.tar.gz *.bundle --clobber || {
           echo "gh release upload failed (assets may already exist), continuing..."
@@ -522,7 +522,9 @@ jobs:
         fi
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
+        shopt -s nullglob
         WHLS=(*.whl)
+        shopt -u nullglob
         if [ "${#WHLS[@]}" -ne 1 ]; then
           echo "Expected exactly one .whl file, found ${#WHLS[@]}: ${WHLS[*]}"
           exit 1
@@ -530,7 +532,7 @@ jobs:
         WHL="${WHLS[0]}"
         cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" *.whl *.bundle
+        gh release upload "${VERSION}" *.whl *.bundle --clobber
 
   build_cedarling_go:
     if: |
@@ -633,9 +635,9 @@ jobs:
               ;;
           esac
   
-          cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE" || echo "Failed to sign $FILE"
+          cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
           if [ -n "$FILE_LIB" ]; then
-            cosign sign-blob --yes --bundle "${FILE_LIB}.bundle" "$FILE_LIB" || echo "Failed to sign $FILE_LIB"
+            cosign sign-blob --yes --bundle "${FILE_LIB}.bundle" "$FILE_LIB"
           fi
   
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
@@ -705,10 +707,10 @@ jobs:
       run: |
         AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
         ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
-        cosign sign-blob --yes --bundle "${AMD64_SO}.bundle" "${AMD64_SO}" || echo "Failed to sign"
-        cosign sign-blob --yes --bundle "${ARM64_SO}.bundle" "${ARM64_SO}" || echo "Failed to sign"
+        cosign sign-blob --yes --bundle "${AMD64_SO}.bundle" "${AMD64_SO}"
+        cosign sign-blob --yes --bundle "${ARM64_SO}.bundle" "${ARM64_SO}"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${{ env.VERSION }}" *.so *.bundle
+        gh release upload "${{ env.VERSION }}" *.so *.bundle --clobber
 
   build_cedarling_uniffi:
     if: |
@@ -750,10 +752,10 @@ jobs:
         cargo build -r -p cedarling_uniffi
         cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
         FILE="libcedarling_uniffi-${TAG}.so"
-        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE" || echo "Failed to sign"
+        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE "${FILE}.bundle"
+        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber
     - name: Build kotlin binding in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
@@ -771,7 +773,7 @@ jobs:
         cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
         zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
-        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE" || echo "Failed to sign"
+        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE "${FILE}.bundle"
+        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber

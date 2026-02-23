@@ -218,6 +218,8 @@ jobs:
           cnSqlDbName: jans
           cnSqlDbUser: ${DB_USER}
         lbIp: ${EXT_IP}
+        nginx-ingress:
+          enabled: ${USE_NGINX_INGRESS}
         gatewayApi:
           enabled: ${USE_GATEWAY_API}
           gatewayClassName: nginx
@@ -320,6 +322,9 @@ jobs:
           -d "client_secret=${JCA_CLIENT_PW}" \
           -d "scope=https://jans.io/oauth/config/openid/clients.write https://jans.io/oauth/config/scopes.readonly")
         ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token // empty')
+        if [[ -n "$ACCESS_TOKEN" ]]; then
+          echo "::add-mask::${ACCESS_TOKEN}"
+        fi
         if [[ -z "$ACCESS_TOKEN" ]]; then
           echo "ERROR: Failed to obtain access token"
           echo "$TOKEN_RESPONSE" | jq . 2>/dev/null || echo "$TOKEN_RESPONSE"

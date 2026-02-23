@@ -157,7 +157,7 @@ jobs:
             fi
             MATCH=false
             for svc in $SELECTED; do
-              if [[ "$svc" == "${{ matrix.docker-images }}" ]]; then
+              if [[ "$svc" == "${{ matrix.docker-images }}" ]] || [[ "$svc" == "docker-jans-${{ matrix.docker-images }}" ]]; then
                 MATCH=true
                 break
               fi
