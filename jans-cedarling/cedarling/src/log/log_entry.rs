@@ -412,8 +412,8 @@ pub(crate) fn gen_uuid4() -> Uuid {
         .expect("RND_UUID4 should be locked")
         .fill_bytes(&mut bytes);
 
-    bytes[6] = 0x40 | (bytes[6] >> 4);
-    bytes[8] = 0x80 | (bytes[8] >> 2);
+    bytes[6] = (bytes[6] & 0x0F) | 0x40;
+    bytes[8] = (bytes[8] & 0x3F) | 0x80;
     Uuid::from(bytes)
 }
 
