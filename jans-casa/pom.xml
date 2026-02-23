@@ -26,7 +26,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.6.3</maven.min-version>
         <weld.version>4.0.3.Final</weld.version>
-        <pf4j.version>3.13.0</pf4j.version>
+        <pf4j.version>3.15.0</pf4j.version>
         <log4j.version>2.25.3</log4j.version>
         <jackson.version>2.21.0</jackson.version>
         <zk.version>10.1.0-jakarta</zk.version>
