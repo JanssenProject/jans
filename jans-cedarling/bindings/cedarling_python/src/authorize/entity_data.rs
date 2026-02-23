@@ -61,10 +61,7 @@ pub struct CedarEntityMapping {
 impl CedarEntityMapping {
     #[new]
     fn new(entity_type: String, id: String) -> Self {
-        Self {
-            entity_type,
-            id,
-        }
+        Self { entity_type, id }
     }
 }
 
@@ -84,7 +81,10 @@ fn get_payload(object: Bound<'_, PyDict>) -> PyResult<EntityDataAttrs> {
 impl EntityData {
     #[new]
     #[pyo3(signature = (cedar_entity_mapping, **kwargs))]
-    fn new(cedar_entity_mapping: CedarEntityMapping, kwargs: Option<Bound<'_, PyDict>>) -> PyResult<Self> {
+    fn new(
+        cedar_entity_mapping: CedarEntityMapping,
+        kwargs: Option<Bound<'_, PyDict>>,
+    ) -> PyResult<Self> {
         let attributes = kwargs
             .map(|dict| get_payload(dict))
             .unwrap_or(Ok(HashMap::new()))?;

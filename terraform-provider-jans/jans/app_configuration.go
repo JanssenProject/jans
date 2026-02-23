@@ -106,6 +106,13 @@ type LockMessageConfig struct {
         IDTokenMessagesChannel string `schema:"id_token_messages_channel" json:"idTokenMessagesChannel"`
 }
 
+// ConnectionServiceConfiguration represents the HTTP connection pool configuration
+type ConnectionServiceConfiguration struct {
+        MaxTotal               int `schema:"max_total" json:"maxTotal"`
+        MaxPerRoute            int `schema:"max_per_route" json:"maxPerRoute"`
+        ValidateAfterInactivity int `schema:"validate_after_inactivity" json:"validateAfterInactivity"`
+}
+
 // AppConfiguration represents the Janssen authorization server
 // configuration properties
 type AppConfiguration struct {
@@ -313,7 +320,6 @@ type AppConfiguration struct {
         DisablePromptCreate                                       bool                                  `schema:"disable_prompt_create" json:"disablePromptCreate"`
         CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
         EnabledOAuthAuditLogging                                  bool                                  `schema:"enabled_oauth_audit_logging" json:"enabledOAuthAuditLogging"`
-        JmsBrokerUriSet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerUriSet"`
         JmsUserName                                               string                                `schema:"jms_user_name" json:"jmsUserName"`
         JmsPassword                                               string                                `schema:"jms_password" json:"jmsPassword"`
         ExternalUriWhiteList                                      []string                              `schema:"external_uri_white_list" json:"externalUriWhiteList"`
@@ -416,6 +422,17 @@ type AppConfiguration struct {
         Fapi                                                      bool                                  `schema:"fapi" json:"fapi"`
         SkipAuthenticationFilterOptionsMethod                     bool                                  `schema:"skip_authentication_filter_options_method" json:"skipAuthenticationFilterOptionsMethod"`
         LockMessageConfig                                         LockMessageConfig                     `schema:"lock_message_config" json:"lockMessageConfig"`
+        IncludeRequestedClaimsInIdToken                           bool                                  `schema:"include_requested_claims_in_id_token" json:"includeRequestedClaimsInIdToken"`
+        ApplyXFrameOptionsHeaderIfUriContainsAny                  []string                              `schema:"apply_x_frame_options_header_if_uri_contains_any" json:"applyXFrameOptionsHeaderIfUriContainsAny"`
+        XframeOptionsHeaderValue                                  string                                `schema:"xframe_options_header_value" json:"xframeOptionsHeaderValue"`
+        AuthorizationChallengeSessionLifetimeInSeconds            int                                   `schema:"authorization_challenge_session_lifetime_in_seconds" json:"authorizationChallengeSessionLifetimeInSeconds"`
+        ConnectionServiceConfiguration                            *ConnectionServiceConfiguration       `schema:"connection_service_configuration" json:"connectionServiceConfiguration,omitempty"`
+        IncludeRefreshTokenLifetimeInTokenResponse                bool                                  `schema:"include_refresh_token_lifetime_in_token_response" json:"includeRefreshTokenLifetimeInTokenResponse"`
+        JmsBrokerURISet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerURISet"`
+        LogoutStatusJwtLifetime                                   int                                   `schema:"logout_status_jwt_lifetime" json:"logoutStatusJwtLifetime"`
+        LogoutStatusJwtSigningAlgValuesSupported                  []string                              `schema:"logout_status_jwt_signing_alg_values_supported" json:"logoutStatusJwtSigningAlgValuesSupported"`
+        RunAllUpdateTokenScripts                                  bool                                  `schema:"run_all_update_token_scripts" json:"runAllUpdateTokenScripts"`
+        SessionIdUserClaimsInAttributes                           []string                              `schema:"session_id_user_claims_in_attributes" json:"sessionIdUserClaimsInAttributes"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

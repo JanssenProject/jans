@@ -182,4 +182,8 @@ public boolean modifyResponse(Object responseAsJsonObject, Object context) {
 
 ## Sample Scripts
 
-- [Access Evaluation Discovery](../../../script-catalog/access_evaluation/AccessEvaluationDiscovery.java)
+### Access Evaluation Discovery Script
+
+```java
+--8<-- "script-catalog/access_evaluation/AccessEvaluationDiscovery.java"
+```

@@ -161,6 +161,9 @@ class PropertiesUtils(SetupUtils):
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
+        if p.get('install_jans_saml'):
+            base.argsp.install_jans_shib = True
+
         if base.as_bool(p.get('loadTestData', False)):
             base.argsp.t = True
 
@@ -350,24 +353,19 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_jans_lock:
             Config.addPostSetupService.append('install_jans_lock')
 
-    def prompt_for_jans_saml(self):
-        if not self.prompt_to_install('install_jans_saml'):
+    def prompt_for_jans_shib(self):
+        if not self.prompt_to_install('install_jans_shib'):
             return
 
-        prompt = self.getPrompt("Install Jans KC?",
-                                            self.getDefaultOption(Config.install_jans_saml)
-                                            )[0].lower()
+        prompt = self.getPrompt("Install Shibboleth IDP?",
+                                self.getDefaultOption(Config.install_jans_shib)
+                            )[0].lower()
 
-        Config.install_jans_saml = prompt == 'y'
-        if Config.installed_instance:
-            if Config.install_jans_saml:
-                Config.addPostSetupService.append('install_jans_saml')
-                if Config.install_config_api and not Config.install_scim_server:
-                    Config.addPostSetupService.append('install_scim_server')
-                    Config.install_scim_server = True
-        else:
-            if Config.install_jans_saml and Config.install_config_api:
-                Config.install_scim_server = True
+        Config.install_jans_shib = prompt == 'y'
+
+        if Config.installed_instance and Config.install_jans_shib:
+            Config.addPostSetupService.append('install_jans_shib')
+
 
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
@@ -634,7 +632,7 @@ class PropertiesUtils(SetupUtils):
             #self.prompt_for_jans_link()
             self.prompt_for_casa()
             self.pompt_for_jans_lock()
-            self.prompt_for_jans_saml()
+            self.prompt_for_jans_shib()
 
 
 

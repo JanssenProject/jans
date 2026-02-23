@@ -62,6 +62,7 @@ pub struct JwtConfig {
 /// The default configuration for Access Tokens, ID Tokens, and Userinfo Tokens
 /// can be easily instantiated via the provided methods.
 #[derive(Debug, Default, PartialEq)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct TokenValidationConfig {
     /// Requires the `iss` claim to be present in the JWT and the scheme
     /// must be `https`.
@@ -82,7 +83,8 @@ pub struct TokenValidationConfig {
 }
 
 impl TokenValidationConfig {
-    /// Collects all the required claims into a HashSet.
+    /// Collects all the required claims into a `HashSet`.
+    #[must_use]
     pub fn required_claims(&self) -> HashSet<Box<str>> {
         let mut req_claims = HashSet::new();
         if self.iss_validation {
@@ -115,6 +117,7 @@ impl TokenValidationConfig {
     /// - `iss` (Issuer)
     /// - `jti` (JWT ID)
     /// - `exp` (Expiration)
+    #[must_use]
     pub fn access_token() -> Self {
         Self {
             iss_validation: true,
@@ -134,6 +137,7 @@ impl TokenValidationConfig {
     /// - `aud` (Audience)
     /// - `sub` (Subject)
     /// - `exp` (Expiration)
+    #[must_use]
     pub fn id_token() -> Self {
         Self {
             iss_validation: true,
@@ -153,6 +157,7 @@ impl TokenValidationConfig {
     /// - `aud` (audience)
     /// - `sub` (subject)
     /// - `exp` (expiration)
+    #[must_use]
     pub fn userinfo_token() -> Self {
         Self {
             iss_validation: true,
@@ -183,6 +188,7 @@ impl Default for JwtConfig {
 
 impl JwtConfig {
     /// Creates a new `JwtConfig` instance with validation turned off for all tokens.
+    #[must_use]
     pub fn new_without_validation() -> Self {
         Self {
             jwks: None,
@@ -195,6 +201,7 @@ impl JwtConfig {
     }
 
     /// Adds all supported algorithms to to `signature_algorithms_supported`.
+    #[must_use]
     pub fn allow_all_algorithms(mut self) -> Self {
         self.signature_algorithms_supported = HashSet::from_iter([
             Algorithm::HS256,

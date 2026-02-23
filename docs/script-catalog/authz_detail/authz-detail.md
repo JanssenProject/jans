@@ -182,4 +182,9 @@ public class AuthzDetail implements AuthzDetailType {
 
 
 ## Sample Scripts
-- [AuthzDetails](../../../script-catalog/authz_detail/AuthzDetail.java)
+
+### Authorization Details Script
+
+```java
+--8<-- "script-catalog/authz_detail/AuthzDetail.java"
+```

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow 
+                          http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+      parent="authn.abstract">
+
+    <action-state id="InitializeJansAuth">
+        <evaluate expression="InitializeJansAuthentication" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="RedirectToJansAuth" />
+    </action-state>
+
+    <action-state id="RedirectToJansAuth">
+        <evaluate expression="RedirectToJans" />
+        <transition to="JansAuthRedirect" />
+    </action-state>
+
+    <view-state id="JansAuthRedirect" view="jans-redirect">
+        <on-render>
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" 
+                      result="requestScope.request"/>
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext)).getSubcontext(T(io.jans.idp.authn.context.JansAuthenticationContext)).getExternalProviderUri()"
+                      result="requestScope.redirectUrl"/>
+        </on-render>
+        <transition on="redirect" to="WaitForCallback" />
+    </view-state>
+
+    <action-state id="WaitForCallback">
+        <on-entry>
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" 
+                      result="flowScope.callbackRequest"/>
+        </on-entry>
+        <evaluate expression="ProcessJansCallback" />
+        <transition on="proceed" to="proceed" />
+        <transition on="AuthenticationException" to="DisplayError" />
+        <transition on="NoCredentials" to="InitializeJansAuth" />
+    </action-state>
+
+    <view-state id="DisplayError" view="error">
+        <on-render>
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext)).getSubcontext(T(io.jans.idp.authn.context.JansAuthenticationContext)).getErrorMessage()"
+                      result="requestScope.errorMessage"/>
+        </on-render>
+        <transition on="retry" to="InitializeJansAuth" />
+        <transition on="cancel" to="InvalidCredentials" />
+    </view-state>
+
+    <bean-import resource="jans-authn-beans.xml" />
+
+</flow>

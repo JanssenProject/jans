@@ -4,8 +4,6 @@
 
 This document lists all OAuth scopes required for the Terraform Provider for Janssen resources and data sources. Configure your OAuth client with these scopes to enable full functionality.
 
-## New Resources & Data Sources (2025-10-13)
-
 ### Session Management
 
 **Data Source: `jans_sessions`**
@@ -32,7 +30,7 @@ This document lists all OAuth scopes required for the Terraform Provider for Jan
 ### SSA Management
 
 **Resource: `jans_ssa_revocation`**
-- Scope: `https://jans.io/oauth/config/ssa.delete`
+- Scope: `https://jans.io/auth/ssa.admin`
 - Purpose: Revoke Software Statement Assertions
 
 ### Statistics
@@ -154,8 +152,9 @@ This document lists all OAuth scopes required for the Terraform Provider for Jan
 ### UMA
 
 **Resource: `jans_uma_resource`**
-- Read: `https://jans.io/oauth/config/uma/resources.readonly`
-- Write: `https://jans.io/oauth/config/uma/resources.write`
+- Read: `https://jans.io/oauth/config/uma.readonly`
+- Write: `https://jans.io/oauth/config/uma.write`
+- Delete: `https://jans.io/oauth/config/uma.delete`
 
 ### Other
 
@@ -213,7 +212,7 @@ For testing only the new session/token/SSA/statistics features:
     "https://jans.io/oauth/jans-auth-server/session.delete",
     "https://jans.io/oauth/config/token.readonly",
     "https://jans.io/oauth/config/token.delete",
-    "https://jans.io/oauth/config/ssa.delete",
+    "https://jans.io/auth/ssa.admin",
     "https://jans.io/oauth/config/stats.readonly"
   ]
 }
@@ -236,7 +235,7 @@ For complete provider functionality, configure all scopes:
     "https://jans.io/oauth/jans-auth-server/session.delete",
     "https://jans.io/oauth/config/token.readonly",
     "https://jans.io/oauth/config/token.delete",
-    "https://jans.io/oauth/config/ssa.delete",
+    "https://jans.io/auth/ssa.admin",
     "https://jans.io/oauth/config/stats.readonly",
     "https://jans.io/oauth/config/openid/clients.readonly",
     "https://jans.io/oauth/config/openid/clients.write",
@@ -270,8 +269,10 @@ For complete provider functionality, configure all scopes:
     "https://jans.io/oauth/config/agama.readonly",
     "https://jans.io/oauth/config/agama.write",
     "https://jans.io/oauth/config/agama.delete",
-    "https://jans.io/oauth/config/uma/resources.readonly",
-    "https://jans.io/oauth/config/uma/resources.write",
+    "https://jans.io/oauth/config/uma.readonly",
+    "https://jans.io/oauth/config/uma.write",
+    "https://jans.io/oauth/config/uma.delete",
+    "https://jans.io/auth/ssa.admin",
     "https://jans.io/oauth/config/acrs.readonly",
     "https://jans.io/oauth/config/acrs.write",
     "https://jans.io/oauth/config/organization.readonly",

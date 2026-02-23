@@ -45,6 +45,7 @@ resource "jans_app_configuration" "global" {
 - `allow_post_logout_redirect_without_validation` (Boolean) Allows post logout redirect without validation for End Session Endpoint.
 - `allow_revoke_for_other_clients` (Boolean) Boolean value ture allow revoke for other clients.
 - `allow_spontaneous_scopes` (Boolean) Specifies whether to allow spontaneous scopes.
+- `apply_x_frame_options_header_if_uri_contains_any` (List of String) List of URIs that should have X-Frame-Options header applied.
 - `archived_jwk_lifetime_in_seconds` (Number) The archived jwk lifetime in seconds.
 - `archived_jwks_uri` (String) Archved URLs of the OP's JSON Web Key Set (JWK) document.
 - `authentication_filters` (Block List) List of authentication filters. (see [below for nested schema](#nestedblock--authentication_filters))
@@ -52,6 +53,7 @@ resource "jans_app_configuration" "global" {
 - `authentication_protection_configuration` (Block List, Max: 1) Authentication Brute Force Protection Configuration. (see [below for nested schema](#nestedblock--authentication_protection_configuration))
 - `authorization_challenge_default_acr` (String) Default ACR for authorization challenge.
 - `authorization_challenge_endpoint` (String) The authorization challenge endpoint URL.
+- `authorization_challenge_session_lifetime_in_seconds` (Number) Lifetime of the authorization challenge session in seconds.
 - `authorization_challenge_should_generate_session` (Boolean) Boolean value specifying whether to generate session for authorization challenge.
 - `authorization_code_lifetime` (Number) The lifetime of the Authorization Code.
 - `authorization_encryption_alg_values_supported` (List of String) A list of the authorization encryption algorithms supported.
@@ -92,6 +94,7 @@ resource "jans_app_configuration" "global" {
 - `client_reg_default_to_code_flow_with_refresh` (Boolean) Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
 - `client_white_list` (List of String) White List for Client Redirection URIs.
 - `configuration_update_interval` (Number) The interval for configuration update in seconds.
+- `connection_service_configuration` (Block List, Max: 1) HTTP connection pool configuration. (see [below for nested schema](#nestedblock--connection_service_configuration))
 - `consent_gathering_script_backward_compatibility` (Boolean) Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.
 - `cookie_domain` (String) Sets cookie domain for all cookies created by OP.
 - `cors_configuration_filters` (Block List) CORS Configuration filters. (see [below for nested schema](#nestedblock--cors_configuration_filters))
@@ -188,6 +191,8 @@ resource "jans_app_configuration" "global" {
                                                                 Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. 
                                                                 If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens. One of 'tbh'.
 - `img_location` (String) The location for image files.
+- `include_refresh_token_lifetime_in_token_response` (Boolean) Boolean value specifying whether to include refresh token lifetime in token response.
+- `include_requested_claims_in_id_token` (Boolean) Boolean value specifying whether to include requested claims in ID Token.
 - `include_sid_in_response` (Boolean) Boolean value specifying whether to include sessionId in response.
 - `introspection_access_token_must_have_introspection_scope` (Boolean) Reject introspection requests if access_token in Authorization header does not have introspection scope.
 - `introspection_access_token_must_have_uma_protection_scope` (Boolean) Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
@@ -226,6 +231,8 @@ resource "jans_app_configuration" "global" {
 - `log_not_found_entity_as_error` (Boolean) Boolean value specifying whether to log not found entity as error.
 - `logging_layout` (String) Logging layout used for Jans Authorization Server loggers. - text - json
 - `logging_level` (String) Logging level for jans-auth logger.
+- `logout_status_jwt_lifetime` (Number) Lifetime of the logout status JWT in seconds.
+- `logout_status_jwt_signing_alg_values_supported` (List of String) List of logout status JWT signing algorithm values supported.
 - `metric_reporter_interval` (Number) The interval for metric reporter in seconds.
 - `metric_reporter_keep_data_days` (Number) The days to keep metric reported data.
 - `mtls_authorization_challenge_endpoint` (String) URL for Mutual TLS Client Authentication and Certificate-Bound Access Tokens (MTLS) Challenge Endpoint.
@@ -293,6 +300,7 @@ resource "jans_app_configuration" "global" {
 - `return_device_secret_from_authz_endpoint` (Boolean) Boolean value to specify if the device secret should be returned by the authz endpoint.
 - `rotate_client_registration_access_token_on_usage` (Boolean) Boolean value specifying whether to rotate client registration access token on usage.
 - `rotate_device_secret` (Boolean) Enable/Disable device secret rotation.
+- `run_all_update_token_scripts` (Boolean) Boolean value specifying whether to run all update token scripts.
 - `save_tokens_in_cache` (Boolean) Boolean value specifying whether to save token in cache.
 - `save_tokens_in_cache_and_dont_save_in_persistence` (Boolean) Boolean value specifying whether to save token in cache and don't save in persistence.
 - `sector_identifier_cache_lifetime_in_minutes` (Number) The cache lifetime in minutes of the sector identifier.
@@ -307,6 +315,7 @@ resource "jans_app_configuration" "global" {
 - `session_id_request_parameter_enabled` (Boolean) Boolean value specifying whether to enable session_id HTTP request parameter.
 - `session_id_unauthenticated_unused_lifetime` (Number) The lifetime for unused unauthenticated session states.
 - `session_id_unused_lifetime` (Number) The lifetime for unused session states.
+- `session_id_user_claims_in_attributes` (List of String) List of user claims to include in session ID attributes.
 - `share_subject_id_between_clients_with_same_sector_id` (Boolean) Share Subject ID between clients with same Sector ID.
 - `skip_authentication_filter_options_method` (Boolean) Boolean value specifying whether to skip authentication filter for options method calls.
 - `skip_authorization_for_open_id_scope_and_pairwise_id` (Boolean) If a client has only openid scope and pairwise id, person should not have to authorize.
@@ -366,6 +375,7 @@ resource "jans_app_configuration" "global" {
                                                                 "ES512", "PS256", "PS384", "PS512".
 - `userinfo_endpoint` (String) The User Info endpoint URL. Example: https://server.example.com/restv1/userinfo
 - `web_keys_storage` (String) Web Key Storage Type.
+- `xframe_options_header_value` (String) X-Frame-Options header value. One of 'SAMEORIGIN', 'DENY'.
 
 ### Read-Only
 
@@ -452,6 +462,16 @@ Optional:
 - `base_dn` (String)
 - `bind` (Boolean)
 - `bind_password_attribute` (String)
+
+
+<a id="nestedblock--connection_service_configuration"></a>
+### Nested Schema for `connection_service_configuration`
+
+Optional:
+
+- `max_per_route` (Number) Maximum connections per route.
+- `max_total` (Number) Maximum total connections.
+- `validate_after_inactivity` (Number) Time in milliseconds to wait before validating an inactive connection.
 
 
 <a id="nestedblock--cors_configuration_filters"></a>

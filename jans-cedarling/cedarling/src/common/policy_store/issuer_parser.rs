@@ -54,8 +54,8 @@ impl IssuerParser {
         let issuer_id = obj
             .get("id")
             .and_then(|v| v.as_str())
-            .map(|s| s.to_string())
-            .unwrap_or_else(|| {
+            .map(std::string::ToString::to_string)
+            .unwrap_or({
                 // Derive ID from filename (strip .json extension)
                 filename
                     .strip_suffix(".json")
@@ -162,7 +162,7 @@ impl IssuerParser {
                         file: filename.to_string(),
                         err: TrustedIssuerErrorType::MissingRequiredField {
                             issuer_id: issuer_id.to_string(),
-                            field: format!("token_metadata.{}: {}", token_type, e),
+                            field: format!("token_metadata.{token_type}: {e}"),
                         },
                     }
                 })?;
@@ -173,7 +173,7 @@ impl IssuerParser {
                     file: filename.to_string(),
                     err: TrustedIssuerErrorType::MissingRequiredField {
                         issuer_id: issuer_id.to_string(),
-                        field: format!("token_metadata.{}.entity_type_name", token_type),
+                        field: format!("token_metadata.{token_type}.entity_type_name"),
                     },
                 });
             }
@@ -216,9 +216,7 @@ impl IssuerParser {
     }
 
     /// Create a consolidated map of all issuers.
-    pub(super) fn create_issuer_map(
-        issuers: Vec<ParsedIssuer>,
-    ) -> Result<HashMap<String, TrustedIssuer>, PolicyStoreError> {
+    pub(super) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
         let mut issuer_map = HashMap::with_capacity(issuers.len());
 
         for parsed in issuers {
@@ -228,13 +226,10 @@ impl IssuerParser {
                 issuer_map.entry(parsed.id.clone())
             {
                 e.insert(parsed.issuer);
-            } else {
-                // Skip duplicate silently since validate_issuers should have reported it
-                continue;
             }
         }
 
-        Ok(issuer_map)
+        issuer_map
     }
 }
 
@@ -338,8 +333,7 @@ mod tests {
                     err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
                 } if file == "bad.json" && issuer_id == "bad" && field == "name"
             ),
-            "Expected MissingRequiredField error for name, got: {:?}",
-            err
+            "Expected MissingRequiredField error for name, got: {err:?}"
         );
     }
 
@@ -361,8 +355,7 @@ mod tests {
                     err: TrustedIssuerErrorType::MissingRequiredField { issuer_id, field }
                 } if file == "bad.json" && issuer_id == "bad" && field == "configuration_endpoint"
             ),
-            "Expected MissingRequiredField error for endpoint, got: {:?}",
-            err
+            "Expected MissingRequiredField error for endpoint, got: {err:?}"
         );
     }
 
@@ -385,8 +378,7 @@ mod tests {
                     err: TrustedIssuerErrorType::InvalidOidcEndpoint { issuer_id, url, .. }
                 } if file == "bad.json" && issuer_id == "bad" && url == "not a valid url"
             ),
-            "Expected InvalidOidcEndpoint error, got: {:?}",
-            err
+            "Expected InvalidOidcEndpoint error, got: {err:?}"
         );
     }
 
@@ -399,8 +391,7 @@ mod tests {
 
         assert!(
             matches!(&err, PolicyStoreError::JsonParsing { file, .. } if file == "invalid.json"),
-            "Expected JsonParsing error, got: {:?}",
-            err
+            "Expected JsonParsing error, got: {err:?}"
         );
     }
 
@@ -421,8 +412,7 @@ mod tests {
         let err = result.expect_err("Should fail on missing entity_type_name in token metadata");
         assert!(
             matches!(&err, PolicyStoreError::TrustedIssuerError { .. }),
-            "Expected TrustedIssuerError, got: {:?}",
-            err
+            "Expected TrustedIssuerError, got: {err:?}"
         );
     }
 
@@ -573,10 +563,8 @@ mod tests {
             },
         ];
 
-        let result = IssuerParser::create_issuer_map(issuers);
-        assert!(result.is_ok(), "Should create issuer map");
+        let map = IssuerParser::create_issuer_map(issuers);
 
-        let map = result.unwrap();
         assert_eq!(map.len(), 2);
         assert!(map.contains_key("issuer1"));
         assert!(map.contains_key("issuer2"));

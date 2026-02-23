@@ -344,4 +344,8 @@ The AS handles semantic logic automatically - your `evaluate()` method is called
 
 ## Sample Scripts
 
-- [Access Evaluation](../../../script-catalog/access_evaluation/AccessEvaluation.java)
+### Access Evaluation Script
+
+```java
+--8<-- "script-catalog/access_evaluation/AccessEvaluation.java"
+```
