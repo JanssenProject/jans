@@ -16,24 +16,16 @@ import java.util.Set;
 
 @ApplicationPath("/fido2")
 @OpenAPIDefinition(info = @Info(title = "Jans Config API - Fido2", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
-
-license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
-
-tags = { @Tag(name = "Fido2 - Configuration"),
-        @Tag(name = "Fido2 - Registration")
-        },
-
-servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
-
+        license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
+        tags = { @Tag(name = "Fido2 - Configuration"), @Tag(name = "Fido2 - Registration") },
+        servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = Constants.FIDO2_CONFIG_READ_ACCESS, description = "View fido2 related information"),
-@OAuthScope(name = Constants.FIDO2_CONFIG_WRITE_ACCESS, description = "Manage fido2 related information"),
-@OAuthScope(name = Constants.FIDO2_CONFIG_DELETE_ACCESS, description = "Delete fido2 related information"),
-@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
-@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
-@OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"),
-}
-)))
+        @OAuthScope(name = Constants.FIDO2_CONFIG_READ_ACCESS, description = "View fido2 related information"),
+        @OAuthScope(name = Constants.FIDO2_CONFIG_WRITE_ACCESS, description = "Manage fido2 related information"),
+        @OAuthScope(name = Constants.FIDO2_CONFIG_DELETE_ACCESS, description = "Delete fido2 related information"),
+        @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
+        @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
+        @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"), })))
 public class ApiApplication extends Application {
 
     @Override
@@ -43,7 +35,7 @@ public class ApiApplication extends Application {
         classes.add(Fido2ConfigResource.class);
         classes.add(Fido2RegistrationResource.class);
         classes.add(Fido2MetricsResource.class);
-        
+
         return classes;
     }
 }

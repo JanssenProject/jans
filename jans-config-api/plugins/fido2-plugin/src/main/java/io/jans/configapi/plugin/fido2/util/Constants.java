@@ -15,6 +15,7 @@ public class Constants {
     public static final String ENTRIES = "/entries";
     public static final String DEVICE  = "/device";
     public static final String USER_DEVICE  = "/userdevice";
+    public static final String METRICS = "/metrics";
     
     public static final String USERNAME_PATH = "/{username}";
     public static final String UUID_PATH  = "/{uuid}";
@@ -25,4 +26,8 @@ public class Constants {
     public static final String FIDO2_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/fido2.write";
     public static final String FIDO2_CONFIG_DELETE_ACCESS = "https://jans.io/oauth/config/fido2.delete";
     public static final String FIDO2_ADMIN_ACCESS = "https://jans.io/oauth/config/fido2.admin";
+    
+    public static final String FIDO2_METRICS_READ_ACCESS = "https://jans.io/oauth/fido2-metrics.readonly";
+    
+    public static final int DEFAULT_MAX_COUNT = 200;  
 }

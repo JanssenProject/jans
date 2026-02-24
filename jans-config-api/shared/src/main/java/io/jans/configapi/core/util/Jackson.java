@@ -156,6 +156,12 @@ public class Jackson {
         final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
+    
+    public static <T> T readStringValue(String content, Class<T> clazz) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(content, clazz);
+    }
+
 
     public static JSONObject createJSONObject(Map<String, Object> map) throws JSONException {
         if (map == null || map.size() == 0) {
