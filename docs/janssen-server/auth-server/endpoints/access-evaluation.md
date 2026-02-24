@@ -8,7 +8,7 @@ tags:
 # Access Evaluation Endpoint
 
 
-The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 (doc published on 11 January 2026)](https://openid.github.io/authzen/).
+The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 (doc published on 11 January 2026)](https://openid.net/specs/authorization-api-1_0.html).
 The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
 Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
 It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
