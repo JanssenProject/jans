@@ -67,8 +67,7 @@ changed via `AccessEvaluationDiscoveryType` custom script.
   "subject_search_endpoint": "https://janssen.server.host/jans-auth/restv1/access/v1/search/subject",
   "resource_search_endpoint": "https://janssen.server.host/jans-auth/restv1/access/v1/search/resource",
   "action_search_endpoint": "https://janssen.server.host/jans-auth/restv1/access/v1/search/action",
-  "capabilities": [],
-  "access_evaluation_v1_endpoint": "https://janssen.server.host/jans-auth/restv1/access/v1"
+  "capabilities": []
 }
 ```
 
