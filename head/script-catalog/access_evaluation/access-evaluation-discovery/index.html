@@ -2021,6 +2021,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#discovery-response-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discovery Response Fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#interface" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2047,7 +2058,7 @@
   <a href="#new-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New methods
+        New Methods
       
     </span>
   </a>
@@ -2067,6 +2078,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2095,6 +2117,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-adding-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Adding Capabilities
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3108,6 +3141,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#discovery-response-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discovery Response Fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#interface" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3134,7 +3178,7 @@
   <a href="#new-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New methods
+        New Methods
       
     </span>
   </a>
@@ -3154,6 +3198,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3182,6 +3237,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-adding-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Adding Capabilities
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3327,14 +3393,68 @@
 
 
 <h1 id="access-evaluation-discovery-custom-script">Access Evaluation Discovery Custom Script<a class="headerlink" href="#access-evaluation-discovery-custom-script" title="Permanent link">#</a></h1>
-<p>This script is used to control Access Evaluation Discovery Endpoint (<code>/.well-known/authzen-configuration</code>).</p>
-<p><strong>Sample request</strong>
-<div class="highlight"><pre><span></span><code>GET /.well-known/authzen-configuration HTTP/1.1
-Host: happy-example.gluu.info
-Content-Type: application/json
-
-{&quot;access_evaluation_v1_endpoint&quot;:&quot;https://happy-example.gluu.info/jans-auth/restv1/evaluation&quot;}
-</code></pre></div></p>
+<p>This script is used to control the Access Evaluation Discovery Endpoint (<code>/.well-known/authzen-configuration</code>).</p>
+<p>The AuthZEN discovery endpoint publishes PDP (Policy Decision Point) metadata per the AuthZEN specification,
+including all available endpoints and capabilities.</p>
+<p><strong>Sample Request</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">GET</span> <span class="nn">/.well-known/authzen-configuration</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">janssen.server.host</span>
+</code></pre></div>
+<p><strong>Sample Response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;policy_decision_point&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;access_evaluation_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/access/v1/evaluation&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;access_evaluations_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/access/v1/evaluations&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;subject_search_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/access/v1/search/subject&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;resource_search_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/access/v1/search/resource&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;action_search_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/access/v1/search/action&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;capabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;access_evaluation_v1_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host/jans-auth/restv1/access/v1&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="discovery-response-fields">Discovery Response Fields<a class="headerlink" href="#discovery-response-fields" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>policy_decision_point</code></td>
+<td style="text-align: left;">The issuer URL identifying the PDP</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>access_evaluation_endpoint</code></td>
+<td style="text-align: left;">URL for single evaluation requests</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>access_evaluations_endpoint</code></td>
+<td style="text-align: left;">URL for batch evaluation requests</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>subject_search_endpoint</code></td>
+<td style="text-align: left;">URL for subject search requests</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>resource_search_endpoint</code></td>
+<td style="text-align: left;">URL for resource search requests</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>action_search_endpoint</code></td>
+<td style="text-align: left;">URL for action search requests</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>capabilities</code></td>
+<td style="text-align: left;">Array of supported capabilities (extensible via script)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>access_evaluation_v1_endpoint</code></td>
+<td style="text-align: left;">Legacy base endpoint URL for backward compatibility</td>
+</tr>
+</tbody>
+</table>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
 <p>The Access Evaluation Discovery script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authzen/AccessEvaluationDiscoveryType.java">AccessEvaluationDiscoveryType</a> interface.
 This extends methods from the base script type in addition to adding new methods:</p>
@@ -3361,7 +3481,7 @@ This extends methods from the base script type in addition to adding new methods
 </tr>
 </tbody>
 </table>
-<h3 id="new-methods">New methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
+<h3 id="new-methods">New Methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
@@ -3372,11 +3492,11 @@ This extends methods from the base script type in addition to adding new methods
 <tbody>
 <tr>
 <td style="text-align: left;"><code>def modifyResponse(self, responseAsJsonObject, context)</code></td>
-<td style="text-align: left;">This method is called after discovery response is ready. This method can modify discovery response.<br/><code>responseAsJsonObject</code> is <code>org.codehaus.jettison.json.JSONObject</code><br/> <code>context</code> is <code>io.jans.as.server.model.common.ExecutionContext</code></td>
+<td style="text-align: left;">This method is called after discovery response is ready. This method can modify discovery response.<br/><code>responseAsJsonObject</code> is <code>org.json.JSONObject</code><br/> <code>context</code> is <code>io.jans.as.server.model.common.ExecutionContext</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>modifyResponse</code> method returns <code>true</code> to access modification or <code>false</code> to revert all changes.</p>
+<p><code>modifyResponse</code> method returns <code>true</code> to accept modifications or <code>false</code> to revert all changes.</p>
 <h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -3392,16 +3512,25 @@ This extends methods from the base script type in addition to adding new methods
 </tr>
 <tr>
 <td style="text-align: left;"><code>context</code></td>
-<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java">Reference</a></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/ExecutionContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
+<h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">#</a></h2>
+<p>The discovery script can be used to:</p>
+<ol>
+<li><strong>Add custom capabilities</strong> - Advertise PDP-specific features</li>
+<li><strong>Add custom endpoints</strong> - Include additional proprietary endpoints</li>
+<li><strong>Add metadata</strong> - Include organization-specific information</li>
+<li><strong>Conditional responses</strong> - Modify response based on request context</li>
+</ol>
 <h2 id="sample-demo-custom-script">Sample Demo Custom Script<a class="headerlink" href="#sample-demo-custom-script" title="Permanent link">#</a></h2>
 <h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.authzen.AccessEvaluationDiscoveryType</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.json.JSONArray</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.json.JSONObject</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
@@ -3439,11 +3568,38 @@ This extends methods from the base script type in addition to adding new methods
 
 <span class="w">    </span><span class="nd">@Override</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;write to script logger&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scriptLogger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Modifying AuthZEN discovery response&quot;</span><span class="p">);</span>
 <span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span>
-<span class="w">        </span><span class="n">response</span><span class="p">.</span><span class="na">accumulate</span><span class="p">(</span><span class="s">&quot;key_from_java&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value_from_script_on_java&quot;</span><span class="p">);</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Add custom capabilities</span>
+<span class="w">        </span><span class="n">JSONArray</span><span class="w"> </span><span class="n">capabilities</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="na">optJSONArray</span><span class="p">(</span><span class="s">&quot;capabilities&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">capabilities</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">capabilities</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONArray</span><span class="p">();</span>
+<span class="w">            </span><span class="n">response</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;capabilities&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">capabilities</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Add custom metadata</span>
+<span class="w">        </span><span class="n">response</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;organization&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Acme Corp&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">response</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;pdp_version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Add custom endpoint</span>
+<span class="w">        </span><span class="n">response</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;custom_endpoint&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;https://example.com/custom&quot;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"> </span><span class="c1">// Accept modifications</span>
 <span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="example-adding-capabilities">Example: Adding Capabilities<a class="headerlink" href="#example-adding-capabilities" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">modifyResponse</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">JSONObject</span><span class="p">)</span><span class="w"> </span><span class="n">responseAsJsonObject</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Add supported capabilities per AuthZEN spec</span>
+<span class="w">    </span><span class="n">JSONArray</span><span class="w"> </span><span class="n">capabilities</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONArray</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">response</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;capabilities&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">capabilities</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
@@ -3522,7 +3678,7 @@ This extends methods from the base script type in addition to adding new methods
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 24, 2026 12:49:48 UTC"><span class="timeago" datetime="2026-02-24T12:49:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 24, 2026 12:49:48 UTC">2026-02-24</span>
   </span>
 
     
@@ -3627,15 +3783,7 @@ This extends methods from the base script type in addition to adding new methods
         <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
-<!--Release automation scripts should replace the placeholder with actual URL-->
-<!--for Scarf pixel. This will be done when docs are released into PROD. Not-->
-<!--when releasing for HEAD or nightly builds. This is to ensure that Scarf -->
-<!--is only tracking the user behaviour on the PROD release docs. HEAD and -->
-<!--nightly docs may be used extensively by development team and contributors-->
-<!--for testing purposes-->
-<img referrerpolicy="no-referrer-when-downgrade"
-     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
-     width="0" height="0"/>
+
 
 
   </body>
