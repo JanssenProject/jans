@@ -64,14 +64,23 @@ jobs:
     - uses: cargo-bins/cargo-binstall@v1.17.4
     - name: Install dylint
       run: |
+        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
         cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
         cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
+        if ! which dylint-link > /dev/null 2>&1; then
+          echo "dylint-link not found via binstall, falling back to cargo install"
+          cargo install dylint-link --version 5.0.0 --locked
+        fi
+        echo "dylint-link location: $(which dylint-link)"
     - name: Run Tests
       working-directory: jans-cedarling/custom-lints
-      run: cargo test
+      run: |
+        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+        cargo +nightly-2025-09-18 test
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
+        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
         # Nightly pin for dylint: check dylint release notes for compatible nightly.
         # To upgrade: 1) Find the nightly used by the target dylint release
         # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
