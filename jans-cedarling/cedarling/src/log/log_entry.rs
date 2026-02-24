@@ -17,7 +17,10 @@ use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
 use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
+use rand::Rng;
+use rand::{SeedableRng, rngs::StdRng};
 use smol_str::{SmolStr, ToSmolStr};
+use std::sync::{LazyLock, Mutex};
 use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
@@ -361,6 +364,10 @@ impl Loggable for DecisionLogEntry {
     }
 }
 
+fn get_std_rng() -> StdRng {
+    StdRng::try_from_rng(&mut rand::rngs::SysRng).expect("failed to seed StdRng from OS RNG")
+}
+
 /// Custom uuid generation function to avoid using [`std::time`] because it makes panic in WASM
 //
 // TODO: maybe using wasm we can use `js_sys::Date::now()`
@@ -370,21 +377,44 @@ pub(crate) fn gen_uuid7() -> Uuid {
     use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
-    static GLOBAL_V7_GENERATOR: LazyLock<
-        Mutex<V7Generator<uuid7::generator::with_rand08::Adapter<rand::rngs::OsRng>>>,
-    > = LazyLock::new(|| Mutex::new(V7Generator::with_rand08(rand::rngs::OsRng)));
-
-    // from docs
+    // from docs uuid7 crate
     // The rollback_allowance parameter specifies the amount of unix_ts_ms rollback that is considered significant.
     // A suggested value is 10_000 (milliseconds).
     const ROLLBACK_ALLOWANCE: u64 = 10_000;
 
-    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
+    static GLOBAL_V7_GENERATOR: LazyLock<
+        Mutex<V7Generator<uuid7::generator::with_rand010::Adapter<StdRng>>>,
+    > = LazyLock::new(|| {
+        let mut g = V7Generator::with_rand010(get_std_rng());
+        g.set_rollback_allowance(ROLLBACK_ALLOWANCE);
+        Mutex::new(g)
+    });
+
+    let mut g = GLOBAL_V7_GENERATOR
+        .lock()
+        .expect("GLOBAL_V7_GENERATOR should be locked");
 
     let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
 
     #[allow(clippy::cast_sign_loss)]
-    g.generate_or_reset_core(custom_unix_ts_ms as u64, ROLLBACK_ALLOWANCE)
+    g.generate_or_reset_with_ts(custom_unix_ts_ms as u64)
+}
+
+/// Generates a new `UUIDv4` object utilizing the random number generator inside.
+///
+/// The implementation is based on the `uuid7::uuid4` function.
+pub(crate) fn gen_uuid4() -> Uuid {
+    static RND_UUID4: LazyLock<Mutex<StdRng>> = LazyLock::new(|| Mutex::new(get_std_rng()));
+
+    let mut bytes = [0u8; 16];
+    RND_UUID4
+        .lock()
+        .expect("RND_UUID4 should be locked")
+        .fill_bytes(&mut bytes);
+
+    bytes[6] = (bytes[6] & 0x0F) | 0x40;
+    bytes[8] = (bytes[8] & 0x3F) | 0x80;
+    Uuid::from(bytes)
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]

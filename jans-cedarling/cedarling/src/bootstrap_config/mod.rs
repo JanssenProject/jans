@@ -24,9 +24,9 @@ pub mod policy_store_config;
 pub mod raw_config;
 
 #[cfg(not(target_arch = "wasm32"))]
-use std::{io, path::Path};
-
 use config::{Config, File};
+#[cfg(not(target_arch = "wasm32"))]
+use std::{io, path::Path};
 
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
@@ -128,6 +128,7 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_default().unwrap();
     /// ```
+    #[cfg(test)]
     pub fn load_default() -> Result<Self, BootstrapConfigLoadingError> {
         const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.yaml");
 

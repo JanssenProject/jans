@@ -303,7 +303,7 @@ fn convert_json_to_object(json_value: &serde_json::Value) -> Result<JsValue, Err
 fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
     if value.is_instance_of::<Map>() {
         // Convert the Map into an Object where keys and values are recursively processed
-        let map = Map::unchecked_from_js(value);
+        let map = Map::from(value);
         let obj = Object::new();
         for entry in map.entries().into_iter() {
             let entry = Array::unchecked_from_js(entry?);
@@ -322,7 +322,7 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
         Ok(serialized_array.into())
     } else if value.is_object() {
         // Recursively process plain objects
-        let obj = Object::unchecked_from_js(value);
+        let obj = Object::from(value);
         let keys = Object::keys(&obj);
         let serialized_obj = Object::new();
         for key in keys.iter() {
