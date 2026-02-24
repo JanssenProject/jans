@@ -7,19 +7,20 @@ tags:
 
 # Access Evaluation Discovery Custom Script
 
-
 This script is used to control the Access Evaluation Discovery Endpoint (`/.well-known/authzen-configuration`).
 
 The AuthZEN discovery endpoint publishes PDP (Policy Decision Point) metadata per the AuthZEN specification,
 including all available endpoints and capabilities.
 
 **Sample Request**
+
 ```http
 GET /.well-known/authzen-configuration HTTP/1.1
 Host: janssen.server.host
 ```
 
 **Sample Response**
+
 ```json
 {
   "policy_decision_point": "https://janssen.server.host",
