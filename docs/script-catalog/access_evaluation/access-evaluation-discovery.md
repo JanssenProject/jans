@@ -169,9 +169,6 @@ public boolean modifyResponse(Object responseAsJsonObject, Object context) {
 
     // Add supported capabilities per AuthZEN spec
     JSONArray capabilities = new JSONArray();
-    capabilities.put("search");           // Indicates search endpoints are supported
-    capabilities.put("batch_evaluation"); // Indicates batch evaluation is supported
-    capabilities.put("audit_logging");    // Custom capability
 
     response.put("capabilities", capabilities);
 
