@@ -322,6 +322,7 @@ The `context` field in requests is fully dynamic and accepts any key-value pairs
 ```
 
 Access context values in your script:
+
 ```java
 Context ctx = request.getContext();
 String ipAddress = (String) ctx.get("ip_address");
