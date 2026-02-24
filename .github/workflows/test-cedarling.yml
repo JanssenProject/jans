@@ -18,8 +18,6 @@ jobs:
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Install Protoc
-      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:
@@ -31,6 +29,11 @@ jobs:
       uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
+    - name: Run Tests (without default features)
+      working-directory: jans-cedarling/cedarling
+      run: cargo test --no-default-features
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Run Tests
       working-directory: jans-cedarling
       run: cargo test --workspace
