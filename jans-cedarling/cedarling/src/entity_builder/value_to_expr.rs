@@ -30,7 +30,7 @@ pub(crate) fn value_to_expr(
             if IpAddr::from_str(val).is_ok() {
                 RestrictedExpression::new_ip(val)
             } else {
-                RestrictedExpression::new_string(val.to_string())
+                RestrictedExpression::new_string(val.clone())
             }
         },
         Value::Array(values) => {
@@ -47,7 +47,7 @@ pub(crate) fn value_to_expr(
         Value::Object(map) => {
             let (fields, errs): (Vec<_>, Vec<_>) = map
                 .iter()
-                .map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
+                .map(|(key, val)| value_to_expr(val).map(|expr| (key.clone(), expr)))
                 .partition_result();
 
             if !errs.is_empty() {
