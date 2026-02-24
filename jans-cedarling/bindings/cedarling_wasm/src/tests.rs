@@ -498,15 +498,14 @@ async fn test_memory_log_interface() {
         assert_ne!(log_val, JsValue::NULL, "log result should be not null");
 
         // Verify log entry has expected structure
-        let log_obj = Object::unchecked_from_js(log_val);
-        let log_id = Reflect::get(&log_obj, &"id".into())
+        let log_id = Reflect::get(&log_val, &"id".into())
             .expect("log should have id field")
             .as_string()
             .expect("id should be a string");
         assert_eq!(log_id, log_id_str, "log id should match the requested id");
 
         // Verify log has log_kind field
-        let log_kind = Reflect::get(&log_obj, &"log_kind".into())
+        let log_kind = Reflect::get(&log_val, &"log_kind".into())
             .expect("log should have log_kind field")
             .as_string()
             .expect("log_kind should be a string");
@@ -1245,8 +1244,7 @@ async fn test_data_api_list_data_ctx() {
     let mut keys = Vec::new();
     for i in 0..entries.length() {
         let entry_js = entries.get(i);
-        let entry_obj = Object::unchecked_from_js(entry_js);
-        let key = Reflect::get(&entry_obj, &"key".into())
+        let key = Reflect::get(&entry_js, &"key".into())
             .expect("entry should have key field")
             .as_string()
             .expect("key should be a string");
