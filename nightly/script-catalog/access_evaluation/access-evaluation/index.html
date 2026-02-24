@@ -2030,10 +2030,71 @@
   <a href="#new-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New methods
+        New Methods
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Method Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#evaluaterequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evaluate(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searchsubjectrequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        searchSubject(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searchresourcerequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        searchResource(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searchactionrequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        searchAction(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2078,6 +2139,39 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-implementation-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Implementation Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Object
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batch-evaluation-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Evaluation Options
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3156,10 +3250,71 @@
   <a href="#new-methods" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New methods
+        New Methods
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Method Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#evaluaterequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evaluate(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searchsubjectrequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        searchSubject(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searchresourcerequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        searchResource(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searchactionrequest-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        searchAction(request, context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3204,6 +3359,39 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-implementation-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Implementation Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Object
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batch-evaluation-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Evaluation Options
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3349,14 +3537,14 @@
 
 
 <h1 id="access-evaluation-custom-script">Access Evaluation Custom Script<a class="headerlink" href="#access-evaluation-custom-script" title="Permanent link">#</a></h1>
-<p>The Jans-Auth server implements <a href="https://openid.github.io/authzen/">OpenID AuthZEN Authorization API 1.0 – draft 01</a>.
+<p>The Jans-Auth server implements <a href="https://openid.github.io/authzen/">OpenID AuthZEN Authorization API 1.0</a>.
 The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
 Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
 It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
 enhancing interoperability and scalability in authorization processes.
 The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
 and dynamic authorization mechanisms.</p>
-<p>This script is used to control Access Evaluation Endpoint described in specification.</p>
+<p>This script is used to control Access Evaluation Endpoints described in specification.</p>
 <h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h2>
 <p>The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs)
 to request access decisions from a Policy Decision Point (PDP) for specific resources and actions.
@@ -3364,17 +3552,54 @@ Upon receiving a request, the endpoint evaluates the subject, resource, and acti
 if access should be granted, denied, or if additional information is needed.
 The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.</p>
-<p>During Access Evaluation request processing <code>Access Evaluation</code> custom script is executed.
+<p>During Access Evaluation request processing the <code>Access Evaluation</code> custom script is executed.
 Name of the script must be specified by <code>accessEvaluationScriptName</code> configuration property.
 If AS can't find such script or if configuration property is not specified then server executes first script it finds on database.
 AS comes with sample demo script which shows simple example of custom validation and granting access.</p>
-<p><strong>Sample request</strong>
-<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
-Host: happy-example.gluu.info
-Content-Type: application/json
-Authorization: Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWFhLWY5N2YtNDU5NS04ZWExLWFlNmU1NDFmNDZjNg==
+<p><strong>Sample Single Evaluation Request</strong>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/jans-auth/restv1/access/v1/evaluation</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">happy-example.gluu.info</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Basic &lt;encoded_credentials&gt;</span>
 
-{&quot;subject&quot;:{&quot;id&quot;:&quot;alice@acmecorp.com&quot;,&quot;type&quot;:&quot;super_admin&quot;,&quot;properties&quot;:null},&quot;resource&quot;:{&quot;id&quot;:&quot;123&quot;,&quot;type&quot;:&quot;account&quot;,&quot;properties&quot;:null},&quot;action&quot;:{&quot;name&quot;:&quot;can_read&quot;,&quot;properties&quot;:{&quot;method&quot;:&quot;GET&quot;}},&quot;context&quot;:{&quot;properties&quot;:null}}
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;super_admin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice@acmecorp.com&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;account&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;can_read&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ip_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.1.1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:30:00Z&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Sample Batch Evaluations Request</strong>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/jans-auth/restv1/access/v1/evaluations</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">happy-example.gluu.info</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Basic &lt;encoded_credentials&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alice@acmecorp.com&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;evaluations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;read&quot;</span><span class="p">}},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="p">}},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;delete&quot;</span><span class="p">}}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;options&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;evaluations_semantic&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;deny_on_first_deny&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
 <p>The Access Evaluation script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authzen/AccessEvaluationType.java">AccessEvaluationType</a> interface.
@@ -3402,7 +3627,7 @@ This extends methods from the base script type in addition to adding new methods
 </tr>
 </tbody>
 </table>
-<h3 id="new-methods">New methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
+<h3 id="new-methods">New Methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
@@ -3412,12 +3637,48 @@ This extends methods from the base script type in addition to adding new methods
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>def evaluation(self, context)</code></td>
-<td style="text-align: left;">Called when the request is received and contains main logic of evaluation. It must return <code>AccessEvaluationResponse</code>.</td>
+<td style="text-align: left;"><code>evaluate(request, context)</code></td>
+<td style="text-align: left;">Called for single evaluation requests. Must return <code>AccessEvaluationResponse</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>searchSubject(request, context)</code></td>
+<td style="text-align: left;">Called for subject search requests. Returns <code>SearchResponse&lt;Subject&gt;</code> or <code>null</code> for empty response.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>searchResource(request, context)</code></td>
+<td style="text-align: left;">Called for resource search requests. Returns <code>SearchResponse&lt;Resource&gt;</code> or <code>null</code> for empty response.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>searchAction(request, context)</code></td>
+<td style="text-align: left;">Called for action search requests. Returns <code>SearchResponse&lt;Action&gt;</code> or <code>null</code> for empty response.</td>
 </tr>
 </tbody>
 </table>
-<p><code>evaluation</code> method returns <code>AccessEvaluationResponse</code> which indicates to RP whether to grant access or deny it.</p>
+<h3 id="method-details">Method Details<a class="headerlink" href="#method-details" title="Permanent link">#</a></h3>
+<h4 id="evaluaterequest-context">evaluate(request, context)<a class="headerlink" href="#evaluaterequest-context" title="Permanent link">#</a></h4>
+<p>The main evaluation method called when a single evaluation or batch evaluation request is received.</p>
+<p><strong>Parameters:</strong>
+- <code>request</code> - <code>AccessEvaluationRequest</code> containing subject, resource, action, and context
+- <code>context</code> - <code>ExternalScriptContext</code> providing access to HTTP request and other contextual data</p>
+<p><strong>Returns:</strong> <code>AccessEvaluationResponse</code> indicating the access decision (true/false) with optional context</p>
+<h4 id="searchsubjectrequest-context">searchSubject(request, context)<a class="headerlink" href="#searchsubjectrequest-context" title="Permanent link">#</a></h4>
+<p>Called when a subject search request is received at <code>/access/v1/search/subject</code>.</p>
+<p><strong>Parameters:</strong>
+- <code>request</code> - <code>SearchSubjectRequest</code> containing search criteria
+- <code>context</code> - Script context</p>
+<p><strong>Returns:</strong> <code>SearchResponse&lt;Subject&gt;</code> with matching subjects, or <code>null</code> for default empty response</p>
+<h4 id="searchresourcerequest-context">searchResource(request, context)<a class="headerlink" href="#searchresourcerequest-context" title="Permanent link">#</a></h4>
+<p>Called when a resource search request is received at <code>/access/v1/search/resource</code>.</p>
+<p><strong>Parameters:</strong>
+- <code>request</code> - <code>SearchResourceRequest</code> containing search criteria
+- <code>context</code> - Script context</p>
+<p><strong>Returns:</strong> <code>SearchResponse&lt;Resource&gt;</code> with matching resources, or <code>null</code> for default empty response</p>
+<h4 id="searchactionrequest-context">searchAction(request, context)<a class="headerlink" href="#searchactionrequest-context" title="Permanent link">#</a></h4>
+<p>Called when an action search request is received at <code>/access/v1/search/action</code>.</p>
+<p><strong>Parameters:</strong>
+- <code>request</code> - <code>SearchActionRequest</code> containing search criteria
+- <code>context</code> - Script context</p>
+<p><strong>Returns:</strong> <code>SearchResponse&lt;Action&gt;</code> with matching actions, or <code>null</code> for default empty response</p>
 <h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -3435,6 +3696,18 @@ This extends methods from the base script type in addition to adding new methods
 <td style="text-align: left;"><code>context</code></td>
 <td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java">Reference</a></td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>AccessEvaluationRequest</code></td>
+<td style="text-align: left;">Request containing subject, resource, action, context, evaluations (for batch), and options</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>AccessEvaluationResponse</code></td>
+<td style="text-align: left;">Response with decision (boolean) and optional context</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>SearchResponse</code></td>
+<td style="text-align: left;">Paginated response for search operations</td>
+</tr>
 </tbody>
 </table>
 <h2 id="sample-demo-custom-script">Sample Demo Custom Script<a class="headerlink" href="#sample-demo-custom-script" title="Permanent link">#</a></h2>
@@ -3443,10 +3716,7 @@ This extends methods from the base script type in addition to adding new methods
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.databind.node.ObjectNode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.AccessEvaluationRequest</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.AccessEvaluationResponse</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.AccessEvaluationResponseContext</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.Resource</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.*</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.authzen.AccessEvaluationType</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
@@ -3459,6 +3729,10 @@ This extends methods from the base script type in addition to adding new methods
 <span class="kn">import</span><span class="w"> </span><span class="nn">java.util.UUID</span><span class="p">;</span>
 
 <span class="cm">/**</span>
+<span class="cm"> * Sample AccessEvaluation script demonstrating:</span>
+<span class="cm"> * - Single evaluation with custom validation</span>
+<span class="cm"> * - Search method stubs (return null for default empty response)</span>
+<span class="cm"> *</span>
 <span class="cm"> * @author Yuriy Z</span>
 <span class="cm"> */</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AccessEvaluation</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">AccessEvaluationType</span><span class="w"> </span><span class="p">{</span>
@@ -3526,18 +3800,102 @@ This extends methods from the base script type in addition to adding new methods
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Subject</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchSubject</span><span class="p">(</span><span class="n">SearchSubjectRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Implement subject search logic here</span>
+<span class="w">        </span><span class="c1">// Return null to use default empty response</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Resource</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchResource</span><span class="p">(</span><span class="n">SearchResourceRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Implement resource search logic here</span>
+<span class="w">        </span><span class="c1">// Return null to use default empty response</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Action</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchAction</span><span class="p">(</span><span class="n">SearchActionRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Implement action search logic here</span>
+<span class="w">        </span><span class="c1">// Return null to use default empty response</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<h2 id="search-implementation-example">Search Implementation Example<a class="headerlink" href="#search-implementation-example" title="Permanent link">#</a></h2>
+<p>Here's an example of implementing a search method that returns actual results:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Subject</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchSubject</span><span class="p">(</span><span class="n">SearchSubjectRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Example: Return users who have access to the requested resource/action</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Subject</span><span class="o">&gt;</span><span class="w"> </span><span class="n">subjects</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Query your authorization backend/database here</span>
+<span class="w">    </span><span class="c1">// This is just a sample - implement your actual logic</span>
+<span class="w">    </span><span class="n">subjects</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Subject</span><span class="p">().</span><span class="na">setType</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">).</span><span class="na">setId</span><span class="p">(</span><span class="s">&quot;alice@acmecorp.com&quot;</span><span class="p">));</span>
+<span class="w">    </span><span class="n">subjects</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Subject</span><span class="p">().</span><span class="na">setType</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">).</span><span class="na">setId</span><span class="p">(</span><span class="s">&quot;bob@acmecorp.com&quot;</span><span class="p">));</span>
+
+<span class="w">    </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Subject</span><span class="o">&gt;</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">    </span><span class="n">response</span><span class="p">.</span><span class="na">setResults</span><span class="p">(</span><span class="n">subjects</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Set pagination info</span>
+<span class="w">    </span><span class="n">PageResponse</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PageResponse</span><span class="p">();</span>
+<span class="w">    </span><span class="n">page</span><span class="p">.</span><span class="na">setCount</span><span class="p">(</span><span class="n">subjects</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
+<span class="w">    </span><span class="n">page</span><span class="p">.</span><span class="na">setTotal</span><span class="p">(</span><span class="n">subjects</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
+<span class="w">    </span><span class="n">response</span><span class="p">.</span><span class="na">setPage</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="context-object">Context Object<a class="headerlink" href="#context-object" title="Permanent link">#</a></h2>
+<p>The <code>context</code> field in requests is fully dynamic and accepts any key-value pairs per AuthZEN specification:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ip_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192.168.1.100&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:30:00Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;device_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mobile&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;custom_field&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;any_value&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Access context values in your script:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Context</span><span class="w"> </span><span class="n">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getContext</span><span class="p">();</span>
+<span class="n">String</span><span class="w"> </span><span class="n">ipAddress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="w"> </span><span class="n">ctx</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;ip_address&quot;</span><span class="p">);</span>
+<span class="n">String</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="w"> </span><span class="n">ctx</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;region&quot;</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="batch-evaluation-options">Batch Evaluation Options<a class="headerlink" href="#batch-evaluation-options" title="Permanent link">#</a></h2>
+<p>When handling batch evaluations, the <code>options.evaluations_semantic</code> field controls processing:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Value</th>
+<th style="text-align: left;">Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>execute_all</code></td>
+<td style="text-align: left;">Process all evaluations regardless of results (default)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>deny_on_first_deny</code></td>
+<td style="text-align: left;">Stop on first deny result</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>permit_on_first_permit</code></td>
+<td style="text-align: left;">Stop on first permit result</td>
+</tr>
+</tbody>
+</table>
+<p>The AS handles semantic logic automatically - your <code>evaluate()</code> method is called for each individual evaluation.</p>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
 <h3 id="access-evaluation-script">Access Evaluation Script<a class="headerlink" href="#access-evaluation-script" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.databind.ObjectMapper</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.databind.node.ObjectNode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.as.server.service.external.context.ExternalScriptContext</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.AccessEvaluationRequest</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.AccessEvaluationResponse</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.AccessEvaluationResponseContext</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.Resource</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.authzen.*</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.authzen.AccessEvaluationType</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span>
@@ -3616,6 +3974,24 @@ This extends methods from the base script type in addition to adding new methods
 <span class="w">    </span><span class="nd">@Override</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Subject</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchSubject</span><span class="p">(</span><span class="n">SearchSubjectRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Not implemented - return null to use default empty response</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Resource</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchResource</span><span class="p">(</span><span class="n">SearchResourceRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Not implemented - return null to use default empty response</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">SearchResponse</span><span class="o">&lt;</span><span class="n">Action</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">searchAction</span><span class="p">(</span><span class="n">SearchActionRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Not implemented - return null to use default empty response</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -3641,7 +4017,7 @@ This extends methods from the base script type in addition to adding new methods
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 24, 2026 12:49:48 UTC"><span class="timeago" datetime="2026-02-24T12:49:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 24, 2026 12:49:48 UTC">2026-02-24</span>
   </span>
 
     
