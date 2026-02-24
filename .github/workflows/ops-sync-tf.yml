@@ -1,14 +1,11 @@
 name: sync
 on:
   workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'The PR number to pull the body from'
-        required: false
-        default: ''
-  pull_request_target:
+  push:
     branches:
-      - "cn-update-terraform-provider-jans"
+      - main
+    paths:
+      - "terraform-provider-jans/**"
 permissions:
   contents: read
 
@@ -25,46 +22,26 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-    - name: Set up Python 3.8
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
-        python-version: 3.8
+        fetch-depth: 0
 
-    - name: Import GPG key
-      id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
-
-    - name: Configure Git
+    - name: Split and sync to downstream repo
       run: |
-        mkdir sync
-        cd sync
-        git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/terraform-provider-jans.git
         git config --global user.name "mo-auto"
         git config --global user.email "54212639+mo-auto@users.noreply.github.com"
-        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        # If the user passed in a PR number
-        PR_NUMBER=${{ github.event.inputs.pr_number }}
-        if [ ! -z "$PR_NUMBER" ]
-        then
-          pull_number=$PR_NUMBER
-          echo "Manual PR number inputted"
-        else
-          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-        fi
-        BODY=$(gh pr view $pull_number --json body --jq '.body')
-        echo $BODY
-        cd terraform-provider-jans
-        git checkout -b cn-update-terraform-provider-jans
-        rsync -av --progress ../../terraform-provider-jans/* . --exclude=.git
-        git add -A
-        git commit -S -s -m "fix(terraform-provider-jans): update terraform provider" || exit 0
-        git push --set-upstream origin cn-update-terraform-provider-jans
-        MESSAGE="fix(terraform-provider-jans): update terraform module"
-        PR=$(gh pr create --body "${BODY}" --title "${MESSAGE}")      
+
+        SPLIT_BRANCH="terraform-split"
+        git subtree split --prefix=terraform-provider-jans -b "$SPLIT_BRANCH"
+
+        DOWNSTREAM="https://github.com/JanssenProject/terraform-provider-jans.git"
+        git remote add downstream "$DOWNSTREAM"
+        git fetch --no-tags downstream
+
+        # Unset the extraheader injected by actions/checkout so only our credential is used
+        git config --unset-all http.https://github.com/.extraheader || true
+
+        # Use Basic auth (Git HTTPS requires Basic, not Bearer)
+        BASIC_CRED=$(echo -n "x-access-token:${TOKEN}" | base64 -w0)
+        git -c "http.https://github.com/.extraheader=AUTHORIZATION: Basic ${BASIC_CRED}" push downstream "${SPLIT_BRANCH}:main" --force-with-lease
+      env:
+        TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
