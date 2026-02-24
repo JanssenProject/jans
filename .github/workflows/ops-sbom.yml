@@ -1,4 +1,3 @@
-
 name: Generate and Upload SBOM Reports
 
 on:
@@ -12,22 +11,24 @@ jobs:
   enrich_and_upload_sbom:
     permissions:
       contents: write
+      id-token: write
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Harden Runner
+      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      with:
+        egress-policy: audit
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
     - name: Fetch Jans SBOM from Github
       run: |
             curl -H "Accept: application/vnd.github.v3.raw" \
                  -o gh-sbom.json \
                  https://api.github.com/repos/JanssenProject/jans/dependency-graph/sbom
             wc gh-sbom.json
-
-    - name: Install jq
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y jq
 
     - name: Trim SBOM
       run: |
@@ -74,10 +75,20 @@ jobs:
         sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
         wc jans-sbom-openchain-report.json
 
+    - name: Sign SBOM and compliance reports
+      run: |
+        for file in jans-sbom.json jans-sbom-fsct-report.json jans-sbom-bsi-v2-report.json jans-sbom-NTIA-report.json jans-sbom-openchain-report.json; do
+          cosign sign-blob --yes --bundle "${file}.bundle" "${file}" || echo "Failed to sign ${file}"
+        done
+
     - name: Upload the enriched SBOM and compliance reports to the release
       run: |
         VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" jans-sbom.json jans-sbom-fsct-report.json \
-        jans-sbom-bsi-v2-report.json jans-sbom-NTIA-report.json \
-        jans-sbom-openchain-report.json --clobber
+        gh release upload "${VERSION}" \
+          jans-sbom.json jans-sbom.json.bundle \
+          jans-sbom-fsct-report.json jans-sbom-fsct-report.json.bundle \
+          jans-sbom-bsi-v2-report.json jans-sbom-bsi-v2-report.json.bundle \
+          jans-sbom-NTIA-report.json jans-sbom-NTIA-report.json.bundle \
+          jans-sbom-openchain-report.json jans-sbom-openchain-report.json.bundle \
+          --clobber
