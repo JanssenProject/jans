@@ -145,8 +145,6 @@ public class AccessEvaluationDiscovery implements AccessEvaluationDiscoveryType 
             capabilities = new JSONArray();
             response.put("capabilities", capabilities);
         }
-        capabilities.put("custom_capability_1");
-        capabilities.put("custom_capability_2");
 
         // Add custom metadata
         response.put("organization", "Acme Corp");
