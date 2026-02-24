@@ -194,21 +194,17 @@ class DBUtils:
             with self.local_session.begin() as session:
                 sqlalchemyObj = self.get_sqlalchObj_for_dn('ou=configuration,o=jans', session)
                 setattr(sqlalchemyObj, service, 1)
-
-
+                session.commit()
 
     def set_configuration(self, component, value, dn='ou=configuration,o=jans'):
         if Config.rdbm_type in ('mysql', 'pgsql'):
             typed_val = self.get_rdbm_val(component, value)
             with self.local_session.begin() as session:
-                result = self.get_sqlalchObj_for_dn(dn, session)
-                table_name = result.objectClass
-                sqlalchemy_table = self.Base.classes[table_name]
-                sqlalchemyObj = session.query(sqlalchemy_table).filter(sqlalchemy_table.dn ==dn).first()
-                cur_val = getattr(sqlalchemyObj, component)
-                setattr(sqlalchemyObj, component, typed_val)
-
-
+                sqlalchemyObj = self.get_sqlalchObj_for_dn(dn, session)
+                if sqlalchemyObj:
+                    cur_val = getattr(sqlalchemyObj, component)
+                    setattr(sqlalchemyObj, component, typed_val)
+                    session.commit()
 
     def dn_exists(self, dn):
         mapping_location = self.get_backend_location_for_dn(dn)
@@ -228,8 +224,9 @@ class DBUtils:
         sqlalchemy_table = self.Base.classes[table].__table__
 
         with self.local_session.begin() as session:
-            
-            return session.query(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
+            select_stmt = sqlalchemy.select(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn)
+            qury_result = session.execute(select_stmt)
+            return qury_result.scalars().first()
 
 
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=SearchScopes.LEVEL, fetchmany=False):
@@ -269,7 +266,7 @@ class DBUtils:
             sqlalchemy_table = self.Base.classes[s_table]
 
             with self.local_session.begin() as session:
-                sqlalchemyQueryObject = session.query(sqlalchemy_table)
+                sqlalchemyQueryObject = sqlalchemy.select(sqlalchemy_table)
 
                 for col, val in search_list:
                     if val == '*':
@@ -288,8 +285,10 @@ class DBUtils:
                 else:
                     sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemy_table.dn.like('%'+search_base))
 
+                qury_result = session.execute(sqlalchemyQueryObject)
+
                 if fetchmany:
-                    result = sqlalchemyQueryObject.all()
+                    result = qury_result.scalars().all()
                     ret_val = []
                     for item in result:
                         item_val = dict(item.__dict__)
@@ -298,12 +297,11 @@ class DBUtils:
                     return ret_val
 
                 else:
-                    result = sqlalchemyQueryObject.first()
+                    result = qury_result.scalars().first()
                     if result:
                         ret_val = dict(result.__dict__)
                         ret_val.pop('_sa_instance_state', None)
                         return ret_val
-
 
 
     def add2strlist(self, client_id, strlist):
@@ -412,19 +410,23 @@ class DBUtils:
 
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
 
-    def get_sqlalchObj_for_dn(self, dn, session):
+    def get_sqlalchObj_for_dn(self, dn, session, *, exact=True):
 
-        for tbl in self.Base.classes:
-            result = session.query(tbl).filter(tbl.dn == dn).first()
+        if exact:
+            for tbl in self.Base.classes:
+                select_stmt = sqlalchemy.select(tbl).filter(tbl.dn == dn)
+                qury_result = session.execute(select_stmt)
+                result = qury_result.first()
+                if result:
+                    return result[0]
 
-            if result:
-                return result
-
-        for tbl in self.Base.classes:
-            result = session.query(tbl).filter(tbl.dn.like('%'+dn)).first()
-
-            if result:
-                return result
+        else:
+            for tbl in self.Base.classes:
+                select_stmt = sqlalchemy.select(tbl).filter(tbl.dn.like('%'+dn))
+                qury_result = session.execute(select_stmt)
+                result = qury_result.first()
+                if result:
+                    return result[0]
 
     def table_exists(self, table):
 
