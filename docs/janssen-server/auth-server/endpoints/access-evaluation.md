@@ -58,6 +58,7 @@ https://janssen.server.host/jans-auth/.well-known/authzen-configuration
 changed via `AccessEvaluationDiscoveryType` custom script.
 
 **Sample AuthZEN Discovery Response**
+
 ```json
 {
   "policy_decision_point": "https://janssen.server.host",
