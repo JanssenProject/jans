@@ -5,13 +5,15 @@ on:
       - main
     paths:
       - "charts/**"
-      - "automation/startjanssendemo.sh"
+      - "terraform-provider-jans/**"
+      - "!**.md"
   pull_request:
     branches:
       - main
     paths:
       - "charts/**"
-      - "automation/startjanssendemo.sh"
+      - "terraform-provider-jans/**"
+      - "!**.md"
   workflow_dispatch:
     inputs:
       jans_version:
@@ -21,15 +23,24 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   microk8s:
     strategy:
       max-parallel: 6
       matrix:
-        istio: ["true", "false"]
-        persistence-backends: ["MYSQL", "PGSQL"]
+        chart: ["janssen", "janssen-all-in-one"]
+        persistence-backend: ["MYSQL", "PGSQL"]
+        ingress: ["nginx-legacy", "nginx-gateway-fabric"]
       fail-fast: false
     runs-on: ubuntu-latest
+    env:
+      JANS_FQDN: ci-${{ github.run_id }}.jans.test
+      JANS_VERSION: ${{ github.event.inputs.jans_version || '0.0.0-nightly' }}
+      KUBECONFIG: /home/runner/.kube/config
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
@@ -39,12 +50,407 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Test dev setup
-      id: start_up_script
+    - name: Install microk8s
       run: |
-          ip=$(curl ipinfo.io/ip)
-          chmod u+x automation/startjanssendemo.sh
-          JANS_VERSION=${{ github.event.inputs.jans_version }}
-          JANS_VERSION=${JANS_VERSION:-"0.0.0-nightly"}
-          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $JANS_VERSION $ip true ${{ matrix.istio }} 
-          sudo bash ./automation/analyze_test_microk8s_setup.sh "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" ${{ matrix.persistence-backends }}
+        sudo snap install microk8s --classic
+        sudo microk8s.status --wait-ready
+        sudo microk8s.enable dns registry hostpath-storage helm3
+        sudo microk8s config | sudo tee "$KUBECONFIG" > /dev/null
+        sudo chown "$USER" "$KUBECONFIG"
+        sudo snap alias microk8s.kubectl kubectl
+        sudo snap alias microk8s.helm3 helm
+
+    - name: Install ingress controller
+      run: |
+        if [[ "${{ matrix.ingress }}" == "nginx-legacy" ]]; then
+          sudo microk8s.enable ingress
+          sudo microk8s kubectl get daemonset.apps/nginx-ingress-microk8s-controller -n ingress -o yaml \
+            | sed -s "s@ingress-class=public@ingress-class=nginx@g" \
+            | sudo microk8s kubectl apply -f -
+        else
+          echo "Installing Gateway API CRDs..."
+          kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
+          echo "Installing NGINX Gateway Fabric..."
+          helm repo add nginx-gateway https://nginx.org/helm-charts
+          helm repo update
+          helm install ngf nginx-gateway/nginx-gateway-fabric \
+            --version 1.6.2 \
+            --create-namespace -n nginx-gateway \
+            --set service.type=NodePort
+          kubectl -n nginx-gateway wait --for=condition=available --timeout=120s deploy/ngf-nginx-gateway-fabric
+        fi
+
+    - name: Create namespace and deploy database
+      run: |
+        kubectl create namespace jans
+        if [[ "${{ matrix.persistence-backend }}" == "MYSQL" ]]; then
+          kubectl apply -f automation/mysql.yaml
+        else
+          kubectl apply -f automation/pgsql.yaml
+        fi
+        echo "Waiting for database pod to be ready..."
+        if [[ "${{ matrix.persistence-backend }}" == "MYSQL" ]]; then
+          kubectl -n jans wait --for=condition=available --timeout=120s deploy/mysql
+        else
+          kubectl -n jans wait --for=condition=available --timeout=120s deploy/postgresql
+        fi
+
+    - name: Generate Helm override values
+      run: |
+        EXT_IP=$(hostname -I | awk '{print $1}')
+        echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
+
+        if [[ "${{ matrix.persistence-backend }}" == "MYSQL" ]]; then
+          DB_DIALECT="mysql"
+          DB_HOST="mysql.jans.svc"
+          DB_PORT="3306"
+          DB_USER="root"
+        else
+          DB_DIALECT="pgsql"
+          DB_HOST="postgresql.jans.svc"
+          DB_PORT="5432"
+          DB_USER="postgres"
+        fi
+
+        USE_GATEWAY_API="false"
+        USE_NGINX_INGRESS="true"
+        if [[ "${{ matrix.ingress }}" == "nginx-gateway-fabric" ]]; then
+          USE_GATEWAY_API="true"
+          USE_NGINX_INGRESS="false"
+        fi
+
+        if [[ "${{ matrix.chart }}" == "janssen" ]]; then
+          cat > override.yaml << EOF
+        config:
+          countryCode: US
+          email: support@gluu.org
+          orgName: Gluu
+          city: Austin
+          configmap:
+            cnSqlDbName: jans
+            cnSqlDbPort: ${DB_PORT}
+            cnSqlDbDialect: ${DB_DIALECT}
+            cnSqlDbHost: ${DB_HOST}
+            cnSqlDbUser: ${DB_USER}
+            cnSqlDbTimezone: UTC
+            cnSqldbUserPassword: Test1234#
+        global:
+          cloud:
+            testEnviroment: true
+          gatewayApi:
+            enabled: ${USE_GATEWAY_API}
+          nginx-ingress:
+            enabled: ${USE_NGINX_INGRESS}
+          auth-server-key-rotation:
+            enabled: true
+          auth-server:
+            appLoggers:
+              authLogTarget: "FILE"
+              authLogLevel: "TRACE"
+              httpLogTarget: "FILE"
+              httpLogLevel: "TRACE"
+              persistenceLogTarget: "FILE"
+              persistenceLogLevel: "TRACE"
+              persistenceDurationLogTarget: "FILE"
+              persistenceDurationLogLevel: "TRACE"
+              scriptLogTarget: "FILE"
+              scriptLogLevel: "TRACE"
+              auditStatsLogTarget: "FILE"
+              auditStatsLogLevel: "TRACE"
+          casa:
+            appLoggers:
+              casaLogTarget: "FILE"
+              casaLogLevel: "TRACE"
+              timerLogTarget: "FILE"
+              timerLogLevel: "TRACE"
+            ingress:
+              casaEnabled: true
+          config-api:
+            appLoggers:
+              configApiLogTarget: "FILE"
+              configApiLogLevel: "TRACE"
+          fido2:
+            ingress:
+              fido2ConfigEnabled: true
+            appLoggers:
+              fido2LogTarget: "FILE"
+              fido2LogLevel: "TRACE"
+              persistenceLogTarget: "FILE"
+              persistenceLogLevel: "TRACE"
+          scim:
+            ingress:
+              scimConfigEnabled: true
+              scimEnabled: true
+            appLoggers:
+              scimLogTarget: "FILE"
+              scimLogLevel: "TRACE"
+              persistenceLogTarget: "FILE"
+              persistenceLogLevel: "TRACE"
+              persistenceDurationLogTarget: "FILE"
+              persistenceDurationLogLevel: "TRACE"
+              scriptLogTarget: "FILE"
+              scriptLogLevel: "TRACE"
+          fqdn: ${JANS_FQDN}
+          lbIp: ${EXT_IP}
+        nginx-ingress:
+          ingress:
+            path: /
+            hosts:
+            - ${JANS_FQDN}
+            tls:
+            - secretName: tls-certificate
+              hosts:
+              - ${JANS_FQDN}
+        gatewayApi:
+          gatewayClassName: nginx
+          name: jans-gateway
+          tlsSecretName: tls-certificate
+        EOF
+        else
+          cat > override.yaml << EOF
+        fqdn: ${JANS_FQDN}
+        adminPassword: Test1234#
+        testEnviroment: true
+        cnPersistenceType: sql
+        configmap:
+          cnSqlDbDialect: ${DB_DIALECT}
+          cnSqlDbHost: ${DB_HOST}
+          cnSqlDbPort: ${DB_PORT}
+          cnSqlDbName: jans
+          cnSqlDbUser: ${DB_USER}
+        lbIp: ${EXT_IP}
+        nginx-ingress:
+          enabled: ${USE_NGINX_INGRESS}
+        gatewayApi:
+          enabled: ${USE_GATEWAY_API}
+          gatewayClassName: nginx
+          name: jans-gateway
+          tlsSecretName: tls-certificate
+        EOF
+        fi
+
+    - name: Install Janssen via Helm
+      run: |
+        helm repo add janssen https://docs.jans.io/charts
+        helm repo update
+        helm install janssen janssen/${{ matrix.chart }} \
+          -n jans \
+          -f override.yaml \
+          --version="${JANS_VERSION}"
+
+    - name: Wait for services
+      run: |
+        echo "Waiting for Janssen services to come up (timeout 600s)..."
+        DEPLOYMENTS=$(kubectl get deploy -n jans -o jsonpath='{.items[*].metadata.name}')
+        for deploy in $DEPLOYMENTS; do
+          echo "Waiting for $deploy..."
+          kubectl -n jans wait --for=condition=available --timeout=600s "deploy/$deploy" || { echo "FATAL: $deploy not ready"; exit 1; }
+        done
+
+    - name: Verify endpoints
+      run: |
+        echo "Testing openid-configuration endpoint..."
+        HTTP_STATUS=$(curl -sk -o /tmp/openid-response.json -w "%{http_code}" "https://${JANS_FQDN}/.well-known/openid-configuration")
+        if [[ "$HTTP_STATUS" != "200" ]]; then
+          echo "FATAL: openid-configuration returned HTTP $HTTP_STATUS"
+          cat /tmp/openid-response.json 2>/dev/null || true
+          exit 1
+        fi
+        if ! jq -e '.issuer' /tmp/openid-response.json > /dev/null 2>&1; then
+          echo "FATAL: openid-configuration response missing 'issuer' key"
+          cat /tmp/openid-response.json
+          exit 1
+        fi
+        echo "openid-configuration OK (issuer: $(jq -r '.issuer' /tmp/openid-response.json))"
+
+        echo "Testing scim-configuration endpoint..."
+        HTTP_STATUS=$(curl -sk -o /tmp/scim-response.json -w "%{http_code}" "https://${JANS_FQDN}/.well-known/scim-configuration")
+        if [[ "$HTTP_STATUS" != "200" ]]; then
+          echo "FATAL: scim-configuration returned HTTP $HTTP_STATUS"
+          cat /tmp/scim-response.json 2>/dev/null || true
+          exit 1
+        fi
+        if ! jq -e '.' /tmp/scim-response.json > /dev/null 2>&1; then
+          echo "FATAL: scim-configuration response is not valid JSON"
+          cat /tmp/scim-response.json
+          exit 1
+        fi
+        echo "scim-configuration OK"
+
+        echo "Testing fido2-configuration endpoint..."
+        HTTP_STATUS=$(curl -sk -o /tmp/fido2-response.json -w "%{http_code}" "https://${JANS_FQDN}/.well-known/fido2-configuration")
+        if [[ "$HTTP_STATUS" != "200" ]]; then
+          echo "FATAL: fido2-configuration returned HTTP $HTTP_STATUS"
+          cat /tmp/fido2-response.json 2>/dev/null || true
+          exit 1
+        fi
+        if ! jq -e '.' /tmp/fido2-response.json > /dev/null 2>&1; then
+          echo "FATAL: fido2-configuration response is not valid JSON"
+          cat /tmp/fido2-response.json
+          exit 1
+        fi
+        echo "fido2-configuration OK"
+
+    - name: Extract credentials and create test client
+      id: credentials
+      run: |
+        TOKEN_ENDPOINT="https://${JANS_FQDN}/jans-auth/restv1/token"
+        CONFIG_API="https://${JANS_FQDN}/jans-config-api/api/v1"
+
+        echo "Waiting for config-api client credentials in K8s..."
+        for i in $(seq 1 30); do
+          JCA_CLIENT_ID=$(kubectl get configmap cn -n jans -o jsonpath='{.data.jca_client_id}' 2>/dev/null || true)
+          JCA_CLIENT_PW=$(kubectl get secret cn -n jans -o jsonpath='{.data.jca_client_pw}' 2>/dev/null | base64 -d 2>/dev/null || true)
+          if [[ -n "$JCA_CLIENT_ID" && -n "$JCA_CLIENT_PW" ]]; then
+            echo "Found config-api client credentials (attempt $i)"
+            break
+          fi
+          echo "Attempt $i/30: credentials not ready, waiting 10s..."
+          sleep 10
+        done
+        if [[ -z "$JCA_CLIENT_ID" || -z "$JCA_CLIENT_PW" ]]; then
+          echo "ERROR: Could not retrieve config-api client credentials from K8s"
+          kubectl get configmap cn -n jans -o yaml || true
+          exit 1
+        fi
+        echo "::add-mask::${JCA_CLIENT_PW}"
+
+        echo "Obtaining access token from config-api client..."
+        TOKEN_RESPONSE=$(curl -sk -X POST "$TOKEN_ENDPOINT" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=client_credentials" \
+          -d "client_id=${JCA_CLIENT_ID}" \
+          -d "client_secret=${JCA_CLIENT_PW}" \
+          -d "scope=https://jans.io/oauth/config/openid/clients.write https://jans.io/oauth/config/scopes.readonly")
+        ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token // empty')
+        if [[ -n "$ACCESS_TOKEN" ]]; then
+          echo "::add-mask::${ACCESS_TOKEN}"
+        fi
+        if [[ -z "$ACCESS_TOKEN" ]]; then
+          echo "ERROR: Failed to obtain access token"
+          echo "$TOKEN_RESPONSE" | jq . 2>/dev/null || echo "$TOKEN_RESPONSE"
+          exit 1
+        fi
+
+        echo "Fetching all available scopes..."
+        ALL_SCOPES=$(curl -sk -H "Authorization: Bearer $ACCESS_TOKEN" \
+          "${CONFIG_API}/scopes?limit=500" | jq -r '.[].dn')
+        SCOPE_ARRAY=$(echo "$ALL_SCOPES" | jq -R -s 'split("\n") | map(select(length > 0))')
+
+        TEST_CLIENT_PW=$(openssl rand -base64 12)
+        echo "::add-mask::${TEST_CLIENT_PW}"
+
+        echo "Creating test client with all scopes..."
+        RESPONSE=$(curl -sk -X POST "${CONFIG_API}/openid/clients" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"displayName\": \"CI Test Client\",
+            \"clientSecret\": \"${TEST_CLIENT_PW}\",
+            \"applicationType\": \"web\",
+            \"tokenEndpointAuthMethod\": \"client_secret_basic\",
+            \"grantTypes\": [\"client_credentials\"],
+            \"responseTypes\": [\"token\"],
+            \"scopes\": ${SCOPE_ARRAY},
+            \"trustedClient\": true,
+            \"accessTokenAsJwt\": false,
+            \"disabled\": false
+          }")
+
+        TEST_CLIENT_ID=$(echo "$RESPONSE" | jq -r '.inum // .clientId // empty')
+        if [[ -z "$TEST_CLIENT_ID" ]]; then
+          echo "ERROR: Failed to create test client"
+          echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
+          exit 1
+        fi
+
+        echo "Test client created: ${TEST_CLIENT_ID}"
+        echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
+        echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
+
+    - name: Set up Go
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      with:
+        go-version-file: terraform-provider-jans/go.mod
+        cache-dependency-path: terraform-provider-jans/go.sum
+
+    - name: Run Terraform provider acceptance tests
+      id: tf_tests
+      continue-on-error: true
+      working-directory: terraform-provider-jans
+      env:
+        TF_ACC: "1"
+        JANS_CLIENT_ID: ${{ steps.credentials.outputs.test_client_id }}
+        JANS_CLIENT_SECRET: ${{ steps.credentials.outputs.test_client_pw }}
+        JANS_URL: https://${{ env.JANS_FQDN }}
+        JANS_INSECURE_CLIENT: "true"
+      run: |
+        go test ./... -v -json -timeout 30m 2>/tmp/test-errors.log | tee /tmp/test-results.json
+        if [[ -s /tmp/test-errors.log ]]; then
+          echo "--- stderr from go test ---"
+          cat /tmp/test-errors.log
+        fi
+
+    - name: Post test results
+      if: always() && steps.tf_tests.outcome != 'skipped'
+      run: |
+        RESULTS_FILE="/tmp/test-results.json"
+        if [[ ! -f "$RESULTS_FILE" ]]; then
+          echo "No test results found" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
+
+        PASSED=$(jq -s '[.[] | select(.Test != null and .Action == "pass")] | length' "$RESULTS_FILE")
+        FAILED=$(jq -s '[.[] | select(.Test != null and .Action == "fail")] | length' "$RESULTS_FILE")
+        SKIPPED=$(jq -s '[.[] | select(.Test != null and .Action == "skip")] | length' "$RESULTS_FILE")
+        TOTAL=$((PASSED + FAILED + SKIPPED))
+
+        FAILED_TESTS=$(jq -r 'select(.Test != null and .Action == "fail") | .Test' "$RESULTS_FILE" 2>/dev/null | sort -u)
+
+        if [[ "$FAILED" -gt 0 ]]; then
+          STATUS="❌ Some tests failed"
+        else
+          STATUS="✅ All tests passed"
+        fi
+
+        cat << EOF >> "$GITHUB_STEP_SUMMARY"
+        ## Terraform Provider Test Results
+
+        **Chart**: \`${{ matrix.chart }}\` | **Persistence**: \`${{ matrix.persistence-backend }}\` | **Ingress**: \`${{ matrix.ingress }}\`
+
+        ${STATUS}
+
+        | Metric | Count |
+        |--------|-------|
+        | Total | ${TOTAL} |
+        | Passed | ${PASSED} |
+        | Failed | ${FAILED} |
+        | Skipped | ${SKIPPED} |
+        EOF
+
+        if [[ -n "$FAILED_TESTS" ]]; then
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Failed Tests" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "$FAILED_TESTS" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        if [[ "${{ steps.tf_tests.outcome }}" == "failure" ]]; then
+          exit 1
+        fi
+
+    - name: Collect service logs on failure
+      if: failure()
+      run: |
+        echo "## Service Status" >> "$GITHUB_STEP_SUMMARY"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+        kubectl get pods -n jans >> "$GITHUB_STEP_SUMMARY"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+        for pod in $(kubectl get pods -n jans -o jsonpath='{.items[*].metadata.name}'); do
+          echo "### Logs: ${pod}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          kubectl logs "$pod" -n jans --tail=50 >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+        done

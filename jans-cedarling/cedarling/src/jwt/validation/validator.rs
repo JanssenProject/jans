@@ -97,6 +97,8 @@ impl JwtValidator {
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
 
+        #[allow(deprecated)]
+        // TODO: fix the deprecation warning
         if !validate_signature {
             validation.insecure_disable_signature_validation();
         }
@@ -142,6 +144,8 @@ impl JwtValidator {
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
 
+        #[allow(deprecated)]
+        // TODO: fix the deprecation warning
         if !validate_signature {
             validation.insecure_disable_signature_validation();
         }
