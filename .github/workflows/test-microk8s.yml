@@ -74,6 +74,7 @@ jobs:
           helm repo add nginx-gateway https://nginx.org/helm-charts
           helm repo update
           helm install ngf nginx-gateway/nginx-gateway-fabric \
+            --version 1.6.2 \
             --create-namespace -n nginx-gateway \
             --set service.type=NodePort
           kubectl -n nginx-gateway wait --for=condition=available --timeout=120s deploy/ngf-nginx-gateway-fabric
@@ -384,7 +385,11 @@ jobs:
         JANS_URL: https://${{ env.JANS_FQDN }}
         JANS_INSECURE_CLIENT: "true"
       run: |
-        go test ./... -v -json -timeout 30m 2>&1 | tee /tmp/test-results.json
+        go test ./... -v -json -timeout 30m 2>/tmp/test-errors.log | tee /tmp/test-results.json
+        if [[ -s /tmp/test-errors.log ]]; then
+          echo "--- stderr from go test ---"
+          cat /tmp/test-errors.log
+        fi
 
     - name: Post test results
       if: always() && steps.tf_tests.outcome != 'skipped'

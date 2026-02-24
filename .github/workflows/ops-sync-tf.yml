@@ -35,6 +35,13 @@ jobs:
 
         DOWNSTREAM="https://github.com/JanssenProject/terraform-provider-jans.git"
         git remote add downstream "$DOWNSTREAM"
-        git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer ${TOKEN}" push downstream "${SPLIT_BRANCH}:main" --force-with-lease
+        git fetch --no-tags downstream
+
+        # Unset the extraheader injected by actions/checkout so only our credential is used
+        git config --unset-all http.https://github.com/.extraheader || true
+
+        # Use Basic auth (Git HTTPS requires Basic, not Bearer)
+        BASIC_CRED=$(echo -n "x-access-token:${TOKEN}" | base64 -w0)
+        git -c "http.https://github.com/.extraheader=AUTHORIZATION: Basic ${BASIC_CRED}" push downstream "${SPLIT_BRANCH}:main" --force-with-lease
       env:
         TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}

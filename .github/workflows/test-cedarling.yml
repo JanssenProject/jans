@@ -24,7 +24,7 @@ jobs:
         toolchain: stable
         components: clippy
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
     - name: Run Tests
@@ -52,7 +52,7 @@ jobs:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
     - uses: cargo-bins/cargo-binstall@v1.17.4
@@ -66,6 +66,10 @@ jobs:
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
+        # Nightly pin for dylint: check dylint release notes for compatible nightly.
+        # To upgrade: 1) Find the nightly used by the target dylint release
+        # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
+        # 3) Update the pin below and in the toolchain install step above
         RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --path custom-lints
 
   rust_benchmarks:
@@ -81,12 +85,12 @@ jobs:
       with:
         toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
     - name: Run benchmarks
       working-directory: jans-cedarling
-      run: cargo bench --profile release
+      run: cargo bench
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
       run: python3 scripts/check_benchmarks.py
@@ -112,7 +116,7 @@ jobs:
         targets: wasm32-unknown-unknown
 
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
 
@@ -127,7 +131,12 @@ jobs:
 
     - name: Run WASM tests using firefox
       working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: wasm-pack test --headless --firefox
+      run: |
+        # Work around Snap Firefox confinement on ubuntu-latest:
+        # Snap Firefox cannot access /tmp profiles, so redirect TMPDIR under $HOME
+        export TMPDIR="${HOME}/tmp"
+        mkdir -p "$TMPDIR"
+        wasm-pack test --headless --firefox
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
@@ -169,7 +178,7 @@ jobs:
       with:
         toolchain: stable
     - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
     - name: Install Golang dependencies

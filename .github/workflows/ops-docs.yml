@@ -32,13 +32,14 @@ jobs:
         id: check_message
         env:
           PULL_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           echo "Parsing commits from PR $PULL_NUMBER"
           MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq -r '.commits[].messageHeadline' | grep "^docs" || echo "")
           echo "$MESSAGE"
           if [[ -z "$MESSAGE" ]]; then
             echo "conventional commit starting with docs: does not exist. Checking if user confirmed no impact on docs in PR body"
-            pr_body=$(gh pr view https://github.com/${{ github.repository }}/pull/"$PULL_NUMBER" --json body -q '.body')
+            pr_body=$(gh pr view "https://github.com/${REPOSITORY}/pull/${PULL_NUMBER}" --json body -q '.body')
             if [[ $pr_body == *"- [x] **I confirm that there is no impact on the docs due to the code changes in this PR.**"* ]]; then
               echo "Checklist item is filled in PR body. Author confirmed no impact."
               exit 0

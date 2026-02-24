@@ -51,7 +51,7 @@ jobs:
             gh pr view "$issue_or_pull_number" --json files --jq '.files.[].path' > changed_files
             changed_files=$(paste -s -d, changed_files)
             operation="pr"
-            branch=${{github.base_ref}}
+            branch="${GITHUB_BASE_REF}"
             title=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
           fi
           python3 ./automation/github-labels/label.py "${issue_or_pull_number}" "${changed_files}" "${branch}" "${operation}" "${title}"

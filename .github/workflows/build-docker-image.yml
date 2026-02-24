@@ -171,7 +171,7 @@ jobs:
             if [[ -z "$pull_number" || "$pull_number" == "null" ]]; then
               DIRECTORIES_CHANGED="$ALL_SERVICES"
             else
-              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$ALL_SERVICES")
+              DIRECTORIES_CHANGED=$(gh pr view "$pull_number" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep -E '^docker-jans|^cedarling-flask-sidecar' || echo "$ALL_SERVICES")
             fi
             MATCH=false
             for dir in $DIRECTORIES_CHANGED; do
