@@ -26,7 +26,7 @@ jobs:
         toolchain: stable
         components: clippy
     - name: Ensure clippy is installed
-      run: rustup component add clippy
+      run: rustup component add --toolchain stable clippy
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
@@ -36,7 +36,7 @@ jobs:
       run: cargo test --workspace
     - name: Run Clippy on native target
       working-directory: jans-cedarling
-      run: cargo clippy --workspace --all-targets -- -D warnings
+      run: cargo +stable clippy --workspace --all-targets -- -D warnings
 
   custom_lints:
     runs-on: ubuntu-latest
@@ -123,7 +123,7 @@ jobs:
         components: clippy
         targets: wasm32-unknown-unknown
     - name: Ensure clippy is installed
-      run: rustup component add clippy
+      run: rustup component add --toolchain stable clippy
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
@@ -150,7 +150,7 @@ jobs:
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
-      run: cargo clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
+      run: cargo +stable clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
 
   python_tests:
     runs-on: ubuntu-latest
