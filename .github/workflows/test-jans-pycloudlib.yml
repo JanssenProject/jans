@@ -44,6 +44,5 @@ jobs:
         python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
         python3 -m pip install tox
     - name: Test with pytest
-      run: |
-        cd ./jans-pycloudlib
-        tox
+      working-directory: jans-pycloudlib
+      run: tox
