@@ -29,21 +29,15 @@ jobs:
     - name: set nightly version
       id: nightly
       continue-on-error: false
-      if: ${{ github.event_name }} == 'schedule' || ${{ github.event.inputs.nightly }} == 'true'
+      if: github.event_name == 'schedule' || github.event.inputs.nightly == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        TARGET_BRANCH: ${{ github.event.inputs.branch }}
       run: |
-        VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
-        echo $VERSION
-        curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
-        tar xvf gh_${VERSION}_linux_amd64.tar.gz
-        sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
-        gh version
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         NIGHTLY_VERSION="nightly"
-        gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
-        gh release delete ${NIGHTLY_VERSION} --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}" does not exist
-        git push --delete origin ${NIGHTLY_VERSION} || echo "v${NIGHTLY_VERSION}" does not exist
-        TARGET_BRANCH=${{ github.event.inputs.branch }}
+        gh release delete "${NIGHTLY_VERSION}" --cleanup-tag --yes || echo "${NIGHTLY_VERSION} does not exist"
+        git push --delete origin "${NIGHTLY_VERSION}" || echo "${NIGHTLY_VERSION} tag does not exist"
         if [ -z "$TARGET_BRANCH" ]; then
           TARGET_BRANCH="main"
         fi
-        gh release create ${NIGHTLY_VERSION} --generate-notes --prerelease --title "${NIGHTLY_VERSION}" --target "${TARGET_BRANCH}"
+        gh release create "${NIGHTLY_VERSION}" --generate-notes --prerelease --title "${NIGHTLY_VERSION}" --target "${TARGET_BRANCH}"
