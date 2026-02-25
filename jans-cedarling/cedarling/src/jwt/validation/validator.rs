@@ -216,6 +216,8 @@ impl JwtValidator {
         jwt: &str,
         decoding_key: Option<&DecodingKey>,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
+        // TODO: Simplify this branching and decode/validation flow.
+        // Tracking issue: https://github.com/JanssenProject/jans/issues/13287
         let validated_jwt = if self.validate_signature {
             let Some(decoding_key) = decoding_key else {
                 return Err(ValidateJwtError::MissingValidationKey);
