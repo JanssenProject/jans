@@ -79,7 +79,7 @@ WORKDIR /
 
 # default pip timeout
 ARG PIP_TIMEOUT=15
-COPY /app/requirements.txt /app/requirements.txt
+COPY app/requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
