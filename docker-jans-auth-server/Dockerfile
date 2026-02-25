@@ -54,7 +54,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2026-01-29 08:22'
+ENV CN_BUILD_DATE='2026-02-25 15:48'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -80,20 +80,12 @@ ARG JSMPP_VERSION=2.3.7
 RUN set -e \
     && wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
-    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound cedarling-java; \
+    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
     done
 
 # Download jans-lock JARs to _lock_libs (conditionally copied via Python script when lock is enabled)
-# Using set -e to ensure any failed wget aborts the build
-RUN set -e \
-    && for lock_lib in jans-lock-service jans-lock-model jans-lock-cedarling; \
-    do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_lock_libs" || exit 1; \
-    done
-
-# dependencies to run jans-lock as plugin
 RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
     && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/_lock_libs \
     && rm -f /tmp/lock-svc-deps.zip
