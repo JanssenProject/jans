@@ -78,7 +78,7 @@ jobs:
             fi
 
             echo "Creating a comment..."
-            printf "%b" "Error: Hi @$PR_USER, You did not reference an open issue in your [PR]($PR_NUMBER). I attempted to create an [issue](#$ISSUE_NUMBER) for you.\n Please update that [issues'](#$ISSUE_NUMBER) title and body and make sure I correctly referenced it in the above PRs body." \
+            printf "%s\n%s" "Error: Hi @$PR_USER, You did not reference an open issue in your [PR]($PR_NUMBER). I attempted to create an [issue](#$ISSUE_NUMBER) for you." " Please update that [issues'](#$ISSUE_NUMBER) title and body and make sure I correctly referenced it in the above PRs body." \
               | gh issue comment "$PR_NUMBER" \
               --body-file - \
               --repo "$REPO_FULL_NAME"
