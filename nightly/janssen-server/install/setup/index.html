@@ -2226,44 +2226,152 @@ setup files will be preserved.</p>
 <td>-remote-rdbm-ssl-cert-fn REMOTE_RDBM_SSL_CERT_FN</td>
 <td>To use SSL connection for remote RDBM server, set path of SSL root certificate file of remote RDBM server</td>
 </tr>
+<tr>
+<td>--reset-rdbm-db</td>
+<td>Deletes all tables on target database. Warning! You will lose all data on target database.</td>
+</tr>
+<tr>
+<td>--shell</td>
+<td>Drop into interactive shell before starting installation</td>
+</tr>
+<tr>
+<td>--dump-config-on-error</td>
+<td>Dump configuration on error</td>
+</tr>
+<tr>
+<td>--no-progress</td>
+<td>Use simple progress</td>
+</tr>
+<tr>
+<td>-admin-password ADMIN_PASSWORD</td>
+<td>Used as the Administrator password</td>
+</tr>
+<tr>
+<td>-jans-max-mem JANS_MAX_MEM</td>
+<td>Total memory (in KB) to be used by Jannsen Server</td>
+</tr>
+<tr>
+<td>-properties-password PROPERTIES_PASSWORD</td>
+<td>Encoded setup.properties file password</td>
+</tr>
+<tr>
+<td>-approved-issuer APPROVED_ISSUER</td>
+<td>Api Approved Issuer</td>
+</tr>
+<tr>
+<td>--force-download</td>
+<td>Force downloading files</td>
+</tr>
+<tr>
+<td>--download-exit</td>
+<td>Download files and exits</td>
+</tr>
+<tr>
+<td>-jans-app-version JANS_APP_VERSION</td>
+<td>Version for Jannsen applications</td>
+</tr>
+<tr>
+<td>-jans-build JANS_BUILD</td>
+<td>Build version for Janssen applications</td>
+</tr>
+<tr>
+<td>-setup-branch SETUP_BRANCH</td>
+<td>Jannsen setup github branch</td>
+</tr>
+<tr>
+<td>--disable-config-api-security</td>
+<td>Turn off oauth2 security validation for jans-config-api</td>
+</tr>
+<tr>
+<td>--cli-test-client</td>
+<td>Use config api test client for CLI</td>
+</tr>
+<tr>
+<td>--import-ldif IMPORT_LDIF</td>
+<td>Render ldif templates from directory and import them in Database</td>
+</tr>
+<tr>
+<td>-enable-script ENABLE_SCRIPT</td>
+<td>inum of script to enable</td>
+</tr>
+<tr>
+<td>-disable-script DISABLE_SCRIPT</td>
+<td>inum of script to disable</td>
+</tr>
+<tr>
+<td>-disable-selinux</td>
+<td>Disable SELinux</td>
+</tr>
+<tr>
+<td>-w</td>
+<td>Get the development head war files</td>
+</tr>
+<tr>
+<td>-t</td>
+<td>Load test data</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>Load test data and exit</td>
+</tr>
+<tr>
+<td>--allow-pre-released-features</td>
+<td>Enable options to install experimental features, not yet officially supported</td>
+</tr>
+<tr>
+<td>--no-data</td>
+<td>Do not import any data to database backend, used for clustering</td>
+</tr>
+<tr>
+<td>--no-jsauth</td>
+<td>Do not install OAuth2 Authorization Server</td>
+</tr>
+<tr>
+<td>--no-config-api</td>
+<td>Do not install Jans Auth Config Api</td>
+</tr>
+<tr>
+<td>--no-scim</td>
+<td>Do not install Scim Server</td>
+</tr>
+<tr>
+<td>--no-fido2</td>
+<td>Do not install Fido2 Server</td>
+</tr>
+<tr>
+<td>--with-casa</td>
+<td>Install Gluu/Flex Casa Server</td>
+</tr>
+<tr>
+<td>--load-config-api-test</td>
+<td>Load Config Api Test Data</td>
+</tr>
+<tr>
+<td>--install-link</td>
+<td>Install Link Server</td>
+</tr>
+<tr>
+<td>-config-patch-creds CONFIG_PATCH_CREDS</td>
+<td>password:username for downloading auto test ciba password</td>
+</tr>
+<tr>
+<td>-test-client-id TEST_CLIENT_ID</td>
+<td>ID of test client which has all available scopes. Must be in UUID format.</td>
+</tr>
+<tr>
+<td>-test-client-pw TEST_CLIENT_PW</td>
+<td>Secret for test client</td>
+</tr>
+<tr>
+<td>-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI</td>
+<td>Redirect URI for test client</td>
+</tr>
+<tr>
+<td>--test-client-trusted</td>
+<td>Make test client trusted</td>
+</tr>
 </tbody>
 </table>
-<p>| --reset-rdbm-db | Deletes all tables on target database. Warning! You will lose all data on target database. |
-| --shell | Drop into interactive shell before starting installation |
-| --dump-config-on-error | Dump configuration on error |
-| --no-progress | Use simple progress |
-| -admin-password ADMIN_PASSWORD | Used as the Administrator password |
-| -jans-max-mem JANS_MAX_MEM | Total memory (in KB) to be used by Jannsen Server |
-| -properties-password PROPERTIES_PASSWORD | Encoded setup.properties file password |
-| -approved-issuer APPROVED_ISSUER | Api Approved Issuer |
-| --force-download | Force downloading files |
-| --download-exit | Download files and exits |
-| -jans-app-version JANS_APP_VERSION | Version for Jannsen applications |
-| -jans-build JANS_BUILD | Build version for Janssen applications |
-| -setup-branch SETUP_BRANCH | Jannsen setup github branch |
-| --disable-config-api-security | Turn off oauth2 security validation for jans-config-api |
-| --cli-test-client | Use config api test client for CLI |
-| --import-ldif IMPORT_LDIF | Render ldif templates from directory and import them in Database
-| -enable-script ENABLE_SCRIPT | inum of script to enable |
-| -disable-script DISABLE_SCRIPT | inum of script to disable |
-| -disable-selinux | Disable SELinux |
-| -w | Get the development head war files |
-| -t | Load test data |
-| -x | Load test data and exit |
-| --allow-pre-released-features | Enable options to install experimental features, not yet officially supported |
-| --no-data | Do not import any data to database backend, used for clustering |
-| --no-jsauth | Do not install OAuth2 Authorization Server |
-| --no-config-api | Do not install Jans Auth Config Api |
-| --no-scim | Do not install Scim Server |
-| --no-fido2 | Do not install Fido2 Server |
-| --with-casa | Install Gluu/Flex Casa Server |
-| --load-config-api-test | Load Config Api Test Data |
-| --install-link | Install Link Server |
-| -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
-| -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format. |
-| -test-client-pw TEST_CLIENT_PW | Secret for test client |
-| -test-client-redirect-uri TEST_CLIENT_REDIRECT_URI | Redirect URI for test client |
-| --test-client-trusted | Make test client trusted |</p>
 
 
 
@@ -2286,7 +2394,7 @@ setup files will be preserved.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 26, 2026 09:48:40 UTC"><span class="timeago" datetime="2026-02-26T09:48:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 26, 2026 09:48:40 UTC">2026-02-26</span>
   </span>
 
     
