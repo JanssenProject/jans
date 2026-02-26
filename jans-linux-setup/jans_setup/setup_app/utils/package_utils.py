@@ -46,6 +46,13 @@ class PackageUtils(SetupUtils):
         self.run(install_command.format(packages), shell=True)
 
     def check_and_install_packages(self):
+        # Validate OS is supported
+        if not base.check_os_supported():
+            supported = ', '.join(sorted(base.get_os_package_list().keys()))
+            print(f"{base.os_type} {base.os_version} is not supported.")
+            print(f"Supported distributions: {supported}")
+            sys.exit(1)
+        
         install_command, update_command, query_command, check_text = self.get_install_commands()
         dnf_command = shutil.which('dnf')
         if dnf_command:
@@ -60,12 +67,7 @@ class PackageUtils(SetupUtils):
 
         if not Config.installed_instance:
             if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
-                if base.os_type == 'suse':
-                    self.run(['rpm', '-i', f'https://dev.mysql.com/get/mysql80-community-release-sl{base.os_version}-{base.os_subversion}.noarch.rpm'])
-                    self.run(['rpm', '--import', '/etc/RPM-GPG-KEY-mysql'])
-                    self.run(['zypper', '--no-gpg-checks', '--gpg-auto-import-keys', 'refresh'])
-                    package_list[os_type_version]['mandatory'] += ' mysql-community-server-8.0.39'
-                elif base.os_type == 'debian' and base.os_version in ('12', '13'):
+                if base.os_type == 'debian' and base.os_version == '13':
                     with tempfile.TemporaryDirectory() as tmpdirname:
                         libaio1_url = 'http://ftp.de.debian.org/debian/pool/main/liba/libaio/libaio1_0.3.113-4_amd64.deb'
                         base.download(libaio1_url, os.path.join(tmpdirname, os.path.basename(libaio1_url)))
@@ -79,7 +81,8 @@ class PackageUtils(SetupUtils):
                                         ):
                             base.download(f'https://downloads.mysql.com/archives/get/p/23/file/{deb_fn}', os.path.join(tmpdirname, deb_fn))
                         self.run([install_command.format(os.path.join(tmpdirname, '*.deb'))],  shell=True)
-
+                elif base.os_type in ('centos', 'red') and base.os_version == '10':
+                    package_list[os_type_version]['mandatory'] += ' mysql8.4-server'
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
 
@@ -90,17 +93,12 @@ class PackageUtils(SetupUtils):
                 package_list[os_type_version]['mandatory'] += ' ' + package_list[os_type_version]['python'][pypackage]
 
         for install_type in install_list:
-            for package in package_list[os_type_version][install_type].split():
-                if os_type_version in ('centos 7', 'red 7') and package.startswith('python3-'):
-                    package_query = package.replace('python3-', 'python36-')
+            for package in package_list[os_type_version][install_type].split():    
+                if self.check_installed(package):
+                    self.logIt('Package {0} was installed'.format(package))
                 else:
-                    package_query = package
-    
-                if self.check_installed(package_query):
-                    self.logIt('Package {0} was installed'.format(package_query))
-                else:
-                    self.logIt('Package {0} was not installed'.format(package_query))
-                    install_list[install_type].append(package_query)
+                    self.logIt('Package {0} was not installed'.format(package))
+                    install_list[install_type].append(package)
 
         install = {'mandatory': True, 'optional': False}
 
