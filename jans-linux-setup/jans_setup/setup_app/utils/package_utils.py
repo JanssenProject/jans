@@ -46,6 +46,13 @@ class PackageUtils(SetupUtils):
         self.run(install_command.format(packages), shell=True)
 
     def check_and_install_packages(self):
+        # Validate OS is supported
+        if not base.check_os_supported():
+            supported = ', '.join(sorted(base.get_os_package_list().keys()))
+            print(f"{base.os_type} {base.os_version} is not supported.")
+            print(f"Supported distributions: {supported}")
+            sys.exit(1)
+        
         install_command, update_command, query_command, check_text = self.get_install_commands()
         dnf_command = shutil.which('dnf')
         if dnf_command:
