@@ -506,8 +506,14 @@ public class Fido2MetricsService {
             // Normal case: rates as proportion of started operations (ATTEMPT count)
             double successRate = (double) successfulOperations / totalStarted;
             double failureRate = (double) failedOperations / totalStarted;
-            // Clamp to [0.0, 1.0] when mixed legacy/new data (SUCCESS+FAILURE can exceed ATTEMPT count)
-            double completionRate = Math.min(1.0, successRate + failureRate);
+            // When mixed legacy/new data (SUCCESS+FAILURE > ATTEMPT), scale so completionRate = successRate + failureRate and all stay in [0.0, 1.0]
+            double rawCompletion = successRate + failureRate;
+            if (rawCompletion > 1.0) {
+                double scale = 1.0 / rawCompletion;
+                successRate *= scale;
+                failureRate *= scale;
+            }
+            double completionRate = successRate + failureRate;
             double dropOffRate = Math.max(0.0, 1.0 - completionRate);
 
             analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
