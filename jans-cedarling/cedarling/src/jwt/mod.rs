@@ -113,6 +113,7 @@ pub(crate) struct JwtService {
     validators: JwtValidatorCache,
     key_service: Arc<KeyService>,
     issuer_configs: HashMap<IssClaim, IssuerConfig>,
+    token_metadata_keys_by_entity_type: HashMap<String, String>,
     /// Trusted issuer validator for advanced validation scenarios
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
@@ -149,6 +150,7 @@ impl JwtService {
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
+        let mut token_metadata_keys_by_entity_type = HashMap::default();
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
@@ -182,6 +184,11 @@ impl JwtService {
             insert_keys(&mut key_service, jwt_config, &iss_config, logger.as_ref()).await?;
 
             validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.as_ref());
+
+            for (token_key, token_metadata) in &iss_config.policy.token_metadata {
+                token_metadata_keys_by_entity_type
+                    .insert(token_metadata.entity_type_name.clone(), token_key.clone());
+            }
 
             if jwt_config.jwt_status_validation {
                 status_lists
@@ -225,6 +232,7 @@ impl JwtService {
             validators,
             key_service,
             issuer_configs,
+            token_metadata_keys_by_entity_type,
             trusted_issuer_validator,
             logger,
             token_cache,
@@ -565,17 +573,9 @@ impl JwtService {
     /// Find the token metadata key for a given entity type name
     /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
     fn find_token_metadata_key<'a>(&'a self, entity_type_name: &'a str) -> &'a str {
-        // Look through all trusted issuers to find the matching entity type name
-        for issuer_config in self.issuer_configs.values() {
-            for (token_key, token_metadata) in &issuer_config.policy.token_metadata {
-                if token_metadata.entity_type_name == entity_type_name {
-                    return token_key;
-                }
-            }
-        }
-
-        // If not found, return the original mapping (fallback)
-        entity_type_name
+        self.token_metadata_keys_by_entity_type
+            .get(entity_type_name)
+            .map_or(entity_type_name, String::as_str)
     }
 }
 
