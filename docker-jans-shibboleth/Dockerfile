@@ -2,7 +2,7 @@
 # Janssen Shibboleth IDP Container
 # Shibboleth IdP 5.1.6
 # =================================
-FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
+FROM bellsoft/liberica-openjdk-alpine:25-37@sha256:5cf6359f8a4ff004f05f4c7fb02cb2c0ba0c669a60fbdb6cf1c0b5aaf4c88fc4
 
 # ===============
 # Alpine packages
