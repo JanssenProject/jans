@@ -8,7 +8,7 @@ permissions:
 jobs:
   del_runs:
     permissions:
-      actions: write
+      actions: write  # to delete old workflow runs
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
