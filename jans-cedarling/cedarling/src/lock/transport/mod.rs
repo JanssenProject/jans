@@ -44,10 +44,6 @@ pub enum TransportError {
     #[cfg(feature = "grpc")]
     Grpc(#[from] tonic::Status),
 
-    #[error("gRPC connection error: {0}")]
-    #[cfg(feature = "grpc")]
-    GrpcConnection(#[from] tonic::transport::Error),
-
     #[error("gRPC server responded with an error: {0}")]
     #[cfg(feature = "grpc")]
     GrpcServer(String),

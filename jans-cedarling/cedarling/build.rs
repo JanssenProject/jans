@@ -15,6 +15,7 @@ fn compile_protos() {
     println!("cargo:rerun-if-changed={audit_proto}");
 
     tonic_prost_build::configure()
+        .build_transport(false)
         .compile_protos(&[audit_proto], &["src/lock/proto/"])
         .expect("Failed to compile protos");
 }

@@ -5,11 +5,17 @@
 
 //! gRPC transport implementation for Lock Server communication.
 
-use std::{collections::HashMap, time::Duration};
+use std::collections::HashMap;
+#[cfg(not(target_arch = "wasm32"))]
+use std::time::Duration;
 
 use prost_types::Timestamp;
 use serde::Deserialize;
-use tonic::{Request, metadata::MetadataValue, transport::Channel};
+#[cfg(not(target_arch = "wasm32"))]
+use tonic::transport::Channel;
+use tonic::{Request, metadata::MetadataValue};
+#[cfg(target_arch = "wasm32")]
+use tonic_web_wasm_client::Client;
 
 use crate::{
     lock::{
@@ -20,6 +26,7 @@ use crate::{
     log::{LogWriter, Logger},
 };
 
+#[cfg(not(target_arch = "wasm32"))]
 /// Duration to wait for each gRPC request
 const GRPC_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 
@@ -55,7 +62,10 @@ struct JsonLogEntry {
 }
 
 pub(crate) struct GrpcTransport {
+    #[cfg(not(target_arch = "wasm32"))]
     client: AuditServiceClient<Channel>,
+    #[cfg(target_arch = "wasm32")]
+    client: AuditServiceClient<Client>,
     access_token: String,
     logger: Option<Logger>,
 }
@@ -66,13 +76,19 @@ impl GrpcTransport {
         access_token: &str,
         logger: Option<Logger>,
     ) -> Result<Self, TransportError> {
-        let channel = Channel::from_shared(endpoint.into())
-            .map_err(|_| TransportError::InvalidUri)?
-            .timeout(GRPC_REQUEST_TIMEOUT)
-            .connect_lazy();
+        #[cfg(target_arch = "wasm32")]
+        let client = AuditServiceClient::new(Client::new(endpoint.into()));
+
+        #[cfg(not(target_arch = "wasm32"))]
+        let client = AuditServiceClient::new(
+            Channel::from_shared(endpoint.into())
+                .map_err(|_| TransportError::InvalidUri)?
+                .timeout(GRPC_REQUEST_TIMEOUT)
+                .connect_lazy(),
+        );
 
         Ok(Self {
-            client: AuditServiceClient::new(channel),
+            client,
             access_token: access_token.into(),
             logger,
         })

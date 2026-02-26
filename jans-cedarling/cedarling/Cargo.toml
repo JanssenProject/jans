@@ -57,10 +57,12 @@ vfs = "0.12"
 hex = "0.4.3"
 sha2 = "0.10.8"
 zip = "8.1.0"
-tonic = { version = "0.14.3", optional = true }
 prost = { version = "0.14.3", optional = true }
 prost-types = { version = "0.14.3", optional = true }
 tonic-prost = { version = "0.14.3", optional = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tonic = { version = "0.14.3", optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
@@ -72,6 +74,8 @@ getrandom_03 = { package = "getrandom", version = "0.3", features = [
 getrandom_04 = { package = "getrandom", version = "0.4", features = [
     "wasm_js",
 ] }
+tonic = { version = "0.14.3", optional = true, default-features = false, features = ["codegen"]}
+tonic-web-wasm-client = "0.9.0"
 
 
 [dev-dependencies]
