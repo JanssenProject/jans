@@ -128,6 +128,8 @@ jobs:
     - name: Install chromium
       run: sudo apt-get update && sudo apt-get install chromium-chromedriver
 
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
       with:

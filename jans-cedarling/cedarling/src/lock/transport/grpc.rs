@@ -71,6 +71,8 @@ pub(crate) struct GrpcTransport {
 }
 
 impl GrpcTransport {
+    #[cfg_attr(target_arch = "wasm32", allow(clippy::unnecessary_wraps))]
+    /// Constructs a new [`GrpcTransport`]
     pub(crate) fn new(
         endpoint: impl Into<String>,
         access_token: &str,
