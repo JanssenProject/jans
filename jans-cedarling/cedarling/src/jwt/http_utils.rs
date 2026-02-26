@@ -72,7 +72,7 @@ impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
             use std::time::Duration;
             use tokio::time::sleep;
 
-            sleep(Duration::from_millis(5)).await;
+            sleep(Duration::from_millis(1)).await;
         }
 
         let openid_config = HTTP_CLIENT

@@ -677,12 +677,12 @@ impl TrustedIssuerLoadingInfo for Authz {
             .is_trusted_issuer_loaded_by_iss(iss_claim)
     }
 
-    fn loaded_trusted_issuers_count(&self) -> usize {
-        self.config.jwt_service.loaded_trusted_issuers_count()
+    fn total_issuers(&self) -> usize {
+        self.config.jwt_service.total_issuers()
     }
 
-    fn percent_loaded_trusted_issuers(&self) -> f32 {
-        self.config.jwt_service.percent_loaded_trusted_issuers()
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.config.jwt_service.loaded_trusted_issuers_count()
     }
 
     fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {

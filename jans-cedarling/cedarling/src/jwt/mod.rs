@@ -558,8 +558,8 @@ impl TrustedIssuerLoadingInfo for JwtService {
         self.issuer_configs.len()
     }
 
-    fn percent_loaded_trusted_issuers(&self) -> f32 {
-        self.loading_state.percent_handled()
+    fn total_issuers(&self) -> usize {
+        self.loading_state.total_issuers()
     }
 
     fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
@@ -598,7 +598,7 @@ fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
 #[cfg(test)]
 mod test {
     use super::test_utils::*;
-    use super::{JwtService, Token};
+    use super::{JwtService, Token, TrustedIssuerLoadingInfo};
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::request::TokenInput;
@@ -1029,5 +1029,45 @@ mod test {
             result,
             Err(MultiIssuerValidationError::TokenValidationFailed)
         ));
+    }
+
+    #[test]
+    async fn test_trusted_issuer_loading_info() {
+        let server = MockServer::new_with_defaults().await.unwrap();
+        let iss = server.trusted_issuer();
+
+        let jwt_service = JwtService::new(
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: true,
+                jwt_status_validation: false,
+                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
+                ..Default::default()
+            },
+            Some(HashMap::from([("Jans".into(), iss)])),
+            None,
+        )
+        .await
+        .expect("Should create JwtService");
+
+        // Test is_trusted_issuer_loaded_by_name
+        assert!(jwt_service.is_trusted_issuer_loaded_by_name("Jans"));
+        assert!(!jwt_service.is_trusted_issuer_loaded_by_name("NonExistent"));
+
+        // Test is_trusted_issuer_loaded_by_iss
+        assert!(jwt_service.is_trusted_issuer_loaded_by_iss(server.issuer().as_str()));
+        assert!(!jwt_service.is_trusted_issuer_loaded_by_iss("https://nonexistent.com"));
+
+        // Test loaded_trusted_issuers_count
+        assert_eq!(jwt_service.loaded_trusted_issuers_count(), 1);
+
+        // Test loaded_trusted_issuer_ids
+        let loaded_ids = jwt_service.loaded_trusted_issuer_ids();
+        assert_eq!(loaded_ids.len(), 1);
+        assert!(loaded_ids.contains("Jans"));
+
+        // Test failed_trusted_issuer_ids
+        let failed_ids = jwt_service.failed_trusted_issuer_ids();
+        assert!(failed_ids.is_empty());
     }
 }

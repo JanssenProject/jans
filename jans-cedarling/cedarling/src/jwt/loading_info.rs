@@ -12,28 +12,20 @@ use std::collections::HashSet;
 /// and overall loading statistics.
 pub trait TrustedIssuerLoadingInfo {
     /// Returns `true` if the trusted issuer with the given ID (policy store key) is loaded.
-    ///
-    /// # Arguments
-    ///
-    /// * `issuer_id` - The policy store key identifier for the trusted issuer.
     #[must_use]
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool;
 
     /// Returns `true` if the trusted issuer with the given iss claim is loaded.
-    ///
-    /// # Arguments
-    ///
-    /// * `iss_claim` - The iss claim value from a JWT token.
     #[must_use]
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool;
+
+    /// Returns the total number of trusted issuers that are expected to be loaded.
+    #[must_use]
+    fn total_issuers(&self) -> usize;
 
     /// Returns the number of trusted issuers that have been loaded.
     #[must_use]
     fn loaded_trusted_issuers_count(&self) -> usize;
-
-    /// Returns the percentage (0.0 to 100.0) of trusted issuers loaded.
-    #[must_use]
-    fn percent_loaded_trusted_issuers(&self) -> f32;
 
     /// Returns all issuer IDs in the index of loaded trusted issuers.
     ///

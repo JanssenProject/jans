@@ -145,6 +145,8 @@ async fn load_trusted_issuers(
                 loader_clone
                     .loading_state
                     .add_trusted_issuer_failed(issuer_id.clone());
+            } else {
+                loader_clone.loading_state.add_trusted_issuer_loaded();
             }
         });
         handles.push(handle);
@@ -217,7 +219,6 @@ pub(super) async fn load_trusted_issuer(
     }
 
     loader.issuer_configs.insert(iss_claim, iss_config);
-    loader.loading_state.add_trusted_issuer_loaded();
 
     Ok(())
 }
@@ -281,7 +282,9 @@ fn log_load_trusted_issuers_error(logger: Option<&Logger>, error: &JwtServiceIni
 mod test {
     use super::*;
     use crate::jwt::key_service::DecodingKeyInfo;
-    use crate::jwt::test_utils::MockServer;
+    use crate::jwt::test_utils::{
+        MockServer, create_failing_trusted_issuer, create_unreachable_trusted_issuer,
+    };
     use crate::{common::issuer_utils::IssClaim, jwt_config::WorkersCount};
     use jsonwebtoken::Algorithm;
     use mockito::Server;
@@ -309,6 +312,21 @@ mod test {
         panic!("{message} (failed after {max_retries} retries)");
     }
 
+    /// Helper to create a `TrustedIssuerLoader` with proper loading state initialized
+    /// with the given number of issuers.
+    fn create_loader(jwt_config: JwtConfig, issuer_count: usize) -> TrustedIssuerLoader {
+        TrustedIssuerLoader {
+            jwt_config,
+            status_lists: StatusListCache::default(),
+            issuer_configs: Arc::new(IssuerIndex::new()),
+            validators: Arc::new(JwtValidatorCache::default()),
+            key_service: Arc::new(KeyService::new()),
+            token_cache: TokenCache::default(),
+            logger: None,
+            loading_state: Arc::new(TrustedIssuerLoadingState::new(issuer_count)),
+        }
+    }
+
     /// Tests synchronous loading of a single trusted issuer.
     ///
     /// Verifies that a trusted issuer can be loaded successfully in sync mode
@@ -325,19 +343,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load single trusted issuer successfully in sync mode");
@@ -379,20 +388,11 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("issuer1".to_string(), trusted_issuer_1);
         trusted_issuers.insert("issuer2".to_string(), trusted_issuer_2);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully in async mode");
@@ -407,8 +407,8 @@ mod test {
                     .get_trusted_issuer(&issuer_claim1)
                     .is_some()
             },
+            20,
             10,
-            1,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -419,8 +419,8 @@ mod test {
                     .get_trusted_issuer(&issuer_claim2)
                     .is_some()
             },
+            20,
             10,
-            1,
             "second trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -454,19 +454,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("failing_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect_err(
@@ -497,19 +488,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("failing_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         // Async mode should not return error for individual failures
@@ -529,16 +511,7 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
+        let loader = create_loader(jwt_config, 0);
 
         // This should not panic
         loader.check_keys_loaded();
@@ -589,19 +562,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect(
@@ -653,19 +617,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load trusted issuer successfully with signature validation enabled");
@@ -721,19 +676,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load trusted issuer successfully with status validation enabled");
@@ -777,20 +723,11 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("issuer1".to_string(), trusted_issuer_1);
         trusted_issuers.insert("issuer2".to_string(), trusted_issuer_2);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully in async mode with signature validation");
@@ -805,8 +742,8 @@ mod test {
                     .get_trusted_issuer(&issuer_claim1)
                     .is_some()
             },
+            20,
             10,
-            5,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -817,8 +754,8 @@ mod test {
                     .get_trusted_issuer(&issuer_claim2)
                     .is_some()
             },
+            20,
             10,
-            5,
             "second trusted issuer should be inserted into issuer index",
         )
         .await;
@@ -826,8 +763,8 @@ mod test {
         // Verify keys are stored for both issuers with retry for async operations
         retry_assert(
             || async { loader.key_service.has_keys() },
+            20,
             10,
-            5,
             "key service should have keys after loading OpenID configurations in async mode",
         )
         .await;
@@ -840,8 +777,8 @@ mod test {
         };
         retry_assert(
             || async { loader.key_service.get_key(&key_info1).is_some() },
+            20,
             10,
-            5,
             "HS256 key from first OpenID configuration should be stored in key service",
         )
         .await;
@@ -853,8 +790,8 @@ mod test {
         };
         retry_assert(
             || async { loader.key_service.get_key(&key_info2).is_some() },
+            20,
             10,
-            5,
             "HS256 key from second OpenID configuration should be stored in key service",
         )
         .await;
@@ -882,21 +819,12 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         for (i, server) in servers.iter().enumerate() {
             trusted_issuers.insert(format!("issuer{i}"), server.trusted_issuer());
         }
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load multiple trusted issuers successfully with max workers");
@@ -911,8 +839,8 @@ mod test {
                         .get_trusted_issuer(&issuer_claim)
                         .is_some()
                 },
+                20,
                 10,
-                5,
                 &format!("trusted issuer {i} should be inserted into issuer index"),
             )
             .await;
@@ -947,21 +875,12 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         for (i, server) in servers.iter().enumerate() {
             trusted_issuers.insert(format!("issuer{i}"), server.trusted_issuer());
         }
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         result.expect("should load many trusted issuers successfully with single worker");
@@ -1003,19 +922,10 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("test_issuer".to_string(), trusted_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         // Start timing
         let start = tokio::time::Instant::now();
@@ -1046,8 +956,8 @@ mod test {
                     .get_trusted_issuer(&issuer_claim)
                     .is_some()
             },
+            20,
             10,
-            1,
             "trusted issuer should eventually be inserted into issuer index via async loading",
         )
         .await;
@@ -1076,20 +986,11 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("valid_issuer".to_string(), valid_issuer);
         trusted_issuers.insert("invalid_issuer".to_string(), invalid_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         // Should return error because at least one issuer failed
@@ -1133,21 +1034,12 @@ mod test {
             ..Default::default()
         };
 
-        let loader = TrustedIssuerLoader {
-            jwt_config,
-            status_lists: StatusListCache::default(),
-            issuer_configs: Arc::new(IssuerIndex::new()),
-            validators: Arc::new(JwtValidatorCache::default()),
-            key_service: Arc::new(KeyService::new()),
-            token_cache: TokenCache::default(),
-            logger: None,
-            loading_state: Arc::new(TrustedIssuerLoadingState::new(0)),
-        };
-
         let mut trusted_issuers = HashMap::new();
         trusted_issuers.insert("valid_issuer1".to_string(), valid_issuer1);
         trusted_issuers.insert("valid_issuer2".to_string(), valid_issuer2);
         trusted_issuers.insert("invalid_issuer".to_string(), invalid_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
 
         let result = loader.load_trusted_issuers(trusted_issuers).await;
         // Async mode should return Ok immediately even if some issuers fail
@@ -1165,8 +1057,8 @@ mod test {
                     .get_trusted_issuer(&valid_issuer_claim1)
                     .is_some()
             },
+            20,
             10,
-            1,
             "first valid issuer should be inserted into issuer index",
         )
         .await;
@@ -1177,10 +1069,168 @@ mod test {
                     .get_trusted_issuer(&valid_issuer_claim2)
                     .is_some()
             },
+            20,
             10,
-            1,
             "second valid issuer should be inserted into issuer index",
         )
         .await;
+    }
+
+    /// Tests that `failed_trusted_issuer_ids()` correctly returns IDs of issuers that failed to load.
+    ///
+    /// Verifies that both sync and async modes properly track failed issuers and that the
+    /// `TrustedIssuerLoadingInfo` trait provides accurate information about loading status.
+    #[tokio::test]
+    async fn failed_trusted_issuer_ids_tracks_failures() {
+        // Create a mix of successful and failing issuers
+        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_issuer = valid_server.trusted_issuer();
+
+        let failing_server = MockServer::new_with_failing_oidc().await.unwrap();
+        let failing_issuer = failing_server.trusted_issuer();
+
+        let unreachable_issuer = create_unreachable_trusted_issuer("unreachable_issuer");
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true, // Required to trigger OpenID config fetch
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            ..Default::default()
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        trusted_issuers.insert("valid_issuer".to_string(), valid_issuer);
+        trusted_issuers.insert("failing_issuer".to_string(), failing_issuer);
+        trusted_issuers.insert("unreachable_issuer".to_string(), unreachable_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
+
+        // In sync mode, load_trusted_issuers returns error, but some issuers may still be loaded
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        // Should return error because at least one issuer failed
+        result.expect_err("sync mode should return error when issuers fail");
+
+        // Verify valid issuer was loaded
+        let valid_issuer_claim = valid_server.issuer();
+        assert!(
+            loader
+                .issuer_configs
+                .get_trusted_issuer(&valid_issuer_claim)
+                .is_some(),
+            "valid issuer should be loaded even when other issuers fail"
+        );
+
+        // Verify failed issuer IDs are tracked
+        let failed_ids = loader.loading_state.failed_issuers();
+        assert_eq!(
+            failed_ids.len(),
+            2,
+            "should have 2 failed issuers (failing_issuer and unreachable_issuer)"
+        );
+        assert!(
+            failed_ids.contains("failing_issuer"),
+            "failed_issuers should contain 'failing_issuer'"
+        );
+        assert!(
+            failed_ids.contains("unreachable_issuer"),
+            "failed_issuers should contain 'unreachable_issuer'"
+        );
+        assert!(
+            !failed_ids.contains("valid_issuer"),
+            "failed_issuers should not contain 'valid_issuer'"
+        );
+
+        // Verify loading state counts
+        assert_eq!(
+            loader.loading_state.total_issuers(),
+            3,
+            "loading state should track total issuers"
+        );
+        assert_eq!(
+            loader.loading_state.processed_count(),
+            3,
+            "loading state should have processed all issuers"
+        );
+        let loaded_count =
+            loader.loading_state.processed_count() - loader.loading_state.failed_issuers().len();
+        assert_eq!(loaded_count, 1, "loading state should have 1 loaded issuer");
+    }
+
+    /// Tests that `failed_trusted_issuer_ids()` works correctly in async loading mode.
+    ///
+    /// Verifies that async mode tracks failed issuers even when the overall load process
+    /// returns success immediately.
+    #[tokio::test]
+    async fn failed_trusted_issuer_ids_async_mode() {
+        // Create a mix of successful and failing issuers
+        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_issuer = valid_server.trusted_issuer();
+
+        let failing_issuer = create_failing_trusted_issuer("failing_issuer");
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true,
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::Async {
+                workers: WorkersCount::new(2),
+            },
+            ..Default::default()
+        };
+
+        let mut trusted_issuers = HashMap::new();
+        trusted_issuers.insert("valid_issuer".to_string(), valid_issuer);
+        trusted_issuers.insert("failing_issuer".to_string(), failing_issuer);
+
+        let loader = create_loader(jwt_config, trusted_issuers.len());
+
+        // Async mode should return Ok immediately
+        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        result.expect("async mode should not fail entire load process");
+
+        // Wait for async loading to complete
+        let valid_issuer_claim = valid_server.issuer();
+        retry_assert(
+            || async {
+                loader
+                    .issuer_configs
+                    .get_trusted_issuer(&valid_issuer_claim)
+                    .is_some()
+            },
+            20,
+            10,
+            "valid issuer should eventually be loaded via async loading",
+        )
+        .await;
+
+        // Verify failed issuer IDs are tracked
+        let failed_ids = loader.loading_state.failed_issuers();
+        assert_eq!(
+            failed_ids.len(),
+            1,
+            "should have 1 failed issuer (failing_issuer)"
+        );
+        assert!(
+            failed_ids.contains("failing_issuer"),
+            "failed_issuers should contain 'failing_issuer'"
+        );
+        assert!(
+            !failed_ids.contains("valid_issuer"),
+            "failed_issuers should not contain 'valid_issuer'"
+        );
+
+        // Verify loading state counts
+        assert_eq!(
+            loader.loading_state.total_issuers(),
+            2,
+            "loading state should track total issuers"
+        );
+        assert_eq!(
+            loader.loading_state.processed_count(),
+            2,
+            "loading state should have processed all issuers"
+        );
+        let loaded_count =
+            loader.loading_state.processed_count() - loader.loading_state.failed_issuers().len();
+        assert_eq!(loaded_count, 1, "loading state should have 1 loaded issuer");
     }
 }

@@ -382,4 +382,75 @@ impl MockServer {
             status_list_endpoint: self.status_list_endpoint(),
         }
     }
+
+    /// Creates a mock server that will fail on OIDC configuration fetch.
+    /// This is useful for testing error handling when trusted issuers fail to load.
+    pub(crate) async fn new_with_failing_oidc() -> Result<Self, KeyGenerationError> {
+        let mut server = Server::new_async().await;
+
+        let keys = generate_keypair_hs256(Some("some_hs256_key"))?;
+
+        // Create a mock that returns 500 Internal Server Error for OIDC config
+        let oidc = Some(
+            server
+                .mock("GET", "/.well-known/openid-configuration")
+                .with_status(500)
+                .with_header("content-type", "application/json")
+                .with_body(r#"{"error": "Internal Server Error"}"#)
+                .expect(1)
+                .create(),
+        );
+
+        // JWKS endpoint may still be created but won't be used since OIDC fails
+        let jwks = Some(
+            server
+                .mock("GET", MOCK_JWKS_URI)
+                .with_status(200)
+                .with_header("content-type", "application/json")
+                .with_body(
+                    json!({"keys": generate_jwks(std::slice::from_ref(&keys)).keys}).to_string(),
+                )
+                .expect(0) // Expect 0 calls since OIDC will fail first
+                .create(),
+        );
+
+        let endpoints = MockEndpoints {
+            oidc,
+            jwks,
+            status_list: None,
+        };
+
+        Ok(Self {
+            endpoints,
+            server,
+            keys,
+        })
+    }
+}
+
+/// Creates a trusted issuer with an invalid URL that will fail to fetch.
+/// This is useful for testing error handling in issuer loading.
+pub(crate) fn create_failing_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
+    let mut issuer = TrustedIssuer::default();
+    issuer.set_oidc_endpoint(
+        Url::parse(&format!(
+            "invalid://{issuer_id}/.well-known/openid-configuration"
+        ))
+        .expect("should be a valid URL format"),
+    );
+    issuer
+}
+
+/// Creates a trusted issuer with a URL that points to a non-existent server.
+/// This will fail with network connection errors.
+pub(crate) fn create_unreachable_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
+    let mut issuer = TrustedIssuer::default();
+    // Use a localhost port that's unlikely to be in use
+    issuer.set_oidc_endpoint(
+        Url::parse(&format!(
+            "http://localhost:65535/{issuer_id}/.well-known/openid-configuration"
+        ))
+        .expect("should be a valid URL format"),
+    );
+    issuer
 }

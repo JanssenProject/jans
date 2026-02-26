@@ -46,18 +46,8 @@ impl TrustedIssuerLoadingState {
     }
 
     /// Get the total number of issuers to load
-    pub(super) fn total_count(&self) -> usize {
+    pub(super) fn total_issuers(&self) -> usize {
         self.total_issuers
-    }
-
-    /// Get the percentage of issuers that have been loaded (0.0 to 100.0)
-    #[allow(clippy::cast_precision_loss)]
-    pub(super) fn percent_handled(&self) -> f32 {
-        if self.total_issuers == 0 {
-            100.0
-        } else {
-            (self.processed_count() as f32 / self.total_count() as f32) * 100.0
-        }
     }
 
     /// Get the issuer IDs that failed to load

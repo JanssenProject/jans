@@ -221,12 +221,12 @@ impl TrustedIssuerLoadingInfo for Cedarling {
         self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
     }
 
-    fn loaded_trusted_issuers_count(&self) -> usize {
-        self.authz.loaded_trusted_issuers_count()
+    fn total_issuers(&self) -> usize {
+        self.authz.total_issuers()
     }
 
-    fn percent_loaded_trusted_issuers(&self) -> f32 {
-        self.authz.percent_loaded_trusted_issuers()
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.authz.loaded_trusted_issuers_count()
     }
 
     fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
