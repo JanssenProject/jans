@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -22,9 +23,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -156,12 +155,30 @@ public class Jackson {
         final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
-    
+
     public static <T> T readStringValue(String content, Class<T> clazz) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(content, clazz);
     }
 
+    public static <T> List<T> readListValue(String content, Class<T> clazz) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(content, new TypeReference<List<T>>() {
+        });
+    }
+
+    public static <T> List<T> readList(String str, Class<T> type) {
+        return readList(str, ArrayList.class, type);
+    }
+
+    public static <T> List<T> readList(String str, Class<? extends Collection> type, Class<T> elementType) {
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(str, mapper.getTypeFactory().constructCollectionType(type, elementType));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static JSONObject createJSONObject(Map<String, Object> map) throws JSONException {
         if (map == null || map.size() == 0) {
