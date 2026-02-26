@@ -506,23 +506,24 @@ public class Fido2MetricsService {
             // Normal case: rates as proportion of started operations (ATTEMPT count)
             double successRate = (double) successfulOperations / totalStarted;
             double failureRate = (double) failedOperations / totalStarted;
-            double completionRate = successRate + failureRate;
-            double dropOffRate = 1.0 - completionRate;
+            // Clamp to [0.0, 1.0] when mixed legacy/new data (SUCCESS+FAILURE can exceed ATTEMPT count)
+            double completionRate = Math.min(1.0, successRate + failureRate);
+            double dropOffRate = Math.max(0.0, 1.0 - completionRate);
 
-            analysis.put("successRate", successRate);
-            analysis.put("failureRate", failureRate);
-            analysis.put("completionRate", completionRate);
-            analysis.put("dropOffRate", dropOffRate);
+            analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
+            analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
         } else {
             // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
             long totalCompleted = successfulOperations + failedOperations;
             if (totalCompleted > 0) {
                 double successRate = (double) successfulOperations / totalCompleted;
                 double failureRate = (double) failedOperations / totalCompleted;
-                analysis.put("successRate", successRate);
-                analysis.put("failureRate", failureRate);
-                analysis.put("completionRate", 1.0);
-                analysis.put("dropOffRate", 0.0);
+                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
+                analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
+                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
+                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
             }
         }
 
