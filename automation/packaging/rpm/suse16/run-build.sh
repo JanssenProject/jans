@@ -5,9 +5,9 @@ REL=$(echo "%VERSION%" | sed "s/^${VERSION}//g" | sed "s/^-//g")
 current_dir=$PWD
 sed -i "s/%VER%/$VERSION/g" jans.spec
 if [ -z "$REL" ]; then
-        RELEASE="el8"
+        RELEASE="suse16"
 else
-        RELEASE="$REL.el8"
+        RELEASE="$REL.suse16"
 fi
 sed -i "s/%RELEASE%/$RELEASE/g" jans.spec
 rpmbuild_path="$current_dir/rpmbuild"

@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu24, ubuntu22, ubuntu20, el8, suse15]
+        name: [ubuntu24, ubuntu22, debian13, el9, el10, suse16]
         include:
           - name: ubuntu24
             os: ubuntu-22.04
@@ -81,32 +81,39 @@ jobs:
             build_files: deb/jammy
             asset_prefix: '_'
             asset_path: jans
-            python_version: 3.8
-          - name: ubuntu20
+            python_version: 3.10
+          - name: debian13
             os: ubuntu-22.04
-            asset_suffix: ~ubuntu20.04_amd64.deb
-            build_files: deb/focal
+            asset_suffix: ~debian13_amd64.deb
+            build_files: deb/trixie
             asset_prefix: '_'
             asset_path: jans
-            python_version: 3.8
-          - name: el8
+            python_version: 3.11
+          - name: el9
             os: ubuntu-22.04
-            asset_suffix: .el8.x86_64.rpm
-            build_files: rpm/el8
+            asset_suffix: .el9.x86_64.rpm
+            build_files: rpm/el9
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
-            python_version: 3.8
-          - name: suse15
+            python_version: 3.11
+          - name: el10
+            os: ubuntu-22.04
+            asset_suffix: .el10.x86_64.rpm
+            build_files: rpm/el10
+            asset_prefix: '-'
+            asset_path: jans/rpmbuild/RPMS/x86_64
+            python_version: 3.11
+          - name: suse16
             os: ubuntu-24.04
-            asset_suffix: .suse15.x86_64.rpm
-            build_files: rpm/suse15
+            asset_suffix: .suse16.x86_64.rpm
+            build_files: rpm/suse16
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
-            python_version: 3.8
+            python_version: 3.11
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -124,10 +131,9 @@ jobs:
          sudo add-apt-repository -y ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm python3-dev python3-requests python3-ruamel.yaml python3-pymysql python3-prompt-toolkit python${{ matrix.python_version }}-distutils libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib
-         sudo apt install -y dpkg-sig python3-crypto python3-distutils ||  sudo apt install -y python3-distutils-extra python3-cryptography
-         sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
-         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2 || echo "failed to install psycopg2"
+         sudo apt install -y build-essential devscripts debhelper rpm python3-dev libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog postgresql postgresql-contrib
+         sudo apt install -y python${{ matrix.python_version }}-distutils 2>/dev/null || sudo apt install -y python3-distutils 2>/dev/null || echo "distutils not available (Python 3.12+ bundles it)"
+         sudo python${{ matrix.python_version }} -m pip install --break-system-packages cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary || echo "pip install partially failed"
     - name: Get tag and version
       id: previoustag
       run: |
@@ -175,7 +181,7 @@ jobs:
 
     - name: Upload binaries to release
       id: upload_binaries
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
@@ -184,7 +190,7 @@ jobs:
         overwrite: true
     - name: Upload cosign bundle to release
       id: upload_cosign_bundle
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/cosign.bundle
@@ -208,14 +214,14 @@ jobs:
             os: ubuntu-24.04
             python_version: '3.10'
             use_docker: true
-            docker_image: opensuse/leap:15.4
+            docker_image: opensuse/tumbleweed@sha256:46a7e0d003097de8b74079d5ed2bf6741329311a4a562f33677b252ea0eee228
           - name: macos
             os: macos-latest
             python_version: '3.10'
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -290,7 +296,7 @@ jobs:
 
     - name: Upload setup binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
@@ -300,7 +306,7 @@ jobs:
 
     - name: Upload CLI binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
@@ -317,7 +323,7 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -395,6 +401,8 @@ jobs:
     - name: Archive and sign pkg contents
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -410,7 +418,6 @@ jobs:
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
         cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.tar.gz *.bundle --clobber || {
           echo "gh release upload failed (assets may already exist), continuing..."
         }
@@ -423,7 +430,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -431,6 +438,8 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Build with Ubuntu
       continue-on-error: true
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         sudo apt-get update
         sudo apt-get install -y zip jq
@@ -478,7 +487,6 @@ jobs:
         mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-janssen-tarp-firefox-$VER.xpi || touch ../demo-janssen-tarp-firefox-$VER.xpi
         cd ..
 
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload $VER *.zip --clobber
         gh release upload $VER *.xpi --clobber || echo "Sign your extension for self-distribution to mozilla failed"
 
@@ -491,7 +499,7 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -510,6 +518,8 @@ jobs:
 
     - name: Sign and upload Cedarling Python wheels
       id: sign-cedarling
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -532,7 +542,6 @@ jobs:
         fi
         WHL="${WHLS[0]}"
         cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${VERSION}" *.whl *.bundle --clobber
 
   build_cedarling_go:
@@ -557,7 +566,7 @@ jobs:
             os: windows-2025
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -608,6 +617,8 @@ jobs:
       - name: Sign and upload Cedarling Go libraries
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ inputs.target_tag }}"
@@ -641,7 +652,6 @@ jobs:
             cosign sign-blob --yes --bundle "${FILE_LIB}.bundle" "$FILE_LIB"
           fi
   
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber
           if [ -n "$FILE_LIB" ]; then
             gh release upload "${VERSION}" "${FILE_LIB}" "${FILE_LIB}.bundle" --clobber
@@ -660,7 +670,7 @@ jobs:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -705,12 +715,13 @@ jobs:
         rm libcedarling_go.so
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
         ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
         cosign sign-blob --yes --bundle "${AMD64_SO}.bundle" "${AMD64_SO}"
         cosign sign-blob --yes --bundle "${ARM64_SO}.bundle" "${ARM64_SO}"
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         gh release upload "${{ env.VERSION }}" *.so *.bundle --clobber
 
   build_cedarling_uniffi:
@@ -722,7 +733,7 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -738,6 +749,8 @@ jobs:
 
     - name: Build and release cedarling uniffi build in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         rustup default stable
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -755,10 +768,11 @@ jobs:
         FILE="libcedarling_uniffi-${TAG}.so"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber
+        gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
     - name: Build kotlin binding in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           VERSION="${{ inputs.target_tag }}"
@@ -776,5 +790,4 @@ jobs:
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber
+        gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
