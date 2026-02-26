@@ -131,10 +131,9 @@ jobs:
          sudo add-apt-repository -y ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm python3-dev python3-requests python3-ruamel.yaml python3-cryptography libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib
+         sudo apt install -y build-essential devscripts debhelper rpm python3-dev libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog postgresql postgresql-contrib
          sudo apt install -y python${{ matrix.python_version }}-distutils 2>/dev/null || sudo apt install -y python3-distutils 2>/dev/null || echo "distutils not available (Python 3.12+ bundles it)"
-         sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
-         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2 || echo "failed to install psycopg2"
+         sudo python${{ matrix.python_version }} -m pip install --break-system-packages cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary || echo "pip install partially failed"
     - name: Get tag and version
       id: previoustag
       run: |
@@ -215,7 +214,7 @@ jobs:
             os: ubuntu-24.04
             python_version: '3.10'
             use_docker: true
-            docker_image: opensuse/tumbleweed
+            docker_image: opensuse/tumbleweed@sha256:46a7e0d003097de8b74079d5ed2bf6741329311a4a562f33677b252ea0eee228
           - name: macos
             os: macos-latest
             python_version: '3.10'
@@ -791,5 +790,4 @@ jobs:
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber
+        gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
