@@ -1016,7 +1016,7 @@
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-cdi</artifactId>
-					<version>3.0.21.Final</version>
+					<version>7.0.1.Final</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
