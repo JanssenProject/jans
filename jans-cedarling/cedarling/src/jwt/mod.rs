@@ -150,7 +150,8 @@ impl JwtService {
     ) -> Result<Self, JwtServiceInitError> {
         let mut status_lists = StatusListCache::default();
         let mut issuer_configs = HashMap::default();
-        let mut token_metadata_keys_by_entity_type = HashMap::default();
+        let mut token_metadata_keys_by_entity_type: HashMap<String, String> =
+            HashMap::default();
         let mut validators = JwtValidatorCache::default();
         let mut key_service = KeyService::new();
 
@@ -186,6 +187,19 @@ impl JwtService {
             validators.init_for_iss(&iss_config, jwt_config, &status_lists, logger.as_ref());
 
             for (token_key, token_metadata) in &iss_config.policy.token_metadata {
+                if let Some(existing_token_key) = token_metadata_keys_by_entity_type
+                    .get(&token_metadata.entity_type_name)
+                {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "conflicting token metadata entity_type_name '{}': keeping token key '{}' and skipping '{}'",
+                            token_metadata.entity_type_name, existing_token_key, token_key
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                    continue;
+                }
+
                 token_metadata_keys_by_entity_type
                     .insert(token_metadata.entity_type_name.clone(), token_key.clone());
             }
