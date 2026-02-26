@@ -491,15 +491,39 @@ public class Fido2MetricsService {
             ));
         analysis.put("topErrors", topErrors);
 
-        // Success/failure rates
-        long totalOperations = entries.size();
+        // Rates based on started operations (ATTEMPT entries = total started)
+        long totalStarted = entries.stream()
+            .filter(e -> Fido2MetricsConstants.ATTEMPT.equals(e.getStatus()))
+            .count();
         long successfulOperations = entries.stream()
             .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
             .count();
-        
-        if (totalOperations > 0) {
-            analysis.put("successRate", (double) successfulOperations / totalOperations);
-            analysis.put("failureRate", (double) (totalOperations - successfulOperations) / totalOperations);
+        long failedOperations = entries.stream()
+            .filter(e -> Fido2MetricsConstants.FAILURE.equals(e.getStatus()))
+            .count();
+
+        if (totalStarted > 0) {
+            // Normal case: rates as proportion of started operations (ATTEMPT count)
+            double successRate = (double) successfulOperations / totalStarted;
+            double failureRate = (double) failedOperations / totalStarted;
+            double completionRate = successRate + failureRate;
+            double dropOffRate = 1.0 - completionRate;
+
+            analysis.put("successRate", successRate);
+            analysis.put("failureRate", failureRate);
+            analysis.put("completionRate", completionRate);
+            analysis.put("dropOffRate", dropOffRate);
+        } else {
+            // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
+            long totalCompleted = successfulOperations + failedOperations;
+            if (totalCompleted > 0) {
+                double successRate = (double) successfulOperations / totalCompleted;
+                double failureRate = (double) failedOperations / totalCompleted;
+                analysis.put("successRate", successRate);
+                analysis.put("failureRate", failureRate);
+                analysis.put("completionRate", 1.0);
+                analysis.put("dropOffRate", 0.0);
+            }
         }
 
         return analysis;
