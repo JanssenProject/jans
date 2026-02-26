@@ -202,7 +202,6 @@ class DBUtils:
             with self.local_session.begin() as session:
                 sqlalchemyObj = self.get_sqlalchObj_for_dn(dn, session)
                 if sqlalchemyObj:
-                    cur_val = getattr(sqlalchemyObj, component)
                     setattr(sqlalchemyObj, component, typed_val)
                     session.commit()
 

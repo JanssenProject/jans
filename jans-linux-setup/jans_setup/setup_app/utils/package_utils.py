@@ -86,17 +86,12 @@ class PackageUtils(SetupUtils):
                 package_list[os_type_version]['mandatory'] += ' ' + package_list[os_type_version]['python'][pypackage]
 
         for install_type in install_list:
-            for package in package_list[os_type_version][install_type].split():
-                if os_type_version in ('centos 7', 'red 7') and package.startswith('python3-'):
-                    package_query = package.replace('python3-', 'python36-')
+            for package in package_list[os_type_version][install_type].split():    
+                if self.check_installed(package):
+                    self.logIt('Package {0} was installed'.format(package))
                 else:
-                    package_query = package
-    
-                if self.check_installed(package_query):
-                    self.logIt('Package {0} was installed'.format(package_query))
-                else:
-                    self.logIt('Package {0} was not installed'.format(package_query))
-                    install_list[install_type].append(package_query)
+                    self.logIt('Package {0} was not installed'.format(package))
+                    install_list[install_type].append(package)
 
         install = {'mandatory': True, 'optional': False}
 
