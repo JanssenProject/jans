@@ -74,7 +74,6 @@ jobs:
             build_files: deb/noble
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.11
           - name: ubuntu22
             os: ubuntu-22.04
@@ -82,7 +81,6 @@ jobs:
             build_files: deb/jammy
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.8
           - name: ubuntu20
             os: ubuntu-22.04
@@ -90,7 +88,6 @@ jobs:
             build_files: deb/focal
             asset_prefix: '_'
             asset_path: jans
-            sign_cmd: cosign sign-blob --yes --bundle cosign.bundle
             python_version: 3.8
           - name: el8
             os: ubuntu-22.04
@@ -98,7 +95,6 @@ jobs:
             build_files: rpm/el8
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
-            sign_cmd: rpm --addsign
             python_version: 3.8
           - name: suse15
             os: ubuntu-24.04
@@ -106,12 +102,11 @@ jobs:
             build_files: rpm/suse15
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
-            sign_cmd: rpm --addsign
             python_version: 3.8
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -133,18 +128,6 @@ jobs:
          sudo apt install -y dpkg-sig python3-crypto python3-distutils ||  sudo apt install -y python3-distutils-extra python3-cryptography
          sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
          sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2 || echo "failed to install psycopg2"
-    - name: Import GPG key
-      id: import_gpg
-      continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
-    - name: List keys
-      id: list_keys
-      run: gpg -K
     - name: Get tag and version
       id: previoustag
       run: |
@@ -186,33 +169,22 @@ jobs:
 
     - name: Sign package
       id: sign_package
-      run : |
-        echo '%_gpg_name moauto (automation) <54212639+mo-auto@users.noreply.github.com>' >> ~/.rpmmacros
-        ${{ matrix.sign_cmd }} ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
-        gpg --armor --detach-sign ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
+      run: |
+        ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}"
+        cosign sign-blob --yes --bundle cosign.bundle "${ARTIFACT}"
 
     - name: Upload binaries to release
       id: upload_binaries
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
         asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
-    - name: Upload sig to release
-      id: upload_sigs
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
-      with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
-        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.asc
-        tag: ${{ steps.previoustag.outputs.tag }}
-        overwrite: true
     - name: Upload cosign bundle to release
-      if: contains(matrix.sign_cmd, 'cosign')
       id: upload_cosign_bundle
-      uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/cosign.bundle
@@ -243,7 +215,7 @@ jobs:
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -318,7 +290,7 @@ jobs:
 
     - name: Upload setup binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
@@ -328,7 +300,7 @@ jobs:
 
     - name: Upload CLI binaries to release
       continue-on-error: true
-      uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
+      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
@@ -345,21 +317,14 @@ jobs:
       id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Import GPG key
-      id: import_gpg
-      continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
     - name: Setup Node.js
       uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
@@ -444,9 +409,9 @@ jobs:
         
         rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
-        gpg --armor --detach-sign cedarling_wasm_"${TAG}"_pkg.tar.gz || echo "Failed to sign"
+        cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" *.tar.gz *.asc --clobber || {
+        gh release upload "${VERSION}" *.tar.gz *.bundle --clobber || {
           echo "gh release upload failed (assets may already exist), continuing..."
         }
 
@@ -458,7 +423,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -522,30 +487,26 @@ jobs:
       github.repository == 'JanssenProject/jans' &&
       (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_python))
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Import GPG key
-      id: import_gpg
-      continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-    - uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+    - uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
       with:
         working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
         command: build
         args: --release -i python3.11
+        maturin-version: "1.9.4"
 
     - name: Sign and upload Cedarling Python wheels
       id: sign-cedarling
@@ -562,15 +523,25 @@ jobs:
         fi
         
         cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        gpg --armor --detach-sign cedarling_python-"${TAG}"-cp311-cp311-manylinux_2_34_x86_64.whl || echo "Failed to sign"
+        shopt -s nullglob
+        WHLS=(*.whl)
+        shopt -u nullglob
+        if [ "${#WHLS[@]}" -ne 1 ]; then
+          echo "Expected exactly one .whl file, found ${#WHLS[@]}: ${WHLS[*]}"
+          exit 1
+        fi
+        WHL="${WHLS[0]}"
+        cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" *.whl *.asc
+        gh release upload "${VERSION}" *.whl *.bundle --clobber
 
   build_cedarling_go:
     if: |
       github.repository == 'JanssenProject/jans' &&
       (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_go))
     runs-on: ${{ matrix.os }}
+    permissions:
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -586,19 +557,12 @@ jobs:
             os: windows-2025
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Import GPG key
-        id: import_gpg
-        continue-on-error: true
-        uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-        with:
-          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
       - name: Install Golang dependencies
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
@@ -672,15 +636,15 @@ jobs:
               ;;
           esac
   
-          gpg --armor --detach-sign $FILE || echo "Failed to sign $FILE"
+          cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
           if [ -n "$FILE_LIB" ]; then
-            gpg --armor --detach-sign $FILE_LIB || echo "Failed to sign $FILE_LIB"
+            cosign sign-blob --yes --bundle "${FILE_LIB}.bundle" "$FILE_LIB"
           fi
   
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-          gh release upload "${VERSION}" $FILE $FILE.asc --clobber
+          gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber
           if [ -n "$FILE_LIB" ]; then
-            gh release upload "${VERSION}" $FILE_LIB $FILE_LIB.asc --clobber
+            gh release upload "${VERSION}" "${FILE_LIB}" "${FILE_LIB}.bundle" --clobber
           fi
 
   build_cedarling_krakend:
@@ -689,26 +653,21 @@ jobs:
       (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_krakend))
     needs: build_cedarling_go
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     strategy:
       matrix:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Import GPG key
-      id: import_gpg
-      continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
     - name: Set environment variables
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -747,33 +706,30 @@ jobs:
     - name: Sign and upload Cedarling Krakend plugins
       working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
       run: |
-        gpg --armor --detach-sign cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so || echo "Failed to sign"
-        gpg --armor --detach-sign cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so || echo "Failed to sign"
+        AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
+        ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
+        cosign sign-blob --yes --bundle "${AMD64_SO}.bundle" "${AMD64_SO}"
+        cosign sign-blob --yes --bundle "${ARM64_SO}.bundle" "${ARM64_SO}"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${{ env.VERSION }}" *.so *.asc
+        gh release upload "${{ env.VERSION }}" *.so *.bundle --clobber
 
   build_cedarling_uniffi:
     if: |
       github.repository == 'JanssenProject/jans' &&
       (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_uniffi))
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Import GPG key
-      id: import_gpg
-      continue-on-error: true
-      uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
-      with:
-        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - name: Install latest stable Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
@@ -797,10 +753,10 @@ jobs:
         cargo build -r -p cedarling_uniffi
         cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
         FILE="libcedarling_uniffi-${TAG}.so"
-        gpg --armor --detach-sign $FILE || echo "Failed to sign"
+        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE $FILE.asc
+        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber
     - name: Build kotlin binding in linux
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
       run: |
@@ -818,7 +774,7 @@ jobs:
         cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
         zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
         FILE="cedarling_uniffi-kotlin-${TAG}.zip"
-        gpg --armor --detach-sign $FILE || echo "Failed to sign"
+        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
   
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload "${VERSION}" $FILE $FILE.asc
+        gh release upload "${VERSION}" $FILE "${FILE}.bundle" --clobber
