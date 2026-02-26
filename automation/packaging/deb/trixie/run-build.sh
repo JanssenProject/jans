@@ -7,4 +7,4 @@ cp -a ../debian .
 tar cvfz ../jans_%VERSION%.orig.tar.gz *
 debuild -us -uc
 cd ..
-chmod a+w jans_%VERSION%~ubuntu20.04_amd64.deb
+chmod a+w jans_%VERSION%~debian13_amd64.deb

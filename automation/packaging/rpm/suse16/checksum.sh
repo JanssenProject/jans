@@ -4,9 +4,9 @@ set -euo pipefail
 VERSION=$(echo "%VERSION%" | awk -F '-' '{print $1}')
 REL=$(echo "%VERSION%" | sed "s/^${VERSION}//g" | sed "s/^-//g")
 if [ -z "$REL" ]; then
-        RELEASE="el8"
+        RELEASE="suse16"
 else
-        RELEASE="$REL.el8"
+        RELEASE="$REL.suse16"
 fi
 
 if [ ! -d "rpmbuild/RPMS/x86_64" ]; then
