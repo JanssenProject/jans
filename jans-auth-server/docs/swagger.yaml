@@ -5044,7 +5044,7 @@ components:
               value:
                 error: invalid_client
                 error_description: Client authentication failed (e.g. unknown client, no client authentication included, or unsupported authentication method).
-    InvalidSSAMetadata: #400 - INVALID SSA METADATA
+    InvalidSSAMetadata: # 400 - INVALID SSA METADATA
       description: Invalid SSA Metadata.
       content:
         application/json:
