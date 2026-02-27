@@ -152,7 +152,7 @@ fn build_entity_refs_from_attr(
             let Some((type_name, _type_schema)) =
                 schema
                     .get_entity_schema(name, Some(namespace))
-                    .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+                    .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
             else {
                 return Ok(None);
             };
@@ -172,7 +172,7 @@ fn build_entity_refs_from_attr(
             let Some((type_name, _type_schema)) =
                 schema
                     .get_entity_schema(name, Some(namespace))
-                    .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+                    .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
             else {
                 return Ok(None);
             };

@@ -24,6 +24,13 @@
                 <include>*:grpc-bridge</include>
                 <include>*:grpc-bridge-runtime</include>
                 <include>io.perfmark:perfmark-api</include>
+                <include>io.perfmark:perfmark-api</include>
+                <include>io.jans:jans-lock-model</include>
+                <include>io.jans:jans-lock-service</include>
+                <include>io.jans:jans-lock-cedarling</include>
+                <include>io.jans:cedarling-java</include>
+                <include>com.github.javaparser:javaparser-core</include>
+                <include>com.github.javaparser:javaparser-symbol-solver-core</include>
             </includes>
         </dependencySet>
     </dependencySets>
