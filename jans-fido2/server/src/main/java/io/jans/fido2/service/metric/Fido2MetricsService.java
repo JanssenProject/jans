@@ -530,6 +530,12 @@ public class Fido2MetricsService {
                 analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
                 analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
                 analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+            } else {
+                // Empty dataset: emit rate keys with defaults so response shape is stable for clients
+                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.FAILURE_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
             }
         }
 
