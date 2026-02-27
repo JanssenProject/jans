@@ -163,4 +163,121 @@ These methods are called to retrieve logs from the memory of the Cedarling insta
 
   - `get_logs_by_request_id_and_tag(request_id, tag)`
 
-    Returns the list of all logs with a given request ID **and** tag. 
+    Returns the list of all logs with a given request ID **and** tag.
+
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace. This enables dynamic, runtime-based authorization decisions without modifying policies.
+
+### Push Data
+
+- `push_data_ctx(key, value, ttl_secs)`
+
+  Pushes a value into the data store with an optional TTL (Time To Live).
+  
+  - `key`: The key for the data entry (string)
+  - `value`: The value to store (any JSON-serializable/Cedar value: object, array, string, number, boolean, or null)
+  - `ttl_secs`: Optional TTL in seconds. If not provided, uses the default TTL from configuration.
+  
+  **Returns:** `None` on success (or a boolean success flag, depending on the binding).
+  
+  **Errors:** The method may raise the following errors:
+  - `InvalidKey`: When the key is empty
+  - `StorageLimitExceeded`: When the configured storage capacity (`max_entries`) is exceeded
+  - `ValueTooLarge`: When the entry size (including metadata) exceeds `max_entry_size`
+  - `TTLExceeded`: When the requested TTL exceeds the configured `max_ttl` limit
+  
+  If the key already exists, the value will be replaced.
+
+### Get Data
+
+- `get_data_ctx(key)`
+
+  Retrieves a value from the data store by key.
+  
+  - `key`: The key to retrieve (string)
+  
+  Returns the value if found, or `None`/`null` if the key doesn't exist or the entry has expired.
+
+### Get Data Entry
+
+- `get_data_entry_ctx(key)`
+
+  Retrieves a data entry with full metadata by key.
+  
+  - `key`: The key to retrieve (string)
+  
+  Returns a `DataEntry` object containing:
+  - `key`: The entry key
+  - `value`: The stored value
+  - `data_type`: The inferred Cedar type (String, Long, Bool, Set, Record, Entity, Ip, Decimal, DateTime, Duration)
+  - `created_at`: Timestamp when the entry was created (RFC 3339 format)
+  - `expires_at`: Timestamp when the entry expires (RFC 3339 format, or null if no TTL)
+  - `access_count`: Number of times this entry has been accessed
+
+### Remove Data
+
+- `remove_data_ctx(key)`
+
+  Removes a value from the data store by key.
+  
+  - `key`: The key to remove (string)
+  
+  Returns `true` if the key existed and was removed, `false` otherwise.
+
+### Clear Data
+
+- `clear_data_ctx()`
+
+  Removes all entries from the data store.
+
+### List Data
+
+- `list_data_ctx()`
+
+  Returns a list of all entries with their metadata.
+  
+  Returns an array of `DataEntry` objects containing key, value, type, and timing metadata.
+
+### Get Statistics
+
+- `get_stats_ctx()`
+
+  Returns statistics about the data store.
+  
+  Returns a `DataStoreStats` object containing:
+  - `entry_count`: Number of entries currently stored
+  - `max_entries`: Maximum number of entries allowed (0 = unlimited)
+  - `max_entry_size`: Maximum size per entry in bytes (0 = unlimited)
+  - `metrics_enabled`: Whether metrics tracking is enabled
+  - `total_size_bytes`: Total size of all entries in bytes
+  - `avg_entry_size_bytes`: Average size per entry in bytes
+  - `capacity_usage_percent`: Percentage of capacity used (0.0-100.0)
+  - `memory_alert_threshold`: Memory usage threshold percentage (from config)
+  - `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace. The `context.data` values follow a three-tier resolution precedence:
+
+1. **Inline request context values** (highest precedence): Values provided directly in the authorization request context override all other sources.
+2. **Pushed data** (from the Context Data API): Data pushed via `push_data_ctx` overrides the default context.
+3. **Default context** (lowest precedence): Values from the default context configuration are used when not overridden by higher-precedence sources.
+
+When keys collide, higher-precedence values shadow lower-precedence ones. The `context.data` namespace combines values from all three sources, with inline values taking precedence over pushed data, and pushed data taking precedence over default context values.
+
+**Example with safe key and attribute checks:**
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data has "user:123" &&
+    context.data["user:123"] has "role" &&
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.

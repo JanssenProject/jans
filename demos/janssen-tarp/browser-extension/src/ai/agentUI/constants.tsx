@@ -56,7 +56,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
 
 export const PROVIDER_ICONS = Object.fromEntries(
     LLM_PROVIDERS.map(p => [p.value, p.icon])
-  ) as Record<string, JSX.Element>;
+  ) as Record<string, React.ReactElement>;
 
 export const DEFAULT_MODEL = 'gpt-4o-mini';
 export const DEFAULT_PROVIDER = 'openai';

@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.io.Serializable;
-
 /**
  * @author Yuriy Z
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Action implements Serializable {
+public class Action {
 
     @JsonProperty("name")
     private String name;

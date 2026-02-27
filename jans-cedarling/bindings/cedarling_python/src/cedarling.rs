@@ -16,7 +16,12 @@ use crate::authorize::request::Request;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::config::bootstrap_config::BootstrapConfig;
-use serde_pyobject::to_pyobject;
+use crate::context_data_api::data_entry::DataEntry;
+use crate::context_data_api::data_store_stats::DataStoreStats;
+use crate::context_data_api::errors::data_error_to_py;
+use cedarling::DataApi;
+use serde_pyobject::{from_pyobject, to_pyobject};
+use std::time::Duration;
 
 /// Cedarling
 /// =========
@@ -98,6 +103,65 @@ use serde_pyobject::to_pyobject;
 /// .. method:: shut_down(self)
 ///
 ///     Closes the connections to the Lock Server and pushes all available logs.
+///
+/// .. method:: push_data_ctx(self, key: str, value: Any, ttl_secs: int | None = None)
+///
+///     Push a value into the data store with an optional TTL.
+///     If the key already exists, the value will be replaced.
+///     If TTL is not provided, the default TTL from configuration is used.
+///
+///     :param key: The key for the data entry
+///     :param value: The value to store (dict, list, str, int, float, bool)
+///     :param ttl_secs: Optional TTL in seconds (None uses default from config)
+///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: get_data_ctx(self, key: str) -> Any | None
+///
+///     Get a value from the data store by key.
+///     Returns None if the key doesn't exist or the entry has expired.
+///
+///     :param key: The key to retrieve
+///     :returns: The value as a Python object, or None if not found
+///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: get_data_entry_ctx(self, key: str) -> DataEntry | None
+///
+///     Get a data entry with full metadata by key.
+///     Returns None if the key doesn't exist or the entry has expired.
+///
+///     :param key: The key to retrieve
+///     :returns: A DataEntry object with metadata, or None if not found
+///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: remove_data_ctx(self, key: str) -> bool
+///
+///     Remove a value from the data store by key.
+///
+///     :param key: The key to remove
+///     :returns: True if the key existed and was removed, False otherwise
+///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: clear_data_ctx(self)
+///
+///     Clear all entries from the data store.
+///
+///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: list_data_ctx(self) -> List[DataEntry]
+///
+///     List all entries with their metadata.
+///     Returns a list of DataEntry objects containing key, value, type, and timing metadata.
+///
+///     :returns: A list of DataEntry objects
+///     :raises DataErrorCtx: If the operation fails
+///
+/// .. method:: get_stats_ctx(self) -> DataStoreStats
+///
+///     Get statistics about the data store.
+///     Returns current entry count, capacity limits, and configuration state.
+///
+///     :returns: A DataStoreStats object
+///     :raises DataErrorCtx: If the operation fails
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -212,6 +276,112 @@ impl Cedarling {
     /// Closes the connections to the Lock Server and pushes all available logs.
     fn shut_down(&self) {
         self.inner.shut_down();
+    }
+
+    /// Push a value into the data store with an optional TTL.
+    ///
+    /// If the key already exists, the value will be replaced.
+    /// If TTL is not provided, the default TTL from configuration is used.
+    ///
+    /// :param key: The key for the data entry
+    /// :param value: The value to store (dict, list, str, int, float, bool)
+    /// :param ttl_secs: Optional TTL in seconds (None uses default from config)
+    /// :raises DataErrorCtx: If the operation fails
+    #[pyo3(signature = (key, value, ttl_secs = None))]
+    fn push_data_ctx(
+        &self,
+        key: &str,
+        value: Bound<'_, PyAny>,
+        ttl_secs: Option<u64>,
+    ) -> PyResult<()> {
+        let json_value: serde_json::Value = from_pyobject(value).map_err(|err| err.0)?;
+
+        let ttl = ttl_secs.map(Duration::from_secs);
+        self.inner
+            .push_data_ctx(key, json_value, ttl)
+            .map_err(data_error_to_py)?;
+        Ok(())
+    }
+
+    /// Get a value from the data store by key.
+    ///
+    /// Returns None if the key doesn't exist or the entry has expired.
+    /// If metrics are enabled, increments the access count for the entry.
+    ///
+    /// :param key: The key to retrieve
+    /// :returns: The value as a Python object, or None if not found
+    /// :raises DataErrorCtx: If the operation fails
+    fn get_data_ctx(&self, key: &str, py: Python) -> PyResult<Option<Py<PyAny>>> {
+        match self.inner.get_data_ctx(key).map_err(data_error_to_py)? {
+            Some(value) => {
+                let py_obj = to_pyobject(py, &value)
+                    .map(|v| v.unbind())
+                    .map_err(|err| err.0)?;
+                Ok(Some(py_obj))
+            },
+            None => Ok(None),
+        }
+    }
+
+    /// Get a data entry with full metadata by key.
+    ///
+    /// Returns None if the key doesn't exist or the entry has expired.
+    /// Includes metadata like creation time, expiration, access count, and type.
+    ///
+    /// :param key: The key to retrieve
+    /// :returns: A DataEntry object with metadata, or None if not found
+    /// :raises DataErrorCtx: If the operation fails
+    fn get_data_entry_ctx(&self, key: &str) -> PyResult<Option<DataEntry>> {
+        match self
+            .inner
+            .get_data_entry_ctx(key)
+            .map_err(data_error_to_py)?
+        {
+            Some(entry) => Ok(Some(entry.into())),
+            None => Ok(None),
+        }
+    }
+
+    /// Remove a value from the data store by key.
+    ///
+    /// :param key: The key to remove
+    /// :returns: True if the key existed and was removed, False otherwise
+    /// :raises DataErrorCtx: If the operation fails
+    fn remove_data_ctx(&self, key: &str) -> PyResult<bool> {
+        self.inner.remove_data_ctx(key).map_err(data_error_to_py)
+    }
+
+    /// Clear all entries from the data store.
+    ///
+    /// :raises DataErrorCtx: If the operation fails
+    fn clear_data_ctx(&self) -> PyResult<()> {
+        self.inner.clear_data_ctx().map_err(data_error_to_py)
+    }
+
+    /// List all entries with their metadata.
+    ///
+    /// Returns a list of DataEntry objects containing key, value, type, and timing metadata.
+    ///
+    /// :returns: A list of DataEntry objects
+    /// :raises DataErrorCtx: If the operation fails
+    fn list_data_ctx(&self) -> PyResult<Vec<DataEntry>> {
+        self.inner
+            .list_data_ctx()
+            .map(|entries| entries.into_iter().map(|e| e.into()).collect())
+            .map_err(data_error_to_py)
+    }
+
+    /// Get statistics about the data store.
+    ///
+    /// Returns current entry count, capacity limits, and configuration state.
+    ///
+    /// :returns: A DataStoreStats object
+    /// :raises DataErrorCtx: If the operation fails
+    fn get_stats_ctx(&self) -> PyResult<DataStoreStats> {
+        self.inner
+            .get_stats_ctx()
+            .map(|stats| stats.into())
+            .map_err(data_error_to_py)
     }
 }
 

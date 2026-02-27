@@ -77,7 +77,7 @@ pub struct AuthorizationConfigRaw {
 }
 
 /// ID token trust mode
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum IdTokenTrustMode {
     /// Always
@@ -87,13 +87,8 @@ pub enum IdTokenTrustMode {
     /// If present
     IfPresent,
     /// Strict
+    #[default]
     Strict,
-}
-
-impl Default for IdTokenTrustMode {
-    fn default() -> Self {
-        Self::Strict
-    }
 }
 
 impl Default for AuthorizationConfig {

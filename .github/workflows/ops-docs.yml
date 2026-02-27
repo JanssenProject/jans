@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   check_pr_for_docs:
@@ -17,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -26,27 +27,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install latest GH
-        continue-on-error: true
-        run: |
-          VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
-          echo $VERSION
-          curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
-          tar xvf gh_${VERSION}_linux_amd64.tar.gz
-          sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
-          gh version
-
       - name: Check commit message
         continue-on-error: false
         id: check_message
+        env:
+          PULL_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
         run: |
-          PULL_NUMBER=${{ github.event.pull_request.number }}
           echo "Parsing commits from PR $PULL_NUMBER"
           MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq -r '.commits[].messageHeadline' | grep "^docs" || echo "")
           echo "$MESSAGE"
           if [[ -z "$MESSAGE" ]]; then
             echo "conventional commit starting with docs: does not exist. Checking if user confirmed no impact on docs in PR body"
-            pr_body=$(gh pr view https://github.com/${{ github.repository }}/pull/"$PULL_NUMBER" --json body -q '.body')
+            pr_body=$(gh pr view "https://github.com/${REPOSITORY}/pull/${PULL_NUMBER}" --json body -q '.body')
             if [[ $pr_body == *"- [x] **I confirm that there is no impact on the docs due to the code changes in this PR.**"* ]]; then
               echo "Checklist item is filled in PR body. Author confirmed no impact."
               exit 0
@@ -57,12 +50,41 @@ jobs:
           fi
           exit 0
 
-  docs:
-    if: github.repository == 'JanssenProject/jans' && github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'docs/')
+  detect_docs_changes:
+    if: github.repository == 'JanssenProject/jans' && github.event_name == 'pull_request'
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
+    outputs:
+      docs_changed: ${{ steps.check.outputs.docs_changed }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
+      - name: Check if docs changed
+        id: check
+        env:
+          PULL_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          DOCS_FILES=$(gh pr view "$PULL_NUMBER" --repo "$REPO" --json files --jq '.files.[].path' | grep '^docs/' || echo "")
+          if [[ -n "$DOCS_FILES" ]]; then
+            echo "docs_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "docs_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  docs:
+    needs: [detect_docs_changes, check_pr_for_docs]
+    if: needs.detect_docs_changes.outputs.docs_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -71,99 +93,38 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.10"
-
       - name: Auto-merge inhouse doc prs
+        env:
+          PULL_NUMBER: ${{ github.event.pull_request.number }}
+          ORG_OWNER: ${{ github.repository_owner }}
+          ACTOR: ${{ github.actor }}
         run: |
-          sudo apt-get update
-          sudo apt-get install jq
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          NUMBER_OF_FOLDERS_CHANGED=$( gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
+          NUMBER_OF_FOLDERS_CHANGED=$(gh pr view "$PULL_NUMBER" --repo "${GITHUB_REPOSITORY}" --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
           echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"
-          IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/${{ github.repository_owner }}/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
-          echo "checking if ${{ github.actor }} belongs to the ${{ github.repository_owner }}. Found $IS_USER_ORG_MEMBER."
-          PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          #The number of folders changed should be 1. Otherwise the contributor has touched other folders besides /docs.
-          if [[ $NUMBER_OF_FOLDERS_CHANGED == "1" ]] && [[ ! -z "$IS_USER_ORG_MEMBER" ]]; then
+          IS_USER_ORG_MEMBER=false
+          if gh api --silent "/orgs/${ORG_OWNER}/members/${ACTOR}" 2>/dev/null; then
+            IS_USER_ORG_MEMBER=true
+          fi
+          echo "checking if ${ACTOR} belongs to ${ORG_OWNER}. Member: $IS_USER_ORG_MEMBER"
+          if [[ $NUMBER_OF_FOLDERS_CHANGED == "1" ]] && [[ "$IS_USER_ORG_MEMBER" == "true" ]]; then
             echo "Approving PR $PULL_NUMBER"
-            gh pr review --approve $PULL_NUMBER
+            gh pr review --approve "$PULL_NUMBER"
             echo "Merging PR $PULL_NUMBER"
-            gh pr merge --squash --auto $PULL_NUMBER
-            echo ""
+            gh pr merge --squash --auto "$PULL_NUMBER"
           else
             echo "Bot will not merge this as it does not meet the requirements."
             echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."
           fi
 
-  check_pr:
-    if: github.repository == 'JanssenProject/jans' && github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'docs/')
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
-        with:
-          egress-policy: audit
-
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: Install latest GH
-        continue-on-error: true
-        run: |
-          VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
-          echo $VERSION
-          curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
-          tar xvf gh_${VERSION}_linux_amd64.tar.gz
-          sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
-          gh version
-
-      - name: Check commit message
-        continue-on-error: true
-        id: check_message
-        run: |
-          PULL_NUMBER=$(echo "$GITHUB_REF" | awk -F / '{print $3}')
-          echo "Parsing commits from PR $PULL_NUMBER"
-          MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq '.' | grep "messageHeadline" | cut -d: -f2- | grep "^docs" || echo "")
-          echo "$MESSAGE"
-          if [[ -z "$MESSAGE" ]]; then
-            echo "conventional commit starting with docs: does not exist"
-            exit 1
-          else
-            echo "conventional commit exists starting with docs:"
-            exit 0
-          fi
-
-      - name: Verify Changed files
-        if: steps.check_message.outcome != 'success'
-        id: check_files
-        run: |
-          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          CHANGES=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | grep '^docs' | sort -u )
-          if [ -n "$CHANGES" ]; then
-            echo "File changes exist"
-            exit 0
-          else
-            echo "No file changes"
-            exit 1
-          fi
-          
-
   lint_docs:
-    if: github.repository == 'JanssenProject/jans' && github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files, 'docs/')
+    needs: detect_docs_changes
+    if: needs.detect_docs_changes.outputs.docs_changed == 'true'
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -178,5 +139,3 @@ jobs:
           sudo apt-get install rubygems -y
           sudo gem install mdl
           mdl --style automation/markdown/.mdl_style.rb docs/
-
-

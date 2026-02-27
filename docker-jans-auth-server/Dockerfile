@@ -54,14 +54,14 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-12-18 08:20'
+ENV CN_BUILD_DATE='2026-02-25 15:48'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
     && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2,http2c --approve-all-licenses
 
 # ===========
 # Custom libs
@@ -69,6 +69,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
 
 RUN mkdir -p /usr/share/java \
     ${JETTY_BASE}/jans-auth/_libs \
+    ${JETTY_BASE}/jans-auth/_lock_libs \
     ${JETTY_BASE}/jans-auth/custom/libs
 
 ARG TWILIO_VERSION=7.17.0
@@ -79,18 +80,15 @@ ARG JSMPP_VERSION=2.3.7
 RUN set -e \
     && wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
-    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound cedarling-java; \
+    && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound; \
     do \
         wget -nv "https://jenkins.jans.io/maven/io/jans/${custom_lib}/${CN_VERSION}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
     done
 
-# Download jans-lock JARs to _libs (conditionally copied via Python script when lock is enabled)
-# Using set -e to ensure any failed wget aborts the build
-RUN set -e \
-    && for lock_lib in jans-lock-service jans-lock-model jans-lock-cedarling; \
-    do \
-        wget -nv "https://jenkins.jans.io/maven/io/jans/${lock_lib}/${CN_VERSION}/${lock_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/_libs" || exit 1; \
-    done
+# Download jans-lock JARs to _lock_libs (conditionally copied via Python script when lock is enabled)
+RUN wget -nv https://jenkins.jans.io/maven/io/jans/jans-lock-server/${CN_VERSION}/jans-lock-server-${CN_VERSION}-service-deps-pack.zip -O /tmp/lock-svc-deps.zip \
+    && unzip -q /tmp/lock-svc-deps.zip -d ${JETTY_BASE}/jans-auth/_lock_libs \
+    && rm -f /tmp/lock-svc-deps.zip
 
 # ===========
 # Assets sync
@@ -103,7 +101,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
+ENV JANS_SOURCE_VERSION=69e5364246941660916bd41527642340aff4228e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -309,6 +307,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown 1000:0 ${JETTY_BASE}/jans-auth/webapps/jans-auth.xml \
     && chown -R 1000:0 ${JETTY_HOME}/temp \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_libs \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/_lock_libs \
     && chown -R 1000:0 /app/templates
 
 USER 1000
