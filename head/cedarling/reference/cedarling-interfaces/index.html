@@ -1499,6 +1499,111 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#context-data-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Data API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context Data API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#push-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data Entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clear Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-data-in-cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Data in Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2401,6 +2506,111 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#context-data-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Data API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context Data API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#push-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-data-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Data Entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clear Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-data-in-cedar-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Data in Cedar Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2688,9 +2898,107 @@ These are described below.</p>
 </li>
 <li>
 <p><code>get_logs_by_request_id_and_tag(request_id, tag)</code></p>
-<p>Returns the list of all logs with a given request ID <strong>and</strong> tag. </p>
+<p>Returns the list of all logs with a given request ID <strong>and</strong> tag.</p>
 </li>
 </ul>
+<h2 id="context-data-api">Context Data API<a class="headerlink" href="#context-data-api" title="Permanent link">#</a></h2>
+<p>The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace. This enables dynamic, runtime-based authorization decisions without modifying policies.</p>
+<h3 id="push-data">Push Data<a class="headerlink" href="#push-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>push_data_ctx(key, value, ttl_secs)</code></li>
+</ul>
+<p>Pushes a value into the data store with an optional TTL (Time To Live).</p>
+<ul>
+<li><code>key</code>: The key for the data entry (string)</li>
+<li><code>value</code>: The value to store (any JSON-serializable/Cedar value: object, array, string, number, boolean, or null)</li>
+<li><code>ttl_secs</code>: Optional TTL in seconds. If not provided, uses the default TTL from configuration.</li>
+</ul>
+<p><strong>Returns:</strong> <code>None</code> on success (or a boolean success flag, depending on the binding).</p>
+<p><strong>Errors:</strong> The method may raise the following errors:
+  - <code>InvalidKey</code>: When the key is empty
+  - <code>StorageLimitExceeded</code>: When the configured storage capacity (<code>max_entries</code>) is exceeded
+  - <code>ValueTooLarge</code>: When the entry size (including metadata) exceeds <code>max_entry_size</code>
+  - <code>TTLExceeded</code>: When the requested TTL exceeds the configured <code>max_ttl</code> limit</p>
+<p>If the key already exists, the value will be replaced.</p>
+<h3 id="get-data">Get Data<a class="headerlink" href="#get-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>get_data_ctx(key)</code></li>
+</ul>
+<p>Retrieves a value from the data store by key.</p>
+<ul>
+<li><code>key</code>: The key to retrieve (string)</li>
+</ul>
+<p>Returns the value if found, or <code>None</code>/<code>null</code> if the key doesn't exist or the entry has expired.</p>
+<h3 id="get-data-entry">Get Data Entry<a class="headerlink" href="#get-data-entry" title="Permanent link">#</a></h3>
+<ul>
+<li><code>get_data_entry_ctx(key)</code></li>
+</ul>
+<p>Retrieves a data entry with full metadata by key.</p>
+<ul>
+<li><code>key</code>: The key to retrieve (string)</li>
+</ul>
+<p>Returns a <code>DataEntry</code> object containing:
+  - <code>key</code>: The entry key
+  - <code>value</code>: The stored value
+  - <code>data_type</code>: The inferred Cedar type (String, Long, Bool, Set, Record, Entity, Ip, Decimal, DateTime, Duration)
+  - <code>created_at</code>: Timestamp when the entry was created (RFC 3339 format)
+  - <code>expires_at</code>: Timestamp when the entry expires (RFC 3339 format, or null if no TTL)
+  - <code>access_count</code>: Number of times this entry has been accessed</p>
+<h3 id="remove-data">Remove Data<a class="headerlink" href="#remove-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>remove_data_ctx(key)</code></li>
+</ul>
+<p>Removes a value from the data store by key.</p>
+<ul>
+<li><code>key</code>: The key to remove (string)</li>
+</ul>
+<p>Returns <code>true</code> if the key existed and was removed, <code>false</code> otherwise.</p>
+<h3 id="clear-data">Clear Data<a class="headerlink" href="#clear-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>clear_data_ctx()</code></li>
+</ul>
+<p>Removes all entries from the data store.</p>
+<h3 id="list-data">List Data<a class="headerlink" href="#list-data" title="Permanent link">#</a></h3>
+<ul>
+<li><code>list_data_ctx()</code></li>
+</ul>
+<p>Returns a list of all entries with their metadata.</p>
+<p>Returns an array of <code>DataEntry</code> objects containing key, value, type, and timing metadata.</p>
+<h3 id="get-statistics">Get Statistics<a class="headerlink" href="#get-statistics" title="Permanent link">#</a></h3>
+<ul>
+<li><code>get_stats_ctx()</code></li>
+</ul>
+<p>Returns statistics about the data store.</p>
+<p>Returns a <code>DataStoreStats</code> object containing:
+  - <code>entry_count</code>: Number of entries currently stored
+  - <code>max_entries</code>: Maximum number of entries allowed (0 = unlimited)
+  - <code>max_entry_size</code>: Maximum size per entry in bytes (0 = unlimited)
+  - <code>metrics_enabled</code>: Whether metrics tracking is enabled
+  - <code>total_size_bytes</code>: Total size of all entries in bytes
+  - <code>avg_entry_size_bytes</code>: Average size per entry in bytes
+  - <code>capacity_usage_percent</code>: Percentage of capacity used (0.0-100.0)
+  - <code>memory_alert_threshold</code>: Memory usage threshold percentage (from config)
+  - <code>memory_alert_triggered</code>: Whether memory usage exceeds the alert threshold</p>
+<h3 id="using-data-in-cedar-policies">Using Data in Cedar Policies<a class="headerlink" href="#using-data-in-cedar-policies" title="Permanent link">#</a></h3>
+<p>Data pushed via the Context Data API is automatically available in Cedar policies under the <code>context.data</code> namespace. The <code>context.data</code> values follow a three-tier resolution precedence:</p>
+<ol>
+<li><strong>Inline request context values</strong> (highest precedence): Values provided directly in the authorization request context override all other sources.</li>
+<li><strong>Pushed data</strong> (from the Context Data API): Data pushed via <code>push_data_ctx</code> overrides the default context.</li>
+<li><strong>Default context</strong> (lowest precedence): Values from the default context configuration are used when not overridden by higher-precedence sources.</li>
+</ol>
+<p>When keys collide, higher-precedence values shadow lower-precedence ones. The <code>context.data</code> namespace combines values from all three sources, with inline values taking precedence over pushed data, and pushed data taking precedence over default context values.</p>
+<p><strong>Example with safe key and attribute checks:</strong></p>
+<div class="highlight"><pre><span></span><code>permit(
+    principal,
+    action == Action::&quot;read&quot;,
+    resource
+) when {
+    context.data has &quot;user:123&quot; &amp;&amp;
+    context.data[&quot;user:123&quot;] has &quot;role&quot; &amp;&amp;
+    context.data[&quot;user:123&quot;].role.contains(&quot;admin&quot;)
+};
+</code></pre></div>
+<p>The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.</p>
 
 
 
@@ -2713,7 +3021,7 @@ These are described below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 27, 2026 15:52:36 UTC"><span class="timeago" datetime="2026-02-27T15:52:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 27, 2026 15:52:36 UTC">2026-02-27</span>
   </span>
 
     

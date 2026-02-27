@@ -1324,6 +1324,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#context-data-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Data API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#logging" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2257,6 +2268,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#context-data-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Data API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#logging" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2417,6 +2439,7 @@
 <ul>
 <li><a href="#initialization">Initialization</a></li>
 <li><a href="#authorization">Authorization</a></li>
+<li><a href="#context-data-api">Context Data API</a></li>
 <li><a href="#logging">Logging</a></li>
 </ul>
 <h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
@@ -2841,6 +2864,169 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <li>This makes authorization decisions by rules based on context values (token payloads).</li>
 </ul>
 <p><a href="../../reference/cedarling-multi-issuer/">More information</a></p>
+<h3 id="context-data-api">Context Data API<a class="headerlink" href="#context-data-api" title="Permanent link">#</a></h3>
+<p>The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace. This enables dynamic, runtime-based authorization decisions.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">JavaScript</label><label for="__tabbed_3_2">Python</label><label for="__tabbed_3_3">Rust</label><label for="__tabbed_3_4">Kotlin</label><label for="__tabbed_3_5">Swift</label><label for="__tabbed_3_6">Go</label><label for="__tabbed_3_7">Java</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1">// Push data with optional TTL (5 minutes = 300 seconds)</span>
+<span class="nx">cedarling</span><span class="p">.</span><span class="nx">push_data_ctx</span><span class="p">(</span><span class="s2">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">role</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;editor&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">country</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span>
+<span class="p">},</span><span class="w"> </span><span class="mf">300</span><span class="p">);</span>
+
+<span class="c1">// Get data</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">get_data_ctx</span><span class="p">(</span><span class="s2">&quot;user:123&quot;</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`User roles: </span><span class="si">${</span><span class="nx">value</span><span class="p">.</span><span class="nx">role</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Get statistics</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">get_stats_ctx</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Entries: </span><span class="si">${</span><span class="nx">stats</span><span class="p">.</span><span class="nx">entry_count</span><span class="si">}</span><span class="sb">/</span><span class="si">${</span><span class="nx">stats</span><span class="p">.</span><span class="nx">max_entries</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># Push data with optional TTL (5 minutes = 300 seconds)</span>
+<span class="n">cedarling</span><span class="o">.</span><span class="n">push_data_ctx</span><span class="p">(</span><span class="s2">&quot;user:123&quot;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;editor&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span>
+<span class="p">},</span> <span class="n">ttl_secs</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+<span class="c1"># Get data</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">get_data_ctx</span><span class="p">(</span><span class="s2">&quot;user:123&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User roles: </span><span class="si">{</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get statistics</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">get_stats_ctx</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entries: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">entry_count</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">max_entries</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">time</span><span class="p">::</span><span class="n">Duration</span><span class="p">;</span>
+<span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
+
+<span class="c1">// Push data with optional TTL (5 minutes)</span>
+<span class="n">cedarling</span><span class="p">.</span><span class="n">push_data_ctx</span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;user:123&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
+<span class="w">        </span><span class="s">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;editor&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="s">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US&quot;</span>
+<span class="w">    </span><span class="p">}),</span>
+<span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">Duration</span><span class="p">::</span><span class="n">from_secs</span><span class="p">(</span><span class="mi">300</span><span class="p">))</span>
+<span class="p">)</span><span class="o">?</span><span class="p">;</span>
+
+<span class="c1">// Get data</span>
+<span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">get_data_ctx</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;User roles: {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">[</span><span class="s">&quot;role&quot;</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="c1">// Get statistics</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">get_stats_ctx</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
+<span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Entries: {}/{}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="n">entry_count</span><span class="p">,</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="n">max_entries</span><span class="p">);</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1">// Push data with optional TTL (5 minutes = 300 seconds)</span>
+<span class="c1">// JsonValue is represented as String in Kotlin/JVM bindings</span>
+<span class="kd">val</span><span class="w"> </span><span class="nv">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;{&quot;role&quot;:[&quot;admin&quot;,&quot;editor&quot;],&quot;country&quot;:&quot;US&quot;}&quot;&quot;&quot;</span>
+<span class="n">cedarling</span><span class="p">.</span><span class="na">pushDataCtx</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="m">300L</span><span class="p">)</span>
+
+<span class="c1">// Get data</span>
+<span class="kd">val</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="na">getDataCtx</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Parse and use the JSON string</span>
+<span class="p">}</span>
+
+<span class="c1">// Get statistics</span>
+<span class="kd">val</span><span class="w"> </span><span class="nv">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="na">getStatsCtx</span><span class="p">()</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Entries: </span><span class="si">${</span><span class="n">stats</span><span class="p">.</span><span class="na">entryCount</span><span class="si">}</span><span class="s">/</span><span class="si">${</span><span class="n">stats</span><span class="p">.</span><span class="na">maxEntries</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1">// Push data with optional TTL (5 minutes = 300 seconds)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">value</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">JsonValue</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{</span><span class="se">\&quot;</span><span class="s">role</span><span class="se">\&quot;</span><span class="s">:[</span><span class="se">\&quot;</span><span class="s">admin</span><span class="se">\&quot;</span><span class="s">,</span><span class="se">\&quot;</span><span class="s">editor</span><span class="se">\&quot;</span><span class="s">],</span><span class="se">\&quot;</span><span class="s">country</span><span class="se">\&quot;</span><span class="s">:</span><span class="se">\&quot;</span><span class="s">US</span><span class="se">\&quot;</span><span class="s">}&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">pushDataCtx</span><span class="p">(</span><span class="n">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">:</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">ttlSecs</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">)</span>
+
+<span class="c1">// Get data</span>
+<span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">getDataCtx</span><span class="p">(</span><span class="n">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user:123&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">jsonStr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">inner</span><span class="p">()</span>
+<span class="w">    </span><span class="c1">// Parse and use the JSON string</span>
+<span class="p">}</span>
+
+<span class="c1">// Get statistics</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">stats</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">getStatsCtx</span><span class="p">()</span>
+<span class="bp">print</span><span class="p">(</span><span class="s">&quot;Entries: </span><span class="si">\(</span><span class="n">stats</span><span class="p">.</span><span class="n">entryCount</span><span class="si">)</span><span class="s">/</span><span class="si">\(</span><span class="n">stats</span><span class="p">.</span><span class="n">maxEntries</span><span class="si">)</span><span class="s">&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">&quot;time&quot;</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Push data with optional TTL (5 minutes)</span>
+<span class="w">    </span><span class="nx">userData</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
+<span class="w">        </span><span class="s">&quot;role&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;editor&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="s">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">ttl</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Minute</span>
+<span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">PushData</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">userData</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ttl</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Handle error</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="c1">// Get data</span>
+<span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">GetData</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Handle error</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">value</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Use the value</span>
+<span class="p">}</span>
+
+<span class="c1">// Get statistics</span>
+<span class="nx">stats</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">GetStats</span><span class="p">()</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Handle error</span>
+<span class="p">}</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Entries: %d/%d\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">stats</span><span class="p">.</span><span class="nx">EntryCount</span><span class="p">,</span><span class="w"> </span><span class="nx">stats</span><span class="p">.</span><span class="nx">MaxEntries</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">uniffi.cedarling_uniffi.*</span><span class="p">;</span>
+
+<span class="c1">// Push data with optional TTL (5 minutes = 300 seconds)</span>
+<span class="c1">// In Java/Kotlin bindings, JsonValue is represented as a plain String</span>
+<span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{\&quot;role\&quot;:[\&quot;admin\&quot;,\&quot;editor\&quot;],\&quot;country\&quot;:\&quot;US\&quot;}&quot;</span><span class="p">;</span>
+<span class="n">Cedarling</span><span class="w"> </span><span class="n">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">adapter</span><span class="p">.</span><span class="na">getCedarling</span><span class="p">();</span>
+<span class="n">cedarling</span><span class="p">.</span><span class="na">pushDataCtx</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="mi">300L</span><span class="p">);</span>
+
+<span class="c1">// Get data</span>
+<span class="n">String</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="na">getDataCtx</span><span class="p">(</span><span class="s">&quot;user:123&quot;</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Parse and use the JSON string</span>
+<span class="w">    </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Get statistics</span>
+<span class="n">DataStoreStats</span><span class="w"> </span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="na">getStatsCtx</span><span class="p">();</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Entries: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getEntryCount</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getMaxEntries</span><span class="p">());</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Data pushed via the Context Data API is automatically available in Cedar policies under the <code>context.data</code> namespace:</p>
+<div class="highlight"><pre><span></span><code>permit(
+    principal,
+    action == Action::&quot;read&quot;,
+    resource
+) when {
+    context.data has &quot;user:123&quot; &amp;&amp;
+    context.data[&quot;user:123&quot;].role.contains(&quot;admin&quot;)
+};
+</code></pre></div>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
 <p>Cedarling supports logging of both <strong>decision</strong> and <strong>system</strong> events, useful for auditing and troubleshooting. Logging is optional and can be configured (or disabled) via the <a href="../../reference/cedarling-properties/">bootstrap properties</a>.</p>
 <hr />
@@ -2875,7 +3061,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 27, 2026 15:52:36 UTC"><span class="timeago" datetime="2026-02-27T15:52:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 27, 2026 15:52:36 UTC">2026-02-27</span>
   </span>
 
     

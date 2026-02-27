@@ -2513,6 +2513,27 @@
 <li><strong><code>CEDARLING_MAX_BASE64_SIZE</code></strong> : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)</li>
 <li><strong><code>CEDARLING_MAX_DEFAULT_ENTITIES</code></strong> : Maximum number of default entities that can be loaded from the policy store.</li>
 </ul>
+<p><strong>The following bootstrap properties are needed to configure the Context Data API:</strong></p>
+<ul>
+<li>
+<p><strong><code>CEDARLING_DATA_STORE_MAX_ENTRIES</code></strong> : Maximum number of entries that can be stored in the data store. Default value is <code>10000</code>. Set to <code>0</code> for unlimited entries.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_DATA_STORE_MAX_ENTRY_SIZE</code></strong> : Maximum size per entry in bytes. Default value is <code>1048576</code> (1 MB). Set to <code>0</code> for unlimited size.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_DATA_STORE_DEFAULT_TTL</code></strong> : Default TTL (Time To Live) in seconds for entries that don't specify a TTL. Default value is <code>None</code> (entries will not expire). When set, entries without an explicit TTL will use this value.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_DATA_STORE_MAX_TTL</code></strong> : Maximum allowed TTL in seconds. Default value is <code>3600</code> (1 hour). Entries with TTL exceeding this value will be rejected. Omit this property for unlimited TTL.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_DATA_STORE_ENABLE_METRICS</code></strong> : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is <code>true</code>.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD</code></strong> : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is <code>80.0</code>. When capacity usage exceeds this threshold, <code>memory_alert_triggered</code> will be <code>true</code> in statistics.</p>
+</li>
+</ul>
 <p><strong>The following bootstrap properties are only needed for the Lock Server Integration.</strong></p>
 <ul>
 <li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events.</li>
@@ -2547,7 +2568,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 6, 2026 11:24:01 UTC"><span class="timeago" datetime="2026-01-06T11:24:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 6, 2026 11:24:01 UTC">2026-01-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 27, 2026 15:52:36 UTC"><span class="timeago" datetime="2026-02-27T15:52:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 27, 2026 15:52:36 UTC">2026-02-27</span>
   </span>
 
     
