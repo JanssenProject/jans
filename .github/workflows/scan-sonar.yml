@@ -28,7 +28,6 @@ on:
 
   pull_request:
     branches:
-      - master
       - main
       - '!update-pycloud-in-**'
     types:
@@ -55,88 +54,121 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+
 jobs:
-  sonar-scan:
-    name: sonar scan
+  detect-changes:
+    name: Detect changed modules
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-link, jans-casa, jans-lock, jans-shibboleth-idp]
-    env:
-      JVM_PROJECTS: |
-        jans-link
-        jans-auth-server
-        jans-lock
-        jans-orm
-        jans-config-api
-        jans-scim
-        jans-core
-        jans-fido2
-        jans-casa
-        agama
-        jans-shibboleth-idp
-      NON_JVM_PROJECTS: |
-        jans-linux-setup
-        jans-cli-tui
-        jans-pycloudlib
     permissions:
-        contents: read
-        pull-requests: read
+      contents: read
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
-      - name: check out code
+      - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
+          fetch-depth: 0
 
-      - name: find changed directories
+      - name: Detect changed modules
+        id: set-matrix
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ $GITHUB_BASE_REF ]; then
-            # Pull Request
-            echo "Triggering event: pull request"
-            echo Pull request base ref: $GITHUB_BASE_REF
-            git fetch origin $GITHUB_BASE_REF --depth=1
-            if [ ${{ github.event.action }} = "opened" ]; then
-              echo "Triggering action: opened"
-              echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
-            fi
-            if [ ${{ github.event.action }} = "synchronize" ]; then
-              echo "Triggering action: synchronize"
-              echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.before }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >>${GITHUB_ENV}
+          ALL_MODULES="jans-auth-server agama jans-config-api jans-core jans-linux-setup jans-cli-tui jans-fido2 jans-orm jans-scim jans-pycloudlib jans-link jans-casa jans-lock jans-shibboleth-idp"
+          CHANGED_DIRS=""
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            CHANGED_MODULES="$ALL_MODULES"
+          elif [ "$GITHUB_BASE_REF" ]; then
+            if [ -z "$BASE_SHA" ] || [ -z "$HEAD_SHA" ]; then
+              echo "Missing PR SHAs. Scanning all modules."
+              CHANGED_MODULES="$ALL_MODULES"
+            else
+              CHANGED_DIRS=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | cut -d/ -f1 | sort -u)
             fi
           else
-            # Push
-            echo "Triggerring event: push"
-            git fetch origin ${{ github.event.before }} --depth=1
-            echo "CHANGED_DIR=$( git diff --name-only ${{ github.event.before }} $GITHUB_SHA  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
+            if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BEFORE_SHA" ]; then
+              echo "Null SHA detected (force push or new branch). Scanning all modules."
+              CHANGED_MODULES="$ALL_MODULES"
+            else
+              CHANGED_DIRS=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" | cut -d/ -f1 | sort -u)
+            fi
           fi
 
-      - name: check env
+          if [ -z "${CHANGED_MODULES:-}" ] && [ -n "$CHANGED_DIRS" ]; then
+            CHANGED_MODULES=""
+            for mod in $ALL_MODULES; do
+              if echo "$CHANGED_DIRS" | grep -qx "$mod"; then
+                CHANGED_MODULES="$CHANGED_MODULES $mod"
+              fi
+            done
+          fi
+
+          CHANGED_MODULES=$(echo "$CHANGED_MODULES" | xargs)
+          if [ -z "$CHANGED_MODULES" ]; then
+            echo "No relevant modules changed"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "matrix={\"module\":[]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changed modules: $CHANGED_MODULES"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            MATRIX_JSON=$(echo "$CHANGED_MODULES" | tr ' ' '\n' | jq -R . | jq -sc '{"module": .}')
+            echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          fi
+
+  sonar-scan:
+    name: sonar scan
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+    env:
+      JVM_PROJECTS: "jans-link jans-auth-server jans-lock jans-orm jans-config-api jans-scim jans-core jans-fido2 jans-casa agama jans-shibboleth-idp"
+    permissions:
+        contents: read
+        pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Determine project type
+        id: project-type
+        env:
+          MODULE: ${{ matrix.module }}
         run: |
-          echo changed dir list: ${{ env.CHANGED_DIR }}
-          echo Matrix module: ${{ matrix.module }}
-          echo GH event action: ${{ github.event.action }}
-          echo PR base sha: ${{ github.event.pull_request.base.sha }}
-          echo PR head sha: ${{ github.event.pull_request.head.sha }}
-          echo event before: ${{ github.event.before }}
-          echo GH sha: $GITHUB_SHA
+          if echo "$JVM_PROJECTS" | tr ' ' '\n' | grep -qx "$MODULE"; then
+            echo "is_jvm=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_jvm=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up JDK 17
-        # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
+        if: steps.project-type.outputs.is_jvm == 'true'
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: '17'
           distribution: 'adopt'
 
       - name: Cache SonarCloud packages for JVM based project
-        # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
+        if: steps.project-type.outputs.is_jvm == 'true'
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.sonar/cache
@@ -144,21 +176,15 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build and analyze JVM based project
-        # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
+        if: steps.project-type.outputs.is_jvm == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          MODULE: ${{ matrix.module }}
         run: |
-          cd ${{ matrix.module }}
-          case ${{ matrix.module }} in
-            "jans-auth-server")
-                    ;&
-            "jans-lock")
-                    ;&
-            "jans-scim")
-                    ;&
-            "jans-config-api")
+          cd "$MODULE"
+          case "$MODULE" in
+            "jans-auth-server"|"jans-lock"|"jans-scim"|"jans-config-api")
                   echo "Run Sonar analysis without test execution"
                   mvn -B -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
                 ;;
@@ -168,16 +194,15 @@ jobs:
             ;;
           esac
 
-
       - name: Convert repo org name to lowercase for non JVM projects
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.NON_JVM_PROJECTS, matrix.module)
+        if: steps.project-type.outputs.is_jvm == 'false'
         env:
           REPO_OWNER: ${{ github.repository_owner }}
         run: |
           echo "REPO_ORG=${REPO_OWNER,,}" >>${GITHUB_ENV}
 
       - name: SonarCloud Scan for non-JVM project
-        if: contains(env.CHANGED_DIR, matrix.module) && contains(env.NON_JVM_PROJECTS, matrix.module)
+        if: steps.project-type.outputs.is_jvm == 'false'
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         with:
           args: >
@@ -185,5 +210,5 @@ jobs:
             -Dsonar.projectKey=${{ github.repository_owner }}_${{ matrix.module }}
           projectBaseDir: ${{ matrix.module }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

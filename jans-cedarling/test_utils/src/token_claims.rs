@@ -82,7 +82,9 @@ pub struct KeyPair {
 /// Generates a HS256-signed token using the given claims.
 #[track_caller]
 pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> KeyPair {
-    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256));
+    let mut jwk = jwk::JsonWebKey::new(
+        jwk::Key::try_generate_symmetric(256).expect("invalid symmetric key size"),
+    );
     jwk.set_algorithm(jwk::Algorithm::HS256)
         .expect("should set encryption algorithm");
     jwk.key_id = Some("some_id".to_string());
