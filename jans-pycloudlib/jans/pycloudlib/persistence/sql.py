@@ -189,7 +189,7 @@ class CloudSqlConnectorMixin:
                 self._cloudsql_connector.close()
                 logger.debug("Cloud SQL Connector closed successfully")
             except Exception as exc:
-                logger.warning(f"Error closing Cloud SQL Connector: {exc}")
+                logger.warning("Error closing Cloud SQL Connector: %s", exc)
             finally:
                 self._cloudsql_connector = None
 
@@ -493,7 +493,7 @@ def _cleanup_sql_clients() -> None:
         try:
             client.close()
         except Exception as exc:
-            logger.debug(f"Error during atexit cleanup of SqlClient: {exc}")
+            logger.debug("Error during atexit cleanup of SqlClient: %s", exc)
 
 
 atexit.register(_cleanup_sql_clients)
@@ -547,7 +547,7 @@ class SqlClient(SqlSchemaMixin):
                 continue
 
             if filepath and (contents := self.manager.secret.get(secret_name)):
-                logger.info(f"Detected non-empty {secret_name=}. The secret will be populated into {filepath!r}.")
+                logger.info("Detected non-empty secret_name=%r. The secret will be populated into %r.", secret_name, filepath)
 
                 with open(filepath, "w") as f:
                     f.write(contents)
@@ -627,14 +627,14 @@ class SqlClient(SqlSchemaMixin):
         try:
             _sql_client_instances.discard(self)
         except Exception as exc:
-            logger.debug(f"Error removing SqlClient from instance tracker: {exc}")
+            logger.debug("Error removing SqlClient from instance tracker: %s", exc)
 
         if self._engine is not None:
             try:
                 self._engine.dispose()
                 logger.debug("SQLAlchemy engine disposed successfully")
             except Exception as exc:
-                logger.warning(f"Error disposing SQLAlchemy engine: {exc}")
+                logger.warning("Error disposing SQLAlchemy engine: %s", exc)
             finally:
                 self._engine = None
 
@@ -1238,7 +1238,7 @@ def preconfigure_simple_json(dbapi_connection, connection_record):
 
     except ProgrammingError as exc:
         # missing table or column will raise ProgrammingError
-        logger.warning(f"Unable to detect JSON data format automatically; reason={exc.args[1]}; fallback to default value")
+        logger.warning("Unable to detect JSON data format automatically; reason=%s; fallback to default value", exc.args[1])
 
     finally:
         # cleanup resource
@@ -1307,7 +1307,7 @@ def override_sql_ssl_property(sql_prop_file):
             if code != 0:
                 # error may not recorded in stderr but available in stdout
                 err = err or out
-                logger.warning(f"Unable to convert key file {ssl_key} to PKCS8 file {ssl_key_p8}; reason={err.decode()}")
+                logger.warning("Unable to convert key file %s to PKCS8 file %s; reason=%s", ssl_key, ssl_key_p8, err.decode())
             props["connection.driver-property.sslkey"] = ssl_key_p8
 
     # mysql dialect
@@ -1322,7 +1322,7 @@ def override_sql_ssl_property(sql_prop_file):
             if code != 0:
                 # error may not recorded in stderr but available in stdout
                 err = err or out
-                logger.warning(f"Unable to convert CA cert file {ssl_ca} to PKCS12 file {ssl_ca_p12}; reason={err.decode()}")
+                logger.warning("Unable to convert CA cert file %s to PKCS12 file %s; reason=%s", ssl_ca, ssl_ca_p12, err.decode())
 
             props["connection.driver-property.trustCertificateKeyStoreUrl"] = f"file://{ssl_ca_p12}"
             props["connection.driver-property.trustCertificateKeyStorePassword"] = "changeit"
@@ -1336,7 +1336,7 @@ def override_sql_ssl_property(sql_prop_file):
             if code != 0:
                 # error may not recorded in stderr but available in stdout
                 err = err or out
-                logger.warning(f"Unable to convert cert file {ssl_cert} and key file {ssl_key} to PKCS12 file {ssl_certkey_p12}; reason={err.decode()}")
+                logger.warning("Unable to convert cert file %s and key file %s to PKCS12 file %s; reason=%s", ssl_cert, ssl_key, ssl_certkey_p12, err.decode())
 
             props["connection.driver-property.clientCertificateKeyStoreUrl"] = f"file://{ssl_certkey_p12}"
             props["connection.driver-property.clientCertificateKeyStorePassword"] = "changeit"
