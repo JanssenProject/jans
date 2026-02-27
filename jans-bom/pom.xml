@@ -30,7 +30,7 @@
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		<weld.version>4.0.3.Final</weld.version>
 	
-		<org.omnifaces.omnifaces.version>4.0</org.omnifaces.omnifaces.version>
+		<org.omnifaces.omnifaces.version>5.0</org.omnifaces.omnifaces.version>
 		<org.glassfish.jakarta.json.version>2.0.1</org.glassfish.jakarta.json.version>
 		<org.hibernate.validator.version>7.0.5.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>7.0.5.Final</org.hibernate.validator.cdi.version>
