@@ -1,8 +1,3 @@
-# This workflow enforces each PR has an issue created.
-# It makes sure each PR is targeting an open issue.
-# If the PR does not target an issue , it will open an issue, write a comment and attempt to edit the PR to link it to the issue
-# The author would be asked to update the issues details.
-
 name: issue->PR
 on:
   pull_request:
@@ -15,12 +10,13 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
   check-prs-issue:
-    if:  startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
+    if: startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
@@ -30,13 +26,16 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
 
-      - name: Wait for 25 seconds so that GH can attach issue to the PR if already mentioned by author
+      - name: Wait for GH metadata sync
         run: sleep 25s
         shell: bash
 
-      - name: Add a comment to a PR and create an issue if the PR does not reference an open issue
+      - name: Validate or Auto-create Issue
         env:
           GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -45,51 +44,45 @@ jobs:
           PR_USER: ${{ github.event.pull_request.user.login }}
           REPO_FULL_NAME: ${{ github.event.pull_request.base.repo.full_name }}
         run: |
-
           issue_found=""
 
-          for issue in $( echo "$PR_TITLE $PR_BODY" | grep -o '#[0-9][0-9]*' ); do
-            if check_issue="$( gh api "repos/$REPO_FULL_NAME/issues/${issue#"#"}" )" \
-                && [ "$( echo "$check_issue" | python3 -c "import sys, json; data = json.load(sys.stdin); print(
-                  'node_id' in data and 'state' in data and data['node_id'].find('I_') == 0 and data['state'] == 'open'
-                )" )" = "True" ]; then
-              issue_found="$issue"
-              break
+          # Safely parse for issue numbers using an environment variable
+          # This avoids expanding untrusted PR data directly into the shell command
+          ISSUES=$(echo "$PR_TITLE $PR_BODY" | grep -o '#[0-9][0-9]*' | sed 's/#//g' || true)
+
+          for issue_id in $ISSUES; do
+            # Use gh api with quoted variables to check issue state
+            check_issue=$(gh api "repos/$REPO_FULL_NAME/issues/$issue_id" --silent -H "Accept: application/vnd.github+json" || echo "failed")
+            
+            if [ "$check_issue" != "failed" ]; then
+              # Use Python to validate the node_id (ensure it is an issue, not a PR) and state
+              is_valid=$(echo "$check_issue" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('state') == 'open' and data.get('node_id', '').startswith('I_'))")
+              if [ "$is_valid" = "True" ]; then
+                issue_found="#$issue_id"
+                break
+              fi
             fi
           done
 
           if [ -n "$issue_found" ]; then
-            echo "OK: An open issue ($issue_found) is referenced in your PR ($PR_NUMBER)"
+            echo "OK: Open issue $issue_found is referenced."
           else
-            echo "Failed: No open issues referenced in your PR ($PR_NUMBER)" >&2
-            echo "Creating an issue..."
+            echo "Failed: No open issues referenced. Creating one..."
 
-            if ISSUE_NUMBER="$( echo "{ \"title\": \"fix: $PR_TITLE -autocreated \", \"body\": \"This issue was created because no open issues were referenced in your PR (#$PR_NUMBER).\" }" \
-                | gh api "repos/$REPO_FULL_NAME/issues" \
-                -X POST \
-                -H "Content-Type: application/json" \
-                --input - \
-                --jq '.number'
-            )"; then
-              echo "Issue number $ISSUE_NUMBER created"
-            else
-              echo "Error: Failed to create an issue" >&2
-              exit 1
-            fi
+            # Create the issue using JSON input to avoid shell injection in the title
+            ISSUE_NUMBER=$(gh api "repos/$REPO_FULL_NAME/issues" \
+              -f title="fix: $PR_TITLE -autocreated" \
+              -f body="This issue was created because no open issues were referenced in your PR (#$PR_NUMBER)." \
+              --jq '.number')
 
-            echo "Creating a comment..."
-            printf "%s\n%s" "Error: Hi @$PR_USER, You did not reference an open issue in your [PR](#$PR_NUMBER). I attempted to create an [issue](#$ISSUE_NUMBER) for you." "Please update that [issues'](#$ISSUE_NUMBER) title and body and make sure I correctly referenced it in the above PRs body." \
-              | gh issue comment "$PR_NUMBER" \
-              --body-file - \
-              --repo "$REPO_FULL_NAME"
+            echo "Created issue #$ISSUE_NUMBER"
 
-            if [ -z "$PR_BODY" ]; then
-              PR_BODY="Please edit this."
-            fi
+            # Create comment and link PR
+            COMMENT_BODY="Error: Hi @$PR_USER, You did not reference an open issue in your PR (#$PR_NUMBER). I created #$ISSUE_NUMBER for you. Please update the issue details."
+            gh issue comment "$PR_NUMBER" --repo "$REPO_FULL_NAME" --body "$COMMENT_BODY"
 
-            echo "Editing PR $PR_NUMBER..."
-            printf "%s\nCloses #%s, " "$PR_BODY" "$ISSUE_NUMBER" | gh pr edit "$PR_NUMBER" \
-              --body-file - \
-              --repo "$REPO_FULL_NAME"
-            exit 0
+            # Update PR body to include the "Closes" keyword
+            # Using --body-file or -f prevents shell redirection issues with multiline bodies
+            NEW_BODY=$(printf "%s\n\nCloses #%s" "${PR_BODY:-'Please edit this.'}" "$ISSUE_NUMBER")
+            gh pr edit "$PR_NUMBER" --repo "$REPO_FULL_NAME" --body "$NEW_BODY"
           fi

@@ -1,12 +1,14 @@
 name: Generate and Upload SBOM Reports
 
 on:
-    push:
-      tags:
+  push:
+    tags:
       - 'v**'
       - 'nightly'
+
 permissions:
-    contents: read
+  contents: read
+
 jobs:
   enrich_and_upload_sbom:
     permissions:
@@ -18,82 +20,71 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          fulcio.sigstore.dev:443
+          rekor.sigstore.dev:443
+          tuf-repo-cdn.sigstore.dev:443
+          sigstore-tuf-root.storage.googleapis.com:443
+          api.deps.dev:443
+          api.securityscorecards.dev:443
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - name: Fetch Jans SBOM from Github
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-            curl -H "Accept: application/vnd.github.v3.raw" \
-                 -o gh-sbom.json \
-                 https://api.github.com/repos/JanssenProject/jans/dependency-graph/sbom
-            wc gh-sbom.json
-
-    - name: Trim SBOM
-      run: |
-        jq '.sbom' gh-sbom.json > trimmed-sbom.json
-        wc trimmed-sbom.json
-
-    - name: Install Parlay CLI
-      run: |
-        curl -s https://api.github.com/repos/snyk/parlay/releases/latest |     
-          grep "browser_download_url" |     
-          grep -P "parlay_\d+\.\d+\.\d+_linux_amd64.deb" |     
-          cut -d '"' -f 4 | 
-          xargs curl -LO
+        # Added GH_TOKEN to avoid rate limits and 403s
+        gh api -H "Accept: application/vnd.github.v3.raw" \
+           /repos/JanssenProject/jans/dependency-graph/sbom \
+           > gh-sbom.json
         
-        sudo dpkg -i parlay_*_linux_amd64.deb
+        jq '.sbom' gh-sbom.json > trimmed-sbom.json
 
-    - name: Enrich trimmed SBOM using Parlay
+    - name: Install Parlay
       run: |
-        cat trimmed-sbom.json | \
-        parlay ecosystems enrich - | \
-        parlay scorecard enrich - > jans-sbom.json
-        wc jans-sbom.json 
+        # Optimized download: targets a specific version for stability
+        PARLAY_VER="0.6.0" 
+        curl -LO "https://github.com/snyk/parlay/releases/download/v${PARLAY_VER}/parlay_linux_amd64"
+        chmod +x parlay_linux_amd64
+        sudo mv parlay_linux_amd64 /usr/local/bin/parlay
 
-    - name: Install sbomqs to generate compliance reports
+    - name: Enrich SBOM using Parlay
       run: |
-        curl -s https://api.github.com/repos/interlynk-io/sbomqs/releases/latest | \
-        grep "browser_download_url" | \
-        grep -P "sbomqs_\d+\.\d+\.\d+_amd64.deb" | \
-        cut -d '"' -f 4 | xargs curl -LO
+        parlay ecosystems enrich trimmed-sbom.json > jans-sbom-ecosystem.json
+        parlay scorecard enrich jans-sbom-ecosystem.json > jans-sbom.json
 
-        sudo dpkg -i sbomqs_*_amd64.deb
+    - name: Install sbomqs
+      run: |
+        QS_VER="0.0.33"
+        curl -LO "https://github.com/interlynk-io/sbomqs/releases/download/v${QS_VER}/sbomqs_linux_amd64"
+        chmod +x sbomqs_linux_amd64
+        sudo mv sbomqs_linux_amd64 /usr/local/bin/sbomqs
 
-    - name: Generate compliance reports using sbomqs
+    - name: Generate compliance reports
       run: |        
         sbomqs compliance --fsct -j jans-sbom.json > jans-sbom-fsct-report.json
-        wc jans-sbom-fsct-report.json 
-
         sbomqs compliance --bsi-v2 -j jans-sbom.json > jans-sbom-bsi-v2-report.json
-        wc jans-sbom-bsi-v2-report.json
-
         sbomqs compliance --ntia -j jans-sbom.json > jans-sbom-NTIA-report.json
-        wc jans-sbom-NTIA-report.json
-
         sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
-        wc jans-sbom-openchain-report.json
 
-    - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        sparse-checkout: .
-        sparse-checkout-cone-mode: true
-
-    - name: Sign SBOM and compliance reports
+    - name: Sign Artifacts
       run: |
         for file in jans-sbom.json jans-sbom-fsct-report.json jans-sbom-bsi-v2-report.json jans-sbom-NTIA-report.json jans-sbom-openchain-report.json; do
           cosign sign-blob --yes --bundle "${file}.bundle" "${file}"
         done
 
-    - name: Upload the enriched SBOM and compliance reports to the release
+    - name: Upload to Release
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        EVENT_REF: ${{ github.event.ref }}
+        VERSION: ${{ github.ref_name }}
       run: |
-        VERSION="$(echo "$EVENT_REF" | cut -d '/' -f 3)"
-        gh release upload "${VERSION}" \
+        gh release upload "$VERSION" \
           jans-sbom.json jans-sbom.json.bundle \
           jans-sbom-fsct-report.json jans-sbom-fsct-report.json.bundle \
           jans-sbom-bsi-v2-report.json jans-sbom-bsi-v2-report.json.bundle \

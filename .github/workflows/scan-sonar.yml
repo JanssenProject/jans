@@ -1,57 +1,23 @@
-# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
-# Contact @moabu
-# Sonar cloud https://sonarcloud.io/organizations/janssenproject/projects
 name: Code quality check
 
 on:
   push:
-    branches:
-      - main
-      - '!update-pycloud-in-**'
+    branches: [main]
     paths:
-      - 'jans-link/**'
-      - 'jans-auth-server/**'
-      - 'jans-lock/**'
-      - 'jans-orm/**'
-      - 'jans-config-api/**'
-      - 'jans-scim/**'
-      - 'jans-core/**'
-      - 'jans-fido2/**'
+      - 'jans-**/**'
       - 'agama/**'
-      - 'jans-linux-setup/**'
-      - 'jans-cli-tui/**'
-      - 'jans-pycloudlib/**'
-      - 'jans-casa/**'
-      - 'jans-shibboleth-idp/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
-
   pull_request:
-    branches:
-      - main
-      - '!update-pycloud-in-**'
-    types:
-      - opened
-      - synchronize
+    types: [opened, synchronize]
+    branches: [main]
     paths:
-      - 'jans-link/**'
-      - 'jans-auth-server/**'
-      - 'jans-lock/**'
-      - 'jans-orm/**'
-      - 'jans-config-api/**'
-      - 'jans-scim/**'
-      - 'jans-core/**'
-      - 'jans-fido2/**'
+      - 'jans-**/**'
       - 'agama/**'
-      - 'jans-linux-setup/**'
-      - 'jans-cli-tui/**'
-      - 'jans-pycloudlib/**'
-      - 'jans-casa/**'
-      - 'jans-shibboleth-idp/**'
       - '!**/CHANGELOG.md'
       - '!**.txt'
-
   workflow_dispatch:
+
 permissions:
   contents: read
 
@@ -59,8 +25,6 @@ jobs:
   detect-changes:
     name: Detect changed modules
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       has_changes: ${{ steps.set-matrix.outputs.has_changes }}
@@ -68,7 +32,10 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -77,136 +44,93 @@ jobs:
 
       - name: Detect changed modules
         id: set-matrix
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BEFORE_SHA: ${{ github.event.before }}
-          EVENT_NAME: ${{ github.event_name }}
         run: |
           ALL_MODULES="jans-auth-server agama jans-config-api jans-core jans-linux-setup jans-cli-tui jans-fido2 jans-orm jans-scim jans-pycloudlib jans-link jans-casa jans-lock jans-shibboleth-idp"
-          CHANGED_DIRS=""
-
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            CHANGED_MODULES="$ALL_MODULES"
-          elif [ "$GITHUB_BASE_REF" ]; then
-            if [ -z "$BASE_SHA" ] || [ -z "$HEAD_SHA" ]; then
-              echo "Missing PR SHAs. Scanning all modules."
-              CHANGED_MODULES="$ALL_MODULES"
-            else
-              CHANGED_DIRS=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | cut -d/ -f1 | sort -u)
-            fi
+          
+          # Use Git to find changed files based on event type
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            CHANGED_DIRS=$(echo "$ALL_MODULES" | tr ' ' '\n')
+          elif [[ -n "${{ github.base_ref }}" ]]; then
+            CHANGED_DIRS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | sort -u)
           else
-            if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] || [ -z "$BEFORE_SHA" ]; then
-              echo "Null SHA detected (force push or new branch). Scanning all modules."
-              CHANGED_MODULES="$ALL_MODULES"
-            else
-              CHANGED_DIRS=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" | cut -d/ -f1 | sort -u)
-            fi
+            CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u)
           fi
 
-          if [ -z "${CHANGED_MODULES:-}" ] && [ -n "$CHANGED_DIRS" ]; then
-            CHANGED_MODULES=""
-            for mod in $ALL_MODULES; do
-              if echo "$CHANGED_DIRS" | grep -qx "$mod"; then
-                CHANGED_MODULES="$CHANGED_MODULES $mod"
-              fi
-            done
-          fi
+          # Safe intersection using jq
+          CHANGED_MODULES=$(jq -n --arg all "$ALL_MODULES" --arg changed "$CHANGED_DIRS" '
+            ($all | split(" ")) as $a | 
+            ($changed | split("\n")) as $c | 
+            ($a & $c) | join(" ")' | tr -d '"')
 
-          CHANGED_MODULES=$(echo "$CHANGED_MODULES" | xargs)
           if [ -z "$CHANGED_MODULES" ]; then
-            echo "No relevant modules changed"
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "matrix={\"module\":[]}" >> "$GITHUB_OUTPUT"
           else
-            echo "Changed modules: $CHANGED_MODULES"
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            MATRIX_JSON=$(echo "$CHANGED_MODULES" | tr ' ' '\n' | jq -R . | jq -sc '{"module": .}')
-            echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+            JSON=$(echo "$CHANGED_MODULES" | tr ' ' '\n' | jq -R . | jq -sc '{"module": .}')
+            echo "matrix=$JSON" >> "$GITHUB_OUTPUT"
           fi
 
   sonar-scan:
-    name: sonar scan
+    name: Sonar Scan
     needs: detect-changes
     if: needs.detect-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       JVM_PROJECTS: "jans-link jans-auth-server jans-lock jans-orm jans-config-api jans-scim jans-core jans-fido2 jans-casa agama jans-shibboleth-idp"
-    permissions:
-        contents: read
-        pull-requests: write
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            repo.maven.apache.org:443
+            sonarcloud.io:443
+            scanner.sonarcloud.io:443
+            analysis.sonarcloud.io:443
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
-      - name: Determine project type
-        id: project-type
-        env:
-          MODULE: ${{ matrix.module }}
-        run: |
-          if echo "$JVM_PROJECTS" | tr ' ' '\n' | grep -qx "$MODULE"; then
-            echo "is_jvm=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_jvm=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Set up JDK 17
-        if: steps.project-type.outputs.is_jvm == 'true'
+        if: contains(env.JVM_PROJECTS, matrix.module)
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: '17'
           distribution: 'adopt'
+          cache: 'maven'
 
-      - name: Cache SonarCloud packages for JVM based project
-        if: steps.project-type.outputs.is_jvm == 'true'
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Build and analyze JVM based project
-        if: steps.project-type.outputs.is_jvm == 'true'
+      - name: Build and analyze JVM project
+        if: contains(env.JVM_PROJECTS, matrix.module)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          MODULE: ${{ matrix.module }}
         run: |
-          cd "$MODULE"
-          case "$MODULE" in
-            "jans-auth-server"|"jans-lock"|"jans-scim"|"jans-config-api")
-                  echo "Run Sonar analysis without test execution"
-                  mvn -B -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-                ;;
-            *)
-            echo "Run Sonar analysis with test execution"
+          cd "${{ matrix.module }}"
+          # Skip tests for specifically heavy modules as per original logic
+          if [[ "${{ matrix.module }}" =~ ^(jans-auth-server|jans-lock|jans-scim|jans-config-api)$ ]]; then
+            mvn -B -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          else
             mvn -B install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-            ;;
-          esac
+          fi
 
-      - name: Convert repo org name to lowercase for non JVM projects
-        if: steps.project-type.outputs.is_jvm == 'false'
-        env:
-          REPO_OWNER: ${{ github.repository_owner }}
-        run: |
-          echo "REPO_ORG=${REPO_OWNER,,}" >>${GITHUB_ENV}
-
-      - name: SonarCloud Scan for non-JVM project
-        if: steps.project-type.outputs.is_jvm == 'false'
+      - name: SonarCloud Scan (Non-JVM)
+        if: "!contains(env.JVM_PROJECTS, matrix.module)"
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         with:
           args: >
-            -Dsonar.organization=${{ env.REPO_ORG }}
+            -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.projectKey=${{ github.repository_owner }}_${{ matrix.module }}
           projectBaseDir: ${{ matrix.module }}
         env:

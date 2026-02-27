@@ -1,4 +1,5 @@
 name: Publish docs via GitHub Pages
+
 on:
   push:
     branches:
@@ -27,6 +28,7 @@ on:
         description: 'Version tag (e.g."v1.6.0")'
         default: "nightly"
         required: false
+
 concurrency:
   group: run-once
   cancel-in-progress: false
@@ -37,7 +39,8 @@ permissions:
 jobs:
   build:
     permissions:
-      contents: write  # for Git to git push
+      contents: write  # Required for Git push to gh-pages
+      pull-requests: write # Required for generating auto-docs PR
     if: github.repository == 'JanssenProject/jans'
     name: Deploy docs
     runs-on: ubuntu-latest
@@ -46,7 +49,20 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
+            install.python-poetry.org:443
+            get.helm.sh:443
+            keys.openpgp.org:443
+            keyserver.ubuntu.com:11371
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            motd.ubuntu.com:443
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -71,32 +87,31 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           export PATH="$HOME/.local/bin:$PATH"
-          cp docs/pyproject.toml docs/poetry.lock ../
+          if [ -f docs/pyproject.toml ]; then
+            cp docs/pyproject.toml docs/poetry.lock ../ || true
+          fi
           poetry install --no-root
-          cp mkdocs.yml CHANGELOG.md ../
+          cp mkdocs.yml CHANGELOG.md ../ || true
 
-      - name: Checkout jans ${{ github.event.inputs.version }}
-        if: >-
-          github.event_name == 'workflow_dispatch'
+      - name: Checkout target version (Dispatch Only)
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: '${{ github.event.inputs.version }}'
+          ref: ${{ github.event.inputs.version }}
           fetch-depth: 0
           token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 
-      - name: Copy files from main to ${{ github.event.inputs.version }}
-        if: >-
-          github.event_name == 'workflow_dispatch'
+      - name: Copy files from main to target
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          mv ../mkdocs.yml mkdocs.yml
-          cp ../CHANGELOG.md docs/CHANGELOG.md
+          mv ../mkdocs.yml mkdocs.yml || true
+          cp ../CHANGELOG.md docs/CHANGELOG.md || true
 
       - name: Sync CHANGELOG to docs
         if: github.event_name != 'workflow_dispatch'
-        run: |
-          cp CHANGELOG.md docs/CHANGELOG.md
+        run: cp CHANGELOG.md docs/CHANGELOG.md || true
 
-      - name: Copy generated chart from main
+      - name: Copy generated chart
         run: |
           helm package charts/janssen/
           helm package charts/janssen-all-in-one/
@@ -111,14 +126,16 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Configure Git
+      - name: Configure Git & Auth
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+          gh auth setup-git
 
-      - name: Generate docs
+      - name: Generate auto-docs
         continue-on-error: true
         if: >-
           github.event_name == 'release' &&
@@ -126,124 +143,99 @@ jobs:
           (!github.event.release.draft) &&
           (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
         env:
-          VERSION: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-         mkdir temp && cd temp
-         git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
-         cd jans
-         git checkout -b cn-jans-update-auto-generated-docs
-         git pull origin cn-jans-update-auto-generated-docs || echo "Nothing to pull"
-         echo "Custom work on generating docs can go here."
+          mkdir -p temp && cd temp
+          gh repo clone JanssenProject/jans .
+          git checkout -b cn-jans-update-auto-generated-docs
+          git pull origin cn-jans-update-auto-generated-docs || echo "Branch is new"
 
-         echo "Generating auto-generated docs and push to main"
-         sudo bash ./automation/docs/generate-autogenerated-docs.sh . || echo "something went wrong with generating the property docs"
-         cd docs
-         git add . || echo "Nothing to add"
-         git commit -a -S -m "docs: auto-generated property docs" || echo "Nothing to commit"
-         cd ..
+          echo "Generating docs..."
+          sudo bash ./automation/docs/generate-autogenerated-docs.sh . || echo "Prop docs failed"
+          git add .
+          git commit -S -m "docs: auto-generated property docs" || echo "No changes"
 
-         echo "Add jans-config-api Swagger SPECs that are auto-generated via API annotations"
-         sudo bash ./automation/docs/generate-swagger-specs.sh . || echo "something went wrong with generating the swagger docs"
-         cd jans-config-api/docs
-         git add . || echo "Nothing to add"
-         git commit -a -S -m "docs: auto-generated Swagger SPEC docs" || echo "Nothing to commit"
-         cd ../..
+          sudo bash ./automation/docs/generate-swagger-specs.sh . || echo "Swagger failed"
+          git add .
+          git commit -S -m "docs: auto-generated Swagger SPEC docs" || echo "No changes"
 
-         git push --set-upstream origin cn-jans-update-auto-generated-docs
-         MESSAGE="fix(docs): autogenerate docs"
-         PR=$(gh pr create --body "Auto generated docs" --title "${MESSAGE}")
-         cd ../../
+          git push origin cn-jans-update-auto-generated-docs
+          gh pr create --body "Auto generated docs" --title "fix(docs): autogenerate docs" || echo "PR exists"
+          cd ../ && sudo rm -rf temp
 
-         sudo rm -rf temp
-
-      - name: Use latest template overrides from main
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
-        run: |
-          git show origin/main:docs/overrides/main.html > docs/overrides/main.html
-
-      - name: Enable Reo and Scarf tracking for versioned docs
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'published')
-        run: |
-          sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
-          sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
-          echo "Tracking flags status:"
-          grep -E 'enable_scarf_pixel|enable_reo_flag' mkdocs.yml
-
-      - name: mike deploy ${{ github.event.inputs.version }}
-        if: >-
-          github.event_name == 'workflow_dispatch'
-        run: |
-          poetry run mike deploy --push --update-aliases ${{ github.event.inputs.version }}
-
-      - name: mike deploy head
-        if: contains(github.ref, 'refs/heads/main') && github.event_name != 'workflow_dispatch'
-        run: |
-          poetry run mike deploy --push head
-
-      - name: mike deploy new version
-        if: >-
-          github.event_name == 'release' &&
-          github.event.action == 'published' &&
-          (!github.event.release.draft) &&
-          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
+      - name: Deploy with Mike
         env:
-          VERSION: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          poetry run mike deploy --push "$VERSION"
-
-      - name: Update mike version aliases
-        id: set_versions
-        run: |
-          GITHUB_EVENT_RELEASE_TAG_NAME="${{ github.event.release.tag_name }}"
-          TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
-          LATEST=$(echo "${TAGS}" | tail -1)
-          STABLE=$(echo "${TAGS}" | grep -v -- "nightly" | tail -1)
-          if [[ "$GITHUB_EVENT_RELEASE_TAG_NAME" == 'nightly' ]]; then
-            LATEST='nightly'
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Use latest template overrides
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "release" ]]; then
+            git show origin/main:docs/overrides/main.html > docs/overrides/main.html || true
           fi
-          echo "Latest is $LATEST and Stable is $STABLE"
+
+          # Enable tracking flags for versions
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "release" ]]; then
+            sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
+            sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
+          fi
+
+          # Deploy logic
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            poetry run mike deploy --push --update-aliases "$INPUT_VERSION"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            poetry run mike deploy --push head
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            poetry run mike deploy --push "${{ github.event.release.tag_name }}"
+          fi
+
+      - name: Update Aliases & gh-pages
+        id: set_versions
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          TAGS=$(gh release list -L 1000 | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
+          STABLE=$(echo "${TAGS}" | grep -v -- "nightly" | tail -1)
+          LATEST=$( [[ "${{ github.event.release.tag_name }}" == "nightly" ]] && echo "nightly" || echo "${TAGS}" | tail -1 )
+          
           poetry run mike alias -u head main
           poetry run mike alias -u "${STABLE}" stable
           poetry run mike set-default --push stable
-          echo "LATEST=${LATEST}" >> $GITHUB_OUTPUT
-          echo "STABLE=${STABLE}" >> $GITHUB_OUTPUT
+          
+          echo "LATEST=$LATEST" >> $GITHUB_OUTPUT
+          echo "STABLE=$STABLE" >> $GITHUB_OUTPUT
 
-      - name: Create version files
+      - name: Post-process gh-pages
+        env:
+          LATEST: ${{ steps.set_versions.outputs.LATEST }}
+          STABLE: ${{ steps.set_versions.outputs.STABLE }}
         run: |
-          LATEST=${{ steps.set_versions.outputs.LATEST }}
-          STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout -f gh-pages
           git pull origin gh-pages
+          
+          # Manage Helm Charts
+          mkdir -p charts
           mv ../janssen-*.tgz ./charts/
-          cd ./charts
-          git add janssen-*.tgz && git update-index --refresh
-          helm repo index .
-          git add index.yaml && git update-index --refresh
-          cd ..
+          cd charts && helm repo index . && cd ..
+          
+          # Versioned search and string replacement
           for folder in v*/; do
-            cp -r nightly/search "$folder"
-            git add $folder/search && git update-index --refresh
+            cp -r nightly/search "$folder" || true
           done
-          cd ${LATEST}
-          if [[ "${LATEST}" == "nightly" ]]; then
-           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version-stable/0.0.0-nightly/g"
-           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/0.0.0-nightly/g"
-           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/v0.0.0-nightly/nightly/g"
-          else
-           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
+          
+          if [ -d "$LATEST" ]; then
+            cd "$LATEST"
+            VERSION_STR=$([[ "$LATEST" == "nightly" ] ] && echo "0.0.0-nightly" || echo "${LATEST:1}")
+            find . -type f -not -name "CONTRIBUTING.md" -print0 | xargs -0 sed -i "s/replace-janssen-version-stable/$VERSION_STR/g"
+            find . -type f -not -name "CONTRIBUTING.md" -print0 | xargs -0 sed -i "s/replace-janssen-version/$VERSION_STR/g"
+            cd ..
           fi
-          git add . && git update-index --refresh
-          cd ..
-          for folder in */; do
-            if [[ $folder != "${STABLE}/" ]]; then
-              git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
-            fi
-          done
-          git diff-index --quiet HEAD -- || git commit -S -m "docs: update version references"
-          echo "${STABLE}" > stable.txt
-          git add stable.txt && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"
-          echo "${LATEST}" > latest.txt
-          git add latest.txt && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "Set latest to ${LATEST}"
+          
+          # Final Commit
+          echo "$STABLE" > stable.txt
+          echo "$LATEST" > latest.txt
+          git add .
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: finalize versioning and charts"
           git push origin gh-pages

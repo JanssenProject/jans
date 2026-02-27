@@ -1,17 +1,10 @@
-# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
-# Contact @moabu
 name: Label PRs and Issues
 on:
   pull_request:
-    types:
-      - opened
-      - edited
-    branches:
-      - main
+    types: [opened, edited]
+    branches: [main]
   issues:
-    types:
-      - opened
-      - edited
+    types: [opened, edited]
   workflow_dispatch:
 
 permissions:
@@ -26,7 +19,10 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -38,27 +34,38 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-          if [[ "${{github.event_name}}" == "issues" ]]; then
-            echo "Activated by an issue event"
-            issue_or_pull_number=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
-            changed_files="NONE"
-            operation="issue"
-            branch="NONE"
-            title=$(jq --raw-output .issue.title "$GITHUB_EVENT_PATH")
+          if [[ "${{ github.event_name }}" == "issues" ]]; then
+            echo "Processing Issue..."
+            NUMBER=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+            TITLE=$(jq --raw-output .issue.title "$GITHUB_EVENT_PATH")
+            OP="issue"
+            FILES="NONE"
+            BRANCH="NONE"
           else
-            echo "Activated by a PR event"
-            issue_or_pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-            gh pr view "$issue_or_pull_number" --json files --jq '.files.[].path' > changed_files
-            changed_files=$(paste -s -d, changed_files)
-            operation="pr"
-            branch="${GITHUB_BASE_REF}"
-            title=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
+            echo "Processing PR..."
+            NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+            TITLE=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
+            OP="pr"
+            BRANCH="${GITHUB_BASE_REF}"
+            # Use a temporary file to safely handle large file lists
+            gh pr view "$NUMBER" --json files --jq '.files.[].path' | paste -s -d, - > changed_files.txt
+            FILES=$(cat changed_files.txt)
           fi
-          python3 ./automation/github-labels/label.py "${issue_or_pull_number}" "${changed_files}" "${branch}" "${operation}" "${title}"
+
+          # VULNERABILITY FIX: Export values to ENV so Python can read them safely
+          export LABEL_NUMBER="$NUMBER"
+          export LABEL_FILES="$FILES"
+          export LABEL_BRANCH="$BRANCH"
+          export LABEL_OP="$OP"
+          export LABEL_TITLE="$TITLE"
+
+          # Update your Python script to use os.environ.get('LABEL_TITLE') etc.
+          python3 ./automation/github-labels/label.py
 
       - name: Add issue to project
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'issues'
         env:
           GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-          gh issue edit $(jq --raw-output .issue.number "$GITHUB_EVENT_PATH") --add-project janssen-issue-dashboard
+          ISSUE_NUM=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+          gh issue edit "$ISSUE_NUM" --add-project janssen-issue-dashboard

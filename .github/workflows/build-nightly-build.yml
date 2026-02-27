@@ -4,40 +4,49 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'The branch to build night release from'
+        description: 'The branch to build nightly release from'
         required: false
         default: 'main'
   schedule:
     - cron: "0 23 * * *"
+
 permissions:
   contents: read
 
 jobs:
-  publish_binary_packages:
+  nightly:
     permissions:
-      contents: write  # for Git to git push
+      contents: write  # Necessary for: gh release create AND git push --delete
     runs-on: ubuntu-22.04
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: set nightly version
+    - name: Set Nightly Version
       id: nightly
-      continue-on-error: false
-      if: github.event_name == 'schedule' || github.event.inputs.nightly == 'true'
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        TARGET_BRANCH: ${{ github.event.inputs.branch }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TARGET_BRANCH: ${{ github.event.inputs.branch || 'main' }}
+        NIGHTLY_VERSION: "nightly"
       run: |
-        NIGHTLY_VERSION="nightly"
-        gh release delete "${NIGHTLY_VERSION}" --cleanup-tag --yes || echo "${NIGHTLY_VERSION} does not exist"
-        git push --delete origin "${NIGHTLY_VERSION}" || echo "${NIGHTLY_VERSION} tag does not exist"
-        if [ -z "$TARGET_BRANCH" ]; then
-          TARGET_BRANCH="main"
-        fi
-        gh release create "${NIGHTLY_VERSION}" --generate-notes --prerelease --title "${NIGHTLY_VERSION}" --target "${TARGET_BRANCH}"
+        # 1. Delete existing release & tag
+        gh release delete "$NIGHTLY_VERSION" --cleanup-tag --yes || echo "No existing release"
+        
+        # 2. Delete the remote tag if it lingered
+        git push origin --delete "$NIGHTLY_VERSION" || echo "Tag not found on remote"
+        
+        # 3. Create new release
+        gh release create "$NIGHTLY_VERSION" \
+          --generate-notes \
+          --prerelease \
+          --title "Nightly Build" \
+          --target "$TARGET_BRANCH"

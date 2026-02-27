@@ -3,18 +3,24 @@ on:
   schedule:
     - cron: '0 0 */2 * *'
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   del_runs:
     permissions:
-      actions: write  # to delete old workflow runs
+      actions: write  # Required for metadata deletion
+      contents: none   # Explicitly disable content access
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
 
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@5bf9a1dac5c4d041c029f0a8370ddf0c5cb5aeb7 # v2.1.0

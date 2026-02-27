@@ -4,9 +4,15 @@ on:
     types:
       - closed
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch/Ref to clear caches for (e.g. refs/heads/main)'
+        required: false
+
 permissions:
-  actions: write  # to delete PR caches via gh cache delete
+  actions: write  # Required to delete caches
   contents: read
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest
@@ -14,23 +20,30 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
 
-      - name: Cleanup
+      - name: Cleanup Caches
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          MANUAL_BRANCH: ${{ github.event.inputs.branch }}
         run: |
-          BRANCH="refs/pull/${PR_NUMBER}/merge"
+          # Determine the correct Git Ref
+          if [ -n "$PR_NUMBER" ]; then
+            TARGET_REF="refs/pull/${PR_NUMBER}/merge"
+          else
+            TARGET_REF="${MANUAL_BRANCH:-$GITHUB_REF}"
+          fi
 
-          echo "Fetching list of cache keys"
-          cacheKeysForPR=$(gh cache list -R "$REPO" --ref "$BRANCH" | cut -f 1)
+          echo "Cleaning up caches for ref: $TARGET_REF"
 
-          set +e
-          echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR
-          do
-              gh cache delete "$cacheKey" -R "$REPO"
-          done
-          echo "Done"
+          # Use xargs for safer, more efficient bulk processing
+          # We fetch the IDs and pipe them to the delete command
+          gh cache list -R "$REPO" --ref "$TARGET_REF" --limit 100 --json id --jq '.[].id' | \
+          xargs -I {} gh cache delete "{}" -R "$REPO" || echo "No caches found to delete."
+          
+          echo "Cleanup process complete."

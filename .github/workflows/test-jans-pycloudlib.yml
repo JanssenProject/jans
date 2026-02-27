@@ -2,16 +2,14 @@ name: testcases
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
       - "jans-pycloudlib/setup.py"
       - "!**.md"
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
@@ -19,30 +17,47 @@ on:
       - "!jans-pycloudlib/CHANGELOG.md"
       - "!jans-pycloudlib/jans/pycloudlib/version.py"
       - "!**.md"
+
 permissions:
   contents: read
 
 jobs:
   build:
+    permissions:
+      contents: read
+      actions: none
+      security-events: none
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11"]
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
+          pypi.org:443
+          files.pythonhosted.org:443
 
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+        cache-dependency-path: 'jans-pycloudlib/setup.py'
+
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        python3 -m pip install --upgrade pip
         python3 -m pip install tox
-    - name: Test with pytest
+
+    - name: Test with pytest (via tox)
       working-directory: jans-pycloudlib
       run: tox

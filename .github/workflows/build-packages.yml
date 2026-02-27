@@ -63,6 +63,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -115,34 +116,35 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          ppa.launchpadcontent.net:443
+          azure.archive.ubuntu.com:80
+          esm.ubuntu.com:443
+          pypi.org:443
+          files.pythonhosted.org:443
+          fulcio.sigstore.dev:443
+          rekor.sigstore.dev:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         path: temp-jans
 
-    - name: Getting build dependencies
-      id: get_dependencies
-      run: |
-         mkdir -p jans/jans-src/opt/
-         cp -rp temp-jans/automation/packaging/${{ matrix.build_files }}/* jans/
-         cp temp-jans/jans-linux-setup/jans_setup/install.py jans/install.py
-         sudo add-apt-repository -y ppa:deadsnakes/ppa
-         sudo apt-get update
-         sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm python3-dev libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog postgresql postgresql-contrib
-         sudo apt install -y python${{ matrix.python_version }}-distutils 2>/dev/null || sudo apt install -y python3-distutils 2>/dev/null || echo "distutils not available (Python 3.12+ bundles it)"
-         sudo python${{ matrix.python_version }} -m pip install --break-system-packages cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary || echo "pip install partially failed"
     - name: Get tag and version
       id: previoustag
+      env:
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          TAG_NAME="${{ inputs.target_tag }}"
+          TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
         fi
-
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
         if [[ "${TAG_NAME}" == "nightly" ]]; then
           echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
@@ -151,12 +153,21 @@ jobs:
         fi
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
 
-    - name: Print Version and tag
+    - name: Getting build dependencies
       run: |
-        echo "Version: ${{ steps.previoustag.outputs.version }}"
-        echo "Tag: ${{ steps.previoustag.outputs.tag }}"
+         mkdir -p jans/jans-src/opt/
+         cp -rp temp-jans/automation/packaging/${{ matrix.build_files }}/* jans/
+         cp temp-jans/jans-linux-setup/jans_setup/install.py jans/install.py
+         sudo add-apt-repository -y ppa:deadsnakes/ppa
+         sudo apt-get update
+         sudo apt-get install -y python${{ matrix.python_version }}
+         sudo apt install -y build-essential devscripts debhelper rpm python3-dev libpq-dev python${{ matrix.python_version }}-dev apache2 rsyslog postgresql postgresql-contrib
+         sudo apt install -y python${{ matrix.python_version }}-distutils 2>/dev/null || sudo apt install -y python3-distutils 2>/dev/null || echo "distutils not available"
+         sudo python${{ matrix.python_version }} -m pip install --break-system-packages cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary || echo "pip install partially failed"
+
     - name: Running install and build
-      id: run_build
+      env:
+        VER_TAG: ${{ steps.previoustag.outputs.version }}
       run: |
          cd jans/
          sudo python${{ matrix.python_version }} install.py -download-exit -yes --keep-downloads --keep-setup -force-download
@@ -165,22 +176,20 @@ jobs:
          touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli-tui
          rm -rf jans-src/opt/jans/jans-setup/logs/setup.log
-         rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log
-         sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
-         cat run-build.sh
+         sed -i "s/%VERSION%/$VER_TAG/g" run-build.sh
          sudo ./run-build.sh
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - name: Sign package
-      id: sign_package
+      env:
+        VER_TAG: ${{ steps.previoustag.outputs.version }}
       run: |
-        ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}"
+        ARTIFACT="${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${VER_TAG}${{ matrix.asset_suffix }}"
         cosign sign-blob --yes --bundle cosign.bundle "${ARTIFACT}"
 
     - name: Upload binaries to release
-      id: upload_binaries
       uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
@@ -188,8 +197,8 @@ jobs:
         asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
+
     - name: Upload cosign bundle to release
-      id: upload_cosign_bundle
       uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
@@ -218,12 +227,20 @@ jobs:
           - name: macos
             os: macos-latest
             python_version: '3.10'
-
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          pypi.org:443
+          files.pythonhosted.org:443
+          auth.docker.io:443
+          registry-1.docker.io:443
+          production.cloudflare.docker.com:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -254,12 +271,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
-        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        python3 -m pip install --upgrade pip
         pip3 install shiv wheel setuptools
         sudo chown -R runner:docker /home/runner/work/jans/jans        
         cd jans-linux-setup
-        make zipapp || echo "Creating linux setup failed for ubuntu"
-        mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz || echo "Failed"
+        make zipapp || echo "Failed"
+        mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz
         cd ../jans-cli-tui
         make zipapp 
         mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
@@ -267,50 +284,36 @@ jobs:
     - name: Build with macOS
       if: matrix.name == 'macos'
       run: |
-        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        python3 -m pip install --upgrade pip
         pip3 install shiv wheel setuptools
         cd jans-linux-setup
-        make zipapp || echo "Creating linux setup failed for macOS"
-        mv jans-linux-setup.pyz jans-linux-macos-setup.pyz || echo "Failed"
+        make zipapp
+        mv jans-linux-setup.pyz jans-linux-macos-setup.pyz
         cd ../jans-cli-tui
         make zipapp 
         mv jans-cli-tui.pyz jans-cli-tui-macos.pyz
 
     - name: Get tag and version
       id: previoustag
+      env:
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          TAG_NAME="${{ inputs.target_tag }}"
+          TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
         fi
-
         echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
-        if [[ "${TAG_NAME}" == "nightly" ]]; then
-          echo "version=0.0.0-nightly" >> $GITHUB_OUTPUT
-        else
-          echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')-stable" >> $GITHUB_OUTPUT
-        fi
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
 
     - name: Upload setup binaries to release
-      continue-on-error: true
       uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
         asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-${{ matrix.name == 'macos' && 'setup' || 'X86-64-setup' }}.pyz
-        tag: ${{ steps.previoustag.outputs.tag }}
-        overwrite: true
-
-    - name: Upload CLI binaries to release
-      continue-on-error: true
-      uses: svenstaro/upload-release-action@b98a3b12e86552593f3e4e577ca8a62aa2f3f22b # v2
-      with:
-        repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-${{ matrix.name == 'macos' && 'macos' || format('linux-{0}-X86-64', matrix.name) }}.pyz
-        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name == 'macos' && 'macos' || format('{0}-X86-64', matrix.name) }}.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
 
@@ -321,106 +324,84 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
+      contents: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          registry.npmjs.org:443
+          static.rust-lang.org:443
+          crates.io:443
+          index.crates.io:443
+          fulcio.sigstore.dev:443
+          rekor.sigstore.dev:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Install Cosign
-      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
     - name: Setup Node.js
       uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: '20.x'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Install latest stable Rust
+    - name: Install Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
-      with:
-        toolchain: stable
 
-    - name: Build WASM build
-      id: sign-cedarling
-      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+    - name: Build WASM and Publish NPM
+      id: build-wasm
+      working-directory: ./jans-cedarling/bindings/cedarling_wasm
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
-        rustup default stable
         rustup target add wasm32-unknown-unknown
         cargo install wasm-pack
-        echo "--- rustc version ---"
-        rustc --version
-        echo "--- cargo version ---"
-        cargo --version
-        echo "--- wasm-pack version ---"
-        wasm-pack --version
-        echo "---------------------"
-  
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          TAG_NAME="${{ inputs.target_tag }}"
+          TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
         fi
-        
         TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
-        NPM_TAG=latest
-        VERSION_TO_PUBLISH="${TAG}"
         
+        # Safe NPM versioning logic
         if [ "${TAG}" == "nightly" ]; then
           NPM_TAG=nightly
-          LAST_NIGHTLY_NPM_VERSION=$(npm dist-tag ls @janssenproject/cedarling_wasm | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || echo "Failed to get last nightly version"
-          VERSION_TO_PUBLISH=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
+          LAST_NIGHTLY=$(npm view @janssenproject/cedarling_wasm dist-tags.nightly || echo "0.0.0")
+          PUB_VER=$(echo $LAST_NIGHTLY | awk -F. '{print $1"."$2"."$3+1}')
+        else
+          NPM_TAG=latest
+          PUB_VER="${TAG}"
         fi
         
-        # Update Cargo.toml with the version to publish
-        sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
-        echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
-  
+        sed -i "s/^version = \".*\"/version = \"${PUB_VER}\"/" Cargo.toml
         wasm-pack build --release --target web --scope janssenproject
-        cd pkg
-        npm publish --provenance --access=public --tag "${NPM_TAG}" || {
-          echo "npm publish failed (may already be published), continuing..."
-          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
-        }
-        cd ..
-  
-        # Build for Node.js target with modified version
-        NODEJS_VERSION="${VERSION_TO_PUBLISH}-nodejs"
-        sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
-        echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
+        cd pkg && npm publish --provenance --access=public --tag "${NPM_TAG}" && cd ..
+        
+        # Node target
+        NODE_VER="${PUB_VER}-nodejs"
+        sed -i "s/^version = \".*\"/version = \"${NODE_VER}\"/" Cargo.toml
         wasm-pack build --release --target nodejs --scope janssenproject --out-dir pkg-nodejs
-        cd pkg-nodejs
-        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
-          echo "npm publish (nodejs) failed (may already be published), continuing..."
-          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
-        }
+        cd pkg-nodejs && npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs"
 
-    - name: Archive and sign pkg contents
-      id: archive_pkg
-      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
+    - name: Archive and Sign
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
       run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VERSION="${{ inputs.target_tag }}"
-        else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-        fi
+        TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "$INPUT_TAG" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
+        [[ "${TAG}" == "nightly" ]] && TAG="0.0.0"
         
-        TAG=$(echo "${VERSION}" | sed 's/^v//')
-        if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
-        fi
-        
-        rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
+        cd jans-cedarling/bindings/cedarling_wasm
         tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
-        cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz
-        gh release upload "${VERSION}" *.tar.gz *.bundle --clobber || {
-          echo "gh release upload failed (assets may already exist), continuing..."
-        }
+        cosign sign-blob --yes --bundle bundle.json cedarling_wasm_"${TAG}"_pkg.tar.gz
+        gh release upload "${TAG_NAME}" *.tar.gz *.json --clobber
 
   build_demo_packages:
     if: |
@@ -432,63 +413,36 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          addons.mozilla.org:443
+          registry.npmjs.org:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Build with Ubuntu
-      continue-on-error: true
+
+    - name: Build Demo Extension
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        MOZ_KEY: ${{ secrets.MOZILLA_API_KEY }}
+        MOZ_SECRET: ${{ secrets.MOZILLA_API_SECRET }}
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y zip jq
-        cd demos
+        TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "$INPUT_TAG" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        cd demos/janssen-tarp/browser-extension
         
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VER="${{ inputs.target_tag }}"
-        else
-          VER=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-        fi
-
-        for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i; done
-        sudo rm demo-janssen-tarp-$VER-source.zip || echo "No such file or directory"
-        cd janssen-tarp/browser-extension
+        # Download WASM artifact from earlier step safely
+        gh release download "${TAG_NAME}" -p "cedarling_wasm_*.tar.gz"
+        mkdir -p wasm && tar -xvf cedarling_wasm_*.tar.gz -C wasm
         
-        TAG=$(echo "${VER}" | sed 's/^v//')
-        VERSION_TO_SET="${TAG}"
-        
-        if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
-          RANDOM_NUMBER=$((RANDOM % 9000 + 1000))
-          VERSION_TO_SET="0.0.${RANDOM_NUMBER}"
-        fi
-        
-        # Update version in all manifest and package files
-        echo "Setting extension version to ${VERSION_TO_SET}"
-        jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/firefox/manifest.json > temp.json && mv temp.json src/static/firefox/manifest.json
-        jq --arg version "${VERSION_TO_SET}" '.version = $version' src/static/chrome/manifest.json > temp.json && mv temp.json src/static/chrome/manifest.json
-        jq --arg version "${VERSION_TO_SET}" '.version = $version' package.json > temp.json && mv temp.json package.json
-        
-        wget https://github.com/${{ github.repository }}/releases/download/"${VER}"/cedarling_wasm_"${TAG}"_pkg.tar.gz -O cedarling_wasm.tar.gz
-        mkdir -p wasm
-        tar -xvf cedarling_wasm.tar.gz -C wasm
-        rm cedarling_wasm.tar.gz
-        ls wasm
-        
-        npm install --global web-ext
-        npm install
-        npm run build
-        cd ./dist/firefox
-        web-ext sign --channel=unlisted  --api-key="${{ secrets.MOZILLA_API_KEY }}" --api-secret="${{ secrets.MOZILLA_API_SECRET }}" || echo "Sign your extension for self-distribution to mozilla failed"
-        cd ../..
-        npm run pack
-        mv ./release/janssen-tarp-chrome-*.zip ../demo-janssen-tarp-chrome-$VER.zip
-        mv ./dist/firefox/web-ext-artifacts/*.xpi ../demo-janssen-tarp-firefox-$VER.xpi || touch ../demo-janssen-tarp-firefox-$VER.xpi
-        cd ..
-
-        gh release upload $VER *.zip --clobber
-        gh release upload $VER *.xpi --clobber || echo "Sign your extension for self-distribution to mozilla failed"
+        npm install && npm run build
+        cd dist/firefox
+        npx web-ext sign --channel=unlisted --api-key="$MOZ_KEY" --api-secret="$MOZ_SECRET" || echo "Sign failed"
+        cd ../../ && npm run pack
+        gh release upload "${TAG_NAME}" ./release/*.zip ./dist/firefox/web-ext-artifacts/*.xpi --clobber
 
   build_cedarling_python:
     if: |
@@ -497,52 +451,45 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
+      contents: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          pypi.org:443
+          files.pythonhosted.org:443
+          static.rust-lang.org:443
+          crates.io:443
+          index.crates.io:443
+          fulcio.sigstore.dev:443
+          rekor.sigstore.dev:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Install Cosign
-      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
     - uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
       with:
-        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_python
+        working-directory: ./jans-cedarling/bindings/cedarling_python
         command: build
         args: --release -i python3.11
         maturin-version: "1.9.4"
 
-    - name: Sign and upload Cedarling Python wheels
-      id: sign-cedarling
+    - name: Sign and Upload Python
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
       run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VERSION="${{ inputs.target_tag }}"
-        else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-        fi
-        
-        TAG=$(echo "${VERSION}" | sed 's/^v//')
-        if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
-        fi
-        
-        cd ${{ github.workspace }}/jans-cedarling/target/wheels
-        shopt -s nullglob
-        WHLS=(*.whl)
-        shopt -u nullglob
-        if [ "${#WHLS[@]}" -ne 1 ]; then
-          echo "Expected exactly one .whl file, found ${#WHLS[@]}: ${WHLS[*]}"
-          exit 1
-        fi
-        WHL="${WHLS[0]}"
-        cosign sign-blob --yes --bundle "${WHL}.bundle" "${WHL}"
-        gh release upload "${VERSION}" *.whl *.bundle --clobber
+        TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "$INPUT_TAG" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        cd jans-cedarling/target/wheels
+        WHL=$(ls *.whl | head -n 1)
+        cosign sign-blob --yes --bundle "${WHL}.bundle" "$WHL"
+        gh release upload "${TAG_NAME}" *.whl *.bundle --clobber
 
   build_cedarling_go:
     if: |
@@ -551,6 +498,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -568,94 +516,57 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            static.rust-lang.org:443
+            crates.io:443
+            index.crates.io:443
+            proxy.golang.org:443
+            sum.golang.org:443
+            fulcio.sigstore.dev:443
+            rekor.sigstore.dev:443
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-      - name: Install Golang dependencies
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+      - uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
             go-version: '1.24'
+      - uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
 
-      - name: Install latest stable Rust
-        uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
-        with:
-          toolchain: stable
-
-      - name: Build rust artifacts
-        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+      - name: Build Go Artifacts
+        working-directory: ./jans-cedarling/bindings/cedarling_go
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ inputs.target_tag }}"
-          else
-            VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-          fi
-          TAG=$(echo "${VERSION}" | sed 's/^v//')
-          if [ "${TAG}" == "nightly" ]; then
-            TAG="0.0.0"
-          fi
-          
           cargo build -r -p cedarling_go
+          TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "${{ inputs.target_tag }}" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
+          [[ "$TAG" == "nightly" ]] && TAG="0.0.0"
           
-          case "${{ matrix.name }}" in
-            ubuntu22)
-              cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_x86-64.so
-              ;;
-            ubuntu22-arm)
-              cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_arm64.so
-              ;;
-            mac)
-              cp ../../target/release/libcedarling_go.dylib libcedarling_go-${TAG}.dylib
-              ;;
-            windows)
-              cp ../../target/release/cedarling_go.dll cedarling_go-${TAG}.dll
-              cp ../../target/release/cedarling_go.dll.lib cedarling_go-${TAG}.lib
-              ;;
-          esac
+          # Cross-platform binary handling
+          if [[ "${{ matrix.os }}" == "windows"* ]]; then
+            cp ../../target/release/cedarling_go.dll cedarling_go-${TAG}.dll
+            cp ../../target/release/cedarling_go.dll.lib cedarling_go-${TAG}.lib
+          elif [[ "${{ matrix.os }}" == "macos"* ]]; then
+            cp ../../target/release/libcedarling_go.dylib libcedarling_go-${TAG}.dylib
+          else
+            ARCH=$([[ "${{ matrix.name }}" == *"arm" ]] && echo "arm64" || echo "x86-64")
+            cp ../../target/release/libcedarling_go.so libcedarling_go-${TAG}_${ARCH}.so
+          fi
 
-      - name: Sign and upload Cedarling Go libraries
-        working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_go
+      - name: Sign and Upload Go
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ inputs.target_tag }}"
-          else
-            VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-          fi
-          TAG=$(echo "${VERSION}" | sed 's/^v//')
-          if [ "${TAG}" == "nightly" ]; then
-            TAG="0.0.0"
-          fi
-  
-          FILE_LIB=""
-          case "${{ matrix.name }}" in
-            ubuntu22)
-              FILE="libcedarling_go-${TAG}_x86-64.so"
-              ;;
-            ubuntu22-arm)
-              FILE="libcedarling_go-${TAG}_arm64.so"
-              ;;
-            mac)
-              FILE="libcedarling_go-${TAG}.dylib"
-              ;;
-            windows)
-              FILE="cedarling_go-${TAG}.dll"
-              FILE_LIB="cedarling_go-${TAG}.lib"
-              ;;
-          esac
-  
-          cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
-          if [ -n "$FILE_LIB" ]; then
-            cosign sign-blob --yes --bundle "${FILE_LIB}.bundle" "$FILE_LIB"
-          fi
-  
-          gh release upload "${VERSION}" "${FILE}" "${FILE}.bundle" --clobber
-          if [ -n "$FILE_LIB" ]; then
-            gh release upload "${VERSION}" "${FILE_LIB}" "${FILE_LIB}.bundle" --clobber
-          fi
+          TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "${{ inputs.target_tag }}" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          cd jans-cedarling/bindings/cedarling_go
+          for f in libcedarling_go* cedarling_go*; do
+            cosign sign-blob --yes --bundle "${f}.bundle" "$f"
+            gh release upload "$TAG_NAME" "$f" "${f}.bundle" --clobber
+          done
 
   build_cedarling_krakend:
     if: |
@@ -665,6 +576,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
+      contents: write
     strategy:
       matrix:
         krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
@@ -672,57 +584,38 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          auth.docker.io:443
+          registry-1.docker.io:443
+          production.cloudflare.docker.com:443
+          fulcio.sigstore.dev:443
+          rekor.sigstore.dev:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Install Cosign
-      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-    - name: Set environment variables
-      run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VERSION="${{ inputs.target_tag }}"
-        else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-        fi
-        TAG=$(echo "${VERSION}" | sed 's/^v//')
-        if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
-        fi
-        
-        echo TAG=${TAG} >> $GITHUB_ENV
-        echo VERSION=${VERSION} >> $GITHUB_ENV
-        KRAKEND_BUILDER_IMAGE_CLEAN=${{ matrix.krakend-builder-image }}
-        KRAKEND_BUILDER_IMAGE_CLEAN=${KRAKEND_BUILDER_IMAGE_CLEAN/:/-}
-        echo KRAKEND_BUILDER_IMAGE_CLEAN=${KRAKEND_BUILDER_IMAGE_CLEAN} >> $GITHUB_ENV
-        echo CC="aarch64-linux-musl-gcc" >> $GITHUB_ENV
-        echo ADD_GIT="apk add --no-cache git" >> $GITHUB_ENV
-        if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
-          echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo ADD_GIT="ls" >> $GITHUB_ENV # no-op
-        fi
-    - name: Build plugin for AMD64
-      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
-      run: |
-        wget https://github.com/JanssenProject/jans/releases/download/${{ env.VERSION }}/libcedarling_go-${{ env.TAG }}_x86-64.so -O libcedarling_go.so
-        docker run --rm -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" sh -c "${{ env.ADD_GIT }} && go build -buildmode=plugin -o cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so ."
-        rm libcedarling_go.so
-    - name: Build plugin for ARM64
-      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
-      run: |
-        wget https://github.com/JanssenProject/jans/releases/download/${{ env.VERSION }}/libcedarling_go-${{ env.TAG }}_arm64.so -O libcedarling_go.so
-        docker run --rm -v "$PWD:/app" -w /app -e "CGO_ENABLED=1" -e "CC=${{ env.CC }}" -e "GOARCH=arm64" -e "GOHOSTARCH=amd64" krakend/"${{ matrix.krakend-builder-image }}" sh -c "${{ env.ADD_GIT }} && go build -ldflags='-extldflags=-fuse-ld=bfd -extld=${{ env.CC }}' -buildmode=plugin -o cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so ."
-        rm libcedarling_go.so
-    - name: Sign and upload Cedarling Krakend plugins
-      working-directory: ${{ github.workspace }}/jans-cedarling/cedarling-krakend
+
+    - name: Build KrakenD Plugin
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
       run: |
-        AMD64_SO="cedarling-krakend-amd64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
-        ARM64_SO="cedarling-krakend-arm64-${{ env.KRAKEND_BUILDER_IMAGE_CLEAN }}-${{ env.TAG }}.so"
-        cosign sign-blob --yes --bundle "${AMD64_SO}.bundle" "${AMD64_SO}"
-        cosign sign-blob --yes --bundle "${ARM64_SO}.bundle" "${ARM64_SO}"
-        gh release upload "${{ env.VERSION }}" *.so *.bundle --clobber
+        TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "$INPUT_TAG" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
+        [[ "$TAG" == "nightly" ]] && TAG="0.0.0"
+        
+        cd jans-cedarling/cedarling-krakend
+        # Download dependencies from previous jobs safely
+        gh release download "$TAG_NAME" -p "libcedarling_go-${TAG}_x86-64.so" -O libcedarling_go.so
+        
+        IMAGE_NAME_CLEAN=$(echo "${{ matrix.krakend-builder-image }}" | tr ':' '-')
+        docker run --rm -v "$PWD:/app" -w /app krakend/"${{ matrix.krakend-builder-image }}" sh -c "go build -buildmode=plugin -o cedarling-krakend-amd64-${IMAGE_NAME_CLEAN}-${TAG}.so ."
+        
+        cosign sign-blob --yes --bundle plugin.bundle *.so
+        gh release upload "$TAG_NAME" *.so *.bundle --clobber
 
   build_cedarling_uniffi:
     if: |
@@ -731,63 +624,45 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
+      contents: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          objects.githubusercontent.com:443
+          static.rust-lang.org:443
+          crates.io:443
+          index.crates.io:443
+          fulcio.sigstore.dev:443
+          rekor.sigstore.dev:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Install Cosign
-      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+    - uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
 
-    - name: Install latest stable Rust
-      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
-      with:
-        toolchain: stable
-
-    - name: Build and release cedarling uniffi build in linux
-      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
+    - name: Build UniFFI
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        INPUT_TAG: ${{ github.event.inputs.target_tag }}
       run: |
-        rustup default stable
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VERSION="${{ inputs.target_tag }}"
-        else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-        fi
-        TAG=$(echo "${VERSION}" | sed 's/^v//')
-        if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
-        fi
+        TAG_NAME=$([[ "${{ github.event_name }}" == "workflow_dispatch" ]] && echo "$INPUT_TAG" || echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+        TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
+        [[ "$TAG" == "nightly" ]] && TAG="0.0.0"
         
+        cd jans-cedarling/bindings/cedarling_uniffi
         cargo build -r -p cedarling_uniffi
-        cp ../../target/release/libcedarling_uniffi.so libcedarling_uniffi-${TAG}.so
+        
+        # Binary
         FILE="libcedarling_uniffi-${TAG}.so"
+        cp ../../target/release/libcedarling_uniffi.so "$FILE"
         cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
-  
-        gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
-    - name: Build kotlin binding in linux
-      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_uniffi
-      env:
-        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-      run: |
-        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          VERSION="${{ inputs.target_tag }}"
-        else
-          VERSION=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
-        fi
-        TAG=$(echo "${VERSION}" | sed 's/^v//')
-        if [ "${TAG}" == "nightly" ]; then
-          TAG="0.0.0"
-        fi
         
-        cargo build -r -p cedarling_uniffi
-        cargo run --bin uniffi-bindgen generate --library ${{ github.workspace }}/jans-cedarling/target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
-        zip -r cedarling_uniffi-kotlin-${TAG}.zip uniffi
-        FILE="cedarling_uniffi-kotlin-${TAG}.zip"
-        cosign sign-blob --yes --bundle "${FILE}.bundle" "$FILE"
-  
-        gh release upload "${VERSION}" "$FILE" "${FILE}.bundle" --clobber
+        # Kotlin Bindings
+        cargo run --bin uniffi-bindgen generate --library ../../target/release/libcedarling_uniffi.so --language kotlin --out-dir ./
+        zip -r "cedarling_uniffi-kotlin-${TAG}.zip" uniffi
+        
+        gh release upload "$TAG_NAME" "$FILE" "$FILE.bundle" "cedarling_uniffi-kotlin-${TAG}.zip" --clobber

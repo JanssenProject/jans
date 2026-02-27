@@ -1,25 +1,40 @@
 name: release
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
   release-mega-pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
 
-    - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
-      id: release-please
+    - name: Run Release Please
+      uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+      id: release
       with:
          release-type: simple
          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+    - name: Log Release Info
+      if: ${{ steps.release.outputs.release_created }}
+      run: |
+        echo "Release created: ${{ steps.release.outputs.tag_name }}"
+        echo "Check the new release at: ${{ steps.release.outputs.html_url }}"

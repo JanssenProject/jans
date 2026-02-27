@@ -16,7 +16,14 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
+          index.crates.io:443
+          static.rust-lang.org:443
+          crates.io:443
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
@@ -44,7 +51,14 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
+          index.crates.io:443
+          static.rust-lang.org:443
+          crates.io:443
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
@@ -68,7 +82,6 @@ jobs:
         cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
         cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
         if ! which dylint-link > /dev/null 2>&1; then
-          echo "dylint-link not found via binstall, falling back to cargo install"
           cargo install dylint-link --version 5.0.0 --locked
         fi
         echo "dylint-link location: $(which dylint-link)"
@@ -81,10 +94,6 @@ jobs:
       working-directory: jans-cedarling
       run: |
         export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
-        # Nightly pin for dylint: check dylint release notes for compatible nightly.
-        # To upgrade: 1) Find the nightly used by the target dylint release
-        # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
-        # 3) Update the pin below and in the toolchain install step above
         RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --path custom-lints
 
   rust_benchmarks:
@@ -93,14 +102,21 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
+          index.crates.io:443
+          static.rust-lang.org:443
+          crates.io:443
+          pypi.org:443
+          files.pythonhosted.org:443
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
-      with:
-        toolchain: stable
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
@@ -118,12 +134,21 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
+          index.crates.io:443
+          static.rust-lang.org:443
+          crates.io:443
+          azure.archive.ubuntu.com:80
+          esm.ubuntu.com:443
+          motd.ubuntu.com:443
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install chromium
-      run: sudo apt-get update && sudo apt-get install chromium-chromedriver
+      run: sudo apt-get update && sudo apt-get install -y chromium-chromedriver
 
     - name: Install Rust Stable
       uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
@@ -141,8 +166,7 @@ jobs:
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
-        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
-        wasm-pack --version
+        curl -sSL https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
 
     - name: Run WASM tests using chrome
       working-directory: jans-cedarling/bindings/cedarling_wasm
@@ -151,8 +175,6 @@ jobs:
     - name: Run WASM tests using firefox
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
-        # Work around Snap Firefox confinement on ubuntu-latest:
-        # Snap Firefox cannot access /tmp profiles, so redirect TMPDIR under $HOME
         export TMPDIR="${HOME}/tmp"
         mkdir -p "$TMPDIR"
         wasm-pack test --headless --firefox
@@ -170,7 +192,12 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          pypi.org:443
+          files.pythonhosted.org:443
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
@@ -178,9 +205,10 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
+        python3 -m pip install --upgrade pip
         python3 -m pip install tox
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
@@ -192,7 +220,16 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          github.com:443
+          api.github.com:443
+          proxy.golang.org:443
+          sum.golang.org:443
+          index.crates.io:443
+          static.rust-lang.org:443
+          crates.io:443
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623

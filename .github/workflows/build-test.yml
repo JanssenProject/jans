@@ -44,43 +44,52 @@ permissions:
 jobs:
   cleanup:
     runs-on: ubuntu-22.04
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: read
-      packages: write  # to delete 0.0.0-nightly package versions
+      packages: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
-        egress-policy: audit
-    - name: Get version ID for 0.0.0-nightly
-      id: get_version_id
-      run: |
-        page=1
-        services=""
-        while true; do
-          response=$(gh api -H "Accept: application/vnd.github+json" \
-            /orgs/JanssenProject/packages?package_type=maven\&per_page=100\&page=$page)
-          names=$(echo "$response" | jq -r '.[].name')
-          if [ -z "$names" ]; then
-            break
-          fi
-          services="$services $names"
-          page=$((page + 1))
-        done
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
 
-        services=$(echo "$services" | tr '\n' ' ' | sed 's/ *$//')
-        echo "Services: $services"
-        for service in $services; do
-          echo "Checking $service"
-          version_id=$(gh api -H "Accept: application/vnd.github+json" \
-            /orgs/JanssenProject/packages/maven/"${service}"/versions \
-            | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
-          if [ -n "$version_id" ]; then
-            echo "Deleting version $version_id of $service"
+    - name: Delete 0.0.0-nightly Maven Packages
+      id: purge_nightly
+      run: |
+        # Use a localized function to handle deletion safely
+        delete_version() {
+          local svc="$1"
+          # Fetch version ID specifically for the nightly tag
+          local vid
+          vid=$(gh api -H "Accept: application/vnd.github+json" \
+            /orgs/JanssenProject/packages/maven/"${svc}"/versions \
+            --jq '.[] | select(.name == "0.0.0-nightly") | .id' 2>/dev/null || echo "")
+          
+          if [ -n "$vid" ]; then
+            echo "Deleting version $vid of $svc"
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
-              /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service version $version_id"
+              /orgs/JanssenProject/packages/maven/"${svc}"/versions/"${vid}" || echo "Skip $svc (likely already gone)"
           fi
+        }
+
+        # Iterate through pages of packages
+        page=1
+        while true; do
+          current_page_svcs=$(gh api -H "Accept: application/vnd.github+json" \
+            "/orgs/JanssenProject/packages?package_type=maven&per_page=100&page=$page" \
+            --jq '.[].name' 2>/dev/null)
+          
+          if [ -z "$current_page_svcs" ]; then break; fi
+          
+          for service in $current_page_svcs; do
+            delete_version "$service"
+          done
+          page=$((page + 1))
         done

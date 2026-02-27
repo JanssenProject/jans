@@ -100,8 +100,9 @@ permissions:
 jobs:
   docker:
     permissions:
+      contents: read
       packages: write
-      id-token: write
+      id-token: write  # Required for Cosign OIDC
       pull-requests: read
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -113,7 +114,25 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            auth.docker.io:443
+            fulcio.sigstore.dev:443
+            ghcr.io:443
+            github.com:443
+            oauth2.sigstore.dev:443
+            objects.githubusercontent.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
+            rekor.sigstore.dev:443
+            registry-1.docker.io:443
+            production.cloudflare.docker.com:443
+            sigstore-tuf-root.storage.googleapis.com:443
+            tuf-repo-cdn.sigstore.dev:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            motd.ubuntu.com:443
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
@@ -127,33 +146,49 @@ jobs:
             automation
             demos
             jans-cedarling
+
       - name: Check docker directories that changed
         id: build_docker_image
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_BUILD_ALL: ${{ inputs.build_all }}
+          INPUT_AUTH_SERVER: ${{ inputs.auth_server }}
+          INPUT_CLOUD_TOOLS: ${{ inputs.cloudtools }}
+          INPUT_CONFIG_API: ${{ inputs.config_api }}
+          INPUT_CONFIGURATOR: ${{ inputs.configurator }}
+          INPUT_FIDO2: ${{ inputs.fido2 }}
+          INPUT_PERSISTENCE_LOADER: ${{ inputs.persistence_loader }}
+          INPUT_SCIM: ${{ inputs.scim }}
+          INPUT_MONOLITH: ${{ inputs.monolith }}
+          INPUT_LOADTESTING_JMETER: ${{ inputs.loadtesting_jmeter }}
+          INPUT_LINK: ${{ inputs.link }}
+          INPUT_CASA: ${{ inputs.casa }}
+          INPUT_ALL_IN_ONE: ${{ inputs.all_in_one }}
+          INPUT_SHIBBOLETH: ${{ inputs.shibboleth }}
+          INPUT_CEDARLING: ${{ inputs.cedarling_flask_sidecar }}
         run: |
           BUILD=true
           ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar"
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
-            if [[ "${{ inputs.build_all }}" == "true" ]]; then
+            if [[ "$INPUT_BUILD_ALL" == "true" ]]; then
               SELECTED="$ALL_SERVICES"
             else
-              [[ "${{ inputs.auth_server }}" == "true" ]] && SELECTED="$SELECTED auth-server"
-              [[ "${{ inputs.cloudtools }}" == "true" ]] && SELECTED="$SELECTED cloudtools"
-              [[ "${{ inputs.config_api }}" == "true" ]] && SELECTED="$SELECTED config-api"
-              [[ "${{ inputs.configurator }}" == "true" ]] && SELECTED="$SELECTED configurator"
-              [[ "${{ inputs.fido2 }}" == "true" ]] && SELECTED="$SELECTED fido2"
-              [[ "${{ inputs.persistence_loader }}" == "true" ]] && SELECTED="$SELECTED persistence-loader"
-              [[ "${{ inputs.scim }}" == "true" ]] && SELECTED="$SELECTED scim"
-              [[ "${{ inputs.monolith }}" == "true" ]] && SELECTED="$SELECTED monolith"
-              [[ "${{ inputs.loadtesting_jmeter }}" == "true" ]] && SELECTED="$SELECTED loadtesting-jmeter"
-              [[ "${{ inputs.link }}" == "true" ]] && SELECTED="$SELECTED link"
-              [[ "${{ inputs.casa }}" == "true" ]] && SELECTED="$SELECTED casa"
-              [[ "${{ inputs.all_in_one }}" == "true" ]] && SELECTED="$SELECTED all-in-one"
-              [[ "${{ inputs.shibboleth }}" == "true" ]] && SELECTED="$SELECTED shibboleth"
-              [[ "${{ inputs.cedarling_flask_sidecar }}" == "true" ]] && SELECTED="$SELECTED cedarling-flask-sidecar"
+              [[ "$INPUT_AUTH_SERVER" == "true" ]] && SELECTED="$SELECTED auth-server"
+              [[ "$INPUT_CLOUD_TOOLS" == "true" ]] && SELECTED="$SELECTED cloudtools"
+              [[ "$INPUT_CONFIG_API" == "true" ]] && SELECTED="$SELECTED config-api"
+              [[ "$INPUT_CONFIGURATOR" == "true" ]] && SELECTED="$SELECTED configurator"
+              [[ "$INPUT_FIDO2" == "true" ]] && SELECTED="$SELECTED fido2"
+              [[ "$INPUT_PERSISTENCE_LOADER" == "true" ]] && SELECTED="$SELECTED persistence-loader"
+              [[ "$INPUT_SCIM" == "true" ]] && SELECTED="$SELECTED scim"
+              [[ "$INPUT_MONOLITH" == "true" ]] && SELECTED="$SELECTED monolith"
+              [[ "$INPUT_LOADTESTING_JMETER" == "true" ]] && SELECTED="$SELECTED loadtesting-jmeter"
+              [[ "$INPUT_LINK" == "true" ]] && SELECTED="$SELECTED link"
+              [[ "$INPUT_CASA" == "true" ]] && SELECTED="$SELECTED casa"
+              [[ "$INPUT_ALL_IN_ONE" == "true" ]] && SELECTED="$SELECTED all-in-one"
+              [[ "$INPUT_SHIBBOLETH" == "true" ]] && SELECTED="$SELECTED shibboleth"
+              [[ "$INPUT_CEDARLING" == "true" ]] && SELECTED="$SELECTED cedarling-flask-sidecar"
             fi
             MATCH=false
             for svc in $SELECTED; do
@@ -163,7 +198,6 @@ jobs:
               fi
             done
             if [[ "$MATCH" == "true" ]]; then
-              echo "Image ${{ matrix.docker-images }} selected for build"
               echo "build=${BUILD}" >> $GITHUB_OUTPUT
             fi
           else
@@ -181,135 +215,83 @@ jobs:
               fi
             done
             if [[ "$MATCH" == "true" ]]; then
-              echo "A change in this images directory has occurred"
               echo "build=${BUILD}" >> $GITHUB_OUTPUT
             fi
           fi
 
       - name: Install dependencies
-        if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
+        if: steps.build_docker_image.outputs.build || contains(github.ref, 'refs/tags/')
         run: |
             python3 -m pip install --upgrade pip --user
             python3 -m pip install -r ./automation/requirements.txt --user
 
-      #- uses: actions/delete-package-versions@v5
-      #  continue-on-error: true
-      #  with:
-      #    package-name: jans/${{ matrix.docker-images }}
-      #    package-type: container
-      #    min-versions-to-keep: 1000
-      #    token:  ${{ secrets.GITHUB_TOKEN }}
-      #    delete-only-untagged-versions: true
-
       - name: Prepare
-        if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
+        if: steps.build_docker_image.outputs.build || contains(github.ref, 'refs/tags/')
         id: prep
+        env:
+          INPUT_IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+          INPUT_CN_VERSION: ${{ github.event.inputs.cn_version }}
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-          DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
-          if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
-            DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
+          DOCKER_FILE_LOCATION="./docker-jans-${{ matrix.docker-images }}"
+          
+          if [[ "${{ matrix.docker-images }}" == "loadtesting-jmeter" ]]; then
+            DOCKER_FILE_LOCATION="./demos/benchmarking/docker-jans-loadtesting-jmeter"
+          elif [[ "${{ matrix.docker-images }}" == "cedarling-flask-sidecar" ]]; then
+            DOCKER_FILE_LOCATION="./jans-cedarling/flask-sidecar"
           fi
-          if [[ "cedarling-flask-sidecar" =~ "${{ matrix.docker-images }}" ]]; then
-            DOCKER_FILE_LOCATION=./jans-cedarling/flask-sidecar
-          fi
-          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
-          DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
+          
+          # Logic to get the version label
+          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION/Dockerfile') ; print(dfparser.labels['org.opencontainers.image.version'])")
+          DOCKER_IMAGE="ghcr.io/$REPOSITORY/${{ matrix.docker-images }}"
           VERSION=${MAIN_VERSION}
           BUILD=true
+          
           if [[ $GITHUB_REF == refs/tags/docker-jans-${{ matrix.docker-images }}-* ]]; then
             VERSION=${GITHUB_REF#refs/tags/docker-jans-${{ matrix.docker-images }}-v}
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            echo "A tag not matching the image triggered the build. I will not continue."
             BUILD=""
           fi
+          
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}"
           fi
-          # If the user passed a manual image tag to build a custom manual image
-          MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
-          if [ ! -z "$MANUAL_IMAGE_TAG" ]
-          then
-            TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
-            VERSION=$MANUAL_IMAGE_TAG
-            echo "Manual image tag has been inputted by the user"
-          else
-            echo "$TAGS"
+          
+          if [[ -n "$INPUT_IMAGE_TAG" ]]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${INPUT_IMAGE_TAG}"
+            VERSION=$INPUT_IMAGE_TAG
           fi
-          # If the user passed a war version to build off ,change this war version.
-          CN_VERSION=${{ github.event.inputs.cn_version }}
-          if [ ! -z "$CN_VERSION" ]
-          then
-            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = '${{ github.event.inputs.cn_version }}'"
-            echo "War version has been modified."
-          else
-            echo "$CN_VERSION"
+          
+          if [[ -n "$INPUT_CN_VERSION" ]]; then
+            python3 -c "from dockerfile_parse import DockerfileParser; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION/Dockerfile'); dfparser.envs['CN_VERSION'] = '$INPUT_CN_VERSION'; dfparser.save()"
           fi
+          
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "build=${BUILD}" >> $GITHUB_OUTPUT
           echo "dockerfilelocation=${DOCKER_FILE_LOCATION}" >> $GITHUB_OUTPUT
-          # wait for all images in DEFAULT_ALL to be built before building the all-in-one image as it depends on all other images
-          if [[ "docker-jans-all-in-one" =~ "${{ matrix.docker-images }}" ]]; then
-            if [[ ${{ github.event_name != 'pull_request' }} ]]; then
-              TEMP_IMG="auth-server cloudtools config-api configurator fido2 persistence-loader scim monolith loadtesting-jmeter link casa shibboleth"
-              for i in $TEMP_IMG; do
-                echo "Waiting for $i to be built"
-                sleep 30
-              done
-            fi
+
+          if [[ "${{ matrix.docker-images }}" == "all-in-one" && "${{ github.event_name }}" != "pull_request" ]]; then
+            sleep 120
           fi
-
-      # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
-      - name: Setup Python 3.10
-        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.10"
-
-      - name: Install Python dependencies
-        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
-        run: |
-          sudo apt-get update
-          sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
-          sudo pip3 install --ignore-installed setuptools --upgrade
-          sudo pip3 install --ignore-installed -r ./automation/requirements.txt
-          sudo apt-get update
-          sudo apt-get install jq
-
-      - name: Update Build date in Dockerfile
-        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
-        id: update_build_date_in_dockerfile
-        run: |
-          sudo python3 ./automation/auto_update_build_date.py
-      #END UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
 
       - name: Free disk space
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         run: |
-          echo "=== Disk space before cleanup ==="
-          df -h
-          echo "=== Removing pre-installed tools ==="
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /usr/local/lib/android || true
-          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
-          sudo rm -rf /usr/local/share/boost || true
-          sudo rm -rf /usr/share/swift || true
-          echo "=== Cleaning Docker ==="
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift
           docker system prune -af --volumes || true
-          echo "=== Cleaning apt cache ==="
           sudo apt-get clean || true
           sudo rm -rf /var/lib/apt/lists/* || true
-          echo "=== Disk space after cleanup ==="
-          df -h
+
+      - name: Update Build date (Dispatch Only)
+        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
+        run: |
+          # Use already installed dependencies from automation/requirements.txt
+          sudo python3 ./automation/auto_update_build_date.py
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         uses: docker/setup-qemu-action@7e10951aea186e886cef2f1a25a7bbf4e593d710 # master
-        with:
-          image: tonistiigi/binfmt:master
-          platforms: all
 
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
@@ -334,41 +316,20 @@ jobs:
           file: ${{ steps.prep.outputs.dockerfilelocation }}/Dockerfile
           sbom: true
           provenance: true
-          #target: prod
-          # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
-          # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not
-          # add to platforms comma seperated ,linux/arm/v6 : Issue: openjdk11-jre-headless alpine package not found
-          # add to platforms comma seperated ,linux/arm/v7 : Issue: openjdk11-jre-headless alpine package not found
-          # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
-          # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
-
           platforms: linux/amd64, linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
           cache-from: type=gha,scope=${{ matrix.docker-images }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-images }}
 
-      - name: Prune BuildKit cache
-        if: always()
-        run: docker buildx prune -af --keep-storage 2GB || true
-
-      - name: Image digest
-        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Sign the images with GitHub OIDC Token
-        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
+      - name: Sign images
+        if: steps.build_docker_image.outputs.build && steps.prep.outputs.build && github.event_name != 'pull_request'
         env:
           DIGEST: ${{ steps.docker_build.outputs.digest }}
           TAGS: ${{ steps.prep.outputs.tags }}
         run: |
           images=""
           for tag in ${TAGS//,/ }; do
-            if [[ $tag == *"_dev"* && $TAGS == *","* ]]; then
-              continue
-            fi
             images+="${tag}@${DIGEST} "
           done
-          if [[ -n $images ]]; then
-            cosign sign --yes -a author=JanssenProject ${images} || echo "Failed to sign images"
-          fi
+          cosign sign --yes -a author=JanssenProject ${images}
