@@ -13,6 +13,7 @@ mod authorize_unsigned;
 mod cases_authorize_different_principals;
 mod cases_authorize_namespace_jans2;
 mod cases_authorize_without_check_jwt;
+mod context_data_api;
 mod json_logic;
 mod policy_store_loader;
 mod schema_type_mapping;

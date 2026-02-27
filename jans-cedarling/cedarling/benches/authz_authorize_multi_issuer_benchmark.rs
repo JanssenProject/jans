@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling,
+    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
     EntityBuilderConfig, EntityData, IdTokenTrustMode, InitCedarlingError, JsonRule, JwtConfig,
     LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
@@ -33,6 +33,15 @@ fn authorize_multi_issuer(c: &mut Criterion) {
         .expect("should initialize Cedarling");
 
     let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
+
+    // Validate that the authorization request executes correctly before benchmarking
+    let validation_result = runtime
+        .block_on(cedarling.authorize_multi_issuer(request.clone()))
+        .expect("authorization validation should succeed");
+    assert!(
+        validation_result.decision,
+        "authorization validation should return Allow decision"
+    );
 
     c.bench_with_input(
         BenchmarkId::new("authorize_multi_issuer", "tokio runtime"),
@@ -115,6 +124,7 @@ async fn prepare_cedarling_with_jwt_validation(
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: DataStoreConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

@@ -68,12 +68,13 @@ application.
 
 ### Cedarling Interfaces
 
-At a high level, developers interact with the Cedarling using five core interfaces:
+At a high level, developers interact with the Cedarling using six core interfaces:
 
 * **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
 * **Authorization** (`authorize`) – Evaluates policies by sending a bundle of JWTs to specify the principal.
 * **Authorization** (`authorize_unsigned`) – Evaluates policies with an application asserted principal.
 * **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on multiple JWT tokens from different issuers without requiring traditional user/workload principals.
+* **Context Data API** (`data`) – Pushes external data into the evaluation context, making it available in Cedar policies through the `context.data` namespace.
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
 Developers call the `init` interface on startup of their application, causing the
@@ -92,6 +93,8 @@ application, or when working with non-token based principals. It follows the sam
 evaluation logic but skips JWT validation steps.
 
 The `authorize_multi_issuer` method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
+
+The `data` interface enables developers to push external data into the Cedarling's evaluation context. This data is automatically injected under the `context.data` namespace during policy evaluation, allowing policies to make decisions based on dynamically pushed data. Data can be stored with optional TTL (Time To Live) for automatic expiration. See the Cedarling [interfaces](./reference/cedarling-interfaces.md#context-data-api) documentation for more information.
 
 The `log` interface enables developers to retrieve decision and system logs from the Cedarling's
 in-memory cache. See the Cedarling [log](./reference/cedarling-logs.md) documentation for more information.

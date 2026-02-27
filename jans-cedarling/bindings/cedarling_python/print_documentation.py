@@ -64,14 +64,20 @@ def print_doc(type_value: any, module_name: str | None = None):
     '''
         this is a helper function show to doc string for a given type
     '''
+
+    # Handle missing or empty docstring
+    if not type_value.__doc__ or not type_value.__doc__.strip():
+        import sys
+        print(f"Warning: Missing docstring for {type_value.__name__}", file=sys.stderr)
+        return
+
     message = fix_newlines(type_value.__doc__)
     message_lines = message.split("\n")
-    if len(message_lines) != 0:
-        # check if in first line we have name of type
-        if not type_value.__name__ in message_lines[0]:
-            # add name of type to the first line
-            head_line = f"# {type_value.__name__}"
-            message_lines = [head_line] + message_lines
+    # check if in first line we have name of type
+    if not type_value.__name__ in message_lines[0]:
+        # add name of type to the first line
+        head_line = f"# {type_value.__name__}"
+        message_lines = [head_line] + message_lines
     message = "\n".join(message_lines)
 
     if module_name is not None:

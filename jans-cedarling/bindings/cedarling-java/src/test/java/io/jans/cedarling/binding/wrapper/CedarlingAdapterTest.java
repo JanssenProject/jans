@@ -4,6 +4,7 @@ import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
 import io.jans.cedarling.binding.wrapper.utils.AppUtils;
 import org.testng.annotations.*;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.util.*;
 
@@ -112,5 +113,153 @@ public class CedarlingAdapterTest {
     public void testLoadFromFile() throws CedarlingException {
         adapter.loadFromFile(BOOTSTRAP_JSON_PATH);
         assertNotNull(adapter.getCedarling());
+    }
+
+    @Test
+    public void testPushAndGetData() throws DataException {
+        // Push data without TTL
+        JSONObject value1 = new JSONObject();
+        value1.put("data", "value1");
+        adapter.pushDataCtx("key1", value1);
+        Object result1 = adapter.getDataCtx("key1");
+        assertNotNull(result1);
+        assertTrue(result1 instanceof JSONObject);
+        assertEquals(((JSONObject) result1).getString("data"), "value1");
+
+        // Push data with TTL
+        JSONObject value2 = new JSONObject();
+        value2.put("nested", "data");
+        adapter.pushDataCtx("key2", value2, 60L);
+        Object result2 = adapter.getDataCtx("key2");
+        assertNotNull(result2);
+        assertTrue(result2 instanceof JSONObject);
+        assertEquals(((JSONObject) result2).getString("nested"), "data");
+
+        // Push array as JSON string - getDataCtx should return JSONArray (not throw)
+        String arrayJson = "[1, 2, 3]";
+        adapter.pushDataCtx("key3", arrayJson, null);
+        Object result3 = adapter.getDataCtx("key3");
+        assertNotNull(result3);
+        assertTrue(result3 instanceof org.json.JSONArray);
+    }
+
+    @Test
+    public void testGetDataEntry() throws DataException {
+        JSONObject value = new JSONObject();
+        value.put("foo", "bar");
+        // Push with explicit TTL to ensure expiresAt is non-null
+        adapter.pushDataCtx("test_key", value, 3600L);
+
+        DataEntry entry = adapter.getDataEntryCtx("test_key");
+        assertNotNull(entry);
+        assertEquals(entry.getKey(), "test_key");
+        // JsonValue is a custom_newtype wrapping String in UniFFI, so it returns String directly
+        String entryValue = entry.getValue();
+        assertNotNull(entryValue);
+        assertNotNull(entry.getDataType());
+        assertNotNull(entry.getCreatedAt());
+        assertNotNull(entry.getExpiresAt());
+    }
+
+    @Test
+    public void testRemoveData() throws DataException {
+        JSONObject value = new JSONObject();
+        value.put("data", "to_remove");
+        adapter.pushDataCtx("to_remove", value);
+
+        Object result = adapter.getDataCtx("to_remove");
+        assertNotNull(result);
+        assertTrue(result instanceof JSONObject);
+        JSONObject resultObj = (JSONObject) result;
+        assertEquals(resultObj.getString("data"), "to_remove");
+
+        boolean removed = adapter.removeDataCtx("to_remove");
+        assertTrue(removed);
+
+        Object resultAfter = adapter.getDataCtx("to_remove");
+        assertNull(resultAfter);
+
+        // Try removing non-existent key
+        boolean removedNonExistent = adapter.removeDataCtx("non_existent");
+        assertFalse(removedNonExistent);
+    }
+
+    @Test
+    public void testClearData() throws DataException {
+        JSONObject value1 = new JSONObject();
+        value1.put("data", "value1");
+        adapter.pushDataCtx("key1", value1);
+
+        JSONObject value2 = new JSONObject();
+        value2.put("data", "value2");
+        adapter.pushDataCtx("key2", value2);
+
+        JSONObject value3 = new JSONObject();
+        value3.put("data", "value3");
+        adapter.pushDataCtx("key3", value3);
+
+        assertNotNull(adapter.getDataCtx("key1"));
+        assertNotNull(adapter.getDataCtx("key2"));
+        assertNotNull(adapter.getDataCtx("key3"));
+
+        adapter.clearDataCtx();
+
+        assertNull(adapter.getDataCtx("key1"));
+        assertNull(adapter.getDataCtx("key2"));
+        assertNull(adapter.getDataCtx("key3"));
+    }
+
+    @Test
+    public void testListData() throws DataException {
+        JSONObject value1 = new JSONObject();
+        value1.put("data", "value1");
+        adapter.pushDataCtx("key1", value1);
+
+        JSONObject value2 = new JSONObject();
+        value2.put("nested", "data");
+        adapter.pushDataCtx("key2", value2);
+
+        String arrayJson = "[1, 2, 3]";
+        adapter.pushDataCtx("key3", arrayJson, null);
+
+        List<DataEntry> entries = adapter.listDataCtx();
+        assertNotNull(entries);
+        assertEquals(3, entries.size());
+
+        Set<String> keys = new HashSet<>();
+        for (DataEntry entry : entries) {
+            keys.add(entry.getKey());
+        }
+        assertTrue(keys.contains("key1"));
+        assertTrue(keys.contains("key2"));
+        assertTrue(keys.contains("key3"));
+    }
+
+    @Test
+    public void testGetStats() throws DataException {
+        DataStoreStats stats = adapter.getStatsCtx();
+        assertNotNull(stats);
+        assertEquals(adapter.listDataCtx().size(), 0);
+
+        JSONObject value1 = new JSONObject();
+        value1.put("data", "value1");
+        adapter.pushDataCtx("key1", value1);
+
+        JSONObject value2 = new JSONObject();
+        value2.put("data", "value2");
+        adapter.pushDataCtx("key2", value2);
+
+        DataStoreStats statsAfter = adapter.getStatsCtx();
+        assertNotNull(statsAfter);
+        assertEquals(adapter.listDataCtx().size(), 2);
+        assertTrue(statsAfter.getMetricsEnabled());
+    }
+
+    @Test(expectedExceptions = DataException.class)
+    public void testDataExceptionInvalidKey() throws DataException {
+        // Empty key should throw DataException
+        JSONObject value = new JSONObject();
+        value.put("data", "value");
+        adapter.pushDataCtx("", value);
     }
 }
