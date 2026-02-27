@@ -1,4 +1,4 @@
-FROM python:3.11.14-slim-trixie@sha256:8ef21a26e7c342e978a68cf2d6b07627885930530064f572f432ea422a8c0907
+FROM python:3.14.3-slim-trixie@sha256:9006fc63e3eaedc00ebc81193c99528575a2f9b9e3fb36d95e94814c23f31f47
 # ===============
 # Debian packages
 # ===============
