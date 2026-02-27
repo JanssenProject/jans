@@ -491,15 +491,56 @@ public class Fido2MetricsService {
             ));
         analysis.put("topErrors", topErrors);
 
-        // Success/failure rates
-        long totalOperations = entries.size();
-        long successfulOperations = entries.stream()
-            .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-            .count();
-        
-        if (totalOperations > 0) {
-            analysis.put("successRate", (double) successfulOperations / totalOperations);
-            analysis.put("failureRate", (double) (totalOperations - successfulOperations) / totalOperations);
+        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed)
+        long totalStarted = 0;
+        long successfulOperations = 0;
+        long failedOperations = 0;
+        for (Fido2MetricsEntry e : entries) {
+            String status = e.getStatus();
+            if (Fido2MetricsConstants.ATTEMPT.equals(status)) {
+                totalStarted++;
+            } else if (Fido2MetricsConstants.SUCCESS.equals(status)) {
+                successfulOperations++;
+            } else if (Fido2MetricsConstants.FAILURE.equals(status)) {
+                failedOperations++;
+            }
+        }
+
+        if (totalStarted > 0) {
+            // Normal case: rates as proportion of started operations (ATTEMPT count)
+            double successRate = (double) successfulOperations / totalStarted;
+            double failureRate = (double) failedOperations / totalStarted;
+            // When mixed legacy/new data (SUCCESS+FAILURE > ATTEMPT), scale so completionRate = successRate + failureRate and all stay in [0.0, 1.0]
+            double rawCompletion = successRate + failureRate;
+            if (rawCompletion > 1.0) {
+                double scale = 1.0 / rawCompletion;
+                successRate *= scale;
+                failureRate *= scale;
+            }
+            double completionRate = successRate + failureRate;
+            double dropOffRate = Math.max(0.0, 1.0 - completionRate);
+
+            analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
+            analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
+        } else {
+            // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
+            long totalCompleted = successfulOperations + failedOperations;
+            if (totalCompleted > 0) {
+                double successRate = (double) successfulOperations / totalCompleted;
+                double failureRate = (double) failedOperations / totalCompleted;
+                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
+                analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
+                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
+                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+            } else {
+                // Empty dataset: emit rate keys with defaults so response shape is stable for clients
+                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.FAILURE_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+            }
         }
 
         return analysis;

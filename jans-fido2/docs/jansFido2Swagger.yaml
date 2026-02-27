@@ -1289,10 +1289,16 @@ components:
           description: Count of errors by message.
         successRate:
           type: number
-          description: Ratio of successful operations (0.0–1.0).
+          description: Ratio of started operations that succeeded (0.0–1.0). Based on ATTEMPT count as denominator.
         failureRate:
           type: number
-          description: Ratio of failed operations (0.0–1.0).
+          description: Ratio of started operations that failed (0.0–1.0). Based on ATTEMPT count as denominator.
+        completionRate:
+          type: number
+          description: Ratio of started operations that completed (success or failure). Equals successRate + failureRate (0.0–1.0).
+        dropOffRate:
+          type: number
+          description: Ratio of started operations that did not complete (user dropped off). Equals 1 - completionRate (0.0–1.0).
     MetricsTrends:
       type: object
       description: Trend analysis over time with data points, growth rate, direction, and insights.
