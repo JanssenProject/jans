@@ -20,6 +20,8 @@ tags:
   - name: FIDO2 configuration
   - name: FIDO2 Assertion
   - name: FIDO2 Attestation
+  - name: FIDO2 Metrics
+    description: Metrics and analytics API for FIDO2/Passkey operations (registrations, authentications, adoption, performance, devices, errors, trends).
 paths:
   /jans-fido2/restv1/configuration:
     get:
@@ -534,6 +536,476 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
+  # ---------------------------------------------------------------------------
+  # FIDO2 Metrics API (GitHub Issue #11922)
+  # ---------------------------------------------------------------------------
+  /jans-fido2/restv1/metrics/entries:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get metrics entries
+      description: Returns all raw metric entries between startTime and endTime (ISO 8601 UTC). Use for event-level detail or custom analysis.
+      operationId: get-metrics-entries
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "2026-01-01T00:00:00"
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "2026-01-01T23:59:59"
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: List of metric entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricsEntry'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/entries/user/{userId}:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get metrics entries for a user
+      description: Returns metric entries for a single user (by userId/inum) in the given time range. Unknown or invalid userId returns 200 with an empty array (consistent with other metrics endpoints); 404 is not used.
+      operationId: get-metrics-entries-by-user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User internal ID (inum).
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: List of metric entries for the user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricsEntry'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/entries/operation/{operationType}:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get metrics entries by operation type
+      description: Returns metric entries filtered by operation type (REGISTRATION or AUTHENTICATION).
+      operationId: get-metrics-entries-by-operation
+      parameters:
+        - name: operationType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - REGISTRATION
+              - AUTHENTICATION
+          description: Operation type filter.
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: List of metric entries for the operation type.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricsEntry'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/aggregations/{aggregationType}:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get aggregations
+      description: Returns pre-computed aggregation records (one per period) that overlap the given time range.
+      operationId: get-metrics-aggregations
+      parameters:
+        - name: aggregationType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - HOURLY
+              - DAILY
+              - WEEKLY
+              - MONTHLY
+          description: Aggregation granularity.
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: List of aggregation records.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricsAggregation'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/aggregations/{aggregationType}/summary:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get aggregation summary
+      description: Returns a single summary over all aggregations in the time range (totals and average success rates).
+      operationId: get-metrics-aggregation-summary
+      parameters:
+        - name: aggregationType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - HOURLY
+              - DAILY
+              - WEEKLY
+              - MONTHLY
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Summary statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsAggregationSummary'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/adoption:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get adoption analytics
+      description: Returns user adoption metrics (new users, returning users, adoption rate).
+      operationId: get-metrics-analytics-adoption
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Adoption analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsAdoption'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/performance:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get performance analytics
+      description: Returns performance statistics (average, min, max durations in milliseconds for registration and authentication).
+      operationId: get-metrics-analytics-performance
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Performance analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsPerformance'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/devices:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get device analytics
+      description: Returns device analytics (device types, OS, browsers, authenticator types).
+      operationId: get-metrics-analytics-devices
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Device analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsDeviceAnalytics'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/errors:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get error analytics
+      description: Returns error analysis (categories, top errors, success/failure rates).
+      operationId: get-metrics-analytics-errors
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Error analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsErrorAnalytics'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/trends/{aggregationType}:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get trend analysis
+      description: Returns trend data over time for the chosen aggregation granularity, with insights (e.g. direction, growth rate).
+      operationId: get-metrics-analytics-trends
+      parameters:
+        - name: aggregationType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - HOURLY
+              - DAILY
+              - WEEKLY
+              - MONTHLY
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Trend analysis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsTrends'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/comparison/{aggregationType}:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get period-over-period comparison
+      description: Compares the current period with previous periods (e.g. this month vs last). The time range is calculated internally from the aligned current period boundary (UTC) and the number of periods; API consumers do not provide startTime or endTime. Optional query parameter periods (2–12, default 2) specifies how many consecutive periods to compare.
+      operationId: get-metrics-analytics-comparison
+      parameters:
+        - name: aggregationType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - HOURLY
+              - DAILY
+              - WEEKLY
+              - MONTHLY
+        - name: periods
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 2
+            maximum: 12
+            default: 2
+          description: Number of consecutive periods to compare.
+      responses:
+        200:
+          description: Period comparison data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsPeriodComparison'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/config:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get metrics configuration
+      description: Returns current metrics configuration (enabled, retention, device info, error categorization, supported aggregation types).
+      operationId: get-metrics-config
+      responses:
+        200:
+          description: Metrics configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsConfig'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/health:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Metrics health check
+      description: Returns health status. HTTP 200 when UP, 503 when DOWN (e.g. database unavailable).
+      operationId: get-metrics-health
+      responses:
+        200:
+          description: Service is UP.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsHealth'
+        503:
+          description: Service is DOWN (e.g. database unavailable).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsHealth'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   responses:
     Found: #302 - FOUND
@@ -589,3 +1061,314 @@ components:
           type: string
         details:
           type: string
+    # FIDO2 Metrics API schemas
+    MetricsEntry:
+      type: object
+      description: A single raw metric entry (one registration or authentication event).
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the entry.
+        timestamp:
+          type: integer
+          format: int64
+          description: Event time in milliseconds since epoch (UTC).
+        userId:
+          type: string
+          description: User internal ID (inum).
+        username:
+          type: string
+          description: Human-readable username at time of operation; use userId for stable tracking.
+        operationType:
+          type: string
+          enum:
+            - REGISTRATION
+            - AUTHENTICATION
+            - FALLBACK
+          description: REGISTRATION (passkey enrollment), AUTHENTICATION (sign-in), or FALLBACK (alternative method).
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+            - ATTEMPT
+          description: ATTEMPT (started), SUCCESS (completed), or FAILURE (completed with error).
+        durationMs:
+          type: integer
+          description: Operation duration in milliseconds.
+        authenticatorType:
+          type: string
+          description: e.g. cross-platform, platform, security-key.
+        nodeId:
+          type: string
+          description: Cluster node identifier (when in cluster).
+        ipAddress:
+          type: string
+          description: Client IP address (when available from request headers). Useful for geo-analysis or security.
+        userAgent:
+          type: string
+          description: Full browser user-agent string; used to derive deviceInfo.
+        deviceInfo:
+          type: object
+          description: Parsed device details (browser, os, deviceType). Present when deviceInfoCollection is enabled.
+        errorReason:
+          type: string
+          description: Human-readable error message. Present only when status is FAILURE.
+        errorCategory:
+          type: string
+          description: Categorized error type (e.g. USER_CANCELLED, TIMEOUT, INVALID_CREDENTIAL). Present only when status is FAILURE.
+        sessionId:
+          type: string
+          description: Session identifier linking this operation to a user session.
+        applicationType:
+          type: string
+          description: Application or relying party identifier (when multiple apps share the FIDO2 server).
+    MetricsAggregation:
+      type: object
+      description: Pre-computed aggregation for one period (e.g. one hour or one day).
+      properties:
+        id:
+          type: string
+          description: e.g. HOURLY_2026-01-01-12 or WEEKLY_2026-W07.
+        aggregationType:
+          type: string
+          enum:
+            - HOURLY
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+        startTime:
+          type: integer
+          format: int64
+          description: Period start in milliseconds since epoch (UTC), inclusive.
+        endTime:
+          type: integer
+          format: int64
+          description: Period end in milliseconds since epoch (UTC), exclusive.
+        period:
+          type: string
+          description: Period identifier (e.g. 2026-01-01-12 for hour, 2026-W07 for week).
+        uniqueUsers:
+          type: integer
+          description: Count of distinct users with activity in this period.
+        registrationAttempts:
+          type: integer
+          description: Total registration operations (SUCCESS or FAILURE) in this period.
+        registrationSuccesses:
+          type: integer
+          description: Successful registrations in this period.
+        registrationFailures:
+          type: integer
+          description: Failed registrations in this period.
+        registrationSuccessRate:
+          type: number
+          format: double
+          description: registrationSuccesses / registrationAttempts (0.0–1.0).
+        registrationAvgDuration:
+          type: number
+          description: Milliseconds.
+        authenticationAttempts:
+          type: integer
+          description: Total authentication operations (SUCCESS or FAILURE) in this period.
+        authenticationSuccesses:
+          type: integer
+          description: Successful authentications in this period.
+        authenticationFailures:
+          type: integer
+          description: Failed authentications in this period.
+        authenticationSuccessRate:
+          type: number
+          description: authenticationSuccesses / authenticationAttempts (0.0–1.0).
+        authenticationAvgDuration:
+          type: number
+          description: Milliseconds.
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by device type (e.g. platform, cross-platform).
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by error category (e.g. USER_CANCELLED, TIMEOUT).
+    MetricsAggregationSummary:
+      type: object
+      description: Summary over all aggregations in a time range.
+      properties:
+        totalRegistrations:
+          type: integer
+          description: Total registration operations across all periods in the range.
+        totalAuthentications:
+          type: integer
+          description: Total authentication operations across all periods in the range.
+        totalOperations:
+          type: integer
+          description: Sum of totalRegistrations and totalAuthentications.
+        totalFallbacks:
+          type: integer
+          description: Count of fallback events (user chose alternative to passkey) in the range.
+        avgRegistrationSuccessRate:
+          type: number
+          description: Average of registration success rates across periods (0.0–1.0).
+        avgAuthenticationSuccessRate:
+          type: number
+          description: Average of authentication success rates across periods (0.0–1.0).
+    MetricsAdoption:
+      type: object
+      description: User adoption metrics (new users, returning users, adoption rate) for the given time range.
+      properties:
+        newUsers:
+          type: integer
+        returningUsers:
+          type: integer
+        totalUniqueUsers:
+          type: integer
+        adoptionRate:
+          type: number
+          description: newUsers / totalUniqueUsers (0.0–1.0).
+    MetricsPerformance:
+      type: object
+      description: Performance statistics (avg/min/max durations in milliseconds for registration and authentication).
+      properties:
+        registrationAvgDuration:
+          type: number
+          description: Average registration duration (ms).
+        registrationMinDuration:
+          type: integer
+          description: Minimum registration duration (ms).
+        registrationMaxDuration:
+          type: integer
+          description: Maximum registration duration (ms).
+        authenticationAvgDuration:
+          type: number
+          description: Average authentication duration (ms).
+        authenticationMinDuration:
+          type: integer
+          description: Minimum authentication duration (ms).
+        authenticationMaxDuration:
+          type: integer
+          description: Maximum authentication duration (ms).
+    MetricsDeviceAnalytics:
+      type: object
+      description: Device analytics (device types, OS, browsers, authenticator types).
+      properties:
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by device type (e.g. desktop, mobile).
+        authenticatorTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by authenticator type (platform, cross-platform).
+        browsers:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by browser.
+        operatingSystems:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Counts by operating system.
+    MetricsErrorAnalytics:
+      type: object
+      description: Error analysis (categories, top errors, success/failure rates).
+      properties:
+        errorCategories:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of errors by category.
+        topErrors:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of errors by message.
+        successRate:
+          type: number
+          description: Ratio of successful operations (0.0–1.0).
+        failureRate:
+          type: number
+          description: Ratio of failed operations (0.0–1.0).
+    MetricsTrends:
+      type: object
+      description: Trend analysis over time with data points, growth rate, direction, and insights.
+      properties:
+        dataPoints:
+          type: array
+          description: One data point per aggregation period (timestamp, period, metrics).
+        growthRate:
+          type: number
+          description: Overall growth rate (e.g. 0.15 = 15% growth).
+        trendDirection:
+          type: string
+          description: INCREASING, DECREASING, or STABLE.
+        insights:
+          type: object
+          description: Peak period, peak operations, average operations.
+    MetricsPeriodComparison:
+      type: object
+      description: Period-over-period comparison (current vs previous period metrics and percentage change).
+      properties:
+        currentPeriod:
+          type: object
+          description: Summary for the most recent period(s).
+        previousPeriod:
+          type: object
+          description: Summary for the preceding period(s).
+        comparison:
+          type: object
+          description: Percentage changes between periods (e.g. totalOperationsChange).
+    MetricsConfig:
+      type: object
+      description: Current metrics configuration as seen by the server.
+      properties:
+        metricsEnabled:
+          type: boolean
+          description: Whether metrics collection is enabled.
+        aggregationEnabled:
+          type: boolean
+          description: Whether automatic aggregation jobs are enabled.
+        retentionDays:
+          type: integer
+          description: Number of days metrics data is retained before cleanup.
+        deviceInfoCollection:
+          type: boolean
+          description: Whether device info (browser, OS) is collected.
+        errorCategorization:
+          type: boolean
+          description: Whether errors are categorized for analytics.
+        performanceMetrics:
+          type: boolean
+          description: Whether durations are tracked.
+        supportedAggregationTypes:
+          type: array
+          items:
+            type: string
+          example: ["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]
+          description: List of available aggregation granularities.
+    MetricsHealth:
+      type: object
+      description: Health status of the metrics service (200 = UP, 503 = DOWN).
+      properties:
+        status:
+          type: string
+          enum:
+            - UP
+            - DOWN
+          description: Overall health; UP returns 200, DOWN returns 503.
+        metricsEnabled:
+          type: boolean
+          description: Whether metrics collection is enabled in configuration.
+        aggregationEnabled:
+          type: boolean
+          description: Whether automatic aggregation is enabled.
+        timestamp:
+          type: string
+          description: Current server time (ISO format, UTC).
+        serviceAvailable:
+          type: boolean
+          description: True if metrics backend (e.g. DB) is reachable.

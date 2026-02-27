@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -73,7 +73,7 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
-          cp mkdocs.yml ../
+          cp mkdocs.yml CHANGELOG.md ../
 
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
@@ -156,6 +156,19 @@ jobs:
 
          sudo rm -rf temp
 
+      - name: Use latest template overrides from main
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+        run: |
+          git show origin/main:docs/overrides/main.html > docs/overrides/main.html
+
+      - name: Enable Reo and Scarf tracking for versioned docs
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'published')
+        run: |
+          sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
+          sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
+          echo "Tracking flags status:"
+          grep -E 'enable_scarf_pixel|enable_reo_flag' mkdocs.yml
+
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
@@ -226,10 +239,7 @@ jobs:
               git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
             fi
           done
-          sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
-          sed -i -e "s/enable_reo_flag/True/g" ${STABLE}/overrides/main.html
-          git add ${STABLE}/overrides/main.html && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url and enable reo integration"
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: update version references"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

@@ -42,10 +42,18 @@ public class ActionService {
             throws Exception {
 
         boolean noInst = instance == null;
-        Class actionCls = null;
+        Class<?> actionCls = null;
+        Object theInstance = instance;
         
-        if (!noInst) {            
-            actionCls = instance.getClass();
+        if (!noInst) {
+            try {
+                actionCls = Class.class.cast(instance);
+                theInstance = null;
+                noInst = true;
+            } catch (ClassCastException e) {
+                //instance is an ordinary object: its class can be obtained via getClass method
+                actionCls = instance.getClass();
+            }
             className = actionCls.getName();
         } else {
 
@@ -89,7 +97,7 @@ public class ActionService {
             }
         }
 
-        return invoker.call(actionCls, instance, methodName, rhinoArgs);
+        return invoker.call(actionCls, theInstance, methodName, rhinoArgs);
 
     }
         

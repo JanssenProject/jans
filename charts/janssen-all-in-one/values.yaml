@@ -185,10 +185,14 @@ auth-server:
     scriptLogTarget: "FILE"
     # -- jans-auth_script.log level
     scriptLogLevel: "INFO"
-    # -- jans-auth_script.log target
+    # -- jans-auth_audit.log target
     auditStatsLogTarget: "FILE"
     # -- jans-auth_audit.log level
     auditStatsLogLevel: "INFO"
+    # -- jans-lock.log target
+    lockLogTarget: "STDOUT"
+    # -- jans-lock.log level
+    lockLogLevel: "INFO"
   # -- space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
   authSigKeys: "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
   # -- space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
@@ -213,8 +217,8 @@ auth-server:
     u2fConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration
     lockConfigEnabled: false
-    # -- Enable endpoint /jans-lock
-    lockEnabled: false
+    # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
+    lockAuditEnabled: false
     # -- Lock config ingress resource labels. key app is taken
     lockConfigLabels: {}
     # -- Lock config ingress resource additional annotations.
@@ -613,7 +617,7 @@ gatewayApi:
   # -- The name of the Gateway resource to be created
   name: jans-gateway
   # -- Gateway http port number
-  httpPort: 80 
+  httpPort: 80
   # -- Gateway https port number
   httpsPort: 443
   # -- Secret containing the TLS certificate for the Gateway

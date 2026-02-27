@@ -117,7 +117,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
         <Box sx={{ pt: 2 }}>
           <Grid container spacing={3}>
             {/* LLM Provider Selection */}
-            <Grid item xs={12}>
+            <Grid size={{xs: 12}}>
+              <>
               <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                 <CloudIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                 AI Provider Selection
@@ -152,10 +153,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>
+              </>
             </Grid>
 
             {/* API Key Section */}
-            <Grid item xs={12}>
+            <Grid size={{ xs:12}}>
+              <>
               <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                 <KeyIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                 {getCurrentProviderConfig().label} API Key
@@ -194,10 +197,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   Format: {getCurrentProviderConfig().apiKeyFormat}
                 </FormHelperText>
               </FormControl>
+              </>
             </Grid>
 
             {/* Model Selection */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md:6}}>
+              <>
               <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                 <SmartToyIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                 Model Selection
@@ -257,10 +262,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   </FormHelperText>
                 </FormControl>
               )}
+              </>
             </Grid>
 
             {/* MCP Server Configuration */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs: 12, md:6}}>
+              <>
               <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                 <LinkIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                 MCP Server Configuration
@@ -309,10 +316,12 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   Status: {getConnectionStatusText()}
                 </Typography>
               </Box>
+              </>
             </Grid>
 
             {/* Information Section */}
-            <Grid item xs={12}>
+            <Grid size={{ xs:12}}>
+              <>
               <Divider sx={{ my: 2 }} />
               <Alert severity="info">
                 <Typography variant="body2">
@@ -330,6 +339,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   Make sure your MCP server supports the tools you want to use.
                 </Typography>
               </Alert>
+              </>
             </Grid>
           </Grid>
         </Box>
