@@ -141,9 +141,9 @@ public class Fido2MetricsResource extends BaseResource {
                 endLocalDate = parseDate(endDate, formatter);
             }
 
-            PagedResult<Fido2MetricsEntry> list = fido2MetricsService.searchFido2MetricsEntries(searchReq, null,
+            PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.searchFido2MetricsEntries(searchReq, null,
                     startLocalDate, endLocalDate);
-            PagedResult<Fido2MetricsEntry> pagedResult = null;
+
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2RegistrationEntry  - pagedResult:{}", pagedResult);
             }
@@ -160,7 +160,8 @@ public class Fido2MetricsResource extends BaseResource {
             logger.info("Fido2MetricsEntry pagedFido2MetricsEntry:{}", pagedFido2MetricsEntry);
 
         } catch (Exception ex) {
-            logger.error("Exception while updating user is - ", ex);
+            ex.printStackTrace();
+            logger.error("Exception while getting metrics user is - ", ex);
             throwInternalServerException(ex);
         }
         return pagedFido2MetricsEntry;

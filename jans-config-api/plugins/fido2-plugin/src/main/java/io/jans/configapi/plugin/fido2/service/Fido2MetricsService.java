@@ -50,6 +50,7 @@ public class Fido2MetricsService {
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
     private static final String FIDO2_METRICS_BASE_URL = "/jans-fido2/restv1/metrics";
+    private static final String FIDO2_METRICS_ENTRIES_URL = "/entries";
 
     @Inject
     Logger log;
@@ -62,6 +63,10 @@ public class Fido2MetricsService {
 
     public String getFido2MetricsUrl() {
         return fido2Util.getIssuer() + FIDO2_METRICS_BASE_URL;
+    }
+    
+    public String getFido2MetricsEntriesUrl() {
+        return getFido2MetricsUrl() + FIDO2_METRICS_ENTRIES_URL;
     }
 
     public String getBaseDnForFido2MetricsEntry() {
@@ -93,8 +98,8 @@ public class Fido2MetricsService {
         }
 
         List<Fido2MetricsEntry> fido2MetricsEntryList = null;
-        JsonNode jsonNode = getMetricsData(this.getFido2MetricsUrl(), headers, data);
-        log.error("\n\n Fido2MetricsEntries: jsonNode:{}", jsonNode);
+        JsonNode jsonNode = getMetricsData(this.getFido2MetricsEntriesUrl(), headers, data);
+        log.error("\n\n Fido2MetricsEntries:jsonNode:{}", jsonNode);
         if (jsonNode != null) {
             fido2MetricsEntryList = Jackson.readStringValue(jsonNode.toPrettyString(), List.class);
             log.error("Fido2MetricsEntry One fido2MetricsEntryList:{}", fido2MetricsEntryList);
@@ -104,6 +109,7 @@ public class Fido2MetricsService {
         }
 
         pagedResultEntry = new PagedResult<Fido2MetricsEntry>();
+        pagedResultEntry.setEntries(fido2MetricsEntryList);
         pagedResultEntry.setTotalEntriesCount((fido2MetricsEntryList == null || fido2MetricsEntryList.size() <= 0) ? 0
                 : fido2MetricsEntryList.size());
 
@@ -111,11 +117,11 @@ public class Fido2MetricsService {
 
     }
 
-    public JsonNode getMetricsData(String url, Map<String, String> headers, Map<String, String> data) {
+    public JsonNode getMetricsData(String url, Map<String, String> headers, Map<String, String> data) throws JsonProcessingException{
 
         log.error("\n\n Fido2Metrics Data: url:{}, headers:{}, data:{}", url, headers, data);
         JsonNode jsonNode = null;
-        try {
+       
 
             if (StringUtils.isBlank(url)) {
                 throw new WebApplicationException("Error while getting Metrics Data",
@@ -125,19 +131,15 @@ public class Fido2MetricsService {
             jsonNode = fido2Util.executeGetRequest(url, headers, data);
             log.error("\n\n Fido2Metrics Data: jsonNode:{}", jsonNode);
 
-        } catch (Exception ex) {
-            log.error("Fido2Metrics Exception -", ex);
-            throw new WebApplicationException("Error while getting MetricsEntries",
-                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        }
+       
         return jsonNode;
     }
 
-    public List<Fido2MetricsEntry> getMetricsEntries1(LocalDateTime startTime, LocalDateTime endTime) {
+    public List<Fido2MetricsEntry> getMetricsEntries1(LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException{
 
         log.error("\n\n Fido2MetricsEntries: startTime:{}, endTime:{}", startTime, endTime);
         List<Fido2MetricsEntry> fido2MetricsEntryList = null;
-        try {
+     
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(FIDO2_METRICS_BASE_URL + "/entries");
             request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -154,11 +156,7 @@ public class Fido2MetricsService {
             log.error("\n\n Fido2MetricsEntries: fido2MetricsEntryList:{}", fido2MetricsEntryList);
             return fido2MetricsEntryList;
 
-        } catch (Exception ex) {
-            log.error("MetricsEntries Exception -", ex);
-            throw new WebApplicationException("Error while getting MetricsEntries",
-                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        }
+       
     }
 
 }
