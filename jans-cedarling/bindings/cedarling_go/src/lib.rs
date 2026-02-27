@@ -9,7 +9,7 @@ use std::{
 };
 use tokio::runtime::Runtime;
 
-use cedarling::{self as base, BootstrapConfig, BootstrapConfigRaw, LogStorage};
+use cedarling::{self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage};
 
 mod cedarling_interface;
 use cedarling_interface::{Result, ResultInstance};
@@ -215,5 +215,72 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
     fn shut_down(instance_id: usize) {
         let instance = get_instance_or_return!(instance_id);
         BINDINGS_RUNTIME.runtime.block_on(instance.shut_down());
+    }
+
+    fn push_data_ctx(
+        instance_id: usize,
+        key: String,
+        value_json: String,
+        ttl_nanos: i64,
+    ) -> Result {
+        let instance = get_instance!(instance_id);
+        let value: serde_json::Value = from_json_str!(value_json);
+        let ttl = if ttl_nanos > 0 {
+            Some(std::time::Duration::from_nanos(ttl_nanos as u64))
+        } else {
+            None
+        };
+        match instance.push_data_ctx(&key, value, ttl) {
+            Ok(()) => Result::success(()),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn get_data_ctx(instance_id: usize, key: String) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.get_data_ctx(&key) {
+            Ok(value) => Result::success(value),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn get_data_entry_ctx(instance_id: usize, key: String) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.get_data_entry_ctx(&key) {
+            Ok(entry) => Result::success(entry),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn remove_data_ctx(instance_id: usize, key: String) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.remove_data_ctx(&key) {
+            Ok(removed) => Result::success(removed),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn clear_data_ctx(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.clear_data_ctx() {
+            Ok(()) => Result::success(()),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn list_data_ctx(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.list_data_ctx() {
+            Ok(entries) => Result::success(entries),
+            Err(e) => Result::error(e),
+        }
+    }
+
+    fn get_stats_ctx(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.get_stats_ctx() {
+            Ok(stats) => Result::success(stats),
+            Err(e) => Result::error(e),
+        }
     }
 }

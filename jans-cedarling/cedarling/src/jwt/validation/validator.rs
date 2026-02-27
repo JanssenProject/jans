@@ -6,13 +6,14 @@
 use std::collections::HashSet;
 
 use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
-use crate::jwt::decode::{DecodeJwtError, DecodedJwt, decode_jwt};
+use crate::jwt::decode::{DecodeJwtError, DecodedJwt};
 use crate::jwt::key_service::DecodingKeyInfo;
 use crate::jwt::validation::TrustedIssuerError;
 use crate::jwt::{
     Arc, JwtStatus, JwtStatusError, OwnedValidatorInfo, StatusListCache, TokenKind, ValidatorInfo,
 };
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::errors::{ErrorKind, new_error};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -97,12 +98,6 @@ impl JwtValidator {
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
 
-        #[allow(deprecated)]
-        // TODO: fix the deprecation warning
-        if !validate_signature {
-            validation.insecure_disable_signature_validation();
-        }
-
         let required_claims = token_metadata.required_claims.iter().cloned().collect();
 
         let key = ValidatorInfo {
@@ -143,12 +138,6 @@ impl JwtValidator {
 
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
-
-        #[allow(deprecated)]
-        // TODO: fix the deprecation warning
-        if !validate_signature {
-            validation.insecure_disable_signature_validation();
-        }
 
         let required_claims = token_metadata.required_claims.iter().cloned().collect();
 
@@ -227,13 +216,17 @@ impl JwtValidator {
         jwt: &str,
         decoding_key: Option<&DecodingKey>,
     ) -> Result<ValidatedJwt, ValidateJwtError> {
-        let validated_jwt = if let Some(decoding_key) = decoding_key {
+        // TODO: Simplify this branching and decode/validation flow.
+        // Tracking issue: https://github.com/JanssenProject/jans/issues/13287
+        let validated_jwt = if self.validate_signature {
+            let Some(decoding_key) = decoding_key else {
+                return Err(ValidateJwtError::MissingValidationKey);
+            };
             jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims
         } else {
-            if self.validate_signature {
-                return Err(ValidateJwtError::MissingValidationKey);
-            }
-            decode_jwt(jwt)?.try_into()?
+            let validated_jwt = jwt::dangerous::insecure_decode::<ValidatedJwt>(jwt)?.claims;
+            self.validate_claims_without_signature(&validated_jwt)?;
+            validated_jwt
         };
 
         // Custom implementation of requiring custom claims
@@ -271,6 +264,87 @@ impl JwtValidator {
         }
 
         Ok(validated_jwt)
+    }
+
+    fn validate_claims_without_signature(
+        &self,
+        validated_jwt: &ValidatedJwt,
+    ) -> Result<(), ValidateJwtError> {
+        let now = jwt::get_current_timestamp();
+        let claims = &validated_jwt.claims;
+
+        if self.validation.validate_exp {
+            let exp = claims
+                .get("exp")
+                .and_then(Value::as_u64)
+                .ok_or_else(|| {
+                    ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidClaimFormat(
+                        "exp".to_string(),
+                    )))
+                })?;
+
+            if exp < self.validation.reject_tokens_expiring_in_less_than {
+                return Err(ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidToken)));
+            }
+
+            if exp - self.validation.reject_tokens_expiring_in_less_than
+                < now.saturating_sub(self.validation.leeway)
+            {
+                return Err(ValidateJwtError::ValidateJwt(new_error(
+                    ErrorKind::ExpiredSignature,
+                )));
+            }
+        }
+
+        if self.validation.validate_nbf
+            && let Some(nbf) = claims.get("nbf")
+        {
+            let nbf = nbf.as_u64().ok_or_else(|| {
+                ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidClaimFormat(
+                    "nbf".to_string(),
+                )))
+            })?;
+
+            if nbf > now.saturating_add(self.validation.leeway) {
+                return Err(ValidateJwtError::ValidateJwt(new_error(
+                    ErrorKind::ImmatureSignature,
+                )));
+            }
+        }
+
+        if let (Some(sub), Some(expected_sub)) = (
+            claims.get("sub").and_then(Value::as_str),
+            self.validation.sub.as_deref(),
+        ) && sub != expected_sub
+        {
+            return Err(ValidateJwtError::ValidateJwt(new_error(
+                ErrorKind::InvalidSubject,
+            )));
+        }
+
+        if let Some(expected_iss) = self.validation.iss.as_ref() {
+            match claims.get("iss") {
+                Some(Value::String(iss)) if !expected_iss.contains(iss) => {
+                    return Err(ValidateJwtError::ValidateJwt(new_error(
+                        ErrorKind::InvalidIssuer,
+                    )));
+                },
+                Some(Value::Array(iss_values)) => {
+                    let has_match = iss_values
+                        .iter()
+                        .filter_map(Value::as_str)
+                        .any(|iss| expected_iss.contains(iss));
+                    if !has_match {
+                        return Err(ValidateJwtError::ValidateJwt(new_error(
+                            ErrorKind::InvalidIssuer,
+                        )));
+                    }
+                },
+                _ => {},
+            }
+        }
+
+        Ok(())
     }
 }
 

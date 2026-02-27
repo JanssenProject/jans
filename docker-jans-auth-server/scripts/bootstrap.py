@@ -20,7 +20,6 @@ from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 from hooks import get_auth_keys_hook
-from lock import configure_lock_logging
 from lock import LockPersistenceSetup
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -84,10 +83,11 @@ def main():
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
 
-    copy_builtin_libs()
-
     if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
-        configure_lock_logging()
+        logger.info("The jans-lock plugin is enabled via CN_LOCK_ENABLED=true")
+
+        # copy required JARs to run jans-lock plugin
+        copy_lock_libs()
 
         with manager.create_lock("lock-setup"):
             persistence_setup = LockPersistenceSetup(manager)
@@ -109,6 +109,8 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "lock_log_target": "STDOUT",
+        "lock_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -153,6 +155,7 @@ def configure_logging():
         "persistence_duration_log_target": "JANS_AUTH_PERSISTENCE_DURATION_FILE",
         "script_log_target": "JANS_AUTH_SCRIPT_LOG_FILE",
         "audit_log_target": "JANS_AUTH_AUDIT_LOG_FILE",
+        "lock_log_target": "JANS_LOCK_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
@@ -173,18 +176,14 @@ def configure_logging():
         f.write(tmpl.safe_substitute(config))
 
 
-def copy_builtin_libs():
-    lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
-
-    if not lock_enabled:
-        return
-
-    libs_path = Path("/opt/jans/jetty/jans-auth/_libs")
-    lock_jars = list(libs_path.glob("jans-lock*.jar"))
+def copy_lock_libs():
+    libs_path = Path("/opt/jans/jetty/jans-auth/_lock_libs")
+    lock_jars = list(libs_path.glob("*.jar"))
 
     if not lock_jars:
         logger.warning(
-            f"CN_LOCK_ENABLED is true but no jans-lock*.jar files were found in {libs_path}"
+            f"Required JAR files to run jans-lock plugin were not found in {libs_path}. "
+            "The plugin may not run properly and affect jans-auth server."
         )
         return
 

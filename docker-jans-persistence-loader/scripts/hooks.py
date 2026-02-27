@@ -152,6 +152,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "maxPerRoute": 50,
             "validateAfterInactivity": 0,
         }),
+        ("disableExternalLoggerConfiguration", False),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
