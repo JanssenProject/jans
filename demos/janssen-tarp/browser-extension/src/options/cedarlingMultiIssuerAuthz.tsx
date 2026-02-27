@@ -19,7 +19,11 @@ import Tooltip from "@mui/material/Tooltip";
 import HelpIcon from '@mui/icons-material/Help';
 import { pink } from '@mui/material/colors';
 
-export default function CedarlingMultiIssuerAuthz({ data }) {
+interface CedarlingMultiIssuerAuthzProps {
+    data: any; // or define the actual shape of cedarlingConfig data
+}
+
+export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuerAuthzProps) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");
@@ -27,7 +31,7 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
 
     React.useEffect(() => {
         chrome.storage.local.get(["multiIssueAuthz"], (result) => {
-            if (!Utils.isEmpty(result) && Object.keys(result).length !== 0) {
+            if (result?.multiIssueAuthz) {
                 setFormFields({
                     tokens: result.multiIssueAuthz.tokens,
                     action: result.multiIssueAuthz.action,
@@ -54,17 +58,21 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
         chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
             let instance: Cedarling | null = null;
             try {
-                if (Object.keys(cedarlingConfig).length !== 0) {
-                    await initWasm();
-                    instance = await init(!Utils.isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
-                    let result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
-                    let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-                    setAuthzResult(result.json_string());
-                    if (logs.length != 0) {
-                        let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
-                        setAuthzLogs(pretty_logs.toString());
-                    }
+                const config = cedarlingConfig?.cedarlingConfig?.[0];
+                if (!config) {
+                    setAuthzResult("Error: No Cedarling configuration found. Please add a configuration first.");
+                    return;
                 }
+                await initWasm();
+                instance = await init(config);
+                let result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
+                let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
+                setAuthzResult(result.json_string());
+                if (logs.length != 0) {
+                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
+                    setAuthzLogs(pretty_logs.toString());
+                }
+
             } catch (err) {
                 setAuthzResult(err.toString());
                 console.log("err:", err);
@@ -88,7 +96,6 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
             context: formFields.context,
             resource: formFields.resource,
         };
-        console.log("reqObj:", reqObj);
         chrome.storage.local.set({ multiIssueAuthz: reqObj });
         return reqObj;
     };
@@ -112,7 +119,7 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
                             aria-controls="panel1-content"
                             id="panel1-header"
                         >
-                            <Typography component="span"><strong>Cedarling Unsigned Authz Request Form</strong></Typography>
+                            <Typography component="span"><strong>Cedarling Multi-Issuer Authz Request Form</strong></Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

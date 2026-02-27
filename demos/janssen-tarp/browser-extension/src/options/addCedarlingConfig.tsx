@@ -25,6 +25,7 @@ import cedarlingBootstrapJson from './cedarlingBootstrap.json';
 import Chip from '@mui/material/Chip';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import Snackbar from '@mui/material/Snackbar';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const [open, setOpen] = React.useState(isOpen);
@@ -151,8 +152,9 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
         size="small"
         aria-label="close"
         color="inherit"
-        onClick={handleClose}
+        onClick={() => setSnackbar({ open: false, message: '' })}
       >
+        <CloseIcon fontSize="small" />
       </IconButton>
     </React.Fragment>
   );
