@@ -78,7 +78,7 @@ function Row(props: { row: any, notifyOnDataChange }) {
                 </TableCell>
 
                 <TableCell component="th" scope="row">
-                    <Grid item xs={8}>
+                    <Grid size={{ xs:8}}>
                         <Tooltip title="Edit">
                             <IconButton aria-label="Edit">
                                 <Edit

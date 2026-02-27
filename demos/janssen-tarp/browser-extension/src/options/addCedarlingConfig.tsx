@@ -24,7 +24,8 @@ import { pink } from '@mui/material/colors';
 import cedarlingBootstrapJson from './cedarlingBootstrap.json';
 import Chip from '@mui/material/Chip';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import UseSnackbar from './UseSnackbar';
+import Snackbar from '@mui/material/Snackbar';
+
 export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
   const [open, setOpen] = React.useState(isOpen);
   const [bootstrap, setBootstrap] = React.useState(newData);
@@ -144,9 +145,26 @@ export default function AddCedarlingConfig({ isOpen, handleDialog, newData }) {
     setLoading(false);
   }
 
+  const action = (
+    <React.Fragment>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleClose}
+      >
+      </IconButton>
+    </React.Fragment>
+  );
+
   return (
     <React.Fragment>
-      <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message}/>
+      <Snackbar 
+      open={snackbar.open}
+      autoHideDuration={6000}
+      onClose={() => setSnackbar({ open: false, message: '' })}
+      message={snackbar.message}
+      action={action}/>
       <Dialog
         open={open}
         onClose={handleClose}

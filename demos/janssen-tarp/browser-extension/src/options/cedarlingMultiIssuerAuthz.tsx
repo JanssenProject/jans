@@ -40,9 +40,11 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
 
     const handleLogTypeChange = (
         event: React.MouseEvent<HTMLElement>,
-        newLogType: string,
+        newLogType: string | null,
     ) => {
-        setLogType(newLogType);
+        if (newLogType) {
+            setLogType(newLogType);
+        }
     };
 
     const triggerCedarlingAuthzRequest = async () => {
@@ -50,14 +52,14 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
         setAuthzLogs("");
         let reqObj = await createCedarlingAuthzRequestObj();
         chrome.storage.local.get(["cedarlingConfig"], async (cedarlingConfig) => {
-            let instance: Cedarling;
+            let instance: Cedarling | null = null;
             try {
                 if (Object.keys(cedarlingConfig).length !== 0) {
                     await initWasm();
                     instance = await init(!Utils.isEmpty(cedarlingConfig?.cedarlingConfig) ? cedarlingConfig?.cedarlingConfig[0] : undefined);
                     let result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
                     let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-                    setAuthzResult(result.json_string())
+                    setAuthzResult(result.json_string());
                     if (logs.length != 0) {
                         let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
                         setAuthzLogs(pretty_logs.toString());
@@ -66,10 +68,12 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
             } catch (err) {
                 setAuthzResult(err.toString());
                 console.log("err:", err);
-                let logs = await instance.pop_logs();
-                if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
-                    setAuthzLogs(pretty_logs.toString());
+                if (instance) {
+                    const logs = await instance.pop_logs();
+                    if (logs.length !== 0) {
+                        const prettyLogs = logs.map((log) => JSON.stringify(log, null, 2));
+                        setAuthzLogs(prettyLogs.join("\n"));
+                    }
                 }
             }
 
@@ -140,11 +144,11 @@ export default function CedarlingMultiIssuerAuthz({ data }) {
                                                 {`[
                                                     {
                                                         "mapping": "Namespace_Name::Token_Entity",
-                                                        "payload": "JWT_Token_String"
+                                                        "payload": "<JWT_TOKEN_STRING>"
                                                     },
                                                     {
                                                         "mapping": "Acme::Access_token",
-                                                        "payload": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2lkcC5hY21lLmNvbSIsImlhdCI6MTc3MTk1MzA3NiwiZXhwIjoxODAzNDg5MDc2LCJhdWQiOiJ3d3cuZXhhbXBsZS5jb20iLCJzdWIiOiJqcm9ja2V0QGV4YW1wbGUuY29tIiwianRpIjoiSm9obm55IiwiY2xpZW50X2lkIjoiYWJjMTIzIiwiZW1haWwiOiJqcm9ja2V0QGV4YW1wbGUuY29tIiwicm9sZSI6WyJtYW5hZ2VyIiwiYWRtaW4iXX0.7uJsN5jIIq9-t-gZAWSTh6_7trSig-VuGCeCUlkgC-Y"
+                                                        "payload": "<JWT_TOKEN_STRING>"
                                                     }
                                                 ]`}
                                             </Box>
