@@ -215,8 +215,8 @@ class AwsSecret(BaseSecret):
 
         if parts > 1:
             logger.warning(
-                f"The secret payload size is {data_length} bytes and is exceeding max. size of {self.max_payload_size} bytes. "
-                f"It will be splitted into {parts} parts."
+                "The secret payload size is %s bytes and is exceeding max. size of %s bytes. "
+                "It will be splitted into %s parts.", data_length, self.max_payload_size, parts
             )
 
         for part in range(0, parts):
@@ -277,7 +277,7 @@ class AwsSecret(BaseSecret):
             # run the actual secrets creation
             create_secret()
 
-            logger.info(f"Created secret: {name}")
+            logger.info("Created secret: %s", name)
 
             # mark the secret as exists so subsequent checks made by
             # client instance won't need to make requests to AWS service

@@ -211,7 +211,7 @@ class GoogleSecret(BaseSecret):
             return False
 
         all_[key] = new_value
-        logger.info(f"Adding/updating key {key} to google secret manager")
+        logger.info("Adding/updating key %s to google secret manager", key)
 
         payload = safe_value(all_)
         return self._add_secret_version_multipart(payload)
@@ -249,7 +249,7 @@ class GoogleSecret(BaseSecret):
             # Delete the secret.
             self.client.delete_secret(request={"name": name})
         except NotFound:
-            logger.warning(f'Secret {self.google_secret_name} does not exist in the secret manager.')
+            logger.warning('Secret %s does not exist in the secret manager.', self.google_secret_name)
 
     def _add_secret_version_multipart(self, payload: _t.AnyStr) -> bool:
         """Add a new secret version to the given secret with the provided payload.
@@ -269,8 +269,8 @@ class GoogleSecret(BaseSecret):
 
         if parts > 1:
             logger.warning(
-                f"The secret payload size is {data_length} bytes and is exceeding max. size of {self.max_payload_size} bytes. "
-                f"It will be splitted into {parts} parts."
+                "The secret payload size is %s bytes and is exceeding max. size of %s bytes. "
+                "It will be splitted into %s parts.", data_length, self.max_payload_size, parts
             )
 
         for part in range(0, parts):
@@ -287,7 +287,7 @@ class GoogleSecret(BaseSecret):
             response = self.client.add_secret_version(
                 request={"parent": parent, "payload": {"data": fragment}}
             )
-            logger.info(f"Added secret version: {response.name}")
+            logger.info("Added secret version: %s", response.name)
             self._destroy_old_versions(parent)
         return True
 
@@ -327,7 +327,7 @@ class GoogleSecret(BaseSecret):
                     },
                 }
             )
-            logger.info(f"Created secret: {response.name}")
+            logger.info("Created secret: %s", response.name)
             self.multiparts.append(name)
         return name
 
@@ -380,8 +380,8 @@ class GoogleSecret(BaseSecret):
             # secrets may have lots of versions; disabling them all could produce bottleneck
             # hence we only disable 1 version after allowed enabled versions are reaching threshold
             logger.info(
-                f"The soft-limit for max. versions (currently set to {self.max_versions}) has been reached; "
-                f"destroying previous version {version.name} (state={version.state.name})"
+                "The soft-limit for max. versions (currently set to %s) has been reached; "
+                "destroying previous version %s (state=%s)", self.max_versions, version.name, version.state.name
             )
 
             try:

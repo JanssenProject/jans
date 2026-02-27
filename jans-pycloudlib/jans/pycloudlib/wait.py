@@ -93,19 +93,19 @@ def on_backoff(details: Details) -> None:
     """Emit logs automatically when error is thrown while running a backoff-decorated function."""
     error = sys.exc_info()[1]
     label = details["kwargs"].get("label") or "Service"
-    logger.warning(f"{label} is not ready; reason={error}; retrying in {details['wait']:0.1f} seconds")
+    logger.warning("%s is not ready; reason=%s; retrying in %0.1f seconds", label, error, details["wait"])
 
 
 def on_success(details: Details) -> None:
     """Emit logs automatically when there's no error while running a backoff-decorated function."""
     label = details["kwargs"].get("label") or "Service"
-    logger.info(f"{label} is ready")
+    logger.info("%s is ready", label)
 
 
 def on_giveup(details: Details) -> None:
     """Emit logs automatically when a backoff-decorated function exceeds allowed retries."""
     label = details["kwargs"].get("label") or "Service"
-    logger.error(f"{label} is not ready after {details['elapsed']:0.1f} seconds")
+    logger.error("%s is not ready after %0.1f seconds", label, details["elapsed"])
 
 
 retry_on_exception = backoff.on_exception(
@@ -262,7 +262,7 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
     for dep in dependencies:
         callback = callbacks.get(dep)
         if not callback:
-            logger.warning(f"Unsupported callback for {dep} dependency")
+            logger.warning("Unsupported callback for %s dependency", dep)
             continue
         callback["func"](manager, **callback["kwargs"])
 

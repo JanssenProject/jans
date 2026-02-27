@@ -388,7 +388,7 @@ class Manager:
                 continue
 
             if path and (contents := self.secret.get(secret)):
-                logger.info(f"Detected non-empty {secret=} and {env=} used by {adapter=}. The secret will be populated into {path!r}.")
+                logger.info("Detected non-empty secret=%r and env=%r used by adapter=%r. The secret will be populated into %r.", secret, env, adapter, path)
                 with open(path, "w") as f:
                     f.write(contents)
 
@@ -431,7 +431,7 @@ class Manager:
         # backward-compat for .lock attribute
         ns = SimpleNamespace()
         ns.create_lock = self.create_lock
-        logger.warning(f"Accessing {self.__class__.__name__}.lock attribute is deprecated")
+        logger.warning("Accessing %s.lock attribute is deprecated", self.__class__.__name__)
         return ns
 
 

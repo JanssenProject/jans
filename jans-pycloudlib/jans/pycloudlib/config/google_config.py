@@ -148,8 +148,8 @@ class GoogleConfig(BaseConfig):
 
         self.create_secret()
 
-        logger.info(f'Adding/updating key {key} to google secret manager')
-        logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
+        logger.info('Adding/updating key %s to google secret manager', key)
+        logger.info('Size of secret payload : %s bytes', sys.getsizeof(safe_value(all_)))
         return self.add_secret_version(safe_value(all_))
 
     def set_all(self, data: dict[str, _t.Any]) -> bool:
@@ -175,7 +175,7 @@ class GoogleConfig(BaseConfig):
 
         self.create_secret()
 
-        logger.info(f'Size of secret payload : {sys.getsizeof(safe_value(all_))} bytes')
+        logger.info('Size of secret payload : %s bytes', sys.getsizeof(safe_value(all_)))
         return self.add_secret_version(safe_value(all_))
 
     def create_secret(self) -> None:
@@ -196,9 +196,9 @@ class GoogleConfig(BaseConfig):
                     "secret": {"replication": {"automatic": {}}},
                 }
             )
-            logger.info(f"Created secret: {response.name}")
+            logger.info("Created secret: %s", response.name)
         except AlreadyExists:
-            logger.warning(f'Secret {self.google_secret_name} already exists. A new version will be created.')
+            logger.warning('Secret %s already exists. A new version will be created.', self.google_secret_name)
 
     def add_secret_version(self, payload: _t.AnyStr) -> bool:
         """Add a new secret version to the given secret with the provided payload.
@@ -252,8 +252,8 @@ class GoogleConfig(BaseConfig):
             # secrets may have lots of versions; disabling them all could produce bottleneck
             # hence we only disable 1 version after allowed enabled versions are reaching threshold
             logger.info(
-                f"The soft-limit for max. versions (currently set to {self.max_versions}) has been reached; "
-                f"destroying previous version {version.name} (state={version.state.name})"
+                "The soft-limit for max. versions (currently set to %s) has been reached; "
+                "destroying previous version %s (state=%s)", self.max_versions, version.name, version.state.name
             )
 
             try:
