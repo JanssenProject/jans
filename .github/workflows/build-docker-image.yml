@@ -111,7 +111,7 @@ jobs:
         docker-images: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar"]
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
         with:
           egress-policy: audit
 
@@ -262,13 +262,13 @@ jobs:
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.10
-        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
+        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.10"
 
       - name: Install Python dependencies
-        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
+        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
         run: |
           sudo apt-get update
           sudo python3 -m pip install --upgrade pip || echo "Failed to upgrade pip"
@@ -278,7 +278,7 @@ jobs:
           sudo apt-get install jq
 
       - name: Update Build date in Dockerfile
-        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
+        if: github.event_name == 'workflow_dispatch' && matrix.docker-images != 'loadtesting-jmeter'
         id: update_build_date_in_dockerfile
         run: |
           sudo python3 ./automation/auto_update_build_date.py
