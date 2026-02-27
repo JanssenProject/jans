@@ -636,7 +636,7 @@ impl Authz {
             user: metadata.user_claims.clone(),
             workload: metadata.workload_claims.clone(),
             lock_client_id: None,
-            action: metadata.action.to_string(),
+            action: metadata.action.clone(),
             resource: metadata.resource.clone(),
             decision: metadata.decision.into(),
             tokens: metadata.tokens_logging_info.clone(),
@@ -659,7 +659,7 @@ impl Authz {
 
             LogEntry::new(base)
                 .set_auth_info(AuthorizationLogInfo {
-                    action: metadata.action.to_string(),
+                    action: metadata.action.clone(),
                     context: metadata.context.clone(),
                     resource: metadata.resource.clone(),
                     entities: entities_json,
