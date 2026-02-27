@@ -440,6 +440,9 @@ class PropertiesUtils(SetupUtils):
                     BackendStrings.REMOTE_MYSQL,
                     ]
 
+        if base.os_type == 'suse':
+            backend_types.remove(BackendStrings.LOCAL_MYSQL)
+
         nlist = []
         for i, btype in enumerate(backend_types):
             nn = i+1

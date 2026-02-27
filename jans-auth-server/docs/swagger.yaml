@@ -4715,7 +4715,7 @@ paths:
                   ssa:
                     type: string
                     example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BvcnRhbC5nbHV1Lm9yZyIsImlhdCI6IjE2NTUzMTkyNjgiLCJqdGkiOiJmN2I1OTkxYy00YzE4LTRjODEtYTY2NC1lNmY4NjcwZjVkNTEiLCJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJvcmdfaWQiOjEsInNvZnR3YXJlX3JvbGVzIjpbInBhc3N3dXJkIl0sImp3a3NfdXJpIjoiaHR0cHM6Ly9jbG91ZC1kZXYuZ2x1dS5jbG91ZC9wb3J0YWwvandrcyIsImdyYW50X3R5cGVzIjpbImNsaWVudF9jcmVkZW50aWFscyJdLCJleHAiOjE2NTkzMTkyNjh9.MkE-47SvBshmazBfyhAcHsqPpFIbg5CpA8k2TxDWhxc
-        404:
+        400:
           $ref: '#/components/responses/InvalidSSAMetadata'
         401:
           $ref: '#/components/responses/UnauthorizedSSA'
@@ -4821,6 +4821,17 @@ paths:
                           - client_credentials
                         exp: 1655419268
                         lifetime: 86400
+        400:
+          description: Invalid client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_client:
+                  value:
+                    error: invalid_client
+                    error_description: Invalid client.
         401:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
@@ -4863,6 +4874,17 @@ paths:
       responses:
         200:
           description: Success.
+        400:
+          description: Invalid client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_client:
+                  value:
+                    error: invalid_client
+                    error_description: Invalid client.
         401:
           $ref: '#/components/responses/UnauthorizedSSA'
         406:
@@ -4946,6 +4968,21 @@ paths:
                   ssa:
                     type: string
                     example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BvcnRhbC5nbHV1Lm9yZyIsImlhdCI6IjE2NTUzMTkyNjgiLCJqdGkiOiJmN2I1OTkxYy00YzE4LTRjODEtYTY2NC1lNmY4NjcwZjVkNTEiLCJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJvcmdfaWQiOjEsInNvZnR3YXJlX3JvbGVzIjpbInBhc3N3dXJkIl0sImp3a3NfdXJpIjoiaHR0cHM6Ly9jbG91ZC1kZXYuZ2x1dS5jbG91ZC9wb3J0YWwvandrcyIsImdyYW50X3R5cGVzIjpbImNsaWVudF9jcmVkZW50aWFscyJdLCJleHAiOjE2NTkzMTkyNjh9.MkE-47SvBshmazBfyhAcHsqPpFIbg5CpA8k2TxDWhxc
+        400:
+          description: When jti does not exist, is invalid or state is in (expired, used or revoked), or when client is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_jti:
+                  value:
+                    error: invalid_jti
+                    error_description: Invalid JTI or not exists.
+                invalid_client:
+                  value:
+                    error: invalid_client
+                    error_description: Invalid client.
         401:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
@@ -5007,7 +5044,7 @@ components:
               value:
                 error: invalid_client
                 error_description: Client authentication failed (e.g. unknown client, no client authentication included, or unsupported authentication method).
-    InvalidSSAMetadata: #404 - INVALID SSA METADATA
+    InvalidSSAMetadata: # 400 - INVALID SSA METADATA
       description: Invalid SSA Metadata.
       content:
         application/json:

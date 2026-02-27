@@ -237,9 +237,6 @@ class Config:
                             os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
                             ]
 
-        self.redhat_services = ['httpd', 'rsyslog']
-        self.debian_services = ['apache2', 'rsyslog']
-
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'
 

@@ -48,10 +48,10 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: read
-      packages: write
+      packages: write  # to delete 0.0.0-nightly package versions
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
     - name: Get version ID for 0.0.0-nightly
@@ -72,11 +72,15 @@ jobs:
 
         services=$(echo "$services" | tr '\n' ' ' | sed 's/ *$//')
         echo "Services: $services"
-          for service in $services; do
-            echo "Checking $service"
-            version_id=$(gh api -H "Accept: application/vnd.github+json" \
-              /orgs/JanssenProject/packages/maven/"${service}"/versions \
-              | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
-            echo "version_id=$version_id" >> $GITHUB_ENV
+        for service in $services; do
+          echo "Checking $service"
+          version_id=$(gh api -H "Accept: application/vnd.github+json" \
+            /orgs/JanssenProject/packages/maven/"${service}"/versions \
+            | jq -r '.[] | select(.name == "0.0.0-nightly") | .id')
+          if [ -n "$version_id" ]; then
+            echo "Deleting version $version_id of $service"
             gh api --method DELETE \
-            -H "Accept: application/vnd.github+json" \
+              -H "Accept: application/vnd.github+json" \
+              /orgs/JanssenProject/packages/maven/"${service}"/versions/"${version_id}" || echo "Failed to delete $service version $version_id"
+          fi
+        done

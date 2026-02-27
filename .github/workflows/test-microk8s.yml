@@ -43,7 +43,7 @@ jobs:
       KUBECONFIG: /home/runner/.kube/config
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -55,10 +55,22 @@ jobs:
         sudo snap install microk8s --classic
         sudo microk8s.status --wait-ready
         sudo microk8s.enable dns registry hostpath-storage helm3
+        sudo microk8s.status --wait-ready
         sudo microk8s config | sudo tee "$KUBECONFIG" > /dev/null
         sudo chown "$USER" "$KUBECONFIG"
         sudo snap alias microk8s.kubectl kubectl
         sudo snap alias microk8s.helm3 helm
+
+        echo "Waiting for Kubernetes API server to be ready..."
+        for i in $(seq 1 30); do
+          if kubectl get nodes > /dev/null 2>&1; then
+            echo "API server is ready"
+            break
+          fi
+          echo "Attempt $i/30: API server not ready, waiting 10s..."
+          sleep 10
+        done
+        kubectl get nodes || { echo "FATAL: Kubernetes API server not reachable after 300s"; exit 1; }
 
     - name: Install ingress controller
       run: |
@@ -369,7 +381,7 @@ jobs:
         echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
 
     - name: Set up Go
-      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
         go-version-file: terraform-provider-jans/go.mod
         cache-dependency-path: terraform-provider-jans/go.sum

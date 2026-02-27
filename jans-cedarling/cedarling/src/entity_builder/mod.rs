@@ -79,7 +79,7 @@ impl EntityBuilder {
                 let iss_id = normalize_issuer(&iss.oidc_endpoint.origin().ascii_serialization());
 
                 let iss_type_name = Self::trusted_issuer_typename(&iss.name);
-                build_iss_entity(&iss_type_name, &iss_id, iss, schema.as_ref())
+                build_iss_entity(&iss_type_name.clone(), &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 

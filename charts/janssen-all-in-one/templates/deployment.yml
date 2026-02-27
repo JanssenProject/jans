@@ -79,8 +79,8 @@ spec:
             value: {{ include "shibboleth.customJavaOptions" . | trim }}
           - name: CN_SCIM_JAVA_OPTIONS
             value: {{ include "scim.customJavaOptions" . | trim }}
-          {{- include "janssen-all-in-one.usr-envs" . | indent 12 }}
-          {{- include "janssen-all-in-one.usr-secret-envs" . | indent 12 }}
+          {{- include "janssen-all-in-one.usr-envs" . | indent 10 }}
+          {{- include "janssen-all-in-one.usr-secret-envs" . | indent 10 }}
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
