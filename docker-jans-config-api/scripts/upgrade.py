@@ -60,6 +60,7 @@ def _transform_api_dynamic_config(conf):
         ("acrExclusionList", ["simple_password_auth"]),
         ("returnClientSecretInResponse", True),
         ("returnEncryptedClientSecretInResponse", True),
+        ("disableExternalLoggerConfiguration", False),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
