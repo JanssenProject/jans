@@ -8,7 +8,7 @@ use super::{
     Arc, AuthorizeEntitiesData, BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME,
     EntityBuilder, EntityData, Token, Value, default_tkn_entity_name,
 };
-use crate::common::issuer_utils::normalize_issuer;
+use crate::common::issuer_utils::IssClaim;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
@@ -113,10 +113,9 @@ fn add_reserved_claims(
             const UNDEFINED_ISSUER: &str = "undefined";
 
             if let Some(token_iss) = &token.iss {
-                let issuer = token
-                    .get_claim_val("iss")
-                    .and_then(|iss| iss.as_str())
-                    .map_or_else(|| UNDEFINED_ISSUER.to_string(), normalize_issuer);
+                let issuer = token.extract_normalized_issuer()
+                    // it should never be None here since token iss exists
+                    .unwrap_or_else(|| IssClaim::new(UNDEFINED_ISSUER));
 
                 attrs.insert(
                     ISS_CLAIM.to_string(),
@@ -175,9 +174,7 @@ fn add_reserved_claims(
 
         if let Some(token_iss) = &token.iss {
             let issuer = token
-                .get_claim_val("iss")
-                .and_then(|iss| iss.as_str())
-                .map(normalize_issuer)
+                .extract_normalized_issuer()
                 .ok_or(MultiIssuerEntityError::MissingIssuer)?;
 
             attrs.insert(
@@ -471,39 +468,39 @@ mod tests {
         let mut trusted_issuers = HashMap::new();
 
         // Add Acme issuer
-        let acme_issuer = TrustedIssuer {
-            name: "Acme".to_string(),
-            description: "Acme Corporation".to_string(),
-            oidc_endpoint: Url::parse("https://idp.acme.com/auth").unwrap(),
-            token_metadata: HashMap::new(),
-        };
+        let acme_issuer = TrustedIssuer::new(
+            "Acme".to_string(),
+            "Acme Corporation".to_string(),
+            Url::parse("https://idp.acme.com/auth").unwrap(),
+            HashMap::new(),
+        );
         trusted_issuers.insert("acme".to_string(), acme_issuer);
 
         // Add Dolphin issuer
-        let dolphin_issuer = TrustedIssuer {
-            name: "Dolphin".to_string(),
-            description: "Dolphin Sea Services".to_string(),
-            oidc_endpoint: Url::parse("https://idp.dolphin.sea/auth").unwrap(),
-            token_metadata: HashMap::new(),
-        };
+        let dolphin_issuer = TrustedIssuer::new(
+            "Dolphin".to_string(),
+            "Dolphin Sea Services".to_string(),
+            Url::parse("https://idp.dolphin.sea/auth").unwrap(),
+            HashMap::new(),
+        );
         trusted_issuers.insert("dolphin".to_string(), dolphin_issuer);
 
         // Add Microsoft issuer
-        let microsoft_issuer = TrustedIssuer {
-            name: "Microsoft".to_string(),
-            description: "Microsoft Azure AD".to_string(),
-            oidc_endpoint: Url::parse("https://login.microsoftonline.com/tenant").unwrap(),
-            token_metadata: HashMap::new(),
-        };
+        let microsoft_issuer = TrustedIssuer::new(
+            "Microsoft".to_string(),
+            "Microsoft Azure AD".to_string(),
+            Url::parse("https://login.microsoftonline.com/tenant").unwrap(),
+            HashMap::new(),
+        );
         trusted_issuers.insert("microsoft".to_string(), microsoft_issuer);
 
         // Add Company issuer
-        let company_issuer = TrustedIssuer {
-            name: "Company".to_string(),
-            description: "Company Internal Auth".to_string(),
-            oidc_endpoint: Url::parse("https://auth.company.internal:8443/oauth").unwrap(),
-            token_metadata: HashMap::new(),
-        };
+        let company_issuer = TrustedIssuer::new(
+            "Company".to_string(),
+            "Company Internal Auth".to_string(),
+            Url::parse("https://auth.company.internal:8443/oauth").unwrap(),
+            HashMap::new(),
+        );
         trusted_issuers.insert("company".to_string(), company_issuer);
 
         EntityBuilder::new(
@@ -774,14 +771,13 @@ mod tests {
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
-        let trusted_issuers = HashMap::from_iter(vec![(
+        let ti = TrustedIssuer::new(
             "Jans".to_string(),
-            TrustedIssuer {
-                name: "Jans".to_string(),
-                oidc_endpoint: Url::parse("https://test.issuer.com").unwrap(),
-                ..Default::default()
-            },
-        )]);
+            String::new(),
+            Url::parse("https://test.issuer.com").unwrap(),
+            HashMap::default(),
+        );
+        let trusted_issuers = HashMap::from_iter(vec![("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
             config,
             TrustedIssuerIndex::new(&trusted_issuers, None),
@@ -956,17 +952,15 @@ mod tests {
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
-        let trusted_issuers = HashMap::from([(
+        let ti = TrustedIssuer::new(
             "Jans".to_string(),
-            TrustedIssuer {
-                name: "Jans".to_string(),
-                oidc_endpoint: Url::parse(
-                    "https://test.issuer.com/.well-known/openid-configuration",
-                )
+            String::new(),
+            Url::parse("https://test.issuer.com/.well-known/openid-configuration")
                 .expect("url should be parsed"),
-                ..Default::default()
-            },
-        )]);
+            HashMap::new(),
+        );
+
+        let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
         let builder = EntityBuilder::new(
             config,
             TrustedIssuerIndex::new(&trusted_issuers, None),

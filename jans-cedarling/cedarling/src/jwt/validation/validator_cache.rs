@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::issuer_utils::normalize_issuer;
+use crate::common::issuer_utils::IssClaim;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::jwt::{IssuerConfig, StatusListCache};
 use crate::log::Logger;
@@ -11,12 +11,15 @@ use crate::{JwtConfig, LogLevel, LogWriter};
 
 use super::JwtValidator;
 use jsonwebtoken::Algorithm;
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::{Arc, RwLock};
 
 type CachedValidator = Arc<RwLock<JwtValidator>>;
+const MUTEX_POISONED_ERR: &str =
+    "JwtValidatorCache RwLock poisoned due to another thread panicking while holding the lock";
 
 /// Holds a collection of JWT validators keyed by a hash.
 ///
@@ -27,33 +30,27 @@ type CachedValidator = Arc<RwLock<JwtValidator>>;
 ///
 /// If multiple validators share the same hash (i.e., hash collision),
 /// we perform an additional full comparison via [`OwnedValidatorInfo::is_equal_to`].
+///
+/// This structure is thread-safe via an internal `RwLock`.
 #[derive(Default)]
 pub(crate) struct JwtValidatorCache {
-    validators: HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>,
+    validators: RwLock<HashMap<ValidatorKeyHash, Vec<(OwnedValidatorInfo, CachedValidator)>>>,
 }
 
 impl JwtValidatorCache {
     /// Initializes the validators for the given [`IssuerConfig`] and the global settings
     /// from [`JwtConfig`].
     pub(crate) fn init_for_iss(
-        &mut self,
+        &self,
         iss_config: &IssuerConfig,
         jwt_config: &JwtConfig,
         status_lists: &StatusListCache,
         logger: Option<&Logger>,
     ) {
-        let iss = iss_config.openid_config.as_ref().map_or_else(
-            || {
-                normalize_issuer(
-                    &iss_config
-                        .policy
-                        .oidc_endpoint
-                        .origin()
-                        .ascii_serialization(),
-                )
-            },
-            |oidc| normalize_issuer(&oidc.issuer),
-        );
+        let iss = iss_config
+            .openid_config
+            .as_ref()
+            .map_or_else(|| iss_config.policy.iss_claim(), |oidc| oidc.issuer.clone());
 
         for (token_name, tkn_metadata) in &iss_config.policy.token_metadata {
             if !tkn_metadata.trusted {
@@ -78,7 +75,7 @@ impl JwtValidatorCache {
                     jwt_config.jwt_status_validation,
                 );
 
-                self.insert(key, validator);
+                self.insert(&key, validator);
             }
 
             for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
@@ -92,7 +89,7 @@ impl JwtValidatorCache {
                     jwt_config.jwt_status_validation,
                 );
 
-                self.insert(key, validator);
+                self.insert(&key, validator);
             }
         }
 
@@ -110,7 +107,7 @@ impl JwtValidatorCache {
                     jwt_config.jwt_sig_validation,
                 );
 
-                self.insert(key, validator);
+                self.insert(&key, validator);
             }
         }
     }
@@ -119,9 +116,11 @@ impl JwtValidatorCache {
     ///
     /// If a validator with the same `ValidatorKeyHash` already exists, it is
     /// appended to the vector. Exact match resolution is deferred to lookup time.
-    fn insert(&mut self, validator_info: ValidatorInfo<'_>, validator: JwtValidator) {
+    fn insert(&self, validator_info: &ValidatorInfo<'_>, validator: JwtValidator) {
         let key = validator_info.key_hash();
         self.validators
+            .write()
+            .expect(MUTEX_POISONED_ERR)
             .entry(key)
             .or_default()
             .push((validator_info.owned(), Arc::new(RwLock::new(validator))));
@@ -136,7 +135,8 @@ impl JwtValidatorCache {
         &self,
         validator_info: &ValidatorInfo<'_>,
     ) -> Option<Arc<RwLock<JwtValidator>>> {
-        let validators = self.validators.get(&validator_info.key_hash())?;
+        let guard = self.validators.read().expect(MUTEX_POISONED_ERR);
+        let validators = guard.get(&validator_info.key_hash())?;
 
         match validators.len() {
             0 => None,
@@ -152,17 +152,17 @@ impl JwtValidatorCache {
 /// Lightweight view of validator identity used for lookup and insertion.
 ///
 /// Holds borrowed data and can be hashed to a `ValidatorKeyHash`.
-#[derive(Hash, Clone, Copy)]
+#[derive(Hash, Clone)]
 pub(crate) struct ValidatorInfo<'a> {
     /// Optional issuer string (typically from a JWT "iss" claim).
-    pub iss: Option<&'a str>,
+    pub iss: Option<&'a IssClaim>,
     /// The token name (e.g., audience or application-specific).
     pub token_kind: TokenKind<'a>,
     /// The algorithm used to sign the token.
     pub algorithm: Algorithm,
 }
 
-#[derive(Hash, Clone, Copy, PartialEq)]
+#[derive(Hash, Clone, PartialEq)]
 pub(crate) enum TokenKind<'a> {
     /// A token that's provided by the user through the [`authorize`] function.
     ///
@@ -173,14 +173,17 @@ pub(crate) enum TokenKind<'a> {
     /// A token that's provided by the user through the [`authorize_multi_issuer`] function.
     ///
     /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
-    AuthorizeMultiIssuer(&'a str),
+    AuthorizeMultiIssuer(Cow<'a, str>),
 }
 
 impl Display for TokenKind<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TokenKind::StatusList => write!(f, "statuslist+jwt"),
-            TokenKind::AuthzRequestInput(tkn_name) | TokenKind::AuthorizeMultiIssuer(tkn_name) => {
+            TokenKind::AuthorizeMultiIssuer(tkn_name) => {
+                write!(f, "{tkn_name}")
+            },
+            TokenKind::AuthzRequestInput(tkn_name) => {
                 write!(f, "{tkn_name}")
             },
         }
@@ -190,7 +193,7 @@ impl Display for TokenKind<'_> {
 /// Owned version of [`ValidatorInfo`] used to store entries inside `ValidatorStore`.
 #[derive(Debug)]
 pub struct OwnedValidatorInfo {
-    iss: Option<String>,
+    iss: Option<IssClaim>,
     token_kind: OwnedTokenKind,
     algorithm: Algorithm,
 }
@@ -209,10 +212,12 @@ pub(crate) enum OwnedTokenKind {
     AuthorizeMultiIssuer(String),
 }
 
-impl From<TokenKind<'_>> for OwnedTokenKind {
-    fn from(tkn_kind: TokenKind<'_>) -> Self {
+impl From<&TokenKind<'_>> for OwnedTokenKind {
+    fn from(tkn_kind: &TokenKind<'_>) -> Self {
         match tkn_kind {
-            TokenKind::AuthzRequestInput(tkn_name) => Self::AuthzRequestInput(tkn_name.to_string()),
+            TokenKind::AuthzRequestInput(tkn_name) => {
+                Self::AuthzRequestInput((*tkn_name).to_string())
+            },
             TokenKind::StatusList => Self::StatusList,
             TokenKind::AuthorizeMultiIssuer(tkn_name) => {
                 Self::AuthorizeMultiIssuer(tkn_name.to_string())
@@ -231,11 +236,11 @@ impl OwnedTokenKind {
             (
                 OwnedTokenKind::AuthzRequestInput(tkn_name_string),
                 TokenKind::AuthzRequestInput(tkn_name_str),
-            )
-            | (
+            ) => tkn_name_string.as_str() == *tkn_name_str,
+            (
                 OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
                 TokenKind::AuthorizeMultiIssuer(tkn_name_str),
-            ) => tkn_name_string.as_str() == *tkn_name_str,
+            ) => tkn_name_string.as_str() == tkn_name_str,
             _ => false,
         }
     }
@@ -251,8 +256,8 @@ impl ValidatorInfo<'_> {
     /// Creates an [`OwnedValidatorInfo`] for storage.
     pub(crate) fn owned(&self) -> OwnedValidatorInfo {
         OwnedValidatorInfo {
-            iss: self.iss.map(std::string::ToString::to_string),
-            token_kind: self.token_kind.into(),
+            iss: self.iss.map(std::borrow::ToOwned::to_owned),
+            token_kind: (&self.token_kind).into(),
             algorithm: self.algorithm,
         }
     }
@@ -272,7 +277,7 @@ impl OwnedValidatorInfo {
     ///
     /// Used to resolve hash collisions in the store.
     fn is_equal_to(&self, other: &ValidatorInfo<'_>) -> bool {
-        if self.iss.as_deref() != other.iss {
+        if self.iss.as_ref() != other.iss {
             return false;
         }
 
@@ -297,9 +302,10 @@ mod test {
 
     #[test]
     fn test_insert_and_retrieve() {
-        let mut store = JwtValidatorCache::default();
+        let store = JwtValidatorCache::default();
+        let test_iss = IssClaim::new("https://example.com/issuer");
         let (validator, info) = JwtValidator::new_input_tkn_validator(
-            Some("test"),
+            Some(&test_iss),
             "access_tkn",
             &TokenEntityMetadata {
                 trusted: true,
@@ -318,7 +324,7 @@ mod test {
             false,
         );
 
-        store.insert(info, validator.clone());
+        store.insert(&info, validator.clone());
 
         assert!(store.get(&info).is_some());
     }

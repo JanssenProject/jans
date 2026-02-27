@@ -3,11 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::sync::LazyLock;
+#![cfg(test)]
+
+use std::sync::{Arc, LazyLock};
 
 use super::http_utils::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
 use super::validation::RefJwtStatusList;
+use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
@@ -28,8 +31,8 @@ pub(crate) struct KeyPair {
 }
 
 impl KeyPair {
-    pub(crate) fn decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
-        DecodingKey::from_jwk(&self.decoding_key)
+    pub(crate) fn decoding_key(&self) -> Result<Arc<DecodingKey>, jsonwebtoken::errors::Error> {
+        DecodingKey::from_jwk(&self.decoding_key).map(Arc::new)
     }
 }
 
@@ -235,11 +238,11 @@ impl MockServer {
 
     /// Generates a [`TrustedIssuer`] for this instance of the [`MockServer`].
     pub(crate) fn trusted_issuer(&self) -> TrustedIssuer {
-        TrustedIssuer {
-            oidc_endpoint: Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT))
-                .expect("should be a valid url"),
-            ..Default::default()
-        }
+        let mut issuer = TrustedIssuer::default();
+        issuer.set_oidc_endpoint(
+            Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT)).expect("should be a valid url"),
+        );
+        issuer
     }
 
     /// Use this to generate the status list JWT
@@ -296,6 +299,33 @@ impl MockServer {
         self.endpoints.status_list = endpoint;
     }
 
+    /// Updates the `OpenID` configuration mock to include the status list endpoint.
+    /// This should be called after `generate_status_list_endpoint` to ensure the
+    /// OIDC configuration returned via HTTP includes the `status_list_endpoint` field.
+    pub(crate) fn update_openid_config_with_status_list_endpoint(&mut self) {
+        // Remove the existing OIDC mock (drop the Mock)
+        let old = self.endpoints.oidc.take();
+        drop(old); // explicit drop for clarity
+
+        let status_list_endpoint = self
+            .status_list_endpoint()
+            .expect("status list endpoint not generated");
+        let body = json!({
+            "issuer": self.server.url(),
+            "jwks_uri": self.server.url() + MOCK_JWKS_URI,
+            "status_list_endpoint": status_list_endpoint.to_string(),
+        });
+        let oidc = self
+            .server
+            .mock("GET", MOCK_OIDC_ENDPOINT)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(body.to_string())
+            .expect(1)
+            .create();
+        self.endpoints.oidc = Some(oidc);
+    }
+
     /// Helper function for generating a status list JWT for this mock server
     pub(crate) async fn status_list_jwt(&self) -> Result<String, reqwest::Error> {
         static CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
@@ -332,18 +362,18 @@ impl MockServer {
         Some(Url::parse(&(self.server.url() + MOCK_JWKS_URI)).expect("invalid status list url"))
     }
 
-    pub(crate) fn jwt_decoding_key(&self) -> Result<DecodingKey, jsonwebtoken::errors::Error> {
+    pub(crate) fn jwt_decoding_key(&self) -> Result<Arc<DecodingKey>, jsonwebtoken::errors::Error> {
         self.keys.decoding_key()
     }
 
     pub(crate) fn jwt_decoding_key_and_id(
         &self,
-    ) -> Result<(DecodingKey, Option<String>), jsonwebtoken::errors::Error> {
+    ) -> Result<(Arc<DecodingKey>, Option<String>), jsonwebtoken::errors::Error> {
         Ok((self.keys.decoding_key()?, self.keys.kid.clone()))
     }
 
-    pub(crate) fn issuer(&self) -> String {
-        self.server.url()
+    pub(crate) fn issuer(&self) -> IssClaim {
+        IssClaim::new(&self.server.url())
     }
 
     #[track_caller]
@@ -354,4 +384,75 @@ impl MockServer {
             status_list_endpoint: self.status_list_endpoint(),
         }
     }
+
+    /// Creates a mock server that will fail on OIDC configuration fetch.
+    /// This is useful for testing error handling when trusted issuers fail to load.
+    pub(crate) async fn new_with_failing_oidc() -> Result<Self, KeyGenerationError> {
+        let mut server = Server::new_async().await;
+
+        let keys = generate_keypair_hs256(Some("some_hs256_key"))?;
+
+        // Create a mock that returns 500 Internal Server Error for OIDC config
+        let oidc = Some(
+            server
+                .mock("GET", "/.well-known/openid-configuration")
+                .with_status(500)
+                .with_header("content-type", "application/json")
+                .with_body(r#"{"error": "Internal Server Error"}"#)
+                .expect(1)
+                .create(),
+        );
+
+        // JWKS endpoint may still be created but won't be used since OIDC fails
+        let jwks = Some(
+            server
+                .mock("GET", MOCK_JWKS_URI)
+                .with_status(200)
+                .with_header("content-type", "application/json")
+                .with_body(
+                    json!({"keys": generate_jwks(std::slice::from_ref(&keys)).keys}).to_string(),
+                )
+                .expect(0) // Expect 0 calls since OIDC will fail first
+                .create(),
+        );
+
+        let endpoints = MockEndpoints {
+            oidc,
+            jwks,
+            status_list: None,
+        };
+
+        Ok(Self {
+            endpoints,
+            server,
+            keys,
+        })
+    }
+}
+
+/// Creates a trusted issuer with an invalid URL that will fail to fetch.
+/// This is useful for testing error handling in issuer loading.
+pub(crate) fn create_failing_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
+    let mut issuer = TrustedIssuer::default();
+    issuer.set_oidc_endpoint(
+        Url::parse(&format!(
+            "invalid://{issuer_id}/.well-known/openid-configuration"
+        ))
+        .expect("should be a valid URL format"),
+    );
+    issuer
+}
+
+/// Creates a trusted issuer with a URL that points to a non-existent server.
+/// This will fail with network connection errors.
+pub(crate) fn create_unreachable_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
+    let mut issuer = TrustedIssuer::default();
+    // Use a localhost port that's unlikely to be in use
+    issuer.set_oidc_endpoint(
+        Url::parse(&format!(
+            "http://localhost:65535/{issuer_id}/.well-known/openid-configuration"
+        ))
+        .expect("should be a valid URL format"),
+    );
+    issuer
 }

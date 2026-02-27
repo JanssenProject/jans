@@ -79,9 +79,11 @@
 - Use test_utils crate for shared test helpers
 - Follow existing test patterns in authorize_*.rs files
 - Include both positive and negative test cases
-- For error checking, use `assert!(matches!(...), "explicit comment")` instead of `assert!(result.is_err())`
-- Use `expect_err("explicit comment")` instead of `panic()`
-- Always include explicit comments explaining what error is expected
+- For success checking, use `result.expect("descriptive message")` instead of `assert!(result.is_ok())`
+- For error checking, use `result.expect_err("descriptive message")` instead of `assert!(result.is_err())`
+- For pattern matching errors, use `assert!(matches!(...), "descriptive message")`
+- All assertions must include a descriptive message explaining what is being tested
+- Use `expect_err("explicit comment")` instead of `panic()` when expecting errors
 
 **File Headers:**
 - Each Rust file must contain the Apache 2.0 license header:

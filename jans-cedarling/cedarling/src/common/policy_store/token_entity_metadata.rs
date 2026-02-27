@@ -4,7 +4,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::{HashMap, HashSet};
+#[cfg(test)]
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
@@ -17,7 +19,7 @@ use typed_builder::TypedBuilder;
 /// by a key-value pair where the key is the claim name and the value is
 /// a `ClaimMapping` struct.
 #[derive(Debug, PartialEq, Clone, Deserialize, TypedBuilder)]
-pub struct TokenEntityMetadata {
+pub(crate) struct TokenEntityMetadata {
     /// Indicates if the access token is trusted.
     #[serde(default = "default_trusted")]
     #[builder(default = true)]
@@ -65,9 +67,10 @@ fn default_token_id() -> String {
     DEFAULT_TKN_ID.to_string()
 }
 
+#[cfg(test)]
 impl TokenEntityMetadata {
     /// Default access token Metadata
-    pub fn access_token() -> Self {
+    pub(crate) fn access_token() -> Self {
         Self {
             trusted: true,
             token_id: default_token_id(),
@@ -82,7 +85,7 @@ impl TokenEntityMetadata {
     }
 
     /// Default id token Metadata
-    pub fn id_token() -> Self {
+    pub(crate) fn id_token() -> Self {
         Self {
             trusted: true,
             token_id: default_token_id(),
@@ -102,7 +105,7 @@ impl TokenEntityMetadata {
     }
 
     /// Default userinfo token Metadata
-    pub fn userinfo_token() -> Self {
+    pub(crate) fn userinfo_token() -> Self {
         Self {
             trusted: true,
             token_id: default_token_id(),

@@ -16,7 +16,7 @@ mod token_entity_metadata;
 use crate::common::{
     default_entities::DefaultEntitiesWithWarns,
     default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
-    issuer_utils::normalize_issuer,
+    issuer_utils::IssClaim,
 };
 
 pub(crate) mod archive_handler;
@@ -213,20 +213,22 @@ pub struct PolicyStoreWithID {
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
     /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
-    pub name: String,
+    pub(crate) name: String,
     /// A brief description of the trusted issuer.
-    pub description: String,
+    pub(crate) description: String,
     /// The `OpenID` configuration endpoint for the issuer.
     ///
     /// This endpoint is used to obtain information about the issuer's capabilities.
+    //
+    // attribute is private to force usage `iss_claim` method to get normalized iss claim
     #[serde(
         rename = "openid_configuration_endpoint",
         deserialize_with = "de_oidc_endpoint_url"
     )]
-    pub oidc_endpoint: Url,
+    oidc_endpoint: Url,
     /// Metadata for tokens issued by the trusted issuer.
     #[serde(default)]
-    pub token_metadata: HashMap<String, TokenEntityMetadata>,
+    pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
 }
 
 fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
@@ -271,33 +273,46 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    /// Retrieves the claim that defines the `Role` for a given token type.
-    pub fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
-        self.token_metadata
-            .get(token_name)
-            .and_then(|x| x.role_mapping.as_deref())
+    #[cfg(test)]
+    pub(crate) fn new(
+        name: String,
+        description: String,
+        oidc_endpoint: Url,
+        metadata: HashMap<String, TokenEntityMetadata>,
+    ) -> Self {
+        Self {
+            name,
+            description,
+            oidc_endpoint,
+            token_metadata: metadata,
+        }
     }
 
-    /// Retrieves the claim that defines the `User` for a given token type.
-    pub fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
-        self.token_metadata
-            .get(token_name)
-            .and_then(|x| x.user_id.as_deref())
+    #[cfg(test)]
+    pub(crate) fn set_oidc_endpoint(&mut self, url: Url) {
+        self.oidc_endpoint = url;
     }
 
-    pub fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
+    /// Get the OIDC endpoint URL.
+    /// Should be used when we need to make requests to the OIDC endpoint.
+    ///
+    /// If you need comparison with `iss` claim, use `iss_claim` method instead.
+    pub(crate) fn get_oidc_endpoint(&self) -> &Url {
+        &self.oidc_endpoint
+    }
+
+    pub(crate) fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
         self.token_metadata
             .get(token_name)
             .map(|x| &x.claim_mapping)
     }
 
-    pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
+    pub(crate) fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
         self.token_metadata.get(token_name)
     }
 
-    pub fn normalized_issuer(&self) -> String {
-        let issuer_url = self.oidc_endpoint.origin().ascii_serialization();
-        normalize_issuer(&issuer_url)
+    pub(crate) fn iss_claim(&self) -> IssClaim {
+        IssClaim::new(&self.oidc_endpoint.origin().ascii_serialization())
     }
 }
 
