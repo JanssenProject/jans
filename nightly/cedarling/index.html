@@ -2134,12 +2134,13 @@ store does <strong>not</strong> contain all policies and schema for all applicat
 Each policy store has unique policies and a schema needed only for one specific
 application.</p>
 <h3 id="cedarling-interfaces">Cedarling Interfaces<a class="headerlink" href="#cedarling-interfaces" title="Permanent link">#</a></h3>
-<p>At a high level, developers interact with the Cedarling using five core interfaces:</p>
+<p>At a high level, developers interact with the Cedarling using six core interfaces:</p>
 <ul>
 <li><strong>Initialization</strong> (<code>init</code>) – Loads the policy store and retrieves configuration settings.</li>
 <li><strong>Authorization</strong> (<code>authorize</code>) – Evaluates policies by sending a bundle of JWTs to specify the principal.</li>
 <li><strong>Authorization</strong> (<code>authorize_unsigned</code>) – Evaluates policies with an application asserted principal.</li>
 <li><strong>Multi-Issuer Authorization</strong> (<code>authorize_multi_issuer</code>) – Evaluates policies based on multiple JWT tokens from different issuers without requiring traditional user/workload principals.</li>
+<li><strong>Context Data API</strong> (<code>data</code>) – Pushes external data into the evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace.</li>
 <li><strong>Logging</strong> (<code>log</code>) – Retrieves decision and system logs for auditing. </li>
 </ul>
 <p>Developers call the <code>init</code> interface on startup of their application, causing the
@@ -2155,6 +2156,7 @@ perform two more important jobs: (1) validate JWT tokens; (2) log the resulting 
 application, or when working with non-token based principals. It follows the same
 evaluation logic but skips JWT validation steps.</p>
 <p>The <code>authorize_multi_issuer</code> method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard <code>authorize</code> method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like <code>context.tokens.acme_access_token</code> or <code>context.tokens.google_id_token</code>.</p>
+<p>The <code>data</code> interface enables developers to push external data into the Cedarling's evaluation context. This data is automatically injected under the <code>context.data</code> namespace during policy evaluation, allowing policies to make decisions based on dynamically pushed data. Data can be stored with optional TTL (Time To Live) for automatic expiration. See the Cedarling <a href="reference/cedarling-interfaces/#context-data-api">interfaces</a> documentation for more information.</p>
 <p>The <code>log</code> interface enables developers to retrieve decision and system logs from the Cedarling's
 in-memory cache. See the Cedarling <a href="reference/cedarling-logs/">log</a> documentation for more information.</p>
 <h3 id="cedarling-components">Cedarling Components<a class="headerlink" href="#cedarling-components" title="Permanent link">#</a></h3>
@@ -2296,7 +2298,7 @@ It’s a presence.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 27, 2026 15:52:36 UTC"><span class="timeago" datetime="2026-02-27T15:52:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 27, 2026 15:52:36 UTC">2026-02-27</span>
   </span>
 
     
