@@ -206,3 +206,293 @@ fn test_authorize_unsigned_success() {
         result
     );
 }
+
+fn create_test_cedarling() -> Cedarling {
+    Cedarling::load_from_file(String::from(
+        "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
+    ))
+    .expect("Error in initializing Cedarling")
+}
+
+#[test]
+fn test_data_api_push_and_get() {
+    let cedarling = create_test_cedarling();
+
+    // Push data without TTL
+    cedarling
+        .push_data_ctx(
+            "key1".to_string(),
+            JsonValue(r#""value1""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    let result = cedarling
+        .get_data_ctx("key1".to_string())
+        .expect("get_data_ctx should succeed");
+    assert!(result.is_some(), "result should not be None");
+    let value: String = serde_json::from_str(&result.unwrap().0)
+        .expect("result should be deserializable to string");
+    assert_eq!(value, "value1", "retrieved value should match pushed value");
+
+    // Push data with TTL
+    cedarling
+        .push_data_ctx(
+            "key2".to_string(),
+            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            Some(60),
+        )
+        .expect("push_data_ctx with TTL should succeed");
+
+    let result2 = cedarling
+        .get_data_ctx("key2".to_string())
+        .expect("get_data_ctx should succeed");
+    assert!(result2.is_some(), "result should not be None");
+    let value2: serde_json::Value = serde_json::from_str(&result2.unwrap().0)
+        .expect("result should be deserializable to JSON");
+    assert_eq!(value2, serde_json::json!({"nested": "data"}), "retrieved nested object should match pushed value");
+
+    // Push array
+    cedarling
+        .push_data_ctx(
+            "key3".to_string(),
+            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    let result3 = cedarling
+        .get_data_ctx("key3".to_string())
+        .expect("get_data_ctx should succeed");
+    assert!(result3.is_some(), "result should not be None");
+    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().0)
+        .expect("result should be deserializable to array");
+    assert_eq!(value3, vec![1, 2, 3], "retrieved array should match pushed value");
+}
+
+#[test]
+fn test_data_api_get_data_entry_ctx() {
+    let cedarling = create_test_cedarling();
+
+    cedarling
+        .push_data_ctx(
+            "test_key".to_string(),
+            JsonValue(r#"{"foo": "bar"}"#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    let entry = cedarling
+        .get_data_entry_ctx("test_key".to_string())
+        .expect("get_data_entry_ctx should succeed");
+    assert!(entry.is_some(), "entry should not be None");
+
+    let entry = entry.unwrap();
+    assert_eq!(entry.key, "test_key", "entry key should match");
+    assert!(
+        !entry.created_at.is_empty(),
+        "created_at should not be empty"
+    );
+}
+
+#[test]
+fn test_data_api_remove_data_ctx() {
+    let cedarling = create_test_cedarling();
+
+    cedarling
+        .push_data_ctx(
+            "to_remove".to_string(),
+            JsonValue(r#""data""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    let result = cedarling
+        .get_data_ctx("to_remove".to_string())
+        .expect("get_data_ctx should succeed");
+    assert!(result.is_some(), "data should exist before removal");
+
+    let removed = cedarling
+        .remove_data_ctx("to_remove".to_string())
+        .expect("remove_data_ctx should succeed");
+    assert!(
+        removed,
+        "remove_data_ctx should return true for existing key"
+    );
+
+    let result_after = cedarling
+        .get_data_ctx("to_remove".to_string())
+        .expect("get_data_ctx should succeed");
+    assert!(result_after.is_none(), "data should be None after removal");
+
+    // Try removing non-existent key
+    let removed_nonexistent = cedarling
+        .remove_data_ctx("non_existent".to_string())
+        .expect("remove_data_ctx should succeed");
+    assert!(
+        !removed_nonexistent,
+        "remove_data_ctx should return false for non-existent key"
+    );
+}
+
+#[test]
+fn test_data_api_clear_data_ctx() {
+    let cedarling = create_test_cedarling();
+
+    cedarling
+        .push_data_ctx(
+            "key1".to_string(),
+            JsonValue(r#""value1""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+    cedarling
+        .push_data_ctx(
+            "key2".to_string(),
+            JsonValue(r#""value2""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+    cedarling
+        .push_data_ctx(
+            "key3".to_string(),
+            JsonValue(r#""value3""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    assert!(
+        cedarling
+            .get_data_ctx("key1".to_string())
+            .unwrap()
+            .is_some(),
+        "key1 should exist"
+    );
+    assert!(
+        cedarling
+            .get_data_ctx("key2".to_string())
+            .unwrap()
+            .is_some(),
+        "key2 should exist"
+    );
+    assert!(
+        cedarling
+            .get_data_ctx("key3".to_string())
+            .unwrap()
+            .is_some(),
+        "key3 should exist"
+    );
+
+    cedarling
+        .clear_data_ctx()
+        .expect("clear_data_ctx should succeed");
+
+    assert!(
+        cedarling
+            .get_data_ctx("key1".to_string())
+            .unwrap()
+            .is_none(),
+        "key1 should be None after clear"
+    );
+    assert!(
+        cedarling
+            .get_data_ctx("key2".to_string())
+            .unwrap()
+            .is_none(),
+        "key2 should be None after clear"
+    );
+    assert!(
+        cedarling
+            .get_data_ctx("key3".to_string())
+            .unwrap()
+            .is_none(),
+        "key3 should be None after clear"
+    );
+}
+
+#[test]
+fn test_data_api_list_data_ctx() {
+    let cedarling = create_test_cedarling();
+
+    cedarling
+        .push_data_ctx(
+            "key1".to_string(),
+            JsonValue(r#""value1""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+    cedarling
+        .push_data_ctx(
+            "key2".to_string(),
+            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+    cedarling
+        .push_data_ctx(
+            "key3".to_string(),
+            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    let entries = cedarling
+        .list_data_ctx()
+        .expect("list_data_ctx should succeed");
+    assert_eq!(entries.len(), 3, "should have 3 entries");
+
+    let keys: Vec<String> = entries.iter().map(|e| e.key.clone()).collect();
+    assert!(
+        keys.contains(&"key1".to_string()),
+        "entries should contain key1"
+    );
+    assert!(
+        keys.contains(&"key2".to_string()),
+        "entries should contain key2"
+    );
+    assert!(
+        keys.contains(&"key3".to_string()),
+        "entries should contain key3"
+    );
+}
+
+#[test]
+fn test_data_api_get_stats_ctx() {
+    let cedarling = create_test_cedarling();
+
+    let stats = cedarling
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
+    assert_eq!(stats.entry_count, 0, "initial entry count should be 0");
+
+    cedarling
+        .push_data_ctx(
+            "key1".to_string(),
+            JsonValue(r#""value1""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+    cedarling
+        .push_data_ctx(
+            "key2".to_string(),
+            JsonValue(r#""value2""#.to_string()),
+            None,
+        )
+        .expect("push_data_ctx should succeed");
+
+    let stats_after = cedarling
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
+    assert_eq!(
+        stats_after.entry_count, 2,
+        "entry count should be 2 after pushing data"
+    );
+}
+
+#[test]
+fn test_data_api_invalid_key() {
+    let cedarling = create_test_cedarling();
+
+    let result = cedarling.push_data_ctx("".to_string(), JsonValue(r#""value""#.to_string()), None);
+    result.expect_err("push_data_ctx with empty key should fail");
+}

@@ -1,6 +1,6 @@
 # Cedarling UniFFI binding
 
-This module is designed to build Cedarling UniFFI binding for iOS and android apps. The Kotlin binding can be Java Projects to run cedarling authz.
+This module is designed to build Cedarling UniFFI bindings for iOS and Android apps. The Kotlin bindings can also be used from Java projects to run Cedarling authorization.
 
 ## iOS
 
@@ -239,3 +239,218 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```
 
 For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+**Note:** These Swift examples assume they are used inside a throwing context (e.g., within a function marked `throws`) or you can wrap calls in `do-catch` to handle errors. Methods like `getDataCtx`, `getDataEntryCtx`, `removeDataCtx`, `clearDataCtx`, `listDataCtx`, and `getStatsCtx` are throwing methods that can raise `DataException`.
+
+### Push Data
+
+Store data with an optional TTL (Time To Live):
+
+**Kotlin:**
+
+```kotlin
+// JsonValue is represented as String in Kotlin/JVM bindings.
+val value = """{"role":["admin","editor"],"country":"US"}"""
+
+// Push data without TTL (uses default from config)
+cedarling.pushDataCtx("user:123", value, null)
+
+// Push data with TTL (5 minutes = 300 seconds)
+cedarling.pushDataCtx("config:app", value, 300L)
+```
+
+**Swift:**
+
+```swift
+// Push data without TTL (uses default from config)
+let value = JsonValue(value: "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}")
+try cedarling.pushDataCtx(key: "user:123", value: value, ttlSecs: nil)
+
+// Push data with TTL (5 minutes = 300 seconds)
+try cedarling.pushDataCtx(key: "config:app", value: value, ttlSecs: 300)
+```
+
+### Get Data
+
+Retrieve stored data:
+
+**Kotlin:**
+
+```kotlin
+val result = cedarling.getDataCtx("user:123")
+if (result != null) {
+    // result is already a JSON string
+}
+```
+
+**Swift:**
+
+```swift
+if let result = try cedarling.getDataCtx(key: "user:123") {
+    let jsonStr = result.inner()
+    // Parse and use the JSON string
+}
+```
+
+### Get Data Entry with Metadata
+
+Get a data entry with full metadata including creation time, expiration, access count, and type:
+
+**Kotlin:**
+
+```kotlin
+val entry = cedarling.getDataEntryCtx("user:123")
+if (entry != null) {
+    println("Key: ${entry.key}")
+    println("Created at: ${entry.createdAt}")
+    println("Expires at: ${entry.expiresAt}")
+    println("Access count: ${entry.accessCount}")
+    println("Data type: ${entry.dataType}")
+}
+```
+
+**Swift:**
+
+```swift
+if let entry = try cedarling.getDataEntryCtx(key: "user:123") {
+    print("Key: \(entry.key)")
+    print("Created at: \(entry.createdAt)")
+    print("Expires at: \(entry.expiresAt)")
+    print("Access count: \(entry.accessCount)")
+    print("Data type: \(entry.dataType)")
+}
+```
+
+### Remove Data
+
+Remove a specific entry:
+
+**Kotlin:**
+
+```kotlin
+val removed = cedarling.removeDataCtx("user:123")
+if (removed) {
+    println("Entry was removed")
+} else {
+    println("Entry did not exist")
+}
+```
+
+**Swift:**
+
+```swift
+let removed = try cedarling.removeDataCtx(key: "user:123")
+if removed {
+    print("Entry was removed")
+} else {
+    print("Entry did not exist")
+}
+```
+
+### Clear All Data
+
+Remove all entries from the data store:
+
+**Kotlin:**
+
+```kotlin
+cedarling.clearDataCtx()
+```
+
+**Swift:**
+
+```swift
+try cedarling.clearDataCtx()
+```
+
+### List All Data
+
+List all entries with their metadata:
+
+**Kotlin:**
+
+```kotlin
+val entries = cedarling.listDataCtx()
+entries.forEach { entry ->
+    println("Key: ${entry.key}, Type: ${entry.dataType}, Created: ${entry.createdAt}")
+}
+```
+
+**Swift:**
+
+```swift
+let entries = try cedarling.listDataCtx()
+for entry in entries {
+    print("Key: \(entry.key), Type: \(entry.dataType), Created: \(entry.createdAt)")
+}
+```
+
+### Get Statistics
+
+Get statistics about the data store:
+
+**Kotlin:**
+
+```kotlin
+val stats = cedarling.getStatsCtx()
+println("Entries: ${stats.entryCount}/${stats.maxEntries}")
+println("Total size: ${stats.totalSizeBytes} bytes")
+println("Capacity usage: ${stats.capacityUsagePercent}%")
+```
+
+**Swift:**
+
+```swift
+let stats = try cedarling.getStatsCtx()
+print("Entries: \(stats.entryCount)/\(stats.maxEntries)")
+print("Total size: \(stats.totalSizeBytes) bytes")
+print("Capacity usage: \(stats.capacityUsagePercent)%")
+```
+
+### Error Handling
+
+The Context Data API methods throw `DataException`:
+
+**Kotlin:**
+
+```kotlin
+try {
+    cedarling.pushDataCtx("", """{"data":"value"}""", null) // Empty key
+} catch (e: DataException.DataOperationFailed) {
+    println("Data operation failed: ${e.message}")
+}
+```
+
+**Swift:**
+
+```swift
+do {
+    let value = JsonValue(value: "{\"data\":\"value\"}")
+    try cedarling.pushDataCtx(key: "", value: value, ttlSecs: nil) // Empty key
+} catch {
+    print("Data operation failed: \(error)")
+}
+```
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+**Note:** The `context.data` symbol must be declared in your Cedar schema as a compatible map/record type for the example to validate. The schema should include an entry like a record/map keyed by resource identifiers (so expressions like `context.data["user:123"].role` are allowed). See the [Cedar schema documentation](https://docs.cedar-policy.com/schema/) for schema typing rules.
+
+```cedar
+permit(
+    principal,
+    action == Jans::Action::"read",
+    resource
+) when {
+    context.data has "user:123" &&
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
