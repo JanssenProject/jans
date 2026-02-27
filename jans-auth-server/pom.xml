@@ -49,7 +49,7 @@
 		<arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
 
 
-		<shrinkwrap.version>2.1.0</shrinkwrap.version>
+		<shrinkwrap.version>3.3.5</shrinkwrap.version>
 		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
 		<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
 
