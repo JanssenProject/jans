@@ -10,13 +10,13 @@ permissions:
 jobs:
   enrich_and_upload_sbom:
     permissions:
-      contents: write
-      id-token: write
+      contents: write  # to upload SBOM and compliance reports to release
+      id-token: write  # for Cosign keyless OIDC signing
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -75,16 +75,24 @@ jobs:
         sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
         wc jans-sbom-openchain-report.json
 
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        sparse-checkout: .
+        sparse-checkout-cone-mode: true
+
     - name: Sign SBOM and compliance reports
       run: |
         for file in jans-sbom.json jans-sbom-fsct-report.json jans-sbom-bsi-v2-report.json jans-sbom-NTIA-report.json jans-sbom-openchain-report.json; do
-          cosign sign-blob --yes --bundle "${file}.bundle" "${file}" || echo "Failed to sign ${file}"
+          cosign sign-blob --yes --bundle "${file}.bundle" "${file}"
         done
 
     - name: Upload the enriched SBOM and compliance reports to the release
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
-        VERSION="$(echo ${{ github.event.ref }} | cut -d '/' -f 3)"
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        VERSION="$(echo "$EVENT_REF" | cut -d '/' -f 3)"
         gh release upload "${VERSION}" \
           jans-sbom.json jans-sbom.json.bundle \
           jans-sbom-fsct-report.json jans-sbom-fsct-report.json.bundle \
