@@ -14,71 +14,109 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+        components: clippy
+    - name: Ensure clippy is installed
+      run: rustup component add --toolchain stable clippy
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      with:
+        workspaces: jans-cedarling
     - name: Run Tests
       working-directory: jans-cedarling
-      run: |
-        cargo test --workspace
+      run: cargo test --workspace
     - name: Run Clippy on native target
       working-directory: jans-cedarling
-      run: |
-        rustup component add clippy
-        cargo clippy --workspace --all-targets -- -D warnings
+      run: cargo +stable clippy --workspace --all-targets -- -D warnings
+
   custom_lints:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust Stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
     - name: Install Rust Nightly
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9
       with:
         toolchain: nightly-2025-09-18
         components: llvm-tools-preview, rustc-dev
-    - uses: cargo-bins/cargo-binstall@v1.17.4
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      with:
+        workspaces: jans-cedarling
+    - uses: cargo-bins/cargo-binstall@ec80feb9e330418e014932e5982599255eff6dbb # v1.17.4
     - name: Install dylint
       run: |
+        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
         cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
         cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
+        if ! which dylint-link > /dev/null 2>&1; then
+          echo "dylint-link not found via binstall, falling back to cargo install"
+          cargo install dylint-link --version 5.0.0 --locked
+        fi
+        echo "dylint-link location: $(which dylint-link)"
     - name: Run Tests
       working-directory: jans-cedarling/custom-lints
-      run: cargo test
-    - name: Install Rust Stable (for workspace)
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      run: |
+        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+        cargo +nightly-2025-09-18 test
     - name: Run custom lints on workspace
       working-directory: jans-cedarling
       run: |
-        RUSTFLAGS="-Dwarnings" cargo dylint --all --workspace --path custom-lints
+        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+        # Nightly pin for dylint: check dylint release notes for compatible nightly.
+        # To upgrade: 1) Find the nightly used by the target dylint release
+        # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
+        # 3) Update the pin below and in the toolchain install step above
+        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --workspace --path custom-lints
+
   rust_benchmarks:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      with:
+        workspaces: jans-cedarling
     - name: Run benchmarks
       working-directory: jans-cedarling
-      run: |
-        cargo bench --profile release
+      run: cargo bench
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
-      run: |
-        python3 scripts/check_benchmarks.py
+      run: python3 scripts/check_benchmarks.py
+
   wasm_tests:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
 
@@ -88,33 +126,41 @@ jobs:
       run: sudo apt-get update && sudo apt-get install chromium-chromedriver
 
     - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+        components: clippy
+        targets: wasm32-unknown-unknown
+    - name: Ensure clippy is installed
+      run: rustup component add --toolchain stable clippy
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      with:
+        workspaces: jans-cedarling
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
         curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
         wasm-pack --version
 
-    - name: Clean project
-      working-directory: jans-cedarling
-      run: cargo clean
-
     - name: Run WASM tests using chrome
       working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: |
-        wasm-pack test --headless --chrome
+      run: wasm-pack test --headless --chrome
 
     - name: Run WASM tests using firefox
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: |
+        # Work around Snap Firefox confinement on ubuntu-latest:
+        # Snap Firefox cannot access /tmp profiles, so redirect TMPDIR under $HOME
+        export TMPDIR="${HOME}/tmp"
+        mkdir -p "$TMPDIR"
         wasm-pack test --headless --firefox
 
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
-      run: |
-        rustup component add clippy
-        rustup target add wasm32-unknown-unknown
-        cargo clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
+      run: cargo +stable clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
+
   python_tests:
     runs-on: ubuntu-latest
     strategy:
@@ -122,10 +168,12 @@ jobs:
         python-version: ["3.10", "3.11"]
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
@@ -136,32 +184,39 @@ jobs:
         python3 -m pip install tox
     - name: Test with pytest
       working-directory: jans-cedarling/bindings/cedarling_python
-      run: |
-        tox
+      run: tox
+
   golang_tests:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1ff72ee08e3cb84d84adba594e0a297990fc1ed3 # stable
+      uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+      with:
+        toolchain: stable
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+      with:
+        workspaces: jans-cedarling
     - name: Install Golang dependencies
       uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
       with:
           go-version: '1.24'
-    - name: Run build rust artifacts
+          cache-dependency-path: jans-cedarling/bindings/cedarling_go/go.sum
+    - name: Build Rust artifacts
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |
-        rustup component add clippy
         cargo build -r -p cedarling_go
         cp "../../target/release/libcedarling_go.so" "."
     - name: Install Go dependencies
       working-directory: jans-cedarling/bindings/cedarling_go
-      run: |
-        go mod download && go mod tidy
+      run: go mod download && go mod tidy -v && git --no-pager diff --exit-code go.mod go.sum || (echo 'go.mod or go.sum changed; run go mod tidy and commit' && exit 1)
     - name: Run golang tests
       working-directory: jans-cedarling/bindings/cedarling_go
       run: |

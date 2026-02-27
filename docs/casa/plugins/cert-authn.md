@@ -14,7 +14,7 @@ At a high level, certificate authentication is a method of verifying identity us
 
 The Casa client certificate authentication plugin offers:
 
-- Enrollment of digital certificates - includes account onboarding
+- Enrollment of digital certificates (may include automatic user registration)
 - Authentication by presenting a valid certificate (no username or password required)
 - Use enrolled certificates as a form of second-factor authentication
 
@@ -144,7 +144,7 @@ The `cert-authn` Agama project is a utility project that allows administrators d
 
 - Display a login page where users are shown the option to present a certificate
 
-    - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert. Then access to the application is granted
+    - If the certificate is not mapped to an existing account, a new identity is created with the attributes found in the cert (automatic user registration). Then access to the application is granted
 
     - If the certificate is mapped to an existing account, access to the application is granted to such user
 
@@ -245,7 +245,7 @@ Testing can be extended to the following scenarios:
 - Attempt to enroll an expired certificate
 - Attempt to enroll an invalid certificate if you have one at hand (as in the NIST PKI certs), or a certificate issued with a certificate chain that is different from the chain currently configured for the `cert-authn` Agama project
 
-## Authentication
+### Authentication
 
 Once testing users have certificates enrolled, add other credentials like OTP so second-factor authentication can be turned on for them.
 
@@ -268,7 +268,7 @@ Testing can be extended to the following scenarios where authentication should f
 - Selecting a certificate that was enrolled but has expired
 - Not selecting any certificate: hitting "Cancel" or "Don't send a certificate" option in the browser dialog
 
-## Account onboarding (optional)
+### Account onboarding (optional)
 
 Having followed [these](#update-the-casa-acr) steps, visit the Casa login page.
 
@@ -339,8 +339,8 @@ The input data contains the key/value pairs found in the subject of the certific
 
 |Attribute Name|Value|
 |-|-|
-|`cn`|`Joe`|
-|`o`|`foobar`|
+|`cn`|Joe|
+|`o`|foobar|
 
 Note attribute names are lowercased. Additionally, if there is a Subject Alternative Name (SAN) consisting of an e-mail, the input map will contain such value under attribute name `mail`.
 
