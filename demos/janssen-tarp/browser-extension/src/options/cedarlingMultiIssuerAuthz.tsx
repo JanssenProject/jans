@@ -65,14 +65,18 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                 }
                 await initWasm();
                 instance = await init(config);
-                let result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
-                let logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
+                const result: MultiIssuerAuthorizeResult = await instance.authorize_multi_issuer(reqObj);
                 setAuthzResult(result.json_string());
-                if (logs.length != 0) {
-                    let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
-                    setAuthzLogs(pretty_logs.toString());
-                }
 
+                try {
+                    const logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
+                    if (logs.length !== 0) {
+                        const prettyLogs = logs.map((log) => JSON.stringify(log, null, 2));
+                        setAuthzLogs(prettyLogs.join("\n"));
+                    }
+                } catch (logErr) {
+                    setAuthzLogs(`Failed to fetch logs: ${String(logErr)}`);
+                }
             } catch (err) {
                 setAuthzResult(err.toString());
                 console.log("err:", err);
@@ -162,7 +166,7 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                                         </Box>
                                     }
                                 >
-                                    <InputLabel id="principal-value-label">Issuer-to-Token Mapping <HelpIcon sx={{ color: pink[500], fontSize: 15 }} /></InputLabel>
+                                    <InputLabel id="issuer-token-mapping-label">Issuer-to-Token Mapping <HelpIcon sx={{ color: pink[500], fontSize: 15 }} /></InputLabel>
                                 </Tooltip>
                                 <JsonEditor
                                     data={formFields.tokens}
@@ -215,7 +219,7 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                                     }}
                                     rootName="context" />
 
-                                <InputLabel id="principal-value-label">Log Type</InputLabel>
+                                <InputLabel id="log-type-label">Log Type</InputLabel>
                                 <ToggleButtonGroup
                                     color="primary"
                                     value={logType}
