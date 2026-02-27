@@ -491,16 +491,20 @@ public class Fido2MetricsService {
             ));
         analysis.put("topErrors", topErrors);
 
-        // Rates based on started operations (ATTEMPT entries = total started)
-        long totalStarted = entries.stream()
-            .filter(e -> Fido2MetricsConstants.ATTEMPT.equals(e.getStatus()))
-            .count();
-        long successfulOperations = entries.stream()
-            .filter(e -> Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-            .count();
-        long failedOperations = entries.stream()
-            .filter(e -> Fido2MetricsConstants.FAILURE.equals(e.getStatus()))
-            .count();
+        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed)
+        long totalStarted = 0;
+        long successfulOperations = 0;
+        long failedOperations = 0;
+        for (Fido2MetricsEntry e : entries) {
+            String status = e.getStatus();
+            if (Fido2MetricsConstants.ATTEMPT.equals(status)) {
+                totalStarted++;
+            } else if (Fido2MetricsConstants.SUCCESS.equals(status)) {
+                successfulOperations++;
+            } else if (Fido2MetricsConstants.FAILURE.equals(status)) {
+                failedOperations++;
+            }
+        }
 
         if (totalStarted > 0) {
             // Normal case: rates as proportion of started operations (ATTEMPT count)
