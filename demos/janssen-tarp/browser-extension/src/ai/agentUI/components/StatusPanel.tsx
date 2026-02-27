@@ -43,7 +43,7 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
 
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs:12, md: 6}}>
         <Alert 
           severity={apiKeyValid ? "success" : "warning"}
           icon={PROVIDER_ICONS[provider as keyof typeof PROVIDER_ICONS]}
@@ -58,7 +58,7 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
           </Typography>
         </Alert>
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{xs:12, md:6}}>
         <Alert 
           severity={getConnectionStatusColor()}
           icon={<LinkIcon />}
