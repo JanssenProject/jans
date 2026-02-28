@@ -28,6 +28,8 @@ use config::{Config, File};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
+use crate::context_data_api::DataStoreConfig;
+
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
 pub use entity_builder_config::{
@@ -65,6 +67,35 @@ pub struct BootstrapConfig {
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
     pub max_base64_size: Option<usize>,
+    /// Data store configuration for the pushed data API.
+    pub data_store_config: DataStoreConfig,
+}
+
+impl Default for BootstrapConfig {
+    fn default() -> Self {
+        use crate::log::LogLevel;
+        Self {
+            application_name: String::new(),
+            log_config: LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_items: None,
+                    max_item_size: None,
+                }),
+                log_level: LogLevel::INFO,
+            },
+            policy_store_config: PolicyStoreConfig {
+                source: PolicyStoreSource::Yaml("cedar_version: v4.0.0\npolicy_stores: {}\n".to_string()),
+            },
+            jwt_config: JwtConfig::new_without_validation(),
+            authorization_config: AuthorizationConfig::default(),
+            entity_builder_config: EntityBuilderConfig::default(),
+            lock_config: None,
+            max_default_entities: None,
+            max_base64_size: None,
+            data_store_config: DataStoreConfig::default(),
+        }
+    }
 }
 
 impl BootstrapConfig {
@@ -309,5 +340,10 @@ mod tests {
         // Verify entity builder configuration
         assert!(config.entity_builder_config.build_user);
         assert!(config.entity_builder_config.build_workload);
+
+        // Verify data store configuration
+        assert_eq!(config.data_store_config.max_entries, 10000);
+        assert_eq!(config.data_store_config.default_ttl, None);
+        assert!(config.data_store_config.enable_metrics);
     }
 }

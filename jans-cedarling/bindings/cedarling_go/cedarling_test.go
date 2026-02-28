@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var bootstrapConfig string = `
@@ -731,5 +732,307 @@ func TestValidationGracefulDegradationInvalidToken(t *testing.T) {
 	}
 	if result.RequestID == "" {
 		t.Error("request_id should be present")
+	}
+}
+
+// TestDataAPIPushAndGetCtx tests basic push and get operations
+func TestDataAPIPushAndGetCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data without TTL
+	value := map[string]interface{}{
+		"level":   "premium",
+		"country": "US",
+	}
+	err = instance.PushDataCtx("user_profile", value, nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get data
+	resultProfile, err := instance.GetDataCtx("user_profile")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if resultProfile == nil {
+		t.Fatal("Expected data to be present")
+	}
+
+	// Test TTL expiration
+	ttlValue := map[string]interface{}{
+		"temp": "data",
+	}
+	// Push with 100ms TTL
+	d := 100 * time.Millisecond
+	err = instance.PushDataCtx("temp_key", ttlValue, &d)
+	if err != nil {
+		t.Fatalf("Failed to push data with TTL: %v", err)
+	}
+
+	// Verify data exists immediately
+	resultTemp, errTemp := instance.GetDataCtx("temp_key")
+	if errTemp != nil {
+		t.Fatalf("Failed to get data: %v", errTemp)
+	}
+	if resultTemp == nil {
+		t.Fatal("Expected data to be present immediately after push")
+	}
+
+	// Wait for TTL to expire (200ms)
+	time.Sleep(200 * time.Millisecond)
+
+	// Verify data is expired
+	resultTemp, errTemp = instance.GetDataCtx("temp_key")
+	if errTemp != nil {
+		t.Fatalf("Failed to get data: %v", errTemp)
+	}
+	if resultTemp != nil {
+		t.Fatal("Expected data to be expired after TTL")
+	}
+
+	// Verify value structure from original result
+	resultMap, ok := resultProfile.(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected result to be a map, got %T", resultProfile)
+	}
+	if resultMap["level"] != "premium" {
+		t.Errorf("Expected level to be 'premium', got %v", resultMap["level"])
+	}
+}
+
+// TestDataAPIGetDataEntryCtx tests getting data with metadata
+func TestDataAPIGetDataEntryCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data
+	err = instance.PushDataCtx("test_key", "test_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get entry with metadata
+	entry, err := instance.GetDataEntryCtx("test_key")
+	if err != nil {
+		t.Fatalf("Failed to get data entry: %v", err)
+	}
+	if entry.Key == "" {
+		t.Fatal("Expected entry to be present")
+	}
+
+	if entry.Key != "test_key" {
+		t.Errorf("Expected key to be 'test_key', got %v", entry.Key)
+	}
+	if entry.CreatedAt == "" {
+		t.Error("Expected created_at to be set")
+	}
+}
+
+// TestDataAPIRemoveDataCtx tests removing data
+func TestDataAPIRemoveDataCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data
+	err = instance.PushDataCtx("to_remove", "value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Remove data
+	removed, err := instance.RemoveDataCtx("to_remove")
+	if err != nil {
+		t.Fatalf("Failed to remove data: %v", err)
+	}
+	if !removed {
+		t.Error("Expected remove to return true")
+	}
+
+	// Verify it's gone
+	result, err := instance.GetDataCtx("to_remove")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if result != nil {
+		t.Error("Expected data to be removed")
+	}
+}
+
+// TestDataAPIClearDataCtx tests clearing all data
+func TestDataAPIClearDataCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push multiple entries
+	err = instance.PushDataCtx("key1", "value1", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+	err = instance.PushDataCtx("key2", "value2", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Clear all data
+	err = instance.ClearDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+
+	// Verify all data is gone
+	stats, err := instance.GetStatsCtx()
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+	if stats.EntryCount != 0 {
+		t.Errorf("Expected entry count to be 0, got %v", stats.EntryCount)
+	}
+}
+
+// TestDataAPIListDataCtx tests listing all data entries
+func TestDataAPIListDataCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Clear any existing data
+	err = instance.ClearDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+
+	// Push multiple entries
+	err = instance.PushDataCtx("list_key1", "value1", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+	err = instance.PushDataCtx("list_key2", "value2", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// List all entries
+	entries, err := instance.ListDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to list data: %v", err)
+	}
+
+	if len(entries) != 2 {
+		t.Errorf("Expected 2 entries, got %v", len(entries))
+	}
+}
+
+// TestDataAPIGetStatsCtx tests getting data store statistics
+func TestDataAPIGetStatsCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Clear and add some data
+	err = instance.ClearDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+	err = instance.PushDataCtx("stats_key", "stats_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get stats
+	stats, err := instance.GetStatsCtx()
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+
+	if stats.EntryCount != 1 {
+		t.Errorf("Expected entry count to be 1, got %v", stats.EntryCount)
+	}
+	if stats.MaxEntries == 0 {
+		t.Error("Expected max_entries to be set")
+	}
+}
+
+// TestDataAPIInstanceIsolationCtx tests that data is isolated between instances
+func TestDataAPIInstanceIsolationCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+
+	instance1, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create first Cedarling instance: %v", err)
+	}
+	defer instance1.ShutDown()
+
+	instance2, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create second Cedarling instance: %v", err)
+	}
+	defer instance2.ShutDown()
+
+	// Push data to instance1
+	err = instance1.PushDataCtx("isolated_key", "instance1_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data to instance1: %v", err)
+	}
+
+	// Verify data is NOT in instance2
+	result, err := instance2.GetDataCtx("isolated_key")
+	if err != nil {
+		t.Fatalf("Failed to get data from instance2: %v", err)
+	}
+	if result != nil {
+		t.Error("Data should be isolated between instances")
+	}
+
+	// Verify data IS in instance1
+	result, err = instance1.GetDataCtx("isolated_key")
+	if err != nil {
+		t.Fatalf("Failed to get data from instance1: %v", err)
+	}
+	if result == nil {
+		t.Error("Data should be present in instance1")
 	}
 }

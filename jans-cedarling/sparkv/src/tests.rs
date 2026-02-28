@@ -64,11 +64,13 @@ fn test_get_item() {
 #[test]
 fn test_get_item_return_none_if_expired() {
     let mut sparkv = SparKV::new();
-    _ = sparkv.set_with_ttl("key", "value", Duration::microseconds(40), &[]);
+    // Use milliseconds instead of microseconds for more reliable timing
+    _ = sparkv.set_with_ttl("key", "value", Duration::milliseconds(10), &[]);
     assert_eq!(sparkv.get("key"), Some(&"value"));
 
-    std::thread::sleep(std::time::Duration::from_micros(80));
-    assert_eq!(sparkv.get("key"), None);
+    // Sleep longer than TTL to account for timing precision and ensure expiration
+    std::thread::sleep(std::time::Duration::from_millis(20));
+    assert_eq!(sparkv.get("key"), None, "expired item should return None");
 }
 
 #[test]

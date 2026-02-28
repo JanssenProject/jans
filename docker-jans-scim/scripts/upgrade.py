@@ -1,7 +1,6 @@
 import contextlib
 import json
 import logging.config
-import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
@@ -149,6 +148,7 @@ def _transform_scim_dynamic_config(conf):
     # top-level config that need to be added (if missing)
     for missing_key, value in [
         ("skipDefinedPasswordValidation", False),
+        ("disableExternalLoggerConfiguration", False),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value

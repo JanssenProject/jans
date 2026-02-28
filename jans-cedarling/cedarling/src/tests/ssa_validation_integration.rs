@@ -8,8 +8,8 @@
 use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
-    JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
+    IdTokenTrustMode, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
@@ -73,6 +73,7 @@ async fn test_cedarling_with_valid_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await;
 
@@ -134,6 +135,7 @@ async fn test_cedarling_without_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await;
 
