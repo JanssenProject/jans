@@ -1,7 +1,53 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use crate::log::LogLevel;
 use crate::{BootstrapConfigLoadingError, BootstrapConfigRaw};
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use url::Url;
+
+/// Transport protocol for Lock Server communication
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum LockTransport {
+    /// REST/HTTP transport
+    #[default]
+    Rest,
+    /// gRPC transport (only available when the `grpc` feature is enabled)
+    #[cfg(feature = "grpc")]
+    Grpc,
+}
+
+#[cfg(feature = "grpc")]
+const PARSE_LOCK_TRANSPORT_ERR: &str = "Invalid lock transport. Must be `rest` or `grpc`";
+#[cfg(not(feature = "grpc"))]
+const PARSE_LOCK_TRANSPORT_ERR: &str = "Invalid lock transport. Must be `rest`";
+
+impl std::str::FromStr for LockTransport {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "rest" => Ok(Self::Rest),
+            #[cfg(feature = "grpc")]
+            "grpc" => Ok(Self::Grpc),
+            _ => Err(PARSE_LOCK_TRANSPORT_ERR.to_string()),
+        }
+    }
+}
+
+impl std::fmt::Display for LockTransport {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LockTransport::Rest => write!(f, "rest"),
+            #[cfg(feature = "grpc")]
+            LockTransport::Grpc => write!(f, "grpc"),
+        }
+    }
+}
 
 /// Lock service config
 #[derive(Debug, Clone, PartialEq)]
@@ -29,6 +75,10 @@ pub struct LockServiceConfig {
     pub listen_sse: bool,
     /// Allow interaction with a Lock server with invalid certificates. Used for testing.
     pub accept_invalid_certs: bool,
+    /// Transport protocol to use for Lock Server communication
+    pub transport: LockTransport,
+    /// gRPC endpoint to use for Lock Server communication
+    pub grpc_endpoint: Option<String>,
 }
 
 /// Raw lock service config
@@ -52,6 +102,10 @@ pub struct LockServiceConfigRaw {
     pub listen_sse: bool,
     /// Accept invalid certs
     pub accept_invalid_certs: bool,
+    /// Transport protocol
+    pub transport: LockTransport,
+    /// gRPC endpoint
+    pub grpc_endpoint: Option<String>,
 }
 
 impl Default for LockServiceConfig {
@@ -68,6 +122,8 @@ impl Default for LockServiceConfig {
             telemetry_interval: None,
             listen_sse: false,
             accept_invalid_certs: false,
+            transport: LockTransport::default(),
+            grpc_endpoint: None,
         }
     }
 }
@@ -87,6 +143,8 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
             telemetry_interval: raw.telemetry_interval,
             listen_sse: raw.listen_sse,
             accept_invalid_certs: raw.accept_invalid_certs,
+            transport: raw.transport,
+            grpc_endpoint: raw.grpc_endpoint,
         }
     }
 }
@@ -102,6 +160,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .parse()?;
 
         let ssa_jwt = raw.lock_ssa_jwt.clone();
+        let grpc_endpoint = raw.grpc_endpoint.clone();
 
         let log_interval =
             (raw.audit_log_interval > 0).then(|| Duration::from_secs(raw.audit_log_interval));
@@ -111,6 +170,11 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .then(|| Duration::from_secs(raw.audit_telemetry_interval));
 
         let listen_sse = raw.listen_sse.into();
+
+        #[cfg(feature = "grpc")]
+        if raw.lock_transport == LockTransport::Grpc && raw.grpc_endpoint.is_none() {
+            return Err(BootstrapConfigLoadingError::MissingGrpcEndpoint);
+        }
 
         Ok(LockServiceConfig {
             config_uri,
@@ -122,6 +186,8 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             listen_sse,
             log_level: raw.log_level,
             accept_invalid_certs: raw.accept_invalid_certs.into(),
+            transport: raw.lock_transport,
+            grpc_endpoint,
         })
     }
 }

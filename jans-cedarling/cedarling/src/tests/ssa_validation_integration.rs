@@ -9,7 +9,7 @@ use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    IdTokenTrustMode, JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig,
+    IdTokenTrustMode, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel, LogTypeConfig,
     PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
@@ -36,6 +36,8 @@ async fn test_cedarling_with_valid_ssa() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        grpc_endpoint: None,
     };
 
     let result = Cedarling::new(&BootstrapConfig {
@@ -96,6 +98,8 @@ async fn test_cedarling_without_ssa() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        grpc_endpoint: None,
     };
 
     let result = Cedarling::new(&BootstrapConfig {
@@ -264,6 +268,8 @@ async fn test_ssa_configuration_validation() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        grpc_endpoint: None,
     };
 
     // Verify that the SSA JWT is properly set
@@ -283,6 +289,8 @@ async fn test_ssa_configuration_validation() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        grpc_endpoint: None,
     };
 
     // Verify that the SSA JWT is not set

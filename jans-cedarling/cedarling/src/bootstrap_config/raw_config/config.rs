@@ -12,9 +12,9 @@ use super::default_values::{default_jti, default_token_cache_capacity, default_t
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
-use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
 use crate::log::LogLevel;
+use crate::{LockTransport, UnsignedRoleIdSrc};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -284,6 +284,17 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
     pub accept_invalid_certs: FeatureToggle,
 
+    /// Transport protocol for Lock Server communication ("grpc" or "rest").
+    #[serde(rename = "CEDARLING_LOCK_TRANSPORT", default)]
+    pub lock_transport: LockTransport,
+    /// gRPC endpoint to use for Lock Server communication
+    #[serde(
+        rename = "CEDARLING_LOCK_GRPC_ENDPOINT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub grpc_endpoint: Option<String>,
+
     /// Allows to limit maximum token cache TTL in seconds.
     /// Zero means no token cache TTL limit.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
@@ -496,6 +507,11 @@ mod tests {
                 config.principal_bool_operation,
                 JsonRule::default(),
                 "Default user-workload boolean operator should default"
+            );
+            assert_eq!(
+                config.lock_transport,
+                LockTransport::Rest,
+                "Default transport should be REST"
             );
         });
     }
