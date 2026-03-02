@@ -170,7 +170,7 @@ public class Jackson {
     public static <T> List<T> readList(String str, Class<T> type) {
         return readList(str, ArrayList.class, type);
     }
-
+    
     public static <T> List<T> readList(String str, Class<? extends Collection> type, Class<T> elementType) {
         final ObjectMapper mapper = new ObjectMapper();
         try {
