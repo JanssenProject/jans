@@ -39,7 +39,8 @@ use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
 use crate::{
-    BootstrapConfig, Cedarling, PolicyStoreConfig, PolicyStoreSource, TrustedIssuerLoadingInfo,
+    BootstrapConfig, Cedarling, DataStoreConfig, PolicyStoreConfig, PolicyStoreSource,
+    TrustedIssuerLoadingInfo,
 };
 
 // ============================================================================
@@ -1252,6 +1253,7 @@ fn create_jwt_cedarling_config_with_loader(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     }
 }
 

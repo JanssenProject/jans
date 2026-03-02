@@ -79,12 +79,7 @@ impl EntityBuilder {
                 let iss_id = iss.iss_claim();
 
                 let iss_type_name = Self::trusted_issuer_typename(&iss.name);
-                build_iss_entity(
-                    &iss_type_name.to_string(),
-                    iss_id.as_str(),
-                    iss,
-                    schema.as_ref(),
-                )
+                build_iss_entity(&iss_type_name.clone(), &iss_id, iss, schema.as_ref())
             })
             .partition_result();
 
@@ -132,7 +127,7 @@ impl EntityBuilder {
                 HashSet::new(),
             )?;
             built_entities.insert(&tkn_entity.uid());
-            token_entities.insert(tkn_name.to_string(), tkn_entity);
+            token_entities.insert(tkn_name.clone(), tkn_entity);
         }
 
         let workload = if self.config.build_workload {

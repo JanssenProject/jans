@@ -10,7 +10,7 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 reqwest = { workspace = true }
-tokio = { workspace = true, features = ["rt"] }
+tokio = { workspace = true }
 derive_more = { workspace = true, features = ["display"] }
 
 [dev-dependencies]

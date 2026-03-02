@@ -77,14 +77,14 @@ impl EntityBuilder {
 
 fn extract_roles_from_value(value: &Value) -> Result<Vec<String>, BuildUnsignedEntityError> {
     match value {
-        Value::String(role) => Ok(vec![role.to_string()]),
+        Value::String(role) => Ok(vec![role.clone()]),
         Value::Array(vals) => {
             let mut roles = Vec::new();
             for role in vals {
                 let Value::String(role) = role else {
                     return Err(BuildUnsignedEntityError::InvalidType(role.clone()));
                 };
-                roles.push(role.to_string());
+                roles.push(role.clone());
             }
             Ok(roles)
         },
