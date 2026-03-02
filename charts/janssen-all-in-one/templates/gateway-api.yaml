@@ -61,7 +61,8 @@ spec:
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-  
+  {{- /* DON'T remove `/jans-auth` prefix in filters; they will be stripped in AIO image internally */}}
+
   {{- /* 1. OpenID Configuration */}}
   {{- if index .Values "auth-server" "ingress" "openidConfigEnabled" }}
   - matches:
@@ -265,23 +266,6 @@ spec:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
   {{- end }}
-  
-  {{- /* 13. Jans Lock */}}
-  {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockEnabled") }}
-  - matches:
-    - path:
-        type: Exact
-        value: /jans-lock
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
 
 ---
 {{- /* ======================================================== */}}
@@ -365,17 +349,6 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 6. SAML (/kc) */}}
-  {{- if .Values.saml.ingress.samlEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /kc
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
 ---
 {{- /* ======================================================== */}}
 {{- /* ROUTE 3: SECURE APPS (HTTP REDIRECT)                     */}}
@@ -402,9 +375,9 @@ spec:
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-  
+
   {{- /* Same 6 Rules, but with Redirect Filter instead of BackendRef */}}
-  
+
   {{- /* 1. Auth Server Redirect */}}
   {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
   - matches:
@@ -470,17 +443,73 @@ spec:
         statusCode: 301
   {{- end }}
 
-  {{- /* 6. SAML Redirect */}}
-  {{- if .Values.saml.ingress.samlEnabled }}
+{{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
+---
+{{- /* ======================================================== */}}
+{{- /* ROUTE 4: gRPC APPS                                       */}}
+{{- /* These endpoints use gRPC                                 */}}
+{{- /* ======================================================== */}}
+apiVersion: gateway.networking.k8s.io/v1
+{{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+{{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
+kind: HTTPRoute
+{{- else }}
+kind: GRPCRoute
+{{- end }}
+metadata:
+  name: {{ $fullName }}-grpc-routes
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if .Values.gatewayApi.routeLabels }}
+{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- end }}
+{{- if .Values.gatewayApi.routeAnnotations }}
+  annotations:
+{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayApi.name }}
+    sectionName: https
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  {{- /* 1. Lock Server Audit */}}
+  {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
+  {{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+  {{- /* HTTPRoute matches for istio */}}
   - matches:
     - path:
         type: PathPrefix
-        value: /kc
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
+        value: /io.jans.lock.audit.AuditService
+    backendRefs:
+    - name: {{ $svcName }}-grpc
+      port: 50051
+  {{- else }}
+  - matches:
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessLog
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkLog
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessHealth
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkHealth
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessTelemetry
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkTelemetry
+    backendRefs:
+    - name: {{ $svcName }}-grpc
+      port: 50051
   {{- end }}
+{{- end }}
 
 {{- end }}

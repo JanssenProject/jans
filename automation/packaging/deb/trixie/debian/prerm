@@ -7,9 +7,9 @@ echo "Checking to make sure service is down..."
 case $1 in
     remove)
         if [ -f /etc/systemd/system/jans-auth.service ]; then
-	    systemctl stop jans-auth.service
+            systemctl stop jans-auth.service
         fi
-	if [ -f /etc/systemd/system/jans-config-api.service ]; then
+        if [ -f /etc/systemd/system/jans-config-api.service ]; then
             systemctl stop jans-config-api.service
         fi
         if [ -f /etc/systemd/system/jans-fido2.service ]; then
@@ -19,28 +19,28 @@ case $1 in
             systemctl stop jans-scim.service
         fi
 
-	if [ -d /opt/jans.saved ]; then
+        if [ -d /opt/jans.saved ]; then
             rm -rf /opt/jans.saved
         fi
         if [ -d /opt/jans ]; then
-	    echo "Your changes will be saved into /opt/jans.saved"
-	    mkdir /opt/jans.saved
+            echo "Your changes will be saved into /opt/jans.saved"
+            mkdir /opt/jans.saved
             cp -rp /opt/jans /opt/jans.saved/
-	    if [ -d /opt/dist ]; then
-	        cp -rp /opt/dist /opt/jans.saved/
-	    fi
-	    if [ -e /opt/jetty-* ]; then
+            if [ -d /opt/dist ]; then
+                cp -rp /opt/dist /opt/jans.saved/
+            fi
+            if [ -e /opt/jetty-* ]; then
                 cp -rp /opt/jetty-* /opt/jans.saved/
-	    fi
-	    if [ -e /opt/jython-* ]; then
-	        cp -rp /opt/jython-* /opt/jans.saved/
-	    fi
-	    if [ -e /opt/opendj ]; then
-  	        cp -rp /opt/opendj /opt/jans.saved/
-	    fi
+            fi
+            if [ -e /opt/jython-* ]; then
+                cp -rp /opt/jython-* /opt/jans.saved/
+            fi
+            if [ -e /opt/opendj ]; then
+                cp -rp /opt/opendj /opt/jans.saved/
+            fi
             if [ -e /opt/amazon-corretto-* ]; then
-    	        cp -rp /opt/amazon-corretto-* /opt/jans.saved/ 
-	    fi
+                cp -rp /opt/amazon-corretto-* /opt/jans.saved/ 
+            fi
         fi
         exit 0
         ;;
@@ -60,7 +60,7 @@ case $1 in
         if [ -f /etc/systemd/system/opendj.service ]; then
             systemctl stop opendj.service
         fi
-	exit 0
+        exit 0
         ;;
     failed-upgrade)
         exit 2

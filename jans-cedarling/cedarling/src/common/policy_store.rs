@@ -585,7 +585,7 @@ where
     };
 
     let decoded_body = match policy_with_metadata.encoding {
-        super::Encoding::None => policy_with_metadata.body.to_string(),
+        super::Encoding::None => policy_with_metadata.body.clone(),
         super::Encoding::Base64 => {
             use base64::prelude::*;
             let buf = BASE64_STANDARD

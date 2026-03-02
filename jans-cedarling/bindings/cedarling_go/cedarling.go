@@ -19,6 +19,7 @@ import "C"
 import (
 	"encoding/json"
 	"runtime"
+	"time"
 
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go/internal"
 )
@@ -147,4 +148,143 @@ func (c *Cedarling) GetLogsByRequestIdAndTag(request_id string, tag string) []st
 // Closes the cedarling instance
 func (c *Cedarling) ShutDown() {
 	internal.CallShutDown(c.instance_id)
+}
+
+// PushDataCtx stores a value in the data store with an optional TTL.
+// If ttl is nil or zero, the default TTL from configuration is used.
+// The value can be any JSON-serializable Go value.
+func (c *Cedarling) PushDataCtx(key string, value any, ttl *time.Duration) error {
+	value_json, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	var ttl_nanos int64 = 0
+	if ttl != nil && *ttl > 0 {
+		// Use nanoseconds to preserve full sub-second precision
+		ttl_nanos = ttl.Nanoseconds()
+	}
+
+	result := internal.CallPushDataCtx(c.instance_id, key, string(value_json), ttl_nanos)
+	return result.Error()
+}
+
+// GetDataCtx retrieves a value from the data store by key.
+// Returns nil if the key doesn't exist or the entry has expired.
+func (c *Cedarling) GetDataCtx(key string) (any, error) {
+	result := internal.CallGetDataCtx(c.instance_id, key)
+	err := result.Error()
+	if err != nil {
+		return nil, err
+	}
+
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return nil, nil
+	}
+
+	var value any
+	err = json.Unmarshal([]byte(json_value), &value)
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
+}
+
+// GetDataEntryCtx retrieves a data entry with full metadata by key.
+// Returns a zero value DataEntry if the key doesn't exist or the entry has expired.
+// Check if entry.Key is empty to determine if the entry was found.
+func (c *Cedarling) GetDataEntryCtx(key string) (DataEntry, error) {
+	result := internal.CallGetDataEntryCtx(c.instance_id, key)
+	err := result.Error()
+	if err != nil {
+		return DataEntry{}, err
+	}
+
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return DataEntry{}, nil
+	}
+
+	var entry DataEntry
+	err = json.Unmarshal([]byte(json_value), &entry)
+	if err != nil {
+		return DataEntry{}, err
+	}
+
+	return entry, nil
+}
+
+// RemoveDataCtx removes a value from the data store by key.
+// Returns true if the key existed and was removed, false otherwise.
+func (c *Cedarling) RemoveDataCtx(key string) (bool, error) {
+	result := internal.CallRemoveDataCtx(c.instance_id, key)
+	err := result.Error()
+	if err != nil {
+		return false, err
+	}
+
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return false, nil
+	}
+
+	var removed bool
+	err = json.Unmarshal([]byte(json_value), &removed)
+	if err != nil {
+		return false, err
+	}
+
+	return removed, nil
+}
+
+// ClearDataCtx removes all entries from the data store.
+func (c *Cedarling) ClearDataCtx() error {
+	result := internal.CallClearDataCtx(c.instance_id)
+	return result.Error()
+}
+
+// ListDataCtx returns all entries in the data store with their metadata.
+func (c *Cedarling) ListDataCtx() ([]DataEntry, error) {
+	result := internal.CallListDataCtx(c.instance_id)
+	err := result.Error()
+	if err != nil {
+		return nil, err
+	}
+
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return make([]DataEntry, 0), nil
+	}
+
+	var entries []DataEntry
+	err = json.Unmarshal([]byte(json_value), &entries)
+	if err != nil {
+		return nil, err
+	}
+
+	return entries, nil
+}
+
+// GetStatsCtx returns statistics about the data store.
+func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
+	result := internal.CallGetStatsCtx(c.instance_id)
+	err := result.Error()
+	if err != nil {
+		return DataStoreStats{}, err
+	}
+
+	json_value := result.JsonValue()
+	if json_value == "" || json_value == "null" {
+		return DataStoreStats{}, nil
+	}
+
+	var stats DataStoreStats
+	err = json.Unmarshal([]byte(json_value), &stats)
+	if err != nil {
+		return DataStoreStats{}, err
+	}
+
+	return stats, nil
 }
