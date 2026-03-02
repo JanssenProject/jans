@@ -211,6 +211,17 @@ async fn test_load_from_directory_and_authorize_success() {
         )
         .expect("Failed to create resource"),
     );
+    // Execute authorization
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("Authorization should succeed");
+
+    // Verify the result - read action should be allowed
+    assert!(
+        result.decision,
+        "Read action should be allowed by the allow-read policy"
+    );
 }
 
 /// Test that the `TrustedIssuerLoadingInfo` trait works correctly on `Cedarling`.

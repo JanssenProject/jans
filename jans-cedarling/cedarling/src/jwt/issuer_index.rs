@@ -67,7 +67,7 @@ impl IssuerIndex {
         for issuer_config in index.values() {
             for (token_key, token_metadata) in &issuer_config.policy.token_metadata {
                 if token_metadata.entity_type_name == entity_type_name {
-                    return Some(token_key.to_string());
+                    return Some(token_key.clone());
                 }
             }
         }

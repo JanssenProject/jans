@@ -151,13 +151,12 @@ async fn load_policy_store_from_cjar_file(
     let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
-    let legacy_store = tokio::task::spawn_blocking(move || {
-        PolicyStoreManager::convert_to_legacy(loaded)
-    })
-    .await
-    .map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
-    })??;
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
+            })??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -209,13 +208,12 @@ async fn load_policy_store_from_cjar_url(
     let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
-    let legacy_store = tokio::task::spawn_blocking(move || {
-        PolicyStoreManager::convert_to_legacy(loaded)
-    })
-    .await
-    .map_err(|e| {
-        PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
-    })??;
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
+            })??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -225,7 +223,7 @@ async fn load_policy_store_from_cjar_url(
 }
 
 /// Loads the policy store from a Cedar Archive (.cjar) URL.
-/// WASM version - no spawn_blocking available.
+/// WASM version - no `spawn_blocking` available.
 #[cfg(target_arch = "wasm32")]
 async fn load_policy_store_from_cjar_url(
     url: &str,
@@ -278,13 +276,12 @@ async fn load_policy_store_from_directory(
     let store_metadata = loaded.metadata.clone();
 
     // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
-    let legacy_store = tokio::task::spawn_blocking(move || {
-        PolicyStoreManager::convert_to_legacy(loaded)
-    })
-    .await
-    .map_err(|e| {
-        PolicyStoreLoadError::Directory(format!("Conversion task panicked: {e}"))
-    })??;
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Directory(format!("Conversion task panicked: {e}"))
+            })??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
