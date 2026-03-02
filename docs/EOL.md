@@ -49,7 +49,7 @@ To maintain system integrity and security, we recommend upgrading to the latest 
 ### Migration Resources:
 
 * **Breaking Changes Log:** Review our [Changelog](CHANGELOG.md) for API or configuration changes.
-* **Compatibility Matrix:** Ensure your OS and hardware meet the [System Requirements] for the new version.
+* **Compatibility Matrix:** Ensure your OS and hardware meet the System Requirements for the new version.
 * **Automated Upgrade Scripts:** Available for versions the last three releases to simplify the upgrade process i.e. to upgrade to 2.0.0 from 1.14.0 the upgrade would be from 1.14.0 to 1.15.0 to 1.16.0 to 2.0.0.
 
 > **Warning:** Running software past its EOL date may result in compatibility issues with newer OS updates and increased exposure to security threats.
@@ -60,7 +60,7 @@ To maintain system integrity and security, we recommend upgrading to the latest 
 
 Once a version reaches its EOL date:
 
-1. Online documentation will be moved to the **[Legacy Archive]**.
+1. Online documentation will be moved to the **Legacy Archive**.
 2. Knowledge Base articles will remain searchable but will no longer be updated.
 3. Community forums for that version will be set to **Read-Only**.
 
