@@ -591,6 +591,7 @@ nav:
 # ====================
 - Product & Releases:
   - Changelog: CHANGELOG.md
+  - Version Support Policy: EOL.md
   - Contributing:
     - Contribution Guidelines: CONTRIBUTING.md
     - Code of Conduct: CODE_OF_CONDUCT.md
