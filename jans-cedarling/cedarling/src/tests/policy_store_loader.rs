@@ -1230,7 +1230,7 @@ fn create_jwt_cedarling_config_with_loader(
     BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut(crate::log::StdOutLoggerMode::Immediate),
+            log_type: LogTypeConfig::Off,
             log_level: crate::LogLevel::DEBUG,
         },
         policy_store_config: PolicyStoreConfig {
