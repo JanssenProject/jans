@@ -79,7 +79,12 @@ impl EntityBuilder {
                 let iss_id = iss.iss_claim();
 
                 let iss_type_name = Self::trusted_issuer_typename(&iss.name);
-                build_iss_entity(&iss_type_name.clone(), &iss_id, iss, schema.as_ref())
+                build_iss_entity(
+                    &iss_type_name.clone(),
+                    iss_id.as_str(),
+                    iss,
+                    schema.as_ref(),
+                )
             })
             .partition_result();
 

@@ -224,7 +224,7 @@ impl JwtValidator {
             let Some(decoding_key) = decoding_key else {
                 return Err(ValidateJwtError::MissingValidationKey);
             };
-            jwt::decode::<ValidatedJwt>(jwt, decoding_key, &self.validation)?.claims
+            jwt::decode::<ValidatedJwt>(jwt, decoding_key.as_ref(), &self.validation)?.claims
         } else {
             let validated_jwt = jwt::dangerous::insecure_decode::<ValidatedJwt>(jwt)?.claims;
             self.validate_claims_without_signature(&validated_jwt)?;
