@@ -49,12 +49,14 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.instance.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
@@ -64,6 +66,7 @@ impl Cedarling {
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize_multi_issuer(
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
