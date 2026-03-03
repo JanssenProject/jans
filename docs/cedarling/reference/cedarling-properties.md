@@ -101,6 +101,20 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 - **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
 - **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
 
+**The following bootstrap properties are needed to configure the Context Data API:**
+
+- **`CEDARLING_DATA_STORE_MAX_ENTRIES`** : Maximum number of entries that can be stored in the data store. Default value is `10000`. Set to `0` for unlimited entries.
+
+- **`CEDARLING_DATA_STORE_MAX_ENTRY_SIZE`** : Maximum size per entry in bytes. Default value is `1048576` (1 MB). Set to `0` for unlimited size.
+
+- **`CEDARLING_DATA_STORE_DEFAULT_TTL`** : Default TTL (Time To Live) in seconds for entries that don't specify a TTL. Default value is `None` (entries will not expire). When set, entries without an explicit TTL will use this value.
+
+- **`CEDARLING_DATA_STORE_MAX_TTL`** : Maximum allowed TTL in seconds. Default value is `3600` (1 hour). Entries with TTL exceeding this value will be rejected. Omit this property for unlimited TTL.
+
+- **`CEDARLING_DATA_STORE_ENABLE_METRICS`** : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is `true`.
+
+- **`CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD`** : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is `80.0`. When capacity usage exceeds this threshold, `memory_alert_triggered` will be `true` in statistics.
+
 **The following bootstrap properties are only needed for the Lock Server Integration.**
 
 - **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events.

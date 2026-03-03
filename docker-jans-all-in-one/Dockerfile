@@ -14,7 +14,8 @@ ARG JANS_CONFIG_API_IMAGE=ghcr.io/janssenproject/jans/config-api:${BASE_VERSION}
 ARG JANS_FIDO2_IMAGE=ghcr.io/janssenproject/jans/fido2:${BASE_VERSION}
 ARG JANS_SCIM_IMAGE=ghcr.io/janssenproject/jans/scim:${BASE_VERSION}
 ARG JANS_CASA_IMAGE=ghcr.io/janssenproject/jans/casa:${BASE_VERSION}
-ARG JANS_SHIBBOLETH_IMAGE=ghcr.io/janssenproject/jans/shibboleth:${BASE_VERSION}
+# @NOTE: shibboleth is temporarily disabled
+# ARG JANS_SHIBBOLETH_IMAGE=ghcr.io/janssenproject/jans/shibboleth:${BASE_VERSION}
 # @NOTE: jans-link is temporarily disabled
 # ARG JANS_LINK_IMAGE=ghcr.io/janssenproject/jans/link:${BASE_VERSION}
 
@@ -36,7 +37,8 @@ FROM ${JANS_SCIM_IMAGE} AS jans-scim-src
 
 FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 
-FROM ${JANS_SHIBBOLETH_IMAGE} AS jans-shibboleth-src
+# @NOTE: shibboleth support is temporarily disabled
+# FROM ${JANS_SHIBBOLETH_IMAGE} AS jans-shibboleth-src
 
 # @NOTE: jans-link support is temporarily disabled
 # FROM ${JANS_LINK_IMAGE} AS jans-link-src
@@ -57,7 +59,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
+ENV JANS_SOURCE_VERSION=69e5364246941660916bd41527642340aff4228e
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -77,7 +79,7 @@ WORKDIR /
 
 # default pip timeout
 ARG PIP_TIMEOUT=15
-COPY /app/requirements.txt /app/requirements.txt
+COPY app/requirements.txt /app/requirements.txt
 RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
@@ -157,11 +159,11 @@ RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.s
 # COPY --from=jans-saml-src /opt/keycloak /opt/keycloak
 # RUN ln -sf /app/jans_aio/jans_saml/entrypoint.sh /app/bin/jans-saml-entrypoint.sh
 
-COPY --from=jans-shibboleth-src /app/templates /app/templates/jans-shibboleth
-COPY --from=jans-shibboleth-src /app/scripts /app/jans_aio/jans_shibboleth
-COPY --from=jans-shibboleth-src /opt/shibboleth-idp /opt/shibboleth-idp
-COPY --from=jans-shibboleth-src /opt/jetty /opt/shibboleth-jetty
-RUN ln -sf /app/jans_aio/jans_shibboleth/entrypoint.sh /app/bin/jans-shibboleth-entrypoint.sh
+# COPY --from=jans-shibboleth-src /app/templates /app/templates/jans-shibboleth
+# COPY --from=jans-shibboleth-src /app/scripts /app/jans_aio/jans_shibboleth
+# COPY --from=jans-shibboleth-src /opt/shibboleth-idp /opt/shibboleth-idp
+# COPY --from=jans-shibboleth-src /opt/jetty /opt/shibboleth-jetty
+# RUN ln -sf /app/jans_aio/jans_shibboleth/entrypoint.sh /app/bin/jans-shibboleth-entrypoint.sh
 
 # @NOTE: jans-link support is temporarily disabled
 # COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
@@ -250,6 +252,9 @@ RUN chmod +x /app/bin/entrypoint.sh
 # ${JETTY_BASE}/jans-link/logs \
 # /var/jans/link-snapshots \
 
+# @NOTE: jans-shibboleth support is temporarily disabled
+# /opt/idp
+
 # adjust ownership and permission
 RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -281,15 +286,15 @@ RUN chown -R 1000:1000 ${JETTY_HOME}/temp \
     /var/log/nginx \
     /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java \
-    /opt/idp \
-    /opt/keycloak/logs \
-    /opt/keycloak/conf
+    /usr/share/java
 
 # @NOTE: jans-link is temporarily disabled
 # ${JETTY_BASE}/jans-link/resources \
 # ${JETTY_BASE}/jans-link/logs \
 # /var/jans/link-snapshots \
+
+# @NOTE: jans-shibboleth support is temporarily disabled
+# /opt/idp
 
 RUN chmod -R g=u ${JETTY_HOME}/temp \
     ${JETTY_BASE}/common/libs \
@@ -321,10 +326,7 @@ RUN chmod -R g=u ${JETTY_HOME}/temp \
     /var/log/nginx \
     /var/log/adminui \
     /etc/nginx/jans-aio \
-    /usr/share/java \
-    /opt/idp \
-    /opt/keycloak/logs \
-    /opt/keycloak/conf
+    /usr/share/java
 
 RUN chown 1000:1000 /opt/java/lib/security/cacerts \
     /run/nginx/nginx.pid \

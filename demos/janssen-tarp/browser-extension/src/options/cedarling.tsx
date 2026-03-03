@@ -18,6 +18,7 @@ import Stack from '@mui/material/Stack';
 import AddCedarlingConfig from './addCedarlingConfig';
 import CedarlingUnsignedAuthz from './cedarlingUnsignedAuthz';
 import CedarlingSignedAuthz from './cedarlingSignedAuthz';
+import CedarlingMultiIssuerAuthz from './cedarlingMultiIssuerAuthz';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
@@ -77,7 +78,7 @@ function Row(props: { row: any, notifyOnDataChange }) {
                 </TableCell>
 
                 <TableCell component="th" scope="row">
-                    <Grid item xs={8}>
+                    <Grid size={{ xs:8}}>
                         <Tooltip title="Edit">
                             <IconButton aria-label="Edit">
                                 <Edit
@@ -143,6 +144,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                             >
                                 <ToggleButton value="config">Bootstrap Configuration</ToggleButton>
                                 <ToggleButton value="unsignedAuthz">Cedarling Unsigned Authz Form</ToggleButton>
+                                <ToggleButton value="multiIssuerAuthz">Cedarling Multi-Issuer Authz Form</ToggleButton>
                                 {isLoggedIn &&
                                     <ToggleButton value="signedAuthz">Cedarling Signed Authz Form</ToggleButton>
                                 }
@@ -172,6 +174,8 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                                 <>
                                     {screenType === 'unsignedAuthz' &&
                                         <CedarlingUnsignedAuthz data={data} />}
+                                    {screenType === 'multiIssuerAuthz' &&
+                                        <CedarlingMultiIssuerAuthz data={data} />}
                                     {(screenType === 'signedAuthz' && isLoggedIn)&&
                                         <CedarlingSignedAuthz data={data} />}
                                 </>
