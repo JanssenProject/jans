@@ -74,6 +74,25 @@ public class Fido2MetricsService {
         return getFido2MetricsUrl() + "/analytics/performance/";
     }
     
+    public String getDeviceAnalyticsUrl() {
+        return getFido2MetricsUrl() + "/analytics/devices/";
+    }
+    
+    public String getErrorAnalysisUrl() {
+        return getFido2MetricsUrl() + "/analytics/errors";
+    }
+    
+    public String getTrendAnalysisUrl() {
+        return getFido2MetricsUrl() + "/analytics/trends/";
+    }
+    
+    public String getPeriodOverPeriodComparisonUrl() {
+        return getFido2MetricsUrl() + "/analytics/comparison/";
+    }    
+    
+    public String getMetricsConfigUrl() {
+        return getFido2MetricsUrl() + "/config/";
+    }
 
     public String getBaseDnForFido2MetricsEntry() {
         return METRICS_ENTRY_BASE_DN;
@@ -258,6 +277,146 @@ public class Fido2MetricsService {
         }
 
         return getMetricsData(this.getMetricsAnalyticsPerformanceUrl(), headers, data);
+    }
+    
+    public JsonNode getDeviceAnalytics(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
+        log.error("**** Search DeviceAnalytics with - token:{}, startTime:{}, endTime:{}",
+                token, startTime, endTime);
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        // Query Parameter
+        Map<String, String> data = new HashMap<>();
+        if (startTime != null) {
+            data.put("startTime", startTime.toString());
+        }
+
+        if (endTime != null) {
+            data.put("endTime", endTime.toString());
+        }
+
+        return getMetricsData(this.getDeviceAnalyticsUrl(), headers, data);
+    }
+    
+    public JsonNode getErrorAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
+        log.error("**** Search Error Analysis with - token:{}, startTime:{}, endTime:{}",
+                token, startTime, endTime);
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        // Query Parameter
+        Map<String, String> data = new HashMap<>();
+        if (startTime != null) {
+            data.put("startTime", startTime.toString());
+        }
+
+        if (endTime != null) {
+            data.put("endTime", endTime.toString());
+        }
+
+        return getMetricsData(this.getErrorAnalysisUrl(), headers, data);
+    }
+    
+    public JsonNode getTrendAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
+        log.error("**** Search Trend Analysis with - token:{}, startTime:{}, endTime:{}",
+                token, startTime, endTime);
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        // Query Parameter
+        Map<String, String> data = new HashMap<>();
+        if (startTime != null) {
+            data.put("startTime", startTime.toString());
+        }
+
+        if (endTime != null) {
+            data.put("endTime", endTime.toString());
+        }
+
+        return getMetricsData(this.getTrendAnalysisUrl(), headers, data);
+    }
+    /**
+     * Get period-over-period comparison
+     * 
+     * @param aggregationType Aggregation type for comparison
+     * @param periods Number of periods to compare (default: 2)
+     * @return Period comparison data
+     */    
+    public JsonNode getPeriodOverPeriodComparison(String token, String aggregationType, int periods) throws JsonProcessingException {
+        log.error("**** Search PeriodOverPeriodComparison with - token:{}, aggregationType:{}, periods:{}",
+                token, aggregationType, periods);
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        // Query Parameter
+        Map<String, String> data = new HashMap<>();        
+            data.put("startTime", String.valueOf(periods));       
+
+
+        return getMetricsData(this.getPeriodOverPeriodComparisonUrl()+"/"+aggregationType, headers, data);
+    }
+    
+    /**
+     * Get metrics configuration and status
+     * 
+     * @return Configuration information
+     */
+    public JsonNode getMetricsConfig(String token) throws JsonProcessingException {
+        log.error("**** Get Metrics Config with - token:{}",  token);
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        return getMetricsData(this.getMetricsConfigUrl(), headers, null);
+    }
+    
+    /**
+     * Health check endpoint for metrics service
+     * Verifies that the metrics service is functional and can connect to the database
+     * 
+     * @return Health status
+     */
+    public JsonNode getHealth(String token, String aggregationType, int periods) throws JsonProcessingException {
+        log.error("**** Search PeriodOverPeriodComparison with - token:{}, aggregationType:{}, periods:{}",
+                token, aggregationType, periods);
+
+        // Request headers
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        // Query Parameter
+        Map<String, String> data = new HashMap<>();        
+            data.put("startTime", String.valueOf(periods));       
+
+
+        return getMetricsData(this.getMetricsConfigUrl(), headers, data);
     }
 
 
