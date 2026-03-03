@@ -1,45 +1,30 @@
 package io.jans.configapi.plugin.fido2.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 
-import io.jans.configapi.core.util.DataUtil;
+
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.plugin.fido2.util.Constants;
-import io.jans.configapi.plugin.fido2.util.ClientFactory;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
+
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import static io.jans.as.model.util.Util.escapeLog;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Singleton
 public class Fido2MetricsService {
@@ -49,7 +34,6 @@ public class Fido2MetricsService {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
-    private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
     private static final String FIDO2_METRICS_BASE_URL = "/jans-fido2/restv1/metrics";
     private static final String FIDO2_METRICS_ENTRIES_URL = "/entries";
 
@@ -85,6 +69,11 @@ public class Fido2MetricsService {
     public String getMetricsAnalyticsUrl() {
         return getFido2MetricsUrl() + "/analytics/";
     }
+    
+    public String getMetricsAnalyticsPerformanceUrl() {
+        return getFido2MetricsUrl() + "/analytics/performance/";
+    }
+    
 
     public String getBaseDnForFido2MetricsEntry() {
         return METRICS_ENTRY_BASE_DN;
@@ -93,8 +82,6 @@ public class Fido2MetricsService {
     public PagedResult<Fido2MetricsEntry> searchFido2MetricsEntries(String token, LocalDateTime startTime,
             LocalDateTime endTime) throws JsonProcessingException {
         log.error("**** Search Fido2MetricsEntry with token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
-
-        PagedResult<Fido2MetricsEntry> pagedResultEntry = null;
 
         // Request headers
         Map<String, String> headers = new HashMap<>();
@@ -122,9 +109,7 @@ public class Fido2MetricsService {
         log.error("**** Search Fido2UserMetricsEntry with - token:{}, userId:{}, startTime:{}, endTime:{}", token,
                 userId, startTime, endTime);
 
-        PagedResult<Fido2MetricsEntry> pagedResultEntry = null;
-
-        // Request headers
+         // Request headers
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         if (StringUtils.isNotBlank(token)) {
@@ -133,11 +118,6 @@ public class Fido2MetricsService {
 
         // Query Parameter
         Map<String, String> data = new HashMap<>();
-
-        if (StringUtils.isNotBlank(userId)) {
-            data.put("userId", userId);
-        }
-
         if (startTime != null) {
             data.put("startTime", startTime.toString());
         }
@@ -146,7 +126,7 @@ public class Fido2MetricsService {
             data.put("endTime", endTime.toString());
         }
 
-        return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getFido2UserMetricsEntriesUrl(), headers, data);
+        return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getFido2UserMetricsEntriesUrl()+"/"+userId, headers, data);
 
     }
 
@@ -165,10 +145,6 @@ public class Fido2MetricsService {
         // Query Parameter
         Map<String, String> data = new HashMap<>();
 
-        if (StringUtils.isNotBlank(operationType)) {
-            data.put("operationType", operationType);
-        }
-
         if (startTime != null) {
             data.put("startTime", startTime.toString());
         }
@@ -177,7 +153,7 @@ public class Fido2MetricsService {
             data.put("endTime", endTime.toString());
         }
 
-        return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getFido2UserMetricsEntriesUrl(), headers, data);
+        return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getFido2UserMetricsEntriesUrl()+"/"+operationType, headers, data);
 
     }
     
@@ -195,11 +171,6 @@ public class Fido2MetricsService {
 
         // Query Parameter
         Map<String, String> data = new HashMap<>();
-
-        if (StringUtils.isNotBlank(aggregationType)) {
-            data.put("aggregationType", aggregationType);
-        }
-
         if (startTime != null) {
             data.put("startTime", startTime.toString());
         }
@@ -208,12 +179,12 @@ public class Fido2MetricsService {
             data.put("endTime", endTime.toString());
         }
 
-        return getFido2MetricsPagedResult(Fido2MetricsAggregation.class, this.getMetricsAggregationsUrl(), headers, data);
+        return getFido2MetricsPagedResult(Fido2MetricsAggregation.class, this.getMetricsAggregationsUrl()+"/"+aggregationType, headers, data);
     }
     
-    public PagedResult<Fido2MetricsEntry> searchFido2MetricsAggregationSummary(String token, String aggregationType,
+    public JsonNode searchFido2MetricsAggregationSummary(String token, String aggregationType,
             LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
-        log.error("**** Search Fido2UserAggregation with - token:{}, aggregationType:{}, startTime:{}, endTime:{}",
+        log.error("**** Search Fido2MetricsAggregationSummary with - token:{}, aggregationType:{}, startTime:{}, endTime:{}",
                 token, aggregationType, startTime, endTime);
 
         // Request headers
@@ -225,11 +196,6 @@ public class Fido2MetricsService {
 
         // Query Parameter
         Map<String, String> data = new HashMap<>();
-
-        if (StringUtils.isNotBlank(aggregationType)) {
-            data.put("aggregationType", aggregationType);
-        }
-
         if (startTime != null) {
             data.put("startTime", startTime.toString());
         }
@@ -238,10 +204,11 @@ public class Fido2MetricsService {
             data.put("endTime", endTime.toString());
         }
 
-        return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getMetricsAggregationsUrl()+"/aggregationType/summary", headers, data);
+        
+        return getMetricsData(this.getMetricsAggregationsUrl()+"/"+aggregationType+"/summary", headers, data);
     }
     
-    public Map<String, Object> getUserAdoptionMetrics(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
+    public JsonNode getUserAdoptionMetrics(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
         log.error("**** Search UserAdoptionMetrics with - token:{}, startTime:{}, endTime:{}",
                 token, startTime, endTime);
 
@@ -263,12 +230,12 @@ public class Fido2MetricsService {
             data.put("endTime", endTime.toString());
         }
 
-        //TO_DO
-        //return getFido2MetricsPagedResult(this.getMetricsAnalyticsUrl()+"/adoption", headers, data);
-        return null;
+      
+        return getMetricsData(this.getMetricsAnalyticsUrl()+"/adoption", headers, data);
+       
     }
     
-    public PagedResult<Fido2MetricsEntry> getPerformanceMetrics(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
+    public JsonNode getPerformanceMetrics(String token, LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
         log.error("**** Search UserAdoptionMetrics with - token:{}, startTime:{}, endTime:{}",
                 token, startTime, endTime);
 
@@ -290,7 +257,7 @@ public class Fido2MetricsService {
             data.put("endTime", endTime.toString());
         }
 
-        return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getMetricsAnalyticsUrl()+"/adoption", headers, data);
+        return getMetricsData(this.getMetricsAnalyticsPerformanceUrl(), headers, data);
     }
 
 

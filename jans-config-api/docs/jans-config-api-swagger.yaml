@@ -15689,21 +15689,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
+        selected:
+          type: boolean
         whitePagesCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        selected:
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -16620,8 +16620,6 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16631,6 +16629,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18346,10 +18346,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -18520,8 +18520,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         logoutStatusJwt:
           type: boolean
         tokenTypeEnum:
@@ -18534,6 +18532,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
