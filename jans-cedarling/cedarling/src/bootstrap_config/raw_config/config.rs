@@ -287,13 +287,6 @@ pub struct BootstrapConfigRaw {
     /// Transport protocol for Lock Server communication ("grpc" or "rest").
     #[serde(rename = "CEDARLING_LOCK_TRANSPORT", default)]
     pub lock_transport: LockTransport,
-    /// gRPC endpoint to use for Lock Server communication
-    #[serde(
-        rename = "CEDARLING_LOCK_GRPC_ENDPOINT",
-        default,
-        deserialize_with = "parse_option_string"
-    )]
-    pub grpc_endpoint: Option<String>,
 
     /// Allows to limit maximum token cache TTL in seconds.
     /// Zero means no token cache TTL limit.

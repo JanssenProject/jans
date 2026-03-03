@@ -127,4 +127,3 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 - **`CEDARLING_LOCK_LISTEN_SSE`** : `enabled` | `disabled`: controls whether Cedarling should listen for updates from the Lock Server.
 - **`CEDARLING_LOCK_ACCEPT_INVALID_CERTS`** : `enabled` | `disabled`: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds.
 - **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires the `grpc` Cargo feature. Default value is `rest`.
-- **`CEDARLING_LOCK_GRPC_ENDPOINT`** : Required if `CEDARLING_LOCK_TRANSPORT` == `grpc`. The gRPC connection endpoint for the Lock server.

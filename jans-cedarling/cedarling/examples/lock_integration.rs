@@ -37,7 +37,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         listen_sse: false,
         accept_invalid_certs: true,
         transport: LockTransport::Rest,
-        grpc_endpoint: None,
     };
 
     let cedarling = Cedarling::new(&BootstrapConfig {

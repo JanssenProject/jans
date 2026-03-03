@@ -77,8 +77,6 @@ pub struct LockServiceConfig {
     pub accept_invalid_certs: bool,
     /// Transport protocol to use for Lock Server communication
     pub transport: LockTransport,
-    /// gRPC endpoint to use for Lock Server communication
-    pub grpc_endpoint: Option<String>,
 }
 
 /// Raw lock service config
@@ -104,8 +102,6 @@ pub struct LockServiceConfigRaw {
     pub accept_invalid_certs: bool,
     /// Transport protocol
     pub transport: LockTransport,
-    /// gRPC endpoint
-    pub grpc_endpoint: Option<String>,
 }
 
 impl Default for LockServiceConfig {
@@ -123,7 +119,6 @@ impl Default for LockServiceConfig {
             listen_sse: false,
             accept_invalid_certs: false,
             transport: LockTransport::default(),
-            grpc_endpoint: None,
         }
     }
 }
@@ -144,7 +139,6 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
             listen_sse: raw.listen_sse,
             accept_invalid_certs: raw.accept_invalid_certs,
             transport: raw.transport,
-            grpc_endpoint: raw.grpc_endpoint,
         }
     }
 }
@@ -160,7 +154,6 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .parse()?;
 
         let ssa_jwt = raw.lock_ssa_jwt.clone();
-        let grpc_endpoint = raw.grpc_endpoint.clone();
 
         let log_interval =
             (raw.audit_log_interval > 0).then(|| Duration::from_secs(raw.audit_log_interval));
@@ -170,11 +163,6 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             .then(|| Duration::from_secs(raw.audit_telemetry_interval));
 
         let listen_sse = raw.listen_sse.into();
-
-        #[cfg(feature = "grpc")]
-        if raw.lock_transport == LockTransport::Grpc && raw.grpc_endpoint.is_none() {
-            return Err(BootstrapConfigLoadingError::MissingGrpcEndpoint);
-        }
 
         Ok(LockServiceConfig {
             config_uri,
@@ -187,7 +175,6 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             log_level: raw.log_level,
             accept_invalid_certs: raw.accept_invalid_certs.into(),
             transport: raw.lock_transport,
-            grpc_endpoint,
         })
     }
 }

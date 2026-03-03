@@ -291,13 +291,8 @@ fn create_log_worker(
         LockTransport::Grpc => {
             use transport::grpc::GrpcTransport;
 
-            let grpc_endpoint = bootstrap_conf
-                .grpc_endpoint
-                .as_ref()
-                .ok_or(InitLockServiceError::MissingGrpcEndpoint)?;
-
             let transport = Arc::new(GrpcTransport::new(
-                grpc_endpoint,
+                log_endpoint.0.origin().ascii_serialization(),
                 access_token,
                 logger.as_ref().and_then(std::sync::Weak::upgrade),
             )?);
@@ -365,8 +360,6 @@ pub enum InitLockServiceError {
     InitHttpClient(#[from] reqwest::Error),
     #[error("transport error: {0}")]
     TransportError(#[from] transport::TransportError),
-    #[error("gRPC endpoint is not configured for the lock server")]
-    MissingGrpcEndpoint,
     #[error("failed to parse access token: {0}")]
     InvalidAccessToken(String),
 }
@@ -427,7 +420,6 @@ mod test {
             log_level: LogLevel::TRACE,
             accept_invalid_certs: true, // Allow invalid certs for testing
             transport: LockTransport::Rest,
-            grpc_endpoint: None,
         };
 
         // Test startup
@@ -480,7 +472,6 @@ mod test {
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
             transport: LockTransport::Rest,
-            grpc_endpoint: None,
         };
 
         // Test startup without SSA
@@ -529,7 +520,6 @@ mod test {
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
             transport: LockTransport::Rest,
-            grpc_endpoint: None,
         };
 
         // Test startup with invalid SSA should fail

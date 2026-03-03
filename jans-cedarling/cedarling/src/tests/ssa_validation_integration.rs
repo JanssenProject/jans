@@ -37,7 +37,6 @@ async fn test_cedarling_with_valid_ssa() {
         listen_sse: false,
         accept_invalid_certs: true,
         transport: LockTransport::Rest,
-        grpc_endpoint: None,
     };
 
     let result = Cedarling::new(&BootstrapConfig {
@@ -99,7 +98,6 @@ async fn test_cedarling_without_ssa() {
         listen_sse: false,
         accept_invalid_certs: true,
         transport: LockTransport::Rest,
-        grpc_endpoint: None,
     };
 
     let result = Cedarling::new(&BootstrapConfig {
@@ -269,7 +267,6 @@ async fn test_ssa_configuration_validation() {
         listen_sse: false,
         accept_invalid_certs: true,
         transport: LockTransport::Rest,
-        grpc_endpoint: None,
     };
 
     // Verify that the SSA JWT is properly set
@@ -290,7 +287,6 @@ async fn test_ssa_configuration_validation() {
         listen_sse: false,
         accept_invalid_certs: true,
         transport: LockTransport::Rest,
-        grpc_endpoint: None,
     };
 
     // Verify that the SSA JWT is not set
