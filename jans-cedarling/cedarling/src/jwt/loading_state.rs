@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// Tracks loading progress of trusted issuers
 #[derive(Debug)]
@@ -22,9 +21,6 @@ impl TrustedIssuerLoadingState {
             failed_issuers: std::sync::RwLock::new(HashSet::new()),
         }
     }
-
-    /// Record that an issuer has been successfully loaded
-    pub(super) fn add_trusted_issuer_loaded(&self) {}
 
     /// Record that an issuer has failed to load
     pub(super) fn add_trusted_issuer_failed(&self, issuer_id: String) {

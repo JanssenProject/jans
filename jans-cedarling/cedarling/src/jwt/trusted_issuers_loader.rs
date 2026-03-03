@@ -145,8 +145,6 @@ async fn load_trusted_issuers(
                 loader_clone
                     .loading_state
                     .add_trusted_issuer_failed(issuer_id.clone());
-            } else {
-                loader_clone.loading_state.add_trusted_issuer_loaded();
             }
         });
         handles.push(handle);
