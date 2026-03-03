@@ -5,12 +5,13 @@
 
 use crate::authorization_config::IdTokenTrustMode;
 use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
-pub use crate::{
-    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+pub(crate) use crate::{
+    BootstrapConfig, Cedarling, DataStoreConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource,
 };
 
 /// fixture for [`BootstrapConfig`]
-pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
+pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
     BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
@@ -36,11 +37,12 @@ pub fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     }
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+pub(crate) async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
     Cedarling::new(&get_config(policy_source))
         .await
         .expect("bootstrap config should initialize correctly")
@@ -48,7 +50,10 @@ pub async fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
 /// with a callback function to modify the bootstrap configuration.
-pub async fn get_cedarling_with_callback<F>(policy_source: PolicyStoreSource, cb: F) -> Cedarling
+pub(crate) async fn get_cedarling_with_callback<F>(
+    policy_source: PolicyStoreSource,
+    cb: F,
+) -> Cedarling
 where
     F: FnOnce(&mut BootstrapConfig),
 {
@@ -61,7 +66,7 @@ where
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-pub async fn get_cedarling_with_authorization_conf(
+pub(crate) async fn get_cedarling_with_authorization_conf(
     policy_source: PolicyStoreSource,
     auth_conf: AuthorizationConfig,
     entity_builder_conf: EntityBuilderConfig,
@@ -85,17 +90,18 @@ pub async fn get_cedarling_with_authorization_conf(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await
     .expect("bootstrap config should initialize correctly")
 }
 
 /// util function for convenient conversion Reason ID to string
-pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
-    resp.as_ref().map(|v| {
+pub(crate) fn get_policy_id(resp: Option<&cedar_policy::Response>) -> Option<Vec<String>> {
+    resp.map(|v| {
         v.diagnostics()
             .reason()
-            .map(|policy_id| policy_id.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<Vec<_>>()
     })
 }
@@ -120,8 +126,8 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
 #[macro_export]
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
-        let policy_ids_resp =
-            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+        let policy_ids_resp = $crate::tests::utils::cedarling_util::get_policy_id($resp.as_ref())
+            .map(|mut v| {
                 v.sort();
                 v
             });
@@ -137,11 +143,10 @@ macro_rules! cmp_policy {
 }
 
 /// util function for convenient conversion Decision
-pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| {
-        println!("diagnostics: {:?}\n", v.diagnostics());
-        v.decision()
-    })
+pub(crate) fn get_decision(
+    resp: Option<&cedar_policy::Response>,
+) -> Option<cedar_policy::Decision> {
+    resp.map(cedar_policy::Response::decision)
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
@@ -164,7 +169,7 @@ pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_polic
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            $crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision($resp.as_ref()),
             Some($decision),
             $msg
         )

@@ -1,11 +1,31 @@
 # Janssen Tarp
 
-## Relying Party tool in form of a Browser Extension.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Supporting Browsers](#supporting-browser)
+3. [Prerequisite](#prerequisite)
+4. [Build Instructions](#build)
+5. [Releases](#releases)
+6. [Installation in Browser](#installation-in-browser)
+   - [Chrome](#chrome)
+   - [Firefox](#firefox)
+7. [Note on Self-Signed Certificates](#note)
+8. [Testing Using Janssen Tarp](#testing-using-janssen-tarp)
+9. [Cedarling Authorization](#cedarling-authorization)
+10. [Cedarling Unsigned Authorization](#cedarling-unsigned-authorization)
+11. [AI Agents in Admin UI](./docs/ai-agents.md#ai-agents-in-admin-ui)
+12. [Testing with Keycloak](#testing-with-keycloak-installed-on-localhost)
+
+## Overview
+
+Janssen Tarp is a Relying Party tool in form of a Browser Extension
 
 [Demo Video](https://www.loom.com/share/b112b9c7214a4920812a2ebe9c36dbf5?sid=7a15d2e5-881e-4002-9b8c-902dd1d80cec)
 
 - This extension is for convenient testing of authentication flows on browser.
 - [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Janssen Tarp to make authorization decision post-authentication.
+- AI Agents can be configured on Janssen Tarp to register OIDC client and invoke authentication flow with natural language input.
 
 ## Supporting Browser
 
@@ -18,10 +38,10 @@
 
 ## Build
 
-1. Change directory to the project directory (`/janssen-tarp`).
+1. Change directory to the project directory (`/janssen-tarp/browser-extension`).
 2. Run `npm install`.
-3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/dist/chrome` and `/janssen-tarp/dist/firefox` directories respectively.
-4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/release`.
+3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/browser-extension/dist/chrome` and `/janssen-tarp/browser-extension/dist/firefox` directories respectively.
+4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/browser-extension/release`.
 
 ## Releases
 
@@ -71,7 +91,7 @@ When you are testing Janssen IdP with self-signed cert then follow below steps b
 * After successful auth, it will show you below screen
 
 ![image](./docs/images/successful-tarp-auth-screen.png)
-
+<br>
 ## Cedarling authorization
 
 * Add Cedarling bootstrap configuration on Cedarling tab (before authentication).

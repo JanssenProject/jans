@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.jans</groupId>
+    <artifactId>jans-shibboleth-idp-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.0-nightly</version>
+    <name>Janssen Shibboleth IDP</name>
+    <description>Janssen Shibboleth Identity Provider integration for SAML SSO</description>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.min-version>3.0.3</maven.min-version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        
+        <jans.bom.version>${project.version}</jans.bom.version>
+        <jans-core.version>${project.version}</jans-core.version>
+        <jans-auth.version>${project.version}</jans-auth.version>
+        
+        <shibboleth.version>5.1.6</shibboleth.version>
+        <opensaml.version>5.1.6</opensaml.version>
+        
+        <spring.version>6.2.10</spring.version>
+        <spring-webflow.version>3.0.0</spring-webflow.version>
+        
+        <jetty.version>12.0.25</jetty.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <logback.version>1.5.18</logback.version>
+        
+        <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
+        
+        <sonar.projectKey>JanssenProject_jans-shibboleth-idp</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <sonar.organization>janssenproject</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    </properties>
+
+    <scm>
+        <url>https://github.com/JanssenProject/jans</url>
+        <connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+        <developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+    </scm>
+
+    <prerequisites>
+        <maven>${maven.min-version}</maven>
+    </prerequisites>
+
+    <modules>
+        <module>idp-conf</module>
+        <module>shib-jans-authn</module>
+        <module>webapp</module>
+        <module>keygenerator</module>
+    </modules>
+
+    <repositories>
+        <repository>
+            <id>shibboleth</id>
+            <name>Shibboleth Maven Repository</name>
+            <url>https://build.shibboleth.net/maven/releases/</url>
+        </repository>
+        <repository>
+            <id>jans</id>
+            <name>Janssen Maven Repository</name>
+            <url>https://jenkins.jans.io/maven/</url>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-bom</artifactId>
+                <version>${jans.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>net.shibboleth.idp</groupId>
+                <artifactId>idp-bom</artifactId>
+                <version>${shibboleth.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-bom</artifactId>
+                <version>${opensaml.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.4.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

@@ -16,6 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
+import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
@@ -31,7 +32,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -39,6 +40,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+
+import java.util.List;
 
 /**
  * Provides interface for audit REST web services
@@ -59,9 +62,11 @@ public interface AuditRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/health")
+	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
-	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS }, grpcMethodName = "ProcessHealth")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health")
+	Response processHealthRequest(HealthEntry healthEntry, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save health data", description = "Bulk save health data", tags = {
@@ -75,9 +80,11 @@ public interface AuditRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/health/bulk")
+	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS })
-	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_HEALTH_WRITE_ACCESS }, grpcMethodName = "ProcessBulkHealth")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_health_write", path="/audit/health/bulk")
+	Response processBulkHealthRequest(List<HealthEntry> healthEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Save log data", description = "Save log data", tags = {
@@ -91,9 +98,11 @@ public interface AuditRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/log")
+	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
-	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS }, grpcMethodName = "ProcessLog")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log")
+	Response processLogRequest(LogEntry logEntry, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save log data", description = "Bulk save log data", tags = {
@@ -107,9 +116,11 @@ public interface AuditRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/log/bulk")
+	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS })
-	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_LOG_WRITE_ACCESS }, grpcMethodName = "ProcessBulkLog")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_log_write", path="/audit/log/bulk")
+	Response processBulkLogRequest(List<LogEntry> logEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Save telemetry data", description = "Save telemetry data", tags = {
@@ -123,9 +134,11 @@ public interface AuditRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/telemetry")
+	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
-	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS }, grpcMethodName = "ProcessTelemetry")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry")
+	Response processTelemetryRequest(TelemetryEntry telemetryEntry, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 	@Operation(summary = "Bulk save telemetry data", description = "Bulk save telemetry data", tags = {
@@ -139,9 +152,11 @@ public interface AuditRestWebService {
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/telemetry/bulk")
+	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS })
-	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TELEMETRY_WRITE_ACCESS }, grpcMethodName = "ProcessBulkTelemetry")
+	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id="lock_audit_telemetry_write", path="/audit/telemetry/bulk")
+	Response processBulkTelemetryRequest(List<TelemetryEntry> telemetryEntries, @Context HttpServletRequest request,
 			@Context SecurityContext sec);
 
 }

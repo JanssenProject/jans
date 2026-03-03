@@ -3,8 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
+use super::errors::IdTokenTrustModeError;
 use crate::jwt::{Token, TokenClaimTypeError};
 
 /// Enforces the trust mode setting set by the `CEDARLING_ID_TOKEN_TRUST_MODE`
@@ -23,8 +24,8 @@ use crate::jwt::{Token, TokenClaimTypeError};
 /// - if a Userinfo token is present:
 ///     - `userinfo_token.aud` == `access_token.client_id`
 ///     - `userinfo_token.sub` == `id_token.sub`
-pub fn validate_id_tkn_trust_mode(
-    tokens: &HashMap<String, Token>,
+pub(super) fn validate_id_tkn_trust_mode(
+    tokens: &HashMap<String, Arc<Token>>,
 ) -> Result<(), IdTokenTrustModeError> {
     let access_tkn = tokens
         .get("access_token")
@@ -34,16 +35,15 @@ pub fn validate_id_tkn_trust_mode(
         .ok_or(IdTokenTrustModeError::MissingIdToken)?;
 
     let access_tkn_client_id = get_tkn_claim_as_str(access_tkn, "client_id")?;
-    
+
     if !aud_claim_contains_value(id_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::AccessTokenClientIdMismatch);
     }
 
-    let userinfo_tkn = match tokens.get("userinfo_token") {
-        Some(token) => token,
-        None => return Ok(()),
+    let Some(userinfo_tkn) = tokens.get("userinfo_token") else {
+        return Ok(());
     };
-    
+
     if !aud_claim_contains_value(userinfo_tkn, &access_tkn_client_id)? {
         return Err(IdTokenTrustModeError::ClientIdUserinfoAudMismatch);
     }
@@ -68,14 +68,15 @@ fn aud_claim_contains_value(
                 },
                 serde_json::Value::Array(arr) => {
                     // Array aud claim - check if it contains the expected value
-                    Ok(arr.iter()
+                    Ok(arr
+                        .iter()
                         .filter_map(|item| item.as_str())
                         .any(|s| s == expected_value))
                 },
                 _ => Err(IdTokenTrustModeError::TokenClaimTypeError(
                     token.name.clone(),
-                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value())
-                ))
+                    TokenClaimTypeError::type_mismatch("aud", "string or array", claim.value()),
+                )),
             }
         })
 }
@@ -93,27 +94,9 @@ fn get_tkn_claim_as_str(
         .and_then(|claim| {
             claim
                 .as_str()
-                .map(|s| s.into())
+                .map(std::convert::Into::into)
                 .map_err(|e| IdTokenTrustModeError::TokenClaimTypeError(token.name.clone(), e))
         })
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum IdTokenTrustModeError {
-    #[error("the access token's `client_id` does not match with the id token's `aud`")]
-    AccessTokenClientIdMismatch,
-    #[error("an access token is required when using strict mode")]
-    MissingAccessToken,
-    #[error("an id token is required when using strict mode")]
-    MissingIdToken,
-    #[error("the id token's `sub` does not match with the userinfo token's `sub`")]
-    SubMismatchIdTokenUserinfo,
-    #[error("the access token's `client_id` does not match with the userinfo token's `aud`")]
-    ClientIdUserinfoAudMismatch,
-    #[error("missing a required claim `{0}` from `{1}` token")]
-    MissingRequiredClaim(String, String),
-    #[error("invalid claim type in {0} token: {1}")]
-    TokenClaimTypeError(String, TokenClaimTypeError),
 }
 
 #[cfg(test)]
@@ -121,7 +104,7 @@ mod test {
     use super::{IdTokenTrustModeError, validate_id_tkn_trust_mode};
     use crate::jwt::Token;
     use serde_json::json;
-    use std::collections::HashMap;
+    use std::{collections::HashMap, sync::Arc};
 
     #[test]
     fn success_without_userinfo_tkn() {
@@ -137,8 +120,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -150,13 +133,12 @@ mod test {
             serde_json::from_value(json!({"aud": "some-id-123"})).expect("valid token claims"),
             None,
         );
-        let tokens = HashMap::from([("id_token".to_string(), id_token)]);
+        let tokens = HashMap::from([("id_token".to_string(), Arc::new(id_token))]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingAccessToken),
-            "expected error due to missing access token, got: {:?}",
-            err
-        )
+            "expected error due to missing access token, got: {err:?}"
+        );
     }
 
     #[test]
@@ -172,8 +154,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -183,9 +165,8 @@ mod test {
                     if claim_name == "client_id" &&
                         tkn_name == "access_token"
             ),
-            "expected error due to access token missing a required claim, got: {:?}",
-            err
-        )
+            "expected error due to access token missing a required claim, got: {err:?}"
+        );
     }
 
     #[test]
@@ -196,13 +177,12 @@ mod test {
                 .expect("valid token claims"),
             None,
         );
-        let tokens = HashMap::from([("access_token".to_string(), access_token)]);
+        let tokens = HashMap::from([("access_token".to_string(), Arc::new(access_token))]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::MissingIdToken),
-            "expected error due to missing id token, got: {:?}",
-            err
-        )
+            "expected error due to missing id token, got: {err:?}"
+        );
     }
 
     #[test]
@@ -220,8 +200,8 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -231,9 +211,8 @@ mod test {
                     if claim_name == "aud" &&
                         tkn_name == "id_token"
             ),
-            "expected error due to id token missing a required claim, got: {:?}",
-            err
-        )
+            "expected error due to id token missing a required claim, got: {err:?}"
+        );
     }
 
     #[test]
@@ -250,15 +229,14 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::AccessTokenClientIdMismatch),
-            "expected error due to the access_token's `client_id` not matching with the id_token's `aud`, got: {:?}",
-            err
-        )
+            "expected error due to the access_token's `client_id` not matching with the id_token's `aud`, got: {err:?}"
+        );
     }
 
     #[test]
@@ -280,9 +258,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+            ("userinfo_token".to_string(), Arc::new(userinfo_token)),
         ]);
         validate_id_tkn_trust_mode(&tokens).expect("should not error");
     }
@@ -306,9 +284,9 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+            ("userinfo_token".to_string(), Arc::new(userinfo_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
@@ -318,11 +296,9 @@ mod test {
                     if claim_name == "aud" &&
                         tkn_name == "userinfo_token"
             ),
-            "expected error due to id token missing a required claim, got: {:?}",
-            err
-        )
+            "expected error due to id token missing a required claim, got: {err:?}"
+        );
     }
-
 
     #[test]
     fn errors_when_userinfo_tkn_aud_does_not_contain_client_id() {
@@ -343,15 +319,14 @@ mod test {
             None,
         );
         let tokens = HashMap::from([
-            ("access_token".to_string(), access_token),
-            ("id_token".to_string(), id_token),
-            ("userinfo_token".to_string(), userinfo_token),
+            ("access_token".to_string(), Arc::new(access_token)),
+            ("id_token".to_string(), Arc::new(id_token)),
+            ("userinfo_token".to_string(), Arc::new(userinfo_token)),
         ]);
         let err = validate_id_tkn_trust_mode(&tokens).expect_err("should error");
         assert!(
             matches!(err, IdTokenTrustModeError::ClientIdUserinfoAudMismatch),
-            "expected error due to userinfo token aud not containing client_id, got: {:?}",
-            err
-        )
+            "expected error due to userinfo token aud not containing client_id, got: {err:?}"
+        );
     }
 }

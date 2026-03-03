@@ -1,0 +1,3 @@
+mcp>=1.23.0
+ollama
+python-dotenv

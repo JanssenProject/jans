@@ -46,23 +46,44 @@ public class PluginResource extends ConfigBaseResource {
     @Inject
     AuthUtil authUtil;
 
+    /**
+     * Retrieve summaries of deployed plugins.
+     *
+     * <p>Each returned entry contains the plugin's name and description for plugins whose implementation
+     * classes are present on the classpath.</p>
+     *
+     * @return a list of PluginConf objects containing the name and description of each deployed plugin
+     */
     @Operation(summary = "Gets list of Plugins", description = "Gets list of Plugins", operationId = "get-plugins", tags = {
-            "Plugins" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.PLUGIN_READ_ACCESS }))
+            "Plugins" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = PluginConf.class)), examples = @ExampleObject(name = "Response example", value = "example/plugins/plugin-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.PLUGIN_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPlugins() {
         return Response.ok(getPluginNames()).build();
     }
 
-    @Operation(summary = "Get plugin by name", description = "Get plugin by name", operationId = "get-plugin-by-name", tags = {
-            "Plugins" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.PLUGIN_READ_ACCESS }))
+    /**
+     * Check whether a plugin with the given name is currently deployed.
+     *
+     * @param pluginName the plugin name to check; comparison is case-insensitive
+     * @return `true` if a plugin with the given name is deployed, `false` otherwise
+     */
+    @Operation(summary = "Check if plugin is deployed", description = "Check if plugin is deployed", operationId = "get-plugin-by-name", tags = {
+            "Plugins" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.PLUGIN_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -70,7 +91,8 @@ public class PluginResource extends ConfigBaseResource {
     @GET
     @Path(ApiConstants.PLUGIN_NAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.PLUGIN_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response isPluginDeployed(
             @Parameter(description = "Plugin name") @NotNull @PathParam(ApiConstants.PLUGIN_NAME) String pluginName) {
 

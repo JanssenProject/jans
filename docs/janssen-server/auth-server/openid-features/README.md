@@ -7,7 +7,7 @@ tags:
 ---
 
 # OpenID Connect Provider (OP)
-The Janssen Authentication Server is a [fully certified OpenID Provider (OP)](http://openid.net/certification/) that supports the following OpenID Connect specifications: 
+The Janssen Authentication Server is a [fully certified OpenID Provider (OP)](http://openid.net/certification/) that supports the following OpenID Connect specifications:
 
 - Core [(spec)](http://openid.net/specs/openid-connect-core-1_0.html)
 - Dynamic Client Registration [(spec)](https://openid.net/specs/openid-connect-registration-1_0.html)

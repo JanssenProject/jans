@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-shibboleth-idp-parent</artifactId>
+        <version>0.0.0-nightly</version>
+    </parent>
+
+    <artifactId>shib-jans-authn</artifactId>
+    <packaging>jar</packaging>
+    <name>Shibboleth Janssen Authentication</name>
+    <description>Shibboleth authentication module integrating with Janssen Auth Server</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-model</artifactId>
+            <version>${jans-auth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-client</artifactId>
+            <version>${jans-auth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-util</artifactId>
+            <version>${jans-core.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-model</artifactId>
+            <version>${jans-core.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-api</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-impl</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-attribute-api</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-session-api</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-core</artifactId>
+            <version>${opensaml.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-saml-api</artifactId>
+            <version>${opensaml.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.webflow</groupId>
+            <artifactId>spring-webflow</artifactId>
+            <version>${spring-webflow.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

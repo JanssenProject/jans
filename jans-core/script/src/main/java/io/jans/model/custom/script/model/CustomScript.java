@@ -249,19 +249,6 @@ public class CustomScript extends BaseEntry {
         }
     }
 
-    public String getLocationPath() {
-        SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_PATH_MODEL_PROPERTY);
-        if (moduleProperty == null) {
-            return null;
-        }
-
-        return moduleProperty.getValue2();
-    }
-
-    public void setLocationPath(String locationPath) {
-        setModuleProperty(LOCATION_PATH_MODEL_PROPERTY, locationPath);
-    }
-
     protected SimpleCustomProperty getModuleProperty(final String modulePropertyName) {
         SimpleCustomProperty result = null;
 

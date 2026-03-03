@@ -11,14 +11,14 @@ use super::{BaseLogEntry, ISO8601, LogLevel};
 use uuid7::Uuid;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct ErrorLogEntry {
+pub(super) struct ErrorLogEntry {
     #[serde(flatten)]
     pub base: BaseLogEntry,
     pub msg: String,
 }
 
 impl ErrorLogEntry {
-    pub fn from_loggable<L: Loggable>(value: &L, msg: String) -> Self {
+    pub(super) fn from_loggable<L: Loggable>(value: &L, msg: String) -> Self {
         let timestamp = Some(chrono::Local::now().format(ISO8601).to_string());
         Self {
             base: BaseLogEntry {

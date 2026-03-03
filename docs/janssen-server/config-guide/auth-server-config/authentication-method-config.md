@@ -15,15 +15,15 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
 
 !!! Note
     Only one of the available authentication methods can be set as the default.
-    While setting the Default authentication method, the Janssen Server 
+    While setting the Default authentication method, the Janssen Server
     checks if the same authentication is available and active.
-    
- See 
- [script documentation](../custom-scripts-config.md#update-an-existing-custom-script) 
+
+ See
+ [script documentation](../custom-scripts-config.md#update-an-existing-custom-script)
  to know how to enable/disable authentication methods using custom scripts.
 
 
- If the script is not active then the following error notification is 
+ If the script is not active then the following error notification is
  returned by API.
  ```{
  "code": "400",
@@ -32,7 +32,7 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
  }
  ```
 
- Also, to understand how Janssen Server picks the authentication method *in the absence* of the default authentication method, refer to 
+ Also, to understand how Janssen Server picks the authentication method *in the absence* of the default authentication method, refer to
  [ACR documentation](../../auth-server/openid-features/acrs.md)
 
 === "Use Command-line"
@@ -153,15 +153,15 @@ jans tui
 ### Find Current Default Authentication Method
 
 Navigate to `Auth Server` -> `Authn` to open the `Authn` screen as shown
-in the image below. In **Default ACR** sub-tab, available authentication 
+in the image below. In **Default ACR** sub-tab, available authentication
 methods are listed
 as radio buttons.
 
 ![image](../../../assets/tui-authn-dafault-acr.png)
 
-To update the default authentication method, bring the tab focus to the 
+To update the default authentication method, bring the tab focus to the
 authentication method,
-and navigate to the new default method with **Up** and **Down** keys. 
+and navigate to the new default method with **Up** and **Down** keys.
 To choose hit **Space** key.
 Navigate to **Save** button and hit **Enter** key
 
@@ -172,7 +172,7 @@ This tab displays the basic, builtin, authentication method as shown in the imag
 
 ![image](../../../assets/tui-authn-basic.png)
 
-You can set basic as the default authentication method by selecting 
+You can set basic as the default authentication method by selecting
 **Default Authn Method**,
 navigate to **Save** button and hit **Enter** key
 
@@ -183,17 +183,17 @@ default authentication method. See below image
 
 ![image](../../../assets/tui-authn-ldap-servers.png)
 
-To add a new LDAP server, navigate to **Add Source LDAP Server** button and 
+To add a new LDAP server, navigate to **Add Source LDAP Server** button and
 hit **Enter**. A popup screen will
 be displayed as shown in the image below.
 
 ![image](../../../assets/tui-authn-ldap-servers-add.png)
 
-Fill in the fields provided in the popup. Before saving LDAP server, it is 
-recommended to test it by navigating 
-**Test** button and hitting **Enter**. If the test is successful, chose 
-**Save** button and hit **Enter**. If you want the current edited LDAP server 
-as the default authentication method, select **Default Authn Method** before 
+Fill in the fields provided in the popup. Before saving LDAP server, it is
+recommended to test it by navigating
+**Test** button and hitting **Enter**. If the test is successful, choose
+**Save** button and hit **Enter**. If you want the current edited LDAP server
+as the default authentication method, select **Default Authn Method** before
 saving.
 
 ### Authentication Methods Enabled By Scripts
@@ -202,15 +202,15 @@ All enabled **Person Authentication** scripts are listed in this tab as below
 
 ![image](../../../assets/tui-authn-scripts.png)
 
-To edit **Level** and/or **Properties** of the authentication script, 
+To edit **Level** and/or **Properties** of the authentication script,
 navigate to the script in the list by hitting **tab** key
 and hit **Enter**. You will see a popup like in the image below
 
 ![image](../../../assets/tui-authn-scripts-edit.png)
 
-If the script you want to use as the default authentication method is not in 
+If the script you want to use as the default authentication method is not in
 the list, you should enable the script by
-navigating **Scripts** in the main tab. Find the script you want to 
+navigating **Scripts** in the main tab. Find the script you want to
 enable and hit **Enter**, you will get a popup where
 you can select **Enabled** checkbox and **Save** it as shown in the image below:
 

@@ -53,7 +53,7 @@ client configuration on Janssen Server.
 
 ### Available Algorithms for Encryption and Signing
 
-The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
+The client can select algorithms for cryptographic and encryption during client configuration. Janssen
 Server supports a list of algorithms as listed in response of Janssen Server's well-known
 [configuration endpoint](../endpoints/configuration.md) given below.
 
@@ -72,7 +72,7 @@ Claims that list supported algorithms:
 - request_object_signing_alg_values_supported
 - request_object_encryption_alg_values_supported
 - request_object_encryption_alg_values_supported
- 
+
 ### Recommendations
 
 - RSA keys with a minimum 2048 bits if using RSA cryptography
@@ -97,7 +97,7 @@ Claim `grant_types_supported` lists all the supported grant types in the respons
 ### Configuring Grant Type For Client
 
 Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
-configured to use or not use certain grant types using [CLI](../../config-guide/config-tools/jans-cli/README.md) or 
+configured to use or not use certain grant types using [CLI](../../config-guide/config-tools/jans-cli/README.md) or
 [TUI](../../config-guide/config-tools/jans-tui/README.md) tools.
 
 ### Recommendations For Using Grant Types and Flows
@@ -111,7 +111,7 @@ is called a `public` client.
 Along with the grant type to be used, developers also need to choose which flow should be used to get the required
 tokens. The table below shows grant types and flows that should be used for various use-cases.
 
-| Client Type                                                                                     | Recommended Grant Type                         | Flow                         | 
+| Client Type                                                                                     | Recommended Grant Type                         | Flow                         |
 |-------------------------------------------------------------------------------------------------|------------------------------------------------|------------------------------|
 | Backend App (Example: batch processes) that need to access its own resources                    | `client_credentials`                           | Client Credentials           |
 | Server backend of a web-application needs access token                                          | `authorization_code`                           | Authorization Code           |
@@ -139,7 +139,7 @@ client informs the authorization server of the desired grant. Response type para
 [defined](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.1) in the OAuth 2.0 framework.
 
 Janssen Server supports response types
-defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
+defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the
 Janssen Server's well-known [configuration endpoint](../endpoints/configuration.md) given below.
 
 ```text
@@ -148,7 +148,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 
 Claim `response_types_supported` lists all the supported grant types in the response.
 
-When registering client using dynamic client registration, if the `response_type` parameter is not specified, it'll 
+When registering client using dynamic client registration, if the `response_type` parameter is not specified, it'll
 default to `code`.
 
 ### Response Type Recommendations
@@ -161,8 +161,8 @@ authorization requests containing response types not permitted for respective cl
 
 ## Client expiration
 
-Client expiration is set based on `dynamicRegistrationExpirationTime` AS configuration property or otherwise 
-if `dcrForbidExpirationTimeInRequest` is `false` then it is set with Dynamic Client Registration Request via `lifetime` parameter 
+Client expiration is set based on `dynamicRegistrationExpirationTime` AS configuration property or otherwise
+if `dcrForbidExpirationTimeInRequest` is `false` then it is set with Dynamic Client Registration Request via `lifetime` parameter
 which expected value in seconds.
 
 Client activity time is tracked/recorded each time client is used for authentication or authorization (date is written in `jansLastAccessTime` client attribute).

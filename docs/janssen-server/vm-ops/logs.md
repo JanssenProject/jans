@@ -13,14 +13,14 @@ The Janssen logs can be viewed via SSH access to the server running the Janssen 
 ## Log Levels
 The following log levels can be configured through the configuration CLI:
 
-| Log Level | Messages Logged |  
-|---------- |------------                  |  
-|Trace      | All messages                 |  
-|Debug      | Debug level and above        |  
-|Info       | Informational level and above|  
-|Warn       | Warning level and above      |  
-|Error      | Error level and above        |  
-|Fatal      | Only fatal errors            |  
+| Log Level | Messages Logged |
+|---------- |------------                  |
+|Trace      | All messages                 |
+|Debug      | Debug level and above        |
+|Info       | Informational level and above|
+|Warn       | Warning level and above      |
+|Error      | Error level and above        |
+|Fatal      | Only fatal errors            |
 |Off        | Logging is disabled          |
 
 ### Configuring Log Levels
@@ -101,7 +101,7 @@ The available logs for Jans server are listed below:
 ### Config API logs
 `/opt/jans/jetty/jans-config-api/logs/`
 
-| Log File | Description |  
+| Log File | Description |
 |--------- |-------------|
 | **configapi.log** | Config API main log |
 | **configapi_persistence.log** | Config API persistence log |
@@ -116,7 +116,7 @@ The most important log files here are described below:
 
 1. `jans-auth.log`: This log file contains most authentication related information. Generally this is the first log to review for any authentication-related troubleshooting, like authentication failure or missing clients etc.
 1. `jans-auth_persistence.log`: This log file contains information about the Jans Auth server communicating with the persistence backend. 
-1. `jans-auth_script.log`: This log file contains debug messages printed from [interception scripts](../developer/interception-scripts.md).
+1. `jans-auth_script.log`: This log file contains debug messages printed from [interception scripts](../developer/scripts/README.md).
 ### Jans Fido2 server logs
 `/opt/jans/jetty/jans-fido2/logs/`
 1. `jetty.log`: Logs web server activity and HTTP request handling by the Jetty server.

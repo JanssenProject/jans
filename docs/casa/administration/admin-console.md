@@ -24,7 +24,6 @@ Widgets shown vary according to plugins installed. In a fresh installation, the 
 - OTP via SMS
 - TOTP/HOTP: mobile OTP apps and hard tokens (cards, key fobs, dongles, etc.)
 - FIDO devices
-- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
 
 To add more authentication methods, please check the developer [guide](../developer/add-authn-methods.md).
 
@@ -67,7 +66,7 @@ Application logs are useful sources of information to diagnose anomalies and und
 if presented. Casa uses the Log4J2 logging framework for this. The severity level for logs can be modified at runtime
 and requires no restart. For more information about logging, check the [FAQ entry](./faq.md#where-are-the-logs).
 
-![logging](../../assets/casa/admin-console/logging.png) 
+![logging](../../assets/casa/admin-console/logging.png)
 
 
 ## CORS domains
@@ -76,7 +75,7 @@ If a given plugin exposes one or more web services that are to be consumed from 
 
 ## 2FA settings
 
-!!! Warning  
+!!! Warning
     This feature is only if the [2FA settings plugin](../plugins/2fa-settings.md) is installed
 
 In the 2FA settings screen, an admin can:

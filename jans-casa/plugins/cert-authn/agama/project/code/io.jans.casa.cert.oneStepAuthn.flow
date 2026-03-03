@@ -1,0 +1,29 @@
+Flow io.jans.casa.cert.oneStepAuthn
+    Basepath ""
+    Configs conf
+
+When conf.useAcctLinking is true
+    obj = Trigger io.jans.casa.authn.acctlinking
+        Override templates "blb4x/acctlinking.ftlh" "login-acctlinking.ftlh"
+        
+    When obj.aborted is null    //User took usual Casa authentication, terminate as such
+        Finish obj
+    
+    When obj.data."_abort".length is 0
+        pid = obj.data.providerId
+        Log "User selected identity provider" pid
+        
+        //Launch the flow again, this time preselecting the given identity provider
+        obj = Trigger io.jans.casa.authn.acctlinking pid null
+        Finish obj
+
+Otherwise
+    obj = Trigger io.jans.casa.authn.main
+        Override templates "kz1vc3/main.ftlh" "login.ftlh"
+        
+    When obj.aborted is null    //User took usual Casa authentication, terminate as such
+        Finish obj
+
+Log "Smart card/User cert option selected"
+obj = Trigger io.jans.casa.cert.standaloneOneStepAuthn
+Finish obj

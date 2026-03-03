@@ -8,9 +8,13 @@
 #[cfg(not(target_arch = "wasm32"))]
 mod native_logger;
 #[cfg(not(target_arch = "wasm32"))]
+pub use native_logger::StdOutLoggerMode;
+#[cfg(not(target_arch = "wasm32"))]
 pub(crate) use native_logger::*;
 
 #[cfg(target_arch = "wasm32")]
 mod wasm_logger;
+#[cfg(target_arch = "wasm32")]
+pub use wasm_logger::StdOutLoggerMode;
 #[cfg(target_arch = "wasm32")]
 pub(crate) use wasm_logger::*;

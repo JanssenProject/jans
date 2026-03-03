@@ -29,6 +29,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String authorizationEndpoint;
     private String authorizationChallengeEndpoint;
     private String statusListEndpoint;
+    private String statusListAggregationEndpoint;
     private String accessEvaluationV1Endpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
@@ -258,6 +259,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setStatusListEndpoint(String statusListEndpoint) {
         this.statusListEndpoint = statusListEndpoint;
+    }
+
+    /**
+     * Gets status list aggregation endpoint
+     *
+     * @return status list aggreation endpoint
+     */
+    public String getStatusListAggregationEndpoint() {
+        return statusListAggregationEndpoint;
+    }
+
+    /**
+     * Sets status list aggregation endpoint
+     *
+     * @param statusListAggregationEndpoint status list aggregation endpoint
+     */
+    public void setStatusListAggregationEndpoint(String statusListAggregationEndpoint) {
+        this.statusListAggregationEndpoint = statusListAggregationEndpoint;
     }
 
     /**
@@ -1349,6 +1368,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
                 ", statusListEndpoint='" + statusListEndpoint + '\'' +
+                ", statusListAggregationEndpoint='" + statusListAggregationEndpoint + '\'' +
                 ", accessEvaluationV1Endpoint='" + accessEvaluationV1Endpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +

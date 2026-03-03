@@ -11,7 +11,7 @@ tags:
 
 ORM stores users password in DB in hashing form. It supports next hash methods:  SHA, SSHA, SHA-256, SSHA-256, SHA-384, SSHA-384, SHA-512, SSHA-512 MD5, SMD5, CRYPT, CRYPT-MD5, CRYPT-SHA-256, CRYPT-SHA-512, CRYPT-BCRYPT $2a$, CRYPT-BCRYPT $2b$, PKCS5S2, ARGON2
 
-Support additional hashing methods can be added with [Persistence Extension](../../script-catalog/persistence_extension/persistence/#persistence-script) script.
+Support additional hashing methods can be added with [Persistence Extension](../../script-catalog/persistence_extension/persistence.md#persistence-script) script.
 
 # Hash Password properties
 

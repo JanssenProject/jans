@@ -65,16 +65,33 @@ public class AttributesResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
+    /**
+     * Retrieve a paged list of Jans attributes matching the provided filters.
+     *
+     * @param limit         maximum number of results to return
+     * @param pattern       search pattern to match attribute fields
+     * @param status        attribute status filter (use ApiConstants.ALL to include all)
+     * @param startIndex    1-based index of the first result to return
+     * @param sortBy        attribute field used to sort results
+     * @param sortOrder     sorting direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter results (e.g. "adminCanEdit=true,dataType=string")
+     * @return              a Response containing a PagedResult of JansAttribute objects that match the query
+     */
     @Operation(summary = "Gets a list of Jans attributes.", description = "Gets a list of Jans attributes.", operationId = "get-attributes", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ATTRIBUTES_READ_ACCESS }))
+            "Attribute" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAttributes(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -97,16 +114,27 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq, status)).build();
     }
 
+    /**
+     * Retrieve the JansAttribute identified by the provided inum.
+     *
+     * @param inum the attribute's inum (unique identifier)
+     * @return the attribute that matches the given inum
+     */
     @Operation(summary = "Gets an attribute based on inum", description = "Gets an attribute based on inum", operationId = "get-attributes-by-inum", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ATTRIBUTES_READ_ACCESS }))
+            "Attribute" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getAttributeByInum(@Parameter(description = "Attribute Id") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         JansAttribute attribute = attributeService.getAttributeByInum(inum);
@@ -114,9 +142,19 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(attribute).build();
     }
 
+    /**
+     * Creates a new JansAttribute if valid and not conflicting.
+     *
+     * Validates required fields (name, displayName, dataType), ensures the attribute name is unique and defined in the DB schema, assigns a new inum and DN, persists the attribute, and returns the created resource.
+     *
+     * @param attribute the JansAttribute to create; must include non-null name, displayName, and dataType
+     * @return the created JansAttribute with assigned inum and dn
+     */
     @Operation(summary = "Adds a new attribute", description = "Adds a new attribute", operationId = "post-attributes", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
+            "Attribute" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "JansAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Request example", value = "example/attribute/attribute.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
@@ -125,8 +163,8 @@ public class AttributesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createAttribute(@Valid JansAttribute attribute) {
         log.debug(" JansAttribute details to add - attribute:{}", attribute);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
@@ -160,9 +198,22 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    /**
+     * Update an existing JansAttribute identified by its inum.
+     *
+     * Validates required fields, checks for name conflicts and schema definition, applies the update, and returns the persisted attribute.
+     *
+     * @param attribute the JansAttribute to update; must include a valid `inum` and non-null `name`, `displayName`, and `dataType`
+     * @return the updated JansAttribute
+     * @throws WebApplicationException if the attribute type is not defined in the DB schema (results in 406 Not Acceptable)
+     * @throws WebApplicationException if the target attribute (by inum) is not found
+     * @throws WebApplicationException if another attribute with the same name but a different inum exists (bad request)
+     */
     @Operation(summary = "Updates an existing attribute", description = "Updates an existing attribute", operationId = "put-attributes", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
+            "Attribute" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "JansAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Request example", value = "example/attribute/attribute.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
@@ -170,8 +221,8 @@ public class AttributesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAttribute(@Valid JansAttribute attribute) {
         log.debug(" JansAttribute details to update - attribute:{}", attribute);
         final String inum = attribute.getInum();
@@ -213,9 +264,22 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(result).build();
     }
 
+    /**
+     * Apply a JSON Patch to the JansAttribute identified by the given inum.
+     *
+     * Retrieves the attribute, applies the provided JSON Patch document, persists the update, and returns the modified attribute.
+     *
+     * @param inum the identifier of the attribute to patch
+     * @param pathString the JSON Patch document as a string (RFC 6902)
+     * @return the updated JansAttribute
+     * @throws JsonPatchException if the patch document is invalid or cannot be applied to the attribute
+     * @throws IOException if the patch cannot be read or parsed
+     */
     @Operation(summary = "Partially modify a JansAttribute", description = "Partially modify a JansAttribute", operationId = "patch-attributes-by-inum", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }))
+            "Attribute" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = PatchRequest.class)), examples = @ExampleObject(name = "Patch request example", value = "example/attribute/attribute-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated JansAttribute", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
@@ -225,7 +289,7 @@ public class AttributesResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@Parameter(description = "Attribute Id") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
@@ -238,9 +302,17 @@ public class AttributesResource extends ConfigBaseResource {
         return Response.ok(existingAttribute).build();
     }
 
+    /**
+     * Deletes the attribute identified by the provided inum.
+     *
+     * @param inum the attribute identifier (inum)
+     * @return a Response with HTTP 204 No Content when deletion succeeds
+     */
     @Operation(summary = "Deletes an attribute based on inum", description = "Deletes an attribute based on inum", operationId = "delete-attributes-by-inum", tags = {
-            "Attribute" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }))
+            "Attribute" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -248,7 +320,7 @@ public class AttributesResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+            ApiAccessConstants.ATTRIBUTES_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteAttribute(@Parameter(description = "Attribute Id") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         log.debug(" JansAttribute details to delete - inum:{}", inum);
         JansAttribute attribute = attributeService.getAttributeByInum(inum);

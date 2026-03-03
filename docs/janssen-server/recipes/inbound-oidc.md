@@ -140,7 +140,7 @@ rp->>browser: Page is accessed
       ```
       jans cli --operation-id post-config-scripts --data /tmp/cs.json
       ```
-         
+
 ### 2. Login Page Setup
 
 - OIDC Script needs a login page

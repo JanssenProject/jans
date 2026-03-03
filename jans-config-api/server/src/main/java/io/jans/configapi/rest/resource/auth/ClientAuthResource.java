@@ -42,16 +42,28 @@ public class ClientAuthResource extends ConfigBaseResource {
     @Inject
     ClientAuthService clientAuthService;
 
+    /**
+     * Retrieves the client authorizations associated with the specified user.
+     *
+     * @param userId the user identifier whose client-to-scope authorizations are retrieved
+     * @return a map from Client to the set of authorized Scope objects for the specified user
+     */
     @Operation(summary = "Gets list of client authorization", description = "Gets list of client authorizations", operationId = "get-client-authorization", tags = {
-            "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }))
+            "Client Authorization" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = ClientAuth.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/client-auth-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.USERID_PATH)
     public Response getClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId) {
@@ -66,19 +78,31 @@ public class ClientAuthResource extends ConfigBaseResource {
         ClientAuth clientAuth = new ClientAuth();
         clientAuth.setClientAuths(clientAuths);
         
-        return Response.ok(clientAuths).build();
+        return Response.ok(clientAuth).build();
     }
 
+    /**
+     * Revoke all authorizations for the specified user on the specified client.
+     *
+     * @param userId  the identifier of the user whose authorizations will be revoked
+     * @param clientId the identifier of the client from which the user's authorizations will be removed
+     * @param userName the username associated with the authorizations to remove
+     * @return HTTP 204 No Content response when the authorizations are successfully removed
+     */
     @Operation(summary = "Revoke client authorization", description = "Revoke client authorizations", operationId = "delete-client-authorization", tags = {
-            "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }))
+            "Client Authorization" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {
+                            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+            ApiAccessConstants.CLIENT_AUTHORIZATIONS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.USERID_PATH + ApiConstants.CLIENTID_PATH + ApiConstants.USERNAME_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,

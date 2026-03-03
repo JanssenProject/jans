@@ -11,7 +11,6 @@
 
 use std::sync::LazyLock;
 
-use lazy_static::lazy_static;
 use test_utils::assert_eq;
 use tokio::test;
 
@@ -47,8 +46,8 @@ static OPERATOR_USER: LazyLock<JsonRule> =
 static OPERATOR_WORKLOAD: LazyLock<JsonRule> =
     LazyLock::new(|| JsonRule::new(json!({"===": [{"var": "Jans::Workload"}, "ALLOW"]})).unwrap());
 
-lazy_static! {
-    pub(crate) static ref AuthRequestBase: Request = Request::deserialize(serde_json::json!(
+pub(crate) static AUTH_REQUEST_BASE: LazyLock<Request> = LazyLock::new(|| {
+    Request::deserialize(serde_json::json!(
         {
             "tokens": {
                 "access_token": generate_token_using_claims(json!({
@@ -85,15 +84,15 @@ lazy_static! {
             "context": {},
         }
     ))
-    .expect("Request should be deserialized from json");
-}
+    .expect("Request should be deserialized from json")
+});
 
 /// Check if action executes for next principals: Workload, User
 #[test]
 async fn success_test_for_all_principals() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"Update\"".to_string();
 
     let result = cedarling
@@ -147,7 +146,7 @@ async fn success_test_for_principal_workload() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
 
     let result = cedarling
@@ -191,7 +190,7 @@ async fn success_test_for_principal_user() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForUser\"".to_string();
 
     let result = cedarling
@@ -239,7 +238,7 @@ async fn success_test_for_principal_person_role() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForUserAndRole\"".to_string();
 
     let result = cedarling
@@ -285,7 +284,7 @@ async fn success_test_for_principal_workload_role() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForWorkloadAndRole\"".to_string();
 
     let result = cedarling
@@ -337,7 +336,7 @@ async fn success_test_for_principal_workload_true_or_user_false() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForWorkload\"".to_string();
 
     let result = cedarling
@@ -389,7 +388,7 @@ async fn success_test_for_principal_workload_false_or_user_true() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"UpdateForUser\"".to_string();
 
     let result = cedarling
@@ -441,7 +440,7 @@ async fn success_test_for_principal_workload_false_or_user_false() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
 
     let result = cedarling
@@ -482,7 +481,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         crate::AuthorizationConfig {
             use_user_principal: true,
             use_workload_principal: true,
-            principal_bool_operator: Default::default(),
+            principal_bool_operator: JsonRule::default(),
             id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
@@ -492,7 +491,7 @@ async fn test_where_principal_workload_cant_be_applied() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"NoApplies\"".to_string();
 
     let result = cedarling
@@ -500,7 +499,7 @@ async fn test_where_principal_workload_cant_be_applied() {
         .await
         .expect_err("request should be parsed with error");
 
-    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)))
+    assert!(matches!(result, crate::AuthorizeError::InvalidPrincipal(_)));
 }
 
 /// Check if action executes when principal user can't be applied
@@ -519,7 +518,7 @@ async fn test_where_principal_user_cant_be_applied() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"NoApplies\"".to_string();
 
     let result = cedarling
@@ -529,9 +528,8 @@ async fn test_where_principal_user_cant_be_applied() {
 
     assert!(
         matches!(result, crate::AuthorizeError::InvalidPrincipal(_)),
-        "expected error InvalidPrincipal, got: {}",
-        result
-    )
+        "expected error InvalidPrincipal, got: {result}"
+    );
 }
 
 /// Test policy evaluation errors are logged for signed authorization
@@ -552,7 +550,7 @@ async fn test_policy_evaluation_errors_logging() {
     )
     .await;
 
-    let mut request = AuthRequestBase.clone();
+    let mut request = AUTH_REQUEST_BASE.clone();
     request.action = "Jans::Action::\"AlwaysDeny\"".to_string();
 
     let result = cedarling
@@ -592,8 +590,7 @@ async fn test_policy_evaluation_errors_logging() {
         let log_kind = log.get("log_kind").unwrap();
         assert!(
             log_kind == "Decision" || log_kind == "System",
-            "Log kind should be Decision or System, got: {:?}",
-            log_kind
+            "Log kind should be Decision or System, got: {log_kind:?}"
         );
 
         // For Decision logs, verify they have required fields

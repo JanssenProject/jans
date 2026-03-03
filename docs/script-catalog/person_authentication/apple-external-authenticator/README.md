@@ -27,7 +27,7 @@ You will need to configure a service id, linked to your App identifier. For each
 Configure the custom script:
 ### Properties
 
-The custom script has the following properties:    
+The custom script has the following properties:
 
 |	Property	|	Description		| Input value     |
 |-----------------------|-------------------------------|---------------|

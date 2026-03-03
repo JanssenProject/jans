@@ -13,7 +13,7 @@ SCIM is a specification designed to reduce the complexity of user management ope
 For your reference, the current version of the standard is governed by the following documents: [RFC 7642](https://datatracker.ietf.org/doc/html/rfc7642), [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643), and [RFC 7644](https://datatracker.ietf.org/doc/html/rfc7644).
 
 
-## Installation 
+## Installation
 
 The API is available as a component of Jans Server. Upon [installation](https://docs.jans.io/v1.0.14/admin/install/vm-install/vm-requirements/) you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
 
@@ -21,7 +21,7 @@ The API is available as a component of Jans Server. Upon [installation](https://
 
 ## About API endpoints
 
-Throughout this document, you will notice endpoints are prefixed with path: 
+Throughout this document, you will notice endpoints are prefixed with path:
 `/jans-scim/restv1/v2`
 
 ## API Protection
@@ -43,14 +43,14 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 |`https://jans.io/scim/fido.write`|Modify fido resources|
 |`https://jans.io/scim/fido2.read`|Query fido 2 resources|
 |`https://jans.io/scim/fido2.write`|Modify fido 2 resources|
-|`https://jans.io/scim/all-resources.search`|Access the root .search endpoint| 
+|`https://jans.io/scim/all-resources.search`|Access the root .search endpoint|
 |`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
 
-In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
+In order to facilitate the process of getting, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
 ## Where to locate SCIM-related logs
 
-Please see [here](https://docs.jans.io/v1.0.14/admin/scim/logs/) besides 
+Please see [Janssen SCIM logs documentation](https://docs.jans.io/v1.0.14/admin/scim/logs/) for additional logs:
 
 * SCIM log is located at `/opt/jans/jetty/jans-scim/logs/scim.log`
 * If you use SCIM custom script aslo see `/opt/jans/jetty/jans-scim/logs/scim_script.log`
@@ -63,7 +63,7 @@ Please see [here](https://docs.jans.io/v1.0.14/admin/scim/logs/) besides
 ## Working in OAuth mode
 
 To know more about OAuth protection mode please visit [here](https://docs.jans.io/v1.0.14/admin/scim/oauth-protection/).
-The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token. 
+The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. We need a client to get Bearer token.
 ### Get SCIM Client
 
 
@@ -75,11 +75,12 @@ You can refer to [here](../../janssen-server/config-guide/scim-config/user-confi
 
 You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#get-access-token) for this topic
 
-### Retrive existing User 
+### Retrieve existing User
 
-You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#retrive-existing-user) for this topic
+You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#retrieve-existing-user) for this topic
 
-## Creating Resource 
+## Creating Resource
+
 ### Create an User
 
 You can refer to [here](../../janssen-server/config-guide/scim-config/user-config.md#create-an-user) for this topic
@@ -134,10 +135,12 @@ The second is a stronger approach that turns off validation of incoming members 
 
 
 ## User Registration Process with SCIM
+
 SCIM service has many use cases. One interesting and often arising is that of coding your own user registration process. With your SCIM endpoints you can build a custom application to maintain user entries in your database.
 
 
 ### Important Considerations
+
 Here, you have some useful tips before you start:
 
 1. Choose a toolset you feel comfortable to work with. Keep in mind that you have to leverage the capabilities of your language/framework to issue complex HTTPS requests. Be sure that:

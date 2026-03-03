@@ -4,7 +4,7 @@ This is an automated PR triggered by a release in [Janssen](https://github.com/J
 
 ## Description
 
-This PR updates the Janssen official chart to rancher ui partner charts.  We reported an [issue](https://github.com/rancher/partner-charts/issues/235) regarding using dashed keys inside `questions.yaml`. 
+This PR updates the Janssen official chart to rancher ui partner charts.  We reported an [issue](https://github.com/rancher/partner-charts/issues/235) regarding using dashed keys inside `questions.yaml`.
 
 
 ## Type of change

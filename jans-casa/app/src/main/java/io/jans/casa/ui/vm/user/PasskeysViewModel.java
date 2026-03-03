@@ -181,7 +181,7 @@ public class PasskeysViewModel extends UserViewModel {
 
 	}
 
-	@NotifyChange({ "uiEnrolled", "newDevice", "devices" })
+	@NotifyChange({ "uiEnrolled", "uiAwaiting", "newDevice", "devices" })
 	public void add() {
 		logger.debug("add - ");
 		FidoDevice dev = null;
@@ -255,7 +255,7 @@ public class PasskeysViewModel extends UserViewModel {
 		logger.debug("Allow list cookie added for credential : "+ newCredential.toJSONString());
 	}
 
-	@NotifyChange({ "uiEnrolled", "newDevice" })
+	@NotifyChange({ "uiEnrolled", "uiAwaiting", "newDevice" })
 	public void cancel() {
 
 		boolean success = false;
@@ -361,6 +361,7 @@ public class PasskeysViewModel extends UserViewModel {
 	private void resetAddSettings() {
 		logger.debug("resetAddSettings");
 		uiEnrolled = false;
+		uiAwaiting = false;
 		newDevice = new FidoDevice();
 	}
 }

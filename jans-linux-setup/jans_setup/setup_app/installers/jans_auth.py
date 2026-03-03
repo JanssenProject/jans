@@ -56,6 +56,8 @@ class JansAuthInstaller(JettyInstaller):
 
     def install(self):
         self.make_pairwise_calculation_salt()
+        if Config.install_jans_lock:
+            self.jetty_app_configuration[self.service_name]['jetty']['modules'] += ',http2c'
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.external_libs()

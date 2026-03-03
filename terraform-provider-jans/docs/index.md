@@ -18,7 +18,7 @@ well as valid credentials that have access to the Janssen instance.
 terraform {
   required_version = ">= 0.12.0"
   required_providers {
-    jans = {
+    janssen = {
       source = "JanssenProject/jans"
       version = "1.4.0"
     }

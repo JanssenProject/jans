@@ -20,7 +20,7 @@ The following environment variables are supported by the container:
 
 - `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, `google`, or `aws`.
 - `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
-- `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
+- `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `85appVersion: "1.13.0"`).
 - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
 - `CN_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
 - `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).

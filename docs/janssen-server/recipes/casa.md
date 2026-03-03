@@ -20,7 +20,7 @@ tags:
 ## Installing Casa
 
 Casa gets installed as an add-on to Janssen Server and integrates with `jans-auth-server` module as an OpenID connect Relying Party.
-Casa can be installed using the command below.  
+Casa can be installed using the command below.
 
 Currently, Casa installation is supported on CentOS 8 and Ubuntu 20.
 
@@ -31,13 +31,13 @@ The following steps will install Casa as an add-on.
   ```shell
     wget https://raw.githubusercontent.com/GluuFederation/flex/main/flex-linux-setup/flex_linux_setup/flex_setup.py  -O flex_setup.py
   ```
-  
+
 - Run the installer
 
 ```shell
 python3 flex_setup.py
 ```
-  
+
 ### Automate install
 
 If you have `setup.properties` file and want to automate installation, you can pass properties file as

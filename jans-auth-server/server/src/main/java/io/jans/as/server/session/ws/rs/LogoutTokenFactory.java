@@ -13,18 +13,19 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.service.SectorIdentifierService;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.json.JSONObject;
-import org.msgpack.core.Preconditions;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -50,7 +51,7 @@ public class LogoutTokenFactory {
 
     public JsonWebResponse createLogoutToken(Client rpClient, String outsideSid, User user) {
         try {
-            Preconditions.checkNotNull(rpClient);
+            checkNotNull(rpClient);
 
             JsonWebResponse jwr = jwrService.createJwr(rpClient);
 

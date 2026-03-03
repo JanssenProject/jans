@@ -8,7 +8,7 @@ tags:
 
 # SCIM Configuration Properties
 
-| Property Name | Description |  | 
+| Property Name | Description |  |
 |-----|-----|-----|
 | applicationUrl | Application base URL | [Details](#applicationurl) |
 | baseDN | Application config Base DN | [Details](#basedn) |

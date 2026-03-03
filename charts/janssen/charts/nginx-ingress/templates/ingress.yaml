@@ -407,7 +407,6 @@ metadata:
 {{ toYaml .Values.global.scim.ingress.scimLabels | indent 4 }}
 {{- end }}
   annotations:
-    nginx.org/ssl-services: "scim"
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
 {{- if .Values.global.scim.ingress.scimAdditionalAnnotations }}
 {{ toYaml .Values.global.scim.ingress.scimAdditionalAnnotations | indent 4 }}
@@ -463,7 +462,6 @@ metadata:
 {{ toYaml (index .Values.global "config-api" "ingress" "configApiLabels") | indent 4 }}
 {{- end }}
   annotations:
-    nginx.org/ssl-services: "configapi"
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
 {{- if index .Values.global "config-api" "ingress" "configApiAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "config-api" "ingress" "configApiAdditionalAnnotations") | indent 4 }}
@@ -632,7 +630,6 @@ metadata:
 {{ toYaml .Values.global.fido2.ingress.fido2Labels | indent 4 }}
 {{- end }}
   annotations:
-    nginx.org/ssl-services: "fido2"
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
 {{- if .Values.global.fido2.ingress.fido2AdditionalAnnotations }}
 {{ toYaml .Values.global.fido2.ingress.fido2AdditionalAnnotations | indent 4 }}
@@ -745,7 +742,6 @@ metadata:
 {{ toYaml (index .Values.global "auth-server" "ingress" "authServerLabels") | indent 4 }}
 {{- end }}
   annotations:
-    nginx.org/ssl-services: "auth-server"
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
 {{- if index .Values.global "auth-server" "ingress" "authServerAdditionalAnnotations" }}
 {{ toYaml (index .Values.global "auth-server" "ingress" "authServerAdditionalAnnotations") | indent 4 }}

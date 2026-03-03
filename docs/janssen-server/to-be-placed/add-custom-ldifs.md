@@ -14,7 +14,7 @@ This guide describes steps to load custom work to Janssen IDP.
 #### Hardware configuration
 
 For development and POC purposes, 4GB RAM and 10 GB HDD should be available for Janssen Server. For PROD deployments, please refer [installation guide](https://github.com/JanssenProject/jans/wiki#janssen-installation).
-  
+
 
 #### Prerequisites
 - Existing Janssen server installed

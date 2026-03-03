@@ -15,7 +15,7 @@ tags:
 sudo systemctl list-units --all "jans*"
 ```
 
-Output should be like below: 
+Output should be like below:
 ```
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
@@ -43,7 +43,7 @@ sudo systemctl list-units --all "apache2*"
 
 ### Start
 
-``` 
+```
 systemctl start [service name]
 ```
 

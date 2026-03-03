@@ -9,9 +9,9 @@ tags:
 This guide shows how to upgrade a Janssen VM deployment.
 
 !!! Note
-    VM deployments don't provide automatic upgrade/update support. 
-    Uninstalling and re-installing with newer binaries is the only option that requires re-configuration of auth-server. 
-    Though this is made easy using [Terraform](../terraform/README.md). 
+    VM deployments don't provide automatic upgrade/update support.
+    Uninstalling and re-installing with newer binaries is the only option that requires re-configuration of auth-server.
+    Though this is made easy using [Terraform](../terraform/README.md).
     We recommend using Kubernetes installations over VM, to avail smooth upgrades and better HA support.
 
 !!! Note
@@ -33,7 +33,7 @@ Let's assume we are upgrading Jans VM installation from `current version` to `vr
 3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `vreplace-janssen-version` to:
     - import all the global configurations from the new installation using `terraform import`
     - define all the custom IDP configurations and apply them using `terraform apply`
-   
+
 4. At this point there should be two versions up, `old version` and `vreplace-janssen-version`.
 
 5. Traffic should be switched gradually from the old setup to the new setup.

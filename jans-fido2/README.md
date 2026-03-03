@@ -1,7 +1,7 @@
 # Fido2
 
-[FIDO 2.0 (FIDO2)](https://fidoalliance.org/fido2/) is an open authentication 
-standard that enables leveraging common devices to authenticate to online services 
+[FIDO 2.0 (FIDO2)](https://fidoalliance.org/fido2/) is an open authentication
+standard that enables leveraging common devices to authenticate to online services
 in both mobile and desktop environments.
 
 Janssen includes a FIDO2 component (or FIDO server) to provide the following infrastructure:

@@ -22,4 +22,3 @@ The module has a few properties:
 
 6) registration_uri - It's URL to page where user can register new account. It's optional property.
     Example: https://ce-dev.jans.org/identity/register
-    

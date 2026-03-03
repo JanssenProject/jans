@@ -15,7 +15,7 @@ Authorization Server (AS) supports different metric data:
 - Token Issued
 - Audit Logs
 
-## Statistic Endpoint 
+## Statistic Endpoint
 
 Statistic data (MAU, Token Issued) is returned from `/jans-auth/restv1/internal/stat` protected endpoint.
 
@@ -51,7 +51,7 @@ Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 If both month range parameters (`start-month` or `end-month` ) and `month` parameter are used at the same time AS will return 400 Bad Request error.
 
 Note that data returned by endpoint is calculated and depending on request can be **expensive** to recalculate each time.
-Thus data (response) is cached during one hour and is not refreshed during this period.  
+Thus data (response) is cached during one hour and is not refreshed during this period.
 
 **Example:** response when `format=jsonmonth`
 
@@ -73,7 +73,7 @@ Thus data (response) is cached during one hour and is not refreshed during this 
   }
   ...
 ]
-``` 
+```
 
 ## Monthly Active Users
 
@@ -96,7 +96,7 @@ server9 - size: 20483bytes, cardinality: 1002353
 UNION - size: 20483bytes, cardinality: 10010897
 ```
 
-**Example:** MAU with no `format` parameter in request   
+**Example:** MAU with no `format` parameter in request
 ```
 {
   "response": {
@@ -261,7 +261,7 @@ Success vs Failed authentications
 
 ### Have questions in the meantime?
 
-You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
 
 ### Want to contribute?
 

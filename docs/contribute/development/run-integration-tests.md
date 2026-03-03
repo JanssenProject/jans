@@ -10,21 +10,21 @@ tags:
 
 # Run Integration Tests with a Janssen Server VM
 
-The procedures for running the Janssen integration test suite against an installed 
+The procedures for running the Janssen integration test suite against an installed
 Janssen Server.
 
 ## Component Setup
 
-Instructions in this guide can be used if Janssen Server is installed on a VM. 
-Developers can use a virtualization software (like VMWare) or use LxD containers 
+Instructions in this guide can be used if Janssen Server is installed on a VM.
+Developers can use a virtualization software (like VMWare) or use LxD containers
 to create VM on developer workstation or use a remote cloud VM.
 
 
 
 ![Component Diagram](../../assets/image-run-integration-test-from-workspace-06122022.png)
 !!! note "OS platform for Developer Workstation"
-    Steps in this guide are applicable to any OS platform a Developer workstation may have. 
-    Example commands given in this guide are for Ubuntu Linux based workstation.  
+    Steps in this guide are applicable to any OS platform a Developer workstation may have.
+    Example commands given in this guide are for Ubuntu Linux based workstation.
 
 ## Install Janssen Server
 
@@ -39,19 +39,19 @@ following installation instructions.
   the `-t` switch when invoking the setup script
   from installation instructions.
 
-Use the [VM installation guide](../janssen-server/install/vm-install/README.md) for the 
+Use the [VM installation guide](../../janssen-server/install/vm-install/README.md) for the
 complete set of instructions.
 
 Once the installation is complete, check if the `.well-known` end-points of the
 Janssen server from the browser. A successful response will ascertain that the
-The Janssen server running inside the local VM is healthy and also accessible 
+The Janssen server running inside the local VM is healthy and also accessible
 from the developer's machine.
 
 !!! Note
-    Based on developer setup it may be necessary to add appropriate IP-HOST 
-    mapping to the developer workstation. For instance, on a Linux-based 
-    developer workstation, this means adding a mapping to `/etc/hosts` file. 
-    Make sure that VM's IP is mapped to a FQDN like `janssen.op.io`. Refering 
+    Based on developer setup it may be necessary to add appropriate IP-HOST
+    mapping to the developer workstation. For instance, on a Linux-based
+    developer workstation, this means adding a mapping to `/etc/hosts` file.
+    Make sure that VM's IP is mapped to a FQDN like `janssen.op.io`. Refering
     to VM with `localhost` or just IP will not work.
 
 URI for OpenID configuration `.well-known` endpoint:
@@ -60,7 +60,7 @@ URI for OpenID configuration `.well-known` endpoint:
   https://janssen.op.io/jans-auth/.well-known/openid-configuration
   ```
 
-The response received should be JSON formatted Janssen configuration details, 
+The response received should be JSON formatted Janssen configuration details,
 similar to those below.
 
   ```
@@ -100,7 +100,7 @@ similar to those below.
 
 ## Setup The Certificates
 
-To run the tests against the installed Janssen Server, the workstation JRE 
+To run the tests against the installed Janssen Server, the workstation JRE
 needs to have the appropriate
 certificate installed. Update cacerts using the steps below:
 
@@ -121,25 +121,25 @@ certificate installed. Update cacerts using the steps below:
 
 ## Configure developer workspace
 
-Now that we have Janssen Server running in a VM and it is accessible from the 
+Now that we have Janssen Server running in a VM and it is accessible from the
 developer workstation as well, we will
 create and configure the code base on the developer workspace to run integration
 tests.
 
 Get Janssen server code from [Janssen GitHub repository](https://github.com/JanssenProject/jans). Note the path to this location, we will refer to it as `source-base`.
 
-Janssen Server is composed of multiple modules. For example `source-base/jans-auth-server`, `source-base/jans-link` etc. 
+Janssen Server is composed of multiple modules. For example `source-base/jans-auth-server`, `source-base/jans-link` etc.
 
-Each module has its own set of 
+Each module has its own set of
 tests.
 Below are the instructions for configuring each module for tests.
 
 !!! info "What is a Profile directory?"
-    - To run integration tests, the developer workspace needs to know details about he Janssen Server agaist which the tests are to be run. 
+    - To run integration tests, the developer workspace needs to know details about he Janssen Server agaist which the tests are to be run.
     - Janssen Server workspace holds this information in `source-base/module/sub-module/profiles` directory.
-    - The `profiles` directory can contain one or more sub-directories, each representing a profile(i.e a target Janssen Server). These profile directories are used to hold files that contain important information required to run tests. 
+    - The `profiles` directory can contain one or more sub-directories, each representing a profile(i.e a target Janssen Server). These profile directories are used to hold files that contain important information required to run tests.
     - Developers can create one or more profiles and use them to run tests
-    against different Janssen Servers. 
+    against different Janssen Servers.
     - This guide uses Janssen Server hostname,
      `janssen.op.io`, as profile name.
 
@@ -191,7 +191,7 @@ from the `jans-auth-server` workspace.
 #### Running The Tests
 
 Each module in Janssen Server has its tests that have to be executed separately.
-For example, to run integration tests for `jans-auth-server` module, run the 
+For example, to run integration tests for `jans-auth-server` module, run the
 following maven command at the directory level:
 
   ```
@@ -209,7 +209,7 @@ mvn clean compile install
 
 ### Configuring the jans-link module
 
-This module does not require a profile setup. It can be built with the below 
+This module does not require a profile setup. It can be built with the below
 maven command.
 
 ```shell
@@ -218,7 +218,7 @@ mvn clean compile install
 
 ### Configuring the jans-orm module
 
-This module does not require a profile setup. It can be built with the below 
+This module does not require a profile setup. It can be built with the below
 maven command.
 
 ```shell
@@ -227,7 +227,7 @@ mvn clean compile install
 
 ### Configuring the agama module
 
-This module does not require a profile setup. It can be built with the below 
+This module does not require a profile setup. It can be built with the below
 maven command.
 
 ```shell
@@ -263,7 +263,7 @@ setting up a profile for the server module.
 
 Post this, remove the `scim-client` directory.
 
-Now as the profile is setup, to build the `jans-scim` module and run tests, 
+Now as the profile is setup, to build the `jans-scim` module and run tests,
 use the command below:
 
   ```

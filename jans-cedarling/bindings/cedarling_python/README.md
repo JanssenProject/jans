@@ -116,6 +116,46 @@ CEDARLING_POLICY_STORE_LOCAL_FN=example_files/policy-store.json python example.p
 
 ## Configuration
 
+### Policy Store Sources
+
+Policy store sources can be configured via a YAML/JSON file or environment variables. Here are examples for each source type:
+
+```python
+from cedarling_python import BootstrapConfig, Cedarling
+
+# From a local JSON/YAML file
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
+# From a local directory (new format)
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_LOCAL_FN: "/path/to/policy-store/"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
+# From a local .cjar archive
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_LOCAL_FN: "/path/to/policy-store.cjar"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
+# From a URL (.cjar or Lock Server)
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
+# Using environment variables instead of a file
+import os
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.json"
+bootstrap_config = BootstrapConfig.from_env()
+instance = Cedarling(bootstrap_config)
+```
+
+For a complete working example showing the full instantiation flow, see [`example.py`](example.py).
+
+For details on the directory-based format and .cjar archives, see [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats).
+
 ### ID Token Trust Mode
 
 The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
@@ -146,6 +186,146 @@ os.environ['CEDARLING_JWT_SIG_VALIDATION'] = 'disabled'
 ```
 
 For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+### Push Data
+
+Store data with an optional TTL (Time To Live):
+
+```python
+from cedarling_python import Cedarling, BootstrapConfig
+
+config = BootstrapConfig.load_from_file("bootstrap-config.yaml")
+instance = Cedarling(config)
+
+# Push data without TTL (uses default from config)
+instance.push_data_ctx("user:123", {"role": ["admin", "editor"], "country": "US"})
+
+# Push data with TTL (5 minutes = 300 seconds)
+instance.push_data_ctx("config:app", {"setting": "value"}, ttl_secs=300)
+
+# Push different data types
+instance.push_data_ctx("key1", "string_value")
+instance.push_data_ctx("key2", 42)
+instance.push_data_ctx("key3", [1, 2, 3])
+instance.push_data_ctx("key4", {"nested": "data"})
+```
+
+### Get Data
+
+Retrieve stored data:
+
+```python
+# Get data by key
+# Note: get_data_ctx returns None for missing keys, not KeyNotFound
+value = instance.get_data_ctx("user:123")
+if value is not None:
+    print(f"User roles: {value['role']}")
+```
+
+### Get Data Entry with Metadata
+
+Get a data entry with full metadata including creation time, expiration, access count, and type:
+
+```python
+# Note: get_data_entry_ctx returns None for missing keys, not KeyNotFound
+entry = instance.get_data_entry_ctx("user:123")
+if entry is not None:
+    print(f"Key: {entry.key}")
+    print(f"Created at: {entry.created_at}")
+    print(f"Access count: {entry.access_count}")
+    print(f"Data type: {entry.data_type}")
+    print(f"Value: {entry.value}")
+```
+
+### Remove Data
+
+Remove a specific entry:
+
+```python
+# Remove data by key
+removed = instance.remove_data_ctx("user:123")
+if removed:
+    print("Entry was removed")
+else:
+    print("Entry did not exist")
+```
+
+### Clear All Data
+
+Remove all entries from the data store:
+
+```python
+instance.clear_data_ctx()
+```
+
+### List All Data
+
+List all entries with their metadata:
+
+```python
+entries = instance.list_data_ctx()
+for entry in entries:
+    print(f"Key: {entry.key}, Type: {entry.data_type}, Created: {entry.created_at}")
+```
+
+### Get Statistics
+
+Get statistics about the data store:
+
+```python
+stats = instance.get_stats_ctx()
+print(f"Entries: {stats.entry_count}/{stats.max_entries}")
+print(f"Total size: {stats.total_size_bytes} bytes")
+print(f"Capacity usage: {stats.capacity_usage_percent}%")
+```
+
+### Error Handling
+
+The Context Data API methods raise specific exceptions for different error conditions:
+
+```python
+from cedarling_python import data_errors
+
+try:
+    instance.push_data_ctx("", {"data": "value"})  # Empty key
+except data_errors.InvalidKey:
+    print("Invalid key provided")
+
+# Note: get_data_ctx and get_data_entry_ctx return None for missing keys,
+# not KeyNotFound. KeyNotFound is only raised for operation failures.
+value = instance.get_data_ctx("nonexistent")
+if value is None:
+    print("Key not found")
+```
+
+Available exceptions:
+- `InvalidKey`: The provided key is invalid (e.g., empty)
+- `KeyNotFound`: Raised for operation failures (not for missing keys - `get_data_ctx` and `get_data_entry_ctx` return `None` for missing keys)
+- `StorageLimitExceeded`: The data store has reached its capacity limit
+- `TTLExceeded`: The requested TTL exceeds the maximum allowed TTL
+- `ValueTooLarge`: The value exceeds the maximum entry size
+- `SerializationError`: Failed to serialize/deserialize the value
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Jans::Action::"read",
+    resource
+) when {
+    context.data has "user:123" &&
+    context.data["user:123"].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
 
 ## Building the Python Library
 

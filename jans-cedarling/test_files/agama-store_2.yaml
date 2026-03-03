@@ -76,6 +76,9 @@ policy_stores:
       encoding: none
       content_type: cedar
       body: |-
+          namespace TestAgama{
+              entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
+          }
           namespace Jans {
           type Context = {"current_time": Long, "device_health": Set < String >, "fraud_indicators": Set < String >, "geolocation": Set < String >, "network": String, "network_type": String, "operating_system": String, "user_agent": String};
           type email_address = {"domain": String, "uid": String};

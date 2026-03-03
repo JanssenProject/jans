@@ -1,5 +1,7 @@
 package io.jans.model.tokenstatus;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +20,7 @@ public class StatusList {
     private BitSet list;
     private final int bits;
     private final int divisor;
+    private String aggregationUri;
 
     public StatusList(int bits) {
         this.divisor = 8 / bits;
@@ -48,6 +51,9 @@ public class StatusList {
         Map<String, Object> object = new HashMap<>();
         object.put("bits", this.bits);
         object.put("lst", encodedList);
+        if (StringUtils.isNotEmpty(this.aggregationUri)) {
+            object.put("aggregation_uri", this.aggregationUri);
+        }
         return object;
     }
 
@@ -166,5 +172,13 @@ public class StatusList {
 
     public String getLst() throws IOException {
         return encodeAsString();
+    }
+
+    public String getAggregationUri() {
+        return aggregationUri;
+    }
+
+    public void setAggregationUri(String aggregationUri) {
+        this.aggregationUri = aggregationUri;
     }
 }

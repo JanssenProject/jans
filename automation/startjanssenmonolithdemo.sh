@@ -41,7 +41,8 @@ sudo apt-get install \
   curl \
   gnupg \
   python3-pip \
-  lsb-release -y
+  lsb-release \
+  git -y
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo \

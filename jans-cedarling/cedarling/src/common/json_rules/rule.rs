@@ -3,11 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use datalogic_rs::Rule;
+use datalogic_rs::CompiledLogic;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::sync::Arc;
 
-/// JsonLogic rule using [JsonLogic](https://jsonlogic.com/)
+use super::ENGINE;
+
+/// `JsonLogic` rule using [JsonLogic](https://jsonlogic.com/)
 /// Default implementation:
 /// ```json
 /// {
@@ -19,7 +22,7 @@ use serde_json::Value;
 /// ```
 #[derive(Debug, Clone)]
 pub struct JsonRule {
-    rule: Rule,
+    compiled: Arc<CompiledLogic>,
     value: Value,
 }
 
@@ -36,20 +39,20 @@ impl From<datalogic_rs::Error> for ParseRuleError {
 }
 
 impl JsonRule {
-    /// Create a new `JsonRule` from a JSON value.
+    /// Create a new [`JsonRule`] from a JSON value.
     pub fn new(rule_value: Value) -> Result<Self, ParseRuleError> {
-        let rule = Rule::from_value(&rule_value)?;
+        let compiled = ENGINE.compile(&rule_value)?;
 
         Ok(JsonRule {
-            rule,
+            compiled,
             value: rule_value,
         })
     }
 
-    /// Get the underlying `Rule` object.
+    /// Get the underlying compiled logic.
     #[inline]
-    pub(crate) fn rule(&self) -> &Rule {
-        &self.rule
+    pub(crate) fn rule(&self) -> &CompiledLogic {
+        &self.compiled
     }
 }
 
@@ -80,7 +83,7 @@ impl<'de> Deserialize<'de> for JsonRule {
         let value = Value::deserialize(deserializer)?;
 
         let rule = JsonRule::new(value).map_err(|e| {
-            serde::de::Error::custom(format!("Failed to deserialize JSON rule: {}", e))
+            serde::de::Error::custom(format!("Failed to deserialize JSON rule: {e}"))
         })?;
         Ok(rule)
     }

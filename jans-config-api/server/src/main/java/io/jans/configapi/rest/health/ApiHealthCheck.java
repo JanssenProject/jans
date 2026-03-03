@@ -35,7 +35,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import java.util.ArrayList;
-import java.util.Map;
+
 
 @Path(ApiConstants.HEALTH)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -134,6 +134,11 @@ public class ApiHealthCheck  {
         }
     }
 
+    /**
+     * Retrieve current application server statistics.
+     *
+     * @return a JAX-RS Response whose entity is a StatsData object containing current server statistics (returned with HTTP 200).
+     */
     @Operation(summary = "Returns application server status", description = "Returns application server status", operationId = "get-server-stat", tags = {
     "Health - Check" })
     @ApiResponses(value = {
@@ -149,14 +154,24 @@ public class ApiHealthCheck  {
 
     }
 
+    /**
+     * Retrieve version information for the specified artifact.
+     *
+     * @param artifact the artifact name to query; use "ALL" to request versions for all artifacts
+     * @return a Response whose entity is a JSON object containing version data for the requested artifact
+     */
     @Operation(summary = "Returns application version", description = "Returns application version", operationId = "get-app-version", tags = {
-    "Health - Check" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            ApiAccessConstants.APP_VERSION_READ_ACCESS }))
+    "Health - Check" }, 
+            security = {
+            @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.APP_VERSION_READ_ACCESS }),
+            @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.HEALTH_ADMIN_ACCESS }),
+            @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    })
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.APP_VERSION_READ_ACCESS }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { ApiAccessConstants.APP_VERSION_READ_ACCESS }, groupScopes = {ApiAccessConstants.HEALTH_ADMIN_ACCESS}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.APP_VERSION)
     public Response getApplicationVersion(@Parameter(description = "artifact name for which version is requied else ALL") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.ARTIFACT) String artifact) {
@@ -164,14 +179,23 @@ public class ApiHealthCheck  {
         return Response.ok(statusCheckerTimer.getAppVersionData(artifact)).build();
     }
 
+    /**
+     * Retrieves status information for a specified service.
+     *
+     * @param service the service name to check; use ApiConstants.ALL to request status for all services (default)
+     * @return a JsonNode containing the service status payload
+     */
     @Operation(summary = "Fetch service status", description = "Fetch service status", operationId = "get-service-status", tags = {
-            "Health - Check" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.APP_DATA_READ_ACCESS }))
+            "Health - Check" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.APP_DATA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.HEALTH_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.APP_DATA_READ_ACCESS }, groupScopes = {}, superScopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.APP_DATA_READ_ACCESS }, groupScopes = {ApiAccessConstants.HEALTH_ADMIN_ACCESS}, superScopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS})
     @Path(ApiConstants.SERVICE_STATUS_PATH)
     public Response getServiceStatus(
             @Parameter(description = "Service name to check status") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.JANS_SERVICE_NAME) String service) {

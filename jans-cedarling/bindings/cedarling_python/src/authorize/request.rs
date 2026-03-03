@@ -58,14 +58,14 @@ impl Request {
 
 impl Request {
     pub fn to_cedarling(&self) -> Result<cedarling::Request, PyErr> {
-        let tokens = Python::with_gil(|py| -> Result<HashMap<String, String>, PyErr> {
+        let tokens = Python::attach(|py| -> Result<HashMap<String, String>, PyErr> {
             let tokens = self.tokens.clone_ref(py).into_bound(py);
             from_pyobject(tokens).map_err(|err| {
                 PyRuntimeError::new_err(format!("Failed to convert tokens to json: {}", err))
             })
         })?;
 
-        let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
+        let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
             let context = self.context.clone_ref(py).into_bound(py);
             from_pyobject(context).map_err(|err| {
                 PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))

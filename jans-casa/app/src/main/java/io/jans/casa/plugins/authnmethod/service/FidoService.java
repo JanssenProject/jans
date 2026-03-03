@@ -8,7 +8,6 @@ import io.jans.casa.conf.MainSettings;
 import io.jans.casa.core.model.DeviceRegistration;
 import io.jans.casa.core.model.Fido2RegistrationEntry;
 import io.jans.casa.core.pojo.FidoDevice;
-import io.jans.casa.core.pojo.SuperGluuDevice;
 import org.slf4j.Logger;
 import org.zkoss.util.Pair;
 
@@ -130,9 +129,6 @@ public class FidoService extends BaseService {
         for (Fido2RegistrationEntry deviceRegistration : list) {
             T device = clazz.getConstructor().newInstance();
 
-            if (clazz.equals(SuperGluuDevice.class)) {
-                ((SuperGluuDevice) device).setDeviceData(deviceRegistration.getDeviceData());
-            }
             device.setApplication(deviceRegistration.getApplication());
             device.setNickName(deviceRegistration.getDisplayName());
             device.setStatus(deviceRegistration.getRegistrationStatus());

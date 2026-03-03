@@ -30,7 +30,7 @@ Note:
 
 ---------------------------------------------
 
-## General Purpose shortcuts 
+## General Purpose shortcuts
 
 *  `f1` :  
 Open help dialog (currently, help dialog is static, in the near future it will dynamically change according to the current position inside the TUI )
@@ -45,15 +45,15 @@ Close any dialog or even nested dialog
 * `Ctrl+c`(Terminate) :  
 Terminate the program (SIGINT)
 
-!!! Note 
+!!! Note
 
     Configuration changes made through the CLI or Config-API may not immediately reflect in the current view of the TUI. To refresh the interface and see the latest updates, you can either switch to a different TUI tab and return, or restart the TUI application. TUI fetches configuration data from the backend server at the start of the TUI session. So, a restart of TUI will load fresh data.
-    
+
 
 ------------------------------------
 
-## Navigation Shortcuts  
-### General Navigation shortcuts  
+## Navigation Shortcuts
+### General Navigation shortcuts
 
 * `tab`(Next):  
 focus on the next field or widget.  
@@ -69,7 +69,7 @@ focus on the previous field or widget
 * `PageUp`(Next tab):  
 Jump to the next tab in dialogs (ex: Client dialog)
 
-Note:  
+Note:
 * the focus must be inside the current tab  
 * In the Gif provided, the focus was inside the tab itself before we can press the `PageUp` key  
 * If the focus is on the tab name itself, we can navigate to other tabs by the `Up` key and `Down` key  
@@ -85,12 +85,12 @@ Note:
 
 ![page_up](https://user-images.githubusercontent.com/63171603/216956999-5c813da5-f3a8-4755-9324-a4694b06ab68.gif)
 
-### Main tabs Navigation shortcuts  
+### Main tabs Navigation shortcuts
 
 * `Alt + key`  
 You can navigate to any tab inside the TUI by using the `Alt` key followed by a certain letter from the tab you want to navigate too  
 
-Note:  
+Note:
 * the colored character inside each Tab name is the specified letter for the navigation.  
 * you can't navigate from a tab in the main top navigation bar to a nested navigation bar inside another tab, you must navigate to it first.  
 
@@ -107,15 +107,15 @@ examples on the navigation letters for the main navigation bar:
 
 -----------------------------------------
 
-## Custom widget shortcuts 
+## Custom widget shortcuts
 
-Note:  
+Note:
 * This section contains any widgets with special shortcuts and behavior  
 
-### Lists (Vertical Nav bar)  
+### Lists (Vertical Nav bar)
 currently, we have about 6 List widgets
 
-Note:  
+Note:
 * Any list widget can be navigated between its items by the `Up` key and `Down` key  
 * There are some shortcuts here that can be used in most but not all List widgets  
 

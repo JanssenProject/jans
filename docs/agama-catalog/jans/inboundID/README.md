@@ -51,7 +51,7 @@ The actual process of inbound identity occurs here. This flow is already [implem
 
 1. The flow finishes successfully and the user gets access to the target application
 
-Note the above design does not involve communication protocols. It is responsability of the concrete provider flow how to implement this aspect. The main flow can remain unmodified regardless of any change in existing flows or when new ones are added. 
+Note the above design does not involve communication protocols. It is responsability of the concrete provider flow how to implement this aspect. The main flow can remain unmodified regardless of any change in existing flows or when new ones are added.
 
 Feel free to modify this flow or create one based on it if customizations are required.
 
@@ -80,7 +80,7 @@ cd jans/docs/agama-catalog/jans/inboundID/project
 
 ### Deploy the archive
 
-Transfer the archive to your server, and then run `/opt/jans/jans-cli/jans_cli_tui.py`. Follow the prompts and then enter the Agama menu (`Alt + m`). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file. 
+Transfer the archive to your server, and then run `/opt/jans/jans-cli/jans_cli_tui.py`. Follow the prompts and then enter the Agama menu (`Alt + m`). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file.
 
 Wait 30 seconds and press the `d` key. This will show the result of the deployment. Ensure no errors are reported.
 
@@ -152,7 +152,7 @@ Property `oauthParams` adheres to the following structure:
 
 |Name|Description|
 |-|-|
-|`authzEndpoint`|The authorization endpoint as in section 3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)| 
+|`authzEndpoint`|The authorization endpoint as in section 3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
 |`tokenEndpoint`|The token endpoint as in section 3.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
 |`userInfoEndpoint`|The endpoint where profile data can be retrieved. This is not part of the OAuth2 specification|
 |`clientId`|The identifier of the client to use, see section 1.1 and 2.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749). This client is assumed to be *confidential* as in section 2.1|
@@ -192,7 +192,7 @@ As an example suppose a provider returned the following:
 
 None of this attributes exist in Janssen; database adheres to LDAP naming. Conformant names would be `uid`, `mail`, `sn`, and `givenName`. Also, let's assume you want to set `displayName` to a string composed by the first and last names separated by a white space. Writing a mapping is required.
 
-A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, that is, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java). 
+A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, that is, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java).
 
 Note property `mappingClassField` of every provider defined in the main flow points to the fully qualified name of a mapping. Not all mappings have to belong to the same class.
 
@@ -202,13 +202,13 @@ Once the JSON file you have been editing is ready, hit `c` key again in TUI. Thi
 
 ## Test
 
-Launch the main flow (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/jans-agama-engine/#launching-flows)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it links to the providers sites. When clicking on a link, the browser will be taken to the given website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is returned back to your server and then to the target application as described [earlier](#main-flow). 
+Launch the main flow (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/jans-agama-engine/#launching-flows)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it links to the providers sites. When clicking on a link, the browser will be taken to the given website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is returned back to your server and then to the target application as described [earlier](#main-flow).
 
 ## How to add another provider?
 
 **Note**: If you want to integrate Apple Sign In, skip this section: guidelines are included at the end of this document.
 
-In practice most identity providers adhere to the OAuth2 `code` grant and require configurations similar to the sample provided. Follow these steps: 
+In practice most identity providers adhere to the OAuth2 `code` grant and require configurations similar to the sample provided. Follow these steps:
 
 1. In your local machine, create a new project with the required layout: directories `web`, `code` and `lib`
 1. Place the logo inside `web`
@@ -235,9 +235,9 @@ Ensure you went through [this](#attribute-mappings) already. Some important cons
 - A mapping has to be declared as a public field in a public class
 - Several providers can use the same mapping
 
-While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the `lib` directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in `lib` corresponding to your class package. 
+While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the `lib` directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in `lib` corresponding to your class package.
 
-A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension and edit the body of the lambda expression. 
+A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension and edit the body of the lambda expression.
 
 <!--
 Also you have to update the main flow as follows:
@@ -262,7 +262,7 @@ Ensure you have an Apple developer account to start. [This tutorial](https://git
 
 You will be prompted to provide a domain name and a return URL. Provide `<your-jans-host>` and `https://<your-jans-host>/jans-auth/fl/callback` respectively, ensuring the changes are effectively saved in the developer's portal.
 
-The configuration for this provider would look like: 
+The configuration for this provider would look like:
 
 ```
 "apple": {

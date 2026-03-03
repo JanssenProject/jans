@@ -11,14 +11,14 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAccessEvaluationService;
 import io.jans.as.server.service.token.TokenService;
-import io.jans.model.authzen.AccessEvaluationRequest;
-import io.jans.model.authzen.AccessEvaluationResponse;
+import io.jans.model.authzen.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.net.URLDecoder;
@@ -30,6 +30,9 @@ import java.util.List;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
+ * AuthZEN Access Evaluation Service.
+ * Handles single and batch evaluations per AuthZEN spec.
+ *
  * @author Yuriy Z
  */
 @ApplicationScoped
@@ -61,6 +64,9 @@ public class AccessEvaluationService {
     @Inject
     private ScopeService scopeService;
 
+    /**
+     * Single evaluation.
+     */
     public AccessEvaluationResponse evaluation(AccessEvaluationRequest request, ExecutionContext executionContext) {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
 
@@ -70,6 +76,85 @@ public class AccessEvaluationService {
 
         log.debug("Access Evaluation response {}", response);
         return response;
+    }
+
+    /**
+     * Batch evaluations with semantic options.
+     * Supports: execute_all, deny_on_first_deny, permit_on_first_permit
+     */
+    public AccessEvaluationsResponse evaluations(AccessEvaluationRequest request, ExecutionContext executionContext) {
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
+
+        accessEvaluationValidator.validateAccessEvaluationsRequest(request);
+
+        final List<AccessEvaluationRequest> evaluationRequests = request.getEvaluations();
+        final String semantic = getEvaluationsSemantic(request.getOptions());
+        final List<AccessEvaluationResponse> results = new ArrayList<>();
+
+        for (AccessEvaluationRequest evalRequest : evaluationRequests) {
+            // Merge defaults from parent request
+            AccessEvaluationRequest mergedRequest = mergeWithDefaults(evalRequest, request);
+            accessEvaluationValidator.validateAccessEvaluationRequest(mergedRequest);
+
+            AccessEvaluationResponse response = externalAccessEvaluationService.externalEvaluate(mergedRequest, executionContext);
+            results.add(response);
+
+            // Apply semantic short-circuit logic per AuthZEN spec
+            // When short-circuiting, add reason to the last response's context
+            if (EvaluationOptions.DENY_ON_FIRST_DENY.equals(semantic) && !response.isDecision()) {
+                log.debug("Batch evaluation short-circuited: deny_on_first_deny triggered");
+                addShortCircuitReason(response, EvaluationOptions.DENY_ON_FIRST_DENY);
+                break;
+            }
+            if (EvaluationOptions.PERMIT_ON_FIRST_PERMIT.equals(semantic) && response.isDecision()) {
+                log.debug("Batch evaluation short-circuited: permit_on_first_permit triggered");
+                addShortCircuitReason(response, EvaluationOptions.PERMIT_ON_FIRST_PERMIT);
+                break;
+            }
+        }
+
+        AccessEvaluationsResponse response = new AccessEvaluationsResponse(results);
+        log.debug("Access Evaluations response {}", response);
+        return response;
+    }
+
+    /**
+     * Merge individual evaluation request with defaults from batch request.
+     */
+    protected AccessEvaluationRequest mergeWithDefaults(AccessEvaluationRequest evalRequest, AccessEvaluationRequest batchRequest) {
+        AccessEvaluationRequest merged = new AccessEvaluationRequest();
+
+        // Use individual values if present, otherwise fall back to defaults
+        merged.setSubject(evalRequest.getSubject() != null ? evalRequest.getSubject() : batchRequest.getSubject());
+        merged.setResource(evalRequest.getResource() != null ? evalRequest.getResource() : batchRequest.getResource());
+        merged.setAction(evalRequest.getAction() != null ? evalRequest.getAction() : batchRequest.getAction());
+        merged.setContext(evalRequest.getContext() != null ? evalRequest.getContext() : batchRequest.getContext());
+
+        return merged;
+    }
+
+    /**
+     * Get evaluations semantic, defaulting to execute_all.
+     */
+    protected String getEvaluationsSemantic(EvaluationOptions options) {
+        if (options != null && StringUtils.isNotBlank(options.getEvaluationsSemantic())) {
+            return options.getEvaluationsSemantic();
+        }
+        return EvaluationOptions.EXECUTE_ALL;
+    }
+
+    /**
+     * Add short-circuit reason to response context per AuthZEN spec.
+     * When batch evaluation short-circuits, the last response should include
+     * context with reason indicating why processing stopped.
+     */
+    protected void addShortCircuitReason(AccessEvaluationResponse response, String reason) {
+        AccessEvaluationResponseContext context = response.getContext();
+        if (context == null) {
+            context = new AccessEvaluationResponseContext();
+            response.setContext(context);
+        }
+        context.setReason(reason);
     }
 
     public void validateAuthorization(String authorization) {

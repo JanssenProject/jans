@@ -25,7 +25,7 @@ On "Create User" button click user is created and redirected Authorization Endpo
 
 ![Create User](../../../assets/create-user.png)
 
-If more or custom fields has to be shown then custom page should be added and ["CreateUser" custom script](../../developer/scripts/create-user.md) 
+If more or custom fields have to be shown then custom page should be added and ["CreateUser" custom script](../../../script-catalog/create_user/create-user.md)
 should redirect to that custom page.
 
 ```java
@@ -34,7 +34,7 @@ public String getCreateUserPage(Object context) {
 }
 ```
 
-- ["CreateUser" custom script](../../developer/scripts/create-user.md)
+- ["CreateUser" custom script](../../../script-catalog/create_user/create-user.md)
 
 
 # Prompt NONE

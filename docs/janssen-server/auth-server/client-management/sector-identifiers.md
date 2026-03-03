@@ -10,8 +10,8 @@ tags:
 Janssen Server supports sector identifier URI and pairwise subject IDs for OpenId Connect relying party.
 As defined in [OpenId Connect core specification](https://openid.net/specs/openid-connect-core-1_0.html#Terminology), the
 sector identifiers value is used to derive pairwise subject IDs. Janssen Server also supports `Sector Identifier URI` as
-part of client configuration. `Sector Identifier URI` when used with `pairwise` subject type, enables a group of 
-websites under the same administrative control to receive the same subject identifiers. 
+part of client configuration. `Sector Identifier URI` when used with `pairwise` subject type, enables a group of
+websites under the same administrative control to receive the same subject identifiers.
 `Sector Identifier URI` also allows clients to
 change the host component of the redirect URI and still keep the subject identifiers unchanged.
 

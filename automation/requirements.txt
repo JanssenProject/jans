@@ -4,3 +4,6 @@ dockerfile-parse
 requests-html
 lxml-html-clean>=0.4.0
 websockets>=10.0 # not directly required, pinned by Snyk to avoid a vulnerability
+requests>=2.32.4 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability

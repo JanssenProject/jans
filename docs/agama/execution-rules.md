@@ -7,10 +7,10 @@ tags:
 
 # Flows execution rules
 
-This document regards flow execution details. Engines implementing the Agama framework must account these aspects fully. 
+This document regards flow execution details. Engines implementing the Agama framework must account these aspects fully.
 
 !!! Important
-    The concept of "_top-level_" flow is used in several places throughout this page. It refers to a flow which has been directly launched from the user browser and hence has no parents (no callers).    
+    The concept of "_top-level_" flow is used in several places throughout this page. It refers to a flow which has been directly launched from the user browser and hence has no parents (no callers).
 
 ## Flows lifecycle
 
@@ -22,7 +22,7 @@ In some cases, the `Finish` instruction is not reached because the flow:
 - has been cancelled
 - has timed out
 
-More on these conditions below. Otherwise, the flow is said to have **finished** and depending on the actual arguments passed to `Finish`, it can be said the flow finished _successfully_  or the flow _failed_. 
+More on these conditions below. Otherwise, the flow is said to have **finished** and depending on the actual arguments passed to `Finish`, it can be said the flow finished _successfully_  or the flow _failed_.
 
 ## Successful flows
 
@@ -58,7 +58,7 @@ The `Timeout` directive specifies a maximum allowable execution time for a _top-
 
 Cancellation allows a flow to early interrupt the execution of a given subflow thus enabling the implementation of alternative routing without the need of re-writing subflows. It can only take place upon the execution of a given `RRF` instruction part of a subflow that has been `Trigger`ed.
 
-This feature is better understood via [examples](../janssen-server/developer/agama/advanced-usages.md#cancellation) - note the link provided is specific to the Janssen Server engine only. Other engines may implement cancellation in a different way, the only requirement is to preserve the convention that the returned value of a cancelled flow must be of the form: `{ aborted: true, data: ..., url: ... }`. 
+This feature is better understood via [examples](../janssen-server/developer/agama/advanced-usages.md#cancellation) - note the link provided is specific to the Janssen Server engine only. Other engines may implement cancellation in a different way, the only requirement is to preserve the convention that the returned value of a cancelled flow must be of the form: `{ aborted: true, data: ..., url: ... }`.
 
 ## Launching flows
 
@@ -84,7 +84,7 @@ Engines may support one or more templating technologies and file formats for ren
 
 ### Languages support
 
-At least one programming language should be supported by an engine. This feature is critical because Agama DSL was designed to force developers use a distinct, more powerful language when the task at hand cannot be implemented by simple data manipulation or comparison of values. 
+At least one programming language should be supported by an engine. This feature is critical because Agama DSL was designed to force developers use a distinct, more powerful language when the task at hand cannot be implemented by simple data manipulation or comparison of values.
 
 ### Routines lookup
 
@@ -101,13 +101,13 @@ In OOP, it is not uncommon to have a method `S` with several different signature
 
 ### Errors
 
-In the execution of the call, if an error occurs, the engine should raise an error catchable in Agama code. The structure or data type of this error is an engine-specific detail. Ideally the error should be easily inspected in Agama code so any required further processing is feasible in a flow. 
+In the execution of the call, if an error occurs, the engine should raise an error catchable in Agama code. The structure or data type of this error is an engine-specific detail. Ideally the error should be easily inspected in Agama code so any required further processing is feasible in a flow.
 
 ### Types compatibility
 
 The arguments conversion/compatibility is also an important topic. Most likely [Agama types](./language-reference.md#data-types) will not match the (foreign) target language types. This means passing a "native" Agama value as parameter in a method `Call` requires some form of compatibility with the target type in the  routine (method) signature. When compatibility does not make sense, seems too complex, or impossible, invocation should "crash" by raising some form of error.
 
-The same analysis has to be done in the other direction: from the target language to Agama. This is for the case where the `Call` returns a value. Such value should be "manipulable" in Agama code. 
+The same analysis has to be done in the other direction: from the target language to Agama. This is for the case where the `Call` returns a value. Such value should be "manipulable" in Agama code.
 
 ### Other considerations
 

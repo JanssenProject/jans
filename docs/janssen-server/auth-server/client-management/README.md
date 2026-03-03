@@ -42,7 +42,7 @@ A client can be created (and managed) by using one of the following tools offere
 * [Jans Text UI (TUI)](../../config-guide/config-tools/jans-tui/README.md)
 * [OpenID Connect Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html)
 
-The choice of tool should be made based on your business requirement. 
+The choice of tool should be made based on your business requirement.
 - For *ad hoc* creation, the TUI is great. 
 - If you need to quickly script client creation (e.g. in a bash script) use the CLI 
 - Use `curl` to call the Jans Config API. 

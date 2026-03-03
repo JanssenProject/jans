@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
@@ -69,8 +71,39 @@ public class Fido2MetricsData implements Serializable {
     @JsonProperty("timestamp")
     private LocalDateTime timestamp;
 
+    @JsonProperty("session_id")
+    private String sessionId;
+
+    @JsonProperty("ip_address")
+    private String ipAddress;
+
+    @JsonProperty("user_agent")
+    private String userAgent;
+
+    @JsonProperty("node_id")
+    private String nodeId;
+
+    @JsonProperty("application_type")
+    private String applicationType;
+
+    @JsonProperty("metric_type")
+    private String metricType;
+
+    @JsonProperty("retry_count")
+    private Integer retryCount;
+
+    @JsonProperty("concurrent_operations")
+    private Integer concurrentOperations;
+
+    @JsonProperty("memory_usage_mb")
+    private Long memoryUsageMb;
+
+    @JsonProperty("cpu_usage_percent")
+    private Double cpuUsagePercent;
+
     public Fido2MetricsData() {
-        this.timestamp = LocalDateTime.now();
+        // Use UTC timezone to align with existing FIDO2 services
+        this.timestamp = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
     }
 
     // Getters and Setters
@@ -192,6 +225,86 @@ public class Fido2MetricsData implements Serializable {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public String getApplicationType() {
+        return applicationType;
+    }
+
+    public void setApplicationType(String applicationType) {
+        this.applicationType = applicationType;
+    }
+
+    public String getMetricType() {
+        return metricType;
+    }
+
+    public void setMetricType(String metricType) {
+        this.metricType = metricType;
+    }
+
+    public Integer getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    public Integer getConcurrentOperations() {
+        return concurrentOperations;
+    }
+
+    public void setConcurrentOperations(Integer concurrentOperations) {
+        this.concurrentOperations = concurrentOperations;
+    }
+
+    public Long getMemoryUsageMb() {
+        return memoryUsageMb;
+    }
+
+    public void setMemoryUsageMb(Long memoryUsageMb) {
+        this.memoryUsageMb = memoryUsageMb;
+    }
+
+    public Double getCpuUsagePercent() {
+        return cpuUsagePercent;
+    }
+
+    public void setCpuUsagePercent(Double cpuUsagePercent) {
+        this.cpuUsagePercent = cpuUsagePercent;
     }
 
     /**

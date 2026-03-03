@@ -1,7 +1,12 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use serde_json::Value;
 use std::mem::size_of;
 
-pub fn calculate_memory_usage(value: &Value) -> usize {
+pub(super) fn calculate_memory_usage(value: &Value) -> usize {
     let mut total = size_of::<Value>(); // Root stack size (32 bytes)
     add_heap_usage(value, &mut total);
     total
@@ -36,9 +41,7 @@ fn add_heap_usage(value: &Value, total: &mut usize) {
                 add_heap_usage(value, total);
             }
         },
-        // next values are alocated on the stack and size taken into account
-        Value::Number(_) => {},
-        Value::Null => {},
-        Value::Bool(_) => {},
+        // next values are allocated on the stack and size taken into account
+        Value::Number(_) | Value::Null | Value::Bool(_) => {},
     }
 }

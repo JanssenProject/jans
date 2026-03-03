@@ -140,6 +140,9 @@ Create aio enabled list
 {{- if .Values.saml.enabled}}
 {{ $newList = append $newList ("jans-saml") }}
 {{- end}}
+{{- if .Values.shibboleth.enabled}}
+{{ $newList = append $newList ("jans-shibboleth") }}
+{{- end}}
 {{ toJson $newList }}
 {{- end }}
 
@@ -269,6 +272,19 @@ Create JAVA_OPTIONS ENV for passing custom work and detailed logs
 {{- define "saml.customJavaOptions"}}
 {{ $custom := "" }}
 {{ $custom = printf "%s" .Values.saml.cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
+Create JAVA_OPTIONS ENV for Shibboleth IDP
+*/}}
+{{- define "shibboleth.customJavaOptions"}}
+{{ $custom := "" }}
+{{ $custom = printf "%s" .Values.shibboleth.cnCustomJavaOptions }}
 {{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
 {{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.10) 1 ) -}}
 {{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.7)) -}}

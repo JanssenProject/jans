@@ -3,19 +3,22 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::*;
+use super::{
+    Arc, AttrSrc, BuildEntityError, BuildEntityErrorKind, BuiltEntities, EntityBuilder,
+    EntityIdSrc, HashMap, PrincipalIdSrc, Token, TokenPrincipalMappings,
+};
 
 use cedar_policy::Entity;
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 const WORKLOAD_ATTR_SRC_TKNS: &[&str] = &["access_token"];
 
 impl EntityBuilder {
     // TODO: we might need to add support for setting the 'spiffe_id' attribute to be
     // either the 'aud' or 'client_id' claim eventually
-    pub fn build_workload_entity(
+    pub(crate) fn build_workload_entity(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
     ) -> Result<Entity, BuildEntityError> {
@@ -36,7 +39,7 @@ impl EntityBuilder {
             return Err(BuildEntityErrorKind::NoAvailableTokensToBuildEntity(
                 WORKLOAD_ATTR_SRC_TKNS
                     .iter()
-                    .map(|s| s.to_string())
+                    .map(|s| (*s).to_string())
                     .collect(),
             )
             .while_building(type_name));
@@ -44,7 +47,7 @@ impl EntityBuilder {
 
         self.build_principal_entity(
             type_name,
-            id_srcs,
+            &id_srcs,
             attrs_srcs,
             tkn_principal_mappings,
             built_entities,
@@ -57,7 +60,7 @@ impl EntityBuilder {
 ///
 /// This struct provides a method to extract workload-related entity IDs from a set of
 /// tokens. It looks for predefined claims within specific tokens to identify workloads.
-pub struct WorkloadIdSrcResolver;
+struct WorkloadIdSrcResolver;
 
 impl WorkloadIdSrcResolver {
     /// Resolves workload entity IDs from the provided authentication tokens.
@@ -71,7 +74,7 @@ impl WorkloadIdSrcResolver {
     /// - `access_token.aud`
     /// - `access_token.client_id`
     /// - `id_token.aud`
-    pub fn resolve(tokens: &HashMap<String, Token>) -> Vec<EntityIdSrc> {
+    fn resolve(tokens: &HashMap<String, Arc<Token>>) -> Vec<EntityIdSrc<'_>> {
         const DEFAULT_WORKLOAD_ID_SRCS: &[PrincipalIdSrc] = &[
             PrincipalIdSrc {
                 token: "access_token",
@@ -89,7 +92,7 @@ impl WorkloadIdSrcResolver {
 
         let mut eid_srcs = Vec::with_capacity(DEFAULT_WORKLOAD_ID_SRCS.len());
 
-        for src in DEFAULT_WORKLOAD_ID_SRCS.iter() {
+        for src in DEFAULT_WORKLOAD_ID_SRCS {
             if let Some(token) = tokens.get(src.token) {
                 // if a `workload_id` is availble in the token's entity metadata
                 let claim = if let Some(claim) =
@@ -102,7 +105,7 @@ impl WorkloadIdSrcResolver {
                 };
 
                 // then we add the fallbacks in-case the token does not have the claims.
-                if claim.map(|claim| claim == src.claim).unwrap_or(false) {
+                if claim.is_some_and(|claim| claim == src.claim) {
                     continue;
                 }
                 eid_srcs.push(EntityIdSrc::Token {
@@ -119,11 +122,15 @@ impl WorkloadIdSrcResolver {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::EntityBuilderConfig;
+    use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
-    use crate::entity_builder::test::*;
-    use cedar_policy::Schema;
-    use serde_json::json;
+    use crate::entity_builder::{TokenPrincipalMapping, TrustedIssuerIndex, test::*};
+    use cedar_policy::{EntityUid, RestrictedExpression, Schema};
+    use cedar_policy_core::validator::ValidatorSchema;
+    use serde_json::{Value, json};
     use std::collections::HashMap;
+    use std::str::FromStr;
     use std::sync::Arc;
 
     #[track_caller]
@@ -131,10 +138,10 @@ mod test {
         token: Token,
         builder: &EntityBuilder,
         tkn_principal_mappings: &TokenPrincipalMappings,
-        expected: Value,
+        expected: &Value,
         schema: Option<&Schema>,
     ) {
-        let tokens = HashMap::from([(token.name.clone(), token)]);
+        let tokens = HashMap::from([(token.name.clone(), Arc::new(token))]);
         let mut built_entities = BuiltEntities::from(&builder.iss_entities);
         built_entities.insert(
             &EntityUid::from_str("Jans::Access_token::\"some_jti\"").expect("a valid EntityUid"),
@@ -148,7 +155,7 @@ mod test {
 
     #[test]
     fn can_build_workload_with_aud_and_schema() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity Access_token;
@@ -159,7 +166,7 @@ mod test {
                     access_token?: Access_token,
                 };
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -168,9 +175,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -202,7 +209,7 @@ mod test {
             access_token,
             &builder,
             &tkn_principal_mappings,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Workload", "id": "some_aud"},
                 "attrs": {
                     "iss": {"__entity": {
@@ -223,7 +230,7 @@ mod test {
 
     #[test]
     fn can_build_workload_with_client_id_and_schema() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity TrustedIssuer;
                 entity Access_token;
@@ -234,7 +241,7 @@ mod test {
                     access_token?: Access_token,
                 };
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -243,9 +250,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -277,7 +284,7 @@ mod test {
             access_token,
             &builder,
             &tkn_principal_mappings,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Workload", "id": "some_client_id"},
                 "attrs": {
                     "iss": {"__entity": {
@@ -303,9 +310,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             None,
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
         let iss = Arc::new(iss);
@@ -336,7 +343,7 @@ mod test {
             access_token,
             &builder,
             &tkn_principal_mappings,
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Workload", "id": "some_aud"},
                 "attrs": {
                     "iss": "https://test.jans.org/",

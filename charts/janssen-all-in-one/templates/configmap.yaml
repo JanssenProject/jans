@@ -94,6 +94,8 @@ data:
   | replace "scriptLogLevel" "script_log_level"
   | replace "auditStatsLogTarget" "audit_log_target"
   | replace "auditStatsLogLevel" "audit_log_level"
+  | replace "lockLogTarget" "lock_log_target"
+  | replace "lockLogLevel" "lock_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
@@ -178,6 +180,7 @@ data:
   | squote
   }}
   {{- end }}
+  CN_CASA_ADMIN_ENABLED: {{ .Values.casa.adminEnabled | quote }}
   CN_SQL_PASSWORD_FILE: {{ .Values.cnSqlPasswordFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}

@@ -16,13 +16,14 @@ type Message struct {
 
 // GetMessages retrieves all messages
 func (c *Client) GetMessages(ctx context.Context) ([]Message, error) {
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.readonly")
+	scope := "https://jans.io/oauth/config/message.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	var messages []Message
-	if err = c.get(ctx, "/jans-config-api/api/v1/config/messages", token, &messages); err != nil {
+	if err = c.get(ctx, "/jans-config-api/api/v1/config/messages", token, scope, &messages); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -35,13 +36,14 @@ func (c *Client) CreateMessage(ctx context.Context, message *Message) (*Message,
 		return nil, fmt.Errorf("message is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &Message{}
-	if err := c.post(ctx, "/jans-config-api/api/v1/config/messages", token, message, ret); err != nil {
+	if err := c.post(ctx, "/jans-config-api/api/v1/config/messages", token, scope, message, ret); err != nil {
 		return nil, fmt.Errorf("post request failed: %w", err)
 	}
 
@@ -50,13 +52,14 @@ func (c *Client) CreateMessage(ctx context.Context, message *Message) (*Message,
 
 // GetMessage retrieves a specific message by ID
 func (c *Client) GetMessage(ctx context.Context, id string) (*Message, error) {
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.readonly")
+	scope := "https://jans.io/oauth/config/message.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &Message{}
-	if err = c.get(ctx, "/jans-config-api/api/v1/config/messages/"+id, token, ret); err != nil {
+	if err = c.get(ctx, "/jans-config-api/api/v1/config/messages/"+id, token, scope, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -69,13 +72,14 @@ func (c *Client) UpdateMessage(ctx context.Context, message *Message) (*Message,
 		return nil, fmt.Errorf("message is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &Message{}
-	if err := c.put(ctx, "/jans-config-api/api/v1/config/messages/"+message.ID, token, message, ret); err != nil {
+	if err := c.put(ctx, "/jans-config-api/api/v1/config/messages/"+message.ID, token, scope, message, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
@@ -84,12 +88,13 @@ func (c *Client) UpdateMessage(ctx context.Context, message *Message) (*Message,
 
 // DeleteMessage deletes a message by ID
 func (c *Client) DeleteMessage(ctx context.Context, id string) error {
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.delete(ctx, "/jans-config-api/api/v1/config/messages/"+id, token); err != nil {
+	if err := c.delete(ctx, "/jans-config-api/api/v1/config/messages/"+id, token, scope); err != nil {
 		return fmt.Errorf("delete request failed: %w", err)
 	}
 
@@ -135,14 +140,15 @@ type MessageConfiguration struct {
 
 func (c *Client) GetMessageConfiguration(ctx context.Context) (*MessageConfiguration, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.readonly")
+	scope := "https://jans.io/oauth/config/message.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	resp := &MessageConfiguration{}
 
-	if err = c.get(ctx, "/jans-config-api/api/v1/config/message", token, resp); err != nil {
+	if err = c.get(ctx, "/jans-config-api/api/v1/config/message", token, scope, resp); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -157,7 +163,7 @@ func (c *Client) PatchMessage(ctx context.Context, patches []PatchRequest) (*Mes
 
 	orig, err := c.GetMessageConfiguration(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
+		return nil, fmt.Errorf("failed to get message configuration: %w", err)
 	}
 
 	updates, err := createPatchesDiff(orig, patches)
@@ -169,12 +175,13 @@ func (c *Client) PatchMessage(ctx context.Context, patches []PatchRequest) (*Mes
 		return orig, nil
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/config/message", token, updates); err != nil {
+	if err := c.patch(ctx, "/jans-config-api/api/v1/config/message", token, scope, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 
@@ -183,14 +190,15 @@ func (c *Client) PatchMessage(ctx context.Context, patches []PatchRequest) (*Mes
 
 func (c *Client) GetMessagePostgres(ctx context.Context) (*PostgresMessageConfiguration, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.readonly")
+	scope := "https://jans.io/oauth/config/message.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	resp := &PostgresMessageConfiguration{}
 
-	if err = c.get(ctx, "/jans-config-api/api/v1/config/message/postgres", token, resp); err != nil {
+	if err = c.get(ctx, "/jans-config-api/api/v1/config/message/postgres", token, scope, resp); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -203,14 +211,15 @@ func (c *Client) CreateMessagePostgres(ctx context.Context, postgres *PostgresMe
 		return nil, fmt.Errorf("postgres is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &PostgresMessageConfiguration{}
 
-	if err := c.put(ctx, "/jans-config-api/api/v1/config/message/postgres", token, postgres, ret); err != nil {
+	if err := c.put(ctx, "/jans-config-api/api/v1/config/message/postgres", token, scope, postgres, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
@@ -225,7 +234,7 @@ func (c *Client) PatchMessagePostgres(ctx context.Context, patches []PatchReques
 
 	orig, err := c.GetMessagePostgres(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
+		return nil, fmt.Errorf("failed to get message/postgres configuration: %w", err)
 	}
 
 	updates, err := createPatchesDiff(orig, patches)
@@ -237,12 +246,13 @@ func (c *Client) PatchMessagePostgres(ctx context.Context, patches []PatchReques
 		return orig, nil
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/config/message/postgres", token, updates); err != nil {
+	if err := c.patch(ctx, "/jans-config-api/api/v1/config/message/postgres", token, scope, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 
@@ -251,14 +261,15 @@ func (c *Client) PatchMessagePostgres(ctx context.Context, patches []PatchReques
 
 func (c *Client) GetMessageRedis(ctx context.Context) (*RedisMessageConfiguration, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.readonly")
+	scope := "https://jans.io/oauth/config/message.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	resp := &RedisMessageConfiguration{}
 
-	if err = c.get(ctx, "/jans-config-api/api/v1/config/message/redis", token, resp); err != nil {
+	if err = c.get(ctx, "/jans-config-api/api/v1/config/message/redis", token, scope, resp); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -271,14 +282,15 @@ func (c *Client) CreateMessageRedis(ctx context.Context, redis *RedisMessageConf
 		return nil, fmt.Errorf("redis is nil")
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &RedisMessageConfiguration{}
 
-	if err := c.put(ctx, "/jans-config-api/api/v1/config/message/redis", token, redis, ret); err != nil {
+	if err := c.put(ctx, "/jans-config-api/api/v1/config/message/redis", token, scope, redis, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
@@ -293,7 +305,7 @@ func (c *Client) PatchMessageRedis(ctx context.Context, patches []PatchRequest) 
 
 	orig, err := c.GetMessageRedis(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
+		return nil, fmt.Errorf("failed to get message/redis configuration: %w", err)
 	}
 
 	updates, err := createPatchesDiff(orig, patches)
@@ -305,12 +317,13 @@ func (c *Client) PatchMessageRedis(ctx context.Context, patches []PatchRequest) 
 		return orig, nil
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/message.write")
+	scope := "https://jans.io/oauth/config/message.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/config/message/redis", token, updates); err != nil {
+	if err := c.patch(ctx, "/jans-config-api/api/v1/config/message/redis", token, scope, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 

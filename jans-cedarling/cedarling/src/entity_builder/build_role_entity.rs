@@ -3,16 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::entity_id_getters::*;
-use super::*;
+use super::entity_id_getters::{EntityIdSrc, collect_all_valid_entity_ids};
+use super::{Arc, BuildEntityError, EntityBuilder, HashMap, Token, build_cedar_entity};
 use cedar_policy::Entity;
 use derive_more::derive::Deref;
 use std::collections::HashSet;
 
 impl EntityBuilder {
-    pub fn build_role_entities(
+    pub(super) fn build_role_entities(
         &self,
-        tokens: &HashMap<String, Token>,
+        tokens: &HashMap<String, Arc<Token>>,
     ) -> Result<Vec<Entity>, BuildEntityError> {
         // Build Role entities
         let role_id_srcs = RoleIdSrcs::resolve(tokens);
@@ -42,7 +42,7 @@ struct RoleIdSrc<'a> {
 }
 
 impl<'a> RoleIdSrcs<'a> {
-    fn resolve(tokens: &'a HashMap<String, Token>) -> Self {
+    fn resolve(tokens: &'a HashMap<String, Arc<Token>>) -> Self {
         const DEFAULT_ROLE_ID_SRCS: &[RoleIdSrc] = &[
             RoleIdSrc {
                 token: "userinfo_token",
@@ -75,7 +75,6 @@ impl<'a> RoleIdSrcs<'a> {
 mod test {
     use super::super::test::*;
     use super::super::*;
-    use super::*;
     use crate::common::policy_store::TrustedIssuer;
     use cedar_policy::Schema;
     use serde_json::json;
@@ -84,11 +83,11 @@ mod test {
 
     #[test]
     fn can_build_role_entity_from_str() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity Role;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -96,9 +95,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -107,7 +106,7 @@ mod test {
             HashMap::from([("role".to_string(), json!("some_role"))]).into(),
             Some(iss),
         );
-        let tokens = HashMap::from([("id_token".into(), id_token)]);
+        let tokens = HashMap::from([("id_token".into(), Arc::new(id_token))]);
 
         let token_entities = builder
             .build_role_entities(&tokens)
@@ -117,7 +116,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[0],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "some_role"},
                 "attrs": {},
                 "parents": [],
@@ -128,11 +127,11 @@ mod test {
 
     #[test]
     fn can_build_role_entities_from_vec() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity Role;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -140,9 +139,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -151,7 +150,7 @@ mod test {
             HashMap::from([("role".to_string(), json!(["some_role", "another_role"]))]).into(),
             Some(iss.clone()),
         );
-        let tokens = HashMap::from([("id_token".into(), id_token)]);
+        let tokens = HashMap::from([("id_token".into(), Arc::new(id_token))]);
 
         let token_entities = builder
             .build_role_entities(&tokens)
@@ -161,7 +160,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[0],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "some_role"},
                 "attrs": {},
                 "parents": [],
@@ -171,7 +170,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[1],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "another_role"},
                 "attrs": {},
                 "parents": [],
@@ -182,11 +181,11 @@ mod test {
 
     #[test]
     fn builds_role_entities_from_multiple_tokens() {
-        let schema_src = r#"
+        let schema_src = r"
             namespace Jans {
                 entity Role;
             }
-        "#;
+        ";
         let schema = Schema::from_str(schema_src).expect("build cedar Schema");
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
@@ -194,9 +193,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &HashMap::new(),
+            TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -211,8 +210,8 @@ mod test {
             Some(iss),
         );
         let tokens = HashMap::from([
-            ("id_token".into(), id_token),
-            ("userinfo_token".into(), userinfo_token),
+            ("id_token".into(), Arc::new(id_token)),
+            ("userinfo_token".into(), Arc::new(userinfo_token)),
         ]);
 
         let token_entities = builder
@@ -223,7 +222,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[0],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "another_role"},
                 "attrs": {},
                 "parents": [],
@@ -233,7 +232,7 @@ mod test {
 
         assert_entity_eq(
             &token_entities[1],
-            json!({
+            &json!({
                 "uid": {"type": "Jans::Role", "id": "some_role"},
                 "attrs": {},
                 "parents": [],

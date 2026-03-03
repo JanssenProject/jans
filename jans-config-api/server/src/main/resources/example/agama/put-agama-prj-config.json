@@ -1,0 +1,31 @@
+{
+  "org.gluu.agama.ldap.pw.main": {
+    "lockConfig": {
+      "MAX_LOGIN_ATTEMPT": 6,
+      "ENABLE_LOCK": true,
+      "LOCK_EXP_TIME": 180
+    },
+    "useInternalLdapConfig": false,
+    "serversConfig": [
+      {
+        "configId": "ad_1",
+        "bindDN": "cn=directory manager",
+        "bindPassword": "encoded_password/plain_passowrd",
+        "servers": [
+          "localhost:1389"
+        ],
+        "maxConnections": 3,
+        "useSSL": false,
+        "baseDNs": [
+          "ou=people,o=jans"
+        ],
+        "loginAttributes": [
+          "uid"
+        ],
+        "localLoginAttributes": [
+          "uid"
+        ]
+      }
+    ]
+  }
+}

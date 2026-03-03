@@ -15,7 +15,7 @@ install: build
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAME}/${VERSION}/${OS_ARCH}
 
 generate-docs:
-	tfplugindocs generate
+	tfplugindocs generate --provider-name jans
 
 sanitize:
 	go fmt ./...

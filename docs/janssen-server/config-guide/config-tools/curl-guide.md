@@ -7,7 +7,7 @@ tags:
   - curl
 ---
 
-# Most useful configurations and operations on Jans server using CURL 
+# Most useful configurations and operations on Jans server using CURL
 ## Configuring the Janssen server
 
 To use CURL commands and configure Janssen's Authorization server, you need to have an access token of "Config-API" (which is an RP of Jans-auth server). Configurations to the AS can be done **only** through "The Config-API client (RP)".
@@ -24,7 +24,7 @@ curl -u "client_inum:client_secret" https://<your.jans.server>/jans-auth/restv1/
     -d  "grant_type=client_credentials&scope=put_scope_name_here"
 ```
 
-**Example**: 
+**Example**:
 
 To modify a custom script, you need to request an access token using the scope `scope=https://jans.io/oauth/config/scripts.write`
 
@@ -75,10 +75,10 @@ Examples of `name_of_the_script` ( Authentication methods that are present in th
 }
 ```
 In place of `http://localhost:8080` uri used above, any valid redirect URI can be used.
-To provide full client configuration at the time of creation, Download and use this 
-[json format](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/server/src/test/resources/feature/openid/clients/client.json), 
+To provide full client configuration at the time of creation, download and use this
+[json format](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/server/src/test/resources/feature/openid/clients/client.json),
 update the values and save it as client.json. Few important fields to populate are `scope`,`responseTypes`,
-`redirectUris` (The only mandatory field), `grantTypes`. If there is a need to update the attributes of the client after 
+`redirectUris` (The only mandatory field), `grantTypes`. If there is a need to update the attributes of the client after
 creation, then make sure that the client is created with `grantTypes` list having `client_credentials` grant type as well.
 
 1. Run curl command
@@ -137,7 +137,7 @@ Response contains `client_id` and `client_secret` apart from other client config
 ```
 curl -X GET https://my.jans.server/jans-config-api/api/v1/openid/clients/client-s_inum_for_which_scope_to_be_added 
    -H "Authorization: Bearer put_access_token_here"
-``` 
+```
 3. This will return JSON response similar to the one below. 
 ```json
 {
@@ -226,12 +226,12 @@ curl -X GET https://my.jans.server/jans-config-api/api/v1/openid/clients/client-
    "baseDn":"inum=994ec0a7-1143-456c-85ca-66ba592d7f9a,ou=clients,o=jans",
    "inum":"994ec0a7-1143-456c-85ca-66ba592d7f9a"
 }
-``` 
+```
 
-### Add New Scope to Client 
+### Add New Scope to Client
 
-To the above client, lets append the profile, so the scope attrib should now have value "openid user_name profile"`. This new value will be patched onto the client. 
-   
+To the above client, let's append the profile, so the scope attrib should now have value "openid user_name profile"`. This new value will be patched onto the client.
+
 1. Obtain an Access Token with scope `https://jans.io/oauth/config/openid/clients.write`
 ```
 curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
@@ -249,7 +249,7 @@ curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \
      }
      ]'
 ```
-	
+
 ### Add OpenID scope and map to database attribute
 
 1. Obtain access token
@@ -356,11 +356,11 @@ Steps:
     curl -k -u "client_id:put_client_secret" https://jans-ui.jans.io/jans-auth/restv1/token \
          -d "grant_type=client_credentials&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=YOUR_DEVICE_CODE&client_id=YOUR_CLIENT_ID" 
     ```
- 
+
 ## Using Janssen Config Api
 
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) is a REST application that is developed using Weld 
-4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration 
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) is a REST application that is developed using Weld
+4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration
 and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server).
 
 ### Authentication

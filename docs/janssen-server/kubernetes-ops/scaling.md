@@ -31,7 +31,7 @@ Kubernetes has the capability to provision resources `automatically` in order to
 
   2.  Define `requests` for the metric used
 
-It is configured and enabled by default in the deployed `jans` components. 
+It is configured and enabled by default in the deployed `jans` components.
 
 The default configuration scales in and out based on the CPU utilization of the pods.
 
@@ -49,7 +49,7 @@ The default configuration scales in and out based on the CPU utilization of the 
 ```
 
 #### Cluster Autoscaler
-Cluster Autoscaler automatically resizes the number of `nodes` in a given node pool, based on the demands of your workloads. 
+Cluster Autoscaler automatically resizes the number of `nodes` in a given node pool, based on the demands of your workloads.
 
 Cluster Autoscaler is available in [AWS](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html), [GCP](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler), and [Azure](https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler).
 
@@ -57,7 +57,7 @@ Cluster Autoscaler is available in [AWS](https://docs.aws.amazon.com/eks/latest/
 ### Manual Scaling
 Kubernetes also offers the option to manually scale your resources.
 
-For example, you can increase `manually` the pod replicas of auth-server deployment using the following command: 
+For example, you can increase `manually` the pod replicas of auth-server deployment using the following command:
 
 ```bash
 kubectl scale --replicas=3 deployment/auth-server -n <namespace>

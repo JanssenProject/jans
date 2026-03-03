@@ -9,7 +9,7 @@ Contents:
 - [How to Run Tests](#how-to-run-tests)
 - [Logging](#logging)
 - [Security Considerations](#security-considerations)
-    
+
 
 ## Functional Overview
 <!-- A high level overview of what the component is supposed to do and how it works. We recommend using diagrams to illustrate cross-module interactions and important flows within the same module -->

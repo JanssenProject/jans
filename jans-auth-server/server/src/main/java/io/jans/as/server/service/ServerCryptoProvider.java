@@ -18,10 +18,11 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-import org.msgpack.core.Preconditions;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,8 +37,8 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     public ServerCryptoProvider(AbstractCryptoProvider cryptoProvider) {
         this.configurationFactory = CdiUtil.bean(ConfigurationFactory.class);
         this.cryptoProvider = cryptoProvider;
-        Preconditions.checkNotNull(configurationFactory);
-        Preconditions.checkNotNull(cryptoProvider);
+        checkNotNull(configurationFactory);
+        checkNotNull(cryptoProvider);
     }
 
     @Override

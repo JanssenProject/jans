@@ -18,11 +18,15 @@ from urllib.parse import urlparse
 from collections import OrderedDict
 from string import Template
 
+from mako.template import Template as MakoTemplate
+
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
+
+MAKO_TEMPLATE_SUFFIX = '.mako'
 
 class SetupUtils(Crypto64):
 
@@ -365,6 +369,10 @@ class SetupUtils(Crypto64):
 
         return text % dictionary
 
+    def un_mako_fn(self, fn):
+        if fn.endswith(MAKO_TEMPLATE_SUFFIX):
+            return fn[:-len(MAKO_TEMPLATE_SUFFIX)]
+        return fn
 
     def renderTemplateInOut(self, file_path, template_folder, output_dir=None, pystring=False, out_file=None):
         fn = os.path.basename(file_path)
@@ -380,6 +388,7 @@ class SetupUtils(Crypto64):
 
         rendered_text = self.render_template(in_fp, pystring)
         out_fp = out_file or os.path.join(output_dir, fn)
+        out_fp = self.un_mako_fn(out_fp)
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
@@ -467,8 +476,10 @@ class SetupUtils(Crypto64):
                 if not full_output_dir.exists():
                     full_output_dir.mkdir(parents=True, exist_ok=True)
 
-                template_text = te.read_text()
-                rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
+                if full_output_file.suffix == MAKO_TEMPLATE_SUFFIX:
+                    full_output_file = full_output_file.with_suffix('')
+
+                rendered_text = self.render_template(te.as_posix())
                 self.logIt("Writing rendered template {}".format(full_output_file))
                 full_output_file.write_text(rendered_text)
 
@@ -481,7 +492,10 @@ class SetupUtils(Crypto64):
             if isinstance(format_dict[k], bool):
                 format_dict[k] = str(format_dict[k]).lower()
 
-        if pystring:
+        if tmp_fn.endswith(MAKO_TEMPLATE_SUFFIX):
+            mako_template = MakoTemplate(filename=tmp_fn)
+            rendered_text = mako_template.render(**format_dict)
+        elif pystring:
             rendered_text = Template(template_text).substitute(format_dict)
         else:
              rendered_text = self.fomatWithDict(template_text, format_dict)

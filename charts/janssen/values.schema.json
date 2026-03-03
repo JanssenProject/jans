@@ -656,6 +656,10 @@
                             "description": "Boolean flag to enable/disable the casa chart.",
                             "type": "boolean"
                         },
+                        "adminEnabled": {
+                            "description": "Boolean flag to enable/disable the casa admin console.",
+                            "type": "boolean"
+                        },
                         "ingress": {
                             "description": "Endpoint control",
                             "type": "object",

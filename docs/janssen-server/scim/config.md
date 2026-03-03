@@ -20,7 +20,7 @@ Relevant configuration properties of the Jans SCIM server are summarized in the 
 
 ## Configuration management using CLI
 
-To retrieve the current server configuration run the command 
+To retrieve the current server configuration run the command
 ```
 python3 jans cli --operation-id get-scim-config
 ```
@@ -43,7 +43,7 @@ To modify some aspect of the retrieved configuration prepare a PATCH request in 
 
 ```
 
-These contents should be then passed to the `patch-scim-config` operation, e.g. 
+These contents should be then passed to the `patch-scim-config` operation, e.g.
 
 ```
 python3 jans cli --operation-id patch-scim-config --data <path-to-JSON-file>

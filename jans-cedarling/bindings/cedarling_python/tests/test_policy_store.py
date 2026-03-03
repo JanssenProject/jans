@@ -24,7 +24,7 @@ test_cases_err = [
     ("policy-store_policy_err_broken_utf8.json",
      "missing required field 'name' in policy store entry"),
     ("policy-store_policy_err_broken_policy.yaml",
-     "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`"),
+     "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: this policy is missing the `resource` variable in the scope"),
     # cases with schema errors
     ("policy-store_schema_err_base64.json",
      "missing required field 'name' in policy store entry"),

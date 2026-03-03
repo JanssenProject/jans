@@ -19,7 +19,7 @@ Jans deployed components uses two types of probes:
 2.  [Liveness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/): used to know when to restart a container
 
 
-## Jans Liveness and Readiness probes 
+## Jans Liveness and Readiness probes
 
 Here is a list of the liveness and readiness probes of the deployed jans components
 

@@ -7,9 +7,11 @@ tags:
 ---
 
 # Keys
- 
-Janssen uses keys for signing and encryption, primarily concerning JSON documents. Janssen supports several signing and encryption algorithms in salted and unsalted, to fit a variety of business needs. If other algorithms are necessary, Janssen supports them via interception scripts.
-   
+
+Janssen uses keys for signing and encryption, primarily concerning JSON documents. Janssen
+supports several signing and encryption algorithms in salted and unsalted
+formats to meet different business requirements. If other algorithms are necessary, Janssen supports them via interception scripts.
+
 
 A key is a piece of information, usually a string of numbers or letters that are stored in a file, which, when processed through a cryptographic algorithm, can encode or decode cryptographic data. In Janssen we use keys for creating token like `id_token`,`access_token`.
 
@@ -30,7 +32,7 @@ Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure tha
 
 When jwk is expired, it is archived and can be access by following url:
 
-```https://<your_server>/jans-auth/restv1/jwks/archived/{kid}``` 
+```https://<your_server>/jans-auth/restv1/jwks/archived/{kid}```
 
 More info about archived jwks can be found [here](../endpoints/archived-jwks-uri.md)
 
@@ -165,23 +167,23 @@ The "kty" (Key Type) of this key is "RSA". This key is "use" (Public Key Use) fo
       ...
  }
 ```
-   
+
 # Crypto Supported
 
-Depending on the transport through which the messages are sent, the integrity of the message might not be guaranteed and the 
-originator of the message might not be authenticated. To mitigate these risks, ID Token, UserInfo Response, Request Object, 
-and Client Authentication JWT values can utilize [JSON Web Signature (JWS) [JWS]](https://openid.net/specs/openid-connect-core-1_0.html#JWS) to sign their contents. To achieve message 
+Depending on the transport through which the messages are sent, the integrity of the message might not be guaranteed and the
+originator of the message might not be authenticated. To mitigate these risks, ID Token, UserInfo Response, Request Object,
+and Client Authentication JWT values can utilize [JSON Web Signature (JWS) [JWS]](https://openid.net/specs/openid-connect-core-1_0.html#JWS) to sign their contents. To achieve message
 confidentiality, these values can also use [JSON Web Encryption (JWE) [JWE]](https://openid.net/specs/openid-connect-core-1_0.html#JWE) to encrypt their contents.
 
 
 ## Signing algorithms
-Signing or Signature algorithm is a cryptographic mechanism used to verify the authenticity and 
-integrity of digital data. We may consider it as a digital version of the ordinary handwritten signatures, but with higher 
+Signing or Signature algorithm is a cryptographic mechanism used to verify the authenticity and
+integrity of digital data. We may consider it as a digital version of the ordinary handwritten signatures, but with higher
 levels of complexity and security.
 
-Let's see some signing key algorithms 
+Let's see some signing key algorithms
 
-| Name           | Kty | Use | Alg    | 
+| Name           | Kty | Use | Alg    |
 |----------------|-----|-----|--------|
 | RS256 Sign Key | RSA | sig | RS256  |
 | RS384 Sign Key | RSA | sig | RS384  |
@@ -196,13 +198,13 @@ Let's see some signing key algorithms
 
 ## Encryption algorithms
 
-In cryptography, encryption is the process of encoding information. This process converts the original 
-representation of the information, known as plaintext, into an alternative form known as ciphertext. 
+In cryptography, encryption is the process of encoding information. This process converts the original
+representation of the information, known as plaintext, into an alternative form known as ciphertext.
 Ideally, only authorized parties can decipher a ciphertext back to plaintext and access the original information.
 
 Let's see some encryption keys.
 
-| Name                    | Kty | Use | Alg      | 
+| Name                    | Kty | Use | Alg      |
 |-------------------------|-----|-----|----------|
 | RSA1_5 Encryption key   | RSA | enc | RSA1_5   |
 | RSA-OAEP Encryption Key | RSA | enc | RSA-OAEP |
@@ -218,10 +220,10 @@ Let's see some encryption keys.
 * PKCS#1 unencrypted "RSAPrivateKey" (OpenSSL private key file format)
 * X.509 "SubjectPublicKeyInfo" (OpenSSL public key file format)
 
-The above key values can be passed as (a) a binary DER-encoded ASN.1 file, (b) a text file in PEM format, (c) a 
+The above key values can be passed as (a) a binary DER-encoded ASN.1 file, (b) a text file in PEM format, (c) a
 string containing the key in [PEM format](https://www.cryptosys.net/pki/manpki/pki_pemstring.html).
 
-Also supported are RSA private and public keys represented in XML format to XKMS 2.0 [XKMS] and JSON Web Key (JWK) format [[JWK]](https://www.cryptosys.net/pki/manpki/pki_References.html#JWK). 
+Also supported are RSA private and public keys represented in XML format to XKMS 2.0 [XKMS] and JSON Web Key (JWK) format [[JWK]](https://www.cryptosys.net/pki/manpki/pki_References.html#JWK).
 For more details, see [Key Storage Format](https://www.cryptosys.net/pki/manpki/pki_Keystorage.html).
 To know more about RSA keyformat browse [here](https://www.cryptosys.net/pki/rsakeyformats.html)
 

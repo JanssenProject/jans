@@ -30,5 +30,4 @@ need any special training. And it will be easy to install, backup,
 monitor, and configure your deployment. If you have many autonomous domains,
 each with its own brand and user identity management process, the simplicity
 of running a single IDP might be the best solution. If three nines are acceptable
-to your business, the expense of deploying and operating a cluster may not be 
-justified.
+to your business, the expense of deploying and operating a cluster may not be justified.

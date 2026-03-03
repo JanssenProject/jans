@@ -8,7 +8,7 @@ tags:
 
 # Fido2 Configuration Properties
 
-| Property Name                   | Description                                                                                   |                                             | 
+| Property Name                   | Description                                                                                   |                                             |
 |---------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------|
 | authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests                               | [Details](#authenticationhistoryexpiration) |
 | authenticatorCertsFolder        | Authenticators certificates folder                                                            | [Details](#authenticatorcertsfolder)        |

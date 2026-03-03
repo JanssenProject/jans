@@ -1,0 +1,24 @@
+{
+    "cedar_version": "v4.0.0",
+    "policy_stores": {
+        "%(policy_store_id)s": {
+            "name": "Jans",
+            "description": "Jans Lock Policy Store",
+            "policies": {
+            },
+            "trusted_issuers": {
+                "%(local_trusted_issuer_id)s": {
+                    "name": "Jans",
+                    "description": "Janssen",
+                    "openid_configuration_endpoint": "https://%(hostname)s/.well-known/openid-configuration",
+                    "token_metadata": {
+                        "access_token": {
+                            "entity_type_name": "Jans::Access_token"
+                        }
+                    }
+                }
+            },
+            "schema": "<Base64 encoded policy content>"
+        }
+    }
+}

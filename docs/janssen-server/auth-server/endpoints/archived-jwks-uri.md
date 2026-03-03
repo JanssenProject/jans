@@ -9,9 +9,9 @@ tags:
 # Archived JWKS URI Endpoint
 
 
-Janssen Server supports `/jwks/archived/{kid}` metadata endpoint and publishes its Archived JSON Web Keys (JWKs) at this endpoint. This 
+Janssen Server supports `/jwks/archived/{kid}` metadata endpoint and publishes its Archived JSON Web Keys (JWKs) at this endpoint. This
 endpoint publishes expired signing keys as well as expired encryption keys used by Janssen Server. RP can use these keys to validate
-signatures from Janssen Server, and also to perform encryption and decryption if keys are no longer present in `/jwks` endpoint. 
+signatures from Janssen Server, and also to perform encryption and decryption if keys are no longer present in `/jwks` endpoint.
 Like other metadata endpoints, this is not a secure endpoint.
 
 URL to access archived jwks endpoint on Janssen Server is listed in the response of Janssen Server's well-known

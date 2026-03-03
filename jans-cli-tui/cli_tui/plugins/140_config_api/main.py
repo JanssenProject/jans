@@ -1,4 +1,5 @@
 import copy
+import json
 import asyncio
 from collections import OrderedDict
 from typing import Any, Optional
@@ -123,6 +124,24 @@ class Plugin(DialogUtils):
                         ),
 
                         self.app.getTitledCheckBox(
+                            _("Return Client Secret in Response"),
+                            name='returnClientSecretInResponse',
+                            checked=self.data.get('returnClientSecretInResponse'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'returnClientSecretInResponse'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
+                        ),
+
+                        self.app.getTitledCheckBox(
+                            _("Return Encrypted Client Secret in Response"),
+                            name='returnEncryptedClientSecretInResponse',
+                            checked=self.data.get('returnEncryptedClientSecretInResponse'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'returnEncryptedClientSecretInResponse'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
+                        ),
+
+                        self.app.getTitledCheckBox(
                             _("Disable Logger Timer"),
                             name='disableLoggerTimer',
                             checked=self.data.get('disableLoggerTimer'),
@@ -178,6 +197,15 @@ class Plugin(DialogUtils):
                         value=self.data.get('loggingLayout', 'text'),
                         style=cli_style.edit_text,
                         jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'),
+                        widget_style=cli_style.black_bg_widget
+                    ),
+
+                    self.app.getTitledCheckBox(
+                        _("Disable External Logger Configuration"),
+                        name='disableExternalLoggerConfiguration',
+                        checked=self.data.get('disableExternalLoggerConfiguration'),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'disableExternalLoggerConfiguration'),
+                        style=cli_style.check_box,
                         widget_style=cli_style.black_bg_widget
                     ),
 
@@ -260,11 +288,20 @@ class Plugin(DialogUtils):
                         label_width=label_widget_width
                         )
 
+
         self.tabs['auditLogConf'] = HSplit([
             common_data.app.getTitledCheckBox(
                     _("Enabled"),
                     name='enabled',
                     checked=self.data.get('auditLogConf', {}).get('enabled'),
+                    style=cli_style.check_box,
+                    widget_style=cli_style.black_bg_widget
+                ),
+
+            common_data.app.getTitledCheckBox(
+                    _("Log Data"),
+                    name='logData',
+                    checked=self.data.get('auditLogConf', {}).get('logData'),
                     style=cli_style.check_box,
                     widget_style=cli_style.black_bg_widget
                 ),
@@ -280,7 +317,57 @@ class Plugin(DialogUtils):
                     height=3
                     ),
 
+            common_data.app.getTitledText(
+                    title=_("Ignore Annotation"),
+                    name='ignoreAnnotation',
+                    value=copy.deepcopy(self.data.get('auditLogConf', {}).get('ignoreAnnotation', [])),
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget,
+                    jans_help="Enter values each line",
+                    jans_list_type=True,
+                    height=3
+                    ),
+
+            common_data.app.getTitledText(
+                    title=_("Ignore Object Mapping"),
+                    name='ignoreObjectMapping',
+                    value=[ json.dumps(_) for _ in self.data.get('auditLogConf', {}).get('ignoreObjectMapping', []) ],
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget,
+                    jans_help="Enter JSON values each line",
+                    jans_list_type=True,
+                    height=3
+                    ),
+
             self.audit_log_configuration_header_attributes_widget,
+
+            common_data.app.getTitledText(
+                    title=_("Audit Log File Path"),
+                    name='auditLogFilePath',
+                    value=self.data.get('auditLogConf', {}).get('auditLogFilePath', ''),
+                    style=cli_style.edit_text,
+                    jans_help=self.app.get_help_from_schema(self.schema, 'auditLogFilePath'),
+                    widget_style=cli_style.black_bg_widget
+                    ),
+
+            common_data.app.getTitledText(
+                    title=_("Audit Log File Name"),
+                    name='auditLogFileName',
+                    value=self.data.get('auditLogConf', {}).get('auditLogFileName', ''),
+                    style=cli_style.edit_text,
+                    jans_help=self.app.get_help_from_schema(self.schema, 'auditLogFileName'),
+                    widget_style=cli_style.black_bg_widget
+                    ),
+
+            common_data.app.getTitledText(
+                    title=_("Audit Log Date Format"),
+                    name='auditLogDateFormat',
+                    value=self.data.get('auditLogConf', {}).get('auditLogDateFormat', ''),
+                    style=cli_style.edit_text,
+                    jans_help=self.app.get_help_from_schema(self.schema, 'auditLogDateFormat'),
+                    widget_style=cli_style.black_bg_widget
+                    ),
+
             Window(height=D()),
             ],
             width=D(),
@@ -694,6 +781,33 @@ class Plugin(DialogUtils):
                 changes.append(('replace', path_, attributes))
 
 
+        def check_mapping_object(obj: Any) -> bool:
+
+            if not isinstance(obj, dict):
+                return False
+
+            if 'name' not in obj:
+                return False
+
+            if not isinstance(obj['name'], str):
+                return False
+
+            for key_ in obj:
+                if key_ not in ('name', 'text'):
+                    return False
+
+            if 'text' in obj:
+                if not isinstance(obj['text'], list):
+                    return False
+                for ti in obj['text']:
+                    if not isinstance(ti, str):
+                        return False
+                    if '=' not in ti:
+                        return False
+
+            return True
+
+
         for ctab in (
                 'auditLogConf',
                 'dataFormatConversionConf',
@@ -701,11 +815,28 @@ class Plugin(DialogUtils):
                 'plugins',
                 ):
             data_ = self.make_data_from_dialog(tabs={ctab: self.tabs[ctab]})
+            if ctab == 'auditLogConf':
+                json_decode_errors = []
+                if 'ignoreObjectMapping' in data_:
+                    for item_number, item_data in enumerate(data_['ignoreObjectMapping']):
+                        try:
+                            data_['ignoreObjectMapping'][item_number] = json.loads(item_data)
+                        except json.decoder.JSONDecodeError:
+                            json_decode_errors.append(f' {item_number+1}. {item_data}')
+                        else:
+                            if not check_mapping_object(data_['ignoreObjectMapping'][item_number]):
+                                json_decode_errors.append(f' {item_number+1}. {item_data}')
+
+                if json_decode_errors:
+                    json_decode_errors_message = _("Either the following line of Object Mapping items could not be converted to JSON or not a valid dictionary for Audit Log Conf:\n")
+                    json_decode_errors_message += '\n'.join(json_decode_errors)
+                    self.app.show_message(_(common_strings.error), json_decode_errors_message, tobefocused=self.main_container)
+                    return
+
             for prop in data_:
                 if data_[prop] != self.data[ctab].get(prop):
                     how = replace if prop in self.data[ctab] else add
                     changes.append((how, '/'.join((ctab, prop)), data_[prop]))
-
 
         if self.plugins_list_box.all_data != self.data['plugins']:
             changes.append((replace, 'plugins', self.plugins_list_box.all_data))

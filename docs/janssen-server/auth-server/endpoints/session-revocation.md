@@ -8,10 +8,10 @@ tags:
 
 # Session Revocation Endpoint
 
-**Note:** Endpoint is deprecated in favor of [Global Token Revocation](./global-token-revocation.md) 
+**Note:** Endpoint is deprecated in favor of [Global Token Revocation](./global-token-revocation.md)
 
 Janssen Server provides session revocation endpoint to enable the client to revoke all sessions of a users.
-Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater 
+Though not being part of any industry standard/specification, Janssen Server provides this endpoint to allow greater
 control and better management of sessions on OP.
 
 URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
@@ -33,7 +33,7 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 
 ## Usage
 
-A request to this endpoint can revoke all sessions of one particular user. Use the request parameters to specify 
+A request to this endpoint can revoke all sessions of one particular user. Use the request parameters to specify
 criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.
 
 ## Disabling The Endpoint Using Feature Flag

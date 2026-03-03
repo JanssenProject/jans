@@ -39,15 +39,32 @@ public class StatResource extends ConfigBaseResource {
     @Inject
     AuthService authService;
 
+    /**
+     * Fetches basic server statistics for a specified month or month range.
+     *
+     * @param authorization the Authorization header value used to authenticate the request
+     * @param month         month for which the stat report is requested; required if both start_month and end_month are absent (format: YYYYMM)
+     * @param startMonth    start month of the range for which the stat report is requested (format: YYYYMM)
+     * @param endMonth      end month of the range for which the stat report is requested (format: YYYYMM)
+     * @param format        report format; an empty value requests the default format
+     * @return              the JSON value of the "response" field containing the requested statistics
+     */
     @Operation(summary = "Provides server with basic statistic", description = "Provides server with basic statistic", operationId = "get-stat", tags = {
-            "Statistics - User" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT  }))
+            "Statistics - User" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JANS_STAT }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.STATS_USER_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stats", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonNode.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS,
+            ApiAccessConstants.JANS_STAT }, groupScopes = {}, superScopes = {
+                    ApiAccessConstants.STATS_USER_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_READ_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
             @Parameter(description = "Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present.", example="202012 (2020 Dec) 202101 (2021 Jan)") @QueryParam(value = "month") String month,

@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2022, Janssen Project
  */
 
 package io.jans.lock.service;
@@ -20,7 +20,6 @@ import io.jans.util.exception.MissingResourceException;
 import io.jans.util.init.Initializable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 /**
  * Provides OpenId configuration
@@ -28,7 +27,6 @@ import jakarta.inject.Named;
  * @author Yuriy Movchan Date: 12/28/2016
  */
 @ApplicationScoped
-@Named("openIdService")
 public class OpenIdService extends Initializable implements Serializable {
 
     private static final long serialVersionUID = 7875838160379126796L;

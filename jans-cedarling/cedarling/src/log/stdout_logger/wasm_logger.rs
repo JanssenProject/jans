@@ -11,13 +11,22 @@ use web_sys::console;
 use web_sys::js_sys::Array;
 use web_sys::wasm_bindgen::JsValue;
 
+/// Mode for stdout logger in WASM builds.
+/// In WASM, only immediate logging is supported.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum StdOutLoggerMode {
+    /// Immediate logging to console.
+    Immediate,
+}
+
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
     log_level: LogLevel,
 }
 
 impl StdOutLogger {
-    pub(crate) fn new(log_level: LogLevel) -> Self {
+    // mode with `_mode` parameter is kept for compatibility with native version
+    pub(crate) fn new(log_level: LogLevel, _mode: StdOutLoggerMode) -> Self {
         Self { log_level }
     }
 }
@@ -66,5 +75,18 @@ impl LogWriter for StdOutLogger {
             },
             None => console::log(&js_array),
         }
+    }
+
+    fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(crate::log::BaseLogEntry) -> R,
+    {
+        if !log_fn.can_log(self.log_level) {
+            // do nothing
+            return;
+        }
+
+        self.log_any(log_fn.build());
     }
 }

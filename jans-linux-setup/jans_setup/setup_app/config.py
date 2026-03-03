@@ -165,7 +165,8 @@ class Config:
         self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
         self.schema_files = [os.path.join(self.install_dir, 'schema', schemma_fn) for schemma_fn in ('jans_schema.json', 'custom_schema.json')]
-        self.pggsql_sslmode = 'disable'
+        self.rdbm_sslmode = 'disable'
+        self.rdbm_sslfactory = 'org.postgresql.ssl.NonValidatingFactory'
 
         # Jans components installation status
         self.loadData = True
@@ -183,8 +184,7 @@ class Config:
         self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.install_jans_saml = False
-        self.install_jans_keycloak_link = False
+        self.install_jans_shib = False
         self.install_jans_lock = False
         self.install_opa = False
 
@@ -236,9 +236,6 @@ class Config:
                             os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
                             os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
                             ]
-
-        self.redhat_services = ['httpd', 'rsyslog']
-        self.debian_services = ['apache2', 'rsyslog']
 
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'

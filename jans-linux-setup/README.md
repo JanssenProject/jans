@@ -67,7 +67,7 @@ Run
     `python3 jans-linux-setup.pyz -uninstall`
 
     or if you used the `make install` command run `jans-setup -uninstall`.
-    
+
 Reinstalling Janssen Server
 ------------------------
 First uninstall and then install

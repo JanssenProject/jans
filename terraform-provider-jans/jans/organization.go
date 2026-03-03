@@ -28,14 +28,15 @@ type Organization struct {
 // GetOrganization returns the current organization configuration.
 func (c *Client) GetOrganization(ctx context.Context) (*Organization, error) {
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/organization.readonly")
+	scope := "https://jans.io/oauth/config/organization.readonly"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	ret := &Organization{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/org", token, ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/org", token, scope, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -52,7 +53,7 @@ func (c *Client) PatchOrganization(ctx context.Context, patches []PatchRequest) 
 
 	orig, err := c.GetOrganization(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
+		return nil, fmt.Errorf("failed to get organization: %w", err)
 	}
 
 	updates, err := createPatchesDiff(orig, patches)
@@ -64,12 +65,13 @@ func (c *Client) PatchOrganization(ctx context.Context, patches []PatchRequest) 
 		return c.GetOrganization(ctx)
 	}
 
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/organization.write")
+	scope := "https://jans.io/oauth/config/organization.write"
+	token, err := c.ensureToken(ctx, scope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/org", token, updates); err != nil {
+	if err := c.patch(ctx, "/jans-config-api/api/v1/org", token, scope, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 

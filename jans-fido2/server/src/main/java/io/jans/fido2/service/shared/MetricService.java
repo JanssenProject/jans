@@ -14,6 +14,7 @@ import jakarta.inject.Named;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
+import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -25,6 +26,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -58,14 +63,82 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
+    private PersistenceEntryManager userPersistenceEntryManager;
+
+	@Inject
     private DeviceInfoExtractor deviceInfoExtractor;
 
     @Inject
     private Logger log;
 
+    @Inject
+    @Named("fido2MetricsService")
+    private Instance<io.jans.fido2.service.metric.Fido2MetricsService> fido2MetricsServiceInstance;
+
+    @Inject
+    @Named("fido2UserMetricsService")
+    private Instance<io.jans.fido2.service.metric.Fido2UserMetricsService> fido2UserMetricsServiceInstance;
+
     
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
+    private static final String SUCCESS_STATUS = "SUCCESS";
+    
+    // Cache for username-to-userId mapping to reduce database load
+    // TTL: 1 hour (3600000 ms) - balances performance with data freshness
+    // Max size: 10000 entries - prevents unbounded memory growth in high-cardinality scenarios
+    private static final long USER_ID_CACHE_TTL_MS = 3600000L; // 1 hour
+    private static final int USER_ID_CACHE_MAX_SIZE = 10000; // Maximum cache entries
+    private final java.util.Map<String, CacheEntry> userIdCache = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    /**
+     * Cache entry for username-to-userId mapping
+     */
+    private static class CacheEntry {
+        final String userId;
+        final long timestamp;
+        
+        CacheEntry(String userId) {
+            this.userId = userId;
+            this.timestamp = System.currentTimeMillis();
+        }
+        
+        boolean isExpired() {
+            return (System.currentTimeMillis() - timestamp) > USER_ID_CACHE_TTL_MS;
+        }
+    }
+    
+    /**
+     * Clean up expired entries and enforce max cache size
+     * Called periodically to prevent unbounded memory growth
+     * Uses a thread-safe approach: collect keys first, then remove to avoid race conditions
+     */
+    private void cleanupCache() {
+        // First, remove expired entries (thread-safe operation on ConcurrentHashMap)
+        userIdCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        
+        // If still over limit after removing expired, remove oldest entries
+        int currentSize = userIdCache.size();
+        if (currentSize >= USER_ID_CACHE_MAX_SIZE) {
+            // Collect keys to remove first (thread-safe snapshot)
+            // Calculate how many to remove: remove enough to get below 90% of max size
+            int targetSize = (int) (USER_ID_CACHE_MAX_SIZE * 0.9);
+            int toRemove = currentSize - targetSize;
+            
+            if (toRemove > 0) {
+                // Collect oldest entries by timestamp (create snapshot to avoid concurrent modification)
+                List<java.util.Map.Entry<String, CacheEntry>> entriesToRemove = 
+                    userIdCache.entrySet().stream()
+                        .sorted((e1, e2) -> Long.compare(e1.getValue().timestamp, e2.getValue().timestamp))
+                        .limit(toRemove)
+                        .collect(Collectors.toList());
+                
+                // Remove collected entries (safe to do after stream collection)
+                entriesToRemove.forEach(entry -> userIdCache.remove(entry.getKey()));
+            }
+        }
+    }
 
     public void initTimer() {
     	initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
@@ -122,7 +195,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used
      */
     public void recordPasskeyRegistrationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, "SUCCESS", null, Fido2MetricType.FIDO2_REGISTRATION_SUCCESS);
+        recordRegistrationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_REGISTRATION_SUCCESS);
     }
 
     /**
@@ -180,7 +253,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used
      */
     public void recordPasskeyAuthenticationSuccess(String username, HttpServletRequest request, long startTime, String authenticatorType) {
-        recordAuthenticationMetrics(username, request, startTime, authenticatorType, "SUCCESS", null, Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS);
+        recordAuthenticationMetrics(username, request, startTime, authenticatorType, SUCCESS_STATUS, null, Fido2MetricType.FIDO2_AUTHENTICATION_SUCCESS);
     }
 
     /**
@@ -250,6 +323,11 @@ public class MetricService extends io.jans.service.metric.MetricService {
             }
             
             storeFido2MetricsData(metricsData);
+            
+            // Update user-level metrics (skip for ATTEMPT status)
+            if (!ATTEMPT_STATUS.equals(status)) {
+                updateUserMetrics(metricsData);
+            }
         }
     }
     
@@ -286,8 +364,10 @@ public class MetricService extends io.jans.service.metric.MetricService {
                     metricsData.setUsername(username);
                     metricsData.setFallbackMethod(fallbackMethod);
                     metricsData.setFallbackReason(reason);
-                    metricsData.setStartTime(LocalDateTime.now());
-                    metricsData.setEndTime(LocalDateTime.now());
+                    // Use UTC timezone to align with FIDO2 services
+                    LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+                    metricsData.setStartTime(utcNow);
+                    metricsData.setEndTime(utcNow);
                     
                     storeFido2MetricsData(metricsData);
                 }
@@ -328,22 +408,58 @@ public class MetricService extends io.jans.service.metric.MetricService {
         metricsData.setOperationType(operationType);
         metricsData.setOperationStatus(status);
         metricsData.setUsername(username);
-        metricsData.setStartTime(LocalDateTime.now());
-        metricsData.setEndTime(LocalDateTime.now());
+        
+        // Look up the real userId (inum) from username
+        // This is the immutable unique identifier that should be used for analytics
+        String userId = getUserIdFromUsername(username);
+        metricsData.setUserId(userId);
+        
+        // Use UTC timezone to align with FIDO2 services
+        LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+        metricsData.setStartTime(utcNow);
+        metricsData.setEndTime(utcNow);
         
         if (authenticatorType != null) {
             metricsData.setAuthenticatorType(authenticatorType);
             incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
         }
         
-        if (request != null && appConfiguration.isFido2DeviceInfoCollection()) {
+        // Extract HTTP request details
+        if (request != null) {
             try {
-                metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
+                // Extract IP address - check proxy headers first, then fall back to remote address
+                String ipAddress = extractIpAddress(request);
+                metricsData.setIpAddress(ipAddress);
+                
+                // Extract User-Agent header
+                String userAgent = request.getHeader("User-Agent");
+                metricsData.setUserAgent(userAgent);
             } catch (Exception e) {
-                log.debug("Failed to extract device info: {}", e.getMessage());
-                metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
+                log.debug("Failed to extract request details: {}", e.getMessage());
+            }
+            
+            // Extract device info if enabled
+            if (appConfiguration.isFido2DeviceInfoCollection()) {
+                try {
+                    metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
+                } catch (Exception e) {
+                    log.debug("Failed to extract device info: {}", e.getMessage());
+                    metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
+                }
             }
         }
+        
+        // Set node identifier (for cluster environments) - only if available
+        try {
+            String nodeId = networkService.getMacAdress();
+            if (nodeId != null && !nodeId.trim().isEmpty()) {
+                metricsData.setNodeId(nodeId);
+            }
+        } catch (Exception e) {
+            log.debug("Failed to get node ID: {}", e.getMessage());
+        }
+        
+        // Note: applicationType is not set as it's always "FIDO2" and redundant
         
         return metricsData;
     }
@@ -376,13 +492,17 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Store FIDO2 metrics data (placeholder for future persistence implementation)
+     * Store FIDO2 metrics data to persistence layer
      */
     private void storeFido2MetricsData(Fido2MetricsData metricsData) {
-        // Placeholder for future persistence implementation
-        // For now, just log the metrics data for debugging
-        if (log.isDebugEnabled()) {
-            log.debug("FIDO2 Metrics Data: {}", metricsData);
+        try {
+            if (fido2MetricsServiceInstance != null && !fido2MetricsServiceInstance.isUnsatisfied()) {
+                fido2MetricsServiceInstance.get().storeMetricsData(metricsData);
+            } else {
+                log.debug("Fido2MetricsService not available, skipping metrics data storage");
+            }
+        } catch (Exception e) {
+            log.error("Failed to store FIDO2 metrics data: {}", e.getMessage(), e);
         }
     }
 
@@ -402,6 +522,248 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // For now, we'll log the FIDO2 timer metrics
         // In a production environment, you might want to integrate with the base metric system
         log.debug("FIDO2 Timer updated: {} - {} ms", fido2MetricType.getMetricName(), duration);
+    }
+
+    /**
+     * Extract IP address from HTTP request, checking proxy headers first
+     * Handles X-Forwarded-For, Proxy-Client-IP, and other common proxy headers
+     * 
+     * SECURITY NOTE: This method trusts proxy headers without validation. In production,
+     * ensure the application is behind a trusted reverse proxy (e.g., nginx, Apache, load balancer)
+     * that strips or validates these headers. If the application is directly exposed to the internet,
+     * clients can spoof these headers to mask their real IP address.
+     * 
+     * For enhanced security, consider:
+     * 1. Only trusting proxy headers when behind a known reverse proxy
+     * 2. Validating the source IP is from a trusted proxy before trusting forwarded headers
+     * 3. Making proxy header trust configurable via application configuration
+     * 
+     * @param request HTTP servlet request
+     * @return Client IP address (may be spoofed if not behind trusted proxy)
+     */
+    private String extractIpAddress(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        
+        // Get the direct remote address first (most trustworthy)
+        String directRemoteAddr = request.getRemoteAddr();
+        
+        // List of proxy headers to check (in order of preference)
+        // Only check these if we're behind a trusted proxy (validation should be added in production)
+        String[] proxyHeadersToTry = {
+            "X-Forwarded-For",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED"
+        };
+        
+        // Check proxy headers (trusted only if behind reverse proxy)
+        // TODO: Add configuration option to enable/disable proxy header trust
+        // TODO: Add validation to ensure request came from trusted proxy IP range
+        for (String header : proxyHeadersToTry) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                // X-Forwarded-For can contain multiple IPs; take the first one
+                int commaIndex = ip.indexOf(',');
+                if (commaIndex > 0) {
+                    ip = ip.substring(0, commaIndex).trim();
+                }
+                // Basic validation: check if it looks like a valid IP
+                if (isValidIpAddress(ip)) {
+                    return ip;
+                }
+            }
+        }
+        
+        // Fallback to direct remote address (most secure)
+        return directRemoteAddr;
+    }
+    
+    /**
+     * Basic validation for IP address format
+     * @param ip IP address string to validate
+     * @return true if format appears valid, false otherwise
+     */
+    private boolean isValidIpAddress(String ip) {
+        if (ip == null || ip.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Check for loopback addresses first
+        if (ip.equals("localhost") || ip.equals("127.0.0.1") || ip.equals("::1")) {
+            return true;
+        }
+        
+        // Validate IPv4: each octet must be 0-255
+        // More precise regex: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) for each octet
+        if (ip.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
+            return true;
+        }
+        
+        // Validate IPv6: simplified check for colons (full validation would be more complex)
+        // This is a basic check - for production, consider using InetAddress.getByName()
+        if (ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
+            // Additional validation: try parsing with InetAddress for more robust check
+            try {
+                java.net.InetAddress.getByName(ip);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Look up the immutable userId (inum) from username
+     * This ensures we use the stable unique identifier for analytics
+     * 
+     * PERFORMANCE: Uses in-memory cache with 1-hour TTL to reduce database load.
+     * In high-throughput scenarios, this prevents a database query on every metric event.
+     * 
+     * @param username The username to look up
+     * @return The user's inum (userId), or the username as fallback if lookup fails
+     */
+    private String getUserIdFromUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Check cache first to avoid database lookup
+        CacheEntry cached = userIdCache.get(username);
+        if (cached != null && !cached.isExpired()) {
+            return cached.userId;
+        }
+        
+        // Cache miss or expired - perform database lookup
+        String userId = performUserIdLookup(username);
+        
+        // Cleanup cache if approaching max size (every 100th lookup to avoid overhead)
+        if (userIdCache.size() >= USER_ID_CACHE_MAX_SIZE * 0.9) {
+            cleanupCache();
+        }
+        
+        // Update cache (performUserIdLookup always returns non-null - either inum or username as fallback)
+        // If cache is full after cleanup, remove oldest entry before adding new one
+        if (userIdCache.size() >= USER_ID_CACHE_MAX_SIZE) {
+            // Remove oldest entry
+            userIdCache.entrySet().stream()
+                .min((e1, e2) -> Long.compare(e1.getValue().timestamp, e2.getValue().timestamp))
+                .ifPresent(entry -> userIdCache.remove(entry.getKey()));
+        }
+        
+        userIdCache.put(username, new CacheEntry(userId));
+        
+        return userId;
+    }
+    
+    /**
+     * Perform the actual database lookup for userId from username
+     * @param username The username to look up
+     * @return The user's inum (userId), or the username as fallback if lookup fails
+     */
+    private String performUserIdLookup(String username) {
+        try {
+            // In Janssen, users are stored with "uid" attribute as username
+            // and "inum" as the unique identifier
+            io.jans.orm.model.base.SimpleBranch usersBranch = new io.jans.orm.model.base.SimpleBranch();
+            usersBranch.setDn(staticConfiguration.getBaseDn().getPeople());
+            
+            // Search for user by uid (username)
+            io.jans.orm.search.filter.Filter filter = io.jans.orm.search.filter.Filter.createEqualityFilter("uid", username);
+            
+            // Use a simple user object to get the inum
+            java.util.List<io.jans.as.common.model.common.User> users = userPersistenceEntryManager.findEntries(
+                staticConfiguration.getBaseDn().getPeople(),
+                io.jans.as.common.model.common.User.class,
+                filter,
+                null,
+                1
+            );
+            
+            if (users != null && !users.isEmpty()) {
+                io.jans.as.common.model.common.User user = users.get(0);
+                String inum = user.getAttribute("inum");
+                if (inum != null && !inum.trim().isEmpty()) {
+                    // PRIVACY: Log userId (inum) instead of username to comply with GDPR/CCPA requirements
+                    log.debug("Resolved username to userId: {}", inum);
+                    return inum;
+                }
+            }
+            
+            // Fallback: if we can't find the inum, use username as identifier
+            log.debug("Could not resolve userId for username, using username as fallback");
+            return username;
+            
+        } catch (Exception e) {
+            // If lookup fails, use username as fallback (better than null)
+            // PRIVACY: Don't log username in error messages to prevent PII leakage
+            log.debug("Failed to look up userId: {}, using username as fallback", e.getMessage());
+            return username;
+        }
+    }
+
+    /**
+     * Update user-level metrics based on the metrics data
+     */
+    private void updateUserMetrics(Fido2MetricsData metricsData) {
+        if (fido2UserMetricsServiceInstance == null || fido2UserMetricsServiceInstance.isUnsatisfied()) {
+            log.debug("Fido2UserMetricsService not available, skipping user metrics update");
+            return;
+        }
+
+        try {
+            io.jans.fido2.service.metric.Fido2UserMetricsService userMetricsService = fido2UserMetricsServiceInstance.get();
+            
+            UserMetricsUpdateRequest request = new UserMetricsUpdateRequest();
+            request.setUserId(metricsData.getUserId());
+            request.setUsername(metricsData.getUsername());
+            request.setSuccess(SUCCESS_STATUS.equals(metricsData.getOperationStatus()));
+            request.setAuthenticatorType(metricsData.getAuthenticatorType());
+            request.setDurationMs(metricsData.getDurationMs());
+            
+            // Extract device info if available
+            if (metricsData.getDeviceInfo() != null) {
+                request.setDeviceType(metricsData.getDeviceInfo().getDeviceType());
+                request.setBrowser(metricsData.getDeviceInfo().getBrowser());
+                request.setOs(metricsData.getDeviceInfo().getOperatingSystem());
+            }
+            
+            request.setIpAddress(metricsData.getIpAddress());
+            request.setUserAgent(metricsData.getUserAgent());
+            request.setFallbackMethod(metricsData.getFallbackMethod());
+            request.setFallbackReason(metricsData.getFallbackReason());
+
+            // Call the appropriate user metrics update method based on operation type
+            // PRIVACY: Log userId (inum) instead of username to comply with GDPR/CCPA requirements
+            String operationType = metricsData.getOperationType();
+            String logIdentifier = metricsData.getUserId() != null ? metricsData.getUserId() : "[unknown-user]";
+            
+            if ("REGISTRATION".equals(operationType)) {
+                userMetricsService.updateUserRegistrationMetrics(request);
+                log.debug("Updated user registration metrics for userId: {}", logIdentifier);
+            } else if ("AUTHENTICATION".equals(operationType)) {
+                userMetricsService.updateUserAuthenticationMetrics(request);
+                log.debug("Updated user authentication metrics for userId: {}", logIdentifier);
+            } else if ("FALLBACK".equals(operationType)) {
+                userMetricsService.updateUserFallbackMetrics(
+                    request.getUserId(),
+                    request.getUsername(),
+                    request.getIpAddress(),
+                    request.getUserAgent()
+                );
+                log.debug("Updated user fallback metrics for userId: {}", logIdentifier);
+            }
+        } catch (Exception e) {
+            log.error("Failed to update user metrics: {}", e.getMessage(), e);
+        }
     }
 
 }

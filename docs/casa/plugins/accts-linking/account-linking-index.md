@@ -36,28 +36,24 @@ b) The Agama inbound identity project
 
 c) The Casa accounts linking Agama project
 
-Most of work is demanded on setting up project _c_, where configuration of identity providers and attribute mapping tuning takes place. 
+Most of work is demanded on setting up project _c_, where configuration of identity providers and attribute mapping tuning takes place.
 
-In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed. 
+In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed.
 
 1. Download the plugin jar file `https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
 
 1. Download the utility jar file `https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
-1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly 
+1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes  
 
 1. Run the following commands to generate the archive of the Agama inbound identity project
-    
-    ```
-    git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
-    cd jans
-    git sparse-checkout init --cone
-    git sparse-checkout set docs/agama-catalog/jans/inboundID/project
-    git checkout main
-    cd docs/agama-catalog/jans/inboundID/project
+
+    ```bash
+    git clone --depth 1 https://github.com/JanssenProject/jans.git
+    cd jans/docs/agama-catalog/jans/inboundID/project
     zip -r inbound.zip *
     ```
-    
+
 1. Download the Casa accounts linking Agama project `https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`. 
@@ -91,6 +87,6 @@ Now it's time to supply the settings grabbed. The component these configurations
 1. Apply changes as needed - this is covered in a separate doc page [here](./accts-linking-agama.md). Note you can add or remove sections in the file at will, and that providers can also be disabled so they are not listed in the login page or in Casa app
 1. Still in TUI, choose to import the file you have edited
 
-For VM-based installations, update the file `/etc/default/jans-casa`. Locate a segment that reads `-Dacr=` and assign  `agama_io.jans.casa.authn.acctlinking` as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. 
+For VM-based installations, update the file `/etc/default/jans-casa`. Locate a segment that reads `-Dacr=` and assign  `agama_io.jans.casa.authn.acctlinking` as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box.
 
 Finally restart Casa and conduct your testing. You will now see the login page contains a list of links to the configured identity providers.

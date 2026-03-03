@@ -166,31 +166,37 @@ public class DpopService {
             throw new InvalidJwtException("Invalid DPoP Proof. The jti param has been used before.");
         }
 
-        if (BooleanUtils.isTrue(appConfiguration.getDpopUseNonce())) {
-            if (StringUtils.isBlank(nonce)) {
-                throw new WebApplicationException(Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .type(MediaType.APPLICATION_JSON_TYPE)
-                        .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.USE_DPOP_NONCE, "Nonce is not set"))
-                        .cacheControl(ServerUtil.cacheControl(true, false))
-                        .header(PRAGMA, NO_CACHE)
-                        .header(DPOP_NONCE, generateNonce()).build());
-            }
+        validateDpopNonce(nonce);
+    }
 
-            final Object nonceValue = cacheService.get(nonce);
-            if (nonceValue == null) {
-                throw new WebApplicationException(Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .type(MediaType.APPLICATION_JSON_TYPE)
-                        .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.USE_NEW_DPOP_NONCE, "New nonce value is required"))
-                        .cacheControl(ServerUtil.cacheControl(true, false))
-                        .header(PRAGMA, NO_CACHE)
-                        .header(DPOP_NONCE, generateNonce()).build());
-            }
+    public void validateDpopNonce(String nonce) {
+        if (BooleanUtils.isFalse(appConfiguration.getDpopUseNonce())) {
+            return;
+        }
+
+        if (StringUtils.isBlank(nonce)) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.USE_DPOP_NONCE, "Nonce is not set"))
+                    .cacheControl(ServerUtil.cacheControl(true, false))
+                    .header(PRAGMA, NO_CACHE)
+                    .header(DPOP_NONCE, generateDpopNonce()).build());
+        }
+
+        final Object nonceValue = cacheService.get(nonce);
+        if (nonceValue == null) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.USE_NEW_DPOP_NONCE, "New nonce value is required"))
+                    .cacheControl(ServerUtil.cacheControl(true, false))
+                    .header(PRAGMA, NO_CACHE)
+                    .header(DPOP_NONCE, generateDpopNonce()).build());
         }
     }
 
-    private String generateNonce() {
+    private String generateDpopNonce() {
         final String nonce = UUID.randomUUID().toString();
         cacheService.put(appConfiguration.getDpopNonceCacheTime(), nonce, nonce);
         return nonce;

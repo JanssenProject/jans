@@ -24,13 +24,13 @@ If there is no such file, the flow will crash right away, otherwise, processing 
 
 ### How to build templates?
 
-Templates are expected to be written using [Apache FreeMarker](https://freemarker.apache.org/docs/index.html). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama should have the extension `ftlh`. Practically they will look and behave as regular HTML files.  
+Templates are expected to be written using [Apache FreeMarker](https://freemarker.apache.org/docs/index.html). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama should have the extension `ftlh`. Practically they will look and behave as regular HTML files.
 
-Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. It usually boils down to produce the desired markup plus adding some placeholders for information that is dynamic. The key concept there is `Template + data-model = output` which is pretty natural. The sumation in this equation is generally referred to as "rendering a template" in this documentation.
+Developers are encouraged to take a peep at the [FreeMarker manual](https://freemarker.apache.org/docs/index.html) before trying to write their first pages. It usually boils down to produce the desired markup plus adding some placeholders for information that is dynamic. The key concept there is `Template + data-model = output` which is pretty natural. The summation in this equation is generally referred to as "rendering a template" in this documentation.
 
 ## Rendering
 
-Rendering is the process of "injecting" the variable passed (_map-variable_ in the above) into a template. If no variable is present in the instruction, it is assumed an empty _map_ was passed, i.e. `{ }`. 
+Rendering is the process of "injecting" the variable passed (_map-variable_ in the above) into a template. If no variable is present in the instruction, it is assumed an empty _map_ was passed, i.e. `{ }`.
 
 The variable injected ("data model" in FreeMarker terms) always has to be an Agama _map_, Java bean or object implementing the `java.util.Map` interface. This will allow access to the contents of such variable from within the template.
 
@@ -105,9 +105,9 @@ foo
 
 ## User-data retrieval
 
-Once the rendered page is shown in the browser, the flow execution is literally paused. If the user stands idly at this page, nothing will happen. To make the flow proceed, an HTTP POST must be made to the current URL. This is exactly what `login.ftl` of the above example tries to do: it provides a button that submits the form via POST for the flow to resume execution.  
+Once the rendered page is shown in the browser, the flow execution is literally paused. If the user stands idly at this page, nothing will happen. To make the flow proceed, an HTTP POST must be made to the current URL. This is exactly what `login.ftl` of the above example tries to do: it provides a button that submits the form via POST for the flow to resume execution.
 
-Once the flow continues, an Agama _map_ is built using all form fields received at the server and bound to the variable used in the assignment of the RRF instruction (the variable referred as _assignment-var_ in the introduction of this page). This only applies when `RRF` has an assignment associated, of course.  
+Once the flow continues, an Agama _map_ is built using all form fields received at the server and bound to the variable used in the assignment of the RRF instruction (the variable referred as _assignment-var_ in the introduction of this page). This only applies when `RRF` has an assignment associated, of course.
 
 If the earlier example is modified to
 

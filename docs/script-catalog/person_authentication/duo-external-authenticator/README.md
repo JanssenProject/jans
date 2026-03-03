@@ -2,10 +2,10 @@
 
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. 
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
 
 ## Authentication flow
-```mermaid 
+```mermaid
 sequenceDiagram
 title Integrating DUO's Universal Prompt as an authentication method in Janssen server
 autonumber 1
@@ -43,7 +43,7 @@ Jans AS->>RP: 10. write Jans session cookie
 
 3. Click Protect an Application and locate Web SDK in the applications list. Click Protect this Application to get your client ID, secret key, and API hostname.
 
-For additional info for the steps refer to Duo's Web SDK 4, check [this article](https://duo.com/docs/duoweb-v4). 
+For additional info for the steps refer to Duo's Web SDK 4, check [this article](https://duo.com/docs/duoweb-v4).
 
 ## Configure Jans-auth server (AS)
 ### 1. Add the duo-universal Dependency to your jans-auth server
@@ -79,7 +79,7 @@ The dependencies have to be added separately as mentioned in the steps below. Us
      |api_hostname		|Mandatory     |URL of the Duo API Server|api-random.duosecurity.com|
      |client_id		|Mandatory    |Value from the Duo application using Web SDK 4 that was registered using DUO Admin console|DI3ICTTJKLL8PPPNGH7YI|
      |client_secret	|Mandatory|Value from the Duo application using Web SDK 4 that was registered using DUO Admin console|eEbJdi3hg42zxyFYbHArU5RuioPP|   
-   
+
   *  `name` field should reflect the use case
   *  `script_type` should be `PERSON_AUTHENTICATION`
 
@@ -137,10 +137,10 @@ The dependencies have to be added separately as mentioned in the steps below. Us
 /opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
 ```
 
-Now Duo is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request Duo authentication for users. 
+Now Duo is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request Duo authentication for users.
 
-!!! Note 
-    To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`. 
+!!! Note
+    To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`.
 
 ## Make Duo the Default Authentication Mechanism
 For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
@@ -158,9 +158,9 @@ Steps:
 ```
 :memo: **NOTE**
 
-To make sure `duo` has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`. 
+To make sure `duo` has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`.
 
-## Test the feature 
+## Test the feature
 To test , enter the complete URL for authorization in a browser or create a simple web page with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
 
 An example of a complete URL looks like this -

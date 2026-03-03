@@ -10,11 +10,11 @@ tags:
 
 CORS Filter is an implementation of the [W3C's Cross-Origin Resource Sharing (CORS) specification](https://fetch.spec.whatwg.org/).
 
-The CORS Filter works by adding required `Access-Control-*` headers to the `HttpServletResponse` object. 
-The filter also protects against HTTP response splitting. If a request is invalid or not permitted, the request is 
+The CORS Filter works by adding required `Access-Control-*` headers to the `HttpServletResponse` object.
+The filter also protects against HTTP response splitting. If a request is invalid or not permitted, the request is
 rejected with HTTP status code 403 (Forbidden).
 
-The minimal configuration required to use the CORS Filter is shown below, and is already added to the `web.xml` in `jans-auth.war`. 
+The minimal configuration required to use the CORS Filter is shown below, and is already added to the `web.xml` in `jans-auth.war`.
 The filter name is `io.jans.as.server.filter.CorsFilter`.
 
 ```
@@ -32,7 +32,7 @@ CORS can be configured in Jans Server using `Jans TUI`. Follow these steps:
 1. Open `Jans TUI` using `jans tui` command.
 2. Go to `Auth Server > Properties` and select `corsConfigurationFilters`
 3. This will display the CORS Configuration Filter parameters, as shown below:
- 
+
   ![Screenshot from 2023-12-08 04-38-33](https://github.com/JanssenProject/jans/assets/43112579/3cbcfad9-9410-46b6-88d2-34e5a45556c8)
 
 5. Define and configure the parameters.

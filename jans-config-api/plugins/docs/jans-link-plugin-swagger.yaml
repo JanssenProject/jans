@@ -36,6 +36,12 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans-link.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/jans-link.write
+      - oauth2:
+        - https://jans.io/oauth/config/link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
     put:
       tags:
       - Jans Link - Configuration
@@ -62,6 +68,10 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans-link.write
+      - oauth2:
+        - https://jans.io/oauth/config/link.admin
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
 components:
   schemas:
     AppConfiguration:
@@ -215,3 +225,11 @@ components:
               related information
             https://jans.io/oauth/config/jans-link.write: Manage Jans link configuration
               related information
+            https://jans.io/oauth/config/link.admin: Admin for Jans link configuration
+              related information
+            https://jans.io/oauth/config/read-all: Super admin for viewing application
+              resource information
+            https://jans.io/oauth/config/write-all: Super admin for updating application
+              resource information
+            https://jans.io/oauth/config/delete-all: Super admin for deleting application
+              resource information

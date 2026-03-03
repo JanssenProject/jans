@@ -34,6 +34,8 @@ import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ServerCryptoProvider;
+import io.jans.as.server.service.external.ExternalTxTokenService;
+import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.token.TokenEntity;
 import io.jans.util.security.StringEncrypter;
@@ -41,6 +43,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -88,6 +91,9 @@ public class TxTokenService {
     @Inject
     private AuthorizationGrantList authorizationGrantList;
 
+    @Inject
+    private ExternalTxTokenService externalTxTokenService;
+
     public Response processTxToken(ExecutionContext executionContext) throws Exception {
         final JSONObject responseJson = process(executionContext);
         final String entity = responseJson.toString();
@@ -106,7 +112,14 @@ public class TxTokenService {
 
         TxToken txToken = createTxToken(executionContext, subjectGrant);
 
-        return createResponse(txToken.getCode());
+        JSONObject response = createResponse(txToken.getCode());
+        JSONObject responseForScript = new JSONObject(response.toString());
+
+        if (externalTxTokenService.modifyResponse(responseForScript, ExternalScriptContext.of(executionContext))) {
+            // change response only if external script returned `true`
+            response = responseForScript;
+        }
+        return response;
     }
 
     public static JSONObject createResponse(String txToken) {
@@ -133,7 +146,7 @@ public class TxTokenService {
         final JsonWebResponse jwr = createTxTokenJwr(audience, requestContext, requestDetails, executionContext, subjectGrant);
         final String jwrString = jwr.toString();
 
-        final int txTokenLifetime = getTxTokenLifetime(client);
+        final int txTokenLifetime = getTxTokenLifetime(executionContext);
         TxToken txToken = new TxToken(txTokenLifetime);
         txToken.setCode(jwrString);
 
@@ -147,9 +160,8 @@ public class TxTokenService {
 
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
-        calendar.add(Calendar.SECOND, getTxTokenLifetime(client));
+        calendar.add(Calendar.SECOND, getTxTokenLifetime(executionContext));
         Date expiration = calendar.getTime();
-
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         jwr.getClaims().setExpirationTime(expiration);
@@ -180,6 +192,20 @@ public class TxTokenService {
         azd.put("client_id", client.getClientId());
 
         jwr.getClaims().setClaim("azd", azd);
+
+        boolean externalOk = externalTxTokenService.modifyTokenPayload(jwr, ExternalScriptContext.of(executionContext));
+        if (!externalOk) {
+            final String reason = "External TxToken script forbids tx_token creation.";
+            log.trace(reason);
+
+            throw new WebApplicationException(Response
+                    .status(Response.Status.FORBIDDEN)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .cacheControl(ServerUtil.cacheControl(true, false))
+                    .header("Pragma", "no-cache")
+                    .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.ACCESS_DENIED, reason))
+                    .build());
+        }
     }
 
     private static JSONObject decodeJson(String jsonString) {
@@ -194,10 +220,17 @@ public class TxTokenService {
         }
     }
 
-    private int getTxTokenLifetime(Client client) {
+    private int getTxTokenLifetime(ExecutionContext executionContext) {
+        Client client = executionContext.getClient();
         if (client.getAttributes().getTxTokenLifetime() != null && client.getAttributes().getTxTokenLifetime() > 0) {
             log.trace("Override TxToken lifetime with value {} from client: {}", client.getAttributes().getTxTokenLifetime(), client.getClientId());
             return client.getAttributes().getTxTokenLifetime();
+        }
+
+        int lifetimeFromScript = externalTxTokenService.getTxTokenLifetimeInSeconds(ExternalScriptContext.of(executionContext));
+        if (lifetimeFromScript > 0) {
+            log.trace("Override TxToken lifetime with value {} from script.", lifetimeFromScript);
+            return lifetimeFromScript;
         }
         return appConfiguration.getTxTokenLifetime();
     }

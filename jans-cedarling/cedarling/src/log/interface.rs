@@ -8,15 +8,24 @@
 
 use std::sync::{Arc, Weak};
 
-use uuid7::Uuid;
-use crate::log::log_strategy::LogStrategyLogger;
 use super::{LogLevel, LogStrategy};
+use crate::log::{
+    BaseLogEntry,
+    loggable_fn::LoggableFn,
+    stdout_logger::{StdOutLogger, StdOutLoggerMode},
+};
+use uuid7::Uuid;
 
 /// Log Writer
 /// interface for logging events
 pub(crate) trait LogWriter {
     /// log any serializable entry that not suitable for [`LogEntry`]
     fn log_any<T: Loggable>(&self, entry: T);
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R;
 }
 
 impl LogWriter for Option<Arc<LogStrategy>> {
@@ -25,30 +34,60 @@ impl LogWriter for Option<Arc<LogStrategy>> {
             logger.log_any(entry);
         }
     }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(logger) = self.as_ref() {
+            logger.log_fn(log_fn);
+        }
+    }
+}
+
+impl LogWriter for Option<&Arc<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if let Some(logger) = self.as_ref() {
+            logger.log_any(entry);
+        }
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(logger) = self.as_ref() {
+            logger.log_fn(log_fn);
+        }
+    }
 }
 
 impl LogWriter for Option<Weak<LogStrategy>> {
     fn log_any<T: Loggable>(&self, entry: T) {
-        if let Some(log_strategy) = self.as_ref().and_then(|l| l.upgrade()) {
-            match log_strategy.logger() {
-                LogStrategyLogger::Off(log) => log.log_any(entry),
-                LogStrategyLogger::MemoryLogger(memory_logger) => memory_logger.log_any(entry),
-                LogStrategyLogger::StdOut(std_out_logger) => std_out_logger.log_any(entry),
-            }
+        if let Some(log_strategy) = self.as_ref().and_then(std::sync::Weak::upgrade) {
+            log_strategy.as_ref().log_any(entry);
             return;
         }
 
         // we log the error manually to stdout if the logger is gone
-        
-        let log = match serde_json::to_value(&entry) {
-            Ok(json) => json.to_string(),
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(entry).expect(&err_msg).to_string()
-            },
-        };
+        StdOutLogger::new(LogLevel::INFO, StdOutLoggerMode::Immediate).log_any(entry);
+    }
 
-        println!("{log}");
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(log_strategy) = self.as_ref().and_then(std::sync::Weak::upgrade) {
+            log_strategy.as_ref().log_fn(log_fn);
+            return;
+        }
+
+        let entry = log_fn.build();
+        // we log the error manually to stdout if the logger is gone
+        StdOutLogger::new(LogLevel::INFO, StdOutLoggerMode::Immediate).log_any(entry);
     }
 }
 
@@ -102,7 +141,10 @@ pub(crate) trait Indexed {
     }
 }
 
-pub(crate) trait Loggable: serde::Serialize + Indexed + Clone {
+// static means that entities owns value or has reference with 'static lifetime
+pub(crate) trait Loggable:
+    serde::Serialize + Indexed + Clone + Send + Sync + Sized + 'static
+{
     /// get log level for entity
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
@@ -111,14 +153,21 @@ pub(crate) trait Loggable: serde::Serialize + Indexed + Clone {
     // default implementation of method
     // is used to avoid boilerplate code
     fn can_log(&self, logger_level: LogLevel) -> bool {
-        if let Some(entry_log_level) = self.get_log_level() {
-            // higher level is more important, ie closer to fatal
-            logger_level <= entry_log_level
-        } else {
-            // if `.get_log_level` return None
-            // it means that `log_kind` != `System` and we should log it
-            true
-        }
+        can_log(self.get_log_level(), logger_level)
+    }
+}
+
+/// check if entry can log to logger
+// default implementation of method
+// is used to avoid boilerplate code
+pub(super) fn can_log(entity_level: Option<LogLevel>, logger_level: LogLevel) -> bool {
+    if let Some(entry_log_level) = entity_level {
+        // higher level is more important, ie closer to fatal
+        logger_level <= entry_log_level
+    } else {
+        // if `.get_log_level` return None
+        // it means that `log_kind` != `System` and we should log it
+        true
     }
 }
 
@@ -138,13 +187,13 @@ pub trait LogStorage {
     /// Tag can be `log_kind`, `log_level`.
     fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
 
-    /// Get logs by request_id.
-    /// Return log entries that match the given request_id.
+    /// Get logs by `request_id`.
+    /// Return log entries that match the given `request_id`.
     fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
 
-    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Get log by `request_id` and tag, like composite key `request_id` + `log_kind`.
     /// Tag can be `log_kind`, `log_level`.
-    /// Return log entries that match the given request_id and tag.
+    /// Return log entries that match the given `request_id` and tag.
     fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
     -> Vec<serde_json::Value>;
 }

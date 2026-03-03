@@ -1,0 +1,6 @@
+dn: ou=shibboleth-idp,ou=configuration,o=jans
+objectClass: top
+objectClass: jansAppConf
+ou: shibboleth-idp
+jansConfApp: {"shibbolethIdp":{"entityId":"%(shibboleth_idp_entity_id)s","scope":"%(shibboleth_idp_scope)s","enabled":true,"metadataProviders":[],"trustedServiceProviders":[]}}
+jansRevision: 1

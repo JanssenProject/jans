@@ -115,7 +115,7 @@ This section offers details on how the server deploys a `.gama` file. In summary
 1. Transfer of assets and source files
 1. Task finalization
 
-After the initial validation of structure takes place, the `code` directory is scanned for `flow` files and every flow is transpiled and added to the database if its transpilation was successful. 
+After the initial validation of structure takes place, the `code` directory is scanned for `flow` files and every flow is transpiled and added to the database if its transpilation was successful.
 
 Next, `jar` files found are transferred to the server's custom libs directory - this only applies for VM-based installations.
 

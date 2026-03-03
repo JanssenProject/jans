@@ -11,7 +11,7 @@ tags:
 
 # Using TUI Command Line Log
 
-When you do a write operation (post/put/patch) with Jans TUI, it [logs](README.md#command-line-logs) 
+When you do a write operation (post/put/patch) with Jans TUI, it [logs](README.md#command-line-logs)
 activities to file `<log-dir>/cli_cmd.log`,default `log-dir` is home directory.
 
 Consider you created a user with TUI and have the following line in `cli_cmd.log`:

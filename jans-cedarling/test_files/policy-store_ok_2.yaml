@@ -27,7 +27,7 @@ policy_stores:
     policies:
       1:
         description: simple policy example for principal workload, permit when workload org_id same with resource
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -41,7 +41,7 @@ policy_stores:
             };
       2:
         description: simple policy example for principal user, permit if user country same with the issue
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -55,7 +55,7 @@ policy_stores:
             };
       3:
         description: simple policy example for principal role, permit when Admin
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -67,7 +67,7 @@ policy_stores:
             );
       4:
         description: simple policy example for principal role, forbid for Guest
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -79,7 +79,7 @@ policy_stores:
             );
       5:
         description: simple policy for principal TestPrincipal-s
-        creation_date: '2025-03-18T17:22:39.996050'
+        creation_date: "2025-03-18T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -99,7 +99,8 @@ policy_stores:
         namespace Jans {
         type Url = {"host": String, "path": String, "protocol": String};
         entity TrustedIssuer = {"issuer_entity_id": Url};
-        entity Issue = {"country": String, "org_id": String};
+        entity Issue in [BaseIssue] = {"country": String, "org_id": String};
+        entity BaseIssue = {"country": String, "org_id": String};
         entity Role;
         entity User in [Role] = {
           sub: String,
@@ -196,4 +197,18 @@ policy_stores:
           resource: [Issue],
           context: {}
         };
+        }
+    default_entities:
+      "SomeNotRandomID1234":
+        {
+          "uid": { "type": "Jans::Issue", "id": "SomeNotRandomID1234" },
+          "attrs": { "org_id": "some_long_id", "country": "US" },
+          "parents":
+            [{ "type": "Jans::BaseIssue", "id": "SomeNotRandomID12345" }],
+        }
+      "SomeNotRandomID12345":
+        {
+          "uid": { "type": "Jans::BaseIssue", "id": "SomeNotRandomID12345" },
+          "attrs": { "org_id": "some_long_id", "country": "US" },
+          "parents": [],
         }

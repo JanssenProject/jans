@@ -7,9 +7,14 @@ mod unsigned;
 mod user;
 mod workload;
 
-use super::entity_id_getters::*;
+use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::schema::AttrsShape;
-use super::*;
+use super::{
+    Arc, BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
+    BuiltEntities, ClaimMappings, EntityBuilder, EntityData, EntityUid, HashMap, PartitionResult,
+    RestrictedExpression, Token, TokenPrincipalMappings, Value, build_cedar_entity,
+    build_entity_attrs,
+};
 use cedar_policy::Entity;
 use smol_str::SmolStr;
 use std::collections::HashSet;
@@ -17,7 +22,7 @@ use std::collections::HashSet;
 type TokenClaims = HashMap<String, Value>;
 
 #[derive(Clone, Copy)]
-pub enum AttrSrc<'a> {
+pub(super) enum AttrSrc<'a> {
     Token {
         claims: &'a TokenClaims,
         mappings: Option<&'a ClaimMappings>,
@@ -29,7 +34,7 @@ impl EntityBuilder {
     fn build_principal_entity(
         &self,
         type_name: &str,
-        id_srcs: Vec<EntityIdSrc>,
+        id_srcs: &[EntityIdSrc],
         attrs_srcs: Vec<AttrSrc>,
         tkn_principal_mappings: &TokenPrincipalMappings,
         built_entities: &BuiltEntities,
@@ -41,7 +46,7 @@ impl EntityBuilder {
             .and_then(|s| s.get_entity_shape(type_name));
 
         let entity_id =
-            get_first_valid_entity_id(&id_srcs).map_err(|e| e.while_building(type_name))?;
+            get_first_valid_entity_id(id_srcs).map_err(|e| e.while_building(type_name))?;
 
         // Extract attributes from sources
         let ExtractedAttrsResult { attrs, errs } =
@@ -49,9 +54,12 @@ impl EntityBuilder {
 
         let mut entity_attrs: HashMap<String, RestrictedExpression> = if errs.is_empty() {
             // what should happen if claims have the same name but different values?
-            HashMap::from_iter(attrs.into_iter().flatten())
+            attrs.into_iter().flatten().collect::<HashMap<_, _>>()
         } else {
-            let errs: Vec<_> = errs.into_iter().flat_map(|e| e.into_inner()).collect();
+            let errs: Vec<_> = errs
+                .into_iter()
+                .flat_map(super::error::BuildAttrsErrorVec::into_inner)
+                .collect();
             return Err(BuildEntityErrorKind::from(errs).while_building(type_name));
         };
 
@@ -89,7 +97,7 @@ struct ExtractedAttrsResult {
     errs: Vec<BuildAttrsErrorVec>,
 }
 
-pub struct BuiltPrincipalUnsigned {
+pub(crate) struct BuiltPrincipalUnsigned {
     pub principal: Entity,
     pub parents: Vec<Entity>,
 }
@@ -101,23 +109,31 @@ pub struct BuiltPrincipalUnsigned {
 /// - [`user::UserIdSrcResolver`]     
 /// - [`workload::WorkloadIdSrcResolver`]     
 #[derive(Clone, Copy)]
-pub struct PrincipalIdSrc<'a> {
+pub(super) struct PrincipalIdSrc<'a> {
     token: &'a str,
     claim: &'a str,
 }
 
 #[cfg(test)]
 mod test {
+    use std::str::FromStr;
+
+    use cedar_policy_core::validator::ValidatorSchema;
+
     use super::*;
-    use crate::common::policy_store::TrustedIssuer;
+    use crate::{
+        EntityBuilderConfig,
+        common::{default_entities::DefaultEntities, policy_store::TrustedIssuer},
+        entity_builder::TrustedIssuerIndex,
+    };
 
     #[test]
     fn err_on_missing_entity_id() {
-        let schema_src = r#"namespace Jans {
+        let schema_src = r"namespace Jans {
             entity TrustedIssuer;
             entity Test;
         }
-        "#;
+        ";
         let validator_schema =
             ValidatorSchema::from_str(schema_src).expect("build cedar ValidatorSchema");
         let iss = TrustedIssuer::default();
@@ -125,9 +141,9 @@ mod test {
 
         let builder = EntityBuilder::new(
             EntityBuilderConfig::default().with_workload(),
-            &issuers,
+            TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
-            None,
+            DefaultEntities::default(),
         )
         .expect("should init entity builder");
 
@@ -143,7 +159,7 @@ mod test {
         let error = builder
             .build_principal_entity(
                 type_name,
-                id_srcs,
+                &id_srcs,
                 attrs_srcs.clone(),
                 &tkn_principal_mappings,
                 &built_entities,
@@ -155,7 +171,7 @@ mod test {
             ref error,
         } if
             entity_type_name == "Test" &&
-            matches!(error, BuildEntityErrorKind::MissingEntityId(_))
+            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
         ));
 
         // Case where there's available sources but the token is missing the claim
@@ -166,7 +182,7 @@ mod test {
         let error = builder
             .build_principal_entity(
                 type_name,
-                id_srcs,
+                &id_srcs,
                 attrs_srcs,
                 &tkn_principal_mappings,
                 &built_entities,
@@ -178,7 +194,7 @@ mod test {
             ref error,
         } if
             entity_type_name == "Test" &&
-            matches!(error, BuildEntityErrorKind::MissingEntityId(_))
+            matches!(&**error, BuildEntityErrorKind::MissingEntityId(_))
         ));
     }
 }

@@ -54,7 +54,7 @@ The command line is:
 jans cli --operation-id get-config-scripts
 ```
 
-It returns all the custom scripts of the Janssen Server. 
+It returns all the custom scripts of the Janssen Server.
 
 
 ## Adds a New Custom Script
@@ -106,7 +106,7 @@ jans cli CustomScript > /tmp/cs.json
 }
 ```
 
-We need to fill some of these properties with valid data to add this new script. 
+We need to fill some of these properties with valid data to add this new script.
 
 ```
 {
@@ -286,7 +286,7 @@ It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` 
 
 ## Get Custom Scripts by it's `inum`
 
-In case we need to find out details configuration of any custom script, we can search by its unique `inum` value. 
+In case we need to find out details configuration of any custom script, we can search by its unique `inum` value.
 
 ```
 Operation ID: get-config-scripts-by-inum
@@ -350,7 +350,7 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 
 Well, we can delete any custom script also in deed. In that case, we need to remember the `inum` value of the custom script we want to delete. In the above we [added](custom-scripts-config.md#adds-a-new-custom-script), [updated](custom-scripts-config.md#update-an-existing-custom-script) a custom script. We know the `inum` value, so let's delete this one.
 
-Command line: 
+Command line:
 
 ```
 jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value

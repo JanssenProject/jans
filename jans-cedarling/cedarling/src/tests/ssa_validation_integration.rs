@@ -5,11 +5,16 @@
 
 //! Integration tests for SSA JWT validation functionality
 
-use crate::{LockServiceConfig, Cedarling, BootstrapConfig, LogLevel, PolicyStoreSource, JwtConfig, EntityBuilderConfig, AuthorizationConfig, IdTokenTrustMode, LogConfig, LogTypeConfig, PolicyStoreConfig};
 use crate::common::json_rules::JsonRule;
+use crate::log::StdOutLoggerMode;
+use crate::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
+    IdTokenTrustMode, JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource,
+};
+use serde_json::json;
 use std::collections::HashSet;
 use std::time::Duration;
-use serde_json::json;
 
 static POLICY_STORE_RAW: &str = include_str!("../../../test_files/policy-store_ok.yaml");
 
@@ -36,7 +41,7 @@ async fn test_cedarling_with_valid_ssa() {
     let result = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -47,6 +52,7 @@ async fn test_cedarling_with_valid_ssa() {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -65,6 +71,7 @@ async fn test_cedarling_with_valid_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await;
 
@@ -94,7 +101,7 @@ async fn test_cedarling_without_ssa() {
     let result = Cedarling::new(&BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
+            log_type: LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
             log_level: LogLevel::INFO,
         },
         policy_store_config: PolicyStoreConfig {
@@ -105,6 +112,7 @@ async fn test_cedarling_without_ssa() {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             signature_algorithms_supported: HashSet::new(),
+            ..Default::default()
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
@@ -123,6 +131,7 @@ async fn test_cedarling_without_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await;
 
@@ -135,8 +144,10 @@ async fn test_cedarling_without_ssa() {
 #[tokio::test]
 async fn test_ssa_validation_structure() {
     // Test SSA JWT structure validation
-    use crate::lock::ssa_validation::{validate_ssa_structure_with_config, SsaValidationConfig, SsaValidationError};
-    use crate::jwt::{DecodedJwt, DecodedJwtHeader, DecodedJwtClaims};
+    use crate::jwt::{DecodedJwt, DecodedJwtClaims, DecodedJwtHeader};
+    use crate::lock::ssa_validation::{
+        SsaValidationConfig, SsaValidationError, validate_ssa_structure_with_config,
+    };
     use jsonwebtoken::Algorithm;
 
     // Test valid SSA structure
@@ -146,8 +157,8 @@ async fn test_ssa_validation_structure() {
         "org_id": "test_org",
         "iss": "https://test.issuer.com",
         "software_roles": ["cedarling"],
-        "exp": 1735689600,
-        "iat": 1735603200,
+        "exp": 1_735_689_600,
+        "iat": 1_735_603_200,
         "jti": "test-jti-123"
     });
 
@@ -158,7 +169,9 @@ async fn test_ssa_validation_structure() {
             cty: None,
             kid: Some("test-kid".to_string()),
         },
-        claims: DecodedJwtClaims { inner: valid_claims },
+        claims: DecodedJwtClaims {
+            inner: valid_claims,
+        },
     };
 
     let config = SsaValidationConfig::default();
@@ -179,11 +192,16 @@ async fn test_ssa_validation_structure() {
             cty: None,
             kid: Some("test-kid".to_string()),
         },
-        claims: DecodedJwtClaims { inner: invalid_claims },
+        claims: DecodedJwtClaims {
+            inner: invalid_claims,
+        },
     };
 
     let result = validate_ssa_structure_with_config(&invalid_decoded_jwt, &config);
-    assert!(matches!(result, Err(SsaValidationError::MissingRequiredClaims(_))));
+    assert!(matches!(
+        result,
+        Err(SsaValidationError::MissingRequiredClaims(_))
+    ));
 
     // Test invalid grant_types (not an array)
     let invalid_grant_types_claims = json!({
@@ -192,8 +210,8 @@ async fn test_ssa_validation_structure() {
         "org_id": "test_org",
         "iss": "https://test.issuer.com",
         "software_roles": ["cedarling"],
-        "exp": 1735689600,
-        "iat": 1735603200,
+        "exp": 1_735_689_600,
+        "iat": 1_735_603_200,
         "jti": "test-jti-123"
     });
 
@@ -204,7 +222,9 @@ async fn test_ssa_validation_structure() {
             cty: None,
             kid: Some("test-kid".to_string()),
         },
-        claims: DecodedJwtClaims { inner: invalid_grant_types_claims },
+        claims: DecodedJwtClaims {
+            inner: invalid_grant_types_claims,
+        },
     };
 
     let result = validate_ssa_structure_with_config(&invalid_grant_types_jwt, &config);
@@ -218,13 +238,13 @@ async fn test_ssa_jwt_decode() {
 
     // Test decoding a valid JWT structure
     let valid_jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-    
+
     let result = decode_jwt(valid_jwt);
     assert!(result.is_ok());
 
     // Test decoding an invalid JWT structure
     let invalid_jwt = "invalid.jwt.token";
-    
+
     let result = decode_jwt(invalid_jwt);
     assert!(result.is_err());
 }
@@ -267,4 +287,4 @@ async fn test_ssa_configuration_validation() {
 
     // Verify that the SSA JWT is not set
     assert!(config_without_ssa.ssa_jwt.is_none());
-} 
+}

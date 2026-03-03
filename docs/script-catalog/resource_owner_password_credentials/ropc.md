@@ -40,7 +40,7 @@ This script has been adapted from the Gluu Server [sample ROPC script](https://g
 
 Main usage of script is at Token Endpoint.
 
-However sometimes it can be useful to use ROPC custom script at Authorization Endpoint to avoid redirects and pages. 
+However sometimes it can be useful to use ROPC custom script at Authorization Endpoint to avoid redirects and pages.
 By default it is not enabled but it can be enabled if set `forceRopcInAuthorizationEndpoint` AS configuration property to `true`.
 
 Also it is required to set `user` in context in custom script (`context.setUser(<user>)`). Without it authorization will go on in normal way (with pages and redirects).
@@ -49,60 +49,7 @@ Also it is required to set `user` in context in custom script (`context.setUser(
 ### Script Type: Python
 
 ```python
-from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
-from io.jans.as.server.service import AuthenticationService
-from io.jans.service.cdi.util import CdiUtil
-from java.lang import String
-
-class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "ROPC script. Initializing ..."
-
-        self.usernameParamName = "username"
-        self.passwordParamName = "password"
-
-        print "ROPC script. Initialized successfully"
-
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "ROPC script. Destroying ..."
-        print "ROPC script. Destroyed successfully"
-        return True
-
-    def getApiVersion(self):
-        return 11
-
-    # Returns True and set user into context when user authenticated succesfully
-    # Returns False when user not authenticated or it's needed to cancel notmal flow
-    def authenticate(self, context):
-        print "ROPC script. Authenticate"
-        deviceIdParam = context.getHttpRequest().getParameterValues("device_id")
-        if deviceIdParam != None and (deviceIdParam.length > 0 ):
-            result = deviceIdParam[0] == "device_id_1"
-            if not result:
-                return False
-
-            # Set authenticated user in context
-            # context.setUser(user)
-            return True
-
-        # Do generic authentication in other cases
-        authService = CdiUtil.bean(AuthenticationService)
-
-        username = context.getHttpRequest().getParameter(self.usernameParamName)
-        password = context.getHttpRequest().getParameter(self.passwordParamName)
-        result = authService.authenticate(username, password)
-        if not result:
-            print "ROPC script. Authenticate. Could not authenticate user '%s' " % username
-            return False
-
-        context.setUser(authService.getAuthenticatedUser())
-
-        return True
+--8<-- "script-catalog/resource_owner_password_credentials/resource-owner-password-credentials/resource_owner_password_credentials.py"
 ```
 
 ### Script Type: Java
@@ -121,65 +68,64 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResourceOwnerPasswordCredentials implements ResourceOwnerPasswordCredentialsType {
-	
-	private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
-	
-	private final String usernameParamName = "username";
-	private final String passwordParamName = "password";
+        
+        private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
+        
+        private final String usernameParamName = "username";
+        private final String passwordParamName = "password";
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ROPC Script. Initializing...");
         log.info("ROPC Script. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ROPC Script. Initializing...");
         log.info("ROPC Script. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ROPC Script. Destroying...");
         log.info("ROPC Script. Destroyed.");
         return true;
-	}
+        }
 
-	@Override
-	public int getApiVersion() {
-		return 11;
-	}
+        @Override
+        public int getApiVersion() {
+                return 11;
+        }
 
-	@Override
-	public boolean authenticate(Object context) {
-		log.info("ROPC script. Authenticate");
-		ExternalResourceOwnerPasswordCredentialsContext ropcContext = (ExternalResourceOwnerPasswordCredentialsContext) context;
-		String[] deviceIdParam = ropcContext.getHttpRequest().getParameterValues("device_id");
-		if(deviceIdParam != null && deviceIdParam.length > 0) {
-			boolean result = deviceIdParam[0] == "device_id_1";
-			if (!result) {
-				return false;
-			}
-            // Set authenticated user in context
-            // context.setUser(user)
+        @Override
+        public boolean authenticate(Object context) {
+                log.info("ROPC script. Authenticate");
+                ExternalResourceOwnerPasswordCredentialsContext ropcContext = (ExternalResourceOwnerPasswordCredentialsContext) context;
+                String[] deviceIdParam = ropcContext.getHttpRequest().getParameterValues("device_id");
+                if(deviceIdParam != null && deviceIdParam.length > 0) {
+                        boolean result = "device_id_1".equals(deviceIdParam[0]);
+                        if (!result) {
+                                return false;
+                        }
+            // Set authenticated user in context using ropcContext.setUser(user)
             return true;
-		}
-		// generic authentication in other cases
+                }
+                // generic authentication in other cases
 
-		AuthenticationService authService = CdiUtil.bean(AuthenticationService.class);
-		String username = ropcContext.getHttpRequest().getParameter(usernameParamName);
-		String password = ropcContext.getHttpRequest().getParameter(passwordParamName);
-		boolean result = authService.authenticate(username, password);
-		if(!result) {
-			log.info("ROPC script. Authenticate. Could not authenticate " + username);
-			return false;
-		}
-		ropcContext.setUser(authService.getAuthenticatedUser());
-		return true;
-	}
+                AuthenticationService authService = CdiUtil.bean(AuthenticationService.class);
+                String username = ropcContext.getHttpRequest().getParameter(usernameParamName);
+                String password = ropcContext.getHttpRequest().getParameter(passwordParamName);
+                boolean result = authService.authenticate(username, password);
+                if(!result) {
+                        log.info("ROPC script. Authenticate. Could not authenticate " + username);
+                        return false;
+                }
+                ropcContext.setUser(authService.getAuthenticatedUser());
+                return true;
+        }
 
 }
 ```

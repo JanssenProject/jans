@@ -45,6 +45,8 @@ public class AppConfiguration extends LinkConfiguration {
     private int metricReporterKeepDataDays;
     private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
+    private Boolean disableExternalLoggerConfiguration = true;
+    
     // in seconds
     private int cleanServiceInterval;
     private boolean linkEnabled;
@@ -158,7 +160,15 @@ public class AppConfiguration extends LinkConfiguration {
         return disableJdkLogger;
     }
 
-    public int getCleanServiceInterval() {
+    public Boolean getDisableExternalLoggerConfiguration() {
+		return disableExternalLoggerConfiguration;
+	}
+
+	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+	}
+
+	public int getCleanServiceInterval() {
         return cleanServiceInterval;
     }
 

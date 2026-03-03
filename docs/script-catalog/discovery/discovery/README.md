@@ -5,7 +5,7 @@ The Authorization Server Metadata spec [RFC8414](https://datatracker.ietf.org/do
 - finding the authorization endpoint,
 - listing the supported scopes and client authentication mechanisms.
 
-The ["OpenID Connect Discovery 1.0"](https://openid.net/specs/openid-connect-discovery-1_0.html) defines the metadata in such a way that is compatible with OpenID Connect Discovery while being applicable to a wider set of OAuth 2.0 use cases.  
+The ["OpenID Connect Discovery 1.0"](https://openid.net/specs/openid-connect-discovery-1_0.html) defines the metadata in such a way that is compatible with OpenID Connect Discovery while being applicable to a wider set of OAuth 2.0 use cases.
 
 This is intentionally parallel to the way that ["OAuth 2.0 Dynamic Client Registration Protocol" RFC7591](https://datatracker.ietf.org/doc/html/rfc8414) defines the dynamic client registration mechanisms "OpenID Connect Dynamic Client Registration 1.0 OpenID.Registration so that is compatible with it.
 
@@ -47,7 +47,7 @@ The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomPr
     def modifyResponse(self, responseAsJsonObject, context):
         responseAsJsonObject.accumulate("key_from_script", "value_from_script")
         return True
-        
+
 ## Common Use Cases
 
 ## Script Type: Python

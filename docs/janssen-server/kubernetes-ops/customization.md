@@ -9,7 +9,7 @@ tags:
 
 # Customization
 
-Most organizations will want to edit and customize the look and feel of public-facing `jans` server pages to match their own corporate branding. 
+Most organizations will want to edit and customize the look and feel of public-facing `jans` server pages to match their own corporate branding.
 The following documentation provides the file locations of public facing pages, as well as instructions for adding custom HTML, CSS, and Javascript files to your `jans` server.
 
 
@@ -81,7 +81,7 @@ Templates refers to the common interface layout and style. For example, a banner
 2. Place a modified `template.xhtml` in the above location which will override the [default template file](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml) from the war
 
 
-## Custom Jar file for scripts 
+## Custom Jar file for scripts
 
 ### for JARs less than 1MB
 1.  Create a configmap with the custom jar file: 
@@ -100,7 +100,7 @@ Templates refers to the common interface layout and style. For example, a banner
           configMap:
             name: my-custom-jar
     ```
-        
+
 1.  Run helm install or helm upgrade if Jans has been already installed.
     ```bash
     helm upgrade <helm-release-name> janssen/janssen -n <namespace> -f values.yaml --version=1.0.x
@@ -132,7 +132,7 @@ Templates refers to the common interface layout and style. For example, a banner
       customScripts:
         - /tmp/mycustomjar.sh
     ```
-        
+
 1.  Run helm install or helm upgrade if Jans has been already installed.
     ```bash
     helm upgrade <helm-release-name> janssen/janssen -n <namespace> -f values.yaml --version=1.0.x

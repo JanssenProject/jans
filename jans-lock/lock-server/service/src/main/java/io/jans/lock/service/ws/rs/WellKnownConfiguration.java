@@ -13,9 +13,13 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.lock.model.app.audit.AuditActionType;
+import io.jans.lock.model.app.audit.AuditLogEntry;
 import io.jans.lock.model.core.LockApiError;
+import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.config.ConfigurationService;
 import io.jans.lock.util.ServerUtil;
+import io.jans.net.InetAddressUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,6 +51,9 @@ public class WellKnownConfiguration extends HttpServlet {
     @Inject
     private transient ConfigurationService configurationService;
 
+    @Inject
+    private transient ApplicationAuditLogger applicationAuditLogger;
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -56,13 +63,18 @@ public class WellKnownConfiguration extends HttpServlet {
      * @throws IOException
      */
     protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
+        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(servletRequest), AuditActionType.CONFIGURATION_READ);
+
+        boolean success = false;
     	httpResponse.setContentType("application/json");
         try (PrintWriter out = httpResponse.getWriter()) {
             ObjectNode responde = configurationService.getLockConfiguration();
             out.println(ServerUtil.toPrettyJson(responde).replace("\\/", "/"));
+            success = true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        applicationAuditLogger.log(auditLogEntry, success);
     }
 
     /**

@@ -14,6 +14,7 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.annotation.Ignore;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AttributeService;
@@ -29,7 +30,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.service.EncryptionService;
-import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,6 +56,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author Mougang T.Gasmyr
  *
@@ -68,6 +70,10 @@ import java.util.UUID;
 public class ClientsResource extends ConfigBaseResource {
 
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
+    private static final String CLIENT_SECRET = "clientSecret";
+
+    @Inject
+    private ApiAppConfiguration appConfiguration;
 
     @Inject
     ClientService clientService;
@@ -90,58 +96,116 @@ public class ClientsResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
+    /**
+     * Retrieve a paged list of OpenID Connect clients matching the given search
+     * criteria.
+     *
+     * @param limit          maximum number of results to return
+     * @param pattern        search pattern to filter clients
+     * @param startIndex     1-based index of the first result to return
+     * @param sortBy         attribute used to sort results
+     * @param sortOrder      sorting direction; allowed values are "ascending" and
+     *                       "descending"
+     * @param fieldValuePair comma-separated field=value pairs to further filter
+     *                       results (e.g.
+     *                       "applicationType=web,persistClientAuthorizations=true")
+     * @return HTTP 200 response whose entity is a PagedResult<Client> containing
+     *         the matching clients
+     * @throws EncryptionException if decrypting client secrets for the response
+     *                             fails
+     */
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getOpenIdConnectClients(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) throws EncryptionException {
+            @Parameter(description = "Field and value pair for searching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
+            throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+            logger.debug(
+                    "Client search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, Client.class);
+                startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, Client.class);
 
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
+    /**
+     * Retrieve a specific OpenID Connect client by its Inum.
+     *
+     * @param inum the client's Inum (identifier)
+     * @return a Response whose entity is the requested Client and whose status is
+     *         200 (OK)
+     */
     @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getOpenIdClientByInum(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getOpenIdClientByInum(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
+            throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client serach by inum:{}", escapeLog(inum));
+            logger.debug("Client search by inum:{}", escapeLog(inum));
         }
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
-        return Response.ok(client).build();
+
+        return Response.ok(applyResponsePolicy(client)).build();
     }
 
+    /**
+     * Create a new OpenID Connect client.
+     *
+     * Validates the provided client, ensures a clientId and client secret exist
+     * (encrypting the secret as needed), persists the client, and returns the
+     * persisted representation.
+     *
+     * @param client the Client to create; must include redirect URIs. If the client's
+     *               clientId is absent, a new one will be generated and assigned.
+     * @return an HTTP 201 Created response containing the persisted Client. The
+     *         presence and form of the `clientSecret` in the response are governed
+     *         by the server's response policy/configuration.
+     * @throws EncryptionException if encryption or decryption of the client secret fails.
+     */
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
@@ -150,7 +214,8 @@ public class ClientsResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client to be added - client:{}, client.getAttributes():{}, client.getCustomAttributes():{}",
@@ -175,11 +240,11 @@ public class ClientsResource extends ConfigBaseResource {
 
         String clientSecret = client.getClientSecret();
 
-        if (StringHelper.isEmpty(clientSecret)) {
+        if (StringUtils.isBlank(clientSecret)) {
             clientSecret = generatePassword();
         }
 
-        client.setClientSecret(encryptionService.encrypt(clientSecret));
+        client.setClientSecret(this.encryptPassword(client.getClientName(), clientSecret));
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         ignoreCustomObjectClassesForNonLDAP(client);
@@ -189,16 +254,33 @@ public class ClientsResource extends ConfigBaseResource {
                 client, client.getAttributes(), client.getCustomAttributes());
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
-        result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
         result.setClaims(claims);
 
+        // Response handling
+        applyResponsePolicy(result);
         logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    /**
+     * Update an existing OpenID Connect client.
+     *
+     * <p>
+     * Validates scopes and claims, preserves the existing client identifier and base DN,
+     * encrypts a provided client secret before saving, and returns the stored client with
+     * claims restored and the client secret adjusted according to the configured response policy.
+     * </p>
+     *
+     * @param client the Client object containing updated fields; must include the client's `clientId` and `redirectUris`
+     * @return the updated Client with claims restored and `clientSecret` adjusted according to response policy
+     * @throws EncryptionException if encryption or decryption of the client secret fails
+     */
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
@@ -208,7 +290,8 @@ public class ClientsResource extends ConfigBaseResource {
     @PUT
     @Ignore
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be updated - client:{}", escapeLog(client));
@@ -231,24 +314,41 @@ public class ClientsResource extends ConfigBaseResource {
         client.setClientId(existingClient.getClientId());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
-        if (client.getClientSecret() != null) {
-            client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
+        if (StringUtils.isNotBlank(client.getClientSecret())) {
+            client.setClientSecret(this.encryptPassword(client.getClientName(), client.getClientSecret()));
+        } else {
+            client.setClientSecret(existingClient.getClientSecret());
         }
+
         ignoreCustomObjectClassesForNonLDAP(client);
 
         logger.debug("Final Client details to be updated - client:{}", client);
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
-        result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
         result.setClaims(claims);
 
+        // Response handling
+        applyResponsePolicy(result);
         logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
 
+    /**
+     * Apply a JSON Patch to the OpenID Connect client with the given inum.
+     *
+     * @param inum            the client identifier (inum) to patch
+     * @param jsonPatchString the JSON Patch document as a string
+     * @return                a Response containing the patched Client entity
+     * @throws EncryptionException if encrypting a provided client secret fails
+     * @throws JsonPatchException  if the patch cannot be applied to the client
+     * @throws IOException         if an I/O error occurs while processing the patch
+     */
     @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
@@ -258,10 +358,12 @@ public class ClientsResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String jsonPatchString)
-            throws JsonPatchException, IOException {
+    public Response patchClient(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
+            @NotNull String jsonPatchString) throws EncryptionException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be patched - inum:{}, jsonPatchString:{}", escapeLog(inum),
                     escapeLog(jsonPatchString));
@@ -270,13 +372,36 @@ public class ClientsResource extends ConfigBaseResource {
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
         existingClient = Jackson.applyPatch(jsonPatchString, existingClient);
+
+        // ClientSecret encryption check
+        boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET);
+        logger.debug(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
+
+        if (isClientSecretPresent && StringUtils.isNotBlank(existingClient.getClientSecret())) {
+            existingClient.setClientSecret(
+                    this.encryptPassword(existingClient.getClientName(), existingClient.getClientSecret()));
+        }
+
         clientService.updateClient(existingClient);
+
+        applyResponsePolicy(existingClient);
         return Response.ok(existingClient).build();
     }
 
+    /**
+     * Delete the OpenID Connect client identified by the given inum.
+     *
+     * Validates that the client exists and removes it from storage.
+     *
+     * @param inum the client identifier (inum) of the client to delete
+     * @return a 204 No Content response on successful deletion
+     */
     @Operation(summary = "Delete OpenId Connect client", description = "Delete OpenId Connect client", operationId = "delete-oauth-openid-client-by-inum", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }))
+            "OAuth - OpenID Connect - Clients" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -284,8 +409,10 @@ public class ClientsResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }, groupScopes = {
-            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.OPENID_CLIENTS_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    public Response deleteClient(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Client to be deleted - inum:{} ", escapeLog(inum));
         }
@@ -295,17 +422,49 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.noContent().build();
     }
 
-    private List<Client> getClients(List<Client> clients) throws EncryptionException {
-        if (clients != null && !clients.isEmpty()) {
-            for (Client client : clients) {
-                try {
-                    client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-                } catch (Exception ex) {
-                    logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",ex);
-                }
+    private List<Client> applyResponsePolicy(List<Client> clients) {
+        logger.debug("isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, clients:{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), clients);
+        if (clients == null || clients.isEmpty()) {
+            return clients;
+        }
+        for (Client client : clients) {
+            applyResponsePolicy(client);
+        }
+
+        return clients;
+    }
+
+    private Client applyResponsePolicy(Client client) {
+        logger.debug(
+                " ApplyResponsePolicy - isReturnClientSecretInResponse():{}, isReturnEncryptedClientSecretInResponse():{}, client:{}",
+                isReturnClientSecretInResponse(), isReturnEncryptedClientSecretInResponse(), client);
+        if (client == null) {
+            return client;
+        }
+
+        if (isReturnClientSecretInResponse()) {
+            if (!isReturnEncryptedClientSecretInResponse()) {
+                getDecryptedClientSecret(client);
+            }
+        } else {
+            client.setClientSecret(null);
+        }
+
+        return client;
+    }
+
+    private Client getDecryptedClientSecret(Client client) {
+        if (client != null) {
+            try {
+                client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+            } catch (Exception ex) {
+                logger.error(" Error while decrypting ClientSecret for '{}', exception is - ", client.getClientId(),
+                        ex);
+                client.setClientSecret(null);
             }
         }
-        return clients;
+        return client;
     }
 
     private String generatePassword() {
@@ -328,7 +487,7 @@ public class ClientsResource extends ConfigBaseResource {
                     pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
 
             List<Client> clients = pagedResult.getEntries();
-            getClients(clients);
+            applyResponsePolicy(clients);
             logger.debug("Clients fetched  - clients:{}", clients);
             pagedResult.setEntries(clients);
         }
@@ -446,4 +605,67 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
+    private boolean isReturnEncryptedClientSecretInResponse() {
+        logger.debug("appConfiguration.isReturnEncryptedClientSecretInResponse():{} ",
+                appConfiguration.isReturnEncryptedClientSecretInResponse());
+        return this.appConfiguration.isReturnEncryptedClientSecretInResponse();
+    }
+
+    /**
+     * Determine whether API responses should include client secrets.
+     *
+     * @return `true` if responses should include client secrets, `false` otherwise.
+     */
+    private boolean isReturnClientSecretInResponse() {
+        logger.debug("appConfiguration.isReturnClientSecretInResponse():{} ",
+                appConfiguration.isReturnClientSecretInResponse());
+        return this.appConfiguration.isReturnClientSecretInResponse();
+    }
+
+    /**
+     * Encrypts the provided client password if it is not blank and not already encrypted.
+     *
+     * @param clientName     the client identifier used for encryption-check context
+     * @param clientPassword the plaintext or already-encrypted password to evaluate
+     * @return               the encrypted password if encryption was performed; the original password unchanged if it was blank or already encrypted
+     * @throws EncryptionException if encryption fails
+     */
+    private String encryptPassword(String clientName, String clientPassword) throws EncryptionException {
+        String encryptedPassword = clientPassword;
+        if (StringUtils.isBlank(clientPassword)) {
+            return encryptedPassword;
+        }
+        logger.debug("Check for clientName:{}, isPasswordEncrypted(clientPassword):{}", clientName,
+                isPasswordEncrypted(clientName, clientPassword));
+
+        if (!isPasswordEncrypted(clientName, clientPassword)) {
+            encryptedPassword = encryptionService.encrypt(clientPassword);
+        }
+        return encryptedPassword;
+    }
+
+    /**
+     * Checks whether the provided client password appears to be already encrypted.
+     *
+     * If the password is blank, it is treated as encrypted.
+     *
+     * @param clientName     the client identifier (used for logging)
+     * @param clientPassword the password to inspect
+     * @return `true` if the password appears encrypted, `false` otherwise
+     */
+    private boolean isPasswordEncrypted(String clientName, String clientPassword) {
+        boolean isPasswordEncrypted = true;
+        if (StringUtils.isBlank(clientPassword)) {
+            return isPasswordEncrypted;
+        }
+        logger.debug("Check for clientName:{}", clientName);
+        try {
+            encryptionService.decrypt(clientPassword);
+        } catch (EncryptionException ex) {
+            logger.info("Password of {} is not encrypted, will encrypt before storage", clientName);
+            isPasswordEncrypted = false;
+        }
+
+        return isPasswordEncrypted;
+    }
 }

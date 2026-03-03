@@ -36,9 +36,9 @@ Additionally this plugin allows to:
     - When user's location is unrecognized
     - When user's device is unrecognized
     - Users can define their own policy (based on the above)
-  
+
 - Set how long a location or device can be deemed as recognized
-    
+
 Moreover, when administrators allow users to set their own strong authentication policy, users can:
 
 - View the list of physical devices they have used to login (e.g. PC, tablet, phone)
@@ -50,7 +50,7 @@ A device/location is considered trustworthy when the user has presented a strong
 ## Requirements
 
 - The plugin jar file must match the version of your Janssen Server installation.
-    
+
 ## Installation
 
 1. [Download the plugin](https://maven.jans.io/maven/io/jans/casa/plugins/strong-authn-settings/replace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)

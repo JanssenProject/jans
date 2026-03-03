@@ -1,4 +1,4 @@
-This authentication interception script configures oxAuth to use an external SAML identity provider. This approach enables you to dynamically enroll users in your Gluu Server after they authenticate at their home IDP--meaning you can create a local ldap entry for each new inbound SAML user. This is handy because it enables you to use either SAML or OpenID Connect API's that connect to the Gluu Server. Confusing? Yes! Handy... yes, yes! 
+This authentication interception script configures oxAuth to use an external SAML identity provider. This approach enables you to dynamically enroll users in your Gluu Server after they authenticate at their home IDP--meaning you can create a local ldap entry for each new inbound SAML user. This is handy because it enables you to use either SAML or OpenID Connect API's that connect to the Gluu Server. Confusing? Yes! Handy... yes, yes!
 
 ## Installation
 This list of steps needed to do to enable Asimba/SAML person authentication module.
@@ -55,7 +55,7 @@ This module has next properties:
 5) saml_name_identifier_format - Specify in which format IdP should return a name identifier for the user.
    This property isn't required when saml_use_authn_context has value 'false'
    Example: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
-   
+
 6) saml_deployment_type - Specify deployment mode. It's optional property. If this property isn't specified Saml script
    tries to find user in local LDAP by 'Persistent Id' specified in Saml response. If this property has 'map' value Saml script map
    should map 'Persistent Id' to local user account. If this property has 'enroll' value Saml script should add new user to local LDAP
@@ -86,7 +86,7 @@ This module has next properties:
     The count of attributes in this property should be equal to count attributes in saml_idp_attributes_list property.
     Local attributes list should contains next mandatory attributes: uid, mail, givenName, sn, cn.
     Example: uid, mail, givenName, sn, cn
-   
+
 11) user_object_classes - Specify custom list of LDAP user object classes
    Example: eduPerson
 

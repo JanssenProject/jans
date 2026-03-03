@@ -6,23 +6,6 @@
 
 package io.jans.service.custom.script;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-
-import io.jans.model.ScriptLocationType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.SimpleExtendedCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
@@ -43,6 +26,11 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
+import org.slf4j.Logger;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Provides actual versions of scripts
@@ -223,14 +211,6 @@ public class CustomScriptManager {
 				continue;
 			}
 
-			if (ScriptLocationType.FILE == newCustomScript.getLocationType()) {
-				// Add to script revision file modification time. This should allow to
-				// reload script automatically after changing location_type
-				long fileModifiactionTime = getFileModificationTime(newCustomScript.getLocationPath());
-
-				newCustomScript.setRevision(newCustomScript.getRevision() + fileModifiactionTime);
-			}
-
 			String newSupportedCustomScriptInum = StringHelper.toLowerCase(newCustomScript.getInum());
 			newSupportedCustomScriptInums.add(newSupportedCustomScriptInum);
 
@@ -259,21 +239,6 @@ public class CustomScriptManager {
 
 				for (SimpleCustomProperty simpleCustomProperty : simpleCustomProperties) {
 					newConfigurationAttributes.put(simpleCustomProperty.getValue1(), simpleCustomProperty);
-				}
-
-				if (ScriptLocationType.FILE == loadedCustomScript.getLocationType()) {
-					// Add to script revision file modification time. This should allow to
-					// reload script automatically after changing location_type
-					long fileModifiactionTime = getFileModificationTime(loadedCustomScript.getLocationPath());
-					loadedCustomScript.setRevision(loadedCustomScript.getRevision() + fileModifiactionTime);
-
-					if (fileModifiactionTime != 0) {
-						String scriptFromFile = loadFromFile(loadedCustomScript.getLocationPath());
-						if (StringHelper.isNotEmpty(scriptFromFile)) {
-							loadedCustomScript.setScript(scriptFromFile);
-						}
-
-					}
 				}
 				
 				// Load script
@@ -307,30 +272,6 @@ public class CustomScriptManager {
 		}
 
 		return new ReloadResult(newCustomScriptConfigurations, modified);
-	}
-
-	private String loadFromFile(String locationPath) {
-		try {
-			String scriptFromFile = FileUtils.readFileToString(new File(locationPath), StandardCharsets.UTF_8);
-			if (log.isTraceEnabled()) {
-                log.trace("Loaded from file: {}, script: {}", locationPath, scriptFromFile);
-            }
-			return scriptFromFile;
-		} catch (IOException ex) {
-			log.error("Failed to load script from '{}'", locationPath);
-		}
-
-		return null;
-	}
-
-	private long getFileModificationTime(String locationPath) {
-		File scriptFile = new File(locationPath);
-
-		if (scriptFile.exists()) {
-			return scriptFile.lastModified();
-		}
-
-		return 0;
 	}
 
 	private boolean destroyCustomScript(CustomScriptConfiguration customScriptConfiguration) {

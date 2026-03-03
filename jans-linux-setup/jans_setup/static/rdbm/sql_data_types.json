@@ -92,6 +92,14 @@
       "type": "TEXT"
     }
   },
+  "jansConfPolicy": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    }
+  },
   "jansConfErrors": {
     "mysql": {
       "type": "TEXT"
@@ -701,6 +709,12 @@
     },
     "pgsql": {
       "type": "TEXT"
+    }
+  },
+  "jansAccessType": {
+    "mysql": {
+      "size": 20,
+      "type": "VARCHAR"
     }
   }
 }

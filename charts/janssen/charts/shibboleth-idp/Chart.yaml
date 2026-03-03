@@ -1,0 +1,21 @@
+apiVersion: v2
+name: shibboleth-idp
+version: 0.0.0-nightly
+kubeVersion: ">=v1.23.0-0"
+description: Shibboleth Identity Provider 5.1.6 for SAML SSO, integrated with Janssen Auth Server for authentication.
+type: application
+keywords:
+  - SAML
+  - SSO
+  - Identity Provider
+  - Shibboleth
+home: https://jans.io
+sources:
+  - https://github.com/JanssenProject/jans
+  - https://shibboleth.net/products/identity-provider.html
+maintainers:
+  - name: Janssen Project
+    email: support@jans.io
+    url: https://github.com/JanssenProject
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+appVersion: "5.1.6"

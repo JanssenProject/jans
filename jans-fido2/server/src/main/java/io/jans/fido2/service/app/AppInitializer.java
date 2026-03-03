@@ -11,6 +11,7 @@ import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.exception.ConfigurationException;
 import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
+import io.jans.fido2.service.metric.Fido2MetricsAggregationScheduler;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
@@ -104,6 +105,9 @@ public class AppInitializer {
 	@Inject
 	private MDS3UpdateTimer mds3UpdateTimer;
 
+	@Inject
+	private Instance<Fido2MetricsAggregationScheduler> fido2MetricsAggregationSchedulerInstance;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -114,35 +118,115 @@ public class AppInitializer {
 	}
 
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+		log.info("=== FIDO2 Application Initialization Started ===");
 		log.debug("Initializing application services");
 
-		configurationFactory.create();
+		try {
+			configurationFactory.create();
+			log.info("Configuration factory created successfully");
+		} catch (Exception e) {
+			log.error("Failed to create configuration factory: {}", e.getMessage(), e);
+			return;
+		}
 
-		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
-		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
-				localPersistenceEntryManager.getOperationService());
+		try {
+			PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
+			log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
+					localPersistenceEntryManager.getOperationService());
+			log.info("Persistence entry manager initialized successfully");
+		} catch (Exception e) {
+			log.error("Failed to initialize persistence entry manager: {}", e.getMessage(), e);
+			return;
+		}
 
 		// Initialize python interpreter
-		pythonService
-				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
+		try {
+			pythonService
+					.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
+			log.info("Python interpreter initialized successfully");
+		} catch (Exception e) {
+			log.error("Failed to initialize Python interpreter: {}", e.getMessage(), e);
+			// Continue anyway - Python might not be critical
+		}
 
 		// Initialize script manager
 		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.FIDO2_EXTENSION);
 
 		// Start timer
-		initSchedulerService();
+		try {
+			initSchedulerService();
+			log.info("Scheduler service initialized successfully");
+		} catch (Exception e) {
+			log.error("Failed to initialize scheduler service: {}", e.getMessage(), e);
+			return;
+		}
 
 		// Schedule timer tasks
-		metricService.initTimer();
-		configurationFactory.initTimer();
-		loggerService.initTimer(true);
-		cleanerTimer.initTimer();
-		mds3UpdateTimer.initTimer();
-		customScriptManager.initTimer(supportedCustomScriptTypes);
+		try {
+			metricService.initTimer();
+			log.info("Metric service timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize metric service timer: {}", e.getMessage(), e);
+		}
+		
+		try {
+			configurationFactory.initTimer();
+			log.info("Configuration factory timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize configuration factory timer: {}", e.getMessage(), e);
+		}
+		
+		try {
+			loggerService.initTimer(true);
+			log.info("Logger service timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize logger service timer: {}", e.getMessage(), e);
+		}
+		
+		try {
+			cleanerTimer.initTimer();
+			log.info("Cleaner timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize cleaner timer: {}", e.getMessage(), e);
+		}
+		
+		try {
+			mds3UpdateTimer.initTimer();
+			log.info("MDS3 update timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize MDS3 update timer: {}", e.getMessage(), e);
+		}
+		
+		try {
+			customScriptManager.initTimer(supportedCustomScriptTypes);
+			log.info("Custom script manager timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize custom script manager timer: {}", e.getMessage(), e);
+		}
+		
+		// Initialize FIDO2 metrics aggregation scheduler (optional - might not be available)
+		// Note: CDI Instance<> is never null when injected, so we only check isUnsatisfied()
+		try {
+			if (!fido2MetricsAggregationSchedulerInstance.isUnsatisfied()) {
+				fido2MetricsAggregationSchedulerInstance.get().initTimer();
+				log.info("FIDO2 metrics aggregation scheduler initialized");
+			} else {
+				log.info("FIDO2 metrics aggregation scheduler not available, skipping initialization");
+			}
+		} catch (Exception e) {
+			log.warn("Failed to initialize FIDO2 metrics aggregation scheduler: {}", e.getMessage(), e);
+		}
 
 		// Notify plugins about finish application initialization
-		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
-				.fire(new ApplicationInitializedEvent());
+		try {
+			eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
+					.fire(new ApplicationInitializedEvent());
+			log.info("Application initialization event fired successfully");
+		} catch (Exception e) {
+			log.error("Failed to fire application initialized event: {}", e.getMessage(), e);
+		}
+		
+		log.info("=== FIDO2 Application Initialization Completed Successfully ===");
 	}
 
 	protected void initSchedulerService() {

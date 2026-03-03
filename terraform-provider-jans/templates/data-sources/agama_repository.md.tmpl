@@ -1,0 +1,24 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Data source for retrieving Agama flow repositories from Janssen server
+---
+
+# {{.Name}} ({{.Type}})
+
+Data source for retrieving Agama flow repositories from the Janssen server.
+Agama is a domain-specific language for building authentication flows.
+
+## Example Usage
+
+```terraform
+data "jans_agama_repository" "all" {
+}
+
+output "agama_repos" {
+  value = data.jans_agama_repository.all.repositories
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

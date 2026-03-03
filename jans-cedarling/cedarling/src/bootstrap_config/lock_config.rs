@@ -1,7 +1,7 @@
-use crate::{BootstrapConfigRaw, BootstrapConfigLoadingError};
 use crate::log::LogLevel;
-use url::Url;
+use crate::{BootstrapConfigLoadingError, BootstrapConfigRaw};
 use std::time::Duration;
+use url::Url;
 
 /// Lock service config
 #[derive(Debug, Clone, PartialEq)]
@@ -76,7 +76,8 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
     fn from(raw: LockServiceConfigRaw) -> Self {
         Self {
             log_level: raw.log_level,
-            config_uri: raw.config_uri
+            config_uri: raw
+                .config_uri
                 .parse()
                 .expect("Failed to parse lock server configuration URI from raw config"),
             dynamic_config: raw.dynamic_config,
@@ -123,4 +124,4 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             accept_invalid_certs: raw.accept_invalid_certs.into(),
         })
     }
-} 
+}

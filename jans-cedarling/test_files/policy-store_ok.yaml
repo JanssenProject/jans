@@ -9,7 +9,7 @@ policy_stores:
     name: Jans
     description: A test policy store where everything is fine.
     trusted_issuers:
-      Jans123123:
+      Jans:
         name: "Jans"
         description: "A Test IDP"
         openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
@@ -28,8 +28,8 @@ policy_stores:
             user_id: "sub"
             principal_mapping:
               - "Jans::User"
-      AnotherIssuer:
-        name: "Another Issuer"
+      Jans2:
+        name: "Jans2"
         description: "This is a placeholder issuer used to test if Cedarling still works with multiple issuers"
         openid_configuration_endpoint: "https://another.jans.org/.well-known/openid-configuration"
     policies:
@@ -129,4 +129,7 @@ policy_stores:
             resource: [Issue],
             context: Context
           };
+        }
+        namespace Jans2 {
+          entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
         }

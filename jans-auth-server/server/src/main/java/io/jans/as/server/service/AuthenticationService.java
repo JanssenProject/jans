@@ -6,23 +6,6 @@
 
 package io.jans.as.server.service;
 
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -58,6 +41,15 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.slf4j.Logger;
+
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.*;
+
+import static io.jans.as.server.util.ServerUtil.sanitizeUsernameForLog;
 
 /**
  * Authentication service methods
@@ -126,7 +118,7 @@ public class AuthenticationService {
      * @return <code>true</code> if success, otherwise <code>false</code>.
      */
     public boolean authenticate(String userName, String password) {
-        log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName,
+        log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", sanitizeUsernameForLog(userName),
                 System.identityHashCode(credentials));
         boolean authenticated = false;
 
@@ -157,7 +149,7 @@ public class AuthenticationService {
      * @return <code>true</code> if success, otherwise <code>false</code>.
      */
     public boolean authenticate(String nameValue, String password, String... nameAttributes) {
-        log.debug("Authenticating user with LDAP: nameValue: '{}', nameAttributes: '{}', credentials: '{}'", nameValue,
+        log.debug("Authenticating user with LDAP: nameValue: '{}', nameAttributes: '{}', credentials: '{}'", sanitizeUsernameForLog(nameValue),
                 ArrayHelper.toString(nameAttributes),
                 System.identityHashCode(credentials));
 
@@ -232,7 +224,7 @@ public class AuthenticationService {
                 updateLastLogonUserTime(user);
 
                 log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
-                        System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                        System.identityHashCode(credentials), sanitizeUsernameForLog(credentials.getUsername()), getAuthenticatedUserId());
             }
 
             return authenticated;
@@ -256,7 +248,7 @@ public class AuthenticationService {
                 updateLastLogonUserTime(user);
 
                 log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
-                        System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                        System.identityHashCode(credentials), sanitizeUsernameForLog(credentials.getUsername()), getAuthenticatedUserId());
             }
 
             return new Pair<Boolean, User>(authenticated, user);
@@ -467,7 +459,7 @@ public class AuthenticationService {
 
                                 log.trace(
                                         "authenticate_external: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
-                                        System.identityHashCode(credentials), credentials.getUsername(),
+                                        System.identityHashCode(credentials), sanitizeUsernameForLog(credentials.getUsername()),
                                         getAuthenticatedUserId());
 
                                 return true;
@@ -486,7 +478,7 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String userName) {
-        log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName,
+        log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", sanitizeUsernameForLog(userName),
                 System.identityHashCode(credentials));
 
         boolean authenticated = false;
@@ -502,7 +494,7 @@ public class AuthenticationService {
                 updateLastLogonUserTime(user);
 
                 log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
-                        System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                        System.identityHashCode(credentials), sanitizeUsernameForLog(credentials.getUsername()), getAuthenticatedUserId());
 
                 authenticated = true;
             }
@@ -548,7 +540,7 @@ public class AuthenticationService {
                 updateLastLogonUserTime(user);
 
                 log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
-                        System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                        System.identityHashCode(credentials), sanitizeUsernameForLog(credentials.getUsername()), getAuthenticatedUserId());
 
                 authenticated = true;
             }
@@ -653,7 +645,7 @@ public class AuthenticationService {
 
     public SessionId configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
         log.trace("configureSessionUser: credentials: '{}', sessionId: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
-                System.identityHashCode(credentials), sessionId, credentials.getUsername(), getAuthenticatedUserId());
+                System.identityHashCode(credentials), sessionId, sanitizeUsernameForLog(credentials.getUsername()), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
 

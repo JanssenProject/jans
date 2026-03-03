@@ -104,8 +104,8 @@ class SQLBackend:
         fields = self.sql_indexes.get(table_name, {}).get("fields", [])
         fields += self.sql_indexes["__common__"]["fields"]
 
-        # make unique fields
-        return list(set(fields))
+        # make unique fields while preserving order
+        return list(dict.fromkeys(fields))
 
     def create_mysql_indexes(self, table_name: str, column_mapping: dict):
         fields = self.get_index_fields(table_name)
@@ -243,9 +243,6 @@ class SQLBackend:
                 "To enable the feature, set the environment variable CN_PERSISTENCE_IMPORT_BUILTIN_LDIF=true"
             )
 
-        logger.info("Importing custom LDIF files (if any)")
-        self.import_custom_ldif(ctx)
-
     def update_schema(self):
         """Updates schema (may include data migration)"""
 
@@ -267,8 +264,9 @@ class SQLBackend:
             # to change the storage format of a JSON column, drop the column and
             # add the column back specifying the new storage format
             with self.client.engine.connect() as conn:
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+                with conn.begin():
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"))
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"))
 
             # force-reload metadata as we may have changed the schema before migrating old data
             self.client._metadata = None
@@ -290,7 +288,8 @@ class SQLBackend:
 
             data_type = self.get_data_type(col_name, table_name)
             with self.client.engine.connect() as conn:
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+                with conn.begin():
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"))
 
         def change_column_type(table_name, col_name, old_data_type, data_type):
             if self.client.dialect == "mysql":
@@ -301,27 +300,28 @@ class SQLBackend:
                         f"ALTER COLUMN {self.client.quoted_id(col_name)} TYPE {data_type}"
 
             with self.client.engine.connect() as conn:
-                # mysql will raise error if changing type to text but the column already indexed without explicit key length
-                # hence the associated index must be dropped first
-                if self.client.dialect == "mysql" and old_data_type.startswith("VARCHAR") and data_type == "TEXT":
-                    for idx in conn.execute(
-                        text(
-                            "SELECT index_name "
-                            "FROM information_schema.statistics "
-                            "WHERE table_name = :table_name "
-                            "AND index_name LIKE :index_name "
-                            "AND column_name = :col_name;"
-                        ),
-                        {
-                            "table_name": table_name,
-                            "index_name": f"{table_name}_{col_name}",
-                            "col_name": col_name
-                        },
-                    ):
-                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+                with conn.begin():
+                    # mysql will raise error if changing type to text but the column already indexed without explicit key length
+                    # hence the associated index must be dropped first
+                    if self.client.dialect == "mysql" and old_data_type.startswith("VARCHAR") and data_type == "TEXT":
+                        for idx in conn.execute(
+                            text(
+                                "SELECT index_name "
+                                "FROM information_schema.statistics "
+                                "WHERE table_name = :table_name "
+                                "AND index_name LIKE :index_name "
+                                "AND column_name = :col_name;"
+                            ),
+                            {
+                                "table_name": table_name,
+                                "index_name": f"{table_name}_{col_name}",
+                                "col_name": col_name
+                            },
+                        ):
+                            conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP INDEX {self.client.quoted_id(idx[0])}"))
 
-                # change the type
-                conn.execute(query)
+                    # change the type
+                    conn.execute(text(query))
 
         def column_from_multivalued(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
@@ -337,29 +337,30 @@ class SQLBackend:
             }
 
             with self.client.engine.connect() as conn:
-                # mysql will raise error if dropping column which has functional index,
-                # hence the associated index must be dropped first
-                if self.client.dialect == "mysql":
-                    for idx in conn.execute(
-                        text(
-                            "SELECT index_name "
-                            "FROM information_schema.statistics "
-                            "WHERE table_name = :table_name "
-                            "AND index_name LIKE :index_name '%' "
-                            "AND expression LIKE '%' :col_name '%';"
-                        ),
-                        {
-                            "table_name": table_name,
-                            "index_name": f"{table_name}_json_",
-                            "col_name": col_name
-                        },
-                    ):
-                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+                with conn.begin():
+                    # mysql will raise error if dropping column which has functional index,
+                    # hence the associated index must be dropped first
+                    if self.client.dialect == "mysql":
+                        for idx in conn.execute(
+                            text(
+                                "SELECT index_name "
+                                "FROM information_schema.statistics "
+                                "WHERE table_name = :table_name "
+                                "AND index_name LIKE :index_name "
+                                "AND expression LIKE :col_name;"
+                            ),
+                            {
+                                "table_name": table_name,
+                                "index_name": f"{table_name}_json_%",
+                                "col_name": f"%{col_name}%"
+                            },
+                        ):
+                            conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP INDEX {self.client.quoted_id(idx[0])}"))
 
-                # to change the storage format of a JSON column, drop the column and
-                # add the column back specifying the new storage format
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
-                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+                    # to change the storage format of a JSON column, drop the column and
+                    # add the column back specifying the new storage format
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"))
+                    conn.execute(text(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"))
 
             # force-reload metadata as we may have changed the schema before migrating old data
             self.client._metadata = None
@@ -420,12 +421,6 @@ class SQLBackend:
                         logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
                         column_from_multivalued(table_name, column)
 
-    def import_custom_ldif(self, ctx):
-        custom_dir = Path("/app/custom_ldif")
-
-        for file_ in custom_dir.rglob("*.ldif"):
-            self._import_ldif(file_, ctx, self.safe_column_mapping)
-
     def _import_ldif(self, path, ctx, transform_column_mapping=None):
         logger.info(f"Importing {path} file")
         self.client.create_from_ldif(path, ctx, transform_column_mapping)
@@ -464,11 +459,23 @@ class SQLBackend:
                 "dn": "VARCHAR(128)",
             })
 
-            # make sure ``oc["may"]`` doesn't have duplicate attribute
-            for attr in set(oc["may"]):
+            # make sure ``oc["may"]`` doesn't have duplicate attribute while preserving order
+            for attr in list(dict.fromkeys(oc["may"])):
                 data_type = self.get_data_type(attr, table)
                 table_mapping[table].update({attr: data_type})
         return table_mapping
+
+    def customize(self):
+        logger.info("Importing custom LDIF files (if any)")
+        ctx = prepare_template_ctx(self.manager)
+        self.import_custom_ldif(ctx)
+
+    def import_custom_ldif(self, ctx):
+        custom_dir = Path("/app/custom_ldif")
+
+        for file_ in sorted(custom_dir.rglob("*.ldif")):
+            logger.info(f"Importing {file_} file")
+            self.client.upsert_from_file(file_, ctx, self.safe_column_mapping)
 
     def safe_column_mapping(self, table_name, column_mapping):
         if table_name == "jansToken" and "jansUsrId" in column_mapping:

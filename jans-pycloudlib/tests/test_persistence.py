@@ -113,6 +113,8 @@ def test_get_sql_password_from_file(monkeypatch, tmpdir, gmanager):
     ("pgsql", 5432, "public", "postgresql"),
 ])
 def test_render_sql_properties(monkeypatch, tmpdir, gmanager, dialect, port, schema, jdbc_driver):
+    import os
+    import stat
     from jans.pycloudlib.persistence.sql import render_sql_properties
 
     passwd = tmpdir.join("sql_password")
@@ -144,6 +146,10 @@ auth.userPassword=fHL54sT5qHk=
 
     render_sql_properties(gmanager, str(src), str(dest))
     assert dest.read() == expected
+
+    # check file permission (should writable only by owner)
+    perms = stat.S_IMODE(os.stat(dest).st_mode)
+    assert oct(perms) == '0o600'
 
 
 class PGException(Exception):
@@ -279,6 +285,23 @@ def test_sql_opendj_attr_types(monkeypatch):
     types_str = '{"ds-task-reset-change-number-base-dn": "1.3.6.1.4.1.1466.115.121.1.12"}'
     monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO(types_str))
     assert SqlSchemaMixin().opendj_attr_types == json.loads(types_str)
+
+
+@pytest.mark.parametrize(("db_dialect", "db_name", "db_schema", "actual_db_schema"), [
+    # using default schema names
+    ("mysql", "jans", "", "jans"),
+    ("pgsql", "jans", "", "public"),
+    # using custom schema names
+    ("mysql", "jans", "custom", "custom"),
+    ("pgsql", "jans", "custom", "custom"),
+])
+def test_resolve_db_schema_name(monkeypatch, db_dialect, db_name, db_schema, actual_db_schema):
+    from jans.pycloudlib.persistence.sql import resolve_db_schema_name
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", db_dialect)
+    monkeypatch.setenv("CN_SQL_DB_NAME", db_name)
+    monkeypatch.setenv("CN_SQL_DB_SCHEMA", db_schema)
+    assert resolve_db_schema_name() == actual_db_schema
 
 
 # =====

@@ -289,7 +289,7 @@ public class UserAuthnUtil {
         
         if (oldAcr == null) return null;
         
-        if (!List.of("fido2", "super_gluu", "otp", "twilio_sms").contains(oldAcr)) return oldAcr;
+        if (!List.of("fido2", "otp", "twilio_sms").contains(oldAcr)) return oldAcr;
         
         return "io.jans.casa.authn." + oldAcr;
         

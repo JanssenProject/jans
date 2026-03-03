@@ -1,0 +1,6 @@
+<?page language="xhtml"?>
+<h:html xmlns:h="xhtml" xmlns:z="http://www.zkoss.org/2005/zul">
+    <h:body>
+        <z:div viewModel="@('io.jans.casa.plugins.certauthn.vm.CertAuthnVM')"></z:div>
+    </h:body>
+</h:html>

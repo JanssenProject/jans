@@ -1,0 +1,40 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Data source for validating Agama flow code syntax
+---
+
+# {{.Name}} ({{.Type}})
+
+Data source for validating Agama DSL code syntax. This allows you to check if
+Agama flow code is syntactically correct before deploying it.
+
+Agama is a domain-specific language (DSL) for building authentication flows
+in the Janssen identity platform.
+
+## Example Usage
+
+```terraform
+data "jans_agama_syntax_check" "my_flow" {
+  flow_name = "my.authentication.Flow"
+  code      = <<-EOT
+    Flow my.authentication.Flow
+      Basepath ""
+      
+    in = { name: "" }
+    
+    Finish in.name
+  EOT
+}
+
+output "is_valid" {
+  value = data.jans_agama_syntax_check.my_flow.valid
+}
+
+output "validation_message" {
+  value = data.jans_agama_syntax_check.my_flow.message
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

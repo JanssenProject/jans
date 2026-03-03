@@ -34,6 +34,10 @@ import static io.jans.as.model.config.Constants.CONTENT_TYPE_STATUSLIST_JSON;
 import static io.jans.as.model.config.Constants.CONTENT_TYPE_STATUSLIST_JWT;
 
 /**
+ * Implementation sticks to draft 13 (20 October 2025).
+ *
+ * https://datatracker.ietf.org/doc/html/draft-ietf-oauth-status-list-13
+ *
  * @author Yuriy Z
  */
 @ApplicationScoped
@@ -57,12 +61,14 @@ public class StatusListService {
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
 
-    public Response requestStatusList(String acceptHeader) {
-        log.debug("Attempting to request status_list, acceptHeader: {} ...", acceptHeader);
+    public Response requestStatusList(String acceptHeader, String time) {
+        log.debug("Attempting to request status_list, acceptHeader: {}, time: {} ...", acceptHeader, time);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.STATUS_LIST);
 
         try {
+            validateTime(time);
+
             final List<StatusIndexPool> pools = statusTokenPoolService.getAllPools();
             final StatusList statusList = join(pools, appConfiguration.getStatusListBitSize(), log);
 
@@ -75,7 +81,10 @@ public class StatusListService {
                 log.trace("Response entity {}, responseType {}", entity, responseType);
             }
 
-            return Response.status(Response.Status.OK).entity(entity).type(responseType).build();
+            return Response.status(Response.Status.OK)
+                    .entity(entity)
+                    .type(responseType)
+                    .build();
         } catch (WebApplicationException e) {
             if (log.isTraceEnabled()) {
                 log.trace(e.getMessage(), e);
@@ -84,6 +93,14 @@ public class StatusListService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
+        }
+    }
+
+    public void validateTime(String time) {
+        if (StringUtils.isNotBlank(time)) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_IMPLEMENTED)
+                    .entity("Time parameter is not supported.")
+                    .build());
         }
     }
 
@@ -149,7 +166,7 @@ public class StatusListService {
      * @return Returns sub of status list
      */
     public String getSub() {
-        return discoveryService.getTokenStatusListEndpoint();
+        return discoveryService.getStatusListEndpoint();
     }
 
     public String createResponseJwt(JSONObject response) throws Exception {

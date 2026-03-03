@@ -64,7 +64,7 @@ default, Jans Auth Server access tokens expire after 5 minutes.
 
 | claim       | Description                                                                                                                                      |
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| `active`    | `true` or `false`.                                                                                                                               |  
+| `active`    | `true` or `false`.                                                                                                                               |
 | `iss`       | The URI of the issuer authorization server                                                                                                       |
 | `aud`       | The audience, used by the client to verify it is the correct recipient. During registration, the client can specify `additional_audience` values |
 | `iat`       | When the client was issued, in seconds, e.g. *1514797822*                                                                                        |
@@ -76,8 +76,8 @@ default, Jans Auth Server access tokens expire after 5 minutes.
 
 It is possible to add additional claims to an access token via the
 Auth Server interception scripts. The preferred script is the
-[update token script](../../developer/scripts/update-token.md). You can
-also use the [introspection script](../../developer/scripts/introspection.md).
+[update token script](../../../script-catalog/update_token/update-token.md). You can
+also use the [introspection script](../../../script-catalog/introspection/introspection.md).
 
 ### Access Token Crypto (JWT)
 

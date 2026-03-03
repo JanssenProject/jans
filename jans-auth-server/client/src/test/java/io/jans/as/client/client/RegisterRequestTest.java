@@ -84,4 +84,14 @@ public class RegisterRequestTest {
 
         assertEquals(Lists.newArrayList("client_secret_basic"), request.getJSONParameters().getJSONArray(RegisterRequestParam.ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.getName()).toList());
     }
+
+    @Test
+    public void fromJson_forTxTokenScriptDns_shouldReturnCorrectValue() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(RegisterRequestParam.TX_TOKEN_SCRIPT_DNS.getName(), new JSONArray(Lists.newArrayList("script1")));
+
+        final RegisterRequest registerRequest = RegisterRequest.fromJson(jsonObject.toString());
+
+        assertEquals(Lists.newArrayList("script1"), registerRequest.getTxTokenScriptDns());
+    }
 }

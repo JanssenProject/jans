@@ -1,19 +1,14 @@
 package io.jans.ca.plugin.adminui.model.auth;
 
-import java.util.List;
-
 public class ApiTokenRequest {
-    private List<String> permissionTag;
+
     private String ujwt;
 
-    public List<String> getPermissionTag() {
-        return permissionTag;
-    }
-
-    public void setPermissionTag(List<String> permissionTag) {
-        this.permissionTag = permissionTag;
-    }
-
+    /**
+     * Retrieves the UJWT token value.
+     *
+     * @return the UJWT string, or {@code null} if not set
+     */
     public String getUjwt() {
         return ujwt;
     }

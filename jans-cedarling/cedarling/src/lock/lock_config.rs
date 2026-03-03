@@ -14,7 +14,7 @@ use serde::{Deserialize, Deserializer, de};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[allow(dead_code)]
-pub struct LockConfig {
+pub(super) struct LockConfig {
     pub version: String,
     #[serde(rename = "issuer", deserialize_with = "host_to_oidc")]
     pub issuer_oidc_url: Url,
@@ -26,7 +26,7 @@ pub struct LockConfig {
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Default)]
 #[allow(dead_code)]
-pub struct AuditEndpoints {
+pub(super) struct AuditEndpoints {
     #[serde(
         rename = "log_endpoint",
         deserialize_with = "deserialize_to_bulk_endpoint",
@@ -49,7 +49,7 @@ pub struct AuditEndpoints {
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Default)]
 #[allow(dead_code)]
-pub struct ConfigEndpoints {
+pub(super) struct ConfigEndpoints {
     #[serde(rename = "config_endpoint", default)]
     pub config: Option<Url>,
     #[serde(rename = "issuers_endpoint", default)]
@@ -63,7 +63,7 @@ pub struct ConfigEndpoints {
 }
 
 impl LockConfig {
-    pub async fn get(
+    pub(super) async fn get(
         lock_config_url: &url::Url,
         accept_invalid_certs: bool,
     ) -> Result<Self, HttpRequestError> {
@@ -80,7 +80,7 @@ impl LockConfig {
 
 /// A wrapper for [`url::Url`] that implements [`serde::de::Deserialize`].
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Url(pub url::Url);
+pub(super) struct Url(pub(super) url::Url);
 
 impl AsRef<url::Url> for Url {
     fn as_ref(&self) -> &url::Url {
@@ -133,10 +133,7 @@ where
     let src = src + "/bulk";
 
     let url: url::Url = src.parse().map_err(|e| {
-        de::Error::custom(format!(
-            "the bulk endpoint url, '{}', is not valid: {}",
-            src, e
-        ))
+        de::Error::custom(format!("the bulk endpoint url, '{src}', is not valid: {e}"))
     })?;
 
     Ok(Some(Url(url)))
@@ -153,14 +150,13 @@ where
     // NOTE: for tests, we can't use http since mockito doesn't support creating https
     // endpoints. However in prod, this should always be https.
     #[cfg(not(test))]
-    let derived_url = format!("https://{}/.well-known/openid-configuration", host);
+    let derived_url = format!("https://{host}/.well-known/openid-configuration");
     #[cfg(test)]
-    let derived_url = format!("http://{}/.well-known/openid-configuration", host);
+    let derived_url = format!("http://{host}/.well-known/openid-configuration");
 
     let url: url::Url = derived_url.parse().map_err(|e| {
         de::Error::custom(format!(
-            "the derived url, '{}', from the host, '{}' is not valid: {}",
-            derived_url, host, e
+            "the derived url, '{derived_url}', from the host, '{host}' is not valid: {e}"
         ))
     })?;
 
@@ -188,20 +184,23 @@ mod test {
         let deserialized =
             serde_json::from_value::<LockConfig>(src).expect("deserialize audit endpoints");
 
-        assert_eq!(deserialized, LockConfig {
-            version: "1.0".into(),
-            // NOTE: resolving this url in tests will always be `http` instead of `https`
-            // to support mocking using mockito
-            issuer_oidc_url: "http://test.com/.well-known/openid-configuration"
-                .parse()
-                .unwrap(),
-            audit_endpoints: AuditEndpoints {
-                // should resolve to the `/bulk` endpoint automatically
-                log: Some("https://test.com/audit/log/bulk".parse().unwrap()),
-                health: None,
-                telemetry: None
-            },
-            config_endpoints: ConfigEndpoints::default(),
-        })
+        assert_eq!(
+            deserialized,
+            LockConfig {
+                version: "1.0".into(),
+                // NOTE: resolving this url in tests will always be `http` instead of `https`
+                // to support mocking using mockito
+                issuer_oidc_url: "http://test.com/.well-known/openid-configuration"
+                    .parse()
+                    .unwrap(),
+                audit_endpoints: AuditEndpoints {
+                    // should resolve to the `/bulk` endpoint automatically
+                    log: Some("https://test.com/audit/log/bulk".parse().unwrap()),
+                    health: None,
+                    telemetry: None
+                },
+                config_endpoints: ConfigEndpoints::default(),
+            }
+        );
     }
 }

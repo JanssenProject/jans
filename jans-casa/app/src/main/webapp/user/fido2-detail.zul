@@ -31,13 +31,13 @@
                             <div class="flex items-start">
                                
                                 <zk:zk if="${FidoDevice.isPlatformAuthenticator(each)}">
-								    <img src="${zkService.contextPath}${assetsService.prefix}/images/touchid.png" />
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/touchid.png" class="w3" />
 								</zk:zk>
 								<zk:zk if="${FidoDevice.isMultideviceAuthenticator(each)}">
-								    <img src="${zkService.contextPath}${assetsService.prefix}/images/passkey.png" />
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/passkey.png" class="w3" />
 								</zk:zk>
 								<zk:zk if="${FidoDevice.isSecurityKey(each)}">
-								    <img src="${zkService.contextPath}${assetsService.prefix}/images/u2fkey.png" />
+								    <img src="${zkService.contextPath}${assetsService.prefix}/images/u2fkey.png" class="w3" />
 								</zk:zk>
 								
                                 <p class="ml3 mb0">

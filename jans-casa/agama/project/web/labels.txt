@@ -12,7 +12,6 @@ casa.2fa_verification=2-step verification
 casa.selector.otp=A verification code from my OTP mobile app or hardware token
 casa.selector.twilio=A verification code sent to my phone via text message
 casa.selector.fido=My Fido device (eg. security key)
-casa.selector.sg=A notification to my Super Gluu
 
 # Specific authn method labels
 
@@ -40,21 +39,3 @@ casa.fido.error=An error occurred
 casa.otp.wrong=Wrong code entered
 casa.otp.title=Get a verification code from your OTP mobile app or hardware token
 casa.otp.enter=Enter code
-
-# SuperGluu
-
-casa.sg.sent=A notification to your Super Gluu was sent
-casa.sg.noNotification=Didn't receive a notification?
-casa.sg.scanQRInstead=Scan a QR code instead
-casa.sg.scanQR=Scan the QR code with your Super Gluu
-casa.sg.remaining=Time remaining:
-casa.sg.secondsAbbr=secs
-casa.sg.waitAuthn2=We'll log you in as soon as we detect your approval.
-
-#For the following label HTML escaping is not applied (see notification template).
-casa.sg.waitAuthn1=You will be authenticated once you tap &quot;approve&quot; in the <br> notification screen.
-
-#The following labels are used inside Javascript strings. HTML escaping is not applied (see notification and code-scan templates).
-#If double quotes are needed, use escaping like \\" to avoid JS syntax errors - or just single quotes
-casa.sg.error=An error occurred
-casa.sg.timeout=We couldn't detect approval of the notification sent

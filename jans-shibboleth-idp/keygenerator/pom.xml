@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-shibboleth-idp-parent</artifactId>
+        <version>0.0.0-nightly</version>
+    </parent>
+
+    <artifactId>jans-shibboleth-keygenerator</artifactId>
+    <packaging>jar</packaging>
+    <name>Janssen Shibboleth Key Generator</name>
+    <description>Key generation utility for Shibboleth IDP</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-util</artifactId>
+            <version>${jans-core.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-security-api</artifactId>
+            <version>${opensaml.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-security-impl</artifactId>
+            <version>${opensaml.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml-xmlsec-api</artifactId>
+            <version>${opensaml.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.80</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>io.jans.idp.keygen.KeyGenerator</mainClass>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

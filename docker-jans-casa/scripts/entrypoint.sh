@@ -49,7 +49,6 @@ get_jetty_args() {
     fi
 }
 
-touch "$CN_CASA_ADMIN_LOCK_FILE"
 get_prometheus_lib
 python3 "$basedir/wait.py"
 python3 "$basedir/bootstrap.py"

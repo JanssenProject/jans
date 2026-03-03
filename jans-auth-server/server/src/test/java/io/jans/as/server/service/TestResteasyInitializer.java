@@ -10,6 +10,7 @@ import io.jans.as.server.authorize.ws.rs.AuthorizationChallengeEndpoint;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.authzen.ws.rs.AccessEvaluationDiscoveryWS;
 import io.jans.as.server.authzen.ws.rs.AccessEvaluationRestWebServiceImplV1;
+import io.jans.as.server.authzen.ws.rs.AccessEvaluationSearchWS;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
 import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
@@ -17,6 +18,7 @@ import io.jans.as.server.jwk.ws.rs.ArchivedJwksWebServiceImpl;
 import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
 import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
+import io.jans.as.server.status.ws.rs.StatusListAggregationRestWebService;
 import io.jans.as.server.status.ws.rs.StatusListRestWebService;
 import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
 import io.jans.as.server.uma.ws.rs.*;
@@ -56,6 +58,7 @@ public class TestResteasyInitializer extends Application {
         classes.add(EndSessionRestWebServiceImpl.class);
 
         classes.add(StatusListRestWebService.class);
+        classes.add(StatusListAggregationRestWebService.class);
 
         classes.add(UmaPermissionRegistrationWS.class);
         classes.add(UmaResourceRegistrationWS.class);
@@ -66,6 +69,7 @@ public class TestResteasyInitializer extends Application {
 
         classes.add(AccessEvaluationRestWebServiceImplV1.class);
         classes.add(AccessEvaluationDiscoveryWS.class);
+        classes.add(AccessEvaluationSearchWS.class);
 
         classes.add(JansConfigurationWS.class);
         return classes;

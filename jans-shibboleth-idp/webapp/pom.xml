@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-shibboleth-idp-parent</artifactId>
+        <version>0.0.0-nightly</version>
+    </parent>
+
+    <artifactId>jans-shibboleth-idp-webapp</artifactId>
+    <packaging>war</packaging>
+    <name>Janssen Shibboleth IDP Webapp</name>
+    <description>Shibboleth IDP web application with Janssen integration</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-shibboleth-idp-conf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>shib-jans-authn</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-war</artifactId>
+            <version>${shibboleth.version}</version>
+            <type>war</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-core</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-impl</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-saml-impl</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-session-impl</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-attribute-resolver-impl</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>idp</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <overlays>
+                        <overlay>
+                            <groupId>net.shibboleth.idp</groupId>
+                            <artifactId>idp-war</artifactId>
+                        </overlay>
+                    </overlays>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

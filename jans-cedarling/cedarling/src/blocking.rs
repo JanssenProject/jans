@@ -8,11 +8,13 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage, Request,
+    AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
+    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
     RequestUnsigned,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::runtime::Runtime;
 
 /// The blocking instance of the Cedarling application.
@@ -47,8 +49,10 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.runtime.block_on(self.instance.authorize(request))
+    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, Box<AuthorizeError>> {
+        self.runtime
+            .block_on(self.instance.authorize(request))
+            .map_err(Box::new)
     }
 
     /// Authorize request with unsigned data.
@@ -56,9 +60,21 @@ impl Cedarling {
     pub fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
-    ) -> Result<AuthorizeResult, AuthorizeError> {
+    ) -> Result<AuthorizeResult, Box<AuthorizeError>> {
         self.runtime
             .block_on(self.instance.authorize_unsigned(request))
+            .map_err(Box::new)
+    }
+
+    /// Authorize multi-issuer request.
+    /// makes authorization decision based on multiple JWT tokens from different issuers
+    pub fn authorize_multi_issuer(
+        &self,
+        request: crate::authz::request::AuthorizeMultiIssuerRequest,
+    ) -> Result<MultiIssuerAuthorizeResult, Box<AuthorizeError>> {
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer(request))
+            .map_err(Box::new)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
@@ -90,5 +106,40 @@ impl LogStorage for Cedarling {
 
     fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
         self.instance.get_logs_by_request_id_and_tag(id, tag)
+    }
+}
+
+impl DataApi for Cedarling {
+    fn push_data_ctx(
+        &self,
+        key: &str,
+        value: serde_json::Value,
+        ttl: Option<Duration>,
+    ) -> Result<(), DataError> {
+        self.instance.push_data_ctx(key, value, ttl)
+    }
+
+    fn get_data_ctx(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
+        self.instance.get_data_ctx(key)
+    }
+
+    fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+        self.instance.get_data_entry_ctx(key)
+    }
+
+    fn remove_data_ctx(&self, key: &str) -> Result<bool, DataError> {
+        self.instance.remove_data_ctx(key)
+    }
+
+    fn clear_data_ctx(&self) -> Result<(), DataError> {
+        self.instance.clear_data_ctx()
+    }
+
+    fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
+        self.instance.list_data_ctx()
+    }
+
+    fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
+        self.instance.get_stats_ctx()
     }
 }

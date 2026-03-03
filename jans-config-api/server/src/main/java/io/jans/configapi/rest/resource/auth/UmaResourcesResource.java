@@ -60,16 +60,32 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Inject
     ClientService clientService;
 
+    /**
+     * Retrieve a paged list of UMA resources matching the given search criteria.
+     *
+     * @param limit        maximum number of results to return
+     * @param pattern      search pattern used to filter resources
+     * @param startIndex   1-based index of the first result to return
+     * @param sortBy       attribute used to order the results
+     * @param sortOrder    sort direction; allowed values are "ascending" and "descending"
+     * @param fieldValuePair  single field=value filter to apply to the search
+     * @return             a Response whose entity is a PagedResult of UmaResource objects (HTTP 200)
+     */
     @Operation(summary = "Gets list of UMA resources", description = "Gets list of UMA resources", operationId = "get-oauth-uma-resources", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS } , groupScopes = {
-            ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.UMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response fetchUmaResources(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -91,9 +107,20 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(doSearch(searchReq)).build();
     }
 
+    /**
+     * Retrieve an UMA resource by its identifier.
+     *
+     * @param id the UMA resource identifier (inum)
+     * @return the UMA resource with the given id
+     * @throws NotFoundException if no UMA resource exists for the given id
+     */
     @Operation(summary = "Gets an UMA resource by ID", description = "Gets an UMA resource by ID", operationId = "get-oauth-uma-resources-by-id", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class), examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -101,24 +128,36 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.UMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getUmaResourceByInum(@Parameter(description = "Resource description ID") @PathParam(value = ApiConstants.ID) @NotNull String id) {
         logger.debug("UMA_RESOURCE to fetch by id:{}", id);
         return Response.ok(findOrThrow(id)).build();
     }
 
+    /**
+     * Fetches UMA resources associated with a given client identifier.
+     *
+     * @param associatedClientId the client identifier whose UMA resources will be returned
+     * @return a Response whose entity is a list of UmaResource objects serialized as JSON
+     */
     @Operation(summary = "Fetch uma resources by client id", description = "Fetch uma resources by client id", operationId = "get-oauth-uma-resources-by-clientid", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = UmaResource.class)), examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources-by-client.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/" + ApiConstants.CLIENTID + ApiConstants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.UMA_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getUmaResourceByAssociatedClient(
             @Parameter(description = "Client ID") @PathParam(value = ApiConstants.CLIENTID) @NotNull String associatedClientId) {
         logger.debug("UMA_RESOURCE to fetch by associatedClientId:{} ", associatedClientId);
@@ -126,16 +165,28 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(getUmaResourceByClient(associatedClientId)).build();
     }
 
+    /**
+     * Create a new UMA resource and persist it.
+     *
+     * Validates that the resource's name and description are present, assigns a new identifier and DN,
+     * persists the resource, and returns the created resource with its id and DN populated.
+     *
+     * @param umaResource the UMA resource to create; must include non-null name and description
+     * @return the created UmaResource with its generated id and DN
+     */
     @Operation(summary = "Creates an UMA resource", description = "Creates an UMA resource", operationId = "post-oauth-uma-resources", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "UmaResource object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class), examples = @ExampleObject(name = "Request json example", value = "example/uma/resources/uma-resources-post.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class), examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.UMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createUmaResource(@Valid UmaResource umaResource) {
         logger.debug("UMA_RESOURCE to be added umaResource:{}", umaResource);
         checkNotNull(umaResource.getName(), AttributeNames.NAME);
@@ -149,6 +200,13 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(umaResource).build();
     }
 
+    /**
+     * Retrieve the UMA resource with the specified id.
+     *
+     * @param id the UMA resource id (inum)
+     * @return the UmaResource with the specified id
+     * @throws NotFoundException if no resource exists for the given id
+     */
     private UmaResource findOrThrow(String id) {
         try {
             UmaResource existingResource = umaResourceService.getResourceById(id);
@@ -159,9 +217,19 @@ public class UmaResourcesResource extends ConfigBaseResource {
         }
     }
 
+    /**
+     * Update an existing UMA resource.
+     *
+     * Updates the stored UMA resource identified by the supplied resource's id. The provided resource must include an id; the response contains the updated UMA resource.
+     *
+     * @param resource the UMA resource payload; must include a valid id
+     * @return the updated UmaResource
+     */
     @Operation(summary = "Updates an UMA resource", description = "Updates an UMA resource", operationId = "put-oauth-uma-resources", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "UmaResource object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class), examples = @ExampleObject(name = "Request json example", value = "example/uma/resources/uma-resources.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "UmaResource", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class), examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources.json"))),
@@ -169,7 +237,8 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.UMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateUmaResource(@Valid UmaResource resource) {
         logger.debug("UMA_RESOURCE to be upated - umaResource:{}", resource);
         String id = resource.getId();
@@ -182,18 +251,30 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(resource).build();
     }
 
+    /**
+     * Apply a JSON Patch document to an existing UMA resource identified by its id.
+     *
+     * @param id         the identifier of the UMA resource to patch
+     * @param pathString a JSON Patch document (as a JSON string) to apply to the resource
+     * @return           a Response containing the patched UmaResource with HTTP 200 OK
+     * @throws JsonPatchException if the patch document cannot be applied to the resource
+     * @throws IOException        if the patch document cannot be read or parsed
+     */
     @Operation(summary = "Patch UMA resource", description = "Patch UMA resource", operationId = "patch-oauth-uma-resources-by-id", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/uma/resources/uma-resources-patch")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class) , examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UmaResource.class), examples = @ExampleObject(name = "Response json example", value = "example/uma/resources/uma-resources.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.UMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@Parameter(description = "Resource description ID") @PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
@@ -205,16 +286,25 @@ public class UmaResourcesResource extends ConfigBaseResource {
         return Response.ok(existingResource).build();
     }
 
+    /**
+     * Deletes the UMA resource identified by the given id.
+     *
+     * @param id the identifier of the UMA resource to delete
+     * @return HTTP 204 No Content response when the resource is successfully deleted
+     */
     @Operation(summary = "Deletes an UMA resource", description = "Deletes an UMA resource", operationId = "delete-oauth-uma-resources-by-id", tags = {
-            "OAuth - UMA Resources" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS }))
+            "OAuth - UMA Resources" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.UMA_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.UMA_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.UMA_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteUmaResource(@Parameter(description = "Resource description ID") @PathParam(value = ApiConstants.ID) @NotNull String id) {
         logger.debug("UMA_RESOURCE to delete - id:{}", id);
         UmaResource umaResource = findOrThrow(id);

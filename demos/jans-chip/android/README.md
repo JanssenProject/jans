@@ -45,7 +45,7 @@
 
 1. A Running Janssen Auth server and Janssen FIDO server.
 2. SSA generated from the Janssen Auth server with `authorization_code` `grant_types`.
- 
+
 ### Auth Challenge Script
 
 Add following [Auth Challenge Script](./docs/authChallengeScript.java) in Jans Server (before using the App) with following details.

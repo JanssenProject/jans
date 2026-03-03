@@ -1,15 +1,18 @@
 import copy
 import asyncio
 
-from typing import Any, Optional
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, HorizontalAlign
 
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Frame
+from prompt_toolkit.widgets import Button, Frame, Dialog
 from prompt_toolkit.application import Application
 from wui_components.widget_collections import get_logging_level_widget
+from wui_components.jans_drop_down import DropDownWidget
+from wui_components.jans_vetrical_nav import JansVerticalNav
+from wui_components.jans_cli_dialog import JansGDialog
+
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
@@ -43,149 +46,364 @@ class Plugin(DialogUtils):
         self.app.create_background_task(self.get_configuration())
 
 
+
+    def edit_policy_source(self, *_args, **kwargs):
+        if kwargs.get('passed'):
+            title = _("Edit Policy Source")
+            source_data = kwargs['passed']
+        else:
+            title = _("Add Policy Source")
+            source_data = (False, '', '')
+
+        enabled_widget = common_data.app.getTitledCheckBox(
+                    title=_("Enabled"),
+                    name='enabled',
+                    checked=source_data[0],
+                    style=cli_style.check_box,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'enabled'),
+                    widget_style=cli_style.titled_text
+                )
+
+        authorization_token_widget = common_data.app.getTitledText(
+                    title=_("Authorization Token"),
+                    name='authorizationToken',
+                    value=source_data[1],
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.titled_text,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'authorizationToken'),
+                )
+
+        policy_store_uri_widget = common_data.app.getTitledText(
+                    title=_("Policy Store Uri"),
+                    name='policyStoreUri',
+                    value=source_data[2],
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.titled_text,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling_policy_sources, 'policyStoreUri'),
+                )
+
+        def add_policy_source(_dialog: Dialog) -> None:
+
+            cur_widget_data = (
+                enabled_widget.me.checked,
+                authorization_token_widget.me.text,
+                policy_store_uri_widget.me.text
+                )
+
+            if not kwargs.get('passed'):
+                self.policy_sources_container.add_item(cur_widget_data)
+            else:
+                self.policy_sources_container.replace_item(kwargs['selected'], cur_widget_data)
+
+        body = HSplit([enabled_widget, authorization_token_widget, policy_store_uri_widget])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_policy_source)]
+        dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=common_data.app.dialog_width-20)
+        common_data.app.show_jans_dialog(dialog)
+
+
+    def delete_policy_source(self, **kwargs):
+
+        dialog = common_data.app.get_confirm_dialog(_("Are you sure want to delete policy source?")+"\n {} ?".format(kwargs['selected'][2]))
+
+        async def coroutine() -> None:
+            result = await common_data.app.show_dialog_as_float(dialog)
+            common_data.app.layout.focus(self.policy_sources_container)
+
+            if not result:
+                return
+            if str(result).lower() == 'yes':
+                self.policy_sources_container.remove_item(kwargs['selected'])
+
+        self.app.create_background_task(coroutine())
+
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/AppConfiguration')
+        self.schema_grpc = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/GrpcConfiguration')
+        self.schema_cedarling = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/CedarlingConfiguration')
+        self.schema_cedarling_policy_sources = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/PolicySource')
 
-        self.working_container = HSplit([
-
-                common_data.app.getTitledText(
-                    title=_("Base DN"),
-                    name='baseDN',
-                    value=self.data.get('baseDN'),
+        self.grpc_configuration_widgets = HSplit(
+            children=[
+                common_data.app.getTitledWidget(
+                    _("Server Mode"),
+                    name='serverMode',
+                    widget=DropDownWidget(
+                        values=[(mode, mode) for mode in ('disabled', 'bridge', 'plain_server', 'tls_server')],
+                        value=self.data.get('grpcConfiguration', {}).get('serverMode', 'bridge'),
+                        select_one_option=False
+                        ),
+                    jans_help=common_data.app.get_help_from_schema(self.schema_grpc, 'serverMode'),
                     style=cli_style.edit_text,
-                    jans_help=_("Base DN"),
-                    widget_style=cli_style.black_bg_widget
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("Token Channels"),
-                    name='tokenChannels',
-                    value=' '.join(self.data.get('tokenChannels', [])),
+                    title=_("Grpc Port"),
+                    name='grpcPort',
+                    value=self.data.get('grpcConfiguration', {}).get('grpcPort', '50051'),
                     style=cli_style.edit_text,
-                    jans_help=_("Space seperated token channels"),
-                    jans_list_type=True,
-                    widget_style=cli_style.black_bg_widget
+                    widget_style=cli_style.black_bg_widget,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_grpc, 'grpcPort'),
+                    text_type='integer'
                 ),
 
                 common_data.app.getTitledCheckBox(
-                    title=_("Disable JDK Logger"),
-                    name='disableJdkLogger', 
-                    checked=self.data.get('disableJdkLogger', False),
+                    title=_("Use Tls"),
+                    name='useTls', 
+                    checked=self.data.get('grpcConfiguration', {}).get('useTls', False),
                     style=cli_style.check_box,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_grpc, 'useTls'),
                     widget_style=cli_style.black_bg_widget
-                ),
+                )
+            ]
+        )
 
-                get_logging_level_widget(self.data.get('loggingLevel', 'INFO')),
+        cedarling_configuration_data = self.data.get('cedarlingConfiguration', {})
+        cedarling_configuration_policy_sources_data = []
+        for ccps in cedarling_configuration_data.get('policySources', []):
+            cedarling_configuration_policy_sources_data.append((
+                    ccps.get('enabled', False),
+                    ccps.get('authorizationToken', ''),
+                    ccps.get('policyStoreUri', '')
+                ))
 
-                common_data.app.getTitledText(
-                    title=_("Logging Layout"),
-                    name='loggingLayout',
-                    value=self.data.get('loggingLayout', 'text'),
-                    style=cli_style.edit_text,
-                    jans_help=_("Logging layout"),
-                    widget_style=cli_style.black_bg_widget
-                ),
+        self.policy_sources_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['Enabled', 'Auth Token', 'Store Uri'],
+                preferred_size=[10, 30, common_data.app.output.get_size().columns -60],
+                data=cedarling_configuration_policy_sources_data,
+                on_enter=self.edit_policy_source,
+                on_delete=self.delete_policy_source,
+                on_display=common_data.app.data_display_dialog,
+                selectes=0,
+                underline_headings=False,
+                max_width=common_data.app.output.get_size().columns - 5,
+                jans_name='policySources',
+                max_height=len(cedarling_configuration_policy_sources_data)+2
+                )
 
-                common_data.app.getTitledText(
-                    title=_("External Logger Configuration"),
-                    name='externalLoggerConfiguration',
-                    value=self.data.get('externalLoggerConfiguration'),
-                    style=cli_style.edit_text,
-                    jans_help=_("Configuration for External Logger"),
-                    widget_style=cli_style.black_bg_widget
-                ),
-
+        self.cedarling_configuration_widgets = HSplit(
+            children=[
                 common_data.app.getTitledCheckBox(
-                    title=_("Enable Metric Reporter"),
-                    name='metricReporterEnabled', 
-                    checked=self.data.get('metricReporterEnabled', False),
+                    title=_("Enabled"),
+                    name='enabled', 
+                    checked=cedarling_configuration_data.get('enabled', False),
                     style=cli_style.check_box,
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling, 'enabled'),
                     widget_style=cli_style.black_bg_widget
                 ),
 
-                common_data.app.getTitledText(
-                    title=_("Metric Reporter Interval"),
-                    name='metricReporterInterval',
-                    value=self.data.get('metricReporterInterval', '300'),
+                common_data.app.getTitledWidget(
+                    _("Log Type"),
+                    name='logType',
+                    widget=DropDownWidget(
+                        values=[(ltype, ltype) for ltype in ('OFF', 'MEMORY', 'STD_OUT')],
+                        value=cedarling_configuration_data.get('logType', 'STD_OUT'),
+                        select_one_option=False
+                        ),
+                    jans_help=common_data.app.get_help_from_schema(self.schema_cedarling, 'logType'),
                     style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget,
-                    text_type='integer'
                 ),
 
-                common_data.app.getTitledText(
-                    title=_("Metric Reporter Keep Data Days"),
-                    name='metricReporterKeepDataDays',
-                    value=self.data.get('metricReporterKeepDataDays', '15'),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget,
-                    text_type='integer'
-                ),
+                get_logging_level_widget(cedarling_configuration_data.get('logLevel', 'INFO')),
 
-                common_data.app.getTitledText(
-                    title=_("Clean Service Interval"),
-                    name='cleanServiceInterval',
-                    value=self.data.get('cleanServiceInterval', '60'),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget,
-                    text_type='integer'
-                ),
 
-                common_data.app.getTitledText(
-                    title=_("Metric Channel"),
-                    name='metricChannel',
-                    value=self.data.get('metricChannel', ''),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-                ),
+                Frame(
+                    title=_("Policy Sources"),
+                    body=HSplit([
+                        self.policy_sources_container,
+                        common_data.app.getButtonWithHandler(text=_("Add Source"), handler=self.edit_policy_source, centered=True)
+                    ]),
+                )
+            ]
+        )
 
-                common_data.app.getTitledText(
-                    title=_("PDP Type"),
-                    name='pdpType',
-                    value=self.data.get('pdpType', ''),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-                ),
+        self.main_widgets = HSplit([
 
-                common_data.app.getTitledText(
-                    title=_("Policies JSON URIs Authorization Token"),
-                    name='policiesJsonUrisAuthorizationToken',
-                    value=self.data.get('policiesJsonUrisAuthorizationToken', ''),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-                ),
+            common_data.app.getTitledText(
+                title=_("Base Endpoint"),
+                name='baseEndpoint',
+                value=self.data.get('baseEndpoint'),
+                style=cli_style.edit_text,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'baseEndpoint'),
+                widget_style=cli_style.black_bg_widget
+            ),
 
-                common_data.app.getTitledText(
-                    title=_("Policies JSON URIs"),
-                    name='policiesJsonUris',
-                    value=' '.join(self.data.get('policiesJsonUris', [])),
-                    style=cli_style.edit_text,
-                    jans_help=_("Space seperated policies JSON URIs"),
-                    jans_list_type=True,
-                    widget_style=cli_style.black_bg_widget
-                ),
+            common_data.app.getTitledText(
+                title=_("Open ID Issuer"),
+                name='openIdIssuer',
+                value=self.data.get('openIdIssuer'),
+                style=cli_style.edit_text,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'openIdIssuer'),
+                widget_style=cli_style.black_bg_widget
+            ),
 
-                common_data.app.getTitledText(
-                    title=_("Policies Zip URIs Authorization Token"),
-                    name='policiesZipUrisAuthorizationToken',
-                    value=self.data.get('policiesZipUrisAuthorizationToken', ''),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-                ),
+            common_data.app.getTitledWidget(
+                _("Protection Mode"),
+                name='protectionMode',
+                widget=DropDownWidget(
+                    values=[('cedarling', 'cedarling'), ('oauth', 'oauth')],
+                    value=self.data.get('protectionMode'),
+                    select_one_option=False
+                    ),
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'protectionMode'),
+                style=cli_style.edit_text,
+            ),
 
-                common_data.app.getTitledText(
-                    title=_("Policies Zip URIs"),
-                    name='policiesZipUris',
-                    value=' '.join(self.data.get('policiesZipUris', [])),
-                    style=cli_style.edit_text,
-                    jans_help=_("Space seperated policies Zip URIs"),
-                    jans_list_type=True,
-                    widget_style=cli_style.black_bg_widget
-                ),
+            common_data.app.getTitledWidget(
+                _("Audit Persistence Mode"),
+                name='auditPersistenceMode',
+                widget=DropDownWidget(
+                    values=[('internal', 'internal'), ('config-api', 'config-api')],
+                    value=self.data.get('auditPersistenceMode'),
+                    select_one_option=False
+                    ),
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'auditPersistenceMode'),
+                style=cli_style.edit_text,
+            ),
 
-            Window(height=1),
-            VSplit([Button(text=_("Save"), handler=self.save)], align=HorizontalAlign.CENTER)
+            common_data.app.getTitledCheckBox(
+                title=_("Stat Enabled"),
+                name='statEnabled', 
+                checked=self.data.get('statEnabled', True),
+                style=cli_style.check_box,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'statEnabled'),
+                widget_style=cli_style.black_bg_widget
+            ),
 
-            ])
+            common_data.app.getTitledText(
+                title=_("Stat Timer Interval in Seconds"),
+                name='statTimerIntervalInSeconds',
+                value=self.data.get('statTimerIntervalInSeconds', '0'),
+                style=cli_style.edit_text,
+                widget_style=cli_style.black_bg_widget,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'statTimerIntervalInSeconds'),
+                text_type='integer'
+            ),
+
+            common_data.app.getTitledCheckBox(
+                title=_("Disable JDK Logger"),
+                name='disableJdkLogger',
+                checked=self.data.get('disableJdkLogger', True),
+                style=cli_style.check_box,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'disableJdkLogger'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+            common_data.app.getTitledCheckBox(
+                title=_("Disable External Logger Configuration"),
+                name='disableExternalLoggerConfiguration',
+                checked=self.data.get('disableExternalLoggerConfiguration', True),
+                style=cli_style.check_box,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'disableExternalLoggerConfiguration'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+            get_logging_level_widget(self.data.get('loggingLevel', 'INFO')),
+
+            common_data.app.getTitledText(
+                title=_("Logging Layout"),
+                name='loggingLayout',
+                value=self.data.get('loggingLayout', 'text'),
+                style=cli_style.edit_text,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'loggingLayout'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+            common_data.app.getTitledText(
+                title=_("External Logger Configuration"),
+                name='externalLoggerConfiguration',
+                value=self.data.get('externalLoggerConfiguration'),
+                style=cli_style.edit_text,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'externalLoggerConfiguration'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+            common_data.app.getTitledCheckBox(
+                title=_("Enable Metric Reporter"),
+                name='metricReporterEnabled', 
+                checked=self.data.get('metricReporterEnabled', False),
+                style=cli_style.check_box,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'metricReporterEnabled'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+            common_data.app.getTitledText(
+                title=_("Metric Reporter Interval"),
+                name='metricReporterInterval',
+                value=self.data.get('metricReporterInterval', '300'),
+                style=cli_style.edit_text,
+                widget_style=cli_style.black_bg_widget,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'metricReporterInterval'),
+                text_type='integer'
+            ),
+
+            common_data.app.getTitledText(
+                title=_("Metric Reporter Keep Data Days"),
+                name='metricReporterKeepDataDays',
+                value=self.data.get('metricReporterKeepDataDays', '15'),
+                style=cli_style.edit_text,
+                widget_style=cli_style.black_bg_widget,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'metricReporterKeepDataDays'),
+                text_type='integer'
+            ),
+
+            common_data.app.getTitledText(
+                title=_("Clean Service Interval"),
+                name='cleanServiceInterval',
+                value=self.data.get('cleanServiceInterval', '60'),
+                style=cli_style.edit_text,
+                widget_style=cli_style.black_bg_widget,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'cleanServiceInterval'),
+                text_type='integer'
+            ),
+
+            common_data.app.getTitledText(
+                title=_("Clean Service Batch ChunkSize"),
+                name='cleanServiceBatchChunkSize',
+                value=self.data.get('cleanServiceBatchChunkSize', '10000'),
+                style=cli_style.edit_text,
+                widget_style=cli_style.black_bg_widget,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'cleanServiceBatchChunkSize'),
+                text_type='integer'
+            ),
+
+            common_data.app.getTitledText(
+                title=_("Message Consumer Type"),
+                name='messageConsumerType',
+                value=self.data.get('messageConsumerType', 'DISABLED'),
+                style=cli_style.edit_text,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'messageConsumerType'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+            common_data.app.getTitledCheckBox(
+                title=_("Error Reason Enabled"),
+                name='errorReasonEnabled', 
+                checked=self.data.get('errorReasonEnabled', False),
+                style=cli_style.check_box,
+                jans_help=common_data.app.get_help_from_schema(self.schema, 'errorReasonEnabled'),
+                widget_style=cli_style.black_bg_widget
+            ),
+
+         Frame(
+            title=_("Grpc Configuration"),
+            body=self.grpc_configuration_widgets,
+        ),
+
+         Frame(
+            title=_("Cedarling Configuration"),
+            body=self.cedarling_configuration_widgets,
+        ),
+
+        Window(height=1),
+        VSplit([Button(text=_("Save"), handler=self.save)], align=HorizontalAlign.CENTER)
+
+        ])
+
+
+        self.working_container = ScrollablePane(
+            content = self.main_widgets
+        )
 
 
     async def get_configuration(self) -> None:
@@ -214,21 +432,52 @@ class Plugin(DialogUtils):
 
 
     def save(self):
-        # save lock configuration
 
-        async def lock_config_coroutine():
-            lock_config = self.make_data_from_dialog(tabs={'lock_config': self.working_container})
+        async def lock_config_coroutine() -> None:
 
-            cli_args = {'operation_id': 'put-lock-properties', 'data': lock_config}
+            lock_config = self.make_data_from_dialog(tabs={'lock_config': self.main_widgets})
+            grpc_configuration = self.make_data_from_dialog(tabs={'grpc_configuration': self.grpc_configuration_widgets})
+            cedarling_configuration = self.make_data_from_dialog(tabs={'cedarling_configuration': self.cedarling_configuration_widgets})
+            merged_grpc = copy.deepcopy(self.data.get('grpcConfiguration', {}))
+            merged_grpc.update(grpc_configuration)
+            lock_config['grpcConfiguration'] = merged_grpc
+            merged_cedarling = copy.deepcopy(self.data.get('cedarlingConfiguration', {}))
+            merged_cedarling.update(cedarling_configuration)
+            merged_cedarling['policySources'] = []
+
+            for ps in self.policy_sources_container.data:
+                ps_dict = {
+                    'enabled': ps[0],
+                    'authorizationToken': ps[1],
+                    'policyStoreUri': ps[2]
+                }
+                merged_cedarling['policySources'].append(ps_dict)
+
+            lock_config['cedarlingConfiguration'] = merged_cedarling
+
+            new_data = copy.deepcopy(self.data)
+
+            new_data.update(lock_config)
+
+            cli_args = {'operation_id': 'put-lock-properties', 'data': new_data}
             common_data.app.start_progressing(_("Saving Lock configuration"))
             response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
             if response.status_code not in (200, 201):
-                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.main_container)
+                common_data.app.show_message(
+                    title=_(common_strings.error),
+                    message=str(response.text),
+                    tobefocused=self.main_container
+                    )
             else:
                 self.data = response.json()
+                common_data.app.show_message(
+                    title=_(common_strings.success),
+                    message=_("Jans Lock Server configuration was saved."),
+                    tobefocused=self.main_container
+                    )
 
-        asyncio.ensure_future(lock_config_coroutine())
+        self.app.create_background_task(lock_config_coroutine())
 
     def set_center_frame(self) -> None:
         """center frame content

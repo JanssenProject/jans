@@ -45,25 +45,48 @@ public class ConfigApiResource extends ConfigBaseResource {
     @Inject
     ConfigApiService configApiService;
 
+    /**
+     * Retrieve the current config-api application configuration.
+     *
+     * @return the current ApiAppConfiguration
+     */
     @Operation(summary = "Gets config-api configuration properties.", description = "Gets config-api configuration properties.", operationId = "get-config-api-properties", tags = {
-            "Configuration – Config API" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CONFIG_READ_ACCESS }))
+            "Configuration – Config API" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+            ApiAccessConstants.CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.CONFIG_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAppConfiguration() {
         ApiAppConfiguration appConfiguration = configApiService.find();
         log.debug("Config API Configuration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
+    /**
+     * Apply a JSON Patch to the config-api dynamic configuration and return the updated application configuration.
+     *
+     * <p>The provided JSON Patch document is applied to the stored dynamic configuration, the change is persisted,
+     * and the latest ApiAppConfiguration is returned.</p>
+     *
+     * @param jsonPatchString a JSON Patch document (RFC 6902) as a string describing the modifications to apply
+     * @return the updated ApiAppConfiguration after the patch has been applied and persisted
+     * @throws JsonPatchException if the JSON Patch cannot be applied to the current configuration
+     * @throws IOException if there is an I/O or JSON processing error while applying the patch
+     */
     @Operation(summary = "Partially modifies config-api configuration properties.", description = "Partially modifies config-api Configuration properties.", operationId = "patch-config-api-properties", tags = {
-            "Configuration – Config API" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CONFIG_WRITE_ACCESS }))
+            "Configuration – Config API" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.CONFIG_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
     @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/config/config-api-patch.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiAppConfiguration.class))),
@@ -72,7 +95,7 @@ public class ConfigApiResource extends ConfigBaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+            ApiAccessConstants.CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String jsonPatchString)
             throws JsonPatchException, IOException {
         log.debug("Config API - jsonPatchString:{} ", jsonPatchString);

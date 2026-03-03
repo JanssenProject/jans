@@ -156,7 +156,7 @@ jans cli --operation-id get-sessions
 
 
 We can view the specific session details through its `sid` using `get-session-by-id` operation.
-For example, we can use `sid:bdb46abb-06e6-453e-9251-b0b697070d6a` with `--url-suffix` to retrieve 
+For example, we can use `sid:bdb46abb-06e6-453e-9251-b0b697070d6a` with `--url-suffix` to retrieve
 the session details.
 
 The following command is below:

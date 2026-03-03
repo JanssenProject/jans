@@ -8,7 +8,7 @@ tags:
   - code
 ---
 
-# OAuth 2.0 Authorization Code Grant 
+# OAuth 2.0 Authorization Code Grant
 
 The [Authorization Code grant type](https://tools.ietf.org/html/rfc6749#section-1.3.1) is used by confidential and public clients to exchange an authorization code for an access token.
 After the user returns to the client via the redirect URL, the application will get the authorization code from the URL and use it to request an access token.

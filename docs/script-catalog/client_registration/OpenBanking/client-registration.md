@@ -8,15 +8,15 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 - [Client Registration script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
 - Setting configuration parameters
 - Setting third party library (Jose4j) in classpath 
- 
+
 ## Adding the custom script
 
 1. To add or update custom scripts, you can use either jans-cli or curl. jans-cli in interactive mode, option 13 enables you manage custom scripts. For more info, see the [docs](https://github.com/JanssenProject/home/wiki/Custom-Scripts-using-jans-cli).
-1. jans-cli in command line argument mode is more conducive to scripting and automation. To display the available operations for custom scripts, use config-cli.py --info CustomScripts. See the [docs](../../../janssen-server/config-guide/config-tools/jans-cli/README.md) for more info.
+1. jans-cli in command-line argument mode is more conducive to scripting and automation. To display the available operations for custom scripts, use config-cli.py --info CustomScripts. See the [docs](../../../janssen-server/config-guide/config-tools/jans-cli/README.md) for more info.
 1. To use `curl` see these [docs](../../../janssen-server/config-guide/config-tools/curl-guide.md)
 
 !!! Note
-    You can normally find `jans-cli.py` in the `/opt/jans/jans-cli/` folder. 
+    You can normally find `jans-cli.py` in the `/opt/jans/jans-cli/` folder.
 
 ## Configuring keys, certificates and SSA validation endpoints
 
@@ -35,7 +35,7 @@ The client registration custom script will use configuration parameters like SSA
 |tokenUrl|Used in SSA validation to obtain token to query SCIM endpoint. Details here - https://openbanking.atlassian.net/wiki/spaces/DZ/pages/1150124033/Directory+2.0+Technical+Overview+v1.5#Directory2.0TechnicalOverviewv1.5-ManageDirectoryInformation |https://matls-sso.openbankingtest.org.uk/as/token.oauth2|
 |tppUrl|Used in SSA validation to query SCIM endpoint. Details here - https://openbanking.atlassian.net/wiki/spaces/DZ/pages/1150124033/Directory+2.0+Technical+Overview+v1.5#Directory2.0TechnicalOverviewv1.5-ManageDirectoryInformation |https://matls-api.openbankingtest.org.uk/scim/v2/OBThirdPartyProviders/|
 |jwks_endpoint |Used for signing software statement and request object for DCR|https://keystore.openbankingtest.org.uk/keystore/openbanking.jwks|
-  
+
 **Steps to add / edit / delete configuration parameters:**
 
 1. Place a [JSON file](https://github.com/JanssenProject/jans-setup/blob/openbank/static/extension/client_registration/clientregistration.json) containing the above configuration parameters and the [custom script](https://github.com/JanssenProject/jans-setup/blob/openbank/static/extension/client_registration/Registration.py) in a folder. 
@@ -56,7 +56,7 @@ This script uses [jose4j](https://bitbucket.org/b_c/jose4j/wiki/Home) library fo
 1. Download the [`jose4j-0.7.7.jar`](https://bitbucket.org/b_c/jose4j/downloads/) and  Place  in `/opt/jans/jetty/jans-auth/custom/libs/`
 
 1. Change your current working directory to `/opt/jans/jetty/jans-auth/webapps` and edit `jans-auth.xml` to add this line:  
- 
+
     ```
     <Set name="extraClasspath">/opt/jans/jetty/jans-auth/custom/libs/jose4j-0.7.7.jar</Set>
     ```
@@ -91,10 +91,10 @@ This script uses [jose4j](https://bitbucket.org/b_c/jose4j/wiki/Home) library fo
     ```bash
     helm upgrade gluu gluu/gluu -n <gluu-namespace> --version=5.0.0 -f override.yaml
     ```       
-       
+
 ### Understanding the Script
 
-The [Client Registration script](https://github.com/JanssenProject/jans-setup/blob/openbank/static/extension/client_registration/Registration.py) is available
+The [Client Registration script](https://github.com/JanssenProject/jans-setup/blob/openbank/static/extension/client_registration/Registration.py) is available at the link above.
 
 The following are the ***mandatory*** functions which need to be implemented in order to perform registration:
 
@@ -176,7 +176,7 @@ The following are the ***mandatory*** functions which need to be implemented in 
    ```    
 
    Used for signing the request object (DCR): 
-    
+
    ```python3
    def getDcrJwks(self, context):
        return JwtUtil.getJSONWebKeys(self.jwks_endpoint).toString()
@@ -188,7 +188,7 @@ The following are the ***mandatory*** functions which need to be implemented in 
 
   This updateClient method is called when the PUT method is called on registration endpoint to update client details. This method should return True for successful update and to reject any update request this method should return False when the request fulfills the condition to reject it:
 
-    
+
    ```python3
    def   updateClient(self, context):
         print "Client registration. UpdateClient method"

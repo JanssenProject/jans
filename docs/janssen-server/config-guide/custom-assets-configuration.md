@@ -81,7 +81,7 @@ To get sample schema type jans cli --schema-sample <schema>, for example jans cl
 
 ### Get All Current Custom Assets
 
-Use the operation ID `get-all-assets` to get all the currently configured 
+Use the operation ID `get-all-assets` to get all the currently configured
 custom assets on the Janssen Server.
 
 ```bash title="Command"
@@ -140,7 +140,7 @@ jans cli --operation-id get-all-assets
 
 ### Get Custom Asset By inum
 
-With `get-asset-by-inum` operation-id, we can get any specific asset matched 
+With `get-asset-by-inum` operation-id, we can get any specific asset matched
 with `inum`. If we know the `inum`, we can simply use the below command:
 
 ```bash title="Command"
@@ -204,7 +204,7 @@ It returns the details as below:
 ### Get Services
 
 
-Get the list of Janssen Server services that support custom assets 
+Get the list of Janssen Server services that support custom assets
 by performing `get-asset-services` operation.
 
 ```bash title="Command"
@@ -227,7 +227,7 @@ jans cli --operation-id get-asset-services
 
 ### Get Valid Asset Types
 
-Get the asset types of your Janssen Server by performing `get-asset-types` 
+Get the asset types of your Janssen Server by performing `get-asset-types`
 operation.
 
 ```bash title="Command"
@@ -251,7 +251,7 @@ jans cli --operation-id get-asset-types
 ### Add New Custom Asset
 
 To create a new asset, we can use `post-new-asset` operation id. As shown in
-the [output](#using-the-command-line) for `--info` command, the `post-new-asset` 
+the [output](#using-the-command-line) for `--info` command, the `post-new-asset`
 operation requires data to be sent according to `AssetForm` schema.
 
 
@@ -261,19 +261,19 @@ To see the schema, use the command below:
 jans cli --schema AssetForm
 ```
 
-For better understanding, the Janssen Server also provides a sample of data to 
-be sent to the server. This sample conforms to the schema above. Use the command 
+For better understanding, the Janssen Server also provides a sample of data to
+be sent to the server. This sample conforms to the schema above. Use the command
 below to get the sample.
 
 ```bash title="Command"
 jans cli --schema-sample AssetForm
 ```
 
-Using the schema and the example above, we have added below data to the 
+Using the schema and the example above, we have added below data to the
 file `/tmp/add-asset.json`. Example below will load `p3.properties` file as
 a custom asset to the `jans-auth` service.
 
-```json title="Input" linenums="1" 
+```json title="Input" linenums="1"
 {
   "document": {
     "fileName": "p3.properties",
@@ -320,7 +320,7 @@ assuming that there is an existing asset as show below:
 !!! Note
 
     `assetFile` attribute is optional for update operation as there may be scenario where only metadata of an asset is to be updated.
-    
+
 
 Now to update level of this asset to 6, create a text file with following
 content in it. Let's name this text file as `/tmp/update-asset.json`

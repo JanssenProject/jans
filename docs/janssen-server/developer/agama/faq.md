@@ -11,7 +11,7 @@ tags:
 
 ### Unable to find a suitable constructor with arity ... in class ...
 
-A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of any of the constructors for that class. 
+A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of the constructors for that class.
 
 ### Unable to find a suitable method called ... with arity ... in class ...
 
@@ -23,7 +23,7 @@ This occurs when no `Finish` statement has been found in the execution of a flow
 
 ### Serialization errors
 
-Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to certain point. 
+Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to a certain point.
 
 Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always possible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
 
@@ -35,7 +35,7 @@ Use the information in the logs to detect the problematic Java class. This would
 - Tweak the engine serialization [rules](./engine-bridge-config.md#serialization-rules) so an alternative type of serialization can be used for this particular object 
 - Modify your Java code so an alternative class is used instead
 
-In general, a good practice is to avoid handling complex variables in flows. Letting big object graphs live in the state has a negative impact on performance and also increases the risk of serialization issues.   
+In general, a good practice is to avoid handling complex variables in flows. Letting big object graphs live in the state has a negative impact on performance and also increases the risk of serialization issues.
 
 ## Libraries and classes added on the fly
 
@@ -103,11 +103,11 @@ This topic is covered [here](./advanced-usages.md#localization-and-international
 
 ### How to modify the built-in error pages?
 
-Agama features some error pages out-of-the-box. They can be customized by editing the corresponding files referenced in the [configuration](./engine-bridge-config.md#engine-configuration) doc page.  
+Agama features some error pages out-of-the-box. They can be customized by editing the corresponding files referenced in the [configuration](./engine-bridge-config.md#engine-configuration) doc page.
 
 ### Is Javascript supported?
 
-Yes, the template engine is not concerned about the kind of contents linked in markup. It does not even care if your markup makes any sense. For FreeMarker, templates just produce a textual output. 
+Yes, the template engine is not concerned about the kind of contents linked in markup. It does not even care if your markup makes any sense. For FreeMarker, templates just produce a textual output.
 
 ### A flow page is not rendered as HTML, the browser just shows the source code as text
 
@@ -121,7 +121,7 @@ In your templates use `<#ftl output_format="JSON">` in the first line. Take a lo
 
 ### Are there any IDE or editor plugins available for coding flows and manage projects?
 
-Not plugins but you can use [Agama Lab](https://agama-lab.gluu.org) for projects and flows authoring. 
+Not plugins, but you can use [Agama Lab](https://agama-lab.gluu.org) for projects and flows authoring.
 
 ### How to debug flows?
 
@@ -131,7 +131,7 @@ We plan to offer a debugger in the future. In the meantime, you can do `printf`-
 
 ### How to launch a flow?
 
-A flow is launched by issuing an authentication request in a browser as explained [here](./jans-agama-engine.md#launching-flows). 
+A flow is launched by issuing an authentication request in a browser as explained in the [launching flows documentation](./jans-agama-engine.md#launching-flows).
 
 ### Does flow execution timeout?
 
@@ -143,7 +143,7 @@ This can be configured in the project's [metadata file](../../../agama/gama-form
 
 ### Updates in a flow's code are not reflected in its execution
 
-When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The tool used for deployment will let you know which flows have errors and their descriptions. 
+When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The tool used for deployment will let you know which flows have errors and their descriptions.
 
 ### Why are the contents of a list or map logged partially?
 
@@ -153,7 +153,7 @@ This is to avoid traversing big structures fully. You can increase the value of 
 
 Agama only provides operators for equality/inequality check in conditional statements. Comparisons like "less-than", "greater-than-or-equal", etc. require Java usage, however, the structure of an authentication flow will rarely have to deal with this kind of computations.
 
-_Hint_: methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` may help you to do some arithmetic.  
+_Hint_: methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` may help you to do some arithmetic.
 
 ### How to concatenate strings in Agama?
 

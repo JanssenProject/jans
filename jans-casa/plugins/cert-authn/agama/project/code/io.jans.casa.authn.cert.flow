@@ -1,0 +1,20 @@
+Flow io.jans.casa.authn.cert
+    Basepath ""
+    Inputs userData withEscape
+
+obj = Trigger io.jans.casa.cert.promptAndValidate
+When obj.success is true
+    uid = Call io.jans.casa.certauthn.CertUtil#findOwner obj.data.cert.fingerPrint
+    
+    When uid is userData.uid
+        Finish uid
+
+    When uid is null
+        obj = { error: "NOT_RECOGNIZED" }
+    Otherwise
+        obj = { error: "CERT_ENROLLED_OTHER_USER" }
+
+    RRF "authn-error.ftlh" obj
+
+Log "Cert Authentication failed"    
+Finish false

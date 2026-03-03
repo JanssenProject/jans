@@ -78,7 +78,7 @@ domains. The Janssen Server provides implementation for the SCIM specification.
 With Janssen CLI-TUI, it's possible to view / update SCIM configuration. ![image](../../../../assets/Janssen_TUI_SCIM_1.png)
 
 ## Command Line Logs
-Jans TUI logs all write (post/put/patch) activities to file `<log-dir>/cli_cmd.log`, default `log-dir` is home directory 
+Jans TUI logs all write (post/put/patch) activities to file `<log-dir>/cli_cmd.log`, default `log-dir` is home directory
 of user executing TUI. Consider that we create a user as below
 
 ![](../../../../assets/jans-tui-create-user.png)
@@ -114,8 +114,8 @@ After build you can execute as
 ./jans-cli-tui.pyz
 ```
 
-You will be prompted for credentials if you do not have ` ~/.config/jans-cli.ini`. 
-Contact your administrator for credentials. Administrator can obtain credidentials on Janssen Server as follows:
+You will be prompted for credentials if you do not have ` ~/.config/jans-cli.ini`.
+Contact your administrator for credentials. Administrator can obtain credentials on Janssen Server as follows:
 
 ```
 cat /opt/jans/jans-setup/setup.properties.last | grep tui_client

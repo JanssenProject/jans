@@ -15,11 +15,11 @@ In this document we will cover managing people in the Jans Server's LDAP Directo
 === "User Management using SCIM"
 
     SCIM allows many ways to manage users data. Jump into the [SCIM User Management](../config-guide/scim-config/user-config.md) for guidelines of SCIM operations. To know how SCIM works in Janssen Server, read more from [here](../scim/README.md).
-    
+
 === "Manage External Data Sources Using Link"
 
     Janssen Server allows connecting external data sources using Jans Link. Syncing people and attributes from a backend server speeds up authentication transactions. It is possible to perform attribute transformations, changing the name of attributes, or even using an interception script to change the values. Transformations are stored locally in Janssen Server. Read out [Link Guide](../link/README.md) to know more details on it.
-    
+
 
 ## Manage Data in RDBMS
 
@@ -74,4 +74,4 @@ Finally, save it and explore.
 
 ## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

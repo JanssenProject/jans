@@ -10,14 +10,8 @@ use super::utils::*;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 
-/// Test loading policy store with mappings JWT payload to custom `cedar-entities` types in schema
-#[test]
-async fn check_mapping_tokens_data() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
-
-    // deserialize `Request` from json
-    // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
-    let request = Request::deserialize(serde_json::json!(
+fn prepare_cedarling_request() -> Result<Request, serde_json::Error> {
+    Request::deserialize(serde_json::json!(
         {
             "tokens": {
                 "access_token": generate_token_using_claims(json!({
@@ -29,14 +23,14 @@ async fn check_mapping_tokens_data() {
                     "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
                     "acr": "simple_password_auth",
                     "x5t#S256": "",
-                    "nbf": 1730494543,
+                    "nbf": 1_730_494_543,
                     "scope": [
                         "role",
                         "openid"
                     ],
-                    "auth_time": 1730494542,
-                    "exp": 1730574245,
-                    "iat": 1730494543,
+                    "auth_time": 1_730_494_542,
+                    "exp": 1_730_574_245,
+                    "iat": 1_730_494_543,
                     "jti": "qpCu52Z0S8ynfZ7ufCXQow",
                     "username": "John Smith",
                     "status": {
@@ -57,11 +51,11 @@ async fn check_mapping_tokens_data() {
                     "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
                     "acr": "simple_password_auth",
                     "c_hash": "pQi9rYqmSCVc3tK--2AgiA",
-                    "nbf": 1730494543,
-                    "auth_time": 1730494542,
-                    "exp": 1730498143,
+                    "nbf": 1_730_494_543,
+                    "auth_time": 1_730_494_542,
+                    "exp": 1_730_498_143,
                     "grant": "authorization_code",
-                    "iat": 1730494543,
+                    "iat": 1_730_494_543,
                     "jti": "v2SWGfAEQGWZ1mPDSJPvbg",
                     "status": {
                         "status_list": {
@@ -98,7 +92,7 @@ async fn check_mapping_tokens_data() {
                 }
             },
             "context": {
-                "current_time":1731812031,
+                "current_time":1_731_812_031,
                 "device_health": [],
                 "fraud_indicators": [],
                 "geolocation": [],
@@ -109,14 +103,21 @@ async fn check_mapping_tokens_data() {
             },
         }
     ))
-    .expect("Request should be deserialized from json");
+}
+
+/// Test loading policy store with mappings JWT payload to custom `cedar-entities` types in schema
+#[test]
+async fn check_mapping_tokens_data() {
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string())).await;
+
+    // deserialize `Request` from json
+    // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
+    let request = prepare_cedarling_request().expect("Request should be deserialized from json");
 
     let entities = cedarling
         .build_entities(&request)
-        .await
         // log err to be human readable
-        .inspect_err(|err| println!("Error: {}", err))
-        .expect("request should be parsed without errors");
+        .unwrap_or_else(|err| panic!("request should be parsed without errors: {err}"));
 
     // check value of resource entity
     let expected_resource = json!({"uid":{"type":"Jans::Application","id":"SomeID"},"attrs":{"url":{"host":"test-casa.gluu.info","path":"/","protocol":"https"},"app_id":"1234","name":"some_app"},"parents":[]}).sorted();

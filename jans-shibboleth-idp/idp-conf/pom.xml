@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-shibboleth-idp-parent</artifactId>
+        <version>0.0.0-nightly</version>
+    </parent>
+
+    <artifactId>jans-shibboleth-idp-conf</artifactId>
+    <packaging>jar</packaging>
+    <name>Janssen Shibboleth IDP Configuration</name>
+    <description>Configuration files for Shibboleth IDP integration with Janssen</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-conf</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-core</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-saml-api</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.shibboleth.idp</groupId>
+            <artifactId>idp-authn-api</artifactId>
+            <version>${shibboleth.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
+</project>

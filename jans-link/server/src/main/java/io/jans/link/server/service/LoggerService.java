@@ -31,6 +31,11 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
         return isTrue(appConfiguration.getDisableJdkLogger());
     }
 
+	@Override
+	public boolean isDisableExternalLoggerConfiguration() {
+		return isTrue(appConfiguration.getDisableExternalLoggerConfiguration());
+	}
+
     @Override
     public String getLoggingLevel() {
         return appConfiguration.getLoggingLevel();

@@ -17,7 +17,7 @@ type TypeId = SmolStr;
 /// - **Singles**: Unique entities with distinct types.
 /// - **Multiples**: Entities of the same type but with different IDs.
 #[derive(Default)]
-pub struct BuiltEntities {
+pub(crate) struct BuiltEntities {
     singles: HashMap<TypeName, TypeId>,
     multiples: HashMap<TypeName, Vec<TypeId>>,
 }
@@ -44,7 +44,7 @@ impl From<&HashMap<Origin, Entity>> for BuiltEntities {
 }
 
 impl BuiltEntities {
-    pub fn insert(&mut self, uid: &EntityUid) {
+    pub(crate) fn insert(&mut self, uid: &EntityUid) {
         let name = uid.type_name().to_smolstr();
         let id = uid.id().escaped();
         match self.singles.entry(name.clone()) {
@@ -61,11 +61,11 @@ impl BuiltEntities {
         }
     }
 
-    pub fn get_single(&self, type_name: &str) -> Option<&str> {
+    pub(crate) fn get_single(&self, type_name: &str) -> Option<&str> {
         self.singles.get(type_name).map(|v| &**v)
     }
 
-    pub fn get_multiple(&self, type_name: &str) -> Option<&[SmolStr]> {
+    pub(super) fn get_multiple(&self, type_name: &str) -> Option<&[SmolStr]> {
         self.multiples.get(type_name).map(|v| &**v)
     }
 }

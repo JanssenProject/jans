@@ -31,7 +31,7 @@ policy_stores:
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -47,7 +47,7 @@ policy_stores:
       444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         cedar_version: v4.0.0
         description: simple policy example for principal user
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -63,7 +63,7 @@ policy_stores:
       555da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         cedar_version: v4.0.0
         description: Policy that uses default entities
-        creation_date: '2024-09-20T17:22:39.996050'
+        creation_date: "2024-09-20T17:22:39.996050"
         policy_content:
           encoding: none
           content_type: cedar
@@ -145,6 +145,27 @@ policy_stores:
           };
         }
     default_entities:
-      "1694c954f8d9": "eyJlbnRpdHlfaWQiOiIxNjk0Yzk1NGY4ZDkiLCJlbnRpdHlfdHlwZSI6IkphbnM6OkRlZmF1bHRFbnRpdHkiLCJvIjoiQWNtZSBEb2xwaGlucyBEaXZpc2lvbiIsIm9yZ19pZCI6IjEwMDEyOSIsImRvbWFpbiI6ImFjbWUtZG9scGhpbi5zZWEiLCJyZWdpb25zIjpbIkF0bGFudGljIiwiUGFjaWZpYyIsIkluZGlhbiJdfQ=="
-      "74d109b20248": "eyJlbnRpdHlfaWQiOiI3NGQxMDliMjAyNDgiLCJlbnRpdHlfdHlwZSI6IkphbnM6OkRlZmF1bHRFbnRpdHkiLCJkZXNjcmlwdGlvbiI6IjIwMjUgUHJpY2UgTGlzdCIsInByb2R1Y3RzIjp7IjE1MDIwIjo5OTUsIjE1MDUwIjoxNDk1fSwic2VydmljZXMiOnsiNTEwMDEiOjk5MDAsIjUxMDIwIjoyOTkwMH19"
-      "ece25bef0c2a": "eyJlbnRpdHlfaWQiOiJlY2UyNWJlZjBjMmEiLCJlbnRpdHlfdHlwZSI6IkphbnM6OkRlZmF1bHRFbnRpdHkiLCJvIjoiQWNtZSBBbmFseXRpY3MgRGl2aXNpb24iLCJvcmdfaWQiOiIxMDAxMzAiLCJkb21haW4iOiJhY21lLWFuYWx5dGljcy50ZWNoIiwicmVnaW9ucyI6WyJHbG9iYWwiXX0="
+      "1694c954f8d9":
+        {
+          "entity_id": "1694c954f8d9",
+          "entity_type": "Jans::DefaultEntity",
+          "o": "Acme Dolphins Division",
+          "org_id": "100129",
+          "domain": "acme-dolphin.sea",
+          "regions": ["Atlantic", "Pacific", "Indian"],
+        }
+      "74d109b20248":
+        {
+          "entity_type": "Jans::DefaultEntity",
+          "description": "2025 Price List",
+          "products": { "15020": 995, "15050": 1495 },
+          "services": { "51001": 9900, "51020": 29900 },
+        }
+      "ece25bef0c2a":
+        {
+          "entity_type": "Jans::DefaultEntity",
+          "o": "Acme Analytics Division",
+          "org_id": "100130",
+          "domain": "acme-analytics.tech",
+          "regions": ["Global"],
+        }

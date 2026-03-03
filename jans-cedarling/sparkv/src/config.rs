@@ -14,6 +14,7 @@ pub struct Config {
     pub max_ttl: Duration,
     pub default_ttl: Duration,
     pub auto_clear_expired: bool,
+    pub earliest_expiration_eviction: bool,
 }
 
 impl Config {
@@ -24,6 +25,7 @@ impl Config {
             max_ttl: Duration::seconds(60 * 60),
             default_ttl: Duration::seconds(5 * 60), // 5 minutes
             auto_clear_expired: true,
+            earliest_expiration_eviction: false,
         }
     }
 }
@@ -46,5 +48,6 @@ mod tests {
         assert_eq!(config.max_ttl, Duration::seconds(60 * 60));
         assert_eq!(config.default_ttl, Duration::seconds(5 * 60));
         assert!(config.auto_clear_expired);
+        assert!(!config.earliest_expiration_eviction)
     }
 }
