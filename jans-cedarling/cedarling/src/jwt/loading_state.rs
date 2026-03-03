@@ -10,7 +10,6 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 #[derive(Debug)]
 pub(super) struct TrustedIssuerLoadingState {
     total_issuers: usize,
-    loaded_count: AtomicUsize,
     /// Stores issuer IDs that failed to load
     failed_issuers: std::sync::RwLock<HashSet<String>>,
 }
@@ -20,29 +19,20 @@ impl TrustedIssuerLoadingState {
     pub(super) fn new(total_issuers: usize) -> Self {
         Self {
             total_issuers,
-            loaded_count: AtomicUsize::new(0),
             failed_issuers: std::sync::RwLock::new(HashSet::new()),
         }
     }
 
     /// Record that an issuer has been successfully loaded
-    pub(super) fn add_trusted_issuer_loaded(&self) {
-        self.loaded_count.fetch_add(1, Ordering::Release);
-    }
+    pub(super) fn add_trusted_issuer_loaded(&self) {}
 
     /// Record that an issuer has failed to load
     pub(super) fn add_trusted_issuer_failed(&self, issuer_id: String) {
-        self.loaded_count.fetch_add(1, Ordering::Release); // Still counts toward total processed
         let mut failed = self
             .failed_issuers
             .write()
             .expect("TrustedIssuerLoadingState RwLock poisoned");
         failed.insert(issuer_id);
-    }
-
-    /// Get the number of issuers that have been processed (successful or failed)
-    pub(super) fn processed_count(&self) -> usize {
-        self.loaded_count.load(Ordering::Acquire)
     }
 
     /// Get the total number of issuers to load

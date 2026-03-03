@@ -1146,14 +1146,12 @@ mod test {
             3,
             "loading state should track total issuers"
         );
+
         assert_eq!(
-            loader.loading_state.processed_count(),
-            3,
-            "loading state should have processed all issuers"
+            loader.loading_state.failed_issuers().len(),
+            2,
+            "loading state should have 1 failed issuer"
         );
-        let loaded_count =
-            loader.loading_state.processed_count() - loader.loading_state.failed_issuers().len();
-        assert_eq!(loaded_count, 1, "loading state should have 1 loaded issuer");
     }
 
     /// Tests that `failed_trusted_issuer_ids()` works correctly in async loading mode.
@@ -1224,13 +1222,11 @@ mod test {
             2,
             "loading state should track total issuers"
         );
+
         assert_eq!(
-            loader.loading_state.processed_count(),
-            2,
-            "loading state should have processed all issuers"
+            loader.loading_state.failed_issuers().len(),
+            1,
+            "loading state should have 1 failed issuer"
         );
-        let loaded_count =
-            loader.loading_state.processed_count() - loader.loading_state.failed_issuers().len();
-        assert_eq!(loaded_count, 1, "loading state should have 1 loaded issuer");
     }
 }
