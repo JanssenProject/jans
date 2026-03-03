@@ -545,7 +545,6 @@ public class Authenticator {
                     logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizeUsernameForLog(credentials.getUsername()));
                     return true;
                 }
-                logger.info("Authentication failed for User: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
             }
         }
 
