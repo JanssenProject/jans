@@ -62,7 +62,7 @@ prost-types = { version = "0.14.3", optional = true }
 tonic-prost = { version = "0.14.3", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tonic = { version = "0.14.3", optional = true }
+tonic = { version = "0.14.3", optional = true, features = ["tls-native-roots"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }

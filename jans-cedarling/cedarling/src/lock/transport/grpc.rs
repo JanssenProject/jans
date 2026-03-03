@@ -12,7 +12,7 @@ use std::time::Duration;
 use prost_types::Timestamp;
 use serde::Deserialize;
 #[cfg(not(target_arch = "wasm32"))]
-use tonic::transport::Channel;
+use tonic::transport::{Channel, ClientTlsConfig};
 use tonic::{Request, metadata::MetadataValue};
 #[cfg(target_arch = "wasm32")]
 use tonic_web_wasm_client::Client;
@@ -85,6 +85,7 @@ impl GrpcTransport {
         let client = AuditServiceClient::new(
             Channel::from_shared(endpoint.into())
                 .map_err(|_| TransportError::InvalidUri)?
+                .tls_config(ClientTlsConfig::new().with_native_roots())?
                 .timeout(GRPC_REQUEST_TIMEOUT)
                 .connect_lazy(),
         );

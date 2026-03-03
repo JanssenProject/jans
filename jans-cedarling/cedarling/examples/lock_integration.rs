@@ -9,7 +9,8 @@ use cedarling::log_config::StdOutLoggerMode;
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
     EntityBuilderConfig, EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LockServiceConfig,
-    LockTransport, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    LockTransport, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
