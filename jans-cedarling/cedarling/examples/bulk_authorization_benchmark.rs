@@ -6,9 +6,9 @@
 #![allow(clippy::cast_precision_loss)]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
-    EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -101,6 +101,7 @@ async fn initialize_cedarling() -> Result<Cedarling, Box<dyn std::error::Error>>
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 

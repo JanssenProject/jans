@@ -29,7 +29,7 @@ jobs:
     - name: set nightly version
       id: nightly
       continue-on-error: false
-      if: github.event_name == 'schedule' || github.event.inputs.nightly == 'true'
+      if: github.event_name == 'schedule' || github.event.inputs.nightly == 'true' || github.event_name == 'workflow_dispatch'
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         TARGET_BRANCH: ${{ github.event.inputs.branch }}

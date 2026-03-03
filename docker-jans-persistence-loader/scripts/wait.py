@@ -19,6 +19,13 @@ def validate_doc_store_type(value):
         raise ValueError(f"Unsupported document store type {value!r}; please choose one of {','.join(supported_types)}")
 
 
+def validate_message_type(value):
+    supported_types = ("DISABLED", "REDIS", "POSTGRES")
+
+    if value not in supported_types:
+        raise ValueError(f"Unsupported provider message type {value!r}; please choose one of {','.join(supported_types)}")
+
+
 def main():
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
     validate_persistence_type(persistence_type)
@@ -32,6 +39,9 @@ def main():
 
     doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
     validate_doc_store_type(doc_store_type)
+
+    message_type = os.environ.get("CN_MESSAGE_TYPE", "DISABLED")
+    validate_message_type(message_type)
 
     manager = get_manager()
     deps = ["config", "secret"]
