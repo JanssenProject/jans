@@ -370,7 +370,7 @@ permit(
             break;
         }
         assert!(
-            !(start.elapsed() > timeout),
+            (start.elapsed() <= timeout),
             "Timeout waiting for trusted issuers to load. Loaded: {loaded}, Failed: {failed}"
         );
         tokio::time::sleep(Duration::from_millis(1)).await;
