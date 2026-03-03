@@ -386,8 +386,8 @@ mod tests {
 
         logger.log_any(log_entry2);
 
-        // Wait for the full timeout plus small margin
-        thread::sleep(flush_timeout / 2 + Duration::from_millis(1));
+        // Wait for the full timeout plus small margin (timer resets on each log, so wait full timeout after entry2)
+        thread::sleep(flush_timeout + Duration::from_millis(5));
 
         // Buffer should now contain the first message (may also contain second message)
         let expected_json = json!(log_entry1).to_string() + "\n";

@@ -116,7 +116,7 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
                     {row.showClientExpiry ? (!(lifetime <= 0) ? <CheckCircleOutlineIcon sx={{ color: green[500] }} /> : <HighlightOffIcon sx={{ color: pink[500] }} />) : <CheckCircleOutlineIcon sx={{ color: green[500] }} />}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                    <Grid item xs={8}>
+                    <Grid size={{ xs:8}}>
                         <Tooltip title="Trigger authentication flow">
                             <IconButton aria-label="Trigger Auth Flow">
                                 <OfflineBoltIcon

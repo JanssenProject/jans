@@ -21,7 +21,11 @@ pub(crate) fn value_to_expr(
             if let Some(int) = val.as_i64() {
                 RestrictedExpression::new_long(int)
             } else if let Some(float) = val.as_f64() {
-                RestrictedExpression::new_decimal(float.to_string())
+                // Format to 4 decimal places to avoid scientific notation and ensure Cedar compatibility.
+                // Cedar allows no more than 4 digits after the decimal separator.
+                // See https://docs.cedarpolicy.com/policies/syntax-operators.html#function-decimal
+                let decimal_str = format!("{float:.4}");
+                RestrictedExpression::new_decimal(decimal_str)
             } else {
                 return Ok(None);
             }
@@ -30,7 +34,7 @@ pub(crate) fn value_to_expr(
             if IpAddr::from_str(val).is_ok() {
                 RestrictedExpression::new_ip(val)
             } else {
-                RestrictedExpression::new_string(val.to_string())
+                RestrictedExpression::new_string(val.clone())
             }
         },
         Value::Array(values) => {
@@ -47,7 +51,7 @@ pub(crate) fn value_to_expr(
         Value::Object(map) => {
             let (fields, errs): (Vec<_>, Vec<_>) = map
                 .iter()
-                .map(|(key, val)| value_to_expr(val).map(|expr| (key.to_string(), expr)))
+                .map(|(key, val)| value_to_expr(val).map(|expr| (key.clone(), expr)))
                 .partition_result();
 
             if !errs.is_empty() {
@@ -114,7 +118,7 @@ mod test {
         assert!(matches!(
             entity.attr("test_decimal").expect("entity should have a `test_decimal` attribute").expect("should be a valid value"),
             EvalResult::ExtensionValue(ref val)
-                if *val == "decimal(\"12.5\")",
+                if *val == "decimal(\"12.5000\")",
         ));
 
         assert!(matches!(

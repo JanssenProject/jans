@@ -94,6 +94,8 @@ data:
   | replace "scriptLogLevel" "script_log_level"
   | replace "auditStatsLogTarget" "audit_log_target"
   | replace "auditStatsLogLevel" "audit_log_level"
+  | replace "lockLogTarget" "lock_log_target"
+  | replace "lockLogLevel" "lock_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
