@@ -326,6 +326,7 @@ class JCA_CLI:
             return self.scim_url
         elif self.my_op_mode == 'auth':
             return self.auth_url
+        return None
 
     def getCredentials(self):
         if self.host == '' or self.client_id == '' or self.client_secret == '' :
