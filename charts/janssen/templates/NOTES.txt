@@ -1,0 +1,15 @@
+{{ if .Values.global.gatewayApi.enabled -}}
+********************************************************************************
+***              DEPRECATION WARNING: GATEWAY API CONFIGURATION              ***
+********************************************************************************
+
+The flag `global.gatewayApi.enabled` is set to TRUE hence any configuration
+previously managed by `gatewayApi` will be ignored.
+
+RECOMMENDATION:
+
+1. Use `global.gateway-api.enabled` flag.
+2. Use `gateway-api` to configure the Gateway API instead of `gatewayApi`.
+
+********************************************************************************
+{{- end }}
