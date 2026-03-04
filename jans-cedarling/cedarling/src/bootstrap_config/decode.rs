@@ -10,6 +10,7 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fmt::Display;
 use std::fs;
+use std::num::NonZeroUsize;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -21,6 +22,7 @@ use super::{
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::context_data_api::DataStoreConfig;
+use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -122,6 +124,9 @@ impl BootstrapConfig {
             token_cache_max_ttl_secs: raw.token_cache_max_ttl,
             token_cache_capacity: raw.token_cache_capacity,
             token_cache_earliest_expiration_eviction: raw.token_cache_earliest_expiration_eviction,
+            trusted_issuer_loader: raw
+                .trusted_issuer_loader_type
+                .to_config(raw.trusted_issuer_loader_workers),
         };
 
         let authorization_config = AuthorizationConfig {
