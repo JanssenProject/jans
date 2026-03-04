@@ -2412,10 +2412,10 @@
 <p>To enable usage of principals at least one of the following keys must be provided:</p>
 <ul>
 <li>
-<p><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal.</p>
+<p><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal. Default is <code>disabled</code>.</p>
 </li>
 <li>
-<p><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal.</p>
+<p><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal. Default is <code>disabled</code>.</p>
 </li>
 </ul>
 <p>To load policy store one of the following keys must be provided:</p>
@@ -2445,7 +2445,7 @@
 <p class="admonition-title">Note</p>
 </div>
 <p>All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.</p>
-<p><strong>Auxilliary properties</strong></p>
+<p><strong>Auxiliary properties</strong></p>
 <ul>
 <li>
 <p><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more than one policy_store_id in the policy store.</p>
@@ -2463,6 +2463,12 @@
 <li>
 <p><strong><code>CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION</code></strong> : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is <code>true</code>.</p>
 </li>
+<li>
+<p><strong><code>CEDARLING_TRUSTED_ISSUER_LOADER_TYPE</code></strong> : <code>SYNC</code> | <code>ASYNC</code> -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. Async loader means that trusted issuers will be loaded in background. Default is <code>SYNC</code>.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS</code></strong> : Number of concurrent workers to use when loading trusted issuers. Applies to both <code>SYNC</code> (parallel loading during initialization) and <code>ASYNC</code> (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.</p>
+</li>
 </ul>
 <p><strong>Cedar Entity Mapping properties</strong></p>
 <ul>
@@ -2474,7 +2480,7 @@
 </ul>
 <p><strong>The following bootstrap properties are needed to configure log behavior:</strong></p>
 <ul>
-<li><strong><code>CEDARLING_LOG_TYPE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code></li>
+<li><strong><code>CEDARLING_LOG_TYPE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code>. Default is <code>off</code>.</li>
 <li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : System Log Level <a href="../cedarling-logs/">See here</a>. Default to <code>WARN</code></li>
 <li><strong><code>CEDARLING_DECISION_LOG_USER_CLAIMS</code></strong> : List of claims to map from user entity, such as ["sub", "email", "username", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code></strong> : List of claims to map from workload entity, such as ["client_id", "rp_id", ...]</li>
@@ -2492,10 +2498,10 @@
 <p><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : Path to a local file containing a JWKS</p>
 </li>
 <li>
-<p><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. This requires an <code>iss</code> is present.</p>
+<p><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. This requires an <code>iss</code> is present. Default is <code>disabled</code>.</p>
 </li>
-<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retreive the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info.</li>
-<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling.</li>
+<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info. Default is <code>disabled</code>.</li>
+<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.</li>
 <li>
 <p><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> : <code>strict</code> | <code>never</code> | <code>always</code> | <code>ifpresent</code>. Varying levels of validations based on the preference of the developer.</p>
 </li>
@@ -2538,15 +2544,15 @@
 </ul>
 <p><strong>The following bootstrap properties are only needed for the Lock Server Integration.</strong></p>
 <ul>
-<li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events.</li>
+<li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events. Default is <code>disabled</code>.</li>
 <li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-master-configuration</code>.</li>
-<li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : <code>enabled</code> | <code>disabled</code>, controls whether Cedarling should listen for SSE config updates.</li>
+<li><strong><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code></strong> : <code>enabled</code> | <code>disabled</code>, controls whether Cedarling should listen for SSE config updates. Default is <code>disabled</code>.</li>
 <li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
 <li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often to send log messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_HEALTH_INTERVAL</code></strong> : How often to send health messages to Lock Server (0 to turn off transmission).</li>
 <li><strong><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code></strong> : How often to send telemetry messages to Lock Server (0 to turn off transmission).</li>
-<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> : <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server.</li>
-<li><strong><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></strong> : <code>enabled</code> | <code>disabled</code>: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds.</li>
+<li><strong><code>CEDARLING_LOCK_LISTEN_SSE</code></strong> : <code>enabled</code> | <code>disabled</code>: controls whether Cedarling should listen for updates from the Lock Server. Default is <code>disabled</code>.</li>
+<li><strong><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></strong> : <code>enabled</code> | <code>disabled</code>: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Default is <code>disabled</code>.</li>
 </ul>
 
 
@@ -2570,7 +2576,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 27, 2026 15:52:36 UTC"><span class="timeago" datetime="2026-02-27T15:52:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 27, 2026 15:52:36 UTC">2026-02-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 4, 2026 18:43:10 UTC"><span class="timeago" datetime="2026-03-04T18:43:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 4, 2026 18:43:10 UTC">2026-03-04</span>
   </span>
 
     
