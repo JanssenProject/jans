@@ -1,6 +1,0 @@
-decision_logs:
-  plugin: cedarling_opa 
-plugins:
-  cedarling_opa:
-    stderr: false
-    bootstrap_config: {}
