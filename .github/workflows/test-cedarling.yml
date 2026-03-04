@@ -141,7 +141,7 @@ jobs:
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
-        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
+        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
         wasm-pack --version
 
     - name: Run WASM tests using chrome
