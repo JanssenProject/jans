@@ -150,8 +150,13 @@ async fn load_policy_store_from_cjar_file(
     let store_id = loaded.metadata.policy_store.id.clone();
     let store_metadata = loaded.metadata.clone();
 
-    // Convert to legacy format using PolicyStoreManager
-    let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
+    // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
+            })??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
@@ -181,6 +186,7 @@ fn load_policy_store_from_cjar_file(
 ///
 /// Fetches the archive via HTTP, loads it using `load_policy_store_archive_bytes`,
 /// and converts to legacy format for backward compatibility.
+#[cfg(not(target_arch = "wasm32"))]
 async fn load_policy_store_from_cjar_url(
     url: &str,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
@@ -201,7 +207,45 @@ async fn load_policy_store_from_cjar_url(
     let store_id = loaded.metadata.policy_store.id.clone();
     let store_metadata = loaded.metadata.clone();
 
-    // Convert to legacy format using PolicyStoreManager
+    // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Archive(format!("Conversion task panicked: {e}"))
+            })??;
+
+    Ok(PolicyStoreWithID {
+        id: store_id,
+        store: legacy_store,
+        metadata: Some(store_metadata),
+    })
+}
+
+/// Loads the policy store from a Cedar Archive (.cjar) URL.
+/// WASM version - no `spawn_blocking` available.
+#[cfg(target_arch = "wasm32")]
+async fn load_policy_store_from_cjar_url(
+    url: &str,
+) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    use crate::common::policy_store::loader;
+
+    // Fetch the archive bytes via HTTP
+    let client = HttpClient::new(3, Duration::from_secs(3))?;
+    let bytes = client
+        .get_bytes(url)
+        .await
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to fetch archive: {e}")))?;
+
+    // Load from bytes (works in both native and WASM)
+    let loaded = loader::load_policy_store_archive_bytes(&bytes)
+        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
+
+    // Get the policy store ID and metadata
+    let store_id = loaded.metadata.policy_store.id.clone();
+    let store_metadata = loaded.metadata.clone();
+
+    // Convert to legacy format (WASM runs single-threaded, no spawn_blocking)
     let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
 
     Ok(PolicyStoreWithID {
@@ -231,8 +275,13 @@ async fn load_policy_store_from_directory(
     let store_id = loaded.metadata.policy_store.id.clone();
     let store_metadata = loaded.metadata.clone();
 
-    // Convert to legacy format using PolicyStoreManager
-    let legacy_store = PolicyStoreManager::convert_to_legacy(loaded)?;
+    // Convert to legacy format in a blocking task (schema parsing is CPU-heavy)
+    let legacy_store =
+        tokio::task::spawn_blocking(move || PolicyStoreManager::convert_to_legacy(loaded))
+            .await
+            .map_err(|e| {
+                PolicyStoreLoadError::Directory(format!("Conversion task panicked: {e}"))
+            })??;
 
     Ok(PolicyStoreWithID {
         id: store_id,
