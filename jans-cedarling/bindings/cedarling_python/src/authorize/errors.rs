@@ -128,7 +128,6 @@ impl ErrorPayload {
 macro_rules! errors_functions {
     ($($case_name:ident => $error_class:ident),*) => {
         // is used to map CedarlingAuthorizeError to python error
-        #[allow(clippy::boxed_local)]
         pub fn authorize_error_to_py(err: CedarlingAuthorizeError) -> PyErr {
                 let err_args = ErrorPayload(err);
                 match err_args.0 {
