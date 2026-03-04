@@ -294,12 +294,13 @@ class JCA_CLI:
 
         self.tmp_dir = tmp_dir
 
+        self.set_logging()
+
         auth_url_ = auth_url or args.auth_url
         config_url_ = config_url or args.config_url
         scim_url_ = scim_url or args.scim_url
         self.url_normalizations(auth_url_, config_url_, scim_url_)
 
-        self.set_logging()
         self.ssl_settings()
 
     def url_normalizations(self, auth_url, config_url, scim_url):
