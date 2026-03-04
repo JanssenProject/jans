@@ -93,7 +93,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <CedarlingMgmt
               data={data}
               isLoggedIn={(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0)}
@@ -104,7 +104,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <AIAgent
               notifyOnDataChange={notifyOnDataChange}
             />

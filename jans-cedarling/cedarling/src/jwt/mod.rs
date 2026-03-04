@@ -307,7 +307,7 @@ impl JwtService {
                 token
             };
 
-            validated_tokens.insert(token_name.to_string(), token);
+            validated_tokens.insert(token_name.clone(), token);
         }
 
         Ok(validated_tokens)

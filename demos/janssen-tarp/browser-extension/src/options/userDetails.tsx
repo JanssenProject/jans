@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import '../static/css/options.css'
 import '../static/css/alerts.css';
-import { WindmillSpinner } from 'react-spinner-overlay'
+import CircularProgress from "@mui/material/CircularProgress";
 import { JsonEditor } from 'json-edit-react'
 import Button from '@mui/material/Button';
 import Accordion from '@mui/material/Accordion';
@@ -16,7 +16,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { pink } from '@mui/material/colors';
-import UseSnackbar from './UseSnackbar';
+import Snackbar from '@mui/material/Snackbar';
+import CloseIcon from '@mui/icons-material/Close';
 import { OpenIDConfiguration, LogoutOptions, LoginDetails } from './types';
 const UserDetails = ({ data, notifyOnDataChange }) => {
     const [loading, setLoading] = useState(false);
@@ -333,12 +334,39 @@ const UserDetails = ({ data, notifyOnDataChange }) => {
         return `${openidConfiguration.end_session_endpoint}?${params.toString()}`;
     }
 
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => setSnackbar({ open: false, message: '' })}
+            >
+                <CloseIcon fontSize="small" />
+            </IconButton>
+        </React.Fragment>
+    );
+
 
     return (
         <div className="box">
-            <UseSnackbar isSnackbarOpen={snackbar.open} handleSnackbar={(open) => setSnackbar({ ...snackbar, open })} message={snackbar.message} />
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={() => setSnackbar({ open: false, message: '' })}
+                message={snackbar.message}
+                action={action} />
+
             <div className="w3-panel w3-pale-yellow w3-border">
-                <WindmillSpinner loading={loading} color="#00ced1" />
+
+                {loading ? (
+                    <div className="loader-overlay">
+                        <CircularProgress color="success" />
+                    </div>
+                ) : (
+                    ""
+                )}
+
                 <br />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '90vw' }}>

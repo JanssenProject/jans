@@ -5,7 +5,6 @@
 {{- $fido2Svc := .Values.global.fido2.fido2ServiceName -}}
 {{- $scimSvc := .Values.global.scim.scimServiceName -}}
 {{- $casaSvc := .Values.global.casa.casaServiceName -}}
-{{- $samlSvc := .Values.global.saml.samlServiceName -}}
 {{- $namespace := .Release.Namespace -}}
 
 apiVersion: gateway.networking.k8s.io/v1
@@ -66,19 +65,13 @@ spec:
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
-  
+
   {{- /* 1. OpenID Configuration */}}
   {{- if index .Values.global "auth-server" "ingress" "openidConfigEnabled" }}
   - matches:
     - path:
         type: Exact
         value: /.well-known/openid-configuration
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/.well-known/openid-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -95,7 +88,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /jans-auth/device_authorization.htm
+          replaceFullPath: /device_authorization.htm
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -107,12 +100,6 @@ spec:
     - path:
         type: Exact
         value: /firebase-messaging-sw.js
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/firebase-messaging-sw.js
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -129,7 +116,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /jans-auth/restv1/uma2-configuration
+          replaceFullPath: /restv1/uma2-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -141,12 +128,6 @@ spec:
     - path:
         type: Exact
         value: /.well-known/webfinger
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/.well-known/webfinger
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -158,12 +139,6 @@ spec:
     - path:
         type: Exact
         value: /.well-known/simple-web-discovery
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/.well-known/simple-web-discovery
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -180,7 +155,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /jans-auth/restv1/fido-configuration
+          replaceFullPath: /restv1/fido-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -248,7 +223,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /jans-auth/api/v1/configuration
+          replaceFullPath: /api/v1/configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -265,24 +240,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /jans-auth/restv1/authzen-configuration
-    backendRefs:
-    - name: {{ $authSvc }}
-      port: 8080
-  {{- end }}
-  
-  {{- /* 13. Jans Lock */}}
-  {{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockEnabled") }}
-  - matches:
-    - path:
-        type: Exact
-        value: /jans-lock
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth
+          replaceFullPath: /restv1/authzen-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -321,6 +279,12 @@ spec:
     - path:
         type: PathPrefix
         value: /jans-auth
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -370,17 +334,6 @@ spec:
       port: 8080
   {{- end }}
 
-  {{- /* 6. SAML (/kc) */}}
-  {{- if .Values.global.saml.ingress.samlEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /kc
-    backendRefs:
-    - name: {{ $samlSvc }}
-      port: 8083
-  {{- end }}
-
 ---
 {{- /* ======================================================== */}}
 {{- /* ROUTE 3: SECURE APPS (HTTP REDIRECT)                     */}}
@@ -407,7 +360,7 @@ spec:
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
-  
+
   {{- /* 1. Auth Server Redirect */}}
   {{- if index .Values.global "auth-server" "ingress" "authServerEnabled" }}
   - matches:
@@ -473,16 +426,73 @@ spec:
         statusCode: 301
   {{- end }}
 
-  {{- /* 6. SAML Redirect */}}
-  {{- if .Values.global.saml.ingress.samlEnabled }}
+{{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled") }}
+---
+{{- /* ======================================================== */}}
+{{- /* ROUTE 4: gRPC APPS                                       */}}
+{{- /* These endpoints use gRPC                                 */}}
+{{- /* ======================================================== */}}
+apiVersion: gateway.networking.k8s.io/v1
+{{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+{{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
+kind: HTTPRoute
+{{- else }}
+kind: GRPCRoute
+{{- end }}
+metadata:
+  name: {{ $fullName }}-grpc-routes
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if .Values.gatewayApi.routeLabels }}
+{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- end }}
+{{- if .Values.gatewayApi.routeAnnotations }}
+  annotations:
+{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ .Values.gatewayApi.name }}
+    sectionName: https
+  hostnames:
+  - {{ .Values.global.fqdn | quote }}
+  rules:
+  {{- /* 1. Lock Server Audit */}}
+  {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
+  {{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+  {{- /* HTTPRoute matches for istio */}}
   - matches:
     - path:
         type: PathPrefix
-        value: /kc
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
+        value: /io.jans.lock.audit.AuditService
+    backendRefs:
+    - name: {{ $authSvc }}-grpc
+      port: 50051
+  {{- else }}
+  - matches:
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessLog
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkLog
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessHealth
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkHealth
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessTelemetry
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkTelemetry
+    backendRefs:
+    - name: {{ $authSvc }}-grpc
+      port: 50051
   {{- end }}
+{{- end }}
+
 {{- end }}

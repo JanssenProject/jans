@@ -28,8 +28,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def _transform_lock_dynamic_config(conf, manager):
     should_update = False
 
-    hostname = manager.config.get("hostname")
-
     # add missing top-level keys
     hostname = manager.config.get("hostname")
     for missing_key, value in [
@@ -38,7 +36,7 @@ def _transform_lock_dynamic_config(conf, manager):
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
         ("tokenUrl", f"https://{hostname}/jans-auth/restv1/token"),
         ("statEnabled", True),
-        ("protectionMode", "cedarling"),
+        ("protectionMode", "oauth"),
         ("cedarlingConfiguration", {
             "enabled": True,
             "policySources": [
@@ -53,6 +51,9 @@ def _transform_lock_dynamic_config(conf, manager):
             "externalPolicyStoreUri": ""
         }),
         ("auditPersistenceMode", "internal"),
+        ("grpcConfiguration", {
+            "serverMode": "bridge",
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
