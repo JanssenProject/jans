@@ -272,7 +272,7 @@ class JCA_CLI:
     cli_logger.setLevel(logging.DEBUG)
     cli_logger.propagate = True
 
-    def __init__(self, host, client_id, client_secret, access_token, test_client=False, op_mode=None, wrapped=None):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False, op_mode=None, wrapped=None, auth_url=None, config_url=None, scim_url=None):
         self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
@@ -289,29 +289,36 @@ class JCA_CLI:
         self.set_user()
         self.plugins()
 
-        if args.auth_url and not args.auth_url.endswith('/'):
-            args.auth_url += '/'
-
-        if args.config_url and not args.config_url.endswith('/'):
-            args.config_url += '/'
-
-        if args.scim_url and not args.scim_url.endswith('/'):
-            args.scim_url += '/'
-
-        # URLs
-        self.auth_url = args.auth_url or f'https://{self.idp_host}/jans-auth/'
-        self.config_url = args.config_url or f'https://{self.idp_host}/jans-config-api/'
-        self.scim_url = args.scim_url or f'https://{self.idp_host}/jans-scim/restv1/v2/'
-
-        self.jwt_validation_url = urljoin(self.config_url, 'api/v1/acrs')
-
         if self.my_op_mode not in cfg_yaml:
             read_swagger(self.my_op_mode)
 
         self.tmp_dir = tmp_dir
 
+        auth_url_ = auth_url or args.auth_url
+        config_url_ = config_url or args.config_url
+        scim_url_ = scim_url or args.scim_url
+        self.url_normalizations(auth_url_, config_url_, scim_url_)
+
         self.set_logging()
         self.ssl_settings()
+
+    def url_normalizations(self, auth_url, config_url, scim_url):
+
+        if auth_url and not auth_url.endswith('/'):
+            auth_url += '/'
+
+        if config_url and not config_url.endswith('/'):
+            config_url += '/'
+
+        if scim_url and not scim_url.endswith('/'):
+            scim_url += '/'
+
+        # URLs
+        self.auth_url = auth_url or f'https://{self.idp_host}/jans-auth/'
+        self.config_url = config_url or f'https://{self.idp_host}/jans-config-api/'
+        self.scim_url = scim_url or f'https://{self.idp_host}/jans-scim/restv1/v2/'
+        self.auth_url_token_endpoint_postfix = 'restv1/token'
+        self.jwt_validation_url = urljoin(self.config_url, 'api/v1/acrs')
 
         self.cli_logger.debug("Auth Server URL: %s", self.auth_url)
         self.cli_logger.debug("Config Api Server URL: %s", self.config_url)
@@ -513,7 +520,7 @@ class JCA_CLI:
         return response
 
     def check_connection(self):
-        url = urljoin(self.auth_url, 'restv1/token')
+        url = urljoin(self.auth_url, self.auth_url_token_endpoint_postfix)
         self.cli_logger.debug("Checking connection with url: %s", url)
 
         try:
@@ -621,7 +628,7 @@ class JCA_CLI:
             scope_text = " for scope {}\n".format(scope) if scope else ''
             sys.stderr.write("Getting access token{}".format(scope_text))
 
-        url = urljoin(self.auth_url, 'restv1/token')
+        url = urljoin(self.auth_url, self.auth_url_token_endpoint_postfix)
 
         if self.askuser:
             post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username,
@@ -732,7 +739,7 @@ class JCA_CLI:
         After device code was verified, we use it to retreive refresh token
         """
         response = session.post(
-            url=urljoin(self.auth_url, 'restv1/token'),
+            url=urljoin(self.auth_url, self.auth_url_token_endpoint_postfix),
             auth=(self.client_id, self.client_secret),
             data=[
                 ('client_id',self.client_id),
@@ -784,7 +791,7 @@ class JCA_CLI:
         Since introception script will be executed, access token will have permissions with all scopes
         """
         response = session.post(
-            url=urljoin(self.auth_url, 'restv1/token'),
+            url=urljoin(self.auth_url, self.auth_url_token_endpoint_postfix),
             headers=headers_basic_auth,
             data={'grant_type': 'client_credentials', 'scope': 'openid', 'ujwt': result},
             verify=self.verify_ssl,
@@ -1040,10 +1047,11 @@ class JCA_CLI:
         if url_param_dict:
             url_path += '?'+ urllib.parse.urlencode(url_param_dict)
 
+        url = self.get_url_for_endpoint(url_path)
         self.cli_logger.debug("Delete request: %s", url)
 
         response = session.delete(
-            url=self.get_url_for_endpoint(url_path),
+            url=url,
             headers=self.get_request_header({'Accept': 'application/json'}),
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
