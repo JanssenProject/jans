@@ -149,9 +149,9 @@ op_list.sort()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", help="Hostname of server")
-parser.add_argument("--auth-url", help="Auth server url, for example http://auth.internal:8080/auth")
-parser.add_argument("--config-url", help="Config Api server url, for example http://config.internal:8080/config")
-parser.add_argument("--scim-url", help="Scim server url, for example http://scim.internal:8080/scim")
+parser.add_argument("--auth-url", "--auth_url", dest="auth_url", help="Auth server url, for example http://auth.internal:8080/auth")
+parser.add_argument("--config-url", "--config_url", dest="config_url", help="Config Api server url, for example http://config.internal:8080/config")
+parser.add_argument("--scim-url", "--scim_url", dest="scim_url", help="Scim server url, for example http://scim.internal:8080/scim")
 parser.add_argument("--client-id", help="Jans Config Api Client ID")
 parser.add_argument("--client-secret", "--client_secret", help="Jans Config Api Client ID secret")
 parser.add_argument("--access-token", help="JWT access token or path to file containing JWT access token")
@@ -284,7 +284,7 @@ class JCA_CLI:
         if wrapped == None:
             self.wrapped = __name__ != "__main__"
         self.access_token = access_token or config['DEFAULT'].get('access_token')
-        self.discovery_endpoint = '/.well-known/openid-configuration'
+        self.discovery_endpoint = '.well-known/openid-configuration'
         self.openid_configuration = {}
         self.set_user()
         self.plugins()
@@ -333,7 +333,7 @@ class JCA_CLI:
             return self.scim_url
         elif self.my_op_mode == 'auth':
             return self.auth_url
-        return None
+        raise ValueError(f"Unsupported operation mode: {self.my_op_mode}")
 
     def getCredentials(self):
         if self.host == '' or self.client_id == '' or self.client_secret == '' :
@@ -500,8 +500,9 @@ class JCA_CLI:
     def get_openid_configuration(self):
 
         try:
+            discovery_url = urljoin(self.auth_url, self.discovery_endpoint)
             response = session.get(
-                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
+                    url = discovery_url,
                     headers=self.get_request_header({'Accept': 'application/json'}),
                     verify=self.verify_ssl,
                     cert=self.mtls_client_cert
