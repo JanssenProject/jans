@@ -55,8 +55,8 @@ def download_all():
 
 def download_apps():
     download_jans_archive()
+    download_zip_app('typing_extensions.py', 'TYPING_EXTENSIONS', 'src/typing_extensions.py', is_file=True)
     download_zip_app('sqlalchemy', 'SQLALCHEMY', 'lib/sqlalchemy')
-    download_zip_app('cryptography', 'CRYPTOGRAPHY', 'cryptography', par_dir='')
     download_zip_app('jwt', 'PYJWT', 'jwt')
     download_zip_app('pymysql', 'PYMYSQL', 'pymysql')
     download_zip_app('crontab.py', 'PYCRONTAB', 'crontab.py', is_file=True)

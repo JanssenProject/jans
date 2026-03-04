@@ -16,7 +16,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.0.25
+ARG JETTY_VERSION=12.1.6
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -44,7 +44,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-12-18 09:49'
+ENV CN_BUILD_DATE='2026-02-22 08:12'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 

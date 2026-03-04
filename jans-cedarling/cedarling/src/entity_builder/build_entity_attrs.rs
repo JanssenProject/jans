@@ -172,7 +172,7 @@ fn build_entity_attrs_without_schema(
             // without claim mapping
             match value_to_expr(src) {
                 Ok(Some(expr)) => {
-                    attrs.insert(name.to_string(), expr);
+                    attrs.insert(name.clone(), expr);
                 },
                 Err(e) => {
                     errs.push(e);
@@ -186,7 +186,7 @@ fn build_entity_attrs_without_schema(
         let mapped_src = mappings.apply_mapping_value(src);
         match value_to_expr(&mapped_src) {
             Ok(Some(expr)) => {
-                attrs.insert(name.to_string(), expr);
+                attrs.insert(name.clone(), expr);
             },
             Err(e) => {
                 errs.push(e);

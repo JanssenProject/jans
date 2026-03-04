@@ -8,12 +8,12 @@ package io.jans.as.server.auth;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.server.i18n.LanguageBean;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.security.Identity;
@@ -26,10 +26,6 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.FacesMessage.Severity;
@@ -38,6 +34,10 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -319,23 +319,23 @@ public class Authenticator {
                 !OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(authAcr)) {
             initCustomAuthenticatorVariables(sessionIdAttributes);
             if ((this.authStep == null) || StringHelper.isEmpty(this.authAcr)) {
-                logger.error("Failed to determine authentication mode");
+                logger.error("Failed to determine authentication mode. User: '{}'", sanitizedUsername);
                 return Constants.RESULT_EXPIRED;
             }
 
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
                     .getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
             if (customScriptConfiguration == null) {
-                logger.error("Failed to get CustomScriptConfiguration for acr: '{}', auth_step: '{}'", this.authAcr,
-                        this.authStep);
+                logger.error("Failed to get CustomScriptConfiguration for acr: '{}', auth_step: '{}', user: '{}'",
+                        this.authAcr, this.authStep, sanitizedUsername);
                 return Constants.RESULT_FAILURE;
             }
 
             // Check if all previous steps had passed
             boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
             if (!passedPreviousSteps) {
-                logger.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'",
-                        this.authAcr, this.authStep);
+                logger.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}', user: '{}'",
+                        this.authAcr, this.authStep, sanitizedUsername);
                 return Constants.RESULT_FAILURE;
             }
 
@@ -371,6 +371,7 @@ public class Authenticator {
             if (!result && (overridenNextStep == -1)) {
                 // Force session lastUsedAt update if authentication attempt is failed
                 sessionIdService.updateSessionId(sessionId);
+                logger.info("Authentication failed for user: {}. Custom script returned false for authenticate method.", sanitizedUsername);
                 return Constants.RESULT_AUTHENTICATION_FAILED;
             }
 
@@ -381,6 +382,7 @@ public class Authenticator {
                 // Reset to specified step
                 sessionId = sessionIdService.resetToStep(sessionId, overridenNextStep);
                 if (sessionId == null) {
+                    logger.info("Authentication failed for user: {}. Failed to find session.", sanitizedUsername);
                     return Constants.RESULT_AUTHENTICATION_FAILED;
                 }
 
@@ -430,6 +432,9 @@ public class Authenticator {
                     if (!updateResult) {
                         return Constants.RESULT_EXPIRED;
                     }
+
+
+
                 }
 
                 logger.trace("Redirect to page: '{}'", redirectTo);
@@ -469,11 +474,12 @@ public class Authenticator {
                 } else {
                     // Force session lastUsedAt update if authentication attempt is failed
                     sessionIdService.updateSessionId(sessionId);
-                    logger.info("Authentication failed for user: {}", sanitizedUsername);
+                    logger.debug("User {} is not authenticated.", sanitizedUsername);
                 }
             }
         }
 
+        logger.info("Authentication failed for user: {}", sanitizedUsername);
         return Constants.RESULT_FAILURE;
     }
 
@@ -539,7 +545,6 @@ public class Authenticator {
                     logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizeUsernameForLog(credentials.getUsername()));
                     return true;
                 }
-                logger.info("Authentication failed for User: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
             }
         }
 
@@ -552,9 +557,9 @@ public class Authenticator {
                 logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizeUsernameForLog(credentials.getUsername()));
                 return true;
             }
-            logger.info("Authentication failed for User: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
         }
 
+        logger.info("Authentication failed for User: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
         return false;
     }
 
