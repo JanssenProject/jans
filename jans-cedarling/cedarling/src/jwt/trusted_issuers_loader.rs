@@ -162,9 +162,11 @@ async fn load_trusted_issuers(
         .into_inner()
         .map_err(|_| TrustedIssuerLoaderError::ErrorsMutexExtraction)?;
 
-    // if there were any errors, return the first one
-    if let Some(first_error) = errors.into_iter().next() {
-        return Err(first_error);
+    let aggregated_error: Vec<_> = errors.into_iter().collect();
+    if !aggregated_error.is_empty() {
+        return Err(JwtServiceInitError::LoadTrustedIssuersAggregate(
+            aggregated_error.into(),
+        ));
     }
 
     Ok(())
