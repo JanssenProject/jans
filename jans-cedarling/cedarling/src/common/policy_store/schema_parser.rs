@@ -16,11 +16,14 @@ use super::errors::{CedarSchemaErrorType, PolicyStoreError};
 
 /// A parsed and validated Cedar schema.
 ///
-/// Contains the schema and metadata about the source file.
+/// Contains the schema, fragment, and metadata about the source file.
+/// The fragment is preserved to avoid re-parsing when converting to JSON.
 #[derive(Debug, Clone)]
 pub(super) struct ParsedSchema {
     /// The Cedar schema
     pub schema: Schema,
+    /// The schema fragment (preserved for JSON conversion without re-parsing)
+    pub fragment: SchemaFragment,
     /// Source filename
     pub filename: String,
     /// Raw schema content
@@ -42,8 +45,8 @@ impl ParsedSchema {
                 err: CedarSchemaErrorType::ParseError(e.to_string()),
             })?;
 
-        // Create schema from the fragment
-        let schema = Schema::from_schema_fragments([fragment]).map_err(|e| {
+        // Create schema from the fragment (clone the fragment to preserve it)
+        let schema = Schema::from_schema_fragments([fragment.clone()]).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
                 err: CedarSchemaErrorType::ValidationError(e.to_string()),
@@ -52,6 +55,7 @@ impl ParsedSchema {
 
         Ok(Self {
             schema,
+            fragment,
             filename: filename.to_string(),
             content: content.to_string(),
         })
@@ -62,6 +66,14 @@ impl ParsedSchema {
     /// Returns the validated Cedar Schema that can be used for policy validation.
     pub(super) fn get_schema(&self) -> &Schema {
         &self.schema
+    }
+
+    /// Get a reference to the schema fragment.
+    ///
+    /// Returns the parsed fragment, which can be used for JSON serialization
+    /// without re-parsing the schema content.
+    pub(super) fn get_fragment(&self) -> &SchemaFragment {
+        &self.fragment
     }
 
     /// Validate that the schema is non-empty and well-formed.
