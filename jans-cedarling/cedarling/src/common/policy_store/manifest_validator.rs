@@ -28,6 +28,25 @@ enum ChecksumAlgorithm {
     /// SHA-1 (format: "sha1:<hex>")
     Sha1,
 }
+
+impl ChecksumAlgorithm {
+    /// Compute checksum of the given data using this algorithm.
+    /// Returns the checksum in the format "algorithm:hex" (e.g., "sha256:abc123...").
+    fn compute(self, data: &[u8]) -> String {
+        match self {
+            Self::Sha256 => {
+                let mut hasher = Sha256::new();
+                hasher.update(data);
+                format!("sha256:{}", hex::encode(hasher.finalize()))
+            },
+            Self::Sha1 => {
+                let mut hasher = Sha1::new();
+                hasher.update(data);
+                format!("sha1:{}", hex::encode(hasher.finalize()))
+            },
+        }
+    }
+}
 use super::metadata::PolicyStoreManifest;
 use super::vfs_adapter::VfsFileSystem;
 
@@ -231,18 +250,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
         }
 
         // Compute checksum from already-read content using the appropriate algorithm
-        let actual_checksum = match checksum_algo {
-            ChecksumAlgorithm::Sha256 => {
-                let mut hasher = Sha256::new();
-                hasher.update(&content_bytes);
-                format!("sha256:{}", hex::encode(hasher.finalize()))
-            },
-            ChecksumAlgorithm::Sha1 => {
-                let mut hasher = Sha1::new();
-                hasher.update(&content_bytes);
-                format!("sha1:{}", hex::encode(hasher.finalize()))
-            },
-        };
+        let actual_checksum = checksum_algo.compute(&content_bytes);
 
         if actual_checksum != expected_checksum {
             return Err(ManifestErrorType::ChecksumMismatch {
