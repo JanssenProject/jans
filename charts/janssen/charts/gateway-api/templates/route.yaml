@@ -17,12 +17,12 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gateway.route.labels }}
-{{- toYaml .Values.gateway.route.labels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gateway.route.annotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gateway.route.annotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
@@ -223,12 +223,12 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gateway.route.labels }}
-{{- toYaml .Values.gateway.route.labels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gateway.route.annotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gateway.route.annotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
@@ -311,12 +311,12 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gateway.route.labels }}
-{{- toYaml .Values.gateway.route.labels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gateway.route.annotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gateway.route.annotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
@@ -409,12 +409,12 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gateway.route.labels }}
-{{- toYaml .Values.gateway.route.labels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gateway.route.annotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gateway.route.annotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
