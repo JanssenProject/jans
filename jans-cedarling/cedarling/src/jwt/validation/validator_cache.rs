@@ -64,16 +64,6 @@ impl JwtValidatorCache {
                 continue;
             }
 
-            if jwt_config.signature_algorithms_supported.is_empty() {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "no supported algorithms configured in jwt configuration, skipping validator creation for token: {token_name} under issuer: {iss}"
-                    ),
-                    Some(LogLevel::WARN),
-                ));
-                continue;
-            }
-
             logger.log_any(JwtLogEntry::new(
                     format!(
                         "creating validators for token: {token_name} under issuer: {iss} with algorithms: {:?}",

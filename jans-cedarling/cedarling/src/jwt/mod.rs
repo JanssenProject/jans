@@ -96,6 +96,7 @@ use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
+use crate::jwt;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
@@ -153,6 +154,10 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
+        if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
+            return Err(JwtServiceInitError::NoSupportedAlgorithms);
+        }
+
         let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());
