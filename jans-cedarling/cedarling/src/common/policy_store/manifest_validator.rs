@@ -786,8 +786,9 @@ mod tests {
             .compute_checksum_sha1("/test.txt")
             .expect("should succeed");
 
-        let result = validator.validate_file("test.txt", &checksum, content.len() as u64);
-        assert!(result.is_ok(), "SHA-1 checksum validation should succeed");
+        validator
+            .validate_file("test.txt", &checksum, content.len() as u64)
+            .expect("SHA-1 checksum validation should succeed");
     }
 
     #[test]
