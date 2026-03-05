@@ -398,7 +398,7 @@ spec:
 {{- /* These endpoints use gRPC                                 */}}
 {{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
-{{- if eq .Values.gateway.className "istio" }}
+{{- if or (eq .Values.gateway.className "istio") (eq .Values.gateway.className "airlock-microgateway") }}
 {{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
 kind: HTTPRoute
 {{- else }}
@@ -425,7 +425,7 @@ spec:
   rules:
   {{- /* 1. Lock Server Audit */}}
   {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
-  {{- if eq .Values.gateway.className "istio" }}
+  {{- if or (eq .Values.gateway.className "istio") (eq .Values.gateway.className "airlock-microgateway") }}
   {{- /* HTTPRoute matches for istio */}}
   - matches:
     - path:
