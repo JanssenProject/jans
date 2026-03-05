@@ -9,7 +9,7 @@
 
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
+    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
     RequestUnsigned,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
@@ -45,14 +45,6 @@ impl Cedarling {
                 instance: async_instance,
                 runtime: Arc::new(rt),
             })
-    }
-
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize(request))
-            .map_err(Box::new)
     }
 
     /// Authorize request with unsigned data.

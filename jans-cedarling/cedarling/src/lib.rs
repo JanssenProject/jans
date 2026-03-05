@@ -43,11 +43,9 @@ pub use crate::context_data_api::{
     ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
-#[cfg(test)]
-use authz::AuthorizeEntitiesData;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, Request, RequestUnsigned,
+    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned,
     TokenInput,
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
@@ -181,13 +179,6 @@ impl Cedarling {
     // they no longer await internally. Future maintainers can safely remove
     // or refactor these methods when compatibility constraints allow.
 
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    #[allow(clippy::unused_async)]
-    pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(&request)
-    }
-
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
     #[allow(clippy::unused_async)]
@@ -206,17 +197,6 @@ impl Cedarling {
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.authz.authorize_multi_issuer(&request)
-    }
-
-    /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
-    #[doc(hidden)]
-    #[cfg(test)]
-    pub(crate) fn build_entities(
-        &self,
-        request: &Request,
-    ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
-        let tokens = self.authz.decode_tokens(request)?;
-        self.authz.build_entities(request, &tokens)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
