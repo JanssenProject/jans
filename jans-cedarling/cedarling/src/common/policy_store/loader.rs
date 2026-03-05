@@ -31,9 +31,12 @@ use super::vfs_adapter::VfsFileSystem;
 ///
 /// This function uses `PhysicalVfs` to read from the local filesystem.
 /// It is only available on native platforms (not WASM).
+///
+/// If `validate_checksum` is `true` and a manifest is present, file checksums are validated.
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) async fn load_policy_store_directory(
     path: &Path,
+    validate_checksum: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     let path_str = path
         .to_str()
@@ -52,8 +55,10 @@ pub(crate) async fn load_policy_store_directory(
         // Load all components from the directory.
         let loaded_directory = loader.load_directory(&path_str)?;
 
-        // If a manifest is present, validate it against the physical filesystem.
-        if let Some(ref manifest) = loaded_directory.manifest {
+        // If a manifest is present and checksum validation is enabled, validate it.
+        if validate_checksum
+            && let Some(ref manifest) = loaded_directory.manifest
+        {
             DefaultPolicyStoreLoader::<PhysicalVfs>::validate_manifest(
                 &path_str,
                 &loaded_directory.metadata,
@@ -80,6 +85,7 @@ pub(crate) async fn load_policy_store_directory(
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn load_policy_store_directory(
     _path: &Path,
+    _validate_checksum: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
 }
@@ -88,9 +94,12 @@ pub(crate) fn load_policy_store_directory(
 ///
 /// This function uses `ArchiveVfs` to read from a zip archive.
 /// It is only available on native platforms (not WASM).
+///
+/// If `validate_checksum` is `true` and a manifest is present, file checksums are validated.
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) async fn load_policy_store_archive(
     path: &Path,
+    validate_checksum: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     let path = path.to_path_buf();
 
@@ -102,7 +111,29 @@ pub(crate) async fn load_policy_store_archive(
         use super::archive_handler::ArchiveVfs;
         let archive_vfs = ArchiveVfs::from_file(&path)?;
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-        loader.load_directory(".")
+        let loaded_directory = loader.load_directory(".")?;
+
+        // Validate manifest if checksum validation is enabled
+        if validate_checksum
+            && let Some(ref _manifest) = loaded_directory.manifest
+        {
+            use super::manifest_validator::ManifestValidator;
+            use std::path::PathBuf;
+
+            let validator_vfs = ArchiveVfs::from_file(&path)?;
+            let validator = ManifestValidator::new(validator_vfs, PathBuf::from("."));
+            let result = validator.validate(Some(&loaded_directory.metadata.policy_store.id));
+
+            if !result.is_valid
+                && let Some(error) = result.errors.first()
+            {
+                return Err(PolicyStoreError::ManifestError {
+                    err: error.error_type.clone(),
+                });
+            }
+        }
+
+        Ok(loaded_directory)
     })
     .await
     .map_err(|e| {
@@ -121,6 +152,7 @@ pub(crate) async fn load_policy_store_archive(
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn load_policy_store_archive(
     _path: &Path,
+    _validate_checksum: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
 }
@@ -131,8 +163,11 @@ pub(crate) fn load_policy_store_archive(
 /// - WASM environments where file system access is not available
 /// - Loading archives fetched from URLs
 /// - Loading archives from any byte source
+///
+/// If `validate_checksum` is `true` and a manifest is present, file checksums are validated.
 pub(crate) fn load_policy_store_archive_bytes(
     bytes: &[u8],
+    validate_checksum: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     use super::archive_handler::ArchiveVfs;
 
@@ -140,9 +175,11 @@ pub(crate) fn load_policy_store_archive_bytes(
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader.load_directory(".")?;
 
-    // Validate manifest if present (same validation used for archive-backed loading)
+    // Validate manifest if present and checksum validation is enabled
     #[cfg(not(target_arch = "wasm32"))]
-    if let Some(ref _manifest) = loaded_directory.manifest {
+    if validate_checksum
+        && let Some(ref _manifest) = loaded_directory.manifest
+    {
         use super::manifest_validator::ManifestValidator;
         use std::path::PathBuf;
 
@@ -160,6 +197,10 @@ pub(crate) fn load_policy_store_archive_bytes(
             });
         }
     }
+
+    // Suppress unused variable warning for WASM builds
+    #[cfg(target_arch = "wasm32")]
+    let _ = validate_checksum;
 
     Ok(loaded_directory)
 }
