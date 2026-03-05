@@ -114,9 +114,7 @@ pub(crate) async fn load_policy_store_archive(
         let loaded_directory = loader.load_directory(".")?;
 
         // Validate manifest if checksum validation is enabled
-        if validate_checksum
-            && let Some(ref _manifest) = loaded_directory.manifest
-        {
+        if validate_checksum && loaded_directory.manifest.is_some() {
             use super::manifest_validator::ManifestValidator;
             use std::path::PathBuf;
 
@@ -177,9 +175,7 @@ pub(crate) fn load_policy_store_archive_bytes(
 
     // Validate manifest if present and checksum validation is enabled
     #[cfg(not(target_arch = "wasm32"))]
-    if validate_checksum
-        && let Some(ref _manifest) = loaded_directory.manifest
-    {
+    if validate_checksum && loaded_directory.manifest.is_some() {
         use super::manifest_validator::ManifestValidator;
         use std::path::PathBuf;
 
