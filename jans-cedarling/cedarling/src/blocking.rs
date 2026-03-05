@@ -10,7 +10,7 @@
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
     DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
-    RequestUnsigned,
+    RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -49,32 +49,29 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize(request))
-            .map_err(Box::new)
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
+    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        self.instance.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
-    ) -> Result<AuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize_unsigned(request))
-            .map_err(Box::new)
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.instance.authz.authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize_multi_issuer(
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
-    ) -> Result<MultiIssuerAuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize_multi_issuer(request))
-            .map_err(Box::new)
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
+        self.instance.authz.authorize_multi_issuer(&request)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
@@ -141,5 +138,31 @@ impl DataApi for Cedarling {
 
     fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
         self.instance.get_stats_ctx()
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Cedarling {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn total_issuers(&self) -> usize {
+        self.instance.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.instance.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> std::collections::HashSet<String> {
+        self.instance.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> std::collections::HashSet<String> {
+        self.instance.failed_trusted_issuer_ids()
     }
 }

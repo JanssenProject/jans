@@ -66,7 +66,7 @@ jobs:
       uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
       with:
         workspaces: jans-cedarling
-    - uses: cargo-bins/cargo-binstall@ec80feb9e330418e014932e5982599255eff6dbb # v1.17.4
+    - uses: cargo-bins/cargo-binstall@bc432b49369a3f25c8c8b19578a82060c18a5dd6 # v1.17.6
     - name: Install dylint
       run: |
         export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
@@ -148,7 +148,7 @@ jobs:
 
     - name: Install specific wasm-pack version (v0.13.1)
       run: |
-        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
+        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
         wasm-pack --version
 
     - name: Run WASM tests using chrome

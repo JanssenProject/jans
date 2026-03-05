@@ -15,6 +15,11 @@ jobs:
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        sparse-checkout: .
+        sparse-checkout-cone-mode: true
     - name: Harden Runner
       uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
       with:
@@ -74,12 +79,6 @@ jobs:
 
         sbomqs compliance --oct -j jans-sbom.json > jans-sbom-openchain-report.json
         wc jans-sbom-openchain-report.json
-
-    - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        sparse-checkout: .
-        sparse-checkout-cone-mode: true
 
     - name: Sign SBOM and compliance reports
       run: |

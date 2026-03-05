@@ -1329,3 +1329,11 @@ async fn test_data_api_invalid_key() {
     let result = instance.push_data_ctx("", value, None);
     assert!(result.is_err(), "push_data_ctx with empty key should fail");
 }
+
+/// Test that function `spawn_task` works as expected
+#[wasm_bindgen_test]
+async fn test_spawn_task() {
+    let handle = cedarling::bindings::spawn_task(async { 42 });
+    let result = handle.await_result().await;
+    assert_eq!(result, 42);
+}
