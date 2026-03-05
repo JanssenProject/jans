@@ -193,10 +193,10 @@ pub struct BootstrapConfigRaw {
     /// Defaults to `true`. Set to `false` to disable checksum validation.
     #[serde(
         rename = "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM",
-        default,
+        default = "default_true",
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
-    pub policy_store_validate_checksum: Option<bool>,
+    pub policy_store_validate_checksum: bool,
 
     /// Maximum number of default entities allowed in a policy store.
     /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.

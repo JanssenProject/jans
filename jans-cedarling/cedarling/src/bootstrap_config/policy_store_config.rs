@@ -16,7 +16,7 @@ pub struct PolicyStoreConfig {
     /// Specifies the source from which the policy will be read.
     pub source: PolicyStoreSource,
     /// Whether to validate file checksums when loading from directory or archive sources.
-    /// Defaults to `true`. Set to `false` to disable checksum validation.
+    /// Defaults to `true` on parsing json. Set to `false` to disable checksum validation.
     #[serde(default = "default_validate_checksum")]
     pub validate_checksum: bool,
 }

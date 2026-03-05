@@ -56,7 +56,7 @@ impl BootstrapConfig {
         };
 
         // Decode policy store
-        let validate_checksum = raw.policy_store_validate_checksum.unwrap_or(true);
+        let validate_checksum = raw.policy_store_validate_checksum;
         let policy_store_config = match (
             raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
