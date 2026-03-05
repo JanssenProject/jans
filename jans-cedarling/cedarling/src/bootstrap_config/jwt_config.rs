@@ -221,7 +221,7 @@ impl JwtConfig {
         ])
     }
 
-    /// Adds all supported algorithms to to `signature_algorithms_supported`.
+    /// Adds all supported algorithms to `signature_algorithms_supported`.
     #[must_use]
     pub fn allow_all_algorithms(mut self) -> Self {
         self.signature_algorithms_supported = Self::supported_algorithms();
