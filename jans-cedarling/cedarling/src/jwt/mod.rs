@@ -153,6 +153,10 @@ impl JwtService {
         trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
         logger: Option<Logger>,
     ) -> Result<Self, JwtServiceInitError> {
+        if jwt_config.jwt_sig_validation && jwt_config.signature_algorithms_supported.is_empty() {
+            return Err(JwtServiceInitError::NoSupportedAlgorithms);
+        }
+
         let status_lists = StatusListCache::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());
