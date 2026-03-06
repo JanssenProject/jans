@@ -176,7 +176,7 @@ impl TokenValidationConfig {
 impl Default for JwtConfig {
     /// Cedarling will use the strictest validation options by default.
     fn default() -> Self {
-        Self {
+        let config = Self {
             jwks: None,
             jwt_sig_validation: true,
             jwt_status_validation: true,
@@ -185,7 +185,8 @@ impl Default for JwtConfig {
             token_cache_earliest_expiration_eviction: true,
             token_cache_max_ttl_secs: 60 * 5, // 5min
             trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
-        }
+        };
+        config.allow_all_algorithms()
     }
 }
 
@@ -203,10 +204,8 @@ impl JwtConfig {
         .allow_all_algorithms()
     }
 
-    /// Adds all supported algorithms to to `signature_algorithms_supported`.
-    #[must_use]
-    pub fn allow_all_algorithms(mut self) -> Self {
-        self.signature_algorithms_supported = HashSet::from_iter([
+    pub(crate) fn supported_algorithms() -> HashSet<Algorithm> {
+        HashSet::from_iter([
             Algorithm::HS256,
             Algorithm::HS384,
             Algorithm::HS512,
@@ -219,7 +218,13 @@ impl JwtConfig {
             Algorithm::PS384,
             Algorithm::PS512,
             Algorithm::EdDSA,
-        ]);
+        ])
+    }
+
+    /// Adds all supported algorithms to `signature_algorithms_supported`.
+    #[must_use]
+    pub fn allow_all_algorithms(mut self) -> Self {
+        self.signature_algorithms_supported = Self::supported_algorithms();
         self
     }
 }
