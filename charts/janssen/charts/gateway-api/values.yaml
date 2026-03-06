@@ -1,0 +1,60 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Configuration for Gateway resource
+gateway:
+  # -- Set the gatewayClassName corresponding to your installed controller.
+  className: nginx
+  # -- The name of the Gateway resource to be created
+  name: jans-gateway
+  # -- Gateway http port number
+  httpPort: 80
+  # -- Gateway https port number
+  httpsPort: 443
+  # -- Secret containing the TLS certificate for the Gateway
+  tlsSecretName: tls-certificate
+  # -- Attach global.lbIp to Gateway spec.addresses with IPAddress type (enable this if loadbalancer doesn't assign IP address to Gateway automatically)
+  attachLbIp: false
+  # -- Specific labels for the Gateway resource
+  labels: {}
+  # -- Specific annotations for the Gateway resource
+  annotations: {}
+  # -- Gateway spec.infrastructure
+  infrastructure:
+    # -- Specific parametersRef for the infrastructure
+    # Some gateway implementation like `airlock-microgateway` may need to attach GatewayParameters to create Loadbalancer service automatically.
+    parametersRef: {}
+    # -- Specific labels for the infrastructure
+    labels: {}
+    # -- Specific annotations for the infrastructure
+    annotations: {}
+# -- Configuration for HTTPRoute and its related resources
+routes:
+  # -- Specific labels for the HTTPRoute resource
+  labels: {}
+  # -- Specific annotations for the HTTPRoute resource
+  annotations: {}
+# -- Additional configuration for Specific Gateway API implementation
+additionalConfig:
+  # -- Configuration for NGINX Fabric.
+  nginx: {}
+  # -- Configuration for Traefik.
+  traefik: {}
+  # -- Configuration for Istio.
+  istio: {}
+  # -- Configuration for kgateway.
+  kgateway: {}
+  # -- Configuration for Cilium.
+  cilium:
+    # -- Create Cilium IP pool with the specified blocks. See https://docs.cilium.io/en/stable/network/lb-ipam/ for details.
+    ipPoolBlocks: []
+  # -- Configuration for Airlock Microgateway
+  airlock:
+    # -- Create LoadBalancer service using GatewayParameters (by default airlock-microgateway doesn't create the service).
+    # See https://docs.airlock.com/microgateway/latest/index/api/crds/gateway-parameters/v1alpha1/ for details.
+    # The GatewayParameters will be attached to gateway.infrastructure.parametersRef only if it's empty.
+    createLbService: false
+  # -- Configuration for Envoy.
+  envoy:
+    # -- Create GatewayClass named `envoy` (by default Envoy doesn't create gatewayclass). The `envoy` name can be set as value of `gateway.className` attribute.
+    createGatewayClass: false

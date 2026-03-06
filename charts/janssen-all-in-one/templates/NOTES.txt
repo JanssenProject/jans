@@ -1,0 +1,33 @@
+{{- with .Values.gatewayApi }}
+{{- if .enabled -}}
+*********************************************************************************
+***              WARNING: GATEWAY API CONFIGURATION                           ***
+*********************************************************************************
+
+The legacy flag `gatewayApi.enabled` is set to TRUE. Any configuration
+previously managed by `gatewayApi` will be ignored. See the following sections
+for migration.
+
+RECOMMENDATION:
+
+1. Use `gateway-api.enabled` flag.
+2. Use `gateway-api` instead of `gatewayApi` to configure the Gateway API.
+
+ATTRIBUTE CHANGES:
+
+| Legacy                            | New                                   |
+| --------------------------------- | ------------------------------------- |
+| `gatewayApi.enabled`              | `gateway-api.enabled`                 |
+| `gatewayApi.gatewayClassName`     | `gateway-api.gateway.className`       |
+| `gatewayApi.name`                 | `gateway-api.gateway.name`            |
+| `gatewayApi.httpPort`             | `gateway-api.gateway.httpPort`        |
+| `gatewayApi.httpsPort`            | `gateway-api.gateway.httpsPort`       |
+| `gatewayApi.tlsSecretName`        | `gateway-api.gateway.tlsSecretName`   |
+| `gatewayApi.gatewayLabels`        | `gateway-api.gateway.labels`          |
+| `gatewayApi.gatewayAnnotations`   | `gateway-api.gateway.annotations`     |
+| `gatewayApi.routeLabels`          | `gateway-api.routes.labels`           |
+| `gatewayApi.routeAnnotations`     | `gateway-api.routes.annotations`      |
+
+*********************************************************************************
+{{- end }}
+{{- end }}

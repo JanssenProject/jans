@@ -1,46 +1,11 @@
-{{- if .Values.global.gatewayApi.enabled -}}
-{{- $fullName := include "cn.fullname" . -}}
+{{- $fullName := include "gateway-api.fullname" . -}}
+{{- $namespace := .Release.Namespace -}}
 {{- $authSvc := index .Values.global "auth-server" "authServerServiceName" -}}
 {{- $configSvc := index .Values.global "config-api" "configApiServerServiceName" -}}
 {{- $fido2Svc := .Values.global.fido2.fido2ServiceName -}}
 {{- $scimSvc := .Values.global.scim.scimServiceName -}}
 {{- $casaSvc := .Values.global.casa.casaServiceName -}}
-{{- $namespace := .Release.Namespace -}}
 
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: {{ .Values.gatewayApi.name }}
-  namespace: {{ $namespace }}
-  labels:
-    app: {{ $fullName }}-gateway
-{{- if .Values.gatewayApi.gatewayLabels }}
-{{- toYaml .Values.gatewayApi.gatewayLabels | nindent 4 }}
-{{- end }}
-{{- if .Values.gatewayApi.gatewayAnnotations }}
-  annotations:
-{{- toYaml .Values.gatewayApi.gatewayAnnotations | nindent 4 }}
-{{- end }}
-spec:
-  gatewayClassName: {{ .Values.gatewayApi.gatewayClassName }}
-  {{- if .Values.global.lbIp }}
-  addresses:
-  - type: IPAddress
-    value: {{ .Values.global.lbIp }}
-  {{- end }}
-  listeners:
-  - name: http
-    port: {{ .Values.gatewayApi.httpPort }}
-    protocol: HTTP
-  - name: https
-    port: {{ .Values.gatewayApi.httpsPort }}
-    protocol: HTTPS
-    tls:
-      mode: Terminate
-      certificateRefs:
-      - name: {{ .Values.gatewayApi.tlsSecretName }}
-
----
 {{- /* ======================================================== */}}
 {{- /* ROUTE 1: PUBLIC CONFIGURATION (HTTP & HTTPS)             */}}
 {{- /* These endpoints can be accessible via HTTP (No Redirect) */}}
@@ -52,16 +17,16 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ .Values.gateway.name }}
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
@@ -258,16 +223,16 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ .Values.gateway.name }}
     sectionName: https
   hostnames:
   - {{ .Values.global.fqdn | quote }}
@@ -346,16 +311,16 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ .Values.gateway.name }}
     sectionName: http
   hostnames:
   - {{ .Values.global.fqdn | quote }}
@@ -433,7 +398,7 @@ spec:
 {{- /* These endpoints use gRPC                                 */}}
 {{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
-{{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+{{- if or (eq .Values.gateway.className "istio") (eq .Values.gateway.className "airlock-microgateway") }}
 {{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
 kind: HTTPRoute
 {{- else }}
@@ -444,23 +409,23 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if .Values.routes.labels }}
+{{- toYaml .Values.routes.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if .Values.routes.annotations }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml .Values.routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ .Values.gateway.name }}
     sectionName: https
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
   {{- /* 1. Lock Server Audit */}}
   {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
-  {{- if eq .Values.gatewayApi.gatewayClassName "istio" }}
+  {{- if or (eq .Values.gateway.className "istio") (eq .Values.gateway.className "airlock-microgateway") }}
   {{- /* HTTPRoute matches for istio */}}
   - matches:
     - path:
@@ -493,6 +458,4 @@ spec:
     - name: {{ $authSvc }}-grpc
       port: 50051
   {{- end }}
-{{- end }}
-
 {{- end }}

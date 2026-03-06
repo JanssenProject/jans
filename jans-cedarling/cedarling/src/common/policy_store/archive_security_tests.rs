@@ -564,7 +564,7 @@ mod manifest_security {
 
         // Use load_policy_store_directory which validates manifests
         let rt = tokio::runtime::Runtime::new().unwrap();
-        let result = rt.block_on(load_policy_store_directory(temp_dir.path()));
+        let result = rt.block_on(load_policy_store_directory(temp_dir.path(), true));
 
         // Invalid checksum format should be reported via ManifestError::InvalidChecksumFormat.
         let err = result.expect_err(

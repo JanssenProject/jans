@@ -12,6 +12,8 @@ use super::default_values::{default_jti, default_token_cache_capacity, default_t
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
+use crate::JwtConfig;
+use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
@@ -188,6 +190,15 @@ pub struct BootstrapConfigRaw {
     )]
     pub policy_store_local_fn: Option<String>,
 
+    /// Whether to validate file checksums when loading from directory or archive sources.
+    /// Defaults to `true`. Set to `false` to disable checksum validation.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM",
+        default = "default_true",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub policy_store_validate_checksum: bool,
+
     /// Maximum number of default entities allowed in a policy store.
     /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     /// If value is 0, there is no limit. But if None, default value is applied.
@@ -221,7 +232,10 @@ pub struct BootstrapConfigRaw {
     pub jwt_status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
-    #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
+        default = "JwtConfig::supported_algorithms"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
