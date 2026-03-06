@@ -218,6 +218,7 @@ jobs:
             className: nginx
             name: jans-gateway
             tlsSecretName: tls-certificate
+            attachLbIp: true
         EOF
         else
           cat > override.yaml << EOF
@@ -240,6 +241,7 @@ jobs:
             className: nginx
             name: jans-gateway
             tlsSecretName: tls-certificate
+            attachLbIp: true
         EOF
         fi
 
