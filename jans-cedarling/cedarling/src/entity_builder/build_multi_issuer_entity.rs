@@ -5,8 +5,8 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::{
-    Arc, BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME,
-    EntityBuilder, EntityData, Token, Value, default_tkn_entity_name,
+    Arc, BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder, EntityData,
+    Token, Value, default_tkn_entity_name,
 };
 use crate::authz::AuthorizeEntitiesData;
 use crate::common::issuer_utils::normalize_issuer;
@@ -464,8 +464,6 @@ mod tests {
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
             },
-            build_user: false,
-            build_workload: false,
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
@@ -770,8 +768,6 @@ mod tests {
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
             },
-            build_user: false,
-            build_workload: false,
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
@@ -952,8 +948,6 @@ mod tests {
                 role: "Role".to_string(),
                 workload: "Workload".to_string(),
             },
-            build_user: false,
-            build_workload: false,
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 

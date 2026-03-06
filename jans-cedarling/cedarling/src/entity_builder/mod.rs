@@ -343,8 +343,7 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("parse validation schema");
 
         // Set the custom workload name in the config
-        let mut config = EntityBuilderConfig::default().with_workload();
-        config.build_user = false; // Explicitly disable user entity building for this test
+        let mut config = EntityBuilderConfig::default();
         config.entity_names.workload = "Jans::CustomWorkload".into();
 
         // Set the custom token names in the IDP metadata
@@ -516,11 +515,7 @@ mod test {
         )]);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: true,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -697,11 +692,7 @@ mod test {
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: false,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -847,11 +838,7 @@ mod test {
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: false,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -1043,11 +1030,7 @@ mod test {
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: false,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,

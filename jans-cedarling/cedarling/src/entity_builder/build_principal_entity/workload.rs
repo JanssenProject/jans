@@ -174,7 +174,7 @@ mod test {
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
@@ -249,7 +249,7 @@ mod test {
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&issuers, None),
             Some(&validator_schema),
             DefaultEntities::default(),
@@ -309,7 +309,7 @@ mod test {
         let issuers = HashMap::from([("some_iss".into(), iss.clone())]);
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&issuers, None),
             None,
             DefaultEntities::default(),
