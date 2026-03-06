@@ -52,6 +52,7 @@ impl BootstrapConfig {
         };
 
         // Decode policy store
+        let validate_checksum = raw.policy_store_validate_checksum;
         let policy_store_config = match (
             raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
@@ -62,6 +63,7 @@ impl BootstrapConfig {
             // Case: get the policy store from a JSON string
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
+                validate_checksum,
             },
             // Case: get the policy store from a URI (auto-detect .cjar archives)
             (None, Some(policy_store_uri), None) => {
@@ -70,7 +72,10 @@ impl BootstrapConfig {
                 } else {
                     PolicyStoreSource::LockServer(policy_store_uri)
                 };
-                PolicyStoreConfig { source }
+                PolicyStoreConfig {
+                    source,
+                    validate_checksum,
+                }
             },
             // Case: get the policy store from a local file or directory
             (None, None, Some(raw_path)) => {
@@ -94,7 +99,10 @@ impl BootstrapConfig {
                         )?,
                     }
                 };
-                PolicyStoreConfig { source }
+                PolicyStoreConfig {
+                    source,
+                    validate_checksum,
+                }
             },
             // Case: multiple polict stores were set
             _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
