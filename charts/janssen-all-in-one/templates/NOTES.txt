@@ -1,0 +1,15 @@
+{{ if .Values.gatewayApi.enabled -}}
+********************************************************************************
+***              WARNING: GATEWAY API CONFIGURATION                          ***
+********************************************************************************
+
+The legacy flag `gatewayApi.enabled` is set to TRUE. Any configuration
+previously managed by `gatewayApi` will be ignored.
+
+RECOMMENDATION:
+
+1. Use `gateway-api.enabled` flag.
+2. Use `gateway-api` to configure the Gateway API instead of `gatewayApi`.
+
+********************************************************************************
+{{- end }}
