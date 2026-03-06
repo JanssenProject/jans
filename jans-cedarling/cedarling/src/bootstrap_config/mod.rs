@@ -31,7 +31,7 @@ use std::{io, path::Path};
 use crate::context_data_api::DataStoreConfig;
 
 // Re-export types that need to be public
-pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
+pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw};
 pub use entity_builder_config::{
     EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc,
 };
@@ -242,14 +242,6 @@ pub enum BootstrapConfigLoadingError {
     #[error("Failed to load local JWKS from {0}: {1}")]
     LoadLocalJwks(String, String),
 
-    /// Error returned when both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` are disabled.
-    /// These two authentication configurations cannot be disabled at the same time.
-    #[error(
-        "Both `CEDARLING_USER_AUTHZ` and `CEDARLING_WORKLOAD_AUTHZ` cannot be disabled \
-         simultaneously."
-    )]
-    BothPrincipalsDisabled,
-
     /// Error returned when `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set.
     #[error(
         "the `CEDARLING_LOCK` is set to `enabled` but `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` is not set."
@@ -324,16 +316,10 @@ mod tests {
         );
 
         // Verify authorization configuration
-        assert!(config.authorization_config.use_user_principal);
-        assert!(config.authorization_config.use_workload_principal);
         assert_eq!(
             config.authorization_config.decision_log_default_jwt_id,
             "jti"
         );
-
-        // Verify entity builder configuration
-        assert!(config.entity_builder_config.build_user);
-        assert!(config.entity_builder_config.build_workload);
 
         // Verify data store configuration
         assert_eq!(config.data_store_config.max_entries, 10000);

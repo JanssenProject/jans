@@ -13,7 +13,7 @@ use std::fs;
 use std::path::Path;
 use std::str::FromStr;
 
-use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
+use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
@@ -41,10 +41,6 @@ impl BootstrapConfig {
 
     /// Construct an instance from [`BootstrapConfigRaw`]
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
-        if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
-            return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
-        }
-
         let lock_config = raw.lock.is_enabled().then(|| raw.try_into()).transpose()?;
 
         // Decode LogCofig
@@ -125,13 +121,10 @@ impl BootstrapConfig {
         };
 
         let authorization_config = AuthorizationConfig {
-            use_user_principal: raw.user_authz.is_enabled(),
-            use_workload_principal: raw.workload_authz.is_enabled(),
             principal_bool_operator: raw.principal_bool_operation.clone(),
             decision_log_user_claims: raw.decision_log_user_claims.clone(),
             decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            id_token_trust_mode: raw.id_token_trust_mode.clone(),
         };
 
         // Build `DataStoreConfig` from raw config, using defaults if not specified
