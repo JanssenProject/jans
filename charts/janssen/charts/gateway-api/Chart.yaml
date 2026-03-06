@@ -1,7 +1,7 @@
 apiVersion: v2
 name: gateway-api
 version: 0.0.0-nightly
-kubeVersion: ">=v1.22.0-0"
+kubeVersion: ">=v1.23.0-0"
 description: Gateway API definitions chart
 type: application
 keywords:
