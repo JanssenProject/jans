@@ -149,7 +149,7 @@ jobs:
         global:
           cloud:
             testEnviroment: true
-          gatewayApi:
+          gateway-api:
             enabled: ${USE_GATEWAY_API}
           nginx-ingress:
             enabled: ${USE_NGINX_INGRESS}
@@ -213,10 +213,12 @@ jobs:
             - secretName: tls-certificate
               hosts:
               - ${JANS_FQDN}
-        gatewayApi:
-          gatewayClassName: nginx
-          name: jans-gateway
-          tlsSecretName: tls-certificate
+        gateway-api:
+          gateway:
+            className: nginx
+            name: jans-gateway
+            tlsSecretName: tls-certificate
+            attachLbIp: true
         EOF
         else
           cat > override.yaml << EOF
@@ -233,11 +235,13 @@ jobs:
         lbIp: ${EXT_IP}
         nginx-ingress:
           enabled: ${USE_NGINX_INGRESS}
-        gatewayApi:
+        gateway-api:
           enabled: ${USE_GATEWAY_API}
-          gatewayClassName: nginx
-          name: jans-gateway
-          tlsSecretName: tls-certificate
+          gateway:
+            className: nginx
+            name: jans-gateway
+            tlsSecretName: tls-certificate
+            attachLbIp: true
         EOF
         fi
 
