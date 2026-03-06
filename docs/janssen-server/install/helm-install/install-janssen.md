@@ -11,10 +11,6 @@ After configuring your cluster, ingress, and database, you're ready to install J
 
 ## Complete override.yaml Example
 
-!!! warning "Gateway API configuration changes"
-    In previous version, Gateway API is configured via `global.gatewayApi` and `gatewayApi`.
-    As of current version, they are replaced by `global.gateway-api` and `gateway-api` respectively.
-
 Here's a complete `override.yaml` combining Gateway API and MySQL:
 
 ```yaml

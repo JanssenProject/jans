@@ -55,6 +55,21 @@ Reserve a static public IP with your cloud provider before installation. Add thi
     In previous version, Gateway API is configured via `global.gatewayApi` and `gatewayApi`.
     As of current version, they are replaced by `global.gateway-api` and `gateway-api` respectively.
 
+    Attribute changes:
+
+    | Legacy                            | New                                   |
+    | --------------------------------- | ------------------------------------- |
+    | `global.gatewayApi.enabled`       | `global.gateway-api.enabled`          |
+    | `gatewayApi.gatewayClassName`     | `gateway-api.gateway.className`       |
+    | `gatewayApi.name`                 | `gateway-api.gateway.name`            |
+    | `gatewayApi.httpPort`             | `gateway-api.gateway.httpPort`        |
+    | `gatewayApi.httpsPort`            | `gateway-api.gateway.httpsPort`       |
+    | `gatewayApi.tlsSecretName`        | `gateway-api.gateway.tlsSecretName`   |
+    | `gatewayApi.gatewayLabels`        | `gateway-api.gateway.labels`          |
+    | `gatewayApi.gatewayAnnotations`   | `gateway-api.gateway.annotations`     |
+    | `gatewayApi.routeLabels`          | `gateway-api.routes.labels`           |
+    | `gatewayApi.routeAnnotations`     | `gateway-api.routes.annotations`      |
+
 Add this to your `override.yaml`:
 
 ```yaml
