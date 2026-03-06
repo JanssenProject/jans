@@ -1,4 +1,5 @@
-{{ if .Values.global.gatewayApi.enabled -}}
+{{- with .Values.global.gatewayApi }}
+{{- if .enabled -}}
 ********************************************************************************
 ***              WARNING: GATEWAY API CONFIGURATION                          ***
 ********************************************************************************
@@ -9,7 +10,8 @@ previously managed by `gatewayApi` will be ignored.
 RECOMMENDATION:
 
 1. Use `global.gateway-api.enabled` flag.
-2. Use `gateway-api` to configure the Gateway API instead of `gatewayApi`.
+2. Use `gateway-api` instead of `gatewayApi` to configure the Gateway API.
 
 ********************************************************************************
+{{- end }}
 {{- end }}
