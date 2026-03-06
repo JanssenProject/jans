@@ -96,7 +96,6 @@ use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
-use crate::jwt;
 use crate::log::Logger;
 use chrono::Utc;
 use http_utils::{GetFromUrl, OpenIdConfig};
