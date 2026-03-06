@@ -14,7 +14,7 @@ Gateway API definitions chart
 
 ## Source Code
 
-* <https://gateway-api.sigs.k8s.io/>
+* <https://github.com/JanssenProject/jans/tree/main/charts/janssen/charts/gateway-api>
 
 ## Requirements
 

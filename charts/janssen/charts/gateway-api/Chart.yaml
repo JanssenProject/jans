@@ -9,7 +9,7 @@ keywords:
   - Gateway API
 home: https://jans.io
 sources:
-  - https://gateway-api.sigs.k8s.io/
+  - https://github.com/JanssenProject/jans/tree/main/charts/janssen/charts/gateway-api
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io
