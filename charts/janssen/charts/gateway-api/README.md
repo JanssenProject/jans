@@ -18,7 +18,7 @@ Gateway API definitions chart
 
 ## Requirements
 
-Kubernetes: `>=v1.22.0-0`
+Kubernetes: `>=v1.23.0-0`
 
 ## Values
 
