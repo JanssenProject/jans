@@ -13,6 +13,44 @@ Cedarling is written in the Rust programming language (folder `cedarling`). And 
 
 You can install Rust toolchain by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
 
+## Building with gRPC Support
+
+To build the project with gRPC support (enabled by default), you need to install the Protocol Buffers compiler:
+
+### Install protoc
+
+**macOS:**
+
+```bash
+brew install protobuf
+```
+
+**Ubuntu/Debian:**
+
+```bash
+sudo apt install protobuf-compiler
+```
+
+**Fedora/RHEL:**
+
+```bash
+sudo dnf install protobuf-compiler
+```
+
+For other platforms, see the [protoc installation guide](https://protobuf.dev/installation/).
+
+After installing protoc, build the project with:
+
+```bash
+cargo build --workspace
+```
+
+To build without gRPC support, disable the feature:
+
+```bash
+cargo build --workspace --no-default-features
+```
+
 ## Examples of rust Cedarling
 
 Rust examples of using Cedarling contains in the folder `cedarling/examples`.
