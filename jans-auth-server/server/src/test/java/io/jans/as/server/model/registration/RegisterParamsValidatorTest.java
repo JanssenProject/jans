@@ -59,6 +59,18 @@ public class RegisterParamsValidatorTest {
     }
 
     @Test
+    public void validateRedirectUris_webApp_javascriptCamelCase_shouldReturnFalse() {
+        boolean result = registerParamsValidator.validateRedirectUris(
+                Collections.singletonList(GrantType.AUTHORIZATION_CODE),
+                Collections.singletonList(ResponseType.CODE),
+                ApplicationType.WEB,
+                SubjectType.PUBLIC,
+                Collections.singletonList("JaVaScRiPt://example.com/callback"),
+                null);
+        assertFalse(result);
+    }
+
+    @Test
     public void validateRedirectUris_webApp_file_shouldReturnFalse() {
         boolean result = registerParamsValidator.validateRedirectUris(
                 Collections.singletonList(GrantType.AUTHORIZATION_CODE),
@@ -202,6 +214,21 @@ public class RegisterParamsValidatorTest {
                 ApplicationType.NATIVE,
                 SubjectType.PUBLIC,
                 Collections.singletonList("myapp://callback"),
+                null);
+        assertTrue(result);
+    }
+
+    @Test
+    public void validateRedirectUris_nativeApp_javascript_shouldReturnTrue() {
+        when(appConfiguration.getClientWhiteList()).thenReturn(Collections.singletonList("*"));
+        when(appConfiguration.getClientBlackList()).thenReturn(Collections.emptyList());
+
+        boolean result = registerParamsValidator.validateRedirectUris(
+                Collections.singletonList(GrantType.AUTHORIZATION_CODE),
+                Collections.singletonList(ResponseType.CODE),
+                ApplicationType.NATIVE,
+                SubjectType.PUBLIC,
+                Collections.singletonList("javascript://example.com/callback"),
                 null);
         assertTrue(result);
     }

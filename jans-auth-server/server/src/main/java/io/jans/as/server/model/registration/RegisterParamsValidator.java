@@ -329,7 +329,7 @@ public class RegisterParamsValidator {
                 log.debug("Invalid schema for redirect_uri. Only HTTP (localhost) and HTTPS are supported, redirect_uri: '{}'", uri);
                 return false;
             case NATIVE:
-                // Custom schemes are allowed for native apps per RFC 8252 (OAuth 2.0 for Native Apps).
+                // Any schemes (including custom) are allowed for native apps per RFC 8252 (OAuth 2.0 for Native Apps).
                 return true;
         }
         log.debug("redirect_uri is not valid, redirect_uri: '{}'", uri);
