@@ -130,12 +130,6 @@ async fn get_cedarling_from_directory(path: std::path::PathBuf) -> Cedarling {
     use crate::JsonRule;
 
     get_cedarling_with_callback(PolicyStoreSource::Directory(path), |config| {
-        // Disable default entity builders that expect Jans namespace types
-        config.entity_builder_config.build_user = false;
-        config.entity_builder_config.build_workload = false;
-        config.authorization_config.use_user_principal = false;
-        config.authorization_config.use_workload_principal = false;
-
         // Use a custom operator that checks for our TestApp::User principal
         config.authorization_config.principal_bool_operator = JsonRule::new(json!({
             "===": [{"var": "TestApp::User"}, "ALLOW"]
@@ -154,12 +148,6 @@ async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
     use crate::JsonRule;
 
     get_cedarling_with_callback(PolicyStoreSource::CjarFile(path), |config| {
-        // Disable default entity builders that expect Jans namespace types
-        config.entity_builder_config.build_user = false;
-        config.entity_builder_config.build_workload = false;
-        config.authorization_config.use_user_principal = false;
-        config.authorization_config.use_workload_principal = false;
-
         // Use a custom operator that checks for our TestApp::User principal
         config.authorization_config.principal_bool_operator = JsonRule::new(json!({
             "===": [{"var": "TestApp::User"}, "ALLOW"]
@@ -722,12 +710,6 @@ async fn test_load_from_cjar_url_and_authorize_success() {
 
     // Create Cedarling from CjarUrl
     let cedarling = get_cedarling_with_callback(PolicyStoreSource::CjarUrl(cjar_url), |config| {
-        // Disable default entity builders that expect Jans namespace types
-        config.entity_builder_config.build_user = false;
-        config.entity_builder_config.build_workload = false;
-        config.authorization_config.use_user_principal = false;
-        config.authorization_config.use_workload_principal = false;
-
         // Use a custom operator that checks for our TestApp::User principal
         config.authorization_config.principal_bool_operator = JsonRule::new(json!({
             "===": [{"var": "TestApp::User"}, "ALLOW"]
@@ -1017,22 +999,16 @@ fn create_jwt_cedarling_config(
         }
         .allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
-            use_user_principal: false,
-            use_workload_principal: true,
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: vec![],
             decision_log_workload_claims: vec!["client_id".to_string()],
-            id_token_trust_mode: crate::IdTokenTrustMode::Never,
             principal_bool_operator: JsonRule::new(json!({
                 "===": [{"var": "Jans::Workload"}, "ALLOW"]
             }))
             .expect("Failed to create principal bool operator"),
-        },
-        entity_builder_config: EntityBuilderConfig {
-            build_user: false,
-            build_workload: true,
             ..Default::default()
         },
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
