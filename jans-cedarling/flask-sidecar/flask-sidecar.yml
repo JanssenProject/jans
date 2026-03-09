@@ -23,6 +23,14 @@ components:
       required:
       - name
       type: object
+    CedarEntityMapping:
+      additionalProperties: true
+      properties:
+        cedar_entity_mapping:
+          $ref: '#/components/schemas/EntityMapping'
+      required:
+      - cedar_entity_mapping
+      type: object
     Decision:
       properties:
         context:
@@ -32,6 +40,16 @@ components:
           type: boolean
       required:
       - decision
+      type: object
+    EntityMapping:
+      properties:
+        entity_type:
+          type: string
+        id:
+          type: string
+      required:
+      - entity_type
+      - id
       type: object
     Error:
       properties:
@@ -55,6 +73,8 @@ components:
           $ref: '#/components/schemas/Action'
         context:
           additionalProperties: {}
+          default: null
+          nullable: true
           type: object
         resource:
           $ref: '#/components/schemas/Resource'
@@ -87,8 +107,7 @@ components:
         id:
           type: string
         properties:
-          additionalProperties: {}
-          type: object
+          $ref: '#/components/schemas/CedarEntityMapping'
         type:
           type: string
       required:
@@ -100,13 +119,31 @@ components:
         id:
           type: string
         properties:
-          additionalProperties: {}
-          type: object
+          $ref: '#/components/schemas/TokenList'
         type:
           type: string
       required:
       - id
       - type
+      type: object
+    Token:
+      properties:
+        mapping:
+          type: string
+        payload:
+          type: string
+      required:
+      - mapping
+      - payload
+      type: object
+    TokenList:
+      properties:
+        tokens:
+          items:
+            $ref: '#/components/schemas/Token'
+          type: array
+      required:
+      - tokens
       type: object
     WellKnown:
       properties:
