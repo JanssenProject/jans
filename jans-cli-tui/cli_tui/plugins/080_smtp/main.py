@@ -99,7 +99,7 @@ class Plugin(DialogUtils):
             self.app.create_background_task(self.get_smtp_config())
 
     async def get_smtp_config(self) -> None:
-        self.app.start_progressing(_("Retreiving smtp configuration..."))
+        self.app.start_progressing(_("Retrieving smtp configuration..."))
 
         try:
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-smtp'})
@@ -109,7 +109,7 @@ class Plugin(DialogUtils):
                 return
             self.data = response.json()
         except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
-            self.app.logger.exception("An error occurred during retreiving smtp configuration")
+            self.app.logger.exception("An error occurred during retrieving smtp configuration")
             self.app.stop_progressing()
             self.app.show_message(_(common_strings.error), _("Failed to get smtp configuration: {}\n").format(e), tobefocused=self.main_container)
             return
