@@ -497,16 +497,16 @@ public class AuthzRequestServiceTest {
     public void signatureAlgorithmFromString_withJweEncryptionAlgorithm_shouldReturnNull() {
         // Verify that JWE encryption algorithms are not recognized as signature algorithms
         // This is important for the forceSignedRequestObject security fix
-        assertTrue(SignatureAlgorithm.fromString("RSA-OAEP") == null, "RSA-OAEP should return null");
-        assertTrue(SignatureAlgorithm.fromString("RSA1_5") == null, "RSA1_5 should return null");
-        assertTrue(SignatureAlgorithm.fromString("A128KW") == null, "A128KW should return null");
-        assertTrue(SignatureAlgorithm.fromString("A256KW") == null, "A256KW should return null");
-        assertTrue(SignatureAlgorithm.fromString("A128GCM") == null, "A128GCM should return null");
-        assertTrue(SignatureAlgorithm.fromString("A256GCM") == null, "A256GCM should return null");
+        assertNull(SignatureAlgorithm.fromString("RSA-OAEP"), "RSA-OAEP should return null");
+        assertNull(SignatureAlgorithm.fromString("RSA1_5"), "RSA1_5 should return null");
+        assertNull(SignatureAlgorithm.fromString("A128KW"), "A128KW should return null");
+        assertNull(SignatureAlgorithm.fromString("A256KW"), "A256KW should return null");
+        assertNull(SignatureAlgorithm.fromString("A128GCM"), "A128GCM should return null");
+        assertNull(SignatureAlgorithm.fromString("A256GCM"), "A256GCM should return null");
 
         // Verify that actual signature algorithms ARE recognized
-        assertTrue(SignatureAlgorithm.fromString("RS256") == SignatureAlgorithm.RS256, "RS256 should be recognized");
-        assertTrue(SignatureAlgorithm.fromString("ES256") == SignatureAlgorithm.ES256, "ES256 should be recognized");
-        assertTrue(SignatureAlgorithm.fromString("none") == SignatureAlgorithm.NONE, "none should be recognized");
+        assertEquals(SignatureAlgorithm.fromString("RS256"), SignatureAlgorithm.RS256, "RS256 should be recognized");
+        assertEquals(SignatureAlgorithm.fromString("ES256"), SignatureAlgorithm.ES256, "ES256 should be recognized");
+        assertEquals(SignatureAlgorithm.fromString("none"), SignatureAlgorithm.NONE, "none should be recognized");
     }
 }
