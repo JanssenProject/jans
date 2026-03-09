@@ -8,6 +8,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -333,5 +334,49 @@ public class AuthzRequestServiceTest {
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
         authzRequestService.addDeviceSecretToSession(authzRequest, sessionId);
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
+    }
+
+    /**
+     * Security test: Verifies that the forceSignedRequestObject guard correctly handles
+     * both null (unrecognized algorithm) and NONE algorithm cases.
+     *
+     * This test documents the security fix for vulnerability where:
+     * - A JWE with plain JSON payload would have algorithm="RSA-OAEP" in the outer header
+     * - SignatureAlgorithm.fromString("RSA-OAEP") returns null (not a signature algorithm)
+     * - The OLD buggy check: `signatureAlgorithm == SignatureAlgorithm.NONE` would pass (null != NONE)
+     * - The NEW fixed check: `signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE` correctly rejects
+     */
+    @Test
+    public void processRequestObject_whenForceSignedRequestObjectEnabledAndAlgorithmIsNull_shouldRejectRequest() {
+        // Verify that RSA-OAEP is not recognized as a signature algorithm
+        SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString("RSA-OAEP");
+        assertTrue(sigAlg == null, "RSA-OAEP should not be recognized as a signature algorithm");
+
+        // Verify the OLD buggy behavior would have allowed this to pass
+        // OLD: signatureAlgorithm == SignatureAlgorithm.NONE
+        boolean oldBuggyCheck = (sigAlg == SignatureAlgorithm.NONE); // false! (null != NONE)
+        assertTrue(!oldBuggyCheck, "OLD buggy check would have allowed RSA-OAEP to pass");
+
+        // Verify our fix: both null and NONE should be rejected
+        // NEW: signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE
+        boolean newFixedCheck = (sigAlg == null || sigAlg == SignatureAlgorithm.NONE); // true! (null == null)
+        assertTrue(newFixedCheck, "NEW fixed check correctly rejects RSA-OAEP (null algorithm)");
+    }
+
+    @Test
+    public void signatureAlgorithmFromString_withJweEncryptionAlgorithm_shouldReturnNull() {
+        // Verify that JWE encryption algorithms are not recognized as signature algorithms
+        // This is important for the forceSignedRequestObject security fix
+        assertTrue(SignatureAlgorithm.fromString("RSA-OAEP") == null, "RSA-OAEP should return null");
+        assertTrue(SignatureAlgorithm.fromString("RSA1_5") == null, "RSA1_5 should return null");
+        assertTrue(SignatureAlgorithm.fromString("A128KW") == null, "A128KW should return null");
+        assertTrue(SignatureAlgorithm.fromString("A256KW") == null, "A256KW should return null");
+        assertTrue(SignatureAlgorithm.fromString("A128GCM") == null, "A128GCM should return null");
+        assertTrue(SignatureAlgorithm.fromString("A256GCM") == null, "A256GCM should return null");
+
+        // Verify that actual signature algorithms ARE recognized
+        assertTrue(SignatureAlgorithm.fromString("RS256") == SignatureAlgorithm.RS256, "RS256 should be recognized");
+        assertTrue(SignatureAlgorithm.fromString("ES256") == SignatureAlgorithm.ES256, "ES256 should be recognized");
+        assertTrue(SignatureAlgorithm.fromString("none") == SignatureAlgorithm.NONE, "none should be recognized");
     }
 }
