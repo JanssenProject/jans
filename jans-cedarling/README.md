@@ -15,31 +15,25 @@ You can install Rust toolchain by following the official [rust installation guid
 
 ## Building with gRPC Support
 
-To build the project with gRPC support (enabled by default), you need to install the Protocol Buffers compiler:
+To build the project with gRPC support (enabled by default), you need to install the Protocol Buffers compiler.
 
 ### Install protoc
 
-**macOS:**
+Download the pre-built protoc binaries from the [Protocol Buffers releases](https://github.com/protocolbuffers/protobuf/releases) page and extract them to a location of your choice.
+
+Set the `PROTOC` environment variable to point to the protoc binary:
 
 ```bash
-brew install protobuf
+export PROTOC=/path/to/the/protoc_folder/bin/protoc
 ```
 
-**Ubuntu/Debian:**
+For example, if you extracted protoc to `~/tools/protobuf`, you would run:
 
 ```bash
-sudo apt install protobuf-compiler
+export PROTOC=~/tools/protobuf/bin/protoc
 ```
 
-**Fedora/RHEL:**
-
-```bash
-sudo dnf install protobuf-compiler
-```
-
-For other platforms, see the [protoc installation guide](https://protobuf.dev/installation/).
-
-After installing protoc, build the project with:
+After installing protoc and setting the environment variable, build the project with:
 
 ```bash
 cargo build --workspace
