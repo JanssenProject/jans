@@ -6,7 +6,7 @@
 use cedarling::bindings::cedar_policy;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, Request,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
     RequestUnsigned,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
@@ -159,26 +159,6 @@ impl Cedarling {
 
         let conf_object = Object::from_entries(&conf_js_val)?;
         Self::new(&conf_object).await
-    }
-
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    pub async fn authorize(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-
-        let cedar_request: Request = serde_wasm_bindgen::from_value(request_object)?;
-
-        let result = self
-            .instance
-            .authorize(cedar_request)
-            .await
-            .map_err(Error::new)?;
-        Ok(result.into())
     }
 
     /// Authorize request for unsigned principals.
@@ -501,13 +481,6 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
 #[wasm_bindgen]
 #[derive(serde::Serialize)]
 pub struct AuthorizeResult {
-    /// Result of authorization where principal is `Jans::Workload`
-    #[wasm_bindgen(getter_with_clone)]
-    pub workload: Option<AuthorizeResultResponse>,
-    /// Result of authorization where principal is `Jans::User`
-    #[wasm_bindgen(getter_with_clone)]
-    pub person: Option<AuthorizeResultResponse>,
-
     #[wasm_bindgen(skip)]
     pub principals: HashMap<String, AuthorizeResultResponse>,
 
@@ -538,12 +511,6 @@ impl AuthorizeResult {
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {
     fn from(value: cedarling::AuthorizeResult) -> Self {
         Self {
-            workload: value
-                .workload
-                .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
-            person: value
-                .person
-                .map(|v| AuthorizeResultResponse { inner: Rc::new(v) }),
             principals: value
                 .principals
                 .into_iter()

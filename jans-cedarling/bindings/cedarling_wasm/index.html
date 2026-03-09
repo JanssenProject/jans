@@ -38,7 +38,7 @@
     </div>
 
     <script type="module">
-        import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js" // Import js objects: bootstrap config and request
+        import { BOOTSTRAP_CONFIG, REQUEST_UNSIGNED } from "/example_data.js" // Import js objects: bootstrap config and unsigned request
         import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
         async function main() {
@@ -46,9 +46,9 @@
 
             let instance = await init(BOOTSTRAP_CONFIG);
             
-            // Standard authorization
-            let result = await instance.authorize(REQUEST);
-            console.log("Standard authorization result:", result);
+            // Unsigned authorization (principals provided as entity data)
+            let result = await instance.authorize_unsigned(REQUEST_UNSIGNED);
+            console.log("Unsigned authorization result:", result);
             
             // Multi-issuer authorization example
             const multiIssuerRequest = {
