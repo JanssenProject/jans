@@ -97,9 +97,16 @@ class Plugin(DialogUtils):
 
     async def get_smtp_config(self) -> None:
         self.app.start_progressing(_("Retreiving smtp configuration..."))
-        response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-smtp'})
+
+        try:
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-smtp'})
+            self.data = response.json()
+        except Exception as e:
+            self.app.stop_progressing()
+            self.app.show_message(_(common_strings.error), _("Failed to get smtp configuration: {}\n").format(e), tobefocused=self.main_container)
+            return
+
         self.app.stop_progressing()
-        self.data = response.json()
 
         self.host_widget.me.text = self.data.get('host') or ''
         self.port_widget.me.text = str(self.data.get('port')) or ''
