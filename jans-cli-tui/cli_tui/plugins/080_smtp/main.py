@@ -3,6 +3,9 @@ from collections import OrderedDict
 from functools import partial
 from typing import Any
 
+from requests import RequestException
+from json import JSONDecodeError
+
 import prompt_toolkit
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
@@ -100,8 +103,13 @@ class Plugin(DialogUtils):
 
         try:
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-smtp'})
+            if response.status_code != 200:
+                self.app.stop_progressing()
+                self.app.show_message(_(common_strings.error), _("Failed to get smtp configuration: {}\n").format(response.text), tobefocused=self.main_container)
+                return
             self.data = response.json()
-        except Exception as e:
+        except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+            self.app.logger.exception("An error occurred during retreiving smtp configuration")
             self.app.stop_progressing()
             self.app.show_message(_(common_strings.error), _("Failed to get smtp configuration: {}\n").format(e), tobefocused=self.main_container)
             return
@@ -109,7 +117,7 @@ class Plugin(DialogUtils):
         self.app.stop_progressing()
 
         self.host_widget.me.text = self.data.get('host') or ''
-        self.port_widget.me.text = str(self.data.get('port')) or ''
+        self.port_widget.me.text = str(self.data.get('port') or '')
         self.connect_protection_widget.me.current_value = self.data.get('connect_protection') or 'None'
         self.from_name_widget.me.text = self.data.get('from_name') or ''
         self.from_email_address_widget.me.text = self.data.get('from_email_address') or ''
