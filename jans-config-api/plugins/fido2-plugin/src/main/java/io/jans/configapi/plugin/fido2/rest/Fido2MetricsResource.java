@@ -62,14 +62,16 @@ public class Fido2MetricsResource extends BaseResource {
     /**
      * Get metrics entries within a time range.
      *
-     * @param limit          maximum number of results to return
-     * @param startIndex     1-based index of the first result to return
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                       values are "ascending" and "descending"
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date values are "ascending" and "descending"
      *
-     * @return a Response containing a Fido2MetricsEntryPagedResult with the matching entries
-     *         
+     * @return a Response containing a Fido2MetricsEntryPagedResult with the
+     *         matching entries
+     * 
      */
     @Operation(summary = "Get a list of Fido2 Metrics by time range.", description = "Get a list of Fido2 Metrics by time range.", operationId = "search-fido2-metrics", tags = {
             "Fido2 - Metrics" }, security = {
@@ -82,8 +84,9 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/entries")
-    //@ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    //                ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
+    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2MetricsEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -127,33 +130,35 @@ public class Fido2MetricsResource extends BaseResource {
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
     }
 
-    
     /**
      * Get metrics entries for a specific user.
      *
-     * @param limit          maximum number of results to return
-     * @param startIndex     1-based index of the first result to return
-     * @param userId         User ID
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                       values are "ascending" and "descending"
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param userId     User ID
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date values are "ascending" and "descending"
      *
-     * @return a Response containing a Fido2MetricsEntryPagedResult with the matching entries
-     *         
+     * @return a Response containing a Fido2MetricsEntryPagedResult with the
+     *         matching entries
+     * 
      */
-    @Operation(summary = "Get a list of Fido2 Metrics for a specific user by time range.", description = "Get a list of Fido2 Metrics for a specific user by time range.", operationId = "search-fido2-metrics-by-user", tags = {
+    @Operation(summary = "Get a list of Fido2 metrics for a specific user by time range.", description = "Get a list of Fido2 metrics for a specific user by time range.", operationId = "search-fido2-metrics-by-user", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-by-user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/entries/user/{userId}")
-  //@ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    //                ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
+    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2UserMetricsEntries(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -164,8 +169,10 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry for user search param - limit:{}, startIndex:{}, userId:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(userId), escapeLog(startDate), escapeLog(endDate));
+            logger.info(
+                    "Fido2MetricsEntry for user search param - limit:{}, startIndex:{}, userId:{}, startDate:{}, endDate:{}",
+                    escapeLog(limit), escapeLog(startIndex), escapeLog(userId), escapeLog(startDate),
+                    escapeLog(endDate));
         }
 
         // validate Date
@@ -188,8 +195,8 @@ public class Fido2MetricsResource extends BaseResource {
             endLocalDate = parseDate(endDate, formatter);
         }
 
-        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getFido2UserMetricsEntries(null, userId, startLocalDate,
-                endLocalDate);
+        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getFido2UserMetricsEntries(null, userId,
+                startLocalDate, endLocalDate);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Fido2UserMetricsEntries  - pagedResult:{}", pagedResult);
@@ -197,34 +204,36 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
     }
-    
-    
+
     /**
      * Get metrics entries by operation type.
      *
-     * @param limit          maximum number of results to return
-     * @param startIndex     1-based index of the first result to return
+     * @param limit         maximum number of results to return
+     * @param startIndex    1-based index of the first result to return
      * @param operationType Operation type
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                       values are "ascending" and "descending"
+     * @param startDate     optional start date (dd-MM-yyyy) to include entries on
+     *                      or after this date
+     * @param endDate       optional end date (dd-MM-yyyy) to include entries on or
+     *                      before this date values are "ascending" and "descending"
      *
-     * @return a Response containing a Fido2MetricsEntryPagedResult with the matching entries
-     *         
+     * @return a Response containing a Fido2MetricsEntryPagedResult with the
+     *         matching entries
+     * 
      */
-    @Operation(summary = "Get a list of Fido2 Metrics for a operation type by time range.", description = "Get a list of Fido2 Metrics for a operation type by time range.", operationId = "search-fido2-metrics-by-operation", tags = {
+    @Operation(summary = "Get a list of Fido2 metrics for a operation type by time range.", description = "Get a list of Fido2 metrics for a operation type by time range.", operationId = "search-fido2-metrics-by-operation", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-by-operation.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/entries/operation/{operationType}")
-   //@ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    //                ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
+    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getMetricsEntriesByOperation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -235,8 +244,10 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry by operation type search param - limit:{}, startIndex:{}, operationType:{} startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(operationType), escapeLog(startDate), escapeLog(endDate));
+            logger.info(
+                    "Fido2MetricsEntry by operation type search param - limit:{}, startIndex:{}, operationType:{} startDate:{}, endDate:{}",
+                    escapeLog(limit), escapeLog(startIndex), escapeLog(operationType), escapeLog(startDate),
+                    escapeLog(endDate));
         }
 
         // validate Date
@@ -259,8 +270,8 @@ public class Fido2MetricsResource extends BaseResource {
             endLocalDate = parseDate(endDate, formatter);
         }
 
-        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getMetricsEntriesByOperation(null, operationType, startLocalDate,
-                endLocalDate);
+        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getMetricsEntriesByOperation(null,
+                operationType, startLocalDate, endLocalDate);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Fido2MetricsEntriesByOperation - pagedResult:{}", pagedResult);
@@ -268,8 +279,7 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
     }
-    
-    
+
     // aggregation endpoints
     /**
      * Get aggregated metrics data.
@@ -277,12 +287,15 @@ public class Fido2MetricsResource extends BaseResource {
      * @param limit           maximum number of results to return
      * @param startIndex      1-based index of the first result to return
      * @param aggregationType Aggregation type
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                       values are "ascending" and "descending"
+     * @param startDate       optional start date (dd-MM-yyyy) to include entries on
+     *                        or after this date
+     * @param endDate         optional end date (dd-MM-yyyy) to include entries on
+     *                        or before this date values are "ascending" and
+     *                        "descending"
      *
-     * @return a Response containing a Fido2MetricsAggregationPagedResult with the matching entries
-     *         
+     * @return a Response containing a Fido2MetricsAggregationPagedResult with the
+     *         matching entries
+     * 
      */
     @Operation(summary = "Get a list of Fido2 aggregated metrics by time range.", description = "Get a list of Fido2 aggregated metrics by time range.", operationId = "search-fido2-metrics-aggregated", tags = {
             "Fido2 - Metrics" }, security = {
@@ -290,13 +303,14 @@ public class Fido2MetricsResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsAggregationPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsAggregationPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-aggregated.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/aggregations/{aggregationType}")
-  //@ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    //                ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
+    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2MetricsAggregation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -347,12 +361,14 @@ public class Fido2MetricsResource extends BaseResource {
      * @param limit           maximum number of results to return
      * @param startIndex      1-based index of the first result to return
      * @param aggregationType Aggregation type
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                  
+     * @param startDate       optional start date (dd-MM-yyyy) to include entries on
+     *                        or after this date
+     * @param endDate         optional end date (dd-MM-yyyy) to include entries on
+     *                        or before this date
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
     @Operation(summary = "Get Fido2 aggregation summary by time range.", description = "Get Fido2 aggregation summary by time range.", operationId = "get-fido2-aggregation-summary-metrics", tags = {
             "Fido2 - Metrics" }, security = {
@@ -401,8 +417,8 @@ public class Fido2MetricsResource extends BaseResource {
             endLocalDate = parseDate(endDate, formatter);
         }
 
-        JsonNode jsonNode = fido2MetricsService.getFido2MetricsAggregationSummary(null, aggregationType,
-                startLocalDate, endLocalDate);
+        JsonNode jsonNode = fido2MetricsService.getFido2MetricsAggregationSummary(null, aggregationType, startLocalDate,
+                endLocalDate);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Fido2MetricsAggregationSummary  - jsonNode:{}", jsonNode);
@@ -411,18 +427,19 @@ public class Fido2MetricsResource extends BaseResource {
         return Response.ok(jsonNode).build();
     }
 
-    
     /**
      * Get adoption metrics
      *
-     * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                  
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
     @Operation(summary = "Get Fido2 adoption metrics by time range.", description = "Get Fido2 adoption metrics by time range.", operationId = "get-fido2-adoption-metrics", tags = {
             "Fido2 - Metrics" }, security = {
@@ -430,7 +447,7 @@ public class Fido2MetricsResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-aggregation-summary.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-adoption.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -446,8 +463,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info(
-                    "Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
+            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
@@ -478,18 +494,19 @@ public class Fido2MetricsResource extends BaseResource {
         return Response.ok(jsonNode).build();
     }
 
-    
     /**
      * Get performance metrics
      *
-     * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                  
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
     @Operation(summary = "Get Fido2 analytics performance metrics by time range.", description = "Get Fido2 analytics performance metrics by time range.", operationId = "get-fido2-analytics-performance-metrics", tags = {
             "Fido2 - Metrics" }, security = {
@@ -497,7 +514,7 @@ public class Fido2MetricsResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-aggregation-summary.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-analytics-performance-metrics.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -513,8 +530,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info(
-                    "Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
+            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
@@ -545,30 +561,31 @@ public class Fido2MetricsResource extends BaseResource {
         return Response.ok(jsonNode).build();
     }
 
-        
     /**
      * Get device analytics
      *
-     * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                  
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
-    @Operation(summary = "Get Fido2 devices analytics metrics by time range.", description = "Get Fido2 devices analytics metrics by time range.", operationId = "get-fido2-analytics-devices-metrics", tags = {
+    @Operation(summary = "Get Fido2 devices analytics metrics by time range.", description = "Get Fido2 devices analytics metrics by time range.", operationId = "get-fido2-metrics-analytics-devices", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-aggregation-summary.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-analytics-devices.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @Path("/analytics/performance")
+    @Path("/analytics/devices")
     // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
     // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
     // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
@@ -580,8 +597,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info(
-                    "Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
+            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
@@ -611,21 +627,22 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(jsonNode).build();
     }
-    
-    
+
     /**
      * Get error analysis
      *
-     * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                  
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
-    @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-error-analysis-metrics", tags = {
+    @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-metrics-analytics-errors", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
@@ -647,8 +664,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info(
-                    "ErrorAnalysis search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
+            logger.info("ErrorAnalysis search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
@@ -678,27 +694,28 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(jsonNode).build();
     }
-    
-    
+
     /**
      * Get trend analysis for metrics over time
      *
-     * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
-     * @param startDate      optional start date (dd-MM-yyyy) to include entries on or after this date
-     * @param endDate        optional end date (dd-MM-yyyy) to include entries on or before this date
-     *                  
+     * @param limit      maximum number of results to return
+     * @param startIndex 1-based index of the first result to return
+     * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
+     *                   after this date
+     * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
+     *                   before this date
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
-    @Operation(summary = "Get Fido2 trend analysis for metrics over time.", description = "Get Fido2 trend analysis for metrics over time.", operationId = "get-fido2-trend-analysis-metrics", tags = {
+    @Operation(summary = "Get Fido2 analytics trends by aggregationType for metrics over time.", description = "Get Fido2 analytics trends by aggregationType for metrics over time.", operationId = "get-fido2-analytics-trends-aggregationType", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-trend-analysis.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-fido2-analytics-trends-aggregationType.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -717,7 +734,8 @@ public class Fido2MetricsResource extends BaseResource {
         if (logger.isInfoEnabled()) {
             logger.info(
                     "ErrorAnalysis search param - limit:{}, startIndex:{}, aggregationType:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex),  escapeLog(aggregationType), escapeLog(startDate), escapeLog(endDate));
+                    escapeLog(limit), escapeLog(startIndex), escapeLog(aggregationType), escapeLog(startDate),
+                    escapeLog(endDate));
         }
 
         // validate Date
@@ -731,7 +749,6 @@ public class Fido2MetricsResource extends BaseResource {
             startLocalDate = parseDate(startDate, formatter);
         }
 
-        
         // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
         // yyyy-MM-ddTHH:mm:ssZ)
         LocalDateTime endLocalDate = null;
@@ -747,17 +764,16 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(jsonNode).build();
     }
-    
-    
+
     /**
      * Get period-over-period comparison
      *
      * @param aggregationType Aggregation type for comparison
      * @param periods         Number of periods to compare (default: 2)
-     *                  
+     * 
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
     @Operation(summary = "Get Fido2 period-over-period comparison.", description = "Get Fido2 period-over-period comparison.", operationId = "get-fido2-period-over-period-comparison", tags = {
             "Fido2 - Metrics" }, security = {
@@ -765,7 +781,7 @@ public class Fido2MetricsResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-trend-analysis.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-period-over-period-comparison.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -778,16 +794,14 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = " Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
             @Parameter(description = "periods") @DefaultValue("2") @QueryParam(value = "periods") @NotNull int periods)
-            
+
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info(
-                    "ErrorAnalysis search param - limit:{}, startIndex:{}, aggregationType:{}, periods:{}",
-                    escapeLog(limit), escapeLog(startIndex),  escapeLog(aggregationType), escapeLog(periods));
+            logger.info("ErrorAnalysis search param - limit:{}, startIndex:{}, aggregationType:{}, periods:{}",
+                    escapeLog(limit), escapeLog(startIndex), escapeLog(aggregationType), escapeLog(periods));
         }
 
-        
         JsonNode jsonNode = fido2MetricsService.getPeriodOverPeriodComparison(null, aggregationType, periods);
 
         if (logger.isDebugEnabled()) {
@@ -796,12 +810,12 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(jsonNode).build();
     }
-    
+
     /**
      * Get metrics configuration and status
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
     @Operation(summary = "Get Fido2 metrics configuration.", description = "Get Fido2 metrics configuration.", operationId = "get-fido2-metrics-configuration", tags = {
             "Fido2 - Metrics" }, security = {
@@ -831,21 +845,21 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(jsonNode).build();
     }
-    
+
     /**
      * Health check endpoint for metrics service Verifies that the metrics service
      * is functional and can connect to the database
      *
      * @return a Response containing a JsonNode with the matching entries
-     *         
+     * 
      */
-    @Operation(summary = "Get Fido2 metrics Health check endpoint.", description = "Get Fido2 metrics Health check endpoint.", operationId = "get-fido2-metrics-health-check", tags = {
+    @Operation(summary = "Get Fido2 metrics health check endpoint.", description = "Get Fido2 metrics health check endpoint.", operationId = "get-fido2-metrics-health-check", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-configuration.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-health-check.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -867,9 +881,7 @@ public class Fido2MetricsResource extends BaseResource {
 
         return Response.ok(jsonNode).build();
     }
-    
-    
-    
+
     // helper methods
     private void validateDate(String startDate, String endDate, DateTimeFormatter formatter) {
         if (logger.isDebugEnabled()) {
@@ -950,7 +962,8 @@ public class Fido2MetricsResource extends BaseResource {
         return LocalDateTime.parse(trimmed, DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT));
     }
 
-    private Fido2MetricsEntryPagedResult getFido2MetricsEntryPagedResult(PagedResult<Fido2MetricsEntry> pagedResult,int startIndex, int limit) {
+    private Fido2MetricsEntryPagedResult getFido2MetricsEntryPagedResult(PagedResult<Fido2MetricsEntry> pagedResult,
+             int limit, int startIndex) {
         Fido2MetricsEntryPagedResult fido2MetricsEntryPagedResult = null;
 
         if (pagedResult != null) {
@@ -959,8 +972,6 @@ public class Fido2MetricsResource extends BaseResource {
                     : pagedResult.getEntries().size();
             logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
 
-            
-            
             List<Fido2MetricsEntry> identityProviderList = pagedResult.getEntries();
             fido2MetricsEntryPagedResult = new Fido2MetricsEntryPagedResult();
             fido2MetricsEntryPagedResult.setStart(pagedResult.getStart());
@@ -975,17 +986,16 @@ public class Fido2MetricsResource extends BaseResource {
     }
 
     private Fido2MetricsAggregationPagedResult getFido2MetricsAggregationPagedResult(
-            PagedResult<Fido2MetricsAggregation> pagedResult,int startIndex, int limit) {
+            PagedResult<Fido2MetricsAggregation> pagedResult, int limit, int startIndex) {
         Fido2MetricsAggregationPagedResult fido2MetricsAggregationPagedResult = null;
 
         if (pagedResult != null) {
-            
+
             getStartIndex(pagedResult.getEntries(), startIndex);
             int toIndex = (startIndex + limit <= pagedResult.getEntries().size()) ? startIndex + limit
                     : pagedResult.getEntries().size();
             logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
 
-            
             List<Fido2MetricsAggregation> identityProviderList = pagedResult.getEntries();
             fido2MetricsAggregationPagedResult = new Fido2MetricsAggregationPagedResult();
             fido2MetricsAggregationPagedResult.setStart(pagedResult.getStart());
@@ -999,7 +1009,7 @@ public class Fido2MetricsResource extends BaseResource {
         }
         return fido2MetricsAggregationPagedResult;
     }
-    
+
     private String getPattern(String pattern) {
         String searchPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
         if (StringUtils.isNotBlank(pattern)) {
@@ -1011,14 +1021,15 @@ public class Fido2MetricsResource extends BaseResource {
         }
         return searchPattern;
     }
-    
+
     private int getStartIndex(List<?> entriesList, int startIndex) {
         if (logger.isDebugEnabled()) {
             logger.debug("Get startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
         }
 
+        logger.error("Get startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
         if (entriesList != null && !entriesList.isEmpty()) {
-
+            logger.debug("Get startIndex  entriesList.size():{}", entriesList.size());
             try {
                 entriesList.get(startIndex);
             } catch (IndexOutOfBoundsException ioe) {
@@ -1030,5 +1041,4 @@ public class Fido2MetricsResource extends BaseResource {
         return startIndex;
     }
 
-    
 }

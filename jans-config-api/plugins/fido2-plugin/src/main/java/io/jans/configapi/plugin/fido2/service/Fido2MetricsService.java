@@ -289,8 +289,7 @@ public class Fido2MetricsService {
     // @Path("/analytics/adoption")
     public JsonNode getAdoptionMetrics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        log.error("**** Get adoption metrics with - token:{}, startTime:{}, endTime:{}", token, startTime,
-                endTime);
+        log.error("**** Get adoption metrics with - token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
 
         // Request headers
         Map<String, String> headers = new HashMap<>();
