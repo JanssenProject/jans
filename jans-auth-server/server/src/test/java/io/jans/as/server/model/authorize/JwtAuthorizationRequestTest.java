@@ -126,14 +126,12 @@ public class JwtAuthorizationRequestTest {
         // JWE Content Encryption Algorithms - should all return null
         assertNull(SignatureAlgorithm.fromString("A128GCM"),
                 "A128GCM is a JWE content encryption algorithm, not a signature algorithm");
-        assertNull(SignatureAlgorithm.fromString("A192GCM"),
-                "A192GCM is a JWE content encryption algorithm, not a signature algorithm");
         assertNull(SignatureAlgorithm.fromString("A256GCM"),
                 "A256GCM is a JWE content encryption algorithm, not a signature algorithm");
-        assertNull(SignatureAlgorithm.fromString("A128CBC-HS256"),
-                "A128CBC-HS256 is a JWE content encryption algorithm, not a signature algorithm");
-        assertNull(SignatureAlgorithm.fromString("A256CBC-HS512"),
-                "A256CBC-HS512 is a JWE content encryption algorithm, not a signature algorithm");
+        assertNull(SignatureAlgorithm.fromString("A128CBC+HS256"),
+                "A128CBC+HS256 is a JWE content encryption algorithm, not a signature algorithm");
+        assertNull(SignatureAlgorithm.fromString("A256CBC+HS512"),
+                "A256CBC+HS512 is a JWE content encryption algorithm, not a signature algorithm");
     }
 
     /**

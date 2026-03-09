@@ -257,7 +257,7 @@ public class AuthzRequestService {
                     redirectUriResponse.getRedirectUri().setBaseRedirectUri(jwtRequest.getRedirectUri());
                 }
 
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(jwtRequest.getAlgorithm());
+                SignatureAlgorithm signatureAlgorithm = jwtRequest.isJws() ? SignatureAlgorithm.fromString(jwtRequest.getAlgorithm()) : jwtRequest.getNestedJwt().getHeader().getSignatureAlgorithm();
                 // When forceSignedRequestObject is enabled, reject both:
                 // - SignatureAlgorithm.NONE (explicitly unsigned)
                 // - null (unrecognized algorithm, e.g., JWE encryption algorithm like "RSA-OAEP")

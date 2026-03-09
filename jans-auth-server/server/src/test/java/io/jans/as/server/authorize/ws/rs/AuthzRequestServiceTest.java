@@ -10,6 +10,8 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
@@ -20,23 +22,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -337,30 +334,163 @@ public class AuthzRequestServiceTest {
     }
 
     /**
-     * Security test: Verifies that the forceSignedRequestObject guard correctly handles
-     * both null (unrecognized algorithm) and NONE algorithm cases.
+     * Security test: Verifies that processRequestObject rejects JWE request objects
+     * when forceSignedRequestObject=true and the nested JWT has SignatureAlgorithm.NONE.
      *
-     * This test documents the security fix for vulnerability where:
-     * - A JWE with plain JSON payload would have algorithm="RSA-OAEP" in the outer header
-     * - SignatureAlgorithm.fromString("RSA-OAEP") returns null (not a signature algorithm)
-     * - The OLD buggy check: `signatureAlgorithm == SignatureAlgorithm.NONE` would pass (null != NONE)
-     * - The NEW fixed check: `signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE` correctly rejects
+     * This tests the fix for the vulnerability where:
+     * - For JWE, we now extract signature algorithm from nested JWT header (not outer JWE header)
+     * - Both null and NONE algorithms are rejected when forceSignedRequestObject=true
      */
     @Test
-    public void processRequestObject_whenForceSignedRequestObjectEnabledAndAlgorithmIsNull_shouldRejectRequest() {
-        // Verify that RSA-OAEP is not recognized as a signature algorithm
-        SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString("RSA-OAEP");
-        assertTrue(sigAlg == null, "RSA-OAEP should not be recognized as a signature algorithm");
+    public void processRequestObject_whenForceSignedRequestObjectEnabledAndNestedJwtHasNoneAlgorithm_shouldRejectRequest() {
+        // Setup: forceSignedRequestObject = true
+        when(appConfiguration.getForceSignedRequestObject()).thenReturn(true);
 
-        // Verify the OLD buggy behavior would have allowed this to pass
-        // OLD: signatureAlgorithm == SignatureAlgorithm.NONE
-        boolean oldBuggyCheck = (sigAlg == SignatureAlgorithm.NONE); // false! (null != NONE)
-        assertTrue(!oldBuggyCheck, "OLD buggy check would have allowed RSA-OAEP to pass");
+        // Create mock exception to be thrown
+        WebApplicationException expectedException = new WebApplicationException("A signed request object is required");
+        when(authorizeRestWebServiceValidator.createInvalidJwtRequestException(any(), anyString()))
+                .thenReturn(expectedException);
 
-        // Verify our fix: both null and NONE should be rejected
-        // NEW: signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE
-        boolean newFixedCheck = (sigAlg == null || sigAlg == SignatureAlgorithm.NONE); // true! (null == null)
-        assertTrue(newFixedCheck, "NEW fixed check correctly rejects RSA-OAEP (null algorithm)");
+        // Create mock JwtAuthorizationRequest representing a JWE with nested JWT using NONE algorithm
+        JwtAuthorizationRequest mockJwtRequest = mock(JwtAuthorizationRequest.class);
+        when(mockJwtRequest.isJws()).thenReturn(false); // It's a JWE, not JWS
+        // Use lenient for stubs that may not be called depending on code path
+        lenient().when(mockJwtRequest.isJwe()).thenReturn(true);
+        lenient().when(mockJwtRequest.getScopes()).thenReturn(Collections.emptyList());
+        when(mockJwtRequest.getRedirectUri()).thenReturn(null);
+
+        // Mock nested JWT with NONE signature algorithm
+        Jwt mockNestedJwt = mock(Jwt.class);
+        JwtHeader mockHeader = mock(JwtHeader.class);
+        when(mockHeader.getSignatureAlgorithm()).thenReturn(SignatureAlgorithm.NONE);
+        when(mockNestedJwt.getHeader()).thenReturn(mockHeader);
+        when(mockJwtRequest.getNestedJwt()).thenReturn(mockNestedJwt);
+
+        // Setup AuthzRequest
+        Client client = new Client();
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setRequest("dummy-jwe-token");
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(
+                mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+        Set<String> scopes = new HashSet<>();
+        scopes.add("openid");
+
+        // Use MockedStatic to mock the static createJwtRequest method
+        try (MockedStatic<JwtAuthorizationRequest> mockedStatic = Mockito.mockStatic(JwtAuthorizationRequest.class)) {
+            mockedStatic.when(() -> JwtAuthorizationRequest.createJwtRequest(
+                    anyString(), any(), any(), any(), any(), any()
+            )).thenReturn(mockJwtRequest);
+
+            // Call processRequestObject and expect rejection
+            try {
+                authzRequestService.processRequestObject(authzRequest, client, scopes, null);
+                fail("Should have thrown WebApplicationException for NONE algorithm with forceSignedRequestObject=true");
+            } catch (WebApplicationException e) {
+                // Expected - request should be rejected
+                assertTrue(true, "Request correctly rejected for NONE signature algorithm");
+            }
+        }
+    }
+
+    /**
+     * Security test: Verifies that processRequestObject accepts JWE request objects
+     * when forceSignedRequestObject=true and the nested JWT has a valid signature algorithm (RS256).
+     */
+    @Test
+    public void processRequestObject_whenForceSignedRequestObjectEnabledAndNestedJwtHasRS256Algorithm_shouldAcceptRequest() {
+        // Setup: forceSignedRequestObject = true
+        when(appConfiguration.getForceSignedRequestObject()).thenReturn(true);
+        lenient().when(appConfiguration.isFapi()).thenReturn(false);
+
+        // Create mock JwtAuthorizationRequest representing a JWE with properly signed nested JWT
+        JwtAuthorizationRequest mockJwtRequest = mock(JwtAuthorizationRequest.class);
+        when(mockJwtRequest.isJws()).thenReturn(false); // It's a JWE, not JWS
+        lenient().when(mockJwtRequest.isJwe()).thenReturn(true);
+        when(mockJwtRequest.getScopes()).thenReturn(Collections.emptyList());
+        when(mockJwtRequest.getRedirectUri()).thenReturn(null);
+        when(mockJwtRequest.getPrompts()).thenReturn(Collections.emptyList());
+        lenient().when(mockJwtRequest.getState()).thenReturn("test-state");
+
+        // Mock nested JWT with RS256 signature algorithm (valid)
+        Jwt mockNestedJwt = mock(Jwt.class);
+        JwtHeader mockHeader = mock(JwtHeader.class);
+        when(mockHeader.getSignatureAlgorithm()).thenReturn(SignatureAlgorithm.RS256);
+        when(mockNestedJwt.getHeader()).thenReturn(mockHeader);
+        when(mockJwtRequest.getNestedJwt()).thenReturn(mockNestedJwt);
+
+        // Setup AuthzRequest
+        Client client = new Client();
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setRequest("dummy-jwe-token");
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(
+                mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+        Set<String> scopes = new HashSet<>();
+        scopes.add("openid");
+
+        // Use MockedStatic to mock the static createJwtRequest method
+        try (MockedStatic<JwtAuthorizationRequest> mockedStatic = Mockito.mockStatic(JwtAuthorizationRequest.class)) {
+            mockedStatic.when(() -> JwtAuthorizationRequest.createJwtRequest(
+                    anyString(), any(), any(), any(), any(), any()
+            )).thenReturn(mockJwtRequest);
+
+            // Call processRequestObject - should NOT throw exception for RS256
+            try {
+                authzRequestService.processRequestObject(authzRequest, client, scopes, null);
+                // If we get here without exception, the request was accepted
+                assertTrue(true, "Request correctly accepted for RS256 signature algorithm");
+            } catch (WebApplicationException e) {
+                // Should not happen for valid RS256 signature
+                fail("Should NOT have thrown WebApplicationException for RS256 algorithm: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Security test: Verifies that processRequestObject rejects JWS request objects
+     * when forceSignedRequestObject=true and the algorithm is "none".
+     */
+    @Test
+    public void processRequestObject_whenForceSignedRequestObjectEnabledAndJwsHasNoneAlgorithm_shouldRejectRequest() {
+        // Setup: forceSignedRequestObject = true
+        when(appConfiguration.getForceSignedRequestObject()).thenReturn(true);
+
+        // Create mock exception to be thrown
+        WebApplicationException expectedException = new WebApplicationException("A signed request object is required");
+        when(authorizeRestWebServiceValidator.createInvalidJwtRequestException(any(), anyString()))
+                .thenReturn(expectedException);
+
+        // Create mock JwtAuthorizationRequest representing a JWS with NONE algorithm
+        JwtAuthorizationRequest mockJwtRequest = mock(JwtAuthorizationRequest.class);
+        when(mockJwtRequest.isJws()).thenReturn(true); // It's a JWS
+        lenient().when(mockJwtRequest.isJwe()).thenReturn(false);
+        when(mockJwtRequest.getAlgorithm()).thenReturn("none"); // NONE algorithm
+        lenient().when(mockJwtRequest.getScopes()).thenReturn(Collections.emptyList());
+        when(mockJwtRequest.getRedirectUri()).thenReturn(null);
+
+        // Setup AuthzRequest
+        Client client = new Client();
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setRequest("dummy-jws-token");
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(
+                mock(RedirectUri.class), "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+        Set<String> scopes = new HashSet<>();
+        scopes.add("openid");
+
+        // Use MockedStatic to mock the static createJwtRequest method
+        try (MockedStatic<JwtAuthorizationRequest> mockedStatic = Mockito.mockStatic(JwtAuthorizationRequest.class)) {
+            mockedStatic.when(() -> JwtAuthorizationRequest.createJwtRequest(
+                    anyString(), any(), any(), any(), any(), any()
+            )).thenReturn(mockJwtRequest);
+
+            // Call processRequestObject and expect rejection
+            try {
+                authzRequestService.processRequestObject(authzRequest, client, scopes, null);
+                fail("Should have thrown WebApplicationException for 'none' algorithm with forceSignedRequestObject=true");
+            } catch (WebApplicationException e) {
+                // Expected - request should be rejected
+                assertTrue(true, "Request correctly rejected for 'none' signature algorithm");
+            }
+        }
     }
 
     @Test

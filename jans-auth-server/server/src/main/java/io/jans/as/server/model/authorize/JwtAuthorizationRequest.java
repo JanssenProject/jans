@@ -107,6 +107,8 @@ public class JwtAuthorizationRequest {
     private Jwt nestedJwt;
 
     private final AppConfiguration appConfiguration;
+    private boolean isJws;
+    private boolean isJwe;
 
     public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException {
         try {
@@ -169,6 +171,7 @@ public class JwtAuthorizationRequest {
 
                 loadHeader(jwe.getHeader().toJsonString());
                 loadPayload(jwe.getClaims().toJsonString());
+                isJwe = true;
             } else if (parts.length == 2 || parts.length == 3) {
                 String encodedHeader = parts[0];
                 String encodedClaim = parts[1];
@@ -193,6 +196,7 @@ public class JwtAuthorizationRequest {
                 }
 
                 loadPayload(payloadString);
+                isJws = true;
             } else {
                 throw new InvalidJwtException("The JWT is not well formed");
             }
@@ -622,5 +626,13 @@ public class JwtAuthorizationRequest {
                         .build());
             }
         }
+    }
+
+    public boolean isJws() {
+        return isJws;
+    }
+
+    public boolean isJwe() {
+        return isJwe;
     }
 }
