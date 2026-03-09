@@ -57,28 +57,6 @@ func NewCedarlingWithEnv(bootstrap_config *map[string]any) (*Cedarling, error) {
 	return instance, nil
 }
 
-// Executes an authorization request.
-func (c *Cedarling) Authorize(request Request) (AuthorizeResult, error) {
-	request_json, err := json.Marshal(request)
-	if err != nil {
-		return AuthorizeResult{}, err
-	}
-
-	result := internal.CallAuthorize(c.instance_id, string(request_json))
-	err = result.Error()
-	if err != nil {
-		return AuthorizeResult{}, err
-	}
-
-	var authorize_result AuthorizeResult
-	err = json.Unmarshal([]byte(result.JsonValue()), &authorize_result)
-	if err != nil {
-		return AuthorizeResult{}, err
-	}
-
-	return authorize_result, nil
-}
-
 // Executes an unsigned authorization request (raw data for principle)
 func (c *Cedarling) AuthorizeUnsigned(request RequestUnsigned) (AuthorizeResult, error) {
 	request_json, err := json.Marshal(request)
