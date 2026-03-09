@@ -14,15 +14,7 @@ pub struct AuthorizationConfig {
     /// Specifies what boolean operation to use for principals when making authz decisions.
     pub principal_bool_operator: JsonRule,
 
-    /// List of claims to map from user entity for decision logging.
-    /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in bootstrap properties documentation.
-    pub decision_log_user_claims: Vec<String>,
-
-    /// List of claims to map from workload entity for decision logging.
-    /// `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` in bootstrap properties documentation.
-    pub decision_log_workload_claims: Vec<String>,
-
-    /// Token claims that will be used for decision logging.
+    /// Claim name used for decision logging (e.g. which JWT claim identifies the token).
     /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in bootstrap properties documentation.
     pub decision_log_default_jwt_id: String,
 }
@@ -33,10 +25,6 @@ pub struct AuthorizationConfigRaw {
     pub principal_bool_operator: JsonRule,
     /// Decision log default JWT ID
     pub decision_log_default_jwt_id: String,
-    /// Decision log user claims
-    pub decision_log_user_claims: Vec<String>,
-    /// Decision log workload claims
-    pub decision_log_workload_claims: Vec<String>,
 }
 
 impl Default for AuthorizationConfig {
@@ -44,8 +32,6 @@ impl Default for AuthorizationConfig {
         Self {
             principal_bool_operator: JsonRule::default(),
             decision_log_default_jwt_id: "jti".to_string(),
-            decision_log_user_claims: Vec::new(),
-            decision_log_workload_claims: Vec::new(),
         }
     }
 }
@@ -55,8 +41,6 @@ impl From<AuthorizationConfigRaw> for AuthorizationConfig {
         Self {
             principal_bool_operator: raw.principal_bool_operator,
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id,
-            decision_log_user_claims: raw.decision_log_user_claims,
-            decision_log_workload_claims: raw.decision_log_workload_claims,
         }
     }
 }
