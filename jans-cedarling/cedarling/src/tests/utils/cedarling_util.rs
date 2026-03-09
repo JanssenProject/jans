@@ -3,7 +3,6 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::authorization_config::IdTokenTrustMode;
 use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub(crate) use crate::{
     BootstrapConfig, Cedarling, DataStoreConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
@@ -26,14 +25,8 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
             source: policy_source,
         },
         jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
-            principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::Never,
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        authorization_config: AuthorizationConfig::default(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,

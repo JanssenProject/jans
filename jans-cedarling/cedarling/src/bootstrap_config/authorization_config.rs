@@ -9,63 +9,26 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Configuration to specify authorization workflow.
-/// - If we use user entity as principal.
-/// - If we use workload entity as principal.
-/// - What boolean operator we need to use when both is used
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuthorizationConfig {
-    /// When `enabled`, Cedar engine authorization is queried for a User principal.
-    /// bootstrap property: `CEDARLING_USER_AUTHZ`
-    pub use_user_principal: bool,
-
-    /// When `enabled`, Cedar engine authorization is queried for a Workload principal.
-    /// bootstrap property: `CEDARLING_WORKLOAD_AUTHZ`
-    pub use_workload_principal: bool,
-
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD`  when
-    /// making authz (authorization) decisions.
+    /// Specifies what boolean operation to use for principals when making authz decisions.
     pub principal_bool_operator: JsonRule,
 
-    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// List of claims to map from user entity for decision logging.
+    /// `CEDARLING_DECISION_LOG_USER_CLAIMS` in bootstrap properties documentation.
     pub decision_log_user_claims: Vec<String>,
 
-    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
-    /// `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// List of claims to map from workload entity for decision logging.
+    /// `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` in bootstrap properties documentation.
     pub decision_log_workload_claims: Vec<String>,
 
     /// Token claims that will be used for decision logging.
-    /// Default is jti, but perhaps some other claim is needed.
-    /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    /// `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` in bootstrap properties documentation.
     pub decision_log_default_jwt_id: String,
-
-    /// Sets the validation level for ID tokens.
-    ///
-    /// The available levels are [`Always`], [`Never`], [`IfPresent`], and [`Strict`].
-    ///
-    /// # Strict Mode
-    ///
-    /// In `Strict` mode, the following conditions must be met for a token
-    /// to be considered valid:
-    ///
-    /// - The `id_token`'s `aud` (audience) must match the `access_token`'s `client_id`
-    /// - If a Userinfo token is present:
-    ///     - Its `sub` (subject) must match the `id_token`'s `sub`.
-    ///     - Its `aud` (audience) must match the `access_token`'s `client_id`.
-    ///
-    /// [`Always`]: IdTokenTrustMode::Always
-    /// [`Never`]: IdTokenTrustMode::Never
-    /// [`IfPresent`]: IdTokenTrustMode::IfPresent
-    /// [`Strict`]: IdTokenTrustMode::Strict
-    pub id_token_trust_mode: IdTokenTrustMode,
 }
 
 /// Raw authorization config
 pub struct AuthorizationConfigRaw {
-    /// Use user principal
-    pub use_user_principal: bool,
-    /// Use workload principal
-    pub use_workload_principal: bool,
     /// Principal bool operator
     pub principal_bool_operator: JsonRule,
     /// Decision log default JWT ID
@@ -76,31 +39,13 @@ pub struct AuthorizationConfigRaw {
     pub decision_log_workload_claims: Vec<String>,
 }
 
-/// ID token trust mode
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum IdTokenTrustMode {
-    /// Always
-    Always,
-    /// Never
-    Never,
-    /// If present
-    IfPresent,
-    /// Strict
-    #[default]
-    Strict,
-}
-
 impl Default for AuthorizationConfig {
     fn default() -> Self {
         Self {
-            use_user_principal: true,
-            use_workload_principal: true,
             principal_bool_operator: JsonRule::default(),
             decision_log_default_jwt_id: "jti".to_string(),
             decision_log_user_claims: Vec::new(),
             decision_log_workload_claims: Vec::new(),
-            id_token_trust_mode: IdTokenTrustMode::Strict,
         }
     }
 }
@@ -108,13 +53,10 @@ impl Default for AuthorizationConfig {
 impl From<AuthorizationConfigRaw> for AuthorizationConfig {
     fn from(raw: AuthorizationConfigRaw) -> Self {
         Self {
-            use_user_principal: raw.use_user_principal,
-            use_workload_principal: raw.use_workload_principal,
             principal_bool_operator: raw.principal_bool_operator,
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id,
             decision_log_user_claims: raw.decision_log_user_claims,
             decision_log_workload_claims: raw.decision_log_workload_claims,
-            id_token_trust_mode: IdTokenTrustMode::Strict,
         }
     }
 }
@@ -145,11 +87,4 @@ impl<S: std::hash::BuildHasher + Default> From<TokenEntityNames> for HashMap<Str
     fn from(value: TokenEntityNames) -> Self {
         value.0.into_iter().collect::<HashMap<_, _, S>>()
     }
-}
-
-/// Error when parsing [`IdTokenTrustMode`]
-#[derive(Default, Debug, derive_more::Display, derive_more::Error)]
-#[display("Invalid `IdTokenTrustMode`: {trust_mode}. should be `strict` or `never`")]
-pub struct IdTknTrustModeParseError {
-    trust_mode: String,
 }

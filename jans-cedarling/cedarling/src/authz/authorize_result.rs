@@ -127,8 +127,6 @@ impl AuthorizeResult {
     pub(crate) fn new_for_many_principals(
         principal_bool_operator: &JsonRule,
         principal_responses: HashMap<EntityUid, cedar_policy::Response>,
-        _workload_uid: Option<&EntityUid>,
-        _person_uid: Option<&EntityUid>,
         request_id: Uuid,
     ) -> Result<Self, ApplyRuleError> {
         let mut principals_decision_info = HashMap::new();

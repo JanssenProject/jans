@@ -94,7 +94,7 @@ mod test {
         let iss = Arc::new(TrustedIssuer::default());
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
@@ -138,7 +138,7 @@ mod test {
         let iss = Arc::new(TrustedIssuer::default());
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
@@ -192,7 +192,7 @@ mod test {
         let iss = Arc::new(TrustedIssuer::default());
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),

@@ -22,7 +22,6 @@ mod schema;
 mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
-use crate::authz::AuthorizeEntitiesData;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
@@ -95,74 +94,6 @@ impl EntityBuilder {
             schema,
             default_entities,
             issuers_index,
-        })
-    }
-
-    pub(super) fn build_entities(
-        &self,
-        tokens: &HashMap<String, Arc<Token>>,
-        resource_data: &EntityData,
-    ) -> Result<AuthorizeEntitiesData, BuildEntityError> {
-        let mut tkn_principal_mappings = TokenPrincipalMappings::default();
-        let mut built_entities = BuiltEntities::from(&self.iss_entities);
-
-        let mut token_entities = HashMap::new();
-        for (tkn_name, tkn) in tokens {
-            let entity_name = tkn
-                .iss
-                .as_ref()
-                .and_then(|iss| iss.token_metadata.get(tkn_name))
-                .map(|metadata| metadata.entity_type_name.as_str())
-                .or_else(|| default_tkn_entity_name(tkn_name));
-
-            let Some(entity_name) = entity_name else {
-                continue;
-            };
-
-            let tkn_entity = self.build_tkn_entity(
-                entity_name,
-                tkn,
-                &mut tkn_principal_mappings,
-                &built_entities,
-                HashSet::new(),
-            )?;
-            built_entities.insert(&tkn_entity.uid());
-            token_entities.insert(tkn_name.clone(), tkn_entity);
-        }
-
-        let workload = if self.config.build_workload {
-            let workload_entity =
-                self.build_workload_entity(tokens, &tkn_principal_mappings, &built_entities)?;
-            Some(workload_entity)
-        } else {
-            None
-        };
-
-        let (user, roles) = if self.config.build_user {
-            let roles = self.build_role_entities(tokens)?;
-            let role_uids = roles.iter().map(Entity::uid).collect();
-            let user = self.build_user_entity(
-                tokens,
-                &tkn_principal_mappings,
-                &built_entities,
-                role_uids,
-            )?;
-            (Some(user), roles)
-        } else {
-            (None, Vec::new())
-        };
-
-        let resource = self.build_resource_entity(resource_data)?;
-
-        let issuers = self.iss_entities.values().cloned().collect();
-        Ok(AuthorizeEntitiesData {
-            issuers,
-            workload,
-            user,
-            resource,
-            roles,
-            tokens: token_entities,
-            default_entities: self.default_entities.clone(),
         })
     }
 
@@ -412,8 +343,7 @@ mod test {
             ValidatorSchema::from_str(schema_src).expect("parse validation schema");
 
         // Set the custom workload name in the config
-        let mut config = EntityBuilderConfig::default().with_workload();
-        config.build_user = false; // Explicitly disable user entity building for this test
+        let mut config = EntityBuilderConfig::default();
         config.entity_names.workload = "Jans::CustomWorkload".into();
 
         // Set the custom token names in the IDP metadata
@@ -585,11 +515,7 @@ mod test {
         )]);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: true,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -766,11 +692,7 @@ mod test {
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: false,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -916,11 +838,7 @@ mod test {
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: false,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,
@@ -1112,11 +1030,7 @@ mod test {
         let issuers_index = TrustedIssuerIndex::new(&trusted_issuers, None);
 
         // Create entity builder with default entities
-        let config = EntityBuilderConfig {
-            build_workload: false,
-            build_user: false,
-            ..Default::default()
-        };
+        let config = EntityBuilderConfig::default();
 
         let entity_builder = EntityBuilder::new(
             config,

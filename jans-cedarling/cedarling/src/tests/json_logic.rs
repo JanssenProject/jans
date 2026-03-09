@@ -471,8 +471,6 @@ fn test_with_multiple_principals() {
     let result = AuthorizeResult::new_for_many_principals(
         &rule,
         principal_responses,
-        None,
-        None,
         gen_uuid4(),
     )
     .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");

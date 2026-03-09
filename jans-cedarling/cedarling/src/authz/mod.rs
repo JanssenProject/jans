@@ -309,8 +309,6 @@ impl Authz {
         let result = AuthorizeResult::new_for_many_principals(
             &self.config.authorization.principal_bool_operator,
             principal_responses,
-            None,
-            None,
             request_id,
         )?;
 
