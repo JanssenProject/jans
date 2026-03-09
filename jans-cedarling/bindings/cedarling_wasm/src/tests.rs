@@ -163,7 +163,11 @@ async fn test_init_conf_as_object() {
 ///    permit(principal is Jans::User, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
 #[wasm_bindgen_test]
 async fn test_run_cedarling() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    // Require only Jans::User so a single User principal that ALLOWs yields overall ALLOW
+    bootstrap_config_json["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json!({
+        "and": [{"===": [{"var": "Jans::User"}, "ALLOW"]}]
+    });
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -179,7 +183,8 @@ async fn test_run_cedarling() {
             "cedar_entity_mapping": {
                 "entity_type": "Jans::User",
                 "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-            }
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
         }))
         .expect("Principal EntityData should be deserialized correctly")],
         context: json!({
@@ -268,7 +273,8 @@ async fn test_memory_log_interface() {
             "cedar_entity_mapping": {
                 "entity_type": "Jans::User",
                 "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
-            }
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
         }))
         .expect("Principal EntityData should be deserialized correctly")],
         context: json!({

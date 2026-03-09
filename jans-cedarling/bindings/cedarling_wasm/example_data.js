@@ -160,6 +160,7 @@ const REQUEST_UNSIGNED = {
   principals: [
     {
       cedar_entity_mapping: { entity_type: "Jans::User", id: "demo_user_id" },
+      sub: "demo_user_id",
     },
   ],
   action: 'Jans::Action::"Read"',
