@@ -25,6 +25,10 @@ pub enum JwtProcessingError {
 #[derive(Debug, thiserror::Error)]
 pub enum JwtServiceInitError {
     #[error(
+        "the JWT service is configured to validate signed JWTs but no algorithms were provided"
+    )]
+    NoSupportedAlgorithms,
+    #[error(
         "Failed to initialize Key Service for JwtService due to a conflictig config: both a local \
          JWKS and trusted issuers was provided."
     )]
