@@ -77,6 +77,12 @@ pub struct LockServiceConfig {
     pub accept_invalid_certs: bool,
     /// Transport protocol to use for Lock Server communication
     pub transport: LockTransport,
+    /// Channel capacity for buffering log entries before they are sent to the lock server.
+    pub log_channel_capacity: usize,
+}
+
+impl LockServiceConfig {
+    pub(super) const DEFAULT_CHANNEL_CAPACITY: usize = 100;
 }
 
 /// Raw lock service config
@@ -102,6 +108,8 @@ pub struct LockServiceConfigRaw {
     pub accept_invalid_certs: bool,
     /// Transport protocol
     pub transport: LockTransport,
+    /// Channel capacity for log buffering
+    pub log_channel_capacity: usize,
 }
 
 impl Default for LockServiceConfig {
@@ -119,6 +127,7 @@ impl Default for LockServiceConfig {
             listen_sse: false,
             accept_invalid_certs: false,
             transport: LockTransport::default(),
+            log_channel_capacity: Self::DEFAULT_CHANNEL_CAPACITY,
         }
     }
 }
@@ -139,6 +148,7 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
             listen_sse: raw.listen_sse,
             accept_invalid_certs: raw.accept_invalid_certs,
             transport: raw.transport,
+            log_channel_capacity: raw.log_channel_capacity,
         }
     }
 }
@@ -175,6 +185,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             log_level: raw.log_level,
             accept_invalid_certs: raw.accept_invalid_certs.into(),
             transport: raw.lock_transport,
+            log_channel_capacity: raw.lock_log_channel_capacity,
         })
     }
 }

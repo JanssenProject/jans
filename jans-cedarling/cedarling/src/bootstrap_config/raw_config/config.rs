@@ -7,7 +7,9 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
-use super::default_values::{default_jti, default_token_cache_capacity, default_true};
+use super::default_values::{
+    default_jti, default_log_channel_capacity, default_token_cache_capacity, default_true,
+};
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
 use super::feature_types::{FeatureToggle, LoggerType};
@@ -299,8 +301,22 @@ pub struct BootstrapConfigRaw {
     pub accept_invalid_certs: FeatureToggle,
 
     /// Transport protocol for Lock Server communication ("grpc" or "rest").
-    #[serde(rename = "CEDARLING_LOCK_TRANSPORT", default)]
+    #[serde(
+        rename = "CEDARLING_LOCK_TRANSPORT",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
     pub lock_transport: LockTransport,
+
+    /// Channel capacity for buffering log entries before they are sent to the lock server.
+    /// Higher values allow more logs to be buffered in memory when the lock server is slow,
+    /// but also increase memory usage. 
+    /// Default value is 100.
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_CHANNEL_CAPACITY",
+        default = "default_log_channel_capacity"
+    )]
+    pub lock_log_channel_capacity: usize,
 
     /// Allows to limit maximum token cache TTL in seconds.
     /// Zero means no token cache TTL limit.

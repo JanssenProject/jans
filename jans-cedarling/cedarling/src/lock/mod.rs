@@ -257,7 +257,7 @@ fn create_log_worker(
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
 ) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
-    let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(100);
+    let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(bootstrap_conf.log_channel_capacity);
 
     match bootstrap_conf.transport {
         LockTransport::Rest => {
@@ -421,6 +421,7 @@ mod test {
             log_level: LogLevel::TRACE,
             accept_invalid_certs: true, // Allow invalid certs for testing
             transport: LockTransport::Rest,
+            ..Default::default()
         };
 
         // Test startup
@@ -473,6 +474,7 @@ mod test {
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
             transport: LockTransport::Rest,
+            ..Default::default()
         };
 
         // Test startup without SSA
@@ -521,6 +523,7 @@ mod test {
             log_level: LogLevel::TRACE,
             accept_invalid_certs: false,
             transport: LockTransport::Rest,
+            ..Default::default()
         };
 
         // Test startup with invalid SSA should fail
