@@ -137,6 +137,10 @@ The following are the ***mandatory*** functions which need to be implemented in 
             context.createWebApplicationException(400, "invalid_request", "Client certificate is required")
             return False
         cert = CertUtils.x509CertificateFromPem(certPem)
+        if cert is None:
+            print "Client registration. Failed to parse client certificate"
+            context.createWebApplicationException(400, "invalid_request", "Invalid client certificate format")
+            return False
         cn = CertUtils.getCN(cert)
 
         # 2. validate SSA 
