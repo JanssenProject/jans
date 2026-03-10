@@ -1,39 +1,101 @@
-{{- if .Values.gatewayApi.enabled -}}
+{{- if index .Values "gateway-api" "enabled" -}}
 {{- $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $namespace := .Release.Namespace -}}
 {{- $svcName := .Values.service.name -}}
 {{- $svcPort := .Values.service.port -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: {{ .Values.gatewayApi.name }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ index .Values "gateway-api" "gateway" "name" }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-gateway
-{{- if .Values.gatewayApi.gatewayLabels }}
-{{- toYaml .Values.gatewayApi.gatewayLabels | nindent 4 }}
+{{- if index .Values "gateway-api" "gateway" "labels" }}
+{{- toYaml (index .Values "gateway-api" "gateway" "labels") | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.gatewayAnnotations }}
+{{- if index .Values "gateway-api" "gateway" "annotations" }}
   annotations:
-{{- toYaml .Values.gatewayApi.gatewayAnnotations | nindent 4 }}
+{{- toYaml (index .Values "gateway-api" "gateway" "annotations") | nindent 4 }}
 {{- end }}
 spec:
-  gatewayClassName: {{ .Values.gatewayApi.gatewayClassName }}
-  {{- if .Values.lbIp }}
+  gatewayClassName: {{ index .Values "gateway-api" "gateway" "className" }}
+  {{- if or (index .Values "gateway-api" "gateway" "infrastructure" "labels") (index .Values "gateway-api" "gateway" "infrastructure" "annotations") (index .Values "gateway-api" "gateway" "infrastructure" "parametersRef") (and (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") (index .Values "gateway-api" "additionalConfig" "airlock" "createLbService")) }}
+  infrastructure:
+    {{- if index .Values "gateway-api" "gateway" "infrastructure" "labels" }}
+    labels:
+      {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "labels") | nindent 6 }}
+    {{- end }}
+    {{- if index .Values "gateway-api" "gateway" "infrastructure" "annotations" }}
+    annotations:
+      {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "annotations") | nindent 6 }}
+    {{- end }}
+    {{- if index .Values "gateway-api" "gateway" "infrastructure" "parametersRef" }}
+    parametersRef:
+      {{- toYaml (index .Values "gateway-api" "gateway" "infrastructure" "parametersRef") | nindent 6 }}
+    {{- else if and (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") (index .Values "gateway-api" "additionalConfig" "airlock" "createLbService") }}
+    parametersRef:
+      group: microgateway.airlock.com
+      kind: GatewayParameters
+      name: airlock-gw-params
+    {{- end }}
+  {{- end }}
+  {{- if and (index .Values "gateway-api" "gateway" "attachLbIp") (.Values.lbIp) }}
   addresses:
   - type: IPAddress
     value: {{ .Values.lbIp }}
   {{- end }}
   listeners:
   - name: http
-    port: {{ .Values.gatewayApi.httpPort }}
+    port: {{ index .Values "gateway-api" "gateway" "httpPort" }}
     protocol: HTTP
   - name: https
-    port: {{ .Values.gatewayApi.httpsPort }}
+    port: {{ index .Values "gateway-api" "gateway" "httpsPort" }}
     protocol: HTTPS
     tls:
       mode: Terminate
       certificateRefs:
-      - name: {{ .Values.gatewayApi.tlsSecretName }}
+      - name: {{ index .Values "gateway-api" "gateway" "tlsSecretName" }}
+
+{{- /* Start of GatewayParameters definition */}}
+{{- if and (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") (index .Values "gateway-api" "additionalConfig" "airlock" "createLbService") }}
+---
+
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: airlock-gw-params
+  namespace: {{ $namespace }}
+spec:
+  kubernetes:
+    service:
+      type: LoadBalancer
+{{- end }}
+{{- /* End of GatewayParameters definition */}}
+
+{{- /* Start of GatewayClass definition */}}
+{{- if and (eq (index .Values "gateway-api" "gateway" "className") "envoy") (index .Values "gateway-api" "additionalConfig" "envoy" "createGatewayClass") }}
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+{{- end }}
+{{- /* End of GatewayClass definition */}}
+
+{{- if and (eq (index .Values "gateway-api" "gateway" "className") "cilium") (index .Values "gateway-api" "additionalConfig" "cilium" "ipPoolBlocks") }}
+---
+
+apiVersion: "cilium.io/v2"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: {{ $fullName }}-cilium-ip-pool
+spec:
+  blocks:
+{{- toYaml (index .Values "gateway-api" "additionalConfig" "cilium" "ipPoolBlocks") | nindent 4 }}
+{{- end }}
 
 ---
 {{- /* ======================================================== */}}
@@ -44,24 +106,25 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}-routes-public
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if index .Values "gateway-api" "routes" "labels" }}
+{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if index .Values "gateway-api" "routes" "annotations" }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ index .Values "gateway-api" "gateway" "name" }}
     # No sectionName: Attaches to ALL listeners (HTTP and HTTPS)
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-  
+  {{- /* DON'T remove `/jans-auth` prefix in filters; they will be stripped in AIO image internally */}}
+
   {{- /* 1. OpenID Configuration */}}
   {{- if index .Values "auth-server" "ingress" "openidConfigEnabled" }}
   - matches:
@@ -265,23 +328,6 @@ spec:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
   {{- end }}
-  
-  {{- /* 13. Jans Lock */}}
-  {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockEnabled") }}
-  - matches:
-    - path:
-        type: Exact
-        value: /jans-lock
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
 
 ---
 {{- /* ======================================================== */}}
@@ -292,19 +338,19 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}-routes-secure
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if index .Values "gateway-api" "routes" "labels" }}
+{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if index .Values "gateway-api" "routes" "annotations" }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ index .Values "gateway-api" "gateway" "name" }}
     sectionName: https  # ONLY LISTEN ON HTTPS
   hostnames:
   - {{ .Values.fqdn | quote }}
@@ -365,17 +411,6 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 6. SAML (/kc) */}}
-  {{- if .Values.saml.ingress.samlEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /kc
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
 ---
 {{- /* ======================================================== */}}
 {{- /* ROUTE 3: SECURE APPS (HTTP REDIRECT)                     */}}
@@ -385,26 +420,26 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullName }}-routes-redirect
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if .Values.gatewayApi.routeLabels }}
-{{- toYaml .Values.gatewayApi.routeLabels | nindent 4 }}
+{{- if index .Values "gateway-api" "routes" "labels" }}
+{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
 {{- end }}
-{{- if .Values.gatewayApi.routeAnnotations }}
+{{- if index .Values "gateway-api" "routes" "annotations" }}
   annotations:
-{{- toYaml .Values.gatewayApi.routeAnnotations | nindent 4 }}
+{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ .Values.gatewayApi.name }}
+  - name: {{ index .Values "gateway-api" "gateway" "name" }}
     sectionName: http  # ONLY LISTEN ON HTTP
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-  
+
   {{- /* Same 6 Rules, but with Redirect Filter instead of BackendRef */}}
-  
+
   {{- /* 1. Auth Server Redirect */}}
   {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
   - matches:
@@ -470,17 +505,73 @@ spec:
         statusCode: 301
   {{- end }}
 
-  {{- /* 6. SAML Redirect */}}
-  {{- if .Values.saml.ingress.samlEnabled }}
+{{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
+---
+{{- /* ======================================================== */}}
+{{- /* ROUTE 4: gRPC APPS                                       */}}
+{{- /* These endpoints use gRPC                                 */}}
+{{- /* ======================================================== */}}
+apiVersion: gateway.networking.k8s.io/v1
+{{- if or (eq (index .Values "gateway-api" "gateway" "className") "istio") (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") }}
+{{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
+kind: HTTPRoute
+{{- else }}
+kind: GRPCRoute
+{{- end }}
+metadata:
+  name: {{ $fullName }}-grpc-routes
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if index .Values "gateway-api" "routes" "labels" }}
+{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
+{{- end }}
+{{- if index .Values "gateway-api" "routes" "annotations" }}
+  annotations:
+{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ index .Values "gateway-api" "gateway" "name" }}
+    sectionName: https
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  {{- /* 1. Lock Server Audit */}}
+  {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
+  {{- if or (eq (index .Values "gateway-api" "gateway" "className") "istio") (eq (index .Values "gateway-api" "gateway" "className") "airlock-microgateway") }}
+  {{- /* HTTPRoute matches for istio */}}
   - matches:
     - path:
         type: PathPrefix
-        value: /kc
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
+        value: /io.jans.lock.audit.AuditService
+    backendRefs:
+    - name: {{ $svcName }}-grpc
+      port: 50051
+  {{- else }}
+  - matches:
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessLog
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkLog
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessHealth
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkHealth
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessTelemetry
+    - method:
+        service: io.jans.lock.audit.AuditService
+        method: ProcessBulkTelemetry
+    backendRefs:
+    - name: {{ $svcName }}-grpc
+      port: 50051
   {{- end }}
+{{- end }}
 
 {{- end }}

@@ -8,9 +8,9 @@
 use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
-    JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
+    IdTokenTrustMode, JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -46,6 +46,7 @@ async fn test_cedarling_with_valid_ssa() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -71,6 +72,7 @@ async fn test_cedarling_with_valid_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await;
 
@@ -105,6 +107,7 @@ async fn test_cedarling_without_ssa() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -130,6 +133,7 @@ async fn test_cedarling_without_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await;
 

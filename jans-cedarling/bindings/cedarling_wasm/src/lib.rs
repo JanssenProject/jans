@@ -5,7 +5,8 @@
 
 use cedarling::bindings::cedar_policy;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, LogStorage, Request,
+    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, Request,
     RequestUnsigned,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
@@ -13,6 +14,7 @@ use serde_json::json;
 use serde_wasm_bindgen::Error;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::time::Duration;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::{self, Array, Map, Object, Reflect};
 
@@ -291,6 +293,164 @@ impl Cedarling {
     pub async fn shut_down(&self) {
         self.instance.shut_down().await;
     }
+
+    /// Push a value into the data store with an optional TTL.
+    /// If the key already exists, the value will be replaced.
+    /// If TTL is not provided, the default TTL from configuration is used.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry (must not be empty)
+    /// * `value` - The value to store (any JSON-serializable JavaScript value: object, array, string, number, boolean)
+    /// * `ttl_secs` - Optional TTL in seconds (undefined/null uses default from config)
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
+    /// cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+    /// ```
+    pub fn push_data_ctx(
+        &self,
+        key: &str,
+        value: JsValue,
+        ttl_secs: Option<u64>,
+    ) -> Result<(), Error> {
+        let json_value: serde_json::Value = serde_wasm_bindgen::from_value(value)?;
+
+        // Reject null values on write
+        if json_value.is_null() {
+            return Err(Error::new("null values are not allowed in data ctx"));
+        }
+
+        let ttl = ttl_secs.map(Duration::from_secs);
+        self.instance
+            .push_data_ctx(key, json_value, ttl)
+            .map_err(Error::new)
+    }
+
+    /// Get a value from the data store by key.
+    /// Returns null if the key doesn't exist or the entry has expired.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry to retrieve
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const value = cedarling.get_data_ctx("user:123");
+    /// if (value !== null) {
+    ///     console.log(value.name); // "John"
+    /// }
+    /// ```
+    pub fn get_data_ctx(&self, key: &str) -> Result<JsValue, Error> {
+        match self.instance.get_data_ctx(key).map_err(Error::new)? {
+            Some(value) => {
+                let js_value = serde_wasm_bindgen::to_value(&value)?;
+                Ok(to_object_recursive(js_value)?)
+            },
+            None => Ok(JsValue::NULL),
+        }
+    }
+
+    /// Get a data entry with full metadata by key.
+    /// Returns null if the key doesn't exist or the entry has expired.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry to retrieve
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const entry = cedarling.get_data_entry_ctx("user:123");
+    /// if (entry !== null) {
+    ///     console.log(entry.key); // "user:123"
+    ///     console.log(entry.value); // { name: "John", age: 30 }
+    ///     console.log(entry.data_type); // "Record"
+    ///     console.log(entry.created_at); // "2024-01-01T12:00:00Z"
+    ///     console.log(entry.access_count); // 5
+    /// }
+    /// ```
+    pub fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, Error> {
+        match self.instance.get_data_entry_ctx(key).map_err(Error::new)? {
+            Some(entry) => {
+                let wasm_entry = DataEntry::from(entry);
+                Ok(Some(wasm_entry))
+            },
+            None => Ok(None),
+        }
+    }
+
+    /// Remove a value from the data store by key.
+    /// Returns true if the key existed and was removed, false otherwise.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string key for the data entry to remove
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const removed = cedarling.remove_data_ctx("user:123");
+    /// if (removed) {
+    ///     console.log("Entry was successfully removed");
+    /// }
+    /// ```
+    pub fn remove_data_ctx(&self, key: &str) -> Result<bool, Error> {
+        self.instance.remove_data_ctx(key).map_err(Error::new)
+    }
+
+    /// Clear all entries from the data store.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// cedarling.clear_data_ctx();
+    /// console.log("All data entries cleared");
+    /// ```
+    pub fn clear_data_ctx(&self) -> Result<(), Error> {
+        self.instance.clear_data_ctx().map_err(Error::new)
+    }
+
+    /// List all entries with their metadata.
+    /// Returns an array of DataEntry objects.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const entries = cedarling.list_data_ctx();
+    /// entries.forEach(entry => {
+    ///     console.log(`${entry.key}: ${entry.data_type} (accessed ${entry.access_count} times)`);
+    /// });
+    /// ```
+    pub fn list_data_ctx(&self) -> Result<Array, Error> {
+        let entries = self.instance.list_data_ctx().map_err(Error::new)?;
+        let result = Array::new();
+        for entry in entries {
+            let wasm_entry = DataEntry::from(entry);
+            result.push(&wasm_bindgen::JsValue::from(wasm_entry));
+        }
+        Ok(result)
+    }
+
+    /// Get statistics about the data store.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const stats = cedarling.get_stats_ctx();
+    /// console.log(`Entries: ${stats.entry_count}/${stats.max_entries || 'unlimited'}`);
+    /// console.log(`Capacity: ${stats.capacity_usage_percent.toFixed(2)}%`);
+    /// console.log(`Total size: ${stats.total_size_bytes} bytes`);
+    /// ```
+    pub fn get_stats_ctx(&self) -> Result<DataStoreStats, Error> {
+        self.instance
+            .get_stats_ctx()
+            .map(|stats| stats.into())
+            .map_err(Error::new)
+    }
 }
 
 /// convert json to js object
@@ -514,5 +674,108 @@ impl Serialize for PolicyEvaluationError {
         state.serialize_field("id", &self.id())?;
         state.serialize_field("error", &self.error())?;
         state.end()
+    }
+}
+
+/// A WASM wrapper for the Rust `cedarling::DataEntry` struct.
+/// Represents a data entry in the DataStore with value and metadata.
+#[wasm_bindgen]
+#[derive(serde::Serialize)]
+pub struct DataEntry {
+    /// The key for this entry
+    #[wasm_bindgen(getter_with_clone)]
+    pub key: String,
+    /// The actual value stored (as JSON)
+    #[wasm_bindgen(skip)]
+    pub value: serde_json::Value,
+    /// The inferred Cedar type of the value
+    #[wasm_bindgen(getter_with_clone)]
+    pub data_type: String,
+    /// Timestamp when this entry was created (RFC 3339 format)
+    #[wasm_bindgen(getter_with_clone)]
+    pub created_at: String,
+    /// Timestamp when this entry expires (RFC 3339 format), or null if no TTL
+    #[wasm_bindgen(getter_with_clone)]
+    pub expires_at: Option<String>,
+    /// Number of times this entry has been accessed
+    pub access_count: u64,
+}
+
+#[wasm_bindgen]
+impl DataEntry {
+    /// Get the value stored in this entry as a JavaScript object
+    pub fn value(&self) -> Result<JsValue, Error> {
+        let js_value = serde_wasm_bindgen::to_value(&self.value)?;
+        to_object_recursive(js_value)
+    }
+
+    /// Convert `DataEntry` to json string value
+    pub fn json_string(&self) -> String {
+        json!(self).to_string()
+    }
+}
+
+impl From<CedarDataEntry> for DataEntry {
+    fn from(value: CedarDataEntry) -> Self {
+        Self {
+            key: value.key,
+            value: value.value,
+            data_type: serde_json::to_string(&value.data_type)
+                .unwrap_or_else(|_| "unknown".to_string())
+                .trim_matches('"')
+                .to_string(),
+            created_at: value.created_at.to_rfc3339(),
+            expires_at: value.expires_at.map(|dt| dt.to_rfc3339()),
+            access_count: value.access_count,
+        }
+    }
+}
+
+/// A WASM wrapper for the Rust `cedarling::DataStoreStats` struct.
+/// Statistics about the DataStore.
+#[wasm_bindgen]
+#[derive(serde::Serialize)]
+pub struct DataStoreStats {
+    /// Number of entries currently stored
+    pub entry_count: usize,
+    /// Maximum number of entries allowed (0 = unlimited)
+    pub max_entries: usize,
+    /// Maximum size per entry in bytes (0 = unlimited)
+    pub max_entry_size: usize,
+    /// Whether metrics tracking is enabled
+    pub metrics_enabled: bool,
+    /// Total size of all entries in bytes (approximate, based on JSON serialization)
+    pub total_size_bytes: usize,
+    /// Average size per entry in bytes (0 if no entries)
+    pub avg_entry_size_bytes: usize,
+    /// Percentage of capacity used (0.0-100.0, based on entry count)
+    pub capacity_usage_percent: f64,
+    /// Memory usage threshold percentage (from config)
+    pub memory_alert_threshold: f64,
+    /// Whether memory usage exceeds the alert threshold
+    pub memory_alert_triggered: bool,
+}
+
+#[wasm_bindgen]
+impl DataStoreStats {
+    /// Convert `DataStoreStats` to json string value
+    pub fn json_string(&self) -> String {
+        json!(self).to_string()
+    }
+}
+
+impl From<CedarDataStoreStats> for DataStoreStats {
+    fn from(value: CedarDataStoreStats) -> Self {
+        Self {
+            entry_count: value.entry_count,
+            max_entries: value.max_entries,
+            max_entry_size: value.max_entry_size,
+            metrics_enabled: value.metrics_enabled,
+            total_size_bytes: value.total_size_bytes,
+            avg_entry_size_bytes: value.avg_entry_size_bytes,
+            capacity_usage_percent: value.capacity_usage_percent,
+            memory_alert_threshold: value.memory_alert_threshold,
+            memory_alert_triggered: value.memory_alert_triggered,
+        }
     }
 }

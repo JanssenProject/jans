@@ -7,9 +7,9 @@
 #![allow(dead_code)]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
-    EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, Request,
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request,
 };
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
@@ -61,6 +61,7 @@ async fn init_cedarling() -> Cedarling {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -83,6 +84,7 @@ async fn init_cedarling() -> Cedarling {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await
     .expect("should initialize cedarling")

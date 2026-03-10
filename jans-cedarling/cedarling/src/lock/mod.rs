@@ -93,7 +93,7 @@ mod register_client;
 pub(crate) mod ssa_validation;
 
 use crate::app_types::PdpID;
-use crate::common::issuer_utils::normalize_issuer;
+use crate::common::issuer_utils::IssClaim;
 use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
 use crate::{LockServiceConfig, LogWriter};
@@ -169,7 +169,8 @@ impl LockService {
             // Get the JWKS URI from the IDP URL (not the lock server URL)
             let jwks_uri = format!(
                 "{}/jans-auth/restv1/jwks",
-                normalize_issuer(&lock_config.issuer_oidc_url.0.origin().ascii_serialization())
+                IssClaim::new(&lock_config.issuer_oidc_url.0.origin().ascii_serialization())
+                    .as_str()
             );
 
             // Validate the SSA JWT

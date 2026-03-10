@@ -7,9 +7,9 @@ use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, EntityBuilderConfig,
-    EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, Request, log_config::StdOutLoggerMode,
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, Request, log_config::StdOutLoggerMode,
 };
 
 static POLICY_STORE_RAW_YAML: &str =
@@ -44,6 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+            validate_checksum: true,
         },
         jwt_config,
         authorization_config: AuthorizationConfig {
@@ -62,6 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 

@@ -6,7 +6,8 @@
 use crate::authorization_config::IdTokenTrustMode;
 use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub(crate) use crate::{
-    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, DataStoreConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource,
 };
 
 /// fixture for [`BootstrapConfig`]
@@ -23,6 +24,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
+            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
@@ -36,6 +38,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     }
 }
 
@@ -81,6 +84,7 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
+            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
@@ -88,6 +92,7 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await
     .expect("bootstrap config should initialize correctly")

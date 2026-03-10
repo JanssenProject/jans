@@ -8,6 +8,7 @@
     "resolveJsonModule": true,
     "lib": ["es2020", "dom", "dom.iterable"],
     "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types"],
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true
   },

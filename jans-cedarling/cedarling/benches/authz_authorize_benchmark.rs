@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
-    InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, Request,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
+    IdTokenTrustMode, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, Request,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -116,6 +116,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
@@ -129,6 +130,7 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: DataStoreConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -161,6 +163,7 @@ async fn prepare_cedarling_with_jwt_validation(
             source: PolicyStoreSource::Yaml(
                 serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -180,6 +183,7 @@ async fn prepare_cedarling_with_jwt_validation(
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: DataStoreConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

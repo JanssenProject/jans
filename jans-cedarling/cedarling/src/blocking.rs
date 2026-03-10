@@ -8,11 +8,13 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, InitCedarlingError, LogStorage,
-    MultiIssuerAuthorizeResult, Request, RequestUnsigned,
+    AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
+    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
+    RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::runtime::Runtime;
 
 /// The blocking instance of the Cedarling application.
@@ -47,32 +49,29 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize(request))
-            .map_err(Box::new)
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
+    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        self.instance.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
-    ) -> Result<AuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize_unsigned(request))
-            .map_err(Box::new)
+    ) -> Result<AuthorizeResult, AuthorizeError> {
+        self.instance.authz.authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
+    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
     pub fn authorize_multi_issuer(
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
-    ) -> Result<MultiIssuerAuthorizeResult, Box<AuthorizeError>> {
-        self.runtime
-            .block_on(self.instance.authorize_multi_issuer(request))
-            .map_err(Box::new)
+    ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
+        self.instance.authz.authorize_multi_issuer(&request)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
@@ -104,5 +103,66 @@ impl LogStorage for Cedarling {
 
     fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
         self.instance.get_logs_by_request_id_and_tag(id, tag)
+    }
+}
+
+impl DataApi for Cedarling {
+    fn push_data_ctx(
+        &self,
+        key: &str,
+        value: serde_json::Value,
+        ttl: Option<Duration>,
+    ) -> Result<(), DataError> {
+        self.instance.push_data_ctx(key, value, ttl)
+    }
+
+    fn get_data_ctx(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
+        self.instance.get_data_ctx(key)
+    }
+
+    fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+        self.instance.get_data_entry_ctx(key)
+    }
+
+    fn remove_data_ctx(&self, key: &str) -> Result<bool, DataError> {
+        self.instance.remove_data_ctx(key)
+    }
+
+    fn clear_data_ctx(&self) -> Result<(), DataError> {
+        self.instance.clear_data_ctx()
+    }
+
+    fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
+        self.instance.list_data_ctx()
+    }
+
+    fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
+        self.instance.get_stats_ctx()
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Cedarling {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn total_issuers(&self) -> usize {
+        self.instance.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.instance.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> std::collections::HashSet<String> {
+        self.instance.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> std::collections::HashSet<String> {
+        self.instance.failed_trusted_issuer_ids()
     }
 }

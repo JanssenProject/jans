@@ -20,7 +20,7 @@ pub(super) fn build_iss_entity(
     iss: &TrustedIssuer,
     schema: Option<&MappingSchema>,
 ) -> Result<(Origin, Entity), BuildEntityError> {
-    let origin = iss.oidc_endpoint.origin();
+    let origin = iss.get_oidc_endpoint().origin();
 
     let attrs_shape = schema
         .as_ref()
@@ -49,7 +49,7 @@ impl TrustedIssuer {
     /// This currently hard-coded since we don't have specifications yet on
     /// how to configure this using the policy store.
     fn entity_attr_srcs(&self) -> HashMap<String, Value> {
-        let oidc_endpoint = &self.oidc_endpoint;
+        let oidc_endpoint = &self.get_oidc_endpoint();
         HashMap::from([(
             "issuer_entity_id".into(),
             json!({

@@ -26,6 +26,8 @@ public final class Fido2MetricsConstants {
     public static final String ADOPTION_RATE = "adoptionRate";
     public static final String SUCCESS_RATE = "successRate";
     public static final String FAILURE_RATE = "failureRate";
+    public static final String COMPLETION_RATE = "completionRate";
+    public static final String DROP_OFF_RATE = "dropOffRate";
 
     // Aggregation Types
     public static final String HOURLY = "HOURLY";

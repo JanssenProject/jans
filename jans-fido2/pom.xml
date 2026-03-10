@@ -180,7 +180,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.3.1</version>
+					<version>3.4.0</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -188,7 +188,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.5.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -211,7 +211,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.3.4</version>
+					<version>4.9.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
@@ -226,7 +226,7 @@
 						<dependency>
 							<groupId>org.junit.jupiter</groupId>
 							<artifactId>junit-jupiter-engine</artifactId>
-							<version>5.9.2</version>
+							<version>6.0.3</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -238,7 +238,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
