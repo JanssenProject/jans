@@ -199,6 +199,38 @@ public class CoreCertUtilTest {
         assertNull(value.getCert());
     }
 
+    @Test
+    public void getClientCert_withXfccWithoutCert_shouldFallbackToLegacyHeader() {
+        // XFCC header present with Hash/Subject but no Cert field
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn("Hash=abc123;Subject=\"CN=test,O=TestOrg\"");
+        when(request.getHeader(CoreCertUtil.HEADER_CLIENT_CERT)).thenReturn("legacy-cert-pem");
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        // Should have XFCC metadata combined with legacy cert
+        assertEquals(value.getHash(), "abc123");
+        assertEquals(value.getSubject(), "CN=test,O=TestOrg");
+        assertEquals(value.getCert(), "legacy-cert-pem");
+    }
+
+    @Test
+    public void getClientCert_withXfccWithoutCertAndNoLegacyHeader_shouldReturnXfccMetadata() {
+        // XFCC header present with Hash/Subject but no Cert, and no legacy header
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        when(request.getHeader(CoreCertUtil.HEADER_XFCC_CERT)).thenReturn("Hash=abc123;Subject=\"CN=test,O=TestOrg\"");
+        when(request.getHeader(CoreCertUtil.HEADER_CLIENT_CERT)).thenReturn(null);
+
+        CoreCertUtil.ClientCert value = CoreCertUtil.getClientCert(request);
+
+        assertNotNull(value);
+        // Should still have XFCC metadata even without cert
+        assertEquals(value.getHash(), "abc123");
+        assertEquals(value.getSubject(), "CN=test,O=TestOrg");
+        assertNull(value.getCert());
+    }
+
     // ==================== ClientCert class tests ====================
 
     @Test

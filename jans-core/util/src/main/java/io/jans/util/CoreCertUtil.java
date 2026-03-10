@@ -30,11 +30,12 @@ public class CoreCertUtil {
 
         // First try to parse XFCC header
         String headerValue = request.getHeader(HEADER_XFCC_CERT);
+        ClientCert clientCert = null;
 
         if (headerValue != null && !headerValue.isEmpty()) {
             try {
-                ClientCert clientCert = parseXfccHeader(headerValue);
-                if (clientCert != null) {
+                clientCert = parseXfccHeader(headerValue);
+                if (clientCert != null && clientCert.getCert() != null && !clientCert.getCert().isEmpty()) {
                     return clientCert;
                 }
             } catch (Exception e) {
@@ -42,13 +43,22 @@ public class CoreCertUtil {
             }
         }
 
-        // Use legacy header if XFCC is not present or parsing failed
+        // Use legacy header if XFCC is not present, parsing failed, or XFCC has no cert
         headerValue = request.getHeader(HEADER_CLIENT_CERT);
-        if (headerValue == null || headerValue.isEmpty()) {
-            return MISSING_CERT_HEADERS;
+        if (headerValue != null && !headerValue.isEmpty()) {
+            // If we have XFCC metadata (hash, subject, uri) but no cert, combine with legacy cert
+            if (clientCert != null) {
+                return new ClientCert(clientCert.getHash(), headerValue, clientCert.getSubject(), clientCert.getUri());
+            }
+            return new ClientCert(null, headerValue, null, null);
         }
 
-        return new ClientCert(null, headerValue, null, null);
+        // Return XFCC metadata even without cert (hash/subject may still be useful)
+        if (clientCert != null) {
+            return clientCert;
+        }
+
+        return MISSING_CERT_HEADERS;
     }
 
     public static ClientCert parseXfccHeader(String headerValue) {
