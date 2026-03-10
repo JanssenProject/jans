@@ -2962,7 +2962,7 @@ SSLCACertificateFile /etc/certs/mtlscert/example-ca.crt
 </code></pre></div>
 <p>It is critical to configure certificates validation on Apache 2 correctly, since actual validation of the certificates
 is performed by Apache 2. After Apache certificate validation is configured correctly, make sure there is client
-certificate forward to <code>jans-auth</code> application. <code>jans-auth</code> (AS) expects certificate in <code>X-ClientCert</code> header.</p>
+certificate forward to <code>jans-auth</code> application. <code>jans-auth</code> (AS) expects certificate in <code>X-Forwarded-Client-Cert</code> or <code>X-ClientCert</code> header.</p>
 <div class="highlight"><pre><span></span><code>&lt;LocationMatch /jans-auth&gt;
     SSLVerifyClient require
     SSLVerifyDepth 10
@@ -3326,7 +3326,7 @@ link <a href="https://datatracker.ietf.org/doc/html/rfc8705">OAuth 2.0 Mutual-TL
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 10, 2026 13:38:49 UTC"><span class="timeago" datetime="2026-03-10T13:38:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 10, 2026 13:38:49 UTC">2026-03-10</span>
   </span>
 
     
