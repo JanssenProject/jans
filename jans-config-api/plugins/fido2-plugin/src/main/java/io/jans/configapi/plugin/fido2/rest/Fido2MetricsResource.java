@@ -45,7 +45,9 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class Fido2MetricsResource extends BaseResource {
 
-    public static final String METRICS_DATE_FORMAT = "dd-MM-yyyy";
+    private static final String METRICS_DATE_FORMAT = "dd-MM-yyyy";
+    private static final String PARAM = "Search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}";
+    private static final String ERR_MSG = "Exception while getting metric data is - ";
 
     @Inject
     Logger logger;
@@ -97,8 +99,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
+            logger.info(PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
         PagedResult<Fido2MetricsEntry> pagedResult = null;
@@ -130,7 +131,7 @@ public class Fido2MetricsResource extends BaseResource {
             }
 
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
@@ -210,7 +211,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2UserMetricsEntries  - pagedResult:{}", pagedResult);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
 
@@ -292,7 +293,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2MetricsEntriesByOperation - pagedResult:{}", pagedResult);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
@@ -373,7 +374,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2MetricsAggregation  - pagedResult:{}", pagedResult);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
 
@@ -453,7 +454,7 @@ public class Fido2MetricsResource extends BaseResource {
             }
 
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
@@ -496,8 +497,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
+            logger.info(PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
         JsonNode jsonNode = null;
@@ -526,7 +526,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2AdoptionMetrics  - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
@@ -569,8 +569,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
+            logger.info(PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
         JsonNode jsonNode = null;
         try {
@@ -599,7 +598,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2PerformanceMetrics  - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
@@ -642,8 +641,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
+            logger.info(PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
         JsonNode jsonNode = null;
         try {
@@ -671,7 +669,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2DeviceAnalytics  - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
 
@@ -715,8 +713,7 @@ public class Fido2MetricsResource extends BaseResource {
             throws Exception {
 
         if (logger.isInfoEnabled()) {
-            logger.info("ErrorAnalysis search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
+            logger.info(PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
         JsonNode jsonNode = null;
         try {
@@ -745,7 +742,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2ErrorAnalysis  - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
@@ -822,7 +819,7 @@ public class Fido2MetricsResource extends BaseResource {
             }
 
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
 
@@ -876,7 +873,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
 
@@ -919,7 +916,7 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
@@ -961,7 +958,7 @@ public class Fido2MetricsResource extends BaseResource {
             }
 
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
+            logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
@@ -1095,24 +1092,11 @@ public class Fido2MetricsResource extends BaseResource {
         return fido2MetricsAggregationPagedResult;
     }
 
-    private String getPattern(String pattern) {
-        String searchPattern = ApiConstants.DEFAULT_SEARCH_PATTERN;
-        if (StringUtils.isNotBlank(pattern)) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("^.*");
-            stringBuilder.append(pattern);
-            stringBuilder.append(".*$");
-            searchPattern = stringBuilder.toString();
-        }
-        return searchPattern;
-    }
-
     private int getStartIndex(List<?> entriesList, int startIndex) {
         if (logger.isDebugEnabled()) {
             logger.debug("Get startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
         }
 
-        logger.error("Get startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
         if (entriesList != null && !entriesList.isEmpty()) {
             logger.debug("Get startIndex  entriesList.size():{}", entriesList.size());
             try {

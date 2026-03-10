@@ -24,7 +24,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.HttpClient;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -89,27 +88,24 @@ public class Fido2Util {
         HttpResponse httpResponse = serviceResponse.getHttpResponse();
         if (httpResponse != null) {
             HttpEntity entity = httpResponse.getEntity();
-            logger.error("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
+            logger.info("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
                     httpResponse.getStatusLine().getStatusCode());
             if (entity == null) {
                 return jsonString;
             }
             try {
                 jsonString = EntityUtils.toString(entity, "UTF-8");
-
-                logger.error(
-                        "\n\n\n jsonString:{}, httpResponse.getStatusLine():{}, httpResponse.getStatusLine().getStatusCode():{}, Status.OK.getStatusCode():{}, :{}",
+                logger.debug(
+                        " jsonString:{}, httpResponse.getStatusLine():{}, httpResponse.getStatusLine().getStatusCode():{}, Status.OK.getStatusCode():{}",
                         jsonString, httpResponse.getStatusLine(), httpResponse.getStatusLine().getStatusCode(),
-                        Status.OK.getStatusCode(), "\n\n\n");
+                        Status.OK.getStatusCode());
             } catch (Exception ex) {
                 logger.error("Error while getting entity using EntityUtils is ", ex);
             }
             if (httpResponse.getStatusLine() != null
                     && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
-                logger.error("\n\n\n Status.OK jsonString:{}", jsonString);
                 return jsonString;
             } else {
-                logger.error("\n\n\n Status.NOT-OK jsonString:{}", jsonString);
                 throw new WebApplicationException(jsonString, httpResponse.getStatusLine().getStatusCode());
             }
         }
