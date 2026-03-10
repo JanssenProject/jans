@@ -130,7 +130,7 @@ The following are the ***mandatory*** functions which need to be implemented in 
     ```python3
     def createClient(self, context):
 
-        # 1. obtain client id. certProperty contains the httpRequest.getHeader("X-ClientCert"), inshort client certificate passed to the /register endpoint
+        # 1. obtain client id. certProperty contains the CoreCertUtil.getClientCert(httpRequest).getCert(), inshort client certificate passed to the /register endpoint
         cert = CertUtils.x509CertificateFromPem(configurationAttributes.get("certProperty").getValue1())
         cn = CertUtils.getCN(cert)
 
