@@ -36,7 +36,7 @@ pub(super) struct LogWorker<T: AuditTransport> {
 
 impl<T> LogWorker<T>
 where
-    T: AuditTransport,
+    T: AuditTransport + 'static,
 {
     pub(super) fn new(
         log_interval: Duration,
@@ -68,12 +68,12 @@ where
 
                 // Send logs to the server
                 () = sleep(self.log_interval) => {
-                    self.flush_logs(&cancel_tkn).await;
+                    self.flush_logs(&cancel_tkn);
                 },
 
                 () = cancel_tkn.cancelled() => {
                     let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
-                    self.flush_logs(&cancel_tkn).await;
+                    self.flush_logs(&cancel_tkn);
                     logger.log_any(LockLogEntry::info(
                         "gracefully shutting down lock log worker",
                     ));
@@ -83,7 +83,7 @@ where
         }
     }
 
-    async fn flush_logs(&mut self, cancel_tkn: &CancellationToken) {
+    fn flush_logs(&mut self, cancel_tkn: &CancellationToken) {
         // save the length at the time the function is called
         let batch_size = self.log_buffer.len();
         if batch_size == 0 {
@@ -92,31 +92,36 @@ where
 
         let entries: Vec<SerializedLogEntry> = self.log_buffer.drain(0..batch_size).collect();
 
+        let transport = Arc::clone(&self.transport);
+        let cancel_tkn = cancel_tkn.clone();
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
-        loop {
-            match self.transport.send_logs(&entries).await {
-                Ok(()) => {
-                    logger.log_any(LockLogEntry::info(format!(
-                        "sent {batch_size} log entries to lock server",
-                    )));
-                    break;
-                },
-                Err(err) => {
-                    logger.log_any(LockLogEntry::error(format!(
-                        "failed to send logs to lock server: {err}"
-                    )));
-                    tokio::select! {
-                        () = sleep(WORKER_HTTP_RETRY_DUR) => {},
-                        () = cancel_tkn.cancelled() => {
-                            logger.log_any(LockLogEntry::warn(
-                                "cancellation requested during retry; dropping batch"
-                            ));
-                            break;
+
+        crate::http::spawn_task(async move {
+            loop {
+                match transport.send_logs(&entries).await {
+                    Ok(()) => {
+                        logger.log_any(LockLogEntry::info(format!(
+                            "sent {batch_size} log entries to lock server",
+                        )));
+                        break;
+                    },
+                    Err(err) => {
+                        logger.log_any(LockLogEntry::error(format!(
+                            "failed to send logs to lock server: {err}"
+                        )));
+                        tokio::select! {
+                            () = sleep(WORKER_HTTP_RETRY_DUR) => {},
+                            () = cancel_tkn.cancelled() => {
+                                logger.log_any(LockLogEntry::warn(
+                                    "cancellation requested during retry; dropping batch"
+                                ));
+                                break;
+                            }
                         }
-                    }
-                },
+                    },
+                }
             }
-        }
+        });
     }
 }
 

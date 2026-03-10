@@ -7,6 +7,7 @@
 
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use reqwest::Client;
 use serde_json::Value;
 use url::Url;
@@ -36,6 +37,8 @@ impl RestTransport {
     }
 }
 
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for RestTransport {
     async fn send_logs(&self, entries: &[SerializedLogEntry]) -> TransportResult<()> {
         if entries.is_empty() {

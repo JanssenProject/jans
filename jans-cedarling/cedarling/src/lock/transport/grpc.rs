@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use prost_types::Timestamp;
+use async_trait::async_trait;
 use serde::Deserialize;
 #[cfg(not(target_arch = "wasm32"))]
 use tonic::transport::{Channel, ClientTlsConfig};
@@ -98,6 +99,8 @@ impl GrpcTransport {
     }
 }
 
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for GrpcTransport {
     async fn send_logs(&self, entries: &[SerializedLogEntry]) -> TransportResult<()> {
         if entries.is_empty() {

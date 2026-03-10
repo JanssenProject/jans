@@ -8,7 +8,7 @@
 //! This module provides a unified interface for sending audit data to the Lock Server,
 //! supporting both REST and gRPC transports.
 
-use std::future::Future;
+use async_trait::async_trait;
 
 #[cfg(feature = "grpc")]
 pub(super) mod grpc;
@@ -23,15 +23,14 @@ pub(super) type SerializedLogEntry = Box<str>;
 pub(super) type TransportResult<T> = Result<T, TransportError>;
 
 /// Trait for transports that can send audit logs to the Lock Server.
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 pub(super) trait AuditTransport: Send + Sync {
     /// Sends a batch of serialized log entries to the Lock Server.
     ///
     /// The entries are JSON-serialized strings that will be sent as a batch.
     /// Returns `Ok(())` on success, or a `TransportError` on failure.
-    fn send_logs(
-        &self,
-        entries: &[SerializedLogEntry],
-    ) -> impl Future<Output = TransportResult<()>>;
+    async fn send_logs(&self, entries: &[SerializedLogEntry]) -> TransportResult<()>;
 }
 
 /// Errors that can occur during transport operations.
