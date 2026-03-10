@@ -1,0 +1,33 @@
+{
+    "insights": {
+        "avgRegistrationSuccessRate": 0.25,
+        "avgAuthenticationSuccessRate": 0,
+        "peakUsage": {
+            "period": "2026-02-20",
+            "totalOperations": 4
+        }
+    },
+    "growthRate": 0,
+    "trendDirection": "STABLE",
+    "dataPoints": [
+        {
+            "period": "2026-02-20",
+            "metrics": {
+                "deviceTypes": {
+                    "cross-platform": 1
+                },
+                "errorCounts": {},
+                "fallbackEvents": 0,
+                "registrationAttempts": 4,
+                "registrationFailures": 3,
+                "registrationSuccesses": 1,
+                "authenticationAttempts": 0,
+                "authenticationFailures": 0,
+                "authenticationSuccesses": 0,
+                "registrationAvgDuration": 471,
+                "registrationSuccessRate": 0.25
+            },
+            "timestamp": 1771545600000
+        }
+    ]
+}

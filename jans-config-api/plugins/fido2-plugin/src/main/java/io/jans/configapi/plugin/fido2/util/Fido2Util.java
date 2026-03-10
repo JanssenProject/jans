@@ -15,8 +15,6 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.configapi.plugin.fido2.model.config.Fido2ConfigSource;
 
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,10 +29,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
-
 import org.slf4j.Logger;
-
-
 
 @ApplicationScoped
 public class Fido2Util {
@@ -44,10 +39,10 @@ public class Fido2Util {
 
     @Inject
     Fido2ConfigSource fido2ConfigSource;
-    
+
     @Inject
     ConfigHttpService configHttpService;
-    
+
     @Inject
     AuthUtil authUtil;
 
@@ -60,19 +55,20 @@ public class Fido2Util {
         logger.debug("   Fido2Util - ido2ConfigSource.getPropertyNames():{}", fido2ConfigSource.getPropertyNames());
         return fido2ConfigSource.getPropertyNames();
     }
-    
+
     public String getIssuer() {
         return authUtil.getIssuer();
     }
 
-    public JsonNode executeGetRequest(String requestUri, Map<String, String> headers, Map<String, String> data) throws WebApplicationException, JsonProcessingException {
+    public JsonNode executeGetRequest(String requestUri, Map<String, String> headers, Map<String, String> data)
+            throws WebApplicationException, JsonProcessingException {
         return getResponseJsonNode(configHttpService.executeGet(requestUri, headers, data));
     }
-    
+
     public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers, Map<String, String> data) {
         return configHttpService.executeGet(requestUri, headers, data);
     }
-  
+
     public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse)
             throws WebApplicationException, JsonProcessingException {
         JsonNode jsonNode = null;
@@ -100,14 +96,20 @@ public class Fido2Util {
             }
             try {
                 jsonString = EntityUtils.toString(entity, "UTF-8");
+
+                logger.error(
+                        "\n\n\n jsonString:{}, httpResponse.getStatusLine():{}, httpResponse.getStatusLine().getStatusCode():{}, Status.OK.getStatusCode():{}, :{}",
+                        jsonString, httpResponse.getStatusLine(), httpResponse.getStatusLine().getStatusCode(),
+                        Status.OK.getStatusCode(), "\n\n\n");
             } catch (Exception ex) {
                 logger.error("Error while getting entity using EntityUtils is ", ex);
             }
-
             if (httpResponse.getStatusLine() != null
                     && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+                logger.error("\n\n\n Status.OK jsonString:{}", jsonString);
                 return jsonString;
             } else {
+                logger.error("\n\n\n Status.NOT-OK jsonString:{}", jsonString);
                 throw new WebApplicationException(jsonString, httpResponse.getStatusLine().getStatusCode());
             }
         }

@@ -73,20 +73,21 @@ public class Fido2MetricsResource extends BaseResource {
      *         matching entries
      * 
      */
-    @Operation(summary = "Get a list of Fido2 Metrics by time range.", description = "Get a list of Fido2 Metrics by time range.", operationId = "search-fido2-metrics", tags = {
+    @Operation(summary = "Get a list of Fido2 Metrics by time range.", description = "Get a list of Fido2 Metrics by time range.", operationId = "get-fido2-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/entries")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2MetricsEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -100,33 +101,38 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+        PagedResult<Fido2MetricsEntry> pagedResult = null;
+        try {
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // Fetch Fido2 Metrics Entries
+            // Fetch Fido2 Metrics Entries
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
+
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
+
+            pagedResult = fido2MetricsService.getFido2MetricsEntries(null, startLocalDate, endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2MetricsEntry  - pagedResult:{}", pagedResult);
+            }
+
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
-
-        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getFido2MetricsEntries(null, startLocalDate,
-                endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2MetricsEntry  - pagedResult:{}", pagedResult);
-        }
-
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
     }
 
@@ -145,20 +151,21 @@ public class Fido2MetricsResource extends BaseResource {
      *         matching entries
      * 
      */
-    @Operation(summary = "Get a list of Fido2 metrics for a specific user by time range.", description = "Get a list of Fido2 metrics for a specific user by time range.", operationId = "search-fido2-metrics-by-user", tags = {
+    @Operation(summary = "Get a list of Fido2 metrics for a specific user by time range.", description = "Get a list of Fido2 metrics for a specific user by time range.", operationId = "get-fido2-metrics-by-user", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-by-user.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-by-user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/entries/user/{userId}")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2UserMetricsEntries(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -174,32 +181,37 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(limit), escapeLog(startIndex), escapeLog(userId), escapeLog(startDate),
                     escapeLog(endDate));
         }
+        PagedResult<Fido2MetricsEntry> pagedResult = null;
+        try {
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // Fetch Fido2 Metrics Entries
+            // Fetch Fido2 Metrics Entries
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
-        }
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
 
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
 
-        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getFido2UserMetricsEntries(null, userId,
-                startLocalDate, endLocalDate);
+            pagedResult = fido2MetricsService.getFido2UserMetricsEntries(null, userId, startLocalDate, endLocalDate);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2UserMetricsEntries  - pagedResult:{}", pagedResult);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2UserMetricsEntries  - pagedResult:{}", pagedResult);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
 
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
@@ -220,20 +232,21 @@ public class Fido2MetricsResource extends BaseResource {
      *         matching entries
      * 
      */
-    @Operation(summary = "Get a list of Fido2 metrics for a operation type by time range.", description = "Get a list of Fido2 metrics for a operation type by time range.", operationId = "search-fido2-metrics-by-operation", tags = {
+    @Operation(summary = "Get a list of Fido2 metrics for a operation type by time range.", description = "Get a list of Fido2 metrics for a operation type by time range.", operationId = "get-fido2-metrics-by-operation", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-by-operation.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-by-operation-operationType.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/entries/operation/{operationType}")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getMetricsEntriesByOperation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -250,33 +263,38 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(endDate));
         }
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+        PagedResult<Fido2MetricsEntry> pagedResult = null;
+        try {
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // Fetch Fido2 Metrics Entries
+            // Fetch Fido2 Metrics Entries
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
+
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
+
+            pagedResult = fido2MetricsService.getMetricsEntriesByOperation(null, operationType, startLocalDate,
+                    endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2MetricsEntriesByOperation - pagedResult:{}", pagedResult);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
-
-        PagedResult<Fido2MetricsEntry> pagedResult = fido2MetricsService.getMetricsEntriesByOperation(null,
-                operationType, startLocalDate, endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2MetricsEntriesByOperation - pagedResult:{}", pagedResult);
-        }
-
         return Response.ok(getFido2MetricsEntryPagedResult(pagedResult, limit, startIndex)).build();
     }
 
@@ -297,24 +315,25 @@ public class Fido2MetricsResource extends BaseResource {
      *         matching entries
      * 
      */
-    @Operation(summary = "Get a list of Fido2 aggregated metrics by time range.", description = "Get a list of Fido2 aggregated metrics by time range.", operationId = "search-fido2-metrics-aggregated", tags = {
+    @Operation(summary = "Get a list of Fido2 aggregated metrics by time range.", description = "Get a list of Fido2 aggregated metrics by time range.", operationId = "get-fido2-metrics-aggregated", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsAggregationPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-metrics-aggregated.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2MetricsAggregationPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-aggregations-aggregationType.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/aggregations/{aggregationType}")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2MetricsAggregation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = " Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
+            @Parameter(description = " Aggregation Type", schema = @Schema(type = "string")) @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
             @Parameter(description = "Start date/time for the log entries report. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
             throws Exception {
@@ -326,29 +345,36 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(endDate));
         }
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+        PagedResult<Fido2MetricsAggregation> pagedResult = null;
+        try {
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
-        }
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
 
-        PagedResult<Fido2MetricsAggregation> pagedResult = fido2MetricsService.getFido2MetricsAggregation(null,
-                aggregationType, startLocalDate, endLocalDate);
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2MetricsAggregation  - pagedResult:{}", pagedResult);
+            pagedResult = fido2MetricsService.getFido2MetricsAggregation(null, aggregationType, startLocalDate,
+                    endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2MetricsAggregation  - pagedResult:{}", pagedResult);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
 
         return Response.ok(this.getFido2MetricsAggregationPagedResult(pagedResult, limit, startIndex)).build();
@@ -373,6 +399,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 aggregation summary by time range.", description = "Get Fido2 aggregation summary by time range.", operationId = "get-fido2-aggregation-summary-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -381,9 +408,9 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/aggregations/{aggregationType}/summary")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getFido2MetricsAggregationSummary(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -398,32 +425,37 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(limit), escapeLog(startIndex), escapeLog(aggregationType), escapeLog(startDate),
                     escapeLog(endDate));
         }
+        JsonNode jsonNode = null;
+        try {
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
+
+            jsonNode = fido2MetricsService.getFido2MetricsAggregationSummary(null, aggregationType, startLocalDate,
+                    endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2MetricsAggregationSummary  - jsonNode:{}", jsonNode);
+            }
+
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
-
-        JsonNode jsonNode = fido2MetricsService.getFido2MetricsAggregationSummary(null, aggregationType, startLocalDate,
-                endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2MetricsAggregationSummary  - jsonNode:{}", jsonNode);
-        }
-
         return Response.ok(jsonNode).build();
     }
 
@@ -444,6 +476,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 adoption metrics by time range.", description = "Get Fido2 adoption metrics by time range.", operationId = "get-fido2-adoption-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -452,9 +485,9 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/analytics/adoption")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAdoptionMetrics(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -467,30 +500,35 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+        JsonNode jsonNode = null;
+        try {
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
+
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
+
+            jsonNode = fido2MetricsService.getAdoptionMetrics(null, startLocalDate, endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2AdoptionMetrics  - jsonNode:{}", jsonNode);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
-
-        JsonNode jsonNode = fido2MetricsService.getAdoptionMetrics(null, startLocalDate, endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2AdoptionMetrics  - jsonNode:{}", jsonNode);
-        }
-
         return Response.ok(jsonNode).build();
     }
 
@@ -511,6 +549,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 analytics performance metrics by time range.", description = "Get Fido2 analytics performance metrics by time range.", operationId = "get-fido2-analytics-performance-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -519,9 +558,9 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/analytics/performance")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getPerformanceMetrics(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -533,31 +572,36 @@ public class Fido2MetricsResource extends BaseResource {
             logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
+        JsonNode jsonNode = null;
+        try {
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
+
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
+
+            jsonNode = fido2MetricsService.getPerformanceMetrics(null, startLocalDate, endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2PerformanceMetrics  - jsonNode:{}", jsonNode);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
-
-        JsonNode jsonNode = fido2MetricsService.getPerformanceMetrics(null, startLocalDate, endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2PerformanceMetrics  - jsonNode:{}", jsonNode);
-        }
-
         return Response.ok(jsonNode).build();
     }
 
@@ -578,6 +622,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 devices analytics metrics by time range.", description = "Get Fido2 devices analytics metrics by time range.", operationId = "get-fido2-metrics-analytics-devices", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -586,9 +631,9 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/analytics/devices")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getDeviceAnalytics(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -600,29 +645,34 @@ public class Fido2MetricsResource extends BaseResource {
             logger.info("Fido2MetricsEntry search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
+        JsonNode jsonNode = null;
+        try {
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
-        }
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
 
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
+            jsonNode = fido2MetricsService.getDeviceAnalytics(null, startLocalDate, endLocalDate);
 
-        JsonNode jsonNode = fido2MetricsService.getDeviceAnalytics(null, startLocalDate, endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2DeviceAnalytics  - jsonNode:{}", jsonNode);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2DeviceAnalytics  - jsonNode:{}", jsonNode);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
 
         return Response.ok(jsonNode).build();
@@ -645,17 +695,18 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-metrics-analytics-errors", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-aggregation-summary.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-metrics-analytics-errors.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/analytics/errors")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getErrorAnalysis(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -667,31 +718,36 @@ public class Fido2MetricsResource extends BaseResource {
             logger.info("ErrorAnalysis search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
+        JsonNode jsonNode = null;
+        try {
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
+
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
+
+            jsonNode = fido2MetricsService.getErrorAnalysis(null, startLocalDate, endLocalDate);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2ErrorAnalysis  - jsonNode:{}", jsonNode);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
-
-        JsonNode jsonNode = fido2MetricsService.getErrorAnalysis(null, startLocalDate, endLocalDate);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2ErrorAnalysis  - jsonNode:{}", jsonNode);
-        }
-
         return Response.ok(jsonNode).build();
     }
 
@@ -712,17 +768,18 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 analytics trends by aggregationType for metrics over time.", description = "Get Fido2 analytics trends by aggregationType for metrics over time.", operationId = "get-fido2-analytics-trends-aggregationType", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-fido2-analytics-trends-aggregationType.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/fido2-analytics-trends-aggregationType.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/analytics/trends/{aggregationType}")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getTrendAnalysis(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -738,28 +795,35 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(endDate));
         }
 
-        // validate Date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-        validateDate(startDate, endDate, formatter);
+        JsonNode jsonNode = null;
+        try {
+            // validate Date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
+            validateDate(startDate, endDate, formatter);
 
-        // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime startLocalDate = null;
-        if (StringUtils.isNotBlank(startDate)) {
-            startLocalDate = parseDate(startDate, formatter);
-        }
+            // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime startLocalDate = null;
+            if (StringUtils.isNotBlank(startDate)) {
+                startLocalDate = parseDate(startDate, formatter);
+            }
 
-        // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
-        // yyyy-MM-ddTHH:mm:ssZ)
-        LocalDateTime endLocalDate = null;
-        if (StringUtils.isNotBlank(endDate)) {
-            endLocalDate = parseDate(endDate, formatter);
-        }
+            // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
+            // yyyy-MM-ddTHH:mm:ssZ)
+            LocalDateTime endLocalDate = null;
+            if (StringUtils.isNotBlank(endDate)) {
+                endLocalDate = parseDate(endDate, formatter);
+            }
 
-        JsonNode jsonNode = fido2MetricsService.getTrendAnalysis(null, aggregationType, startLocalDate, endLocalDate);
+            jsonNode = fido2MetricsService.getTrendAnalysis(null, aggregationType, startLocalDate, endLocalDate);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+            }
+
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
 
         return Response.ok(jsonNode).build();
@@ -778,6 +842,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 period-over-period comparison.", description = "Get Fido2 period-over-period comparison.", operationId = "get-fido2-period-over-period-comparison", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -786,9 +851,9 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/analytics/comparison/{aggregationType}")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getPeriodOverPeriodComparison(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -802,10 +867,17 @@ public class Fido2MetricsResource extends BaseResource {
                     escapeLog(limit), escapeLog(startIndex), escapeLog(aggregationType), escapeLog(periods));
         }
 
-        JsonNode jsonNode = fido2MetricsService.getPeriodOverPeriodComparison(null, aggregationType, periods);
+        JsonNode jsonNode = null;
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+        try {
+            jsonNode = fido2MetricsService.getPeriodOverPeriodComparison(null, aggregationType, periods);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
 
         return Response.ok(jsonNode).build();
@@ -820,6 +892,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 metrics configuration.", description = "Get Fido2 metrics configuration.", operationId = "get-fido2-metrics-configuration", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -828,21 +901,27 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/config")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getMetricsConfig() throws Exception {
 
         if (logger.isInfoEnabled()) {
             logger.info("Fido2 metrics configuration");
         }
 
-        JsonNode jsonNode = fido2MetricsService.getMetricsConfig(null);
+        JsonNode jsonNode = null;
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+        try {
+            jsonNode = fido2MetricsService.getMetricsConfig(null);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+            }
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
         return Response.ok(jsonNode).build();
     }
 
@@ -856,6 +935,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 metrics health check endpoint.", description = "Get Fido2 metrics health check endpoint.", operationId = "get-fido2-metrics-health-check", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -864,21 +944,26 @@ public class Fido2MetricsResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path("/health")
-    // @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes =
-    // {}, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
-    // ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getMetricsHealth() throws Exception {
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getMetricsHealth() {
 
         if (logger.isInfoEnabled()) {
             logger.info("Fido2 metrics configuration");
         }
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = fido2MetricsService.getMetricsHealth(null);
 
-        JsonNode jsonNode = fido2MetricsService.getMetricsHealth(null);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2MetricsHealth - jsonNode:{}", jsonNode);
+            }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Fido2MetricsHealth - jsonNode:{}", jsonNode);
+        } catch (Exception ex) {
+            logger.error("Exception while creating user is - ", ex);
+            throwInternalServerException(ex);
         }
-
         return Response.ok(jsonNode).build();
     }
 
@@ -963,7 +1048,7 @@ public class Fido2MetricsResource extends BaseResource {
     }
 
     private Fido2MetricsEntryPagedResult getFido2MetricsEntryPagedResult(PagedResult<Fido2MetricsEntry> pagedResult,
-             int limit, int startIndex) {
+            int limit, int startIndex) {
         Fido2MetricsEntryPagedResult fido2MetricsEntryPagedResult = null;
 
         if (pagedResult != null) {
