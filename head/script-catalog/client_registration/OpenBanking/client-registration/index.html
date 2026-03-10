@@ -1242,8 +1242,17 @@
 <p>The createClient method contains the main business logic, here the context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext. It has several useful methods for SSA validations and options to create and throw custom exception (http status, error and error description):</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
 
-    <span class="c1"># 1. obtain client id. certProperty contains the httpRequest.getHeader(&quot;X-ClientCert&quot;), inshort client certificate passed to the /register endpoint</span>
-    <span class="n">cert</span> <span class="o">=</span> <span class="n">CertUtils</span><span class="o">.</span><span class="n">x509CertificateFromPem</span><span class="p">(</span><span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;certProperty&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue1</span><span class="p">())</span>
+    <span class="c1"># 1. obtain client id. certProperty contains the CoreCertUtil.getClientCert(httpRequest).getCert(), inshort client certificate passed to the /register endpoint</span>
+    <span class="n">certPem</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;certProperty&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue1</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">certPem</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">certPem</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Client certificate is missing&quot;</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">createWebApplicationException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="s2">&quot;invalid_request&quot;</span><span class="p">,</span> <span class="s2">&quot;Client certificate is required&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">cert</span> <span class="o">=</span> <span class="n">CertUtils</span><span class="o">.</span><span class="n">x509CertificateFromPem</span><span class="p">(</span><span class="n">certPem</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cert</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="s2">&quot;Client registration. Failed to parse client certificate&quot;</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">createWebApplicationException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="s2">&quot;invalid_request&quot;</span><span class="p">,</span> <span class="s2">&quot;Invalid client certificate format&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="n">cn</span> <span class="o">=</span> <span class="n">CertUtils</span><span class="o">.</span><span class="n">getCN</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
 
     <span class="c1"># 2. validate SSA </span>
@@ -1322,7 +1331,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 22, 2025 12:32:33 UTC"><span class="timeago" datetime="2025-12-22T12:32:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 22, 2025 12:32:33 UTC">2025-12-22</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 10, 2026 13:38:49 UTC"><span class="timeago" datetime="2026-03-10T13:38:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 10, 2026 13:38:49 UTC">2026-03-10</span>
   </span>
 
     
