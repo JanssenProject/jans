@@ -20,9 +20,13 @@ import java.util.Set;
         tags = { @Tag(name = "Fido2 - Configuration"), @Tag(name = "Fido2 - Registration") },
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-        @OAuthScope(name = Constants.FIDO2_CONFIG_READ_ACCESS, description = "View fido2 related information"),
-        @OAuthScope(name = Constants.FIDO2_CONFIG_WRITE_ACCESS, description = "Manage fido2 related information"),
-        @OAuthScope(name = Constants.FIDO2_CONFIG_DELETE_ACCESS, description = "Delete fido2 related information"),
+        @OAuthScope(name = Constants.FIDO2_CONFIG_READ_ACCESS, description = "View fido2 config related information"),
+        @OAuthScope(name = Constants.FIDO2_CONFIG_WRITE_ACCESS, description = "Manage fido2 config related information"),
+        @OAuthScope(name = Constants.FIDO2_CONFIG_DELETE_ACCESS, description = "Delete fido2 config related information"),
+        @OAuthScope(name = Constants.FIDO2_READ_ACCESS, description = "View fido2 related information"),
+        @OAuthScope(name = Constants.FIDO2_WRITE_ACCESS, description = "Manage fido2 related information"),
+        @OAuthScope(name = Constants.FIDO2_DELETE_ACCESS, description = "Delete fido2 related information"),
+        @OAuthScope(name = Constants.FIDO2_METRICS_READ_ACCESS, description = "View fido2 metrics related information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"), })))
