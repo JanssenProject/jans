@@ -7,6 +7,8 @@
 package io.jans.as.server.auth;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -19,17 +21,10 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.HashUtil;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
+import io.jans.util.CoreCertUtil;
 import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +34,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -75,9 +76,9 @@ public class MTLSService {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAllAuthenticationMethods());
 
-        final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
+        final String clientCertAsPem = CoreCertUtil.getClientCert(httpRequest).getCert();
         if (StringUtils.isBlank(clientCertAsPem)) {
-            log.debug("Client certificate is missed in `X-ClientCert` header, client_id: {}.", client.getClientId());
+            log.debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header, client_id: {}.", client.getClientId());
             return false;
         }
 
@@ -182,9 +183,9 @@ public class MTLSService {
             log.error("Error getting TLS_CLIENT_AUTH_SUBJECT_DN field from request registration body", exception);
         }
 
-        final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
+        final String clientCertAsPem = CoreCertUtil.getClientCert(httpRequest).getCert();
         if (StringUtils.isBlank(clientCertAsPem)) {
-            log.debug("Client certificate is missed in `X-ClientCert` header");
+            log.debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header");
             return false;
         }
 
