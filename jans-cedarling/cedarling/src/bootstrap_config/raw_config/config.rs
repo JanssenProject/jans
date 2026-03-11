@@ -98,16 +98,6 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub stdout_buffer_limit: usize,
 
-    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_user_claims: Vec<String>,
-
-    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_workload_claims: Vec<String>,
-
     /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(
@@ -450,14 +440,6 @@ mod tests {
                 "Default log level should be WARN"
             );
             assert_eq!(config.log_ttl, None, "Log TTL should be None by default");
-            assert!(
-                config.decision_log_user_claims.is_empty(),
-                "Decision log user claims should be empty by default"
-            );
-            assert!(
-                config.decision_log_workload_claims.is_empty(),
-                "Decision log workload claims should be empty by default"
-            );
             assert_eq!(
                 config.decision_log_default_jwt_id, "jti",
                 "Default JWT ID for decision logging should be 'jti'"

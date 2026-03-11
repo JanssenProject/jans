@@ -10,7 +10,7 @@ mod workload;
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::schema::AttrsShape;
 use super::{
-    Arc, BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
+    BuildAttrsErrorVec, BuildEntityError, BuildEntityErrorKind, BuildUnsignedEntityError,
     BuiltEntities, ClaimMappings, EntityBuilder, EntityData, EntityUid, HashMap, PartitionResult,
     RestrictedExpression, Token, TokenPrincipalMappings, Value, build_cedar_entity,
     build_entity_attrs,
@@ -100,18 +100,6 @@ struct ExtractedAttrsResult {
 pub(crate) struct BuiltPrincipalUnsigned {
     pub principal: Entity,
     pub parents: Vec<Entity>,
-}
-
-/// Information on how to get a principal's ID.
-///
-/// Used to define default values for the resolvers.
-///
-/// - [`user::UserIdSrcResolver`]     
-/// - [`workload::WorkloadIdSrcResolver`]     
-#[derive(Clone, Copy)]
-pub(super) struct PrincipalIdSrc<'a> {
-    token: &'a str,
-    claim: &'a str,
 }
 
 #[cfg(test)]
