@@ -21,7 +21,7 @@
     "postcss-loader": "^8.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "style-loader": "^3.3.1",
+    "style-loader": "^4.0.0",
     "ts-loader": "^9.3.0",
     "typescript": "^5.3.2",
     "webpack": "^5.72.1",
@@ -48,10 +48,10 @@
     "openai": "^6.9.1",
     "postcss": "^8.4.14",
     "qs": "^6.11.2",
-    "react-dropzone": "^14.2.3",
+    "react-dropzone": "^15.0.0",
     "react-router-dom": "^7.11.0",
     "react-select": "^5.7.3",
     "styled-components": "^6.1.0",
-    "uuid": "^9.0.0"
+    "uuid": "^13.0.0"
   }
 }
