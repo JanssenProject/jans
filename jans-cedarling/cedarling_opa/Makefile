@@ -27,7 +27,7 @@ native:
 	cp ../target/release/$(LIB_FILE) $(LIB_DIR)/
 
 .PHONY: build
-build:
+build: native
 	@echo ">> Building Go binary"
 	mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=$(CGO_ENABLED) \
@@ -39,14 +39,14 @@ build:
 clean:
 	@echo ">> Cleaning"
 	rm -rf $(BUILD_DIR)
-	rm $(LIB_DIR)/$(LIB_FILE)
+	rm -f $(LIB_DIR)/$(LIB_FILE)
 
 # ==============================
 # Debug Build
 # ==============================
 
 .PHONY: debug
-debug:
+debug: native
 	mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=$(CGO_ENABLED) \
 	CGO_LDFLAGS="-L$(LIB_DIR)" \

@@ -31,24 +31,33 @@ type CedarPlugin struct {
 	cedar   *cedarling_go.Cedarling
 }
 
+func buildBootstrapConfig(cfg Config) (map[string]any, error) {
+	newConfig := make(map[string]any)
+	for k, v := range cfg.BootstrapConfig {
+		newConfig[k] = v
+	}
+	policyStoreBytes, err := json.Marshal(cfg.PolicyStore)
+	if err != nil {
+		return nil, err
+	}
+	newConfig["CEDARLING_POLICY_STORE_LOCAL"] = string(policyStoreBytes)
+	return newConfig, nil
+}
+
 func (p *CedarPlugin) Start(ctx context.Context) error {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	//policyStoreJsonPath := "../test_files/policy-store_ok.yaml"
-	var config map[string]any = p.config.BootstrapConfig
-	var policy_store map[string]any = p.config.PolicyStore
-	var stderr bool = p.config.Stderr
-	policy_store_bytes, err := json.Marshal(policy_store)
+	new_config, err := buildBootstrapConfig(p.config)
 	if err != nil {
 		return err
 	}
-	config["CEDARLING_POLICY_STORE_LOCAL"] = string(policy_store_bytes)
+	var stderr bool = p.config.Stderr
 	if stderr {
 		fmt.Fprintln(os.Stderr, "Initializing cedarling")
 	} else {
 		fmt.Println("Initializing cedarling")
 	}
-	instance, err := cedarling_go.NewCedarling(config)
+	instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
@@ -68,29 +77,30 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 }
 
 func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-	if p.cedar != nil {
-		p.cedar.ShutDown()
+	cfg := config.(Config)
+	new_config, err := buildBootstrapConfig(cfg)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
 	}
-	p.config = config.(Config)
-	var new_config map[string]any = p.config.BootstrapConfig
-	var policy_store map[string]any = p.config.PolicyStore
-	var stderr bool = p.config.Stderr
-	policy_store_bytes, _ := json.Marshal(policy_store)
-	new_config["CEDARLING_POLICY_STORE_LOCAL"] = string(policy_store_bytes)
+	var stderr bool = cfg.Stderr
 	if stderr {
 		fmt.Fprintln(os.Stderr, "Initializing cedarling")
 	} else {
 		fmt.Println("Initializing cedarling")
 	}
-	instance, err := cedarling_go.NewCedarling(new_config)
+	new_instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
-		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
-	} else {
-
-		p.cedar = instance
-		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+	p.mtx.Lock()
+	old_cedar := p.cedar
+	p.config = cfg
+	p.cedar = new_instance
+	p.mtx.Unlock()
+	if old_cedar != nil {
+		old_cedar.ShutDown()
 	}
 }
 
