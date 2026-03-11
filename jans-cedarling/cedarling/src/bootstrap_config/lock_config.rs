@@ -79,10 +79,13 @@ pub struct LockServiceConfig {
     pub transport: LockTransport,
     /// Channel capacity for buffering log entries before they are sent to the lock server.
     pub log_channel_capacity: usize,
+    /// Maximum number of retry attempts for sending logs to the lock server.
+    pub log_max_retries: u32,
 }
 
 impl LockServiceConfig {
     pub(super) const DEFAULT_CHANNEL_CAPACITY: usize = 100;
+    pub(super) const DEFAULT_LOG_MAX_RETRIES: u32 = 5;
 }
 
 /// Raw lock service config
@@ -110,6 +113,8 @@ pub struct LockServiceConfigRaw {
     pub transport: LockTransport,
     /// Channel capacity for log buffering
     pub log_channel_capacity: usize,
+    /// Max retries for log sending
+    pub log_max_retries: u32,
 }
 
 impl Default for LockServiceConfig {
@@ -128,6 +133,7 @@ impl Default for LockServiceConfig {
             accept_invalid_certs: false,
             transport: LockTransport::default(),
             log_channel_capacity: Self::DEFAULT_CHANNEL_CAPACITY,
+            log_max_retries: Self::DEFAULT_LOG_MAX_RETRIES,
         }
     }
 }
@@ -149,6 +155,7 @@ impl From<LockServiceConfigRaw> for LockServiceConfig {
             accept_invalid_certs: raw.accept_invalid_certs,
             transport: raw.transport,
             log_channel_capacity: raw.log_channel_capacity,
+            log_max_retries: raw.log_max_retries,
         }
     }
 }
@@ -186,6 +193,7 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             accept_invalid_certs: raw.accept_invalid_certs.into(),
             transport: raw.lock_transport,
             log_channel_capacity: raw.lock_log_channel_capacity,
+            log_max_retries: raw.lock_log_max_retries,
         })
     }
 }

@@ -8,7 +8,8 @@ use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_jti, default_log_channel_capacity, default_token_cache_capacity, default_true,
+    default_jti, default_log_channel_capacity, default_log_max_retries,
+    default_token_cache_capacity, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
@@ -310,13 +311,23 @@ pub struct BootstrapConfigRaw {
 
     /// Channel capacity for buffering log entries before they are sent to the lock server.
     /// Higher values allow more logs to be buffered in memory when the lock server is slow,
-    /// but also increase memory usage. 
+    /// but also increase memory usage.
     /// Default value is 100.
     #[serde(
         rename = "CEDARLING_LOCK_LOG_CHANNEL_CAPACITY",
+        deserialize_with = "deserialize_or_parse_string_as_json",
         default = "default_log_channel_capacity"
     )]
     pub lock_log_channel_capacity: usize,
+
+    /// Maximum number of retry attempts for sending logs to the lock server.
+    /// Default value is 3.
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_MAX_RETRIES",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default = "default_log_max_retries"
+    )]
+    pub lock_log_max_retries: u32,
 
     /// Allows to limit maximum token cache TTL in seconds.
     /// Zero means no token cache TTL limit.

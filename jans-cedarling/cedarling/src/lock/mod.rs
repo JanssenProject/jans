@@ -279,7 +279,12 @@ fn create_log_worker(
                 logger.as_ref().and_then(std::sync::Weak::upgrade),
             ));
 
-            let mut log_worker = LogWorker::new(log_interval, transport, logger);
+            let mut log_worker = LogWorker::new(
+                log_interval,
+                transport,
+                logger,
+                bootstrap_conf.log_max_retries,
+            );
             let handle =
                 crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
 
@@ -297,7 +302,12 @@ fn create_log_worker(
                 access_token,
                 logger.as_ref().and_then(std::sync::Weak::upgrade),
             )?);
-            let mut log_worker = LogWorker::new(log_interval, transport, logger);
+            let mut log_worker = LogWorker::new(
+                log_interval,
+                transport,
+                logger,
+                bootstrap_conf.log_max_retries,
+            );
             let handle =
                 crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
 

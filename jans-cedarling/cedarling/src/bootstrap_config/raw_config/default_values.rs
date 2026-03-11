@@ -34,3 +34,7 @@ pub(super) fn default_stdout_buffer_limit() -> usize {
 pub(super) fn default_log_channel_capacity() -> usize {
     LockServiceConfig::DEFAULT_CHANNEL_CAPACITY
 }
+
+pub(super) fn default_log_max_retries() -> u32 {
+    LockServiceConfig::DEFAULT_LOG_MAX_RETRIES
+}

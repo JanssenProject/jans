@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         listen_sse: false,
         accept_invalid_certs: true,
         transport: LockTransport::Rest,
-        log_channel_capacity: 50,
+        ..Default::default()
     };
 
     let cedarling = Cedarling::new(&BootstrapConfig {

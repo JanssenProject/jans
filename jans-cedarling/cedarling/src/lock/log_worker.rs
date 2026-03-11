@@ -14,6 +14,7 @@ use crate::log::LoggerWeak;
 use super::WORKER_HTTP_RETRY_DUR;
 use futures::StreamExt;
 use futures::channel::mpsc;
+use http_utils::Backoff;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
@@ -32,6 +33,7 @@ pub(super) struct LogWorker<T: AuditTransport> {
     log_interval: Duration,
     transport: Arc<T>,
     logger: Option<LoggerWeak>,
+    max_retries: u32,
 }
 
 impl<T> LogWorker<T>
@@ -42,12 +44,14 @@ where
         log_interval: Duration,
         transport: Arc<T>,
         logger: Option<LoggerWeak>,
+        max_retries: u32,
     ) -> Self {
         Self {
             log_interval,
             log_buffer: VecDeque::new(),
             transport,
             logger,
+            max_retries,
         }
     }
 
@@ -95,8 +99,11 @@ where
         let transport = Arc::clone(&self.transport);
         let cancel_tkn = cancel_tkn.clone();
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
+        let max_retries = self.max_retries;
 
         crate::http::spawn_task(async move {
+            let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(max_retries));
+
             loop {
                 match transport.send_logs(&entries).await {
                     Ok(()) => {
@@ -110,7 +117,7 @@ where
                             "failed to send logs to lock server: {err}"
                         )));
                         tokio::select! {
-                            () = sleep(WORKER_HTTP_RETRY_DUR) => {},
+                            _ = backoff.snooze() => {},
                             () = cancel_tkn.cancelled() => {
                                 logger.log_any(LockLogEntry::warn(
                                     "cancellation requested during retry; dropping batch"
