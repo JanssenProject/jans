@@ -32,7 +32,7 @@
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@google/generative-ai": "^0.24.1",
-    "@janssenproject/cedarling_wasm": "0.0.311",
+    "@janssenproject/cedarling_wasm": "1.15.0",
     "@modelcontextprotocol/sdk": "^1.23.0",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
