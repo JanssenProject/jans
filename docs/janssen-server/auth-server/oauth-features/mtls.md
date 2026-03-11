@@ -252,7 +252,7 @@ SSLCACertificateFile /etc/certs/mtlscert/example-ca.crt
 
 It is critical to configure certificates validation on Apache 2 correctly, since actual validation of the certificates
 is performed by Apache 2. After Apache certificate validation is configured correctly, make sure there is client
-certificate forward to `jans-auth` application. `jans-auth` (AS) expects certificate in `X-ClientCert` header.
+certificate forward to `jans-auth` application. `jans-auth` (AS) expects certificate in `X-Forwarded-Client-Cert` or `X-ClientCert` header.
 
 ```
 <LocationMatch /jans-auth>
