@@ -5,10 +5,11 @@ on:
       - closed
   workflow_dispatch:
 permissions:
-  actions: write  # to delete PR caches via gh cache delete
   contents: read
 jobs:
   cleanup:
+    permissions:
+      actions: write  # to delete PR caches via gh cache delete
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
