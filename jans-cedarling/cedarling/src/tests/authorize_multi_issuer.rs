@@ -17,7 +17,7 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
 
     get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| {
+        |_config| {
             // for debugging purposes set log level to DEBUG and log to stdout
             // config.log_config.log_level = crate::LogLevel::DEBUG;
             // config.log_config.log_type =
