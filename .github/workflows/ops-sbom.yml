@@ -10,7 +10,7 @@ permissions:
 jobs:
   enrich_and_upload_sbom:
     permissions:
-      contents: write  # to upload SBOM and compliance reports to release
+      contents: read
       id-token: write  # for Cosign keyless OIDC signing
     if: github.repository == 'JanssenProject/jans'
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
         egress-policy: audit
 
     - name: Install Cosign
-      uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
 
     - name: Fetch Jans SBOM from Github
       run: |
