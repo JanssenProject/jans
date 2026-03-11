@@ -9,12 +9,12 @@
 //! ## Cedarling log types
 //!
 //!  In [Cedarling-Nativity-Plan Bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) we have variable `CEDARLING_LOG_TYPE`
-//!  and config type [LogType](`crate::models::log_config::LogType`) that may contain next values:
+//!  and config type [`LogType`](`crate::models::log_config::LogType`) that may contain next values:
 //!
-//!  * off
-//!  * memory
-//!  * std_out
-//!  * lock
+//!  * `off`
+//!  * `memory`
+//!  * `std_out`
+//!  * `lock`
 //!  
 //!  #### Log type `off`
 //!  
@@ -47,7 +47,7 @@
 //!
 //!  * [`LogStorage`] is used to gettting logs from log storage.
 //!
-//!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
+//!  Currently only [`MemoryLogger`](`memory_logger::MemoryLogger`) implement this.
 
 mod err_log_entry;
 pub(crate) mod interface;
@@ -99,7 +99,7 @@ pub(crate) async fn init_logger(
     app_name: Option<ApplicationName>,
     lock_config: Option<&LockServiceConfig>,
 ) -> Result<Logger, InitLockServiceError> {
-    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name)?);
+    let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name));
     let logger_weak = Arc::downgrade(&logger);
     if let Some(lock_config) = lock_config {
         let lock_service = LockService::new(pdp_id, lock_config, Some(logger_weak)).await?;
@@ -111,15 +111,12 @@ pub(crate) async fn init_logger(
 #[allow(dead_code)]
 #[cfg(test)]
 pub(crate) fn init_test_logger() -> Logger {
-    Arc::new(
-        LogStrategy::new(
-            &LogConfig {
-                log_level: LogLevel::DEBUG,
-                log_type: crate::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
-            },
-            PdpID::new(),
-            Some("test".to_string().into()),
-        )
-        .unwrap(),
-    )
+    Arc::new(LogStrategy::new(
+        &LogConfig {
+            log_level: LogLevel::DEBUG,
+            log_type: crate::LogTypeConfig::StdOut(StdOutLoggerMode::Immediate),
+        },
+        PdpID::new(),
+        Some("test".to_string().into()),
+    ))
 }

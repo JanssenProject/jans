@@ -7,6 +7,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.persistence.model.ScopeAttributes;
+import io.jans.as.server.authzen.ws.rs.AccessEvaluationDiscoveryService;
 import io.jans.as.server.ciba.CIBAConfigurationService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
@@ -17,6 +18,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -79,7 +81,7 @@ public class DiscoveryService {
             jsonObj.put(STATUS_LIST_AGGREGATION_ENDPOINT, getStatusListAggregationEndpoint());
         }
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION))
-            jsonObj.put(ACCESS_EVALUATION_V1_ENDPOINT, getAccessEvaluationV1Endpoint(appConfiguration));
+            AccessEvaluationDiscoveryService.fillJsonObject(jsonObj, appConfiguration.getIssuer(), Strings.CS.removeEnd(appConfiguration.getEndSessionEndpoint(), "/end_session"));
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.REVOKE_TOKEN))
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
         if (appConfiguration.isFeatureEnabled(FeatureFlagType.GLOBAL_TOKEN_REVOCATION))

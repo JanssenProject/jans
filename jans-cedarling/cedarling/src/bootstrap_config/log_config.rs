@@ -36,7 +36,7 @@ pub enum LogTypeConfig {
 }
 
 /// Configuration for memory log.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_TTL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum time to live (in seconds) of the log entries.
@@ -52,7 +52,7 @@ pub struct MemoryLogConfig {
 }
 
 /// Mode for stdout logging.
-/// Is used in BootstrapConfigRaw
+/// Is used in [`BootstrapConfigRaw`]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum StdOutMode {

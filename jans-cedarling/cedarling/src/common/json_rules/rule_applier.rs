@@ -6,10 +6,9 @@
 use std::collections::HashMap;
 
 use crate::log::Decision;
-use datalogic_rs::JsonLogic;
 use smol_str::SmolStr;
 
-use super::JsonRule;
+use super::{ENGINE, JsonRule};
 
 pub(crate) struct RuleApplier<'a> {
     rule: &'a JsonRule,
@@ -17,7 +16,7 @@ pub(crate) struct RuleApplier<'a> {
 }
 
 impl<'a> RuleApplier<'a> {
-    pub(crate) fn new(rule: &'a JsonRule, data: HashMap<SmolStr, Decision>) -> Self {
+    pub(crate) fn new(rule: &'a JsonRule, data: &HashMap<SmolStr, Decision>) -> Self {
         Self {
             rule,
             data: serde_json::json!(data),
@@ -25,7 +24,7 @@ impl<'a> RuleApplier<'a> {
     }
 
     pub(crate) fn apply(&self) -> Result<bool, ApplyRuleError> {
-        let result = JsonLogic::apply(self.rule.rule(), &self.data)?;
+        let result = ENGINE.evaluate_owned(self.rule.rule(), self.data.clone())?;
 
         if let serde_json::Value::Bool(b) = result {
             Ok(b)

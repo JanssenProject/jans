@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
@@ -100,7 +102,8 @@ public class Fido2MetricsData implements Serializable {
     private Double cpuUsagePercent;
 
     public Fido2MetricsData() {
-        this.timestamp = LocalDateTime.now();
+        // Use UTC timezone to align with existing FIDO2 services
+        this.timestamp = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
     }
 
     // Getters and Setters

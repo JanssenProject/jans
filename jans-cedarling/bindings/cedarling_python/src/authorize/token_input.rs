@@ -49,4 +49,3 @@ impl From<TokenInput> for cedarling::TokenInput {
         }
     }
 }
-

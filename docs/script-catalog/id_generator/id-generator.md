@@ -39,39 +39,7 @@ This script has been adapted from the Gluu Server [sample ID generator script](h
 
 ### Script Type: Python
 ```python
-from io.jans.model.custom.script.type.id import IdGeneratorType
-
-import java
-
-class IdGenerator(IdGeneratorType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, configurationAttributes):
-        print "Id generator. Initialization"
-        print "Id generator. Initialized successfully"
-
-        return True   
-
-    def destroy(self, configurationAttributes):
-        print "Id generator. Destroy"
-        print "Id generator. Destroyed successfully"
-        return True   
-
-    def getApiVersion(self):
-        return 1
-
-    # Id generator init method
-    # appId is application Id
-    # idType is Id Type
-    # idPrefix is Id Prefix
-    def generateId(self, appId, idType, idPrefix, configurationAttributes):
-        print "Id generator. Generate Id"
-        print "Id generator. Generate Id. AppId: '", appId, "', IdType: '", idType, "', IdPrefix: '", idPrefix, "'"
-
-        # Return None or empty string to trigger default Id generation method
-        return None
-
+--8<-- "script-catalog/id_generator/sample-script/SampleScript.py"
 ```
 
 
@@ -91,31 +59,31 @@ public class EndSession implements EndSessionType {
 
     private static final Logger log = LoggerFactory.getLogger(CustomScriptManager.class);
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ID Generator. Initializing...");
         log.info("ID Generator. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ID Generator. Initializing...");
         log.info("ID Generator. Initialized");
         return true;
-	}
+        }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        @Override
+        public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         log.info("ID Generator. Destroying...");
         log.info("ID Generator. Destroyed.");
         return true;
-	}
+        }
 
-	@Override
-	public int getApiVersion() {
-		return 11;
-	}
+        @Override
+        public int getApiVersion() {
+                return 11;
+        }
 
     @Override
     public String generateId(String appId, String idType, String idPrefix, Map<String SimpleCustomProperty> configurationAttributes) {

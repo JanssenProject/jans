@@ -95,4 +95,9 @@ public class HealthCheck implements HealthCheckType {
 ```
 
 ## Sample Scripts
-- [Sample HealthCheck script](../../../script-catalog/health_check/HealthCheck.java)
+
+### Health Check Script
+
+```java
+--8<-- "script-catalog/health_check/HealthCheck.java"
+```

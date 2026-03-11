@@ -4,23 +4,79 @@ tags:
   - installation
   - helm
 ---
+
 # Helm Deployments
 
+Deploy Janssen on Kubernetes using Helm charts. This guide walks you through the installation process step by step.
 
+## Installation Flow
 
-Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software.
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  1. Choose Your Platform                                        │
+│     └─> Set up your Kubernetes cluster                          │
+├─────────────────────────────────────────────────────────────────┤
+│  2. Configure Ingress                                           │
+│     └─> Gateway API (recommended) or Nginx Ingress              │
+├─────────────────────────────────────────────────────────────────┤
+│  3. Set Up Database                                             │
+│     └─> PostgreSQL (recommended) or MySQL                       │
+├─────────────────────────────────────────────────────────────────┤
+│  4. Install Janssen                                             │
+│     └─> Run helm install with your override.yaml                │
+├─────────────────────────────────────────────────────────────────┤
+│  5. Post-Installation                                           │
+│     └─> Verify and configure using TUI                          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards.
+## Step 1: Choose Your Platform
 
-All these components are deployed using janssen [helm chart](https://github.com/JanssenProject/jans/tree/main/charts/janssen).
+Select your Kubernetes platform to get started:
 
-You can check the [reference](../../reference/kubernetes#helm-chart-references) guide to view the list of the chart components and values.
+| Platform | Guide |
+|----------|-------|
+| Amazon EKS | [Amazon EKS Setup](prerequisites/amazon-eks.md) |
+| Google GKE | [Google GKE Setup](prerequisites/google-gke.md) |
+| Microsoft AKS | [Microsoft AKS Setup](prerequisites/microsoft-aks.md) |
+| Local (Minikube/MicroK8s) | [Local Setup](prerequisites/local.md) |
+| Rancher Marketplace | [Rancher Setup](prerequisites/rancher.md) (includes all steps) |
 
-## Looking for older helm charts?
+## Step 2: Configure Ingress
 
-If you are looking for older helm charts, you need to build them from the [janssen](https://github.com/JanssenProject/jans/tree/main/charts) repository. We only keep the last 5 versions of the chart up. We support auto-upgrade using helm upgrade and hence want everyone to stay up to date with our charts.
+After your cluster is ready, configure how traffic reaches Janssen:
 
-To build older charts manually from the janssen repository, you can use the following example which assumes we are building for janssen version `v1.0.0`:
+[Ingress Setup Guide](ingress-setup.md) - Gateway API or Nginx Ingress
+
+## Step 3: Set Up Database
+
+Configure persistence storage:
+
+[Database Setup Guide](database-setup.md) - PostgreSQL or MySQL
+
+## Step 4: Install Janssen
+
+Deploy the Helm chart:
+
+[Install Janssen Guide](install-janssen.md)
+
+## Step 5: Post-Installation
+
+Verify and configure your deployment:
+
+[Post-Installation Guide](post-install.md)
+
+## System Requirements
+
+{% include "includes/cn-system-requirements.md" %}
+
+## Helm Chart Reference
+
+For all configuration options, see the [Helm Chart Reference](../../reference/kubernetes/README.md#helm-chart-references).
+
+## Looking for Older Charts?
+
+We maintain the last 5 versions. For older charts, build from the repository:
 
 ```bash
 git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans.git /tmp/jans \

@@ -10,6 +10,6 @@
             "otp_lifetime": 2,
             "subject": "Here's your passcode",
             "message": "%s is the passcode to continue with your verification process at dummy.foobar.co"
-        }        
+        }
     }
 }

@@ -3,10 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::*;
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use std::{hint::black_box, sync::LazyLock};
+
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use tokio::runtime::Runtime;
+
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
+    IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource,
+};
 
 const POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
@@ -33,7 +39,8 @@ static BSCONFIG_LOCAL: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapCon
         log_level: LogLevel::DEBUG,
     },
     policy_store_config: PolicyStoreConfig {
-        source: cedarling::PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+        source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
+        validate_checksum: true,
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig {
@@ -43,10 +50,9 @@ static BSCONFIG_LOCAL: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapCon
         id_token_trust_mode: IdTokenTrustMode::Never,
         ..Default::default()
     },
-    entity_builder_config: cedarling::EntityBuilderConfig::default()
-        .with_user()
-        .with_workload(),
+    entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
+    data_store_config: DataStoreConfig::default(),
 });

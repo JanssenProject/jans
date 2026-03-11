@@ -141,7 +141,3 @@ public class ClientAuthn implements ClientAuthnType {
 }
 
 ```
-
-
-## Sample Scripts
-- [ClientAuthentication](../../../script-catalog/client_authn/ClientAuthn.java)

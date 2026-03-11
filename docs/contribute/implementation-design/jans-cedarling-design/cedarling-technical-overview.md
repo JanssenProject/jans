@@ -37,8 +37,8 @@ The Cedarling performs other tasks associated with a Policy Decision Point, or "
 ## Cedarling Flow
 
 ### Startup Requirements
-1. [Bootstrap Properties](../../../cedarling/cedarling-properties.md)
-2. [Policy Store](../../../cedarling/cedarling-policy-store.md)
+1. [Bootstrap Properties](../../../cedarling/reference/cedarling-properties.md)
+2. [Policy Store](../../../cedarling/reference/cedarling-policy-store.md)
 
 ### Authorization Flow
 
@@ -63,7 +63,7 @@ Handled via `JwtService` in the `jwt` module. JWTs from untrusted issuers are re
 
 Criteria for valid JWT:
     * Comes from a trusted issuer:
-    * Has a defined [token metadata](../../../cedarling/cedarling-policy-store.md#token-metadata-schema)
+    * Has a defined [token metadata](../../../cedarling/reference/cedarling-policy-store.md#token-metadata-schema)
 
 
 
@@ -73,7 +73,7 @@ Handled via `EntityBuilder` in the `entity_builder` module. JWTs from untrusted 
 
 JWT claims are mapped to Cedar attributes (1:1 by default).
 
-Mappings are configured via the Token Entity Metadata Schema's `claim mapping` field in the [Policy Store](../../../cedarling/cedarling-policy-store.md#claim-mapping).
+Mappings are configured via the Token Entity Metadata Schema's `claim mapping` field in the [Policy Store](../../../cedarling/reference/cedarling-policy-store.md#claim-mapping).
 
 
 !!! Note

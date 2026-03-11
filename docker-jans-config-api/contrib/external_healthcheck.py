@@ -19,9 +19,6 @@ def poll_healthchecks(manager):
         ("jans-casa", "/jans-casa/health-check", False),
         ("jans-fido2", "/jans-fido2/sys/health-check", False),
         ("jans-scim", "/jans-scim/sys/health-check", False),
-        # healthcheck endpoint for KC is bind to internal port 9000,
-        # hence we poll the public endpoint instead
-        ("keycloak", "/kc", True),
         ("jans-link", "/jans-link/sys/health-check", False),
     ]:
         # default component status

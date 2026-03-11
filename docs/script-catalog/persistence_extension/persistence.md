@@ -58,48 +58,5 @@ The ORM module of the Janssen server does the following:
 
 Following sample code snippet shows how to work backwards from an AccessToken to Grant, Session and User information.
 ```python
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.model.custom.script.type.persistence import PersistenceType
-from io.jans.util import StringHelper
-from io.jans.persist.operation.auth import PasswordEncryptionHelper
-from io.jans.persist.operation.auth import PasswordEncryptionMethod
-
-import java
-
-class PersistenceExtension(PersistenceType):
-
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "Persistence extension. Initialization"
-        return True
-
-    def destroy(self, configurationAttributes):
-        print "Persistence extension. Destroy"
-        return True
-
-    def getApiVersion(self):
-        return 11
-
-    def onAfterCreate(self, context, configurationAttributes):
-        print "Persistence extension. Method: onAfterCreate"
-
-    def onAfterDestroy(self, context, configurationAttributes):
-        print "Persistence extension. Method: onAfterDestroy"
-
-    def createHashedPassword(self, credential):
-        print "Persistence extension. Method: createHashedPassword"
-
-        hashed_password= PasswordEncryptionHelper.createStoragePassword(credential, PasswordEncryptionMethod.HASH_METHOD_PKCS5S2)
-
-        return hashed_password
-
-    def compareHashedPasswords(self, credential, storedCredential):
-        print "Persistence extension. Method: compareHashedPasswords"
-        
-        auth_result = PasswordEncryptionHelper.compareCredentials(credential, storedCredential)
-
-        return auth_result 
-
+--8<-- "script-catalog/persistence_extension/sample-script/PersistenceExtension.py"
 ```

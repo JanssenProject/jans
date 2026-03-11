@@ -5,6 +5,8 @@
 
 use base64::prelude::*;
 use cedar_policy::Entity;
+use cedar_policy::EntityId;
+use cedar_policy::EntityTypeName;
 use cedar_policy::EntityUid;
 use cedar_policy::ExpressionConstructionError;
 use cedar_policy::RestrictedExpression;
@@ -67,7 +69,7 @@ impl DefaultEntities {
         }
 
         for warn in &warns {
-            eprintln!("{}", warn);
+            eprintln!("{warn}");
         }
 
         Self {
@@ -88,7 +90,7 @@ impl DefaultEntities {
 ///
 /// Entity data supports two formats:
 /// - Cedar format: {"uid": {"type": "...", "id": "..."}, "attrs": {...}, "parents": [...]}
-/// - Legacy format: {"entity_type": "...", "entity_id": "...", ...attributes...}
+/// - Legacy format: {"`entity_type"`: "...", "`entity_id"`: "...", ...attributes...}
 ///
 /// # JSON Map Example
 /// ```json
@@ -194,7 +196,7 @@ impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
     {
         let option_raw_data: Option<HashMap<String, Value>> =
             Deserialize::deserialize(deserializer)
-                .map_err(|err| D::Error::custom(format!("expect to be JSON object: {}", err)))?;
+                .map_err(|err| D::Error::custom(format!("expect to be JSON object: {err}")))?;
 
         parse_default_entities_with_warns(option_raw_data).map_err(D::Error::custom)
     }
@@ -265,7 +267,7 @@ impl ParseEntityErrorKind {
     }
 }
 
-/// Decode base64 string into UTF-8 JSON and call [parse_single_entity]
+/// Decode base64 string into UTF-8 JSON and call [`parse_single_entity`]
 fn parse_base64_single_entity(
     warns: &mut Vec<DefaultEntityWarning>,
     entry_id: &str,
@@ -401,16 +403,17 @@ fn parse_cedar_format<'a>(
                 parent_obj.get("id").and_then(|v| v.as_str()),
             )
         {
-            let parent_uid_str = format!("{parent_entity_type}::\"{id_v}\"");
-            match EntityUid::from_str(&parent_uid_str) {
-                Ok(parent_uid) => {
+            let entity_id = EntityId::from_str(id_v).unwrap_or_else(|e| match e {});
+            match EntityTypeName::from_str(parent_entity_type) {
+                Ok(type_name) => {
+                    let parent_uid = EntityUid::from_type_name_and_id(type_name, entity_id);
                     parents_set.insert(parent_uid);
                 },
                 Err(e) => {
                     // log warn that we could not parse uid
                     warns.push(DefaultEntityWarning::InvalidParentUid {
                         entry_id: entry_id.to_string(),
-                        parent_uid_str: parent_uid_str.clone(),
+                        parent_uid_str: format!("{parent_entity_type}::\"{id_v}\""),
                         error: e.to_string(),
                     });
                 },
@@ -644,7 +647,7 @@ mod test {
             "attrs": {}
         });
 
-        let default_entities_data = json!({"".to_string(): entity_data});
+        let default_entities_data = json!({String::new(): entity_data});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
         let err = parse_default_entities_with_warns(Some(raw_data))
@@ -682,13 +685,12 @@ mod test {
         });
 
         for pattern in DANGEROUS_PATTERNS {
-            let dangerous_id = format!("prefix{}suffix", pattern);
+            let dangerous_id = format!("prefix{pattern}suffix");
             let default_entities_data = json!({dangerous_id.clone(): entity_data.clone()});
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
             let err = parse_default_entities_with_warns(Some(raw_data)).expect_err(&format!(
-                "Should return error for dangerous pattern: {}",
-                pattern
+                "Should return error for dangerous pattern: {pattern}"
             ));
             assert_eq!(
                 err.entry_id, dangerous_id,
@@ -726,7 +728,7 @@ mod test {
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
             let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-                .unwrap_or_else(|_| panic!("Should parse valid entry ID: {}", valid_id));
+                .unwrap_or_else(|_| panic!("Should parse valid entry ID: {valid_id}"));
 
             assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
         }
@@ -969,7 +971,7 @@ mod test {
         // Verify the entity was parsed successfully with parents
         // The parents are stored internally but we can't easily access them from the Entity
         // The main verification is that parsing succeeded with the parent data
-        let _entity = entity;
+        let _ = entity;
     }
 
     #[test]
@@ -1319,7 +1321,7 @@ mod test {
                     assert_eq!(entry_id, "test_entity");
                     assert!(!value.is_empty());
                 },
-                _ => panic!("Expected NonObjectParentEntry warning, got {:?}", warning),
+                _ => panic!("Expected NonObjectParentEntry warning, got {warning:?}"),
             }
         }
     }
@@ -1362,7 +1364,7 @@ mod test {
                     assert_eq!(entry_id, "test_entity");
                     assert!(!value.is_empty());
                 },
-                _ => panic!("Expected NonObjectParentEntry warning, got {:?}", warning),
+                _ => panic!("Expected NonObjectParentEntry warning, got {warning:?}"),
             }
         }
     }

@@ -71,16 +71,16 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
 
 [
 {
-  	"value1": "param_name",
-  	"value2": "DI3ICTTJKLL8PPPNGH7YI",
-  	"description": "This is just an example",
-  	"hide": true
+        "value1": "param_name",
+        "value2": "DI3ICTTJKLL8PPPNGH7YI",
+        "description": "This is just an example",
+        "hide": true
   },
   {
-  	"value1": "param_name_2",
-  	"value2": "eEbJdi3hg42zxyFYbHArU5RuioPP",
-  	"description": "yet another example",
-  	"hide": true
+        "value1": "param_name_2",
+        "value2": "eEbJdi3hg42zxyFYbHArU5RuioPP",
+        "description": "yet another example",
+        "hide": true
   }
 ]
 ,
@@ -114,9 +114,9 @@ To Associate an Update Token script to a client (RP), execute the command below 
  /opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
   --data '[
      {
-	"op": "add",
-	"path": "updateTokenScriptDns",
-	"value":  ["inum={SCRIPT_ID},ou=scripts,o=jans"]
+        "op": "add",
+        "path": "updateTokenScriptDns",
+        "value":  ["inum={SCRIPT_ID},ou=scripts,o=jans"]
      }
      ]'
 ```
@@ -152,15 +152,15 @@ Pseudocode and example :
     def modifyIdToken(self, jsonWebResponse, context):
 
         # header claims
-	jsonWebResponse.getHeader().setClaim("header_name", "header_value")
+        jsonWebResponse.getHeader().setClaim("header_name", "header_value")
 
-	#custom claims
-	jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id_value)
+        #custom claims
+        jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id_value)
 
-	#regular claims        
-	jsonWebResponse.getClaims().setClaim("sub", claimValue)
+        #regular claims        
+        jsonWebResponse.getClaims().setClaim("sub", claimValue)
 
-	return True
+        return True
 
 ```
 
@@ -189,11 +189,11 @@ Pseudocode and example - Issue Access token only if account balance is greater t
     def modifyAccessToken(self, accessToken, context):
 
          #read from session
-	sessionIdService = CdiUtil.bean(SessionIdService)
-	sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
+        sessionIdService = CdiUtil.bean(SessionIdService)
+        sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
 
         org_id = sessionId.getSessionAttributes().get("org_id")
-	balance = thirdPartyApi.checkBalance(org_id)
+        balance = thirdPartyApi.checkBalance(org_id)
 
         if balance > 0 :
            return True
@@ -209,16 +209,16 @@ Pseudocode and example - Issue Access token only if account balance is greater t
     # context is reference of io.jans.oxauth.service.external.context.ExternalUpdateTokenContext
     def modifyAccessToken(self, accessToken, context):
 
-	    # header claims
-	    context.getHeader().setClaim("header_name", "header_value")
+            # header claims
+            context.getHeader().setClaim("header_name", "header_value")
 
-	    #custom claims
-	    context.getClaims().setClaim("claim_name", "claimValue")
+            #custom claims
+            context.getClaims().setClaim("claim_name", "claimValue")
 
-	    #regular claims        
-	    context.getClaims().setClaim("sub", claimValue)
+            #regular claims        
+            context.getClaims().setClaim("sub", claimValue)
 
-	    return True
+            return True
 
 ```
 
@@ -226,21 +226,21 @@ Pseudocode and example - Issue Access token only if account balance is greater t
 
 1. Refresh token lifetime:
 
-```
+```python
     def getRefreshTokenLifetimeInSeconds(self, context):
         return 24 * 60 * 60 # one day
 ```
 
 2. ID token lifetime:
 
-```
+```python
     def getIdTokenLifetimeInSeconds(self, context):
         return 10 * 60 * 60 # 10 hours
 ```
 
 3. Access token lifetime:
 
-```
+```python
     def getAccessTokenLifetimeInSeconds(self, context):
         return 10 * 60 * 60 # 10 hours
 ```
@@ -250,7 +250,7 @@ Access token lifetime from script has highest priority (it wins from client's ac
 ### modifyRefreshToken() :
 Used to modify claims in a Refresh Token
 
-```
+```python
     # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
     # refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())
     # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
@@ -264,8 +264,8 @@ Used to modify claims in a Refresh Token
 |   | [`IntrospectionType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)| [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) |
 |---|---|---|
 | Client configuration parameter  |Introspection script is invoked only when **`accessTokenAsJwt`=`true`**   | Update token script is invoked irrespective of whether `accessTokenAsJwt` is `true` or `false`   |
-| Core Purpose	 | Used to return access token meta information like current validity, approved scopes, and information about the context in which the token was issued when a Resource Server which queries the [Introspection endpoint](https://datatracker.ietf.org/doc/html/rfc7662)     | used to enable transformation of claims and values in id_token and Access token, set a specific token lifetime, change granularity of access control (up-scoping, down-scoping), audit logging for each token response, forbid the creation of AT based on a criteria. |
-| Functionality	 | 1. Can be used to modify claims of an Access token as JWT, however this it is recommended to use UpdateToken script instead.	 |1. Used to modify id_token, refresh token and access token   |
+| Core Purpose   | Returns access token meta information such as current validity, approved scopes, and issuance context when a Resource Server queries the [Introspection endpoint](https://datatracker.ietf.org/doc/html/rfc7662).     | Enables transformation of claims and values in id_token and Access token, sets specific token lifetimes, changes access control granularity (up-scoping, down-scoping), performs audit logging for each token response, and can forbid Access token creation based on a criterion. |
+| Functionality  | 1. Can be used to modify claims of an Access token as JWT, however this it is recommended to use UpdateToken script instead.  |1. Used to modify id_token, refresh token and access token   |
 |  |2. Introspection script cannot change scope of AT   | 2. UpdateToken can change scope of AT and modify AT object in persistence irrespective of the value of `accessTokenAsJwt` as `true` or `false` |
 | Script Invocation sequence |2. **After** an Access token is generated   | 2. **Before** the creation of AT, id_token and refresh_token  |
 
@@ -278,7 +278,7 @@ Used to modify claims in a Refresh Token
 
 1. How can I add a `dict` type object as a claim value?
 
-```
+```python
 from io.jans.as.model.uti import JwtUtil
 from org.json import JSONObject;
 
@@ -290,11 +290,15 @@ from org.json import JSONObject;
         print "Update token script. Modify idToken: %s" % jsonWebResponse
         return True
 ```
+
 2. How can I set integer value in id token claim?
-```
+
+```python
 jsonWebResponse.getClaims().setClaim("claimY", Integer.valueOf(124456191))
 ```
-Get it as integer, via
-```
+
+Get it as integer, via:
+
+```python
 getClaims().getClaimAsInteger("claimY")
 ```

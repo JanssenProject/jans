@@ -46,9 +46,27 @@ impl LogWriter for Option<Arc<LogStrategy>> {
     }
 }
 
+impl LogWriter for Option<&Arc<LogStrategy>> {
+    fn log_any<T: Loggable>(&self, entry: T) {
+        if let Some(logger) = self.as_ref() {
+            logger.log_any(entry);
+        }
+    }
+
+    fn log_fn<F, R>(&self, log_fn: LoggableFn<F>)
+    where
+        R: Loggable,
+        F: Fn(BaseLogEntry) -> R,
+    {
+        if let Some(logger) = self.as_ref() {
+            logger.log_fn(log_fn);
+        }
+    }
+}
+
 impl LogWriter for Option<Weak<LogStrategy>> {
     fn log_any<T: Loggable>(&self, entry: T) {
-        if let Some(log_strategy) = self.as_ref().and_then(|l| l.upgrade()) {
+        if let Some(log_strategy) = self.as_ref().and_then(std::sync::Weak::upgrade) {
             log_strategy.as_ref().log_any(entry);
             return;
         }
@@ -62,7 +80,7 @@ impl LogWriter for Option<Weak<LogStrategy>> {
         R: Loggable,
         F: Fn(BaseLogEntry) -> R,
     {
-        if let Some(log_strategy) = self.as_ref().and_then(|l| l.upgrade()) {
+        if let Some(log_strategy) = self.as_ref().and_then(std::sync::Weak::upgrade) {
             log_strategy.as_ref().log_fn(log_fn);
             return;
         }
@@ -169,13 +187,13 @@ pub trait LogStorage {
     /// Tag can be `log_kind`, `log_level`.
     fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value>;
 
-    /// Get logs by request_id.
-    /// Return log entries that match the given request_id.
+    /// Get logs by `request_id`.
+    /// Return log entries that match the given `request_id`.
     fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value>;
 
-    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Get log by `request_id` and tag, like composite key `request_id` + `log_kind`.
     /// Tag can be `log_kind`, `log_level`.
-    /// Return log entries that match the given request_id and tag.
+    /// Return log entries that match the given `request_id` and tag.
     fn get_logs_by_request_id_and_tag(&self, request_id: &str, tag: &str)
     -> Vec<serde_json::Value>;
 }

@@ -110,12 +110,14 @@ fn build_expr_from_value(
             let (vals, errs): (Vec<_>, Vec<_>) = src
                 .iter()
                 .map(|src| build_expr_from_value(expected_claim_type, src))
-                .filter_map(|expr| expr.transpose())
+                .filter_map(std::result::Result::transpose)
                 .partition_result();
 
             if !errs.is_empty() {
                 return Err(BuildExprErrorVec(
-                    errs.into_iter().flat_map(|e| e.into_inner()).collect(),
+                    errs.into_iter()
+                        .flat_map(BuildExprErrorVec::into_inner)
+                        .collect(),
                 ))?;
             }
 
@@ -142,7 +144,9 @@ fn build_expr_from_value(
                 fields.into_iter().collect()
             } else {
                 return Err(BuildExprErrorVec(
-                    errs.into_iter().flat_map(|e| e.into_inner()).collect(),
+                    errs.into_iter()
+                        .flat_map(BuildExprErrorVec::into_inner)
+                        .collect(),
                 ))?;
             };
 
@@ -200,7 +204,11 @@ pub struct TypeMismatchError {
 
 impl Display for BuildExprErrorVec {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.0.iter().map(|e| e.to_string()))
+        write!(
+            f,
+            "{:?}",
+            self.0.iter().map(ToString::to_string).collect::<Vec<_>>()
+        )
     }
 }
 

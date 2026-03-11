@@ -133,10 +133,7 @@ where
     let src = src + "/bulk";
 
     let url: url::Url = src.parse().map_err(|e| {
-        de::Error::custom(format!(
-            "the bulk endpoint url, '{}', is not valid: {}",
-            src, e
-        ))
+        de::Error::custom(format!("the bulk endpoint url, '{src}', is not valid: {e}"))
     })?;
 
     Ok(Some(Url(url)))
@@ -153,14 +150,13 @@ where
     // NOTE: for tests, we can't use http since mockito doesn't support creating https
     // endpoints. However in prod, this should always be https.
     #[cfg(not(test))]
-    let derived_url = format!("https://{}/.well-known/openid-configuration", host);
+    let derived_url = format!("https://{host}/.well-known/openid-configuration");
     #[cfg(test)]
-    let derived_url = format!("http://{}/.well-known/openid-configuration", host);
+    let derived_url = format!("http://{host}/.well-known/openid-configuration");
 
     let url: url::Url = derived_url.parse().map_err(|e| {
         de::Error::custom(format!(
-            "the derived url, '{}', from the host, '{}' is not valid: {}",
-            derived_url, host, e
+            "the derived url, '{derived_url}', from the host, '{host}' is not valid: {e}"
         ))
     })?;
 
@@ -205,6 +201,6 @@ mod test {
                 },
                 config_endpoints: ConfigEndpoints::default(),
             }
-        )
+        );
     }
 }

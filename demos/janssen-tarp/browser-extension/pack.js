@@ -3,15 +3,23 @@ const { parse, resolve } = require('path');
 const AdmZip = require('adm-zip');
 
 try {
-  const { base } = parse(__dirname);
   const { version } = JSON.parse(
     readFileSync(resolve(__dirname, 'dist/chrome', 'manifest.json'), 'utf8')
   );
 
+  const { name } = JSON.parse(
+    readFileSync(resolve(__dirname,'package.json'), 'utf8')
+  );
+
+  if (!name) {
+    throw new Error('Missing "name" field in package.json');
+  }
+  const safeName = name.replace(/^@/, '').replace(/[\/\\]/g, '-');
+
   const outdir = 'release';
   const supportedBrowser = ['chrome', 'firefox']
   supportedBrowser.forEach(browser => {
-    const filename = `${base}-${browser}-v${version}.zip`;
+    const filename = `${safeName}-${browser}-v${version}.zip`;
     const zip = new AdmZip();
     zip.addLocalFolder(`dist/${browser}`);
     if (!existsSync(outdir)) {

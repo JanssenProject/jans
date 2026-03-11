@@ -1,7 +1,0 @@
-{
-    "alias":"janssen login",
-    "description": "browser based authentication tailored for the janssen-auth server",
-    "providerId": "basic-flow",
-    "topLevel": true,
-    "builtIn" : false
-}

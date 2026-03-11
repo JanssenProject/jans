@@ -309,22 +309,28 @@ There is an important exception to the above and is related to the `manage*` met
 
 ### Custom SCIM Event Handler
 
-Find the script [here](../../../script-catalog/scim/sample-script/custom_scim_handler.py)
+The sample code snippet shows how to:
 
-The sample code snippet shows how to -
 1. Modify Search Results
 2. Segment the user base
 3. Allow/Deny resource operations
 4. Allow/Deny searches
+
+```python
+--8<-- "script-catalog/scim/sample-script/custom_scim_handler.py"
+```
 
 ## Script Type: Java
 
 ### Custom SCIM Event Handler
 
-Find the code [here](../../../script-catalog/scim/sample-script/custom_scim_handler.java)
+The sample code snippet shows how to:
 
-The sample code snippet shows how to -
 1. Modify Search Results
 2. Segment the user base
 3. Allow/Deny resource operations
 4. Allow/Deny searches
+
+```java
+--8<-- "script-catalog/scim/sample-script/custom_scim_handler.java"
+```

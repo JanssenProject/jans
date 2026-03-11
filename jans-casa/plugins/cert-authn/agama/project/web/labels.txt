@@ -1,4 +1,33 @@
 
+certauthn.orchoose=OR choose one of the options below
+certauthn.sccer=Smart card | User certificate
+certauthn.continue=Continue
+certauthn.ok=OK
+certauthn.contact=Please contact your administrator
+
+certauthn.validation.NOT_SELECTED=It seems you did not select a certificate
+
+certauthn.validation.UNPARSABLE=Your certificate couldn't be processed by the server. {0}
+
+certauthn.validation.NOT_VALID=Your certificate is not valid. {0}
+
+certauthn.enrollment.CERT_ENROLLED_ALREADY=You had already added this certificate. \
+If you were not shown a dialog asking you to choose a certificate before you landed \
+here, the browser cached a previous selection. Restart your browser and attempt the operation again
+
+certauthn.enrollment.SUCCESS=Your certificate has been successfully validated and linked to your account. \
+Click the button below to go back to your dashboard.
+
+certauthn.enrollment.CERT_ENROLLED_OTHER_USER=This certificate is already linked to another account!
+
+certauthn.enrollment.UNKNOWN_USER=User reference not found
+
+certauthn.enrollment.ERROR=There was an error associating the certificate to your account
+
+certauthn.authn.NOT_RECOGNIZED=The certificate presented is not recognized
+
+certauthn.authn.CERT_ENROLLED_OTHER_USER=Certificate presented belongs to a different user 
+        
 # Casa selector page label
 
 casa.selector.certauthn=A certificate imported into this browser or stored in a smart card

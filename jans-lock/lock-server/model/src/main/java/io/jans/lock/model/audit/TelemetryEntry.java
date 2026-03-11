@@ -1,9 +1,18 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2025, Janssen Project
+ */
+
 package io.jans.lock.model.audit;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.orm.annotation.AttributeName;
@@ -11,58 +20,95 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Telemetry Entry for audit logging. Represents telemetry and performance
+ * metrics of a service.
+ *
+ * @author Yuriy Movchan
+ */
+@Schema(description = "Telemetry audit entry")
+@JsonIgnoreProperties(ignoreUnknown = true)
 @DataEntry(sortByName = "eventTime")
 @ObjectClass(value = "jansTelemetryEntry")
 public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = 3237727784024903177L;
 
-    @JsonProperty("inum")
-    @AttributeName(name = "inum", ignoreDuringUpdate = true)
-    private String inum;
+	@JsonProperty("inum")
+	@AttributeName(name = "inum", ignoreDuringUpdate = true)
+	private String inum;
 
-    @AttributeName(name = "creationDate")
-    private Date creationDate;
+	@JsonProperty("creationDate")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+	@Schema(description = "Creation date of the entry", example = "2024-04-21T18:25:43-05:00")
+	@AttributeName(name = "creationDate")
+	private Date creationDate;
 
-    @AttributeName(name = "eventTime")
-    private Date eventTime;
+	@JsonProperty("eventTime")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+	@Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
+	@AttributeName(name = "eventTime")
+	private Date eventTime;
 
-    @AttributeName(name = "jansService")
-    private String service;
+	@JsonProperty("service")
+	@Schema(description = "Service name", example = "jans-auth")
+	@AttributeName(name = "jansService")
+	private String service;
 
-    @AttributeName(name = "jansNodeName")
-    private String nodeName;
+	@JsonProperty("nodeName")
+	@Schema(description = "Node name or identifier", example = "1")
+	@AttributeName(name = "jansNodeName")
+	private String nodeName;
 
-    @AttributeName(name = "jansStatus")
-    private String status;
+	@JsonProperty("status")
+	@Schema(description = "Service status", example = "ok", allowableValues = { "ok", "warning", "error" })
+	@AttributeName(name = "jansStatus")
+	private String status;
 
-    @AttributeName(name = "jansDownloadSize")
-    private int lastPolicyLoadSize;
+	@JsonProperty("lastPolicyLoadSize")
+	@Schema(description = "Size of the last policy load in bytes", example = "1024")
+	@AttributeName(name = "jansDownloadSize")
+	private Long lastPolicyLoadSize;
 
-    @AttributeName(name = "jansSuccessLoadCounter")
-    private long policySuccessLoadCounter;
+	@JsonProperty("policySuccessLoadCounter")
+	@Schema(description = "Number of successful policy loads", example = "100")
+	@AttributeName(name = "jansSuccessLoadCounter")
+	private Long policySuccessLoadCounter;
 
-    @AttributeName(name = "jansFailedLoadCounter")
-    private long policyFailedLoadCounter;
+	@JsonProperty("policyFailedLoadCounter")
+	@Schema(description = "Number of failed policy loads", example = "3")
+	@AttributeName(name = "jansFailedLoadCounter")
+	private Long policyFailedLoadCounter;
 
-    @AttributeName(name = "evaluationTimeNs")
-    private int lastPolicyEvaluationTimeNs;
+	@JsonProperty("lastPolicyEvaluationTimeNs")
+	@Schema(description = "Last policy evaluation time in nanoseconds", example = "100")
+	@AttributeName(name = "evaluationTimeNs")
+	private Long lastPolicyEvaluationTimeNs;
 
-    @AttributeName(name = "averageTimeNs")
-    private int avgPolicyEvaluationTimeNs;
+	@JsonProperty("avgPolicyEvaluationTimeNs")
+	@Schema(description = "Average policy evaluation time in nanoseconds", example = "75")
+	@AttributeName(name = "averageTimeNs")
+	private Long avgPolicyEvaluationTimeNs;
 
-    @JsonProperty("memoryUsage")
-    private String memoryUsage;
+	@JsonProperty("memoryUsage")
+	@Schema(description = "Memory usage in bytes", example = "2097152")
+	@AttributeName(name = "memoryUsage")
+	private Long memoryUsage;
 
-    @AttributeName(name = "requestCounter")
-    private long evaluationRequestsCount;
+	@JsonProperty("evaluationRequestsCount")
+	@Schema(description = "Total number of evaluation requests", example = "100")
+	@AttributeName(name = "requestCounter")
+	private Long evaluationRequestsCount;
 
-    @JsonObject
-    @AttributeName(name = "policyStats")
-    private Map<String, String> policyStats;
+	@JsonProperty("policyStats")
+	@Schema(description = "Additional policy statistics as key-value pairs")
+	@JsonObject
+	@AttributeName(name = "policyStats")
+	private Map<String, Long> policyStats;
 
-    public String getInum() {
+	public String getInum() {
 		return inum;
 	}
 
@@ -110,79 +156,104 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		this.status = status;
 	}
 
-	public int getLastPolicyLoadSize() {
+	public Long getLastPolicyLoadSize() {
 		return lastPolicyLoadSize;
 	}
 
-	public void setLastPolicyLoadSize(int lastPolicyLoadSize) {
+	public void setLastPolicyLoadSize(Long lastPolicyLoadSize) {
 		this.lastPolicyLoadSize = lastPolicyLoadSize;
 	}
 
-	public long getPolicySuccessLoadCounter() {
+	public Long getPolicySuccessLoadCounter() {
 		return policySuccessLoadCounter;
 	}
 
-	public void setPolicySuccessLoadCounter(long policySuccessLoadCounter) {
+	public void setPolicySuccessLoadCounter(Long policySuccessLoadCounter) {
 		this.policySuccessLoadCounter = policySuccessLoadCounter;
 	}
 
-	public long getPolicyFailedLoadCounter() {
+	public Long getPolicyFailedLoadCounter() {
 		return policyFailedLoadCounter;
 	}
 
-	public void setPolicyFailedLoadCounter(long policyFailedLoadCounter) {
+	public void setPolicyFailedLoadCounter(Long policyFailedLoadCounter) {
 		this.policyFailedLoadCounter = policyFailedLoadCounter;
 	}
 
-	public int getLastPolicyEvaluationTimeNs() {
+	public Long getLastPolicyEvaluationTimeNs() {
 		return lastPolicyEvaluationTimeNs;
 	}
 
-	public void setLastPolicyEvaluationTimeNs(int lastPolicyEvaluationTimeNs) {
+	public void setLastPolicyEvaluationTimeNs(Long lastPolicyEvaluationTimeNs) {
 		this.lastPolicyEvaluationTimeNs = lastPolicyEvaluationTimeNs;
 	}
 
-	public int getAvgPolicyEvaluationTimeNs() {
+	public Long getAvgPolicyEvaluationTimeNs() {
 		return avgPolicyEvaluationTimeNs;
 	}
 
-	public void setAvgPolicyEvaluationTimeNs(int avgPolicyEvaluationTimeNs) {
+	public void setAvgPolicyEvaluationTimeNs(Long avgPolicyEvaluationTimeNs) {
 		this.avgPolicyEvaluationTimeNs = avgPolicyEvaluationTimeNs;
 	}
 
-	public String getMemoryUsage() {
+	public Long getMemoryUsage() {
 		return memoryUsage;
 	}
 
-	public void setMemoryUsage(String memoryUsage) {
+	public void setMemoryUsage(Long memoryUsage) {
 		this.memoryUsage = memoryUsage;
 	}
 
-	public long getEvaluationRequestsCount() {
+	public Long getEvaluationRequestsCount() {
 		return evaluationRequestsCount;
 	}
 
-	public void setEvaluationRequestsCount(long evaluationRequestsCount) {
+	public void setEvaluationRequestsCount(Long evaluationRequestsCount) {
 		this.evaluationRequestsCount = evaluationRequestsCount;
 	}
 
-	public Map<String, String> getPolicyStats() {
+	public Map<String, Long> getPolicyStats() {
 		return policyStats;
 	}
 
-	public void setPolicyStats(Map<String, String> policyStats) {
+	public void setPolicyStats(Map<String, Long> policyStats) {
 		this.policyStats = policyStats;
 	}
 
 	@Override
-	public String toString() {
-		return "TelemetryEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime
-				+ ", service=" + service + ", nodeName=" + nodeName + ", status=" + status + ", lastPolicyLoadSize="
-				+ lastPolicyLoadSize + ", policySuccessLoadCounter=" + policySuccessLoadCounter
-				+ ", policyFailedLoadCounter=" + policyFailedLoadCounter + ", lastPolicyEvaluationTimeNs="
-				+ lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs=" + avgPolicyEvaluationTimeNs
-				+ ", memoryUsage=" + memoryUsage + ", evaluationRequestsCount=" + evaluationRequestsCount
-				+ ", policyStats=" + policyStats + ", toString()=" + super.toString() + "]";
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TelemetryEntry that = (TelemetryEntry) o;
+		return Objects.equals(creationDate, that.creationDate) && Objects.equals(eventTime, that.eventTime)
+				&& Objects.equals(service, that.service) && Objects.equals(nodeName, that.nodeName)
+				&& Objects.equals(status, that.status) && Objects.equals(lastPolicyLoadSize, that.lastPolicyLoadSize)
+				&& Objects.equals(policySuccessLoadCounter, that.policySuccessLoadCounter)
+				&& Objects.equals(policyFailedLoadCounter, that.policyFailedLoadCounter)
+				&& Objects.equals(lastPolicyEvaluationTimeNs, that.lastPolicyEvaluationTimeNs)
+				&& Objects.equals(avgPolicyEvaluationTimeNs, that.avgPolicyEvaluationTimeNs)
+				&& Objects.equals(memoryUsage, that.memoryUsage)
+				&& Objects.equals(evaluationRequestsCount, that.evaluationRequestsCount)
+				&& Objects.equals(policyStats, that.policyStats);
 	}
-    
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(creationDate, eventTime, service, nodeName, status, lastPolicyLoadSize,
+				policySuccessLoadCounter, policyFailedLoadCounter, lastPolicyEvaluationTimeNs,
+				avgPolicyEvaluationTimeNs, memoryUsage, evaluationRequestsCount, policyStats);
+	}
+
+	@Override
+	public String toString() {
+		return "TelemetryEntry{" + "creationDate='" + creationDate + '\'' + ", eventTime='" + eventTime + '\''
+				+ ", service='" + service + '\'' + ", nodeName='" + nodeName + '\'' + ", status='" + status + '\''
+				+ ", lastPolicyLoadSize=" + lastPolicyLoadSize + ", policySuccessLoadCounter="
+				+ policySuccessLoadCounter + ", policyFailedLoadCounter=" + policyFailedLoadCounter
+				+ ", lastPolicyEvaluationTimeNs=" + lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs="
+				+ avgPolicyEvaluationTimeNs + ", memoryUsage=" + memoryUsage + ", evaluationRequestsCount="
+				+ evaluationRequestsCount + ", policyStats=" + policyStats + '}';
+	}
 }

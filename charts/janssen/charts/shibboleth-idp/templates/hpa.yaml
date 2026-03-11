@@ -1,0 +1,34 @@
+{{- if .Values.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "shibboleth-idp.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shibboleth-idp.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "shibboleth-idp.fullname" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  {{- if or .Values.hpa.targetCPUUtilizationPercentage .Values.hpa.metrics }}
+  metrics:
+    {{- if .Values.hpa.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.hpa.metrics }}
+    {{- toYaml .Values.hpa.metrics | nindent 4 }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.hpa.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

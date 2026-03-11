@@ -24,9 +24,11 @@ pub mod policy_store_config;
 pub mod raw_config;
 
 #[cfg(not(target_arch = "wasm32"))]
+use config::{Config, File};
+#[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
-use config::{Config, File};
+use crate::context_data_api::DataStoreConfig;
 
 // Re-export types that need to be public
 pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw, IdTokenTrustMode};
@@ -60,11 +62,41 @@ pub struct BootstrapConfig {
     /// If `None` then lock service is disabled.
     pub lock_config: Option<LockServiceConfig>,
     /// Maximum number of default entities allowed in a policy store.
-    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     pub max_default_entities: Option<usize>,
     /// Maximum size of base64-encoded default entity strings in bytes.
     /// This prevents memory exhaustion attacks from extremely large base64 strings.
     pub max_base64_size: Option<usize>,
+    /// Data store configuration for the pushed data API.
+    pub data_store_config: DataStoreConfig,
+}
+
+impl Default for BootstrapConfig {
+    fn default() -> Self {
+        use crate::log::LogLevel;
+        Self {
+            application_name: String::new(),
+            log_config: LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_items: None,
+                    max_item_size: None,
+                }),
+                log_level: LogLevel::INFO,
+            },
+            policy_store_config: PolicyStoreConfig {
+                source: PolicyStoreSource::Yaml("cedar_version: v4.0.0\npolicy_stores: {}\n".to_string()),
+                validate_checksum: true,
+            },
+            jwt_config: JwtConfig::new_without_validation(),
+            authorization_config: AuthorizationConfig::default(),
+            entity_builder_config: EntityBuilderConfig::default(),
+            lock_config: None,
+            max_default_entities: None,
+            max_base64_size: None,
+            data_store_config: DataStoreConfig::default(),
+        }
+    }
 }
 
 impl BootstrapConfig {
@@ -95,7 +127,7 @@ impl BootstrapConfig {
         raw.try_into()
     }
 
-    /// Loads a `BootstrapConfig` from a JSON string
+    /// Loads a [`BootstrapConfig`] from a JSON string
     pub fn load_from_json(json: &str) -> Result<Self, BootstrapConfigLoadingError> {
         let raw: BootstrapConfigRaw = serde_json::from_str(json)
             .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
@@ -128,6 +160,7 @@ impl BootstrapConfig {
     ///
     /// let config = BootstrapConfig::load_default().unwrap();
     /// ```
+    #[cfg(test)]
     pub fn load_default() -> Result<Self, BootstrapConfigLoadingError> {
         const DEFAULT_CONFIG: &str = include_str!("../../config/default_config.yaml");
 
@@ -228,7 +261,7 @@ pub enum BootstrapConfigLoadingError {
     #[error("Invalid lock server configuration URI: {0}")]
     InvalidLockServerConfigUri(url::ParseError),
 
-    /// Error returned when cjar_url is missing or empty.
+    /// Error returned when `cjar_url` is missing or empty.
     #[error(
         "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
     )]
@@ -302,5 +335,10 @@ mod tests {
         // Verify entity builder configuration
         assert!(config.entity_builder_config.build_user);
         assert!(config.entity_builder_config.build_workload);
+
+        // Verify data store configuration
+        assert_eq!(config.data_store_config.max_entries, 10000);
+        assert_eq!(config.data_store_config.default_ttl, None);
+        assert!(config.data_store_config.enable_metrics);
     }
 }

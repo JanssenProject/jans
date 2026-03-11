@@ -12,7 +12,7 @@ type SoftwareStatementAssertion struct {
 
 // RevokeSSA revokes a Software Statement Assertion by JWT ID or organization ID
 func (c *Client) RevokeSSA(ctx context.Context, jti, orgId string) error {
-        scope := "https://jans.io/oauth/config/ssa.delete"
+        scope := "https://jans.io/auth/ssa.admin"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return err

@@ -1,20 +1,20 @@
 Flow io.jans.casa.authn.cert
     Basepath ""
-    Configs conf 
-    Inputs userData
+    Inputs userData withEscape
+
+obj = Trigger io.jans.casa.cert.promptAndValidate
+When obj.success is true
+    uid = Call io.jans.casa.certauthn.CertUtil#findOwner obj.data.cert.fingerPrint
     
-cah = Call io.jans.casa.certauthn.CertAuthnHelper#new userData.inum conf.certPickupUrl conf.roundTripMaxTime
-url = Call cah buildRedirectUrl
-//See template index.zul and class io.jans.casa.plugins.certauthn.vm.CertAuthnVM in casa plugin
-RFAC url
+    When uid is userData.uid
+        Finish uid
 
-outcome = Call cah retrieveOutcome
-When outcome is ""
-    Finish true
+    When uid is null
+        obj = { error: "NOT_RECOGNIZED" }
+    Otherwise
+        obj = { error: "CERT_ENROLLED_OTHER_USER" }
 
-When outcome is null        //the cache entry expired
-    Log "Cert Authentication failed."
-Otherwise
-    Log "Cert Authentication failed. Reason:" outcome
+    RRF "authn-error.ftlh" obj
 
+Log "Cert Authentication failed"    
 Finish false

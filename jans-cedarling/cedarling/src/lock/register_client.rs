@@ -49,12 +49,12 @@ pub(super) async fn register_client(
         "scope": DCR_SCOPE,
         "access_token_as_jwt": true,
     });
-    
+
     // Add SSA JWT to the DCR request if provided
     if let Some(ssa_jwt) = ssa_jwt {
         dcr_body["software_statement"] = json!(ssa_jwt);
     }
-    
+
     let ClientIdAndSecret {
         client_id,
         client_secret,
@@ -75,7 +75,7 @@ pub(super) async fn register_client(
     }))
     // this should never fail since this is a hard-coded valid JSON
     .expect("serialize form data");
-    
+
     let AccessToken { access_token } = sender
         .send(|| {
             client

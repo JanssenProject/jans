@@ -69,7 +69,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('Install Scim Server', 'install_scim_server'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
-                        ('Install Jans KC', 'install_jans_saml')):
+                        ('Install Shibboleth IDP', 'install_jans_shib')):
                     txt += get_install_string(prompt_str, install_var)
 
                 if base.argsp.install_link:
@@ -250,14 +250,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     self.run([paths.cmd_chmod, "755", "/etc/init.d/%s" % script_name])
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
-
-        if base.clone_type == 'rpm':
-            for service in Config.redhat_services:
-                self.run(["/sbin/chkconfig", service, "on"])
-        elif not base.snap:
-            for service in Config.debian_services:
-                self.run([paths.cmd_update_rc , service, 'defaults'])
-                self.run([paths.cmd_update_rc, service, 'enable'])
 
 
     def copy_scripts(self):
@@ -472,6 +464,16 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if base.argsp.import_ldif:
             self.import_custom_ldif_dir(base.argsp.import_ldif)
 
+        # start and enable crontab for SuSE
+        if base.os_type == 'suse':
+            self.run_service_command('start', 'cron')
+            self.run_service_command('enable', 'cron')
+
+        # enable and start rsyslog
+        self.run_service_command('start', 'rsyslog')
+        self.run_service_command('enable', 'rsyslog')
+
+
         if base.snap:
             #write post-install.py script
             self.logIt("Writing snap-post-setup.py", pbar='post-setup')
@@ -649,8 +651,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
-                        ('saml', 'install_jans_saml'),
-                        ('kc-scheduler', 'install_jans_saml'),
+                        ('jans-shibboleth-idp', 'install_jans_shib'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()

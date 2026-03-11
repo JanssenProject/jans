@@ -101,7 +101,7 @@ pub(crate) enum ManifestErrorType {
     },
 
     /// Invalid checksum format
-    #[error("Invalid checksum format for '{file}': expected 'sha256:<hex>', found '{checksum}'")]
+    #[error("Invalid checksum format for '{file}': expected 'sha256:<hex>' or 'sha1:<hex>', found '{checksum}'")]
     InvalidChecksumFormat { file: String, checksum: String },
 
     /// File size mismatch
@@ -201,7 +201,7 @@ pub(crate) enum PolicyStoreError {
 /// Details about Cedar parsing errors.
 #[derive(Debug, Clone, thiserror::Error)]
 pub(crate) enum CedarParseErrorDetail {
-    /// Missing @id() annotation
+    /// Missing `@id()` annotation
     #[error("No @id() annotation found and could not derive ID from filename")]
     MissingIdAnnotation,
 

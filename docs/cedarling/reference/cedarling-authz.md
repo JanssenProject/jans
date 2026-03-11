@@ -21,7 +21,7 @@ grain access controls needed to implement the business rules of their applicatio
 to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy
 Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
-![](../assets/lock-cedarling-diagram-2.jpg)
+![Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context](../../assets/lock-cedarling-diagram-2.jpg)
 
 The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities
 are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create

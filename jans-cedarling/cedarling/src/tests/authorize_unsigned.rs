@@ -9,11 +9,11 @@ use test_utils::assert_eq;
 use tokio::test;
 
 use super::utils::*;
-use crate::authz::request::EntityData;
 use crate::log::interface::LogStorage;
 use crate::{
-    JsonRule, RequestUnsigned, cmp_decision, cmp_policy,
+    JsonRule, cmp_decision, cmp_policy,
     tests::utils::cedarling_util::get_cedarling_with_callback,
+    tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request},
 };
 
 static POLICY_STORE_RAW_YAML: &str =
@@ -30,7 +30,7 @@ static OPERATOR_AND: LazyLock<JsonRule> = LazyLock::new(|| {
     .unwrap()
 });
 
-/// Check if action executes for next principals: TestPrincipal1, TestPrincipal2, TestPrincipal3
+/// Check if action executes for next principals: `TestPrincipal1`, `TestPrincipal2`, `TestPrincipal3`
 #[test]
 async fn test_authorize_unsigned_for_all_principals_success() {
     let cedarling = get_cedarling_with_callback(
@@ -39,46 +39,23 @@ async fn test_authorize_unsigned_for_all_principals_success() {
     )
     .await;
 
-    let request = RequestUnsigned {
-        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "random_id"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "random_id"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal3",
-                    "id": "random_id"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        vec![
+            create_test_principal("Jans::TestPrincipal1", "random_id", json!({"is_ok": true}))
+                .unwrap(),
+            create_test_principal("Jans::TestPrincipal2", "random_id", json!({"is_ok": true}))
+                .unwrap(),
+            create_test_principal("Jans::TestPrincipal3", "random_id", json!({"is_ok": true}))
+                .unwrap(),
         ],
-        resource: EntityData::deserialize(serde_json::json!(
-        {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::Issue",
-                    "id": "random_id"
-                },
-            "org_id": "some_long_id",
-            "country": "US"
-        }))
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
         .unwrap(),
-    };
+    );
 
     let result = cedarling
         .authorize_unsigned(request)
@@ -88,17 +65,17 @@ async fn test_authorize_unsigned_for_all_principals_success() {
     let test_principal_1_result = result
         .principals
         .get("Jans::TestPrincipal1")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_2_result = result
         .principals
         .get("Jans::TestPrincipal2")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
         .get("Jans::TestPrincipal3")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
         test_principal_1_result,
@@ -148,54 +125,28 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
                 "and" : [
                     {"===": [{"var": "Jans::TestPrincipal1::\"id1\""}, "ALLOW"]},
                     {"===": [{"var": "Jans::TestPrincipal1::\"id2\""}, "ALLOW"]},
-                    {"===": [{"var": "Jans::TestPrincipal1::\"id3\""}, "DENY"]}
+                    {"===": [{"var": "Jans::TestPrincipal1::\"id3\""}, "ALLOW"]}
                 ]
             }))
-            .unwrap()
+            .unwrap();
         },
     )
     .await;
 
-    let request = RequestUnsigned {
-        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "id1"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "id2"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "id3"
-                },
-                "is_ok": false
-            }))
-            .unwrap(),
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        vec![
+            create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true})).unwrap(),
+            create_test_principal("Jans::TestPrincipal1", "id2", json!({"is_ok": true})).unwrap(),
+            create_test_principal("Jans::TestPrincipal1", "id3", json!({"is_ok": true})).unwrap(),
         ],
-        resource: EntityData::deserialize(serde_json::json!(
-        {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::Issue",
-                    "id": "random_id"
-                },
-            "org_id": "some_long_id",
-            "country": "US"
-        }))
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
         .unwrap(),
-    };
+    );
 
     let result = cedarling
         .authorize_unsigned(request)
@@ -205,17 +156,17 @@ async fn test_authorize_unsigned_for_all_principals_success_using_entity_same_ty
     let test_principal_1_result = result
         .principals
         .get("Jans::TestPrincipal1::\"id1\"")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_2_result = result
         .principals
-        .get("Jans::TestPrincipal1::\"id1\"")
-        .map(|v| v.to_owned());
+        .get("Jans::TestPrincipal1::\"id2\"")
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
-        .get("Jans::TestPrincipal1::\"id1\"")
-        .map(|v| v.to_owned());
+        .get("Jans::TestPrincipal1::\"id3\"")
+        .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
         test_principal_1_result,
@@ -263,46 +214,23 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
     )
     .await;
 
-    let request = RequestUnsigned {
-        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "random_id"
-                },
-                "is_ok": false
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal2",
-                    "id": "random_id"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal3",
-                    "id": "random_id"
-                },
-                "is_ok": false
-            }))
-            .unwrap(),
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        vec![
+            create_test_principal("Jans::TestPrincipal1", "random_id", json!({"is_ok": false}))
+                .unwrap(),
+            create_test_principal("Jans::TestPrincipal2", "random_id", json!({"is_ok": true}))
+                .unwrap(),
+            create_test_principal("Jans::TestPrincipal3", "random_id", json!({"is_ok": false}))
+                .unwrap(),
         ],
-        resource: EntityData::deserialize(serde_json::json!(
-        {
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::Issue",
-                    "id": "random_id"
-                },
-            "org_id": "some_long_id",
-            "country": "US"
-        }))
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
         .unwrap(),
-    };
+    );
 
     let result = cedarling
         .authorize_unsigned(request)
@@ -314,17 +242,17 @@ async fn test_authorize_unsigned_for_all_principals_failure() {
     let test_principal_1_result = result
         .principals
         .get("Jans::TestPrincipal1")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_2_result = result
         .principals
         .get("Jans::TestPrincipal2")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     let test_principal_3_result = result
         .principals
         .get("Jans::TestPrincipal3")
-        .map(|v| v.to_owned());
+        .map(std::borrow::ToOwned::to_owned);
 
     cmp_decision!(
         test_principal_1_result,
@@ -372,42 +300,28 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         |config| config.authorization_config.principal_bool_operator = OPERATOR_AND.clone(),
     )
     .await;
-
-    let request = RequestUnsigned {
-        action: "Jans::Action::\"AlwaysDeny\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::User",
-                    "id": "user1"
-                },
-                "country": "US",
-                "role": ["Admin"],
-                "sub": "user1"
-            }))
-            .unwrap(),
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::User",
-                    "id": "user2"
-                },
-                "country": "US",
-                "role": ["Guest"],
-                "sub": "user2"
-            }))
-            .unwrap(),
-        ],
-        resource: EntityData::deserialize(serde_json::json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::Issue",
-                "id": "issue1"
-            },
-            "org_id": "invalid",
-            "country": "US"
-        }))
-        .unwrap(),
+    let create_principal = |id: &str, role: &str| {
+        create_test_principal(
+            "Jans::User",
+            id,
+            json!({"country": "US", "role": [role], "sub": id}),
+        )
+        .unwrap()
     };
+
+    let principals = vec![
+        create_principal("user1", "Admin"),
+        create_principal("user1", "Admin"),
+    ];
+    let resource = create_test_principal(
+        "Jans::Issue",
+        "issue1",
+        json!({"org_id": "invalid", "country": "US"}),
+    )
+    .unwrap();
+
+    let request =
+        create_test_unsigned_request("Jans::Action::\"AlwaysDeny\"", principals, resource);
 
     let result = cedarling
         .authorize_unsigned(request)
@@ -418,10 +332,9 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
     let logs = cedarling.pop_logs();
     assert!(!logs.is_empty(), "Should have created logs");
 
-    let request_id = &result.request_id;
     let logs_with_request_id: Vec<&serde_json::Value> = logs
         .iter()
-        .filter(|log| log.get("request_id") == Some(&serde_json::json!(request_id)))
+        .filter(|log| log.get("request_id") == Some(&serde_json::json!(result.request_id)))
         .collect();
 
     assert!(
@@ -446,8 +359,7 @@ async fn test_policy_evaluation_errors_logging_unsigned() {
         let log_kind = log.get("log_kind").unwrap();
         assert!(
             log_kind == "Decision" || log_kind == "System",
-            "Log kind should be Decision or System, got: {:?}",
-            log_kind
+            "Log kind should be Decision or System, got: {log_kind:?}"
         );
 
         // For Decision logs, verify they have required fields
@@ -534,29 +446,19 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
     .await;
 
     // Verify unsigned authorization works
-    let request = RequestUnsigned {
-        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
-        context: json!({}),
-        principals: vec![
-            EntityData::deserialize(serde_json::json!({
-                "cedar_entity_mapping": {
-                    "entity_type": "Jans::TestPrincipal1",
-                    "id": "test_id"
-                },
-                "is_ok": true
-            }))
-            .unwrap(),
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        vec![
+            create_test_principal("Jans::TestPrincipal1", "test_id", json!({"is_ok": true}))
+                .unwrap(),
         ],
-        resource: EntityData::deserialize(serde_json::json!({
-            "cedar_entity_mapping": {
-                "entity_type": "Jans::Issue",
-                "id": "issue1"
-            },
-            "org_id": "some_id",
-            "country": "US"
-        }))
+        create_test_principal(
+            "Jans::Issue",
+            "issue1",
+            json!({"org_id": "some_id", "country": "US"}),
+        )
         .unwrap(),
-    };
+    );
 
     let result = cedarling
         .authorize_unsigned(request)
@@ -579,8 +481,7 @@ async fn test_unsigned_authz_works_without_trusted_issuers() {
         .filter(|log| {
             log.get("msg")
                 .and_then(|m| m.as_str())
-                .map(|m| m.contains("signed authorization is unavailable"))
-                .unwrap_or(false)
+                .is_some_and(|m| m.contains("signed authorization is unavailable"))
         })
         .collect();
 

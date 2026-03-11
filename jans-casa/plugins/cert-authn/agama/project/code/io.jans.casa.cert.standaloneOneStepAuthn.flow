@@ -1,0 +1,24 @@
+Flow io.jans.casa.cert.standaloneOneStepAuthn
+    Basepath ""
+    Configs conf
+
+obj = Trigger io.jans.casa.cert.promptAndValidate
+
+When obj.success is true
+    fingerPrint = obj.data.cert.fingerPrint
+    x509 = obj.data.cert.x509
+    uid = Call io.jans.casa.certauthn.CertUtil#findOwner fingerPrint
+    
+    When uid is not null
+        Finish uid
+
+    uid = Call io.jans.casa.certauthn.CertUtil#register x509 conf.mappingClassField
+    status = Call io.jans.casa.certauthn.CertUtil#enroll uid x509 fingerPrint
+    status = Call status toString
+    
+    When status is "SUCCESS"
+        Finish uid
+
+    obj = { success: false }
+    
+Finish obj

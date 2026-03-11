@@ -6,7 +6,8 @@
 use crate::authorization_config::IdTokenTrustMode;
 use crate::{AuthorizationConfig, EntityBuilderConfig, JsonRule, JwtConfig};
 pub(crate) use crate::{
-    BootstrapConfig, Cedarling, LogConfig, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, DataStoreConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
+    PolicyStoreSource,
 };
 
 /// fixture for [`BootstrapConfig`]
@@ -23,6 +24,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
+            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
@@ -36,6 +38,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     }
 }
 
@@ -81,6 +84,7 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
+            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,
@@ -88,17 +92,18 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await
     .expect("bootstrap config should initialize correctly")
 }
 
 /// util function for convenient conversion Reason ID to string
-pub(crate) fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
-    resp.as_ref().map(|v| {
+pub(crate) fn get_policy_id(resp: Option<&cedar_policy::Response>) -> Option<Vec<String>> {
+    resp.map(|v| {
         v.diagnostics()
             .reason()
-            .map(|policy_id| policy_id.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<Vec<_>>()
     })
 }
@@ -123,8 +128,8 @@ pub(crate) fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec
 #[macro_export]
 macro_rules! cmp_policy {
     ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
-        let policy_ids_resp =
-            $crate::tests::utils::cedarling_util::get_policy_id(&$resp).map(|mut v| {
+        let policy_ids_resp = $crate::tests::utils::cedarling_util::get_policy_id($resp.as_ref())
+            .map(|mut v| {
                 v.sort();
                 v
             });
@@ -141,9 +146,9 @@ macro_rules! cmp_policy {
 
 /// util function for convenient conversion Decision
 pub(crate) fn get_decision(
-    resp: &Option<cedar_policy::Response>,
+    resp: Option<&cedar_policy::Response>,
 ) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
+    resp.map(cedar_policy::Response::decision)
 }
 
 /// This macro removes code duplication when comparing a decision in tests.
@@ -166,7 +171,7 @@ pub(crate) fn get_decision(
 macro_rules! cmp_decision {
     ($resp:expr, $decision:expr, $msg:expr) => {
         assert_eq!(
-            $crate::tests::utils::cedarling_util::get_decision(&$resp),
+            $crate::tests::utils::cedarling_util::get_decision($resp.as_ref()),
             Some($decision),
             $msg
         )

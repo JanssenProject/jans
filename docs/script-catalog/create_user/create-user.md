@@ -240,6 +240,3 @@ public class CreateUser implements CreateUserType {
 }
 
 ```
-
-## Sample Scripts
-- [Sample CreateUser script](../../../script-catalog/create_user/CreateUser.java)

@@ -16,6 +16,7 @@ import jakarta.ws.rs.core.Application;
 import io.jans.fido2.ws.rs.controller.AssertionController;
 import io.jans.fido2.ws.rs.controller.AttestationController;
 import io.jans.fido2.ws.rs.controller.ConfigurationController;
+import io.jans.fido2.ws.rs.controller.Fido2MetricsController;
 
 /**
  * Integration with Resteasy
@@ -33,6 +34,7 @@ public class ResteasyInitializer extends Application {
         classes.add(AssertionController.class);
         classes.add(AttestationController.class);
         classes.add(WebAuthnController.class);
+        classes.add(Fido2MetricsController.class);
 
         return classes;
     }

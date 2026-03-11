@@ -184,7 +184,7 @@ class Config:
         self.install_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.install_jans_saml = False
+        self.install_jans_shib = False
         self.install_jans_lock = False
         self.install_opa = False
 
@@ -236,9 +236,6 @@ class Config:
                             os.path.join(self.staticFolder, 'scripts/jans_services_status.py'),
                             os.path.join(self.staticFolder, 'scripts/get_agama_lab_projects.py'),
                             ]
-
-        self.redhat_services = ['httpd', 'rsyslog']
-        self.debian_services = ['apache2', 'rsyslog']
 
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'

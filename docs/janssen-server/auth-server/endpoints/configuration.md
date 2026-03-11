@@ -17,7 +17,7 @@ is defined in the [OpenID Discovery Spec](https://openid.net/specs/openid-connec
 in other OpenID specifications, or in OAuth specifications.
 
 If you want to customize the configuration response, you can use the
-[OpenID Config Interception Script](../../developer/scripts/discovery.md),
+[OpenID Config Interception Script](../../../script-catalog/discovery/discovery.md),
 which enables you to filter the results, modify claim values, or add claims.
 
 If you want to explicitly allow only certain OpenID Metadata claims, you can

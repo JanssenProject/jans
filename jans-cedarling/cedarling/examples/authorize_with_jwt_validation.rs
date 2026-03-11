@@ -3,9 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{log_config::StdOutLoggerMode, *};
 use jsonwebtoken::Algorithm;
 use std::collections::{HashMap, HashSet};
+
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, Request, log_config::StdOutLoggerMode,
+};
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
@@ -39,6 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+            validate_checksum: true,
         },
         jwt_config,
         authorization_config: AuthorizationConfig {
@@ -57,6 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 
@@ -88,7 +95,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Handle authorization result. If there's an error, print it.
     if let Err(e) = &result {
-        eprintln!("Error while authorizing: {:?}\n\n", e)
+        eprintln!("Error while authorizing: {e:?}\n\n");
     }
 
     Ok(())

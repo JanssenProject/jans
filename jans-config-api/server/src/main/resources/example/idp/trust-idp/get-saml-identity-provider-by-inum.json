@@ -5,7 +5,7 @@
     "name": "SAML_IDP_104",
     "displayName": "Test SAML IDP 104",
     "description": "SAML IDP 104 created using Rest API",
-    "realm": "keycloak-internal-identity",
+    "realm": "jans-internal-identity",
     "enabled": true,
     "providerId": "saml",
     "trustEmail": false,

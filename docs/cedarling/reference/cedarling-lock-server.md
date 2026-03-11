@@ -46,7 +46,7 @@ After creation, **export the SSA token** and save it securely.
 
 ### 2. Setting up the Interception Script
 
-Next, configure an [*interception script*](../janssen-server/developer/interception-scripts.md) to automatically add the required scopes when a Cedarling client registers.
+Next, configure an [*interception script*](../../janssen-server/developer/scripts/README.md) to automatically add the required scopes when a Cedarling client registers.
 
 In your server, create a script file at `/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py` with the following content:
 
@@ -170,24 +170,24 @@ Next, create a JSON file named `script_schema.json` with the following content:
   "programmingLanguage": "python",
   "moduleProperties": [],
   "configurationProperties": [
-	{
-		"value1": "jwks_uri",
-		"value2": "https://demoexample.jans.io/jans-auth/restv1/jwks",
-		"hide": false,
-		"description": "JWKS URI used for the SSA validation"
-	},
-	{
-		"value1": "scope_list",
-		"value2": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write",
-		"hide": false,
-		"description": "space-separated scopes that will be added by the script"
-	},
-	{
-		"value1": "trigger_scope",
-		"value2": "cedarling",
-		"hide": false,
-		"description": "the scope that must be present for the script to run"
-	}
+        {
+                "value1": "jwks_uri",
+                "value2": "https://demoexample.jans.io/jans-auth/restv1/jwks",
+                "hide": false,
+                "description": "JWKS URI used for the SSA validation"
+        },
+        {
+                "value1": "scope_list",
+                "value2": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write",
+                "hide": false,
+                "description": "space-separated scopes that will be added by the script"
+        },
+        {
+                "value1": "trigger_scope",
+                "value2": "cedarling",
+                "hide": false,
+                "description": "the scope that must be present for the script to run"
+        }
   ],
   "level": 100,
   "revision": 0,
@@ -239,7 +239,7 @@ A successful response will contain the following scopes:
 
 > Note:
 >
-> If you want to learn more about configuring the example interception script, see the [reference](../janssen-server/developer/interception-scripts.md).
+> If you want to learn more about configuring the example interception script, see the [reference](../../janssen-server/developer/scripts/README.md).
 
 ---
 

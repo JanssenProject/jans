@@ -10,5 +10,6 @@ pub(super) use serde_json::json;
 pub(super) use crate::{PolicyStoreSource, Request};
 
 pub(super) mod cedarling_util;
+pub(super) mod test_helpers;
 pub(super) use cedarling_util::{get_cedarling, get_cedarling_with_authorization_conf};
 pub(super) use test_utils::token_claims::generate_token_using_claims;

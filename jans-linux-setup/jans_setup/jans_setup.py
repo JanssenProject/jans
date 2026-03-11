@@ -143,7 +143,8 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.jans_link import JansLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
-    from setup_app.installers.jans_saml import JansSamlInstaller
+    # Shibboleth IDP replaces Keycloak-based SAML (jans_saml)
+    from setup_app.installers.shibboleth import ShibbolethInstaller
     from setup_app.installers.jans_lock import JansLockInstaller
 
 from setup_app.installers.config_api import ConfigApiInstaller
@@ -259,9 +260,8 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
-    jans_saml_installer = JansSamlInstaller()
     jans_lock_installer = JansLockInstaller()
-
+    shibboleth_installer = ShibbolethInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
@@ -420,9 +420,9 @@ def main():
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
 
-                if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
-                    jans_saml_installer.start_installation()
+                if (Config.installed_instance and shibboleth_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(shibboleth_installer.install_var)):
+                    shibboleth_installer.start_installation()
 
                 if (Config.installed_instance and jans_lock_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_lock_installer.install_var)):

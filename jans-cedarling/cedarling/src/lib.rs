@@ -5,6 +5,7 @@
 
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
+#![allow(clippy::missing_errors_doc)]
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -16,6 +17,7 @@
 mod authz;
 mod bootstrap_config;
 mod common;
+mod context_data_api;
 mod entity_builder;
 mod http;
 mod init;
@@ -31,11 +33,18 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
-use std::sync::Arc;
+use std::collections::HashSet;
+use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
+use crate::context_data_api::DataStore;
+pub use crate::context_data_api::{
+    CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
+    DataStoreConfig, DataStoreStats, DataValidator, ExtensionValue, ValidationConfig,
+    ValidationError, ValidationResult, ValueMappingError,
+};
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
-use crate::log::BaseLogEntry;
+pub use crate::jwt::TrustedIssuerLoadingInfo;
 #[cfg(test)]
 use authz::AuthorizeEntitiesData;
 use authz::Authz;
@@ -50,8 +59,8 @@ use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
 use lock::InitLockServiceError;
-use log::LogEntry;
 use log::interface::LogWriter;
+use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
@@ -64,7 +73,7 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
-
+    pub use crate::http::spawn_task;
     pub use serde_json;
     pub use serde_yml;
 }
@@ -81,6 +90,9 @@ pub enum InitCedarlingError {
     /// Error while parse [`BootstrapConfigRaw`]
     #[error(transparent)]
     BootstrapConfigLoading(#[from] BootstrapConfigLoadingError),
+    /// Error while initializing the `DataStore` (invalid configuration)
+    #[error(transparent)]
+    DataStoreInit(#[from] ConfigValidationError),
     #[cfg(feature = "blocking")]
     /// Error while init tokio runtime
     #[error(transparent)]
@@ -97,6 +109,7 @@ pub enum InitCedarlingError {
 pub struct Cedarling {
     log: log::Logger,
     authz: Arc<Authz>,
+    data: Arc<DataStore>,
 }
 
 impl Cedarling {
@@ -134,7 +147,7 @@ impl Cedarling {
                         None,
                     ))
                     .set_message("configuration parsed successfully".to_string()),
-                )
+                );
             })
             .inspect_err(|err| {
                 log.log_any(
@@ -144,10 +157,14 @@ impl Cedarling {
                     ))
                     .set_error(err.to_string())
                     .set_message("configuration parsed with error".to_string()),
-                )
+                );
             })?;
 
-        let mut service_factory = ServiceFactory::new(config, service_config, log.clone());
+        // Initialize data store first so it can be passed to authz service
+        let data = Arc::new(DataStore::new(config.data_store_config.clone())?);
+
+        let mut service_factory =
+            ServiceFactory::new(config, service_config, log.clone(), data.clone());
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
@@ -157,47 +174,82 @@ impl Cedarling {
         Ok(Cedarling {
             log,
             authz: service_factory.authz_service().await?,
+            data,
         })
     }
 
+    // The following public methods retain async signatures for API compatibility
+    // to avoid breaking changes. They use #[allow(clippy::unused_async)] since
+    // they no longer await internally. Future maintainers can safely remove
+    // or refactor these methods when compatibility constraints allow.
+
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
+    #[allow(clippy::unused_async)]
     pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize(request).await
+        self.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
+    #[allow(clippy::unused_async)]
     pub async fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
     ) -> Result<AuthorizeResult, AuthorizeError> {
-        self.authz.authorize_unsigned(request).await
+        self.authz.authorize_unsigned(&request)
     }
 
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
+    #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.authz.authorize_multi_issuer(request).await
+        self.authz.authorize_multi_issuer(&request)
     }
 
     /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
     #[doc(hidden)]
     #[cfg(test)]
-    pub(crate) async fn build_entities(
+    pub(crate) fn build_entities(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, Box<AuthorizeError>> {
-        let tokens = self.authz.decode_tokens(request).await.map_err(Box::new)?;
+        let tokens = self.authz.decode_tokens(request)?;
         self.authz.build_entities(request, &tokens)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
         self.log.shut_down().await;
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Cedarling {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn total_issuers(&self) -> usize {
+        self.authz.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.authz.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.failed_trusted_issuer_ids()
     }
 }
 
@@ -222,18 +274,18 @@ fn log_policy_store_metadata(
 
     // Add description if available
     if let Some(desc) = metadata.description() {
-        details.push_str(&format!(" - {}", desc));
+        let _ = write!(details, " - {desc}");
     }
 
     // Add Cedar version info
-    details.push_str(&format!(" [Cedar {}]", metadata.cedar_version()));
+    let _ = write!(details, " [Cedar {}]", metadata.cedar_version());
 
     // Add timestamp info if available
     if let Some(created) = metadata.created_date() {
-        details.push_str(&format!(" (created: {})", created.format("%Y-%m-%d")));
+        let _ = write!(details, " (created: {})", created.format("%Y-%m-%d"));
     }
     if let Some(updated) = metadata.updated_date() {
-        details.push_str(&format!(" (updated: {})", updated.format("%Y-%m-%d")));
+        let _ = write!(details, " (updated: {})", updated.format("%Y-%m-%d"));
     }
 
     log.log_any(
@@ -279,10 +331,7 @@ fn log_policy_store_metadata(
                     LogLevel::WARN,
                     None,
                 ))
-                .set_message(format!(
-                    "Could not check Cedar version compatibility: {}",
-                    e
-                )),
+                .set_message(format!("Could not check Cedar version compatibility: {e}")),
             );
         },
     }
@@ -327,5 +376,113 @@ impl LogStorage for Cedarling {
 
     fn get_logs_by_request_id_and_tag(&self, id: &str, tag: &str) -> Vec<serde_json::Value> {
         self.log.get_logs_by_request_id_and_tag(id, tag)
+    }
+}
+
+// implements DataApi for Cedarling
+// Helper function to calculate capacity usage and check memory alert threshold
+fn calculate_capacity_usage(
+    entry_count: usize,
+    max_entries: usize,
+    memory_alert_threshold: f64,
+) -> (f64, bool) {
+    // Precision loss is acceptable for percentage calculation
+    #[allow(clippy::cast_precision_loss)]
+    let capacity_usage_percent = if max_entries > 0 {
+        (entry_count as f64 / max_entries as f64) * 100.0
+    } else {
+        0.0 // Unlimited capacity, no percentage
+    };
+    let memory_alert_triggered = capacity_usage_percent >= memory_alert_threshold;
+    (capacity_usage_percent, memory_alert_triggered)
+}
+
+// provides public interface for pushing and retrieving data
+impl DataApi for Cedarling {
+    fn push_data_ctx(
+        &self,
+        key: &str,
+        value: serde_json::Value,
+        ttl: Option<std::time::Duration>,
+    ) -> Result<(), DataError> {
+        self.data.push(key, value, ttl)?;
+
+        // Check memory usage and log warning if threshold is exceeded
+        let config = self.data.config();
+        if config.max_entries > 0 {
+            let entry_count = self.data.count();
+            let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(
+                entry_count,
+                config.max_entries,
+                config.memory_alert_threshold,
+            );
+            if memory_alert_triggered {
+                let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(format!(
+                    "DataStore memory usage alert: {:.1}% capacity used ({}/{} entries), threshold: {:.1}%",
+                    capacity_usage_percent,
+                    entry_count,
+                    config.max_entries,
+                    config.memory_alert_threshold
+                ));
+                self.log.log_any(log_entry);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn get_data_ctx(&self, key: &str) -> Result<Option<serde_json::Value>, DataError> {
+        Ok(self.data.get(key))
+    }
+
+    fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, DataError> {
+        Ok(self.data.get_entry(key))
+    }
+
+    fn remove_data_ctx(&self, key: &str) -> Result<bool, DataError> {
+        Ok(self.data.remove(key))
+    }
+
+    fn clear_data_ctx(&self) -> Result<(), DataError> {
+        self.data.clear();
+        Ok(())
+    }
+
+    fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
+        Ok(self.data.list_entries())
+    }
+
+    fn get_stats_ctx(&self) -> Result<DataStoreStats, DataError> {
+        let config = self.data.config();
+        let entry_count = self.data.count();
+        let total_size_bytes = self.data.total_size();
+        let avg_entry_size_bytes = if entry_count > 0 {
+            total_size_bytes / entry_count
+        } else {
+            0
+        };
+
+        // Calculate capacity usage percentage
+        let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(
+            entry_count,
+            config.max_entries,
+            config.memory_alert_threshold,
+        );
+
+        Ok(DataStoreStats {
+            entry_count,
+            max_entries: config.max_entries,
+            max_entry_size: config.max_entry_size,
+            metrics_enabled: config.enable_metrics,
+            total_size_bytes,
+            avg_entry_size_bytes,
+            capacity_usage_percent,
+            memory_alert_threshold: config.memory_alert_threshold,
+            memory_alert_triggered,
+        })
     }
 }

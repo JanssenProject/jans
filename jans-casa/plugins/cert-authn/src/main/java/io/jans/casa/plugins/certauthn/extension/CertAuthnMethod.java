@@ -44,8 +44,7 @@ public class CertAuthnMethod implements AuthnMethod {
 	    return CertService.AGAMA_FLOW;
 	}
 
-	public void reloadConfiguration() {		
-	    certService.reloadConfiguration();
+	public void reloadConfiguration() {
 	}
 
 	public List<BasicCredential> getEnrolledCreds(String id) {
@@ -61,7 +60,7 @@ public class CertAuthnMethod implements AuthnMethod {
 	}
 
 	public int getTotalUserCreds(String id) {
-	    return getEnrolledCreds(id).size();
+	    return certService.getDevicesTotal(id);
 	}
 
 }

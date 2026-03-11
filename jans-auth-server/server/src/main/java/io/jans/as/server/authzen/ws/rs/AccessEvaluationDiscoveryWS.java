@@ -18,6 +18,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
+ * AuthZEN PDP Metadata Endpoint.
+ * Per AuthZEN spec: GET /.well-known/authzen-configuration
+ *
  * @author Yuriy Z
  */
 @Path("/authzen-configuration")

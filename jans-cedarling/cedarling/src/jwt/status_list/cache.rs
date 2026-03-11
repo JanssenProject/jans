@@ -30,7 +30,7 @@ use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
 
-/// Contains an Arc<RwLock<_>> internally so clone should be fine
+/// Contains an `Arc<RwLock<_>>` internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub(crate) struct StatusListCache {
     pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusList>>>,
@@ -39,7 +39,7 @@ pub(crate) struct StatusListCache {
 impl StatusListCache {
     /// Initializes the statuslist for the given issuer
     pub(crate) async fn init_for_iss(
-        &mut self,
+        &self,
         iss_config: &IssuerConfig,
         validators: &JwtValidatorCache,
         key_service: &KeyService,
@@ -57,7 +57,7 @@ impl StatusListCache {
         let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
-        let iss = iss_config.policy.normalized_issuer();
+        let iss = iss_config.policy.iss_claim();
 
         let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
 
@@ -65,9 +65,10 @@ impl StatusListCache {
         let decoding_key_info = decoded_jwt.decoding_key_info();
         let decoding_key = key_service.get_key(&decoding_key_info);
 
+        let decoded_jwt_iss = decoded_jwt.iss();
         // get validator
         let validator_key = ValidatorInfo {
-            iss: decoded_jwt.iss(),
+            iss: decoded_jwt_iss.as_ref(),
             token_kind: TokenKind::StatusList,
             algorithm: decoded_jwt.header.alg,
         };
@@ -82,7 +83,7 @@ impl StatusListCache {
             validator
                 .read()
                 .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, decoding_key)?
+                .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
         }
         .try_into()
         .map_err(DecodeJwtError::DeserializeClaims)?;
@@ -96,13 +97,13 @@ impl StatusListCache {
             crate::http::spawn_task(keep_status_list_updated(
                 ttl,
                 status_list_url.clone(),
-                decoding_key.cloned(),
+                decoding_key,
                 validator,
                 self.status_lists.clone(),
                 logger,
                 // callback is called on updated status list
                 move || {
-                    token_cache.invalidate_by_index(IndexKey::Iss(iss.clone()));
+                    token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
                 },
             ));
         }
@@ -124,7 +125,7 @@ impl StatusListCache {
 async fn keep_status_list_updated<F>(
     mut ttl: u64,
     status_list_url: Url,
-    decoding_key: Option<DecodingKey>,
+    decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<RwLock<JwtValidator>>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
@@ -154,7 +155,7 @@ async fn keep_status_list_updated<F>(
             validator
                 .read()
                 .expect("acquire JwtValidator read lock")
-                .validate_jwt(&status_list_jwt.0, decoding_key.as_ref())
+                .validate_jwt(&status_list_jwt.0, decoding_key.clone())
         };
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
@@ -210,7 +211,7 @@ async fn keep_status_list_updated<F>(
             if let Some(list) = lists.get_mut(status_list_url.as_str()) {
                 *list = updated_status_list;
                 // call callback on updated status list
-                cb()
+                cb();
             } else {
                 logger.log_any(JwtLogEntry::new(
                     format!(
@@ -220,7 +221,7 @@ async fn keep_status_list_updated<F>(
                     Some(LogLevel::ERROR),
                 ));
                 return;
-            };
+            }
         }
     }
 }
@@ -247,24 +248,27 @@ mod test {
     #[tokio::test]
     async fn keep_status_list_updated() {
         // Setup
-        let mut validators = JwtValidatorCache::default();
-        let mut key_service = KeyService::default();
+        let validators = JwtValidatorCache::default();
+        let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), &None)
+            .get_keys_using_oidc(&mock_server.openid_config(), None)
             .await
             .unwrap();
         // we initialize the status list with a 1 sec ttl
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
-        let mut status_list = StatusListCache::default();
+        let status_list = StatusListCache::default();
+
+        let ti = TrustedIssuer::new(
+            "some_iss".into(),
+            "is a trusted issuer".into(),
+            mock_server.openid_config_endpoint().unwrap(),
+            HashMap::default(),
+        );
+
         let iss_config = IssuerConfig {
             issuer_id: "some_iss_id".into(),
-            policy: Arc::new(TrustedIssuer {
-                name: "some_iss".into(),
-                description: "is a trusted issuer".into(),
-                oidc_endpoint: mock_server.openid_config_endpoint().unwrap(),
-                token_metadata: Default::default(),
-            }),
+            policy: Arc::new(ti),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(

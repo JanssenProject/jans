@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="jansAuthenticationService" class="io.jans.idp.authn.impl.JansAuthenticationService">
+        <property name="authServerBaseUrl" value="%{jans.auth.server.url}" />
+        <property name="clientId" value="%{jans.auth.client.id}" />
+        <property name="clientSecret" value="%{jans.auth.client.secret}" />
+        <property name="redirectUri" value="%{jans.auth.redirect.uri}" />
+        <property name="scopes">
+            <list>
+                <value>openid</value>
+                <value>profile</value>
+                <value>email</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="InitializeJansAuthentication" 
+          class="io.jans.idp.authn.action.InitializeJansAuthenticationAction"
+          scope="prototype">
+        <property name="authenticationService" ref="jansAuthenticationService" />
+    </bean>
+
+    <bean id="RedirectToJans" 
+          class="io.jans.idp.authn.action.RedirectToJansAction"
+          scope="prototype" />
+
+    <bean id="ProcessJansCallback" 
+          class="io.jans.idp.authn.action.ProcessJansCallbackAction"
+          scope="prototype">
+        <property name="authenticationService" ref="jansAuthenticationService" />
+    </bean>
+
+</beans>

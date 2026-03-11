@@ -117,7 +117,7 @@ beans. Details and examples of this can be found in this [article](../../janssen
 
 Java or Python libraries to be imported and used with ease. Remember, you
 can import a python library only if it has been written in "pure python".
-More details of this mentioned [here](../../janssen-server/developer/interception-scripts.md#using-python-libraries-in-a-script)
+More details of this mentioned [here](../../janssen-server/developer/scripts/README.md)
 
 
 ### E. Configuring the `acr` parameter in the Jans-auth server:
@@ -164,9 +164,9 @@ specified above. However, **using the OpenID Connect acr_values parameter,
 web and mobile clients can request any enabled authentication mechanism**.
 
 1. Obtain the json contents of a custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
-	Example :
-	 - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION`
-	 - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
+        Example :
+         - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION`
+         - `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
 2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
 
@@ -246,21 +246,21 @@ user object script can call these methods to get required data.
     @AttributeName(name = "jansAuthenticator")
     private UserAuthenticatorList authenticator
 ...
-	public String[] getExternalUid() {
-		return externalUid;
-	}
+        public String[] getExternalUid() {
+                return externalUid;
+        }
 
-	public void setExternalUid(String[] externalUid) {
-		this.externalUid = externalUid;
-	}
+        public void setExternalUid(String[] externalUid) {
+                this.externalUid = externalUid;
+        }
 
-	public UserAuthenticatorList getAuthenticator() {
-		return authenticator;
-	}
+        public UserAuthenticatorList getAuthenticator() {
+                return authenticator;
+        }
 
-	public void setAuthenticator(UserAuthenticatorList authenticator) {
-		this.authenticator = authenticator;
-	}
+        public void setAuthenticator(UserAuthenticatorList authenticator) {
+                this.authenticator = authenticator;
+        }
 ...
 ```
 
@@ -273,25 +273,25 @@ code [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src
 It provides next API methods:
 
 ```
-	public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user);
+        public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user);
 
-	public List<UserAuthenticator> getUserAuthenticatorsByType(SimpleUser user, String type);
+        public List<UserAuthenticator> getUserAuthenticatorsByType(SimpleUser user, String type);
 
-	public UserAuthenticator getUserAuthenticatorById(SimpleUser user, String id);
+        public UserAuthenticator getUserAuthenticatorById(SimpleUser user, String id);
 
-	public void addUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+        public void addUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
 
-	public void removeUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+        public void removeUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
 
-	public void removeUserAuthenticator(SimpleUser user, String type);
+        public void removeUserAuthenticator(SimpleUser user, String type);
 
-	public UserAuthenticator createUserAuthenticator(String id, String type);
+        public UserAuthenticator createUserAuthenticator(String id, String type);
 
-	public UserAuthenticator createUserAuthenticator(String id, String type, Map<String, Object> custom);
+        public UserAuthenticator createUserAuthenticator(String id, String type, Map<String, Object> custom);
 
-	public String formatExternalUid(String id, String type);
+        public String formatExternalUid(String id, String type);
 
-	public boolean checkAndMigrateToAuthenticatorList(SimpleUser user);
+        public boolean checkAndMigrateToAuthenticatorList(SimpleUser user);
 ```
 
 All these methods update both `jansAuthenticator` and `jansExtUid` attributes
@@ -336,14 +336,14 @@ the Jans-auth server. More on this topic in this [article](../../janssen-server/
 ## Testing an authentication flow
 
 An example of a complete URL looks like this -
-		```
+                ```
 
-		https://<your.jans.server>/jans-auth/authorize.htm? \
-		response_type=code&redirect_uri=https://<your.jans.server>/admin \
-		&client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
-		&scope=openid+profile+email+user_name \
-		&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
-	```
+                https://<your.jans.server>/jans-auth/authorize.htm? \
+                response_type=code&redirect_uri=https://<your.jans.server>/admin \
+                &client_id=17b8b82e-b3ec-42a2-bd90-097028a37f3 \
+                &scope=openid+profile+email+user_name \
+                &state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
+        ```
 To test , enter the complete URL for authorization in a browser or create a
 simple webpage with a link that simulates the user sign-in attempt. If the
 server is configured properly, the first page for the selected authentication
@@ -354,72 +354,72 @@ method will be displayed to the user.
 ### 1. How can error messages be displayed on a web page?
 
 1. FacesMessage bean is used for this purpose.
-	```
-	from org.jans.jsf2.message import FacesMessages
-	from org.jans.service.cdi.util import CdiUtil
-	from javax.faces.application import FacesMessage
-	...
+        ```
+        from org.jans.jsf2.message import FacesMessages
+        from org.jans.service.cdi.util import CdiUtil
+        from javax.faces.application import FacesMessage
+        ...
 
-	facesMessages = CdiUtil.bean(FacesMessages)
-	facesMessages.setKeepMessages()
-	facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please enter a valid username")
+        facesMessages = CdiUtil.bean(FacesMessages)
+        facesMessages.setKeepMessages()
+        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please enter a valid username")
 
-	```
+        ```
 2. The error will appear in the associated template using the following markup:
-	```
-	...
-	<h:messages />
-	...
-	```
-	See an example [here](https://github.com/JanssenProject/jans/blob/685a1593fb53e2310cfa38fcd49db94f3453042f/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41)
+        ```
+        ...
+        <h:messages />
+        ...
+        ```
+        See an example [here](https://github.com/JanssenProject/jans/blob/685a1593fb53e2310cfa38fcd49db94f3453042f/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41)
 
 ### 2. How is redirection to a third party application for authentication handled in a script?
 
-For user authentication or consent gathering, there might be a need to redirect to a third party application to perform some operation and return the control back to authentication steps of the custom script. Please apply these steps to a person authentication script in such a scenario:
+For user authentication or consent gathering, there might be a need to redirect to a third-party application to perform some operation and return control to authentication steps of the custom script. Please apply these steps to a person authentication script in such a scenario:
 
  - Return from def getPageForStep(self, step, context), a page /auth/method_name/redirect.html ; with content similar to the code snippet below -
-	```
+        ```
     def getPageForStep(self, step, context):
         return "/auth/method_name/redirect.html"
-	```
+        ```
  - Contents of redirect.xhtml should take the flow to prepareForStep method
-	```
-	...
-	    <f:metadata>
-	        <f:viewAction action="#{authenticator.prepareForStep}" if="#{not identity.loggedIn}" />
-	    </f:metadata>
-	```
+        ```
+        ...
+            <f:metadata>
+                <f:viewAction action="#{authenticator.prepareForStep}" if="#{not identity.loggedIn}" />
+            </f:metadata>
+        ```
  - In method prepareForStep prepare data needed for redirect and perform the redirection to the external service.
-	```
-	def prepareForStep(self, step, context):
-	        .....
-	    facesService = CdiUtil.bean(FacesService)
-	    facesService.redirectToExternalURL(third_party_URL )
+        ```
+        def prepareForStep(self, step, context):
+                .....
+            facesService = CdiUtil.bean(FacesService)
+            facesService.redirectToExternalURL(third_party_URL )
 
-	    return True
-	```
+            return True
+        ```
  - In order to resume flow after the redirection, invoke a similar URL to https://my.gluu.server/postlogin.htm?param=123 from the third party app which takes the flow back to the authenticate method of the custom script.
 So create an xhtml page postlogin.xhtml which will look like this :
-	```
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        ```
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-	<html xmlns="http://www.w3.org/1999/xhtml"
-	      xmlns:f="http://xmlns.jcp.org/jsf/core">
+        <html xmlns="http://www.w3.org/1999/xhtml"
+              xmlns:f="http://xmlns.jcp.org/jsf/core">
 
-	<f:view transient="true" contentType="text/html">
-	    <f:metadata>
-	        <f:viewAction action="#{authenticator.authenticateWithOutcome}" />
-	    </f:metadata>
-	</f:view>
+        <f:view transient="true" contentType="text/html">
+            <f:metadata>
+                <f:viewAction action="#{authenticator.authenticateWithOutcome}" />
+            </f:metadata>
+        </f:view>
 
-	</html>
-	```
+        </html>
+        ```
 The `<f:viewAction action="#{authenticator.authenticateWithOutcome}" />` in step 4 takes us to the authenticate method inside the custom script `def authenticate(self, configurationAttributes, requestParameters, step):`. Here you can
  - use parameters from request
-	```
-	param = ServerUtil.getFirstValue(requestParameters, "param-name"))
-	```
+        ```
+        param = ServerUtil.getFirstValue(requestParameters, "param-name"))
+        ```
  - perform the `state` check (state : Opaque value used to maintain state between the request and the callback.)
 
  - finally, return true or false from this method.

@@ -7,11 +7,15 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
-use super::default_values::*;
-use super::feature_types::*;
-use super::json_util::*;
+use super::default_values::{default_jti, default_token_cache_capacity, default_true};
+#[cfg(not(target_arch = "wasm32"))]
+use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
+use super::feature_types::{FeatureToggle, LoggerType};
+use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
+use crate::JwtConfig;
 use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
+use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
@@ -21,13 +25,13 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
 /// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
 //
 //  All fields should be available to parse from string, because env vars always string.
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -102,7 +106,7 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub decision_log_user_claims: Vec<String>,
 
-    /// List of claims to map from user entity, such as ["client_id", "rp_id", ...]
+    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
     #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub decision_log_workload_claims: Vec<String>,
@@ -141,7 +145,7 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
-    /// Mapping name of cedar schema TrustedIssuer entity
+    /// Mapping name of cedar schema `TrustedIssuer` entity
     #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub mapping_iss: Option<String>,
@@ -185,8 +189,17 @@ pub struct BootstrapConfigRaw {
     )]
     pub policy_store_local_fn: Option<String>,
 
+    /// Whether to validate file checksums when loading from directory or archive sources.
+    /// Defaults to `true`. Set to `false` to disable checksum validation.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM",
+        default = "default_true",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub policy_store_validate_checksum: bool,
+
     /// Maximum number of default entities allowed in a policy store.
-    /// This prevents DoS attacks by limiting the number of entities that can be loaded.
+    /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     /// If value is 0, there is no limit. But if None, default value is applied.
     #[serde(rename = "CEDARLING_MAX_DEFAULT_ENTITIES", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
@@ -218,7 +231,10 @@ pub struct BootstrapConfigRaw {
     pub jwt_status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
-    #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
+        default = "JwtConfig::supported_algorithms"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
@@ -227,9 +243,9 @@ pub struct BootstrapConfigRaw {
     /// # Strict Mode
     ///
     /// Strict mode requires:
-    ///     1. id_token aud matches the access_token client_id;
-    ///     2. if a Userinfo token is present, the sub matches the id_token, and that
-    ///         the aud matches the access token client_id.
+    ///     1. `id_token` aud matches the `access_token` `client_id`;
+    ///     2. if a Userinfo token is present, the sub matches the `id_token`, and that
+    ///         the aud matches the access token `client_id`.
     #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
     pub id_token_trust_mode: IdTokenTrustMode,
 
@@ -303,6 +319,70 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
+
+    // =========================================================================
+    // Data Store Configuration
+    // =========================================================================
+    /// Maximum number of data entries in the data store (0 = unlimited).
+    /// Default: 10,000
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_ENTRIES", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_entries: Option<usize>,
+
+    /// Maximum size per data entry in bytes (0 = unlimited).
+    /// Default: 1MB (1,048,576 bytes)
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_ENTRY_SIZE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_entry_size: Option<usize>,
+
+    /// Default TTL for data entries in seconds.
+    /// If not set, entries do not expire.
+    #[serde(rename = "CEDARLING_DATA_STORE_DEFAULT_TTL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_default_ttl: Option<u64>,
+
+    /// Maximum allowed TTL for data entries in seconds.
+    /// Default: 3600 (1 hour). If not set, no upper limit (10 years max).
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_ttl: Option<u64>,
+
+    /// Enable metrics tracking (access counts, timestamps) for data entries.
+    /// Default: true
+    #[serde(rename = "CEDARLING_DATA_STORE_ENABLE_METRICS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_enable_metrics: Option<bool>,
+
+    /// Memory usage alert threshold as a percentage (0.0-100.0).
+    /// When capacity usage exceeds this threshold, a warning is logged.
+    /// Default: 80.0 (80%)
+    #[serde(rename = "CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_memory_alert_threshold: Option<f64>,
+    /// Type of trusted issuer loader.
+    /// If not set, synchronous loader is used.
+    /// Can be `SYNC` or `ASYNC`.
+    ///
+    /// Sync loader means that trusted issuers will be loaded on initialization.
+    /// Async loader means that trusted issuers will be loaded in background.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_type: TrustedIssuerLoaderTypeRaw,
+    /// Number of concurrent workers to use when loading trusted issuers.
+    /// Applies to both SYNC (parallel loading during initialization) and ASYNC (parallel background loading) modes.
+    /// Minimum possible value is 1. Zero will be used as 1.
+    ///
+    /// For WASM maximum value is 6, default is 2.
+    /// For native maximum value is 1000, default is 10.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_workers: WorkersCount,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -324,13 +404,13 @@ impl BootstrapConfigRaw {
     ) -> Result<Self, BootstrapConfigLoadingError> {
         let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
             .as_object()
-            .map(|v| v.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .unwrap_or_default();
 
-        get_cedarling_env_vars().into_iter().for_each(|(k, v)| {
+        for (k, v) in get_cedarling_env_vars() {
             // update map with values from env variables
             json_config_params.insert(k, v);
-        });
+        }
 
         Ok(BootstrapConfigRaw::deserialize(json_config_params)?)
     }
@@ -358,7 +438,7 @@ mod tests {
 
     static ENV_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
-    fn with_env_vars<F>(vars: Vec<(&str, &str)>, test: F)
+    fn with_env_vars<F>(vars: &[(&str, &str)], test: F)
     where
         F: FnOnce(),
     {
@@ -376,7 +456,7 @@ mod tests {
         }
 
         // Set new env vars
-        for (key, value) in &vars {
+        for (key, value) in vars {
             unsafe {
                 env::set_var(key, value);
             }
@@ -385,7 +465,7 @@ mod tests {
         test();
 
         // Clean up
-        for (key, _) in &vars {
+        for (key, _) in vars {
             unsafe {
                 env::remove_var(key);
             }
@@ -403,7 +483,7 @@ mod tests {
     /// or raw config is provided.
     #[test]
     fn test_from_raw_config_and_env_defaults() {
-        with_env_vars(vec![], || {
+        with_env_vars(&[], || {
             let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
             assert_eq!(
                 config.application_name, "",
@@ -461,7 +541,7 @@ mod tests {
     /// Tests that configuration values are correctly set when only a raw config is provided.
     #[test]
     fn test_from_raw_config_and_env() {
-        with_env_vars(vec![], || {
+        with_env_vars(&[], || {
             let raw = BootstrapConfigRaw {
                 application_name: "test-app".to_string(),
                 log_type: LoggerType::Memory,
@@ -481,7 +561,7 @@ mod tests {
     #[test]
     fn test_from_raw_config_and_env_with_env_vars() {
         with_env_vars(
-            vec![
+            &[
                 ("CEDARLING_APPLICATION_NAME", "env-app"),
                 ("CEDARLING_LOG_TYPE", "memory"),
                 ("CEDARLING_LOG_LEVEL", "DEBUG"),
@@ -500,7 +580,7 @@ mod tests {
     #[test]
     fn test_from_raw_config_and_env_vars_override() {
         with_env_vars(
-            vec![
+            &[
                 ("CEDARLING_APPLICATION_NAME", "env-app"),
                 ("CEDARLING_LOG_TYPE", "memory"),
             ],
@@ -527,7 +607,7 @@ mod tests {
     /// Tests that an error is returned when an invalid environment variable value is provided.
     #[test]
     fn test_from_raw_config_and_env_invalid_env_var() {
-        with_env_vars(vec![("CEDARLING_LOG_TYPE", "invalid")], || {
+        with_env_vars(&[("CEDARLING_LOG_TYPE", "invalid")], || {
             let result = BootstrapConfigRaw::from_raw_config_and_env(None);
             assert!(result.is_err());
         });
@@ -537,7 +617,7 @@ mod tests {
     #[test]
     fn test_from_raw_config_and_env_empty_strings() {
         with_env_vars(
-            vec![
+            &[
                 ("CEDARLING_APPLICATION_NAME", ""),
                 ("CEDARLING_POLICY_STORE_URI", ""),
             ],
@@ -546,6 +626,110 @@ mod tests {
 
                 assert_eq!(config.application_name, "");
                 assert_eq!(config.policy_store_uri, None);
+            },
+        );
+    }
+
+    /// Tests that environment variables for trusted issuer loader are parsed correctly.
+    #[test]
+    fn test_trusted_issuer_loader_env_vars() {
+        with_env_vars(
+            &[
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_TYPE", "ASYNC"),
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "5"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_type,
+                    TrustedIssuerLoaderTypeRaw::Async,
+                    "Loader type should be Async from env var"
+                );
+                assert_eq!(
+                    config.trusted_issuer_loader_workers, 5,
+                    "Worker count should be 5 from env var"
+                );
+            },
+        );
+    }
+
+    /// Tests JSON deserialization for trusted issuer loader fields.
+    #[test]
+    fn test_trusted_issuer_loader_json_deserialization() {
+        // Valid JSON values
+        let valid_cases = vec![
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "SYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 3}"#,
+                TrustedIssuerLoaderTypeRaw::Sync,
+                3,
+            ),
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "ASYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 1}"#,
+                TrustedIssuerLoaderTypeRaw::Async,
+                1,
+            ),
+        ];
+
+        for (json, expected_type, expected_workers) in valid_cases {
+            let config: BootstrapConfigRaw = serde_json::from_str(json).unwrap();
+            assert_eq!(
+                config.trusted_issuer_loader_type, expected_type,
+                "Loader type mismatch for JSON: {}",
+                json
+            );
+            assert_eq!(
+                config.trusted_issuer_loader_workers, expected_workers,
+                "Worker count mismatch for JSON: {}",
+                json
+            );
+        }
+
+        // Invalid JSON values should produce errors
+        let invalid_cases = vec![
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "INVALID"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": -1}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": "not_a_number"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": 123}"#,
+        ];
+
+        for json in invalid_cases {
+            let result: Result<BootstrapConfigRaw, _> = serde_json::from_str(json);
+            result.expect_err(&format!("Should fail to parse invalid JSON: {json}"));
+        }
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped minimum value
+    #[test]
+    fn test_trusted_issuer_loader_claps_min() {
+        with_env_vars(&[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.trusted_issuer_loader_workers,
+                WorkersCount::MIN,
+                "Default worker count should be {}",
+                WorkersCount::MIN.get()
+            );
+        });
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped max value
+    #[test]
+    fn test_trusted_issuer_loader_claps_max() {
+        let max_val = (WorkersCount::MAX.get() + 100).to_string();
+
+        with_env_vars(
+            &[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", max_val.as_str())],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_workers,
+                    WorkersCount::MAX,
+                    "Default worker count should be {}",
+                    WorkersCount::MAX.get()
+                );
             },
         );
     }

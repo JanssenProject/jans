@@ -180,7 +180,7 @@ There difference between `introspectionAccessTokenMustHaveUmaProtectionScope` an
 
 Customizing certain aspects of endpoint behaviour, for example, one can modify claims of an access token as JWT, using
 [introspection scripts](../../../script-catalog/introspection/README.md). Use
-[update token](../../developer/scripts/update-token.md) introspection script for transformation of claims and values in
+[update token](../../../script-catalog/update_token/update-token.md) introspection script for transformation of claims and values in
 id-token and access-token.
 
 Configure below-mentioned client properties to enable usage of introspection scripts.

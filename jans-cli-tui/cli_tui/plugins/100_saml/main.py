@@ -96,8 +96,8 @@ class Plugin(DialogUtils):
                             _("Selected IDP"),
                             name='selectedIdp',
                             widget=DropDownWidget(
-                                values=[('keycloak', 'Keycloak')],
-                                value=self.config.get('selectedIdp', 'keycloak'),
+                                values=[('shibboleth', 'Shibboleth')],
+                                value=self.config.get('selectedIdp', 'shibboleth'),
                                 select_one_option = False
                             ),
                             jans_help=self.app.get_help_from_schema(self.schema, 'selectedIdp'),

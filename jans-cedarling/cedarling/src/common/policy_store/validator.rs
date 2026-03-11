@@ -16,7 +16,7 @@ const DESCRIPTION_MAX_LENGTH: usize = 1000;
 pub(super) struct MetadataValidator;
 
 impl MetadataValidator {
-    /// Validate a PolicyStoreMetadata structure.
+    /// Validate a [`PolicyStoreMetadata`] structure.
     ///
     /// Checks:
     /// - Cedar version format is valid
@@ -259,8 +259,7 @@ mod tests {
         let err = result.expect_err("Expected EmptyCedarVersion error");
         assert!(
             matches!(err, ValidationError::EmptyCedarVersion),
-            "Expected EmptyCedarVersion, got: {:?}",
-            err
+            "Expected EmptyCedarVersion, got: {err:?}"
         );
     }
 
@@ -282,8 +281,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidCedarVersion error");
         assert!(
             matches!(err, ValidationError::InvalidCedarVersion { .. }),
-            "Expected InvalidCedarVersion, got: {:?}",
-            err
+            "Expected InvalidCedarVersion, got: {err:?}"
         );
     }
 
@@ -305,8 +303,7 @@ mod tests {
         let err = result.expect_err("Expected EmptyPolicyStoreName error");
         assert!(
             matches!(err, ValidationError::EmptyPolicyStoreName),
-            "Expected EmptyPolicyStoreName, got: {:?}",
-            err
+            "Expected EmptyPolicyStoreName, got: {err:?}"
         );
     }
 
@@ -328,8 +325,7 @@ mod tests {
         let err = result.expect_err("Expected PolicyStoreNameTooLong error");
         assert!(
             matches!(err, ValidationError::PolicyStoreNameTooLong { length: 256 }),
-            "Expected PolicyStoreNameTooLong with length 256, got: {:?}",
-            err
+            "Expected PolicyStoreNameTooLong with length 256, got: {err:?}"
         );
     }
 
@@ -351,8 +347,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidPolicyStoreId error");
         assert!(
             matches!(err, ValidationError::InvalidPolicyStoreId { .. }),
-            "Expected InvalidPolicyStoreId, got: {:?}",
-            err
+            "Expected InvalidPolicyStoreId, got: {err:?}"
         );
     }
 
@@ -374,8 +369,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidPolicyStoreId error for short ID");
         assert!(
             matches!(err, ValidationError::InvalidPolicyStoreId { .. }),
-            "Expected InvalidPolicyStoreId, got: {:?}",
-            err
+            "Expected InvalidPolicyStoreId, got: {err:?}"
         );
     }
 
@@ -415,8 +409,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidPolicyStoreVersion error");
         assert!(
             matches!(err, ValidationError::InvalidPolicyStoreVersion { .. }),
-            "Expected InvalidPolicyStoreVersion, got: {:?}",
-            err
+            "Expected InvalidPolicyStoreVersion, got: {err:?}"
         );
     }
 
@@ -461,8 +454,7 @@ mod tests {
                 ValidationError::DescriptionTooLong { length, max_length }
                 if length == over_limit && max_length == DESCRIPTION_MAX_LENGTH
             ),
-            "Expected DescriptionTooLong with correct limits, got: {:?}",
-            err
+            "Expected DescriptionTooLong with correct limits, got: {err:?}"
         );
     }
 
@@ -491,8 +483,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidTimestampOrdering error");
         assert!(
             matches!(err, ValidationError::InvalidTimestampOrdering),
-            "Expected InvalidTimestampOrdering, got: {:?}",
-            err
+            "Expected InvalidTimestampOrdering, got: {err:?}"
         );
     }
 
@@ -516,7 +507,7 @@ mod tests {
 
     #[test]
     fn test_parse_and_validate_invalid_json() {
-        let json = r#"{ invalid json }"#;
+        let json = r"{ invalid json }";
 
         let result = MetadataValidator::parse_and_validate(json);
         let err = result.expect_err("Should fail on invalid JSON");

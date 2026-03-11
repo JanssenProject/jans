@@ -15,9 +15,38 @@
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+use sha1::Sha1;
 use sha2::{Digest, Sha256};
 
 use super::errors::{ManifestErrorType, PolicyStoreError};
+
+/// Supported checksum algorithms for manifest file validation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ChecksumAlgorithm {
+    /// SHA-256 (format: "sha256:<hex>")
+    Sha256,
+    /// SHA-1 (format: "sha1:<hex>")
+    Sha1,
+}
+
+impl ChecksumAlgorithm {
+    /// Compute checksum of the given data using this algorithm.
+    /// Returns the checksum in the format "algorithm:hex" (e.g., "sha256:abc123...").
+    fn compute(self, data: &[u8]) -> String {
+        match self {
+            Self::Sha256 => {
+                let mut hasher = Sha256::new();
+                hasher.update(data);
+                format!("sha256:{}", hex::encode(hasher.finalize()))
+            },
+            Self::Sha1 => {
+                let mut hasher = Sha1::new();
+                hasher.update(data);
+                format!("sha1:{}", hex::encode(hasher.finalize()))
+            },
+        }
+    }
+}
 use super::metadata::PolicyStoreManifest;
 use super::vfs_adapter::VfsFileSystem;
 
@@ -130,6 +159,15 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
     /// Useful for manifest generation and file integrity verification in tests and tooling.
     #[cfg(test)]
     pub(super) fn compute_checksum(&self, file_path: &str) -> Result<String, PolicyStoreError> {
+        self.compute_checksum_sha256(file_path)
+    }
+
+    /// Compute SHA-256 checksum for a file.
+    #[cfg(test)]
+    pub(super) fn compute_checksum_sha256(
+        &self,
+        file_path: &str,
+    ) -> Result<String, PolicyStoreError> {
         let content_bytes =
             self.vfs
                 .read_file(file_path)
@@ -142,6 +180,26 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
         hasher.update(&content_bytes);
         let result = hasher.finalize();
         Ok(format!("sha256:{}", hex::encode(result)))
+    }
+
+    /// Compute SHA-1 checksum for a file.
+    #[cfg(test)]
+    pub(super) fn compute_checksum_sha1(
+        &self,
+        file_path: &str,
+    ) -> Result<String, PolicyStoreError> {
+        let content_bytes =
+            self.vfs
+                .read_file(file_path)
+                .map_err(|e| PolicyStoreError::FileReadError {
+                    path: file_path.to_string(),
+                    source: e,
+                })?;
+
+        let mut hasher = Sha1::new();
+        hasher.update(&content_bytes);
+        let result = hasher.finalize();
+        Ok(format!("sha1:{}", hex::encode(result)))
     }
 
     /// Validate a single file against manifest entry.
@@ -160,13 +218,17 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             });
         }
 
-        // Validate checksum format
-        if !expected_checksum.starts_with("sha256:") {
+        // Validate checksum format and determine algorithm
+        let checksum_algo = if expected_checksum.starts_with("sha256:") {
+            ChecksumAlgorithm::Sha256
+        } else if expected_checksum.starts_with("sha1:") {
+            ChecksumAlgorithm::Sha1
+        } else {
             return Err(ManifestErrorType::InvalidChecksumFormat {
                 file: relative_path.to_string(),
                 checksum: expected_checksum.to_string(),
             });
-        }
+        };
 
         // Read file content for size and checksum validation
         let content_bytes =
@@ -174,7 +236,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
                 .read_file(&file_path)
                 .map_err(|e| ManifestErrorType::FileReadError {
                     file: relative_path.to_string(),
-                    error_message: format!("{}", e),
+                    error_message: format!("{e}"),
                 })?;
 
         // Validate file size
@@ -187,11 +249,8 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             });
         }
 
-        // Compute checksum from already-read content
-        let mut hasher = Sha256::new();
-        hasher.update(&content_bytes);
-        let result = hasher.finalize();
-        let actual_checksum = format!("sha256:{}", hex::encode(result));
+        // Compute checksum from already-read content using the appropriate algorithm
+        let actual_checksum = checksum_algo.compute(&content_bytes);
 
         if actual_checksum != expected_checksum {
             return Err(ManifestErrorType::ChecksumMismatch {
@@ -259,10 +318,10 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             let file_name = &entry.name;
 
             if self.vfs.is_file(path) {
-                let relative_path = format!("{}/{}", relative_base, file_name);
+                let relative_path = format!("{relative_base}/{file_name}");
                 files.insert(relative_path);
             } else if self.vfs.is_dir(path) {
-                let new_relative_base = format!("{}/{}", relative_base, file_name);
+                let new_relative_base = format!("{relative_base}/{file_name}");
                 self.scan_directory(path, &new_relative_base, files)?;
             }
         }
@@ -327,7 +386,7 @@ impl<V: VfsFileSystem> ManifestValidator<V> {
             },
             Err(e) => {
                 result.add_error(
-                    ManifestErrorType::ParseError(format!("Failed to scan files: {}", e)),
+                    ManifestErrorType::ParseError(format!("Failed to scan files: {e}")),
                     None,
                 );
             },
@@ -411,8 +470,7 @@ mod tests {
         let err = result.expect_err("Expected FileMissing error for nonexistent file");
         assert!(
             matches!(err, ManifestErrorType::FileMissing { .. }),
-            "Expected FileMissing error, got: {:?}",
-            err
+            "Expected FileMissing error, got: {err:?}"
         );
     }
 
@@ -428,8 +486,7 @@ mod tests {
         let err = result.expect_err("Expected InvalidChecksumFormat error");
         assert!(
             matches!(err, ManifestErrorType::InvalidChecksumFormat { .. }),
-            "Expected InvalidChecksumFormat error, got: {:?}",
-            err
+            "Expected InvalidChecksumFormat error, got: {err:?}"
         );
     }
 
@@ -445,8 +502,7 @@ mod tests {
         let err = result.expect_err("Expected SizeMismatch error");
         assert!(
             matches!(err, ManifestErrorType::SizeMismatch { .. }),
-            "Expected SizeMismatch error, got: {:?}",
-            err
+            "Expected SizeMismatch error, got: {err:?}"
         );
     }
 
@@ -462,8 +518,7 @@ mod tests {
         let err = result.expect_err("Expected ChecksumMismatch error");
         assert!(
             matches!(err, ManifestErrorType::ChecksumMismatch { .. }),
-            "Expected ChecksumMismatch error, got: {:?}",
-            err
+            "Expected ChecksumMismatch error, got: {err:?}"
         );
     }
 
@@ -708,5 +763,119 @@ mod tests {
                 .iter()
                 .any(|e| matches!(&e.error_type, ManifestErrorType::ChecksumMismatch { .. }))
         );
+    }
+
+    #[test]
+    fn test_compute_checksum_sha1() {
+        let vfs = MemoryVfs::new();
+        vfs.create_file("/test.txt", b"hello world")
+            .expect("should create test file");
+
+        let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
+        let checksum = validator
+            .compute_checksum_sha1("/test.txt")
+            .expect("should compute checksum");
+
+        // Expected SHA-1 of "hello world"
+        assert_eq!(checksum, "sha1:2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+    }
+
+    #[test]
+    fn test_validate_file_with_sha1_checksum() {
+        let vfs = MemoryVfs::new();
+        let content = b"hello world";
+        vfs.create_file("/test.txt", content)
+            .expect("should succeed");
+
+        let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
+
+        // Compute correct SHA-1 checksum
+        let checksum = validator
+            .compute_checksum_sha1("/test.txt")
+            .expect("should succeed");
+
+        validator
+            .validate_file("test.txt", &checksum, content.len() as u64)
+            .expect("SHA-1 checksum validation should succeed");
+    }
+
+    #[test]
+    fn test_validate_file_with_sha1_checksum_mismatch() {
+        let vfs = MemoryVfs::new();
+        vfs.create_file("/test.txt", b"hello")
+            .expect("should succeed");
+
+        let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
+        let result = validator.validate_file("test.txt", "sha1:wrongchecksum", 5);
+
+        let err = result.expect_err("Expected ChecksumMismatch error for SHA-1");
+        assert!(
+            matches!(err, ManifestErrorType::ChecksumMismatch { .. }),
+            "Expected ChecksumMismatch error, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_validate_complete_policy_store_with_sha1() {
+        let vfs = MemoryVfs::new();
+
+        // Create metadata
+        let metadata_content = b"{\"test\": \"data\"}";
+        vfs.create_file("/metadata.json", metadata_content)
+            .expect("should succeed");
+
+        // Create policy
+        let policy_content = b"permit(principal, action, resource);";
+        vfs.create_file("/policies/policy1.cedar", policy_content)
+            .expect("should succeed");
+
+        let validator = ManifestValidator::new(vfs, PathBuf::from("/"));
+
+        // Compute SHA-1 checksums
+        let metadata_checksum = validator
+            .compute_checksum_sha1("/metadata.json")
+            .expect("should succeed");
+        let policy_checksum = validator
+            .compute_checksum_sha1("/policies/policy1.cedar")
+            .expect("should succeed");
+
+        // Create manifest with SHA-1 checksums
+        let mut files = HashMap::new();
+        files.insert(
+            "metadata.json".to_string(),
+            FileInfo {
+                size: metadata_content.len() as u64,
+                checksum: metadata_checksum,
+            },
+        );
+        files.insert(
+            "policies/policy1.cedar".to_string(),
+            FileInfo {
+                size: policy_content.len() as u64,
+                checksum: policy_checksum,
+            },
+        );
+
+        let manifest = PolicyStoreManifest {
+            policy_store_id: "test123".to_string(),
+            generated_date: Utc::now(),
+            files,
+        };
+
+        let manifest_json = serde_json::to_string(&manifest).expect("should succeed");
+        validator
+            .vfs
+            .create_file("/manifest.json", manifest_json.as_bytes())
+            .expect("should succeed");
+
+        // Validate
+        let result = validator.validate(Some("test123"));
+        assert!(
+            result.is_valid,
+            "SHA-1 manifest validation should succeed: {:?}",
+            result.errors
+        );
+        assert_eq!(result.validated_files.len(), 2);
+        assert_eq!(result.errors.len(), 0);
     }
 }

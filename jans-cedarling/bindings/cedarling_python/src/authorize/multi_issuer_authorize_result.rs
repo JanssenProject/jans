@@ -53,4 +53,3 @@ impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult 
         Self { inner: value }
     }
 }
-

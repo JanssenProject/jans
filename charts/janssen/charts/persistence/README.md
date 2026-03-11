@@ -33,7 +33,7 @@ Kubernetes: `>=v1.22.0-0`
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenproject/persistence"` | Image  to use for deploying. |
+| image.repository | string | `"ghcr.io/janssenproject/jans/persistence"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | imagePullSecrets | list | `[]` |  |
 | lifecycle | object | `{}` |  |

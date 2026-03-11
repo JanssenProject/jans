@@ -6,10 +6,10 @@
 //! This module is responsible for deserializing the JSON Cedar schema
 
 use crate::common::cedar_schema::CEDAR_NAMESPACE_SEPARATOR;
-use action::*;
-use attribute::*;
+use action::Action;
+use attribute::Attribute;
 use cedar_policy::ParseErrors;
-use entity_type::*;
+use entity_type::EntityType;
 use serde::Deserialize;
 use std::{collections::HashMap, str::FromStr};
 
@@ -101,7 +101,7 @@ impl CedarSchemaJson {
     }
 
     /// Get the entity schema for a given type name.
-    /// `default_namespace` is the default namespace for entities to search if no namespace is provided in type_name.
+    /// `default_namespace` is the default namespace for entities to search if no namespace is provided in `type_name`.
     ///
     /// If the type name does not have namespace, it will look for the type in the default namespace.
     /// If not found in default namespace, it will look with `empty` namespace (value: "").
@@ -170,6 +170,8 @@ struct Namespace {
 
 #[cfg(test)]
 mod test_deserialize_json_cedar_schema {
+    use crate::common::cedar_schema::cedar_json::entity_type::EntityShape;
+
     use super::*;
     use serde_json::json;
     use std::collections::HashSet;
@@ -356,7 +358,7 @@ mod test_deserialize_json_cedar_schema {
             schema
                 .namespaces
                 .keys()
-                .map(|k| k.as_str())
+                .map(std::string::String::as_str)
                 .collect::<HashSet<&str>>(),
             HashSet::from(["", "Jans"])
         );

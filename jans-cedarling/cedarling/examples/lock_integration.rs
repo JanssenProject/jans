@@ -6,7 +6,11 @@
 // run this example using `cargo run --example lock_integration`
 
 use cedarling::log_config::StdOutLoggerMode;
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LockServiceConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+};
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use std::time::Duration;
@@ -42,6 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -68,6 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 
@@ -113,7 +119,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(result) => {
             println!("\n\nis allowed: {}", result.decision);
         },
-        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
+        Err(e) => eprintln!("Error while authorizing: {e}\n {e:?}\n\n"),
     }
 
     // we sleep for a bit so we don't exit before any logs are sent

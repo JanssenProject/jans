@@ -926,13 +926,14 @@ class JansCliApp(Application):
             jans_help: AnyFormattedText = "",
             style: AnyFormattedText = "",
             other_widgets: Optional[Sequence[AnyContainer]] = None,
-            height: int = 1
+            height: int = 1,
+            title_style: AnyFormattedText = "",
     ) -> AnyContainer:
         title += ': '
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
 
-        my_widgets = [Window(FormattedTextControl(title), width=len(title) + 1, style=style, height=height), widget]
+        my_widgets = [Window(FormattedTextControl(title, style=title_style), width=len(title) + 1, style=style, height=height), widget]
         if other_widgets:
             my_widgets.append(other_widgets)
 

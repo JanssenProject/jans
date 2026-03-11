@@ -15,13 +15,26 @@ use std::collections::HashMap;
 
 use super::errors::BuildContextError;
 
-/// Constructs the authorization context by adding the built entities from the tokens
+/// Constructs the authorization context by adding the built entities from the tokens and pushed data.
+///
+/// ## Context Merging
+///
+/// Values are merged in the following order:
+/// 1. **Request Context** - Values passed directly in the authorization request
+/// 2. **Entity References** - Built entity references from tokens
+/// 3. **Pushed Data** - Data from the `DataStore` (injected under `context.data`)
+///
+/// **Important:** Merges will error on key conflicts via `merge_json_values`, which returns
+/// `BuildContextError::KeyConflict` when any key collision occurs. Callers must resolve
+/// conflicts before invoking this function. Pushed data is always placed under the `data`
+/// namespace to avoid conflicts.
 pub(super) fn build_context(
     config: &AuthzConfig,
     request_context: Value,
     build_entities: &BuiltEntities,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
+    pushed_data: &HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     let namespace = action.type_name().namespace();
     let action_name = &action.id().escaped();
@@ -39,7 +52,7 @@ pub(super) fn build_context(
     if let Some(ctx) = action_schema.applies_to.context.as_ref() {
         match ctx {
             Attribute::Record { attrs, .. } => {
-                for (key, attr) in attrs.iter() {
+                for (key, attr) in attrs {
                     if let Some(entity_ref) =
                         build_entity_refs_from_attr(&namespace, attr, build_entities, json_schema)?
                     {
@@ -54,7 +67,7 @@ pub(super) fn build_context(
                 {
                     match attr {
                         Attribute::Record { attrs, .. } => {
-                            for (key, attr) in attrs.iter() {
+                            for (key, attr) in attrs {
                                 if let Some(entity_ref) = build_entity_refs_from_attr(
                                     &namespace,
                                     attr,
@@ -83,7 +96,14 @@ pub(super) fn build_context(
         }
     }
 
-    let context = merge_json_values(request_context, ctx_entity_refs)?;
+    // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
+    if !pushed_data.is_empty() {
+        let data_value = Value::Object(pushed_data.iter().map(|(k, v)| (k.clone(), v.clone())).collect());
+        let pushed_wrapper = json!({ "data": data_value });
+        ctx_entity_refs = merge_json_values(ctx_entity_refs, &pushed_wrapper)?;
+    }
+
+    let context = merge_json_values(request_context, &ctx_entity_refs)?;
     let context: cedar_policy::Context =
         cedar_policy::Context::from_json_value(context, Some((schema, action)))?;
 
@@ -93,14 +113,26 @@ pub(super) fn build_context(
 /// Constructs the authorization context for multi-issuer requests with token collection
 ///
 /// This function implements the design document's token collection context structure:
-/// - Individual token entities are accessible via context.tokens.{issuer}_{token_type}
+/// - Individual token entities are accessible via `context.tokens.{issuer}_{token_type}`
 /// - All JWT claims are stored as entity tags (Set of String by default)
 /// - Provides ergonomic policy syntax for cross-token validation
+///
+/// ## Context Merging
+///
+/// Values are merged in the following order:
+/// 1. **Request Context** - Values passed directly in the authorization request
+/// 2. **Token References** - Built token entity references
+/// 3. **Pushed Data** - Data from the `DataStore` (injected under `context.data`)
+///
+/// **Important:** Merges will error on key conflicts via `merge_json_values`, which returns
+/// `BuildContextError::KeyConflict` when any key collision occurs. Callers must resolve
+/// conflicts before invoking this function.
 pub(super) fn build_multi_issuer_context(
     request_context: Value,
     token_entities: &HashMap<String, Entity>,
     schema: &cedar_policy::Schema,
     action: &cedar_policy::EntityUid,
+    pushed_data: &HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
     // Start with the request context
     let mut context_json = request_context;
@@ -122,13 +154,16 @@ pub(super) fn build_multi_issuer_context(
     // Add total token count as specified in design
     tokens_context.insert("total_token_count".to_string(), json!(token_entities.len()));
 
-    // Merge with request context
-    if let Some(context_obj) = context_json.as_object_mut() {
-        context_obj.insert("tokens".to_string(), Value::Object(tokens_context));
-    } else {
-        context_json = json!({
-            "tokens": Value::Object(tokens_context)
-        });
+    // Merge tokens into request context, checking for conflicts
+    let tokens_value = Value::Object(tokens_context);
+    let tokens_wrapper = json!({ "tokens": tokens_value });
+    context_json = merge_json_values(context_json, &tokens_wrapper)?;
+
+    // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
+    if !pushed_data.is_empty() {
+        let data_value = Value::Object(pushed_data.iter().map(|(k, v)| (k.clone(), v.clone())).collect());
+        let pushed_wrapper = json!({ "data": data_value });
+        context_json = merge_json_values(context_json, &pushed_wrapper)?;
     }
 
     // Create Cedar context
@@ -152,7 +187,7 @@ fn build_entity_refs_from_attr(
             let Some((type_name, _type_schema)) =
                 schema
                     .get_entity_schema(name, Some(namespace))
-                    .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+                    .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
             else {
                 return Ok(None);
             };
@@ -172,7 +207,7 @@ fn build_entity_refs_from_attr(
             let Some((type_name, _type_schema)) =
                 schema
                     .get_entity_schema(name, Some(namespace))
-                    .map_err(|e| BuildContextError::ParseEntityName(name.to_string(), e))?
+                    .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
             else {
                 return Ok(None);
             };
@@ -204,7 +239,7 @@ fn map_entity_id(
     }
 }
 
-fn merge_json_values(mut base: Value, other: Value) -> Result<Value, BuildContextError> {
+fn merge_json_values(mut base: Value, other: &Value) -> Result<Value, BuildContextError> {
     if let (Some(base_map), Some(additional_map)) = (base.as_object_mut(), other.as_object()) {
         for (key, value) in additional_map {
             if let Entry::Vacant(entry) = base_map.entry(key) {
@@ -228,7 +263,7 @@ mod test {
         let obj2 = json!({ "c": 3, "d": 4 });
         let expected = json!({"a": 1, "b": 2, "c": 3, "d": 4});
 
-        let result = merge_json_values(obj1, obj2).expect("Should merge JSON objects");
+        let result = merge_json_values(obj1, &obj2).expect("Should merge JSON objects");
 
         assert_eq!(result, expected);
     }
@@ -238,7 +273,7 @@ mod test {
         // Test for only two objects
         let obj1 = json!({ "a": 1, "b": 2 });
         let obj2 = json!({ "b": 3, "c": 4 });
-        let result = merge_json_values(obj1, obj2);
+        let result = merge_json_values(obj1, &obj2);
 
         assert!(
             matches!(result, Err(BuildContextError::KeyConflict(key)) if key.as_str() == "b"),

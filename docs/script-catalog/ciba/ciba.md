@@ -96,11 +96,6 @@ class EndUserNotification(EndUserNotificationType):
 
 ```
 
-
-## Sample Scripts
-- [EndUserNotification](../../../script-catalog/ciba/end-user-notification/end_user_notification.py)
-
-
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).

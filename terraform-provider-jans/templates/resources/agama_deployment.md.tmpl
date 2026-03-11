@@ -1,0 +1,33 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+  Resource for managing Agama authentication flow deployments.
+---
+
+# {{.Name}} ({{.Type}})
+
+Resource for managing Agama authentication flow deployments. Agama is a framework
+for building authentication flows in the Janssen Server.
+
+## Example Usage
+
+```terraform
+resource "jans_agama_deployment" "example" {
+  name            = "my-agama-project"
+  deployment_file = "path/to/agama-project.zip"
+  autoconfigure   = false
+}
+```
+
+### With Autoconfiguration
+
+```terraform
+resource "jans_agama_deployment" "autoconfigured" {
+  name            = "sample-project"
+  deployment_file = "path/to/sample-project.zip"
+  autoconfigure   = true
+}
+```
+
+{{ .SchemaMarkdown | trimspace }}

@@ -164,14 +164,6 @@ class SecretSchema(Schema):
         },
     )
 
-    kc_db_password = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for Keycloak RDBMS user",
-        },
-    )
-
     admin_ui_client_encoded_pw = String(
         load_default="",
         dump_default="",
@@ -269,65 +261,6 @@ class SecretSchema(Schema):
         dump_default="",
         metadata={
             "description": "Password for jans-config-api client",
-        },
-    )
-
-    kc_admin_password = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Admin password of Keycloak",
-        },
-    )
-
-    kc_master_auth_client_encoded_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client encoded secret of Keycloak master auth app",
-            "x-encoding": "3DES",
-        },
-    )
-
-    kc_master_auth_client_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client secret of Keycloak master auth app",
-        },
-    )
-
-    kc_saml_openid_client_encoded_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client encoded secret of Keycloak SAML app",
-            "x-encoding": "3DES",
-        },
-    )
-
-    kc_saml_openid_client_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client secret of Keycloak SAML app",
-        },
-    )
-
-    kc_scheduler_api_client_encoded_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client encoded secret of Keycloak scheduler API app",
-            "x-encoding": "3DES",
-        },
-    )
-
-    kc_scheduler_api_client_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client secret of Keycloak scheduler API app",
         },
     )
 
@@ -729,33 +662,6 @@ class ConfigmapSchema(Schema):
         },
     )
 
-    kc_master_auth_client_id = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client ID of Keycloak master auth app",
-            "example": "2103.22abf39d-f78f-4fb0-871e-dcb80bc1e43c",
-        },
-    )
-
-    kc_saml_openid_client_id = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client ID of Keycloak SAML OpenID app",
-            "example": "2101.70394974-82ec-481e-9493-e96d3cf8072f",
-        },
-    )
-
-    kc_scheduler_api_client_id = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Client ID of Keycloak scheduler API app",
-            "example": "2102.d424af33-2069-4803-8426-4787af5fd933",
-        },
-    )
-
     token_server_admin_ui_client_id = String(
         load_default="",
         dump_default="",
@@ -822,15 +728,6 @@ class ConfigmapSchema(Schema):
         dump_default="CN=Janssen Auth CA Certificates",
         metadata={
             "description": "CommonName for jans-auth CA certificate",
-        },
-    )
-
-    kc_admin_username = String(
-        load_default="admin",
-        dump_default="admin",
-        metadata={
-            "description": "Admin username of Keycloak",
-            "example": "admin",
         },
     )
 

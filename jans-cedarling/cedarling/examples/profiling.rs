@@ -6,7 +6,11 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use cedarling::*;
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request,
+};
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 
@@ -41,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut options = pprof::flamegraph::Options::default();
         options.image_width = Some(3000);
         report.flamegraph_with_options(file, &mut options).unwrap();
-    };
+    }
 
     Ok(())
 }
@@ -57,6 +61,7 @@ async fn init_cedarling() -> Cedarling {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -79,6 +84,7 @@ async fn init_cedarling() -> Cedarling {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await
     .expect("should initialize cedarling")

@@ -163,7 +163,7 @@
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>4.0.15</version>
+            <version>4.0.30</version>
         </dependency>
         
         <!-- JANS -->

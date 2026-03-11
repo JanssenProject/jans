@@ -90,7 +90,7 @@ Example request to the evaluation endpoint:
 }
 ```
 
-Cedarling requires OpenID Userinfo, Access, and ID tokens to construct the principal entity, as described [here](../../cedarling-authz.md). These values are sent in the subject field's properties. Furthermore, the sidecar expects the SHA256 checksum of the subject and resource's `properties` dictionary to be passed as their corresponding IDs, as shown in the example above. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway)
+Cedarling requires OpenID Userinfo, Access, and ID tokens to construct the principal entity, as described [here](../../reference/cedarling-authz.md). These values are sent in the subject field's properties. Furthermore, the sidecar expects the SHA256 checksum of the subject and resource's `properties` dictionary to be passed as their corresponding IDs, as shown in the example above. A more detailed example of creating an AuthZen request can be seen in the [gateway example](./cedarling-sidecar-tutorial.md#setup-test-gateway).
 
 Upon creating the principal, action, resource, and context entities, cedarling will evaluate these entities against the policies defined in the policy store. Then it will return a true/false decision. If the decision is false, the sidecar will analyze cedarling diagnostics and provide additional information for the admin.
 

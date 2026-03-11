@@ -28,7 +28,7 @@ type UMAResource struct {
 // GetUMAResources returns all UMA resources defined in the system.
 func (c *Client) GetUMAResources(ctx context.Context) ([]UMAResource, error) {
 
-        scope := "https://jans.io/oauth/config/uma/resources.readonly"
+        scope := "https://jans.io/oauth/config/uma.readonly"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
@@ -55,7 +55,7 @@ func (c *Client) GetUMAResource(ctx context.Context, id string) (*UMAResource, e
                 return nil, fmt.Errorf("id is empty")
         }
 
-        scope := "https://jans.io/oauth/config/uma/resources.readonly"
+        scope := "https://jans.io/oauth/config/uma.readonly"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
@@ -77,7 +77,7 @@ func (c *Client) CreateUMAResource(ctx context.Context, resource *UMAResource) (
                 return nil, fmt.Errorf("resource is nil")
         }
 
-        scope := "https://jans.io/oauth/config/uma/resources.write"
+        scope := "https://jans.io/oauth/config/uma.write"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
@@ -99,7 +99,7 @@ func (c *Client) UpdateUMAResource(ctx context.Context, resource *UMAResource) (
                 return nil, fmt.Errorf("resource is nil")
         }
 
-        scope := "https://jans.io/oauth/config/uma/resources.write"
+        scope := "https://jans.io/oauth/config/uma.write"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)
@@ -121,7 +121,7 @@ func (c *Client) DeleteUMAResource(ctx context.Context, id string) error {
                 return fmt.Errorf("id is empty")
         }
 
-        scope := "https://jans.io/oauth/config/uma/resources.delete"
+        scope := "https://jans.io/oauth/config/uma.delete"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return fmt.Errorf("failed to get token: %w", err)

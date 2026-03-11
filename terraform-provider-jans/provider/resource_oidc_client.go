@@ -70,7 +70,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				Description: `Redirection URI values used by the Client. One of these registered Redirection URI values must exactly 
-						match the redirect_uri parameter value used in each Authorization Request Example: [https://client.example.org/cb]`,
+                                                match the redirect_uri parameter value used in each Authorization Request Example: [https://client.example.org/cb]`,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validateURL,
@@ -80,7 +80,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Description: `Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the 
-						requesting party's user agent after completing its interaction.`,
+                                                requesting party's user agent after completing its interaction.`,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validateURL,
@@ -90,7 +90,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Description: `A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself 
-						to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.`,
+                                                to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
@@ -129,9 +129,9 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients 
-						using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use 
-						localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the
-						http scheme with localhost as the hostname.`,
+                                                using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use 
+                                                localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the
+                                                http scheme with localhost as the hostname.`,
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
 					enums := []string{"web", "native"}
@@ -150,8 +150,8 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving 
-						Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID 
-						Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.`,
+                                                Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID 
+                                                Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.`,
 			},
 			"logo_uri": {
 				Type:        schema.TypeString,
@@ -212,15 +212,15 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `URL for the Client's JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. 
-							The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the responses to the Client. 
-							When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the 
-							document to indicate each key's intended usage.`,
+                                                        The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the responses to the Client. 
+                                                        When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the 
+                                                        document to indicate each key's intended usage.`,
 			},
 			"jwks": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object 
-							represent properties of the key, including its value. Example: { "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }`,
+                                                        represent properties of the key, including its value. Example: { "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }`,
 			},
 			"sector_identifier_uri": {
 				Type:             schema.TypeString,
@@ -324,7 +324,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint 
-							for the private_key_jwt and client_secret_jwt authentication methods.`,
+                                                        for the private_key_jwt and client_secret_jwt authentication methods.`,
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 					return validateEnum(v, signingAlgs)
 				},
@@ -338,7 +338,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Description: `Array of default requested Authentication Context Class Reference values that the Authorization Server 
-						must use for processing requests from the Client.`,
+                                                must use for processing requests from the Client.`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -352,7 +352,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Description: `Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has 
-						been performed. Example: [https://client.example.org/logout/page1 https://client.example.org/logout/page2 https://client.example.org/logout/page3]`,
+                                                been performed. Example: [https://client.example.org/logout/page1 https://client.example.org/logout/page2 https://client.example.org/logout/page3]`,
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validateURL,
@@ -446,7 +446,7 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Specifies signing algorithm that has to be used during JWT signing. If it's not specified, 
-						then the default OP signing algorithm will be used.`,
+                                                then the default OP signing algorithm will be used.`,
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 					return validateEnum(v, signingAlgs)
 				},
@@ -469,21 +469,21 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Specifies a unique identifier string (UUID) assigned by the client developer or software 
-							publisher used by registration endpoints to identify the client software to be dynamically 
-							registered. Example: 4NRB1-0XZABZI9E6-5SM3R`,
+                                                        publisher used by registration endpoints to identify the client software to be dynamically 
+                                                        registered. Example: 4NRB1-0XZABZI9E6-5SM3R`,
 			},
 			"software_version": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Specifies a version identifier string for the client software identified by 'software_id'. 
-							The value of the 'software_version' should change on any update to the client software identified 
-							by the same 'software_id'. Example: 2.1`,
+                                                        The value of the 'software_version' should change on any update to the client software identified 
+                                                        by the same 'software_id'. Example: 2.1`,
 			},
 			"software_statement": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Specifies a software statement containing client metadata values about the client software as 
-							claims. This is a string value containing the entire signed JWT.`,
+                                                        claims. This is a string value containing the entire signed JWT.`,
 			},
 			"attributes": {
 				Type:        schema.TypeList,
@@ -496,13 +496,13 @@ func resourceOidcClient() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Description: `String representation of the expected subject distinguished name of the certificate, which 
-									the OAuth client will use in mutual TLS authentication.`,
+                                                                        the OAuth client will use in mutual TLS authentication.`,
 						},
 						"run_introspection_script_before_jwt_creation": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Description: `boolean property which indicates whether to run introspection script and then include claims 
-									from result into access_token as JWT.`,
+                                                                        from result into access_token as JWT.`,
 						},
 						"keep_client_authorization_after_expiration": {
 							Type:        schema.TypeBool,
@@ -550,7 +550,7 @@ func resourceOidcClient() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Description: `Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in 
-									the Logout Token to identify the RP session with the OP when true. Default value is false.`,
+                                                                        the Logout Token to identify the RP session with the OP when true. Default value is false.`,
 						},
 						"additional_audience": {
 							Type:        schema.TypeList,
@@ -563,7 +563,7 @@ func resourceOidcClient() *schema.Resource {
 						"post_authn_scripts": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "List of post authentication scripts.",
+							Description: "List of post-authentication scripts.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -571,6 +571,7 @@ func resourceOidcClient() *schema.Resource {
 						"token_exchange_scripts": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Description: "List of token exchange scripts.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -611,12 +612,12 @@ func resourceOidcClient() *schema.Resource {
 						"par_lifetime": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Description: "represents the lifetime of Pushed Authorisation Request (PAR).",
+							Description: "Lifetime of Pushed Authorization Request (PAR).",
 						},
 						"require_par": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "boolean value to indicate of Pushed Authorisation Request(PAR)is required.",
+							Description: "Whether Pushed Authorization Request (PAR) is required.",
 						},
 						"dpop_bound_access_token": {
 							Type:        schema.TypeBool,
@@ -646,7 +647,7 @@ func resourceOidcClient() *schema.Resource {
 						"redirect_uris_regex": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "If set, redirectUri must match to this regexp",
+							Description: "Redirect URI must match this regexp.",
 						},
 						"jans_authorized_acr": {
 							Type:        schema.TypeList,
@@ -660,7 +661,7 @@ func resourceOidcClient() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Description: `sets prompt=login to the authorization request, which causes the authorization server 
-									to force the user to sign in again before it will show the authorization prompt.`,
+                                                                        to force the user to sign in again before it will show the authorization prompt.`,
 						},
 						"tx_token_lifetime": {
 							Type:        schema.TypeInt,
@@ -677,10 +678,10 @@ func resourceOidcClient() *schema.Resource {
 							Optional:    true,
 							Description: "Specifies whether to allow offline access without consent.",
 						},
-						"require_pcke": {
+						"require_pkce": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "Specifies whether to require PCKE (Proof Key for Code Exchange) for authorization code flow.",
+							Description: "Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.",
 						},
 						"minimum_acr_level": {
 							Type:        schema.TypeInt,
@@ -711,7 +712,7 @@ func resourceOidcClient() *schema.Resource {
 						"requested_lifetime": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Description: "List of requested lifetime.",
+							Description: "Requested lifetime.",
 						},
 						"evidence": {
 							Type:        schema.TypeString,
@@ -752,6 +753,40 @@ func resourceOidcClient() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: "List of authorization details types.",
+							Computed:    true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"logout_status_jwt_script_dns": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							Description: "List of logout status JWT script DNs.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"logout_status_jwt_signed_response_alg": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The JWS algorithm used for signing the logout status JWT response.",
+						},
+						"par_script_dns": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							Description: "List of PAR (Pushed Authorization Request) script DNs.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"tx_token_script_dns": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Optional:    true,
+							Description: "List of TX token script DNs.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -773,15 +808,15 @@ func resourceOidcClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication 
-							of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
-							request to the token endpoint to obtain the tokens.`,
+                                                        of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
+                                                        request to the token endpoint to obtain the tokens.`,
 				ValidateDiagFunc: validateURL,
 			},
 			"backchannel_authentication_request_signing_alg": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `The JWS algorithm alg value that the Client will use for signing authentication request, as described 
-							in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.`,
+                                                        in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.`,
 
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
@@ -831,6 +866,18 @@ func resourceOidcClient() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "XRI i-number. Client Identifier to uniquely identify the client.",
+			},
+			"client_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The client name.",
+				Computed:    true,
+			},
+			"require_pkce": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether PKCE is required for this client.",
 			},
 		},
 	}
@@ -906,5 +953,6 @@ func resourceOidcClientDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	tflog.Debug(ctx, "OidcClient deleted", map[string]interface{}{"inum": inum})
 
-	return resourceOidcClientRead(ctx, d, meta)
+	d.SetId("")
+	return diag.Diagnostics{}
 }

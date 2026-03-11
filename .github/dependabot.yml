@@ -123,16 +123,6 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker-jans-saml
-    schedule:
-      interval: daily
-
-  - package-ecosystem: pip
-    directory: /docker-jans-saml
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
     directory: /docker-jans-scim
     schedule:
       interval: daily
@@ -198,16 +188,6 @@ updates:
       interval: daily
 
   - package-ecosystem: maven
-    directory: /jans-keycloak-integration
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
-    directory: /jans-keycloak-link
-    schedule:
-      interval: daily
-
-  - package-ecosystem: maven
     directory: /jans-link
     schedule:
       interval: daily
@@ -224,5 +204,65 @@ updates:
 
   - package-ecosystem: maven
     directory: /jans-scim
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /demos/janssen-tarp/browser-extension
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /demos/janssen-tarp/mcp-server
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /demos/mcp/config-api/mcp-config-api-server
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docker-jans-shibboleth
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docker-jans-shibboleth
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /jans-cedarling/bindings/cedarling_go
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /jans-cedarling/cedarling-krakend
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /jans-cedarling/flask-sidecar
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /demos/mcp/config-api/mcp-config-api-server
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-cedarling/bindings/cedarling-java
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-cedarling/bindings/cedarling_uniffi/javaApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /jans-shibboleth-idp
     schedule:
       interval: daily

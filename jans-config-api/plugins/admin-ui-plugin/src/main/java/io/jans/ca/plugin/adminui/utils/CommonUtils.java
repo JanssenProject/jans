@@ -9,6 +9,10 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CommonUtils {
     @Inject
@@ -266,5 +271,22 @@ public class CommonUtils {
             }
         });
         return claims;
+    }
+
+    /**
+     * Builds a UTF-8 URL-encoded query string from the provided parameters.
+     *
+     * @param params a map of parameter names to values; entries with a null value are omitted
+     * @return a URL-encoded string of `key=value` pairs joined with `&`, encoded using UTF-8
+     */
+    public static String toUrlEncodedString(Map<String, String> params) {
+        return params.entrySet()
+                .stream()
+                .filter(e -> e.getValue() !=null)
+                .map(e ->
+                        URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
+                                URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)
+                )
+                .collect(Collectors.joining("&"));
     }
 }

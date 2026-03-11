@@ -3,7 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use cedarling::{log_config::StdOutLoggerMode, *};
+use cedarling::{
+    AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, Request, log_config::StdOutLoggerMode,
+};
 use std::collections::{HashMap, HashSet};
 
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
@@ -18,6 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -47,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 
@@ -160,7 +166,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(result) => {
             println!("\n\nis allowed: {}", result.decision);
         },
-        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
+        Err(e) => eprintln!("Error while authorizing: {e}\n {e:?}\n\n"),
     }
 
     Ok(())

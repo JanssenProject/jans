@@ -65,7 +65,7 @@ public class TokenEndpointServiceTest {
     }
 
     @Test
-    public void testGetDecryptedPassword_withNull_shouldReturnNull() {
+    public void testGetDecryptedPassword_withNull_shouldReturnNull() throws Exception {
         String result = tokenEndpointService.getDecryptedPassword(null);
         
         assertNull(result);

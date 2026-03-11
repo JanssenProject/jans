@@ -269,24 +269,6 @@
       "title-prefixes": []
     }
   },
-  "comp-jans-keycloak-integartion": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-keycloak-integartion",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-keycloak-integartion"],
-      "title-prefixes": []
-    }
-  },
-  "comp-jans-keycloak-link": {
-    "color": "0052CC",
-    "description": "Touching folder /jans-keycloak-link",
-    "auto-label": {
-      "branch": "",
-      "paths": ["jans-keycloak-link"],
-      "title-prefixes": []
-    }
-  },
   "comp-jans-link": {
     "color": "0052CC",
     "description": "Touching folder /jans-link",

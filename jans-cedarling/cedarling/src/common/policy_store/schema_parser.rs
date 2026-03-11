@@ -16,11 +16,14 @@ use super::errors::{CedarSchemaErrorType, PolicyStoreError};
 
 /// A parsed and validated Cedar schema.
 ///
-/// Contains the schema and metadata about the source file.
+/// Contains the schema, fragment, and metadata about the source file.
+/// The fragment is preserved to avoid re-parsing when converting to JSON.
 #[derive(Debug, Clone)]
 pub(super) struct ParsedSchema {
     /// The Cedar schema
     pub schema: Schema,
+    /// The schema fragment (preserved for JSON conversion without re-parsing)
+    pub fragment: SchemaFragment,
     /// Source filename
     pub filename: String,
     /// Raw schema content
@@ -42,8 +45,8 @@ impl ParsedSchema {
                 err: CedarSchemaErrorType::ParseError(e.to_string()),
             })?;
 
-        // Create schema from the fragment
-        let schema = Schema::from_schema_fragments([fragment]).map_err(|e| {
+        // Create schema from the fragment (clone the fragment to preserve it)
+        let schema = Schema::from_schema_fragments([fragment.clone()]).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
                 err: CedarSchemaErrorType::ValidationError(e.to_string()),
@@ -52,6 +55,7 @@ impl ParsedSchema {
 
         Ok(Self {
             schema,
+            fragment,
             filename: filename.to_string(),
             content: content.to_string(),
         })
@@ -62,6 +66,14 @@ impl ParsedSchema {
     /// Returns the validated Cedar Schema that can be used for policy validation.
     pub(super) fn get_schema(&self) -> &Schema {
         &self.schema
+    }
+
+    /// Get a reference to the schema fragment.
+    ///
+    /// Returns the parsed fragment, which can be used for JSON serialization
+    /// without re-parsing the schema content.
+    pub(super) fn get_fragment(&self) -> &SchemaFragment {
+        &self.fragment
     }
 
     /// Validate that the schema is non-empty and well-formed.
@@ -114,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_parse_schema_with_multiple_namespaces() {
-        let content = r#"
+        let content = r"
             namespace App1 {
                 entity User;
             }
@@ -122,7 +134,7 @@ mod tests {
             namespace App2 {
                 entity Admin;
             }
-        "#;
+        ";
 
         let result = ParsedSchema::parse(content, "multi.cedarschema");
         assert!(result.is_ok());
@@ -173,8 +185,7 @@ mod tests {
                 PolicyStoreError::CedarSchemaError { file, err: CedarSchemaErrorType::ParseError(_) }
                 if file == "invalid.cedarschema"
             ),
-            "Expected CedarSchemaError with ParseError, got: {:?}",
-            err
+            "Expected CedarSchemaError with ParseError, got: {err:?}"
         );
     }
 
@@ -195,36 +206,34 @@ mod tests {
                         ..
                     }
                 ),
-                "Expected EmptySchema error, got: {:?}",
-                err
+                "Expected EmptySchema error, got: {err:?}"
             );
         }
     }
 
     #[test]
     fn test_parse_schema_missing_closing_brace() {
-        let content = r#"
+        let content = r"
             namespace MyApp {
                 entity User;
                 entity File;
-        "#;
+        ";
 
         let result = ParsedSchema::parse(content, "malformed.cedarschema");
         let err = result.expect_err("Expected error for missing closing brace");
         assert!(
             matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
-            "Expected CedarSchemaError for malformed schema, got: {:?}",
-            err
+            "Expected CedarSchemaError for malformed schema, got: {err:?}"
         );
     }
 
     #[test]
     fn test_validate_schema_success() {
-        let content = r#"
+        let content = r"
             namespace TestApp {
                 entity User;
             }
-        "#;
+        ";
 
         let parsed = ParsedSchema::parse(content, "test.cedarschema").unwrap();
         let result = parsed.validate();
@@ -283,8 +292,7 @@ mod tests {
         let err = result.expect_err("Expected error for invalid namespace syntax");
         assert!(
             matches!(&err, PolicyStoreError::CedarSchemaError { file, .. } if file == "my_schema.cedarschema"),
-            "Expected CedarSchemaError with filename my_schema.cedarschema, got: {:?}",
-            err
+            "Expected CedarSchemaError with filename my_schema.cedarschema, got: {err:?}"
         );
     }
 
@@ -389,37 +397,35 @@ mod tests {
         let err = result.expect_err("Invalid entity type should fail parsing");
         assert!(
             matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
-            "Expected CedarSchemaError for invalid entity type, got: {:?}",
-            err
+            "Expected CedarSchemaError for invalid entity type, got: {err:?}"
         );
     }
 
     #[test]
     fn test_parse_schema_missing_semicolon() {
-        let content = r#"
+        let content = r"
             namespace MyApp {
                 entity User
                 entity File;
             }
-        "#;
+        ";
 
         let result = ParsedSchema::parse(content, "missing_semicolon.cedarschema");
         let err = result.expect_err("Missing semicolon should fail parsing");
         assert!(
             matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
-            "Expected CedarSchemaError for missing semicolon, got: {:?}",
-            err
+            "Expected CedarSchemaError for missing semicolon, got: {err:?}"
         );
     }
 
     #[test]
     fn test_parse_schema_duplicate_entity() {
-        let content = r#"
+        let content = r"
             namespace MyApp {
                 entity User;
                 entity User;
             }
-        "#;
+        ";
 
         let result = ParsedSchema::parse(content, "duplicate.cedarschema");
         // Cedar may or may not allow duplicate entity definitions
@@ -427,19 +433,18 @@ mod tests {
         if let Err(err) = result {
             assert!(
                 matches!(&err, PolicyStoreError::CedarSchemaError { .. }),
-                "Expected CedarSchemaError for duplicate entity, got: {:?}",
-                err
+                "Expected CedarSchemaError for duplicate entity, got: {err:?}"
             );
         }
     }
 
     #[test]
     fn test_parsed_schema_clone() {
-        let content = r#"
+        let content = r"
             namespace TestApp {
                 entity User;
             }
-        "#;
+        ";
 
         let parsed = ParsedSchema::parse(content, "test.cedarschema").unwrap();
         let cloned = parsed.clone();
@@ -450,13 +455,13 @@ mod tests {
 
     #[test]
     fn test_parse_schema_with_extension() {
-        let content = r#"
+        let content = r"
             namespace ExtApp {
                 entity User;
                 entity AdminUser in [User];
                 entity SuperAdmin in [AdminUser];
             }
-        "#;
+        ";
 
         let result = ParsedSchema::parse(content, "extension.cedarschema");
         assert!(
@@ -474,14 +479,13 @@ mod tests {
         let err = result.expect_err("Expected error for malformed schema");
         assert!(
             matches!(&err, PolicyStoreError::CedarSchemaError { file, .. } if file == "test.cedarschema"),
-            "Expected CedarSchemaError with filename test.cedarschema, got: {:?}",
-            err
+            "Expected CedarSchemaError with filename test.cedarschema, got: {err:?}"
         );
     }
 
     #[test]
     fn test_parse_schema_preserves_content() {
-        let content = r#"namespace Test { entity User; }"#;
+        let content = r"namespace Test { entity User; }";
 
         let parsed = ParsedSchema::parse(content, "preserve.cedarschema").unwrap();
         assert_eq!(
@@ -492,16 +496,16 @@ mod tests {
 
     #[test]
     fn test_parse_multiple_schemas_independently() {
-        let schema1 = r#"
+        let schema1 = r"
             namespace App1 {
                 entity User;
             }
-        "#;
-        let schema2 = r#"
+        ";
+        let schema2 = r"
             namespace App2 {
                 entity Admin;
             }
-        "#;
+        ";
 
         let result1 = ParsedSchema::parse(schema1, "schema1.cedarschema");
         let result2 = ParsedSchema::parse(schema2, "schema2.cedarschema");

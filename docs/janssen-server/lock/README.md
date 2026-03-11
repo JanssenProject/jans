@@ -65,7 +65,7 @@ Janssen Lock aligns with established authorization frameworks including [RFC 290
 
 ## Policy Store Structure
 
-The Policy Store is a JSON document that contains all data required for Cedarling policy evaluation and JWT token verification. For detailed information about the Policy Store format, structure, and configuration options, see the [Cedarling Policy Store documentation](../../cedarling/cedarling-policy-store.md).
+The Policy Store is a JSON document that contains all data required for Cedarling policy evaluation and JWT token verification. For detailed information about the Policy Store format, structure, and configuration options, see the [Cedarling Policy Store documentation](../../cedarling/reference/cedarling-policy-store.md).
 
 
 

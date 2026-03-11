@@ -8,17 +8,19 @@
 // looks like the problem in usage PyResult from pyo3 and operator `?`
 #![allow(clippy::useless_conversion)]
 
-use pyo3::Bound;
 use pyo3::prelude::*;
+use pyo3::Bound;
 
 mod authorize;
 mod cedarling;
 mod config;
+mod context_data_api;
 
 #[pymodule]
 fn cedarling_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
     config::register_entities(m)?;
     authorize::register_entities(m)?;
+    context_data_api::register_entities(m)?;
 
     m.add_class::<cedarling::Cedarling>()?;
 
