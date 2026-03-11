@@ -3,11 +3,14 @@ package cedarlingopa
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
+	"sync"
+
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 	"github.com/open-policy-agent/opa/v1/plugins"
 	"github.com/open-policy-agent/opa/v1/util"
-	"sync"
 )
 
 // #cgo LDFLAGS: -L. -lcedarling_go
@@ -34,12 +37,17 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	//policyStoreJsonPath := "../test_files/policy-store_ok.yaml"
 	var config map[string]any = p.config.BootstrapConfig
 	var policy_store map[string]any = p.config.PolicyStore
+	var stderr bool = p.config.Stderr
 	policy_store_bytes, err := json.Marshal(policy_store)
 	if err != nil {
 		return err
 	}
 	config["CEDARLING_POLICY_STORE_LOCAL"] = string(policy_store_bytes)
-	fmt.Println("Initializing cedarling")
+	if stderr {
+		fmt.Fprintln(os.Stderr, "Initializing cedarling")
+	} else {
+		fmt.Println("Initializing cedarling")
+	}
 	instance, err := cedarling_go.NewCedarling(config)
 	if err != nil {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
@@ -62,7 +70,28 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
+	if p.cedar != nil {
+		p.cedar.ShutDown()
+	}
 	p.config = config.(Config)
+	var new_config map[string]any = p.config.BootstrapConfig
+	var policy_store map[string]any = p.config.PolicyStore
+	var stderr bool = p.config.Stderr
+	policy_store_bytes, _ := json.Marshal(policy_store)
+	new_config["CEDARLING_POLICY_STORE_LOCAL"] = string(policy_store_bytes)
+	if stderr {
+		fmt.Fprintln(os.Stderr, "Initializing cedarling")
+	} else {
+		fmt.Println("Initializing cedarling")
+	}
+	instance, err := cedarling_go.NewCedarling(new_config)
+	if err != nil {
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
+	} else {
+
+		p.cedar = instance
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+	}
 }
 
 type Factory struct{}
@@ -79,5 +108,15 @@ func (Factory) New(m *plugins.Manager, config interface{}) plugins.Plugin {
 
 func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) {
 	parsedConfig := Config{}
-	return parsedConfig, util.Unmarshal(config, &parsedConfig)
+	err := util.Unmarshal(config, &parsedConfig)
+	if err != nil {
+		return nil, err
+	}
+	if parsedConfig.BootstrapConfig == nil {
+		return nil, errors.New("Bootstrap config is required")
+	}
+	if parsedConfig.PolicyStore == nil {
+		return nil, errors.New("Policy store is required")
+	}
+	return parsedConfig, nil
 }

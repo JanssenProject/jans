@@ -29,6 +29,7 @@ native:
 .PHONY: build
 build:
 	@echo ">> Building Go binary"
+	mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=$(CGO_ENABLED) \
 	CGO_LDFLAGS="-L$(LIB_DIR)" \
 	$(GO) build -o $(BUILD_DIR)/$(APP_NAME)
@@ -46,6 +47,7 @@ clean:
 
 .PHONY: debug
 debug:
+	mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=$(CGO_ENABLED) \
 	CGO_LDFLAGS="-L$(LIB_DIR)" \
 	$(GO) build -x -v -o $(BUILD_DIR)/$(APP_NAME)

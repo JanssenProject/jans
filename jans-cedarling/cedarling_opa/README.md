@@ -8,7 +8,7 @@ To build an OPA binary that includes the plugin, you need the following:
 
 - Go 1.25+
 - Rust toolchain 1.56+
-- Make (for building the plugin)
+- Make (for building the plugin. This build process is currently Linux only).
 
 1. Clone the Janssen repository:
 
@@ -43,7 +43,7 @@ Output locations:
 export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
 ```
 
-2. Create or edit the plugin configuration file (full example provided in [opa-config.json](./opa-config.json)
+2. Create or edit the plugin configuration file (full example provided in [opa-config.json](./opa-config.json))
 
 ```json
 
@@ -56,6 +56,7 @@ export LD_LIBRARY_PATH=$(pwd)/plugins/cedarling_opa:$LD_LIBRARY_PATH
             "stderr": false,
             "bootstrap_config": {},
             "policy_store": {}
+        }
     }
 }
 ```
