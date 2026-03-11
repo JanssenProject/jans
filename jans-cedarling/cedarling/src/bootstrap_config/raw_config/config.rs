@@ -321,7 +321,8 @@ pub struct BootstrapConfigRaw {
     pub lock_log_channel_capacity: usize,
 
     /// Maximum number of retry attempts for sending logs to the lock server.
-    /// Default value is 3.
+    /// Uses exponential backoff strategy for retrying.
+    /// Default value is 5.
     #[serde(
         rename = "CEDARLING_LOCK_LOG_MAX_RETRIES",
         deserialize_with = "deserialize_or_parse_string_as_json",

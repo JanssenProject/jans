@@ -454,6 +454,7 @@ mod test {
         // Test if logs are getting sent
         let log_entry = MockLogEntry {
             level: LogLevel::TRACE,
+            kind: LogType::Decision,
             id: "some_uuid_string".into(),
             msg: "this is a test log entry".into(),
         };
@@ -506,6 +507,7 @@ mod test {
         // Test if logs are getting sent
         let log_entry = MockLogEntry {
             level: LogLevel::TRACE,
+            kind: LogType::Decision,
             id: "some_uuid_string".into(),
             msg: "this is a test log entry".into(),
         };
@@ -733,6 +735,7 @@ mod test {
     #[derive(Serialize, Clone)]
     struct MockLogEntry {
         level: LogLevel,
+        kind: LogType,
         id: String,
         msg: String,
     }
@@ -743,7 +746,7 @@ mod test {
         }
 
         fn get_log_kind(&self) -> Option<crate::log::LogType> {
-            None
+            Some(self.kind)
         }
     }
 
