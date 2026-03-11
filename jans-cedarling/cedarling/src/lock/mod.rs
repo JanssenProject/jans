@@ -120,8 +120,8 @@ mod proto {
 
 use crate::app_types::PdpID;
 use crate::common::issuer_utils::IssClaim;
-use crate::log::LoggerWeak;
 use crate::log::interface::Loggable;
+use crate::log::{LogType, LoggerWeak};
 use crate::{LockServiceConfig, LockTransport, LogWriter};
 use futures::channel::mpsc;
 use lock_config::LockConfig;
@@ -319,31 +319,38 @@ fn create_log_worker(
     }
 }
 
-// TODO: Lock service should be refactored and add filtering based on log type/level
 impl LogWriter for LockService {
     fn log_any<T: Loggable>(&self, entry: T) {
-        let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref() else {
-            return;
-        };
+        if let Some(log_kind) = entry.get_log_kind() {
+            match log_kind {
+                LogType::Decision => {
+                    let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref()
+                    else {
+                        return;
+                    };
 
-        let entry = serde_json::to_string(&entry)
-            .expect("entry should serialize successfully")
-            .into_boxed_str();
+                    let entry = serde_json::to_string(&entry)
+                        .expect("entry should serialize successfully")
+                        .into_boxed_str();
 
-        let mut log_tx = match tx_lock.write() {
-            Ok(log_tx) => log_tx,
-            Err(err) => {
-                self.logger.log_any(LockLogEntry::error(format!(
-                    "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {err}"
-                )));
-                return;
-            },
-        };
+                    let mut log_tx = match tx_lock.write() {
+                        Ok(log_tx) => log_tx,
+                        Err(err) => {
+                            self.logger.log_any(LockLogEntry::error(format!(
+                                "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {err}"
+                            )));
+                            return;
+                        },
+                    };
 
-        if let Err(err) = log_tx.try_send(entry) {
-            self.logger.log_any(LockLogEntry::error(format!(
-                "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
-            )));
+                    if let Err(err) = log_tx.try_send(entry) {
+                        self.logger.log_any(LockLogEntry::error(format!(
+                            "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
+                        )));
+                    }
+                },
+                LogType::System | LogType::Metric => (),
+            }
         }
     }
 
@@ -733,6 +740,10 @@ mod test {
     impl Loggable for MockLogEntry {
         fn get_log_level(&self) -> Option<crate::LogLevel> {
             Some(self.level)
+        }
+
+        fn get_log_kind(&self) -> Option<crate::log::LogType> {
+            None
         }
     }
 

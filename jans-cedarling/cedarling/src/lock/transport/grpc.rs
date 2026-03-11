@@ -9,8 +9,8 @@ use std::collections::HashMap;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 
-use prost_types::Timestamp;
 use async_trait::async_trait;
+use prost_types::Timestamp;
 use serde::Deserialize;
 #[cfg(not(target_arch = "wasm32"))]
 use tonic::transport::{Channel, ClientTlsConfig};
