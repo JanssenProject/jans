@@ -21,7 +21,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
     @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2MetricsEntries"})
     @Test
     public void getFido2MetricsEntry(final String issuer, final String fido2MetricsUrl, final String fido2MetricsEntries) {
-        log.error("\n\n getFido2MetricsEntry() - accessToken:{}, issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntries:{}", accessToken, issuer, fido2MetricsUrl, fido2MetricsEntries);
+        log.debug(" getFido2MetricsEntry() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntries:{}", issuer, fido2MetricsUrl, fido2MetricsEntries);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2MetricsEntries);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -36,7 +36,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
     @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2UserMetrics"})
     @Test
     public void getFido2UserMetrics(final String issuer, final String fido2MetricsUrl, final String fido2UserMetrics) {
-        log.error("\n\n getFido2UserMetrics() - accessToken:{}, issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", accessToken, issuer, fido2MetricsUrl, fido2UserMetrics);
+        log.debug("\n\n getFido2UserMetrics() - issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", issuer, fido2MetricsUrl, fido2UserMetrics);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2UserMetrics);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
@@ -51,7 +51,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
     @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2MetricsConfig"})
     @Test
     public void getFido2MetricsConfig(final String issuer, final String fido2MetricsUrl, final String fido2MetricsConfig) {
-        log.error("\n\n getFido2MetricsConfig() - accessToken:{}, issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", accessToken, issuer, fido2MetricsUrl, fido2MetricsConfig);
+        log.debug("getFido2MetricsConfig() - issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", issuer, fido2MetricsUrl, fido2MetricsConfig);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2MetricsConfig);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);

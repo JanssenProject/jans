@@ -1048,7 +1048,7 @@ public class Fido2MetricsResource extends BaseResource {
             List<Fido2MetricsEntry> identityProviderList = pagedResult.getEntries();
             int listSize = (identityProviderList == null) ? 0 : identityProviderList.size();
 
-            getStartIndex(identityProviderList, startIndex);
+            validateStartIndex(identityProviderList, startIndex);
             int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
             logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
 
@@ -1079,7 +1079,7 @@ public class Fido2MetricsResource extends BaseResource {
             List<Fido2MetricsAggregation> identityProviderList = pagedResult.getEntries();
             int listSize = (identityProviderList == null) ? 0 : identityProviderList.size();
 
-            getStartIndex(identityProviderList, startIndex);
+            validateStartIndex(identityProviderList, startIndex);
             int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
             logger.info("Final listSize:{}, startIndex:{}, limit:{}, toIndex:{}", listSize, startIndex, limit, toIndex);
 
@@ -1102,13 +1102,13 @@ public class Fido2MetricsResource extends BaseResource {
         return fido2MetricsAggregationPagedResult;
     }
 
-    private int getStartIndex(List<?> entriesList, int startIndex) {
+    private void validateStartIndex(List<?> entriesList, int startIndex) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Get startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
+            logger.debug("Validate startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
         }
 
         if (entriesList != null && !entriesList.isEmpty()) {
-            logger.debug("Get startIndex  entriesList.size():{}", entriesList.size());
+            logger.debug("Validate startIndex  entriesList.size():{}", entriesList.size());
             try {
                 entriesList.get(startIndex);
             } catch (IndexOutOfBoundsException ioe) {
@@ -1117,7 +1117,6 @@ public class Fido2MetricsResource extends BaseResource {
                         + "}, but provided:{" + startIndex + "} ");
             }
         }
-        return startIndex;
     }
 
 }
