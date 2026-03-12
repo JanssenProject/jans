@@ -1628,47 +1628,20 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        period:
-          type: string
         metricsData:
           type: object
           additionalProperties:
             type: object
-        fallbackEvents:
-          type: integer
-          format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        authenticationSuccessRate:
+        authenticationAvgDuration:
           type: number
           format: double
-        authenticationAvgDuration:
+        authenticationSuccessRate:
           type: number
           format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
         registrationAttempts:
           type: integer
           format: int64
@@ -1678,9 +1651,36 @@ components:
         registrationSuccesses:
           type: integer
           format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
         registrationSuccessRate:
           type: number
           format: double
+        period:
+          type: string
+        fallbackEvents:
+          type: integer
+          format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
@@ -1986,6 +1986,8 @@ components:
             https://jans.io/oauth/fido2.write: Manage fido2 related information
             https://jans.io/oauth/fido2.delete: Delete fido2 related information
             https://jans.io/oauth/fido2-metrics.readonly: View fido2 metrics related
+              information
+            https://jans.io/oauth/config/fido2.admin: Admin to manage fido2 related
               information
             https://jans.io/oauth/config/read-all: Super admin for viewing application
               resource information

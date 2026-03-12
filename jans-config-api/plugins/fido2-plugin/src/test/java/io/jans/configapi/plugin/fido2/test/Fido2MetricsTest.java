@@ -28,7 +28,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("getFido2Configuration() - Response for getDefaultAuthenticationMethod -  response:{}, response.getStatus():{}", response, response.getStatus());
+        log.info("getFido2MetricsEntry() - response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         
     }
@@ -43,7 +43,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("getFido2MetricsEntry() - Response for getDefaultAuthenticationMethod -  response:{}, response.getStatus():{}", response, response.getStatus());
+        log.info("getFido2UserMetrics() -  response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         
     }
@@ -58,7 +58,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("getFido2Configuration() - Response for getDefaultAuthenticationMethod -  response:{}, response.getStatus():{}", response, response.getStatus());
+        log.info("getFido2Configuration() - response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         
     }

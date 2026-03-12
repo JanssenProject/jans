@@ -27,6 +27,7 @@ import java.util.Set;
         @OAuthScope(name = Constants.FIDO2_WRITE_ACCESS, description = "Manage fido2 related information"),
         @OAuthScope(name = Constants.FIDO2_DELETE_ACCESS, description = "Delete fido2 related information"),
         @OAuthScope(name = Constants.FIDO2_METRICS_READ_ACCESS, description = "View fido2 metrics related information"),
+        @OAuthScope(name = Constants.FIDO2_ADMIN_ACCESS, description = "Admin to manage fido2 related information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Super admin for viewing application resource information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Super admin for updating application resource information"),
         @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Super admin for deleting application resource information"), })))
