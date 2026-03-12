@@ -76,11 +76,11 @@ func (p *CedarPlugin) Stop(ctx context.Context) {
 	p.mtx.Lock()
 	cedar := p.cedar
 	p.cedar = nil
+	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 	p.mtx.Unlock()
 	if cedar != nil {
 		cedar.ShutDown()
 	}
-	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 }
 
 func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
@@ -103,8 +103,8 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	old_cedar := p.cedar
 	p.config = cfg
 	p.cedar = new_instance
-	p.mtx.Unlock()
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
+	p.mtx.Unlock()
 	if old_cedar != nil {
 		old_cedar.ShutDown()
 	}
