@@ -13,7 +13,7 @@ import (
 	"github.com/open-policy-agent/opa/v1/util"
 )
 
-// #cgo LDFLAGS: -L. -lcedarling_go
+// #cgo LDFLAGS: -L${SRCDIR} -lcedarling_go
 import "C"
 
 const PluginName = "cedarling_opa"
@@ -69,9 +69,11 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 
 func (p *CedarPlugin) Stop(ctx context.Context) {
 	p.mtx.Lock()
-	defer p.mtx.Unlock()
-	if p.cedar != nil {
-		p.cedar.ShutDown()
+	cedar := p.cedar
+	p.cedar = nil
+	p.mtx.Unlock()
+	if cedar != nil {
+		cedar.ShutDown()
 	}
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 }
@@ -99,6 +101,7 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	p.config = cfg
 	p.cedar = new_instance
 	p.mtx.Unlock()
+	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
 	if old_cedar != nil {
 		old_cedar.ShutDown()
 	}
