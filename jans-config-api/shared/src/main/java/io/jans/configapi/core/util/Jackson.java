@@ -166,18 +166,15 @@ public class Jackson {
         return mapper.readValue(content, mapper.getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
-    public static <T> List<T> readList(String str, Class<T> type) {
+    public static <T> List<T> readList(String str, Class<T> type) throws JsonProcessingException{
         return readList(str, ArrayList.class, type);
     }
 
-    public static <T> List<T> readList(String str, Class<? extends List> type, Class<T> elementType) {
+    public static <T> List<T> readList(String str, Class<? extends List> type, Class<T> elementType)
+            throws JsonProcessingException {
         final ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.readValue(str,
-                    mapper.getTypeFactory().constructCollectionType(type.asSubclass(Collection.class), elementType));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return mapper.readValue(str,
+                mapper.getTypeFactory().constructCollectionType(type.asSubclass(Collection.class), elementType));
     }
 
     public static JSONObject createJSONObject(Map<String, Object> map) throws JSONException {
