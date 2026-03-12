@@ -637,4 +637,54 @@ mod test {
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 100);
     }
+
+    #[test]
+    fn test_negative_timestamp_handling() {
+        let json_str = r#"{
+            "creation_date": -86400,
+            "event_time": -3600,
+            "service": "test-service",
+            "node_name": "node-1",
+            "event_type": "access"
+        }"#;
+
+        let json_entry: JsonLogEntry = serde_json::from_str(json_str).unwrap();
+        let proto_entry = json_to_proto(json_entry);
+
+        assert_eq!(
+            proto_entry.creation_date,
+            Some(Timestamp {
+                seconds: -86400,
+                nanos: 0
+            })
+        );
+        assert_eq!(
+            proto_entry.event_time,
+            Some(Timestamp {
+                seconds: -3600,
+                nanos: 0,
+            })
+        );
+    }
+
+    #[test]
+    fn test_large_negative_timestamp() {
+        let json_str = r#"{
+            "creation_date": -2208988800,
+            "event_time": -631152000,
+            "service": "historical-service"
+        }"#;
+
+        let json_entry: JsonLogEntry = serde_json::from_str(json_str).unwrap();
+        let proto_entry = json_to_proto(json_entry);
+
+        assert_eq!(
+            proto_entry.creation_date.as_ref().unwrap().seconds,
+            -2_208_988_800
+        );
+        assert_eq!(
+            proto_entry.event_time.as_ref().unwrap().seconds,
+            -631_152_000
+        );
+    }
 }
