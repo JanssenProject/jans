@@ -17,7 +17,8 @@ import java.util.Set;
 @ApplicationPath("/fido2")
 @OpenAPIDefinition(info = @Info(title = "Jans Config API - Fido2", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
         license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
-        tags = { @Tag(name = "Fido2 - Configuration"), @Tag(name = "Fido2 - Registration") },
+        tags = { @Tag(name = "Fido2 - Configuration"), @Tag(name = "Fido2 - Registration") 
+        , @Tag(name = "Fido2 - Metrics")},
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
         @OAuthScope(name = Constants.FIDO2_CONFIG_READ_ACCESS, description = "View fido2 config related information"),

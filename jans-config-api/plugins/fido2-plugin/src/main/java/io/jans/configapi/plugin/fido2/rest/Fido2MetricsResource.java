@@ -848,7 +848,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPeriodOverPeriodComparison(
             @Parameter(description = " Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
-            @Parameter(description = "periods") @DefaultValue("2") @QueryParam(value = "periods") @NotNull int periods)
+            @Parameter(description = "periods") @DefaultValue("2") @QueryParam(value = "periods") int periods)
 
             throws Exception {
 

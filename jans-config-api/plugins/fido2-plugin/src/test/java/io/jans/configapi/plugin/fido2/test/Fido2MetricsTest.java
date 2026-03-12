@@ -51,14 +51,14 @@ public class Fido2MetricsTest extends Fido2BaseTest {
     @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2MetricsConfig"})
     @Test
     public void getFido2MetricsConfig(final String issuer, final String fido2MetricsUrl, final String fido2MetricsConfig) {
-        log.debug("getFido2MetricsConfig() - issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", issuer, fido2MetricsUrl, fido2MetricsConfig);
+        log.debug("getFido2MetricsConfig() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsConfig:{}", issuer, fido2MetricsUrl, fido2MetricsConfig);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2MetricsConfig);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.get();
-        log.info("getFido2Configuration() - response:{}, response.getStatus():{}", response, response.getStatus());
+        log.info("getFido2MetricsConfig() - response:{}, response.getStatus():{}", response, response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
         
     }

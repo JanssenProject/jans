@@ -15,6 +15,7 @@ servers:
 tags:
 - name: Fido2 - Configuration
 - name: Fido2 - Registration
+- name: Fido2 - Metrics
 paths:
   /fido2/fido2-config:
     get:
@@ -900,7 +901,6 @@ paths:
       - name: periods
         in: query
         description: periods
-        required: true
         schema:
           type: integer
           format: int32
@@ -1648,6 +1648,8 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        period:
+          type: string
         authenticationSuccessRate:
           type: number
           format: double
@@ -1658,30 +1660,34 @@ components:
           type: object
           additionalProperties:
             type: object
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
         registrationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationFailures:
           type: integer
           format: int64
         registrationSuccessRate:
           type: number
           format: double
+        registrationSuccesses:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         deviceTypes:
           type: object
           additionalProperties:
@@ -1692,15 +1698,9 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
         fallbackEvents:
           type: integer
           format: int64
-        period:
-          type: string
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
