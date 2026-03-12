@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -296,7 +297,7 @@ public class BaseResource {
         if (StringUtils.isNotBlank(pattern)) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("^.*");
-            stringBuilder.append(pattern);
+            stringBuilder.append(Pattern.quote(pattern));
             stringBuilder.append(".*$");
             searchPattern = stringBuilder.toString();
         }

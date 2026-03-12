@@ -501,9 +501,6 @@ public class Fido2MetricsService {
         List<T> fido2MetricsList = null;
 
         if (jsonNode != null) {
-            //fido2MetricsList = Jackson.readStringValue(jsonNode.toPrettyString(), List.class);
-            //log.debug(" Fido2MetricsEntry One fido2MetricsList:{}", fido2MetricsList);
-
             fido2MetricsList = Jackson.readList(jsonNode.toPrettyString(), type);
             log.debug("Fido2MetricsEntry Two fido2MetricsList:{}", fido2MetricsList);
         }

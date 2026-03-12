@@ -83,15 +83,17 @@ paths:
       parameters:
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -137,15 +139,17 @@ paths:
       parameters:
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -193,15 +197,17 @@ paths:
       parameters:
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -268,15 +274,17 @@ paths:
           default: ""
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -367,15 +375,17 @@ paths:
           default: ""
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -437,15 +447,17 @@ paths:
           default: 0
       - name: start_date
         in: query
-        description: Start date/time for  entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for  entries report. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z"
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z"
         required: true
         schema:
           type: string
@@ -536,15 +548,17 @@ paths:
           type: string
       - name: start_date
         in: query
-        description: Start date/time for  entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for  entries report. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -680,15 +694,17 @@ paths:
           type: string
       - name: start_date
         in: query
-        description: Start date/time for  entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for  entries report. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -821,15 +837,17 @@ paths:
       parameters:
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -938,15 +956,17 @@ paths:
           default: ""
       - name: start_date
         in: query
-        description: Start date/time for the log entries report. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for the log entries. Accepted format dd-MM-yyyy
-          or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ).
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -1628,14 +1648,12 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        authenticationAvgDuration:
+        period:
+          type: string
+        authenticationSuccessRate:
           type: number
           format: double
-        authenticationSuccessRate:
+        authenticationAvgDuration:
           type: number
           format: double
         performanceMetrics:
@@ -1645,42 +1663,44 @@ components:
         registrationAttempts:
           type: integer
           format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
         registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationAttempts:
           type: integer
           format: int64
         registrationFailures:
           type: integer
           format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        period:
-          type: string
-        fallbackEvents:
-          type: integer
-          format: int64
-        deviceTypes:
+        metricsData:
           type: object
           additionalProperties:
-            type: integer
-            format: int64
+            type: object
         errorCounts:
           type: object
           additionalProperties:
             type: integer
             format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccesses:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
