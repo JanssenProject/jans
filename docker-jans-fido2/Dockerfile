@@ -67,7 +67,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ENV JANS_SOURCE_VERSION=5aa4d67e74931df62683463754fc3d6aa0bcdd4b
+ENV JANS_SOURCE_VERSION=1b66569673d82976da013100f5c4eaae1854547e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
