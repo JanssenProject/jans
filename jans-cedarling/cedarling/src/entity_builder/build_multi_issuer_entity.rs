@@ -5,10 +5,13 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::{
-    Arc, BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder, EntityData,
-    Token, Value, default_tkn_entity_name,
+    BuildEntityError, BuiltEntities, DEFAULT_ENTITY_TYPE_NAME, EntityBuilder, EntityData,
+    default_tkn_entity_name,
 };
 use crate::authz::AuthorizeEntitiesData;
+use crate::jwt::Token;
+use serde_json::Value;
+use std::sync::Arc;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::log::interface::LogWriter;
