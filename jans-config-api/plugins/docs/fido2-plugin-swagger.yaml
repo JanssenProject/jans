@@ -449,7 +449,7 @@ paths:
         in: query
         description: "Start date/time for  entries report. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
-          \ and 2025-12-31T23:59:59Z"
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -457,7 +457,7 @@ paths:
         in: query
         description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
           \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
-          \ and 2025-12-31T23:59:59Z"
+          \ and 2025-12-31T23:59:59Z."
         required: true
         schema:
           type: string
@@ -1648,8 +1648,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        period:
-          type: string
         authenticationSuccessRate:
           type: number
           format: double
@@ -1666,30 +1664,10 @@ components:
         registrationSuccesses:
           type: integer
           format: int64
-        registrationFailures:
-          type: integer
-          format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
         authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
           type: integer
           format: int64
         registrationAvgDuration:
@@ -1698,9 +1676,31 @@ components:
         registrationSuccessRate:
           type: number
           format: double
-        authenticationSuccesses:
+        registrationFailures:
           type: integer
           format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        period:
+          type: string
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        fallbackEvents:
+          type: integer
+          format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

@@ -15695,15 +15695,15 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16565,7 +16565,6 @@ components:
             - REGISTRATION
             - INTROSPECTION
             - REVOKE_TOKEN
-            - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
             - STATUS_LIST
             - LOGOUT_STATUS_JWT
@@ -18346,10 +18345,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -18530,9 +18529,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
