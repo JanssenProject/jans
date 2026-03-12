@@ -173,21 +173,6 @@
             "baseDn": "inum=6D99,ou=scopes,o=jans"
         },
         {
-            "dn": "inum=7D90,ou=scopes,o=jans",
-            "inum": "7D90",
-            "displayName": "revoke_session",
-            "id": "revoke_session",
-            "description": "revoke_session scope which is required to be able call /revoke_session endpoint",
-            "scopeType": "openid",
-            "defaultScope": false,
-            "attributes": {
-                "showInConfigurationEndpoint": true
-            },
-            "creationDate": "2022-10-27T20:51:17",
-            "umaType": false,
-            "baseDn": "inum=7D90,ou=scopes,o=jans"
-        },
-        {
             "dn": "inum=8A01,ou=scopes,o=jans",
             "inum": "8A01",
             "displayName": "view_mobile_phone_number",
