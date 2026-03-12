@@ -54,10 +54,8 @@ WORKDIR /tmp/jans
 RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https://github.com/janssenproject/jans . \
     && git sparse-checkout init --cone \
     && git sparse-checkout add jans-pycloudlib \
-    && git sparse-checkout add jans-keycloak-integration \
     && git checkout ${JANS_SOURCE_VERSION} \
     && mkdir -p /app/templates/kc-scheduler \
-    && cp jans-keycloak-integration/job-scheduler/src/main/resources/config.properties.sample /app/templates/kc-scheduler/config.properties
 
 WORKDIR /
 
