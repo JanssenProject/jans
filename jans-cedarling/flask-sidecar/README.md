@@ -4,7 +4,7 @@ This is a Flask API that implements the [AuthZen](https://openid.github.io/authz
 
 ## Running
 
-To run the API, you will need either Python3.10 or 3.11 installed.
+To run the API, you will need python 3.11 installed.
 
 - Install [poetry](https://python-poetry.org/docs/#installation)
 - Clone the [Janssen](https://github.com/JanssenProject/jans) repository:
@@ -16,12 +16,10 @@ To run the API, you will need either Python3.10 or 3.11 installed.
   && git sparse-checkout set jans-cedarling
   ```
 - Navigate to `jans-cedarling/flask-sidecar`
-- Ensure your poetry environment is using one of the supported Python versions (3.10 or 3.11). For example, to use python3.10: `poetry env use python3.10`. This is not necessary if your system already uses one of these versions by default.
+- Ensure your poetry environment is using python 3.11. For example, to use python3.11: `poetry env use python3.11`. This is not necessary if your system only has Python 3.11 installed.
 - Run `poetry install` to install dependencies
-- Download the correct version of the binding library:
-  - [3.10](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp310-cp310-manylinux_2_34_x86_64.whl)
-  - [3.11](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp311-cp311-manylinux_2_34_x86_64.whl)
-- Install the binding to your local environment: `poetry add ./cedarling_python-0.0.0-[python-version]-manylinux_2_34_x86_64.whl`
+- Download the [binding library](https://github.com/JanssenProject/jans/releases/download/nightly/cedarling_python-0.0.0-cp311-cp311-manylinux_2_34_x86_64.whl)
+- Install the binding to your local environment: `poetry run pip install ./cedarling_python-0.0.0-cp311-cp311-manylinux_2_34_x86_64.whl`
 - Navigate to `main/`
 - Run `poetry run flask run` to run the API on `http://127.0.0.1:5000`
 
@@ -34,7 +32,6 @@ For running via poetry, the sidecar supports the following environment variables
 | APP_MODE                        | testing       | development, testing, production |
 | CEDARLING_BOOTSTRAP_CONFIG_FILE | None          | Path to your configuration       |
 | SIDECAR_DEBUG_RESPONSE          | False         | True, False                      |
-| DISABLE_HASH_CHECK              | False         | True, False                      |
 
 - Navigate to `jans/jans-cedarling/flask-sidecar/main` and create a file named `.env`
 - Set environment variables like so:
@@ -53,8 +50,7 @@ SIDECAR_DEBUG_RESPONSE=False
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
-CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
-CEDARLING_ID_TOKEN_TRUST_MODE=never
+CEDARLING_WORKLOAD_AUTHZ=enabled
 ```
 
 In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`. In addition, JSON values such as `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` must be formatted as string.
@@ -65,6 +61,7 @@ Not yet implemented
 
 # Docker Instructions
 
+- **Note**: Currently only remote policy stores via URI passing is supported on Docker builds.
 - Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file.
 - Modify the file to your specifications. Configuration values are described [here](https://docs.jans.io/head/cedarling/cedarling-properties/).
 - Pull the docker image:
@@ -78,9 +75,8 @@ Not yet implemented
     -e APP_MODE='development' \
     -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
     -e SIDECAR_DEBUG_RESPONSE=False \
-    -e DISABLE_HASH_CHECK=False \
     --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
-    -p 5000:5000\
+    -p 5000:5000 \
     ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
   ```
 
@@ -90,12 +86,10 @@ Not yet implemented
   docker run \
     -e APP_MODE='development' \
     -e SIDECAR_DEBUG_RESPONSE=True \
-    -e DISABLE_HASH_CHECK=False \
     -e CEDARLING_APPLICATION_NAME=MyApp \
     -e CEDARLING_POLICY_STORE_ID=abcdef \
     -e CEDARLING_POLICY_STORE_URI=https://gluu.org \
-    -e CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
-    -e CEDARLING_ID_TOKEN_TRUST_MODE=never \
+    -e CEDARLING_WORKLOAD_AUTHZ=enabled \
     -p 5000:5000 \
     ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
   ```
@@ -149,12 +143,10 @@ Not yet implemented
 ```
 APP_MODE=development
 SIDECAR_DEBUG_RESPONSE=True
-DISABLE_HASH_CHECK=False
 CEDARLING_APPLICATION_NAME=MyApp
 CEDARLING_POLICY_STORE_ID=abcdef
 CEDARLING_POLICY_STORE_URI=https://gluu.org
-CEDARLING_PRINCIPAL_BOOLEAN_OPERATION="{\"or\":[{\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]},{\"===\":[{\"var\":\"Jans::User\"},\"ALLOW\"]}]}"
-CEDARLING_ID_TOKEN_TRUST_MODE=never
+CEDARLING_WORKLOAD_AUTHZ=enabled
 ...
 ```
 
