@@ -31,6 +31,14 @@ type CedarPlugin struct {
 	cedar   *cedarling_go.Cedarling
 }
 
+func logMessage(stderr bool, msg string) {
+	if stderr {
+		fmt.Fprintln(os.Stderr, msg)
+	} else {
+		fmt.Println(msg)
+	}
+}
+
 func buildBootstrapConfig(cfg Config) (map[string]any, error) {
 	newConfig := make(map[string]any)
 	for k, v := range cfg.BootstrapConfig {
@@ -52,11 +60,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 		return err
 	}
 	var stderr bool = p.config.Stderr
-	if stderr {
-		fmt.Fprintln(os.Stderr, "Initializing cedarling")
-	} else {
-		fmt.Println("Initializing cedarling")
-	}
+	logMessage(stderr, "Initializing Cedarling")
 	instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
@@ -83,17 +87,15 @@ func (p *CedarPlugin) Reconfigure(ctx context.Context, config interface{}) {
 	new_config, err := buildBootstrapConfig(cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
 	var stderr bool = cfg.Stderr
-	if stderr {
-		fmt.Fprintln(os.Stderr, "Initializing cedarling")
-	} else {
-		fmt.Println("Initializing cedarling")
-	}
+	logMessage(stderr, "Initializing Cedarling")
 	new_instance, err := cedarling_go.NewCedarling(new_config)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return
 	}
 	p.mtx.Lock()
