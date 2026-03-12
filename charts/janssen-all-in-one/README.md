@@ -285,16 +285,35 @@ Kubernetes: `>=v1.23.0-0`
 | fido2.ingress.fido2WebauthnLabels | object | `{}` | fido2 webauthn ingress resource labels. key app is taken |
 | fqdn | string | `"demoexample.jans.io"` | Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services. |
 | fullNameOverride | string | `""` |  |
-| gatewayApi.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
-| gatewayApi.gatewayAnnotations | object | `{}` | Specific annotations for the Gateway resource |
-| gatewayApi.gatewayClassName | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. We support all GA-conformant implementations(e.g., 'nginx', 'istio', 'cilium', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
-| gatewayApi.gatewayLabels | object | `{}` | Specific labels for the Gateway resource |
-| gatewayApi.httpPort | int | `80` | Gateway http port number |
-| gatewayApi.httpsPort | int | `443` | Gateway https port number |
-| gatewayApi.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
-| gatewayApi.routeAnnotations | object | `{}` | Specific annotations for the HTTPRoute resource |
-| gatewayApi.routeLabels | object | `{}` | Specific labels for the HTTPRoute resource |
-| gatewayApi.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
+| gateway-api | object | `{"additionalConfig":{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{},"traefik":{}},"enabled":false,"gateway":{"annotations":{},"attachLbIp":false,"className":"nginx","httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"},"routes":{"annotations":{},"labels":{}}}` | Gateway API implementation. We support all GA-conformant implementations (e.g., 'nginx', 'istio', 'traefik'). See https://gateway-api.sigs.k8s.io/implementations/#conformant |
+| gateway-api.additionalConfig | object | `{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{},"traefik":{}}` | Additional configuration for Specific Gateway API implementation |
+| gateway-api.additionalConfig.airlock | object | `{"createLbService":false}` | Configuration for Airlock Microgateway |
+| gateway-api.additionalConfig.airlock.createLbService | bool | `false` | Create LoadBalancer service using GatewayParameters (by default airlock-microgateway doesn't create the service). See https://docs.airlock.com/microgateway/latest/index/api/crds/gateway-parameters/v1alpha1/ for details. The GatewayParameters will be attached to gateway.infrastructure.parametersRef only if it's empty. |
+| gateway-api.additionalConfig.cilium | object | `{"ipPoolBlocks":[]}` | Configuration for Cilium. |
+| gateway-api.additionalConfig.cilium.ipPoolBlocks | list | `[]` | Create Cilium IP pool with the specified blocks. See https://docs.cilium.io/en/stable/network/lb-ipam/ for details. |
+| gateway-api.additionalConfig.envoy | object | `{"createGatewayClass":false}` | Configuration for Envoy. |
+| gateway-api.additionalConfig.envoy.createGatewayClass | bool | `false` | Create GatewayClass named `envoy` (by default Envoy doesn't create gatewayclass). The `envoy` name can be set as value of `gateway.className` attribute. |
+| gateway-api.additionalConfig.istio | object | `{}` | Configuration for Istio. |
+| gateway-api.additionalConfig.kgateway | object | `{}` | Configuration for kgateway. |
+| gateway-api.additionalConfig.nginx | object | `{}` | Configuration for NGINX Fabric. |
+| gateway-api.additionalConfig.traefik | object | `{}` | Configuration for Traefik. |
+| gateway-api.enabled | bool | `false` | Boolean flag to enable/disable the Kubernetes Gateway and HTTPRoute resources. |
+| gateway-api.gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
+| gateway-api.gateway.annotations | object | `{}` | Specific annotations for the Gateway resource |
+| gateway-api.gateway.attachLbIp | bool | `false` | Attach global.lbIp to Gateway spec.addresses with IPAddress type (enable this if loadbalancer doesn't assign IP address to Gateway automatically) |
+| gateway-api.gateway.className | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. |
+| gateway-api.gateway.httpPort | int | `80` | Gateway http port number |
+| gateway-api.gateway.httpsPort | int | `443` | Gateway https port number |
+| gateway-api.gateway.infrastructure | object | `{"annotations":{},"labels":{},"parametersRef":{}}` | Gateway spec.infrastructure |
+| gateway-api.gateway.infrastructure.annotations | object | `{}` | Specific annotations for the infrastructure |
+| gateway-api.gateway.infrastructure.labels | object | `{}` | Specific labels for the infrastructure |
+| gateway-api.gateway.infrastructure.parametersRef | object | `{}` | Specific parametersRef for the infrastructure Some gateway implementation like `airlock-microgateway` may need to attach GatewayParameters to create Loadbalancer service automatically. |
+| gateway-api.gateway.labels | object | `{}` | Specific labels for the Gateway resource |
+| gateway-api.gateway.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
+| gateway-api.gateway.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
+| gateway-api.routes | object | `{"annotations":{},"labels":{}}` | Configuration for HTTPRoute and its related resources |
+| gateway-api.routes.annotations | object | `{}` | Specific annotations for the HTTPRoute resource |
+| gateway-api.routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |
 | hpa | object | `{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50}` | Configure the HorizontalPodAutoscaler |
 | hpa.behavior | object | `{}` | Scaling Policies |
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |

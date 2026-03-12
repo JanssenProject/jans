@@ -101,7 +101,7 @@ pub(crate) enum ManifestErrorType {
     },
 
     /// Invalid checksum format
-    #[error("Invalid checksum format for '{file}': expected 'sha256:<hex>', found '{checksum}'")]
+    #[error("Invalid checksum format for '{file}': expected 'sha256:<hex>' or 'sha1:<hex>', found '{checksum}'")]
     InvalidChecksumFormat { file: String, checksum: String },
 
     /// File size mismatch
