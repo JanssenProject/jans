@@ -2,6 +2,7 @@ package io.jans.as.model.util;
 
 import io.jans.as.model.BaseTest;
 import io.jans.as.model.common.Prompt;
+import org.apache.commons.lang3.Strings;
 import org.json.JSONArray;
 import org.testng.annotations.Test;
 
@@ -24,25 +25,25 @@ public class StringUtilsTest extends BaseTest {
     @Test
     public void equals_bothParamsNull_true() {
         showTitle("equals_bothParamsNull_true");
-        assertTrue(StringUtils.equals(null, null));
+        assertTrue(Strings.CS.equals(null, null));
     }
 
     @Test
     public void equals_oneParamNull_false() {
         showTitle("equals_oneParamNull_false");
-        assertFalse(StringUtils.equals("text", null));
+        assertFalse(Strings.CS.equals("text", null));
     }
 
     @Test
     public void equals_validParamsDifferents_false() {
         showTitle("equals_validParamsDifferents_false");
-        assertFalse(StringUtils.equals("text", "other_text"));
+        assertFalse(Strings.CS.equals("text", "other_text"));
     }
 
     @Test
     public void equals_validParamsEquals_true() {
         showTitle("equals_validParamsEquals_true");
-        assertTrue(StringUtils.equals("text", "text"));
+        assertTrue(Strings.CS.equals("text", "text"));
     }
 
     @Test
