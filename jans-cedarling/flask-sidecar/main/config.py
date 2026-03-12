@@ -52,8 +52,14 @@ class BaseConfig:
             "Cedarling bootstrap file not found, falling back to environment variables"
         )
     else:
-        with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
-            CEDARLING_BOOTSTRAP_CONFIG = f.read()
+        try:
+            with open(CEDARLING_BOOTSTRAP_CONFIG_FILE, "r") as f:
+                CEDARLING_BOOTSTRAP_CONFIG = f.read()
+        except OSError as e:
+            logger.warning(
+                f"Unable to read Cedarling bootstrap config from {CEDARLING_BOOTSTRAP_CONFIG_FILE}: {e}. "
+                "Falling back to environment variables"
+            )
 
     SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
 

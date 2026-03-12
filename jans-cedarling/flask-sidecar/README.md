@@ -53,7 +53,7 @@ CEDARLING_POLICY_STORE_URI=https://gluu.org
 CEDARLING_WORKLOAD_AUTHZ=enabled
 ```
 
-In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`. In addition, JSON values such as `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` must be formatted as string.
+In this case, please be aware of case sensitivity. Environment variables are directly parsed as strings, hence `none` is not the same as `None`.
 
 ## Tests
 

@@ -16,6 +16,7 @@ limitations under the License.
 
 import marshmallow as ma
 from marshmallow import EXCLUDE, INCLUDE
+from marshmallow import validate
 
 
 class BaseSchema(ma.Schema):
@@ -39,7 +40,9 @@ class TokenSchema(BaseSchema):
 
 
 class TokenListSchema(BaseSchema):
-    tokens = ma.fields.List(SmartNested(TokenSchema), required=True)
+    tokens = ma.fields.List(
+        SmartNested(TokenSchema), required=True, validate=validate.Length(max=50)
+    )
 
 
 class SubjectSchema(BaseSchema):

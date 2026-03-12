@@ -109,6 +109,12 @@ class CedarlingInstance:
                 context=context,
             )
             authorize_result = self._cedarling.authorize_multi_issuer(cedarling_request)
+        except Exception as e:
+            result_dict["decision"] = False
+            result_dict["context"] = {"id": "-1", "reason_admin": {"Exception": f"{e}"}}
+            logger.info(f"Exception during cedarling authorize: {e}")
+            return Decision(**result_dict)
+        try:
             request_id = authorize_result.request_id()
             tag = "Decision"
             decision_log = self._cedarling.get_logs_by_request_id_and_tag(
@@ -119,11 +125,9 @@ class CedarlingInstance:
                 logger.info(f"Decision log {i}: {str(log)}")
                 i += 1
         except Exception as e:
-            result_dict["decision"] = False
-            result_dict["context"] = {"id": "-1", "reason_admin": {"Exception": f"{e}"}}
-            logger.info(f"Exception during cedarling authorize: {e}")
-            return Decision(**result_dict)
+            logger.warning(f"Failed to retrieve logs: {e}")
         authorize_bool = authorize_result.is_allowed()
+        result_dict["context"] = {}
         if authorize_bool:
             result_dict["decision"] = True
         else:
