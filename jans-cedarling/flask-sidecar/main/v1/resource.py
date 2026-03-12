@@ -1,5 +1,5 @@
 """
-Copyright (c) 2025, Gluu, Inc. 
+Copyright (c) 2025, Gluu, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,10 +19,20 @@ from main.v1.schema import EvaluationRequestSchema, DecisionSchema, WellKnownSch
 from flask.views import MethodView
 from flask import request
 from main.extensions import cedarling
+import json
+from main.infrastructure.services.cedarling_authzen_service import (
+    CedarlingAuthzenService,
+)
+from main.domain.usecases.cedarling_authorize_usecase import (
+    CedarlingAuthorizeUseCase,
+    CedarlingAuthorizeInputPort,
+)
 
-blp = BlueprintApi("Evaluate",
-                   __name__,
-                   description="AuthZen evaluation endpoint")
+cedarling_service = CedarlingAuthzenService(cedarling)
+usecase = CedarlingAuthorizeUseCase(cedarling_service)
+
+blp = BlueprintApi("Evaluate", __name__, description="AuthZen evaluation endpoint")
+
 
 @blp.route("/cedarling/evaluation")
 class Evaluation(MethodView):
@@ -32,13 +42,15 @@ class Evaluation(MethodView):
         """
         Evaluates whether a subject is authorized to perform a specific action on a resource.
         """
-        auth_response = cedarling.authorize(
-                                payload["subject"],
-                                payload["action"],
-                                payload["resource"],
-                                payload.get("context", {})
-                        )
-        return auth_response
+        return usecase.execute(
+            CedarlingAuthorizeInputPort(
+                payload["subject"],
+                payload["action"],
+                payload["resource"],
+                payload["context"],
+            )
+        )
+
 
 @blp.route("/.well-known/authzen-configuration")
 class WellKnown(MethodView):

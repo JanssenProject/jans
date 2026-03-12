@@ -18,13 +18,17 @@ global:
   lbIp: ""  # Add your LoadBalancer IP
   fqdn: demoexample.jans.io  # Your domain
   isFqdnRegistered: true
-  gatewayApi:
+  gateway-api:
     enabled: true
   nginx-ingress:
     enabled: false
-gatewayApi:
-  gatewayClassName: nginx
-  name: jans-gateway
+gateway-api:
+  gateway:
+    className: nginx # Match your controller (nginx, istio, etc.)
+    name: jans-gateway
+    httpPort: 80
+    httpsPort: 443
+    attachLbIp: false # Set the value to true if loadbalancer didn't assign IP address to the gateway automatically
 config:
   configmap:
     cnSqlDbName: jans

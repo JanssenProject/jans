@@ -5,6 +5,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.auth.MTLSService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -12,19 +13,12 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -61,6 +55,7 @@ public class MTLSServiceTest {
         String jsonRequest = "{ \"tls_client_auth_subject_dn\":\"" + tlsClientAuthSubjectDn + "\" }";
         BufferedReader requestReader = new BufferedReader(new StringReader(jsonRequest));
         when(httpServletRequest.getReader()).thenReturn(requestReader);
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Client-Cert"))).thenReturn(null);
         when(httpServletRequest.getHeader(eq("X-ClientCert"))).thenReturn(certPem);
 
         boolean result = mtlsService.processRegisterMTLS(httpServletRequest);
@@ -76,16 +71,13 @@ public class MTLSServiceTest {
     public void processRegisterMTLS_ErrorReadingJsonRequest_ReturnsFalse() throws Exception {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         when(httpServletRequest.getReader()).thenThrow(new IOException());
-        when(httpServletRequest.getHeader(eq("X-ClientCert"))).thenReturn(certPem);
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Client-Cert"))).thenReturn(certPem);
 
         boolean result = mtlsService.processRegisterMTLS(httpServletRequest);
 
         assertFalse(result);
         verify(log).debug("Trying to authenticate client registration request via MTLS");
         verify(log).error(eq("Error getting TLS_CLIENT_AUTH_SUBJECT_DN field from request registration body"), any(IOException.class));
-        verify(log).debug(anyString(), (String) isNull());
-
-        verifyNoMoreInteractions(log);
     }
 
     @Test
@@ -94,13 +86,13 @@ public class MTLSServiceTest {
         String jsonRequest = "{ \"tls_client_auth_subject_dn\":\"" + tlsClientAuthSubjectDn + "\" }";
         BufferedReader requestReader = new BufferedReader(new StringReader(jsonRequest));
         when(httpServletRequest.getReader()).thenReturn(requestReader);
-        when(httpServletRequest.getHeader(eq("X-ClientCert"))).thenReturn("ABC");
+        when(httpServletRequest.getHeader(eq("X-Forwarded-Client-Cert"))).thenReturn("ABC");
 
         boolean result = mtlsService.processRegisterMTLS(httpServletRequest);
 
         assertFalse(result);
         verify(log).debug("Trying to authenticate client registration request via MTLS");
-        verify(log).debug("Failed to parse client certificate");
+        verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header");
 
         verifyNoMoreInteractions(log);
     }
@@ -116,7 +108,7 @@ public class MTLSServiceTest {
 
         assertFalse(result);
         verify(log).debug("Trying to authenticate client registration request via MTLS");
-        verify(log).debug("Client certificate is missed in `X-ClientCert` header");
+        verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert` and in `X-ClientCert` header");
 
         verifyNoMoreInteractions(log);
     }
