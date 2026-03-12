@@ -1023,17 +1023,23 @@ public class Fido2MetricsResource extends BaseResource {
         Fido2MetricsEntryPagedResult fido2MetricsEntryPagedResult = null;
 
         if (pagedResult != null) {
-            getStartIndex(pagedResult.getEntries(), startIndex);
-            int toIndex = (startIndex + limit <= pagedResult.getEntries().size()) ? startIndex + limit
-                    : pagedResult.getEntries().size();
-            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
 
             List<Fido2MetricsEntry> identityProviderList = pagedResult.getEntries();
+            int listSize = (identityProviderList == null) ? 0 : identityProviderList.size();
+
+            getStartIndex(identityProviderList, startIndex);
+            int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
+            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
+
+            // Extract paginated data
+            List<Fido2MetricsEntry> sublist = (identityProviderList == null) ? null
+                    : identityProviderList.subList(startIndex, toIndex);
+
             fido2MetricsEntryPagedResult = new Fido2MetricsEntryPagedResult();
-            fido2MetricsEntryPagedResult.setStart(pagedResult.getStart());
-            fido2MetricsEntryPagedResult.setEntriesCount(pagedResult.getEntriesCount());
+            fido2MetricsEntryPagedResult.setStart(startIndex);
+            fido2MetricsEntryPagedResult.setEntriesCount(toIndex);
             fido2MetricsEntryPagedResult.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-            fido2MetricsEntryPagedResult.setEntries(identityProviderList);
+            fido2MetricsEntryPagedResult.setEntries(sublist);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Fido2MetricsEntry fido2MetricsEntryPagedResult:{}", fido2MetricsEntryPagedResult);
@@ -1047,17 +1053,22 @@ public class Fido2MetricsResource extends BaseResource {
 
         if (pagedResult != null) {
 
-            getStartIndex(pagedResult.getEntries(), startIndex);
-            int toIndex = (startIndex + limit <= pagedResult.getEntries().size()) ? startIndex + limit
-                    : pagedResult.getEntries().size();
-            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
-
             List<Fido2MetricsAggregation> identityProviderList = pagedResult.getEntries();
+            int listSize = (identityProviderList == null) ? 0 : identityProviderList.size();
+
+            getStartIndex(identityProviderList, startIndex);
+            int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
+            logger.info("Final listSize:{}, startIndex:{}, limit:{}, toIndex:{}", listSize, startIndex, limit, toIndex);
+
+            // Extract paginated data
+            List<Fido2MetricsAggregation> sublist = (identityProviderList == null) ? null
+                    : identityProviderList.subList(startIndex, toIndex);
+
             fido2MetricsAggregationPagedResult = new Fido2MetricsAggregationPagedResult();
-            fido2MetricsAggregationPagedResult.setStart(pagedResult.getStart());
-            fido2MetricsAggregationPagedResult.setEntriesCount(pagedResult.getEntriesCount());
+            fido2MetricsAggregationPagedResult.setStart(startIndex);
+            fido2MetricsAggregationPagedResult.setEntriesCount(toIndex);
             fido2MetricsAggregationPagedResult.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-            fido2MetricsAggregationPagedResult.setEntries(identityProviderList);
+            fido2MetricsAggregationPagedResult.setEntries(sublist);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Fido2MetricsAggregation fido2MetricsAggregationPagedResult:{}",
