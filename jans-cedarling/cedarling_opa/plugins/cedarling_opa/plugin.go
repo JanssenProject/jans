@@ -57,6 +57,7 @@ func (p *CedarPlugin) Start(ctx context.Context) error {
 	defer p.mtx.Unlock()
 	new_config, err := buildBootstrapConfig(p.config)
 	if err != nil {
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return err
 	}
 	var stderr bool = p.config.Stderr
