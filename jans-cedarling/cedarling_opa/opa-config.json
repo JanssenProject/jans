@@ -1,0 +1,104 @@
+{
+    "decision_logs": {
+        "plugin": "cedarling_opa"
+    },
+    "plugins": {
+        "cedarling_opa": {
+            "stderr": false,
+            "bootstrap_config": {
+                "CEDARLING_APPLICATION_NAME": "TestApp",
+                "CEDARLING_USER_AUTHZ": "enabled",
+                "CEDARLING_WORKLOAD_AUTHZ": "enabled",
+                "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+                "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+                "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
+                "CEDARLING_LOG_TYPE": "std_out",
+                "CEDARLING_LOG_TTL": 60,
+                "CEDARLING_LOG_LEVEL": "DEBUG",
+                "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+                    "HS256"
+                ]
+            },
+            "policy_store": {
+                "cedar_version": "v4.0.0",
+                "policy_stores": {
+                    "a1bf93115de86de760ee0bea1d529b521489e5a11747": {
+                        "cedar_version": "v4.0.0",
+                        "name": "Jans",
+                        "description": "A test policy store where everything is fine.",
+                        "trusted_issuers": {
+                            "Jans": {
+                                "name": "Jans",
+                                "description": "A Test IDP",
+                                "openid_configuration_endpoint": "https://test.jans.org/.well-known/openid-configuration",
+                                "token_metadata": {
+                                    "access_token": {
+                                        "entity_type_name": "Jans::Access_token",
+                                        "workload_id": "client_id",
+                                        "principal_mapping": [
+                                            "Jans::Workload"
+                                        ]
+                                    },
+                                    "id_token": {
+                                        "entity_type_name": "Jans::Id_token",
+                                        "principal_mapping": [
+                                            "Jans::User"
+                                        ]
+                                    },
+                                    "userinfo_token": {
+                                        "entity_type_name": "Jans::Userinfo_token",
+                                        "user_id": "sub",
+                                        "principal_mapping": [
+                                            "Jans::User"
+                                        ]
+                                    }
+                                }
+                            },
+                            "Jans2": {
+                                "name": "Jans2",
+                                "description": "This is a placeholder issuer used to test if Cedarling still works with multiple issuers",
+                                "openid_configuration_endpoint": "https://another.jans.org/.well-known/openid-configuration"
+                            }
+                        },
+                        "policies": {
+                            "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                                "description": "simple policy example for principal workload",
+                                "creation_date": "2024-09-20T17:22:39.996050",
+                                "policy_content": {
+                                    "encoding": "none",
+                                    "content_type": "cedar",
+                                    "body": "permit(\n    principal is Jans::Workload,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.access_token.org_id == resource.org_id &&\n    principal.aud == \"5b4487c4-8db1-409d-a653-f907b8094039\"\n};"
+                                }
+                            },
+                            "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                                "cedar_version": "v4.0.0",
+                                "description": "simple policy example for principal user",
+                                "creation_date": "2024-09-20T17:22:39.996050",
+                                "policy_content": {
+                                    "encoding": "none",
+                                    "content_type": "cedar",
+                                    "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country &&\n    principal.id_token.aud.contains(\"5b4487c4-8db1-409d-a653-f907b8094039\")\n};"
+                                }
+                            },
+                            "555da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                                "cedar_version": "v4.0.0",
+                                "description": "Superuser that can do anything",
+                                "creation_date": "2024-09-20T17:22:39.996050",
+                                "policy_content": {
+                                    "encoding": "none",
+                                    "content_type": "cedar",
+                                    "body": "permit(\n  principal in Jans::Role::\"SuperUser\",\n    action,\n    resource\n);"
+                                }
+                            }
+                        },
+                        "schema": {
+                            "encoding": "none",
+                            "content_type": "cedar",
+                            "body": "namespace Jans {\n  type Url = {\"host\": String, \"path\": String, \"protocol\": String};\n  entity Issue = {\"country\": String, \"org_id\": String};\n  entity Role;\n  entity TrustedIssuer = {\"issuer_entity_id\": Url};\n  entity User in [Role] = {\n    sub?: String,\n    role?: String,\n    email: String,\n    username: String,\n    country: String,\n    id_token?: Id_token,\n    userinfo_token?: Userinfo_token,\n  };\n  entity Workload = {\n    iss: Jans::TrustedIssuer,\n    aud?: String,\n    client_id?: String,\n    name: String,\n    access_token: Access_token,\n  };\n  entity Access_token = {\n    iss: Jans::TrustedIssuer,\n    jti: String,\n    client_id: String,\n    org_id: String,\n  };\n  entity Id_token = {\n    iss: Jans::TrustedIssuer,\n    sub: String,\n    aud: Set<String>,\n  };\n  entity Userinfo_token  = {\n    iss: Jans::TrustedIssuer,\n    jti: String,\n  };\n  type Context = {\n    user?: User,\n    workload?: Workload,\n    access_token?: Access_token,\n    id_token?: Id_token,\n    userinfo_token?: Userinfo_token,\n  };\n  action \"Update\" appliesTo {\n    principal: [Workload, User, Role],\n    resource: [Issue],\n    context: Context\n  };\n}\nnamespace Jans2 {\n  entity TrustedIssuer = {\"issuer_entity_id\": Jans::Url};\n}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

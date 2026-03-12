@@ -6,22 +6,20 @@
 
 package io.jans.service;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
-import org.apache.commons.lang3.StringUtils;
-
 import io.jans.model.DisplayNameEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.Entry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.OxConstants;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Provides operations with DisplayNameEntry
@@ -47,9 +45,9 @@ public class LookupService implements Serializable {
 	 *            display name
 	 * @return DisplayNameEntry object
 	 */
-	public DisplayNameEntry getDisplayNameEntry(String dn, String objectClass) throws Exception {
+	public DisplayNameEntry getDisplayNameEntry(String dn, String objectClass) {
 		String key = "l_" + objectClass + "_" + dn;
-		DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(key);
 		if (entry == null) {
 			// Prepare sample for search
 			DisplayNameEntry sample = new DisplayNameEntry();
@@ -61,7 +59,7 @@ public class LookupService implements Serializable {
 				entry = entries.get(0);
 			}
 
-			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
+			cacheService.put(key, entry);
 		}
 
 		return entry;
@@ -69,11 +67,11 @@ public class LookupService implements Serializable {
 
 	public <T> T getDisplayNameEntry(String dn, Class<T> entryClass) throws Exception {
 		String key = "l_" + entryClass.getSimpleName() + "_" + dn;
-		T entry = (T) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		T entry = (T) cacheService.get(key);
 		if (entry == null) {
 			entry = persistenceEntryManager.find(dn, entryClass, null);
 
-			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
+			cacheService.put(key, entry);
 		}
 
 		return entry;
@@ -95,13 +93,13 @@ public class LookupService implements Serializable {
 			return null;
 		}
 
-		Class entryClass = Class.class.forName(clazz);
+		Class entryClass = Class.forName(clazz);
 		String key = "l_" + entryClass.getSimpleName() + "_" + dn;
-		Object entry = cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		Object entry = cacheService.get(key);
 		if (entry == null) {
 			entry = persistenceEntryManager.find(entryClass, dn);
 
-			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
+			cacheService.put(key, entry);
 		}
 
 		return entry;
@@ -124,11 +122,11 @@ public class LookupService implements Serializable {
 		}
 
 		String key = getCompoundKey(entryClass, inums);
-		List<T> entries = (List<T>) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		List<T> entries = (List<T>) cacheService.get(key);
 		if (entries == null) {
 			Filter searchFilter = buildInumFilter(inums);
 			entries = persistenceEntryManager.findEntries(baseDn, entryClass, searchFilter);
-			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entries);
+			cacheService.put(key, entries);
 		}
 		return entries;
 	}

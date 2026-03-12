@@ -6,15 +6,14 @@
 
 package io.jans.service.security.protect;
 
-import java.util.List;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
-
-import io.jans.service.CacheService;
 import io.jans.model.security.protect.AuthenticationAttempt;
 import io.jans.model.security.protect.AuthenticationAttemptList;
+import io.jans.service.CacheService;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 /**
  * Base Brute Force authentication protection service implementation
@@ -52,11 +51,11 @@ public abstract class AuthenticationProtectionService {
         AuthenticationAttempt authenticationAttempt = new AuthenticationAttempt(currentTime, currentTime + attemptExpiration * 1000, success);
         authenticationAttemptList.getAuthenticationAttempts().add(authenticationAttempt);
 
-        cacheService.put(Integer.toString(attemptExpiration), buildKey(key), authenticationAttemptList);
+        cacheService.put(attemptExpiration, buildKey(key), authenticationAttemptList);
     }
 
     public AuthenticationAttemptList getAttempts(String key) {
-        Object o = cacheService.get(null, buildKey(key));
+        Object o = cacheService.get(buildKey(key));
         if (o instanceof AuthenticationAttemptList) {
             return (AuthenticationAttemptList) o;
         }
