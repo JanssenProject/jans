@@ -74,7 +74,7 @@ public class EndSessionUtils {
         }
     }
 
-    public static String createFronthannelHtml(Set<String> logoutUris, String postLogoutUrl, String state) {
+    public static String createFronthannelHtml(Set<String> logoutUris, String postLogoutUrl, String state, String opEndSessionUrl) {
         String iframes = "";
         for (String logoutUri : logoutUris) {
             iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\"></iframe>", logoutUri);
@@ -105,8 +105,22 @@ public class EndSessionUtils {
                 "</head>" +
                 "<body>" +
                 "Your logout was successful.<br/>" +
-                iframes +
-                "</body>" +
+                iframes;
+
+        if (Util.isNullOrEmpty(postLogoutUrl)) {
+            html += "<br/>";
+            if (!Util.isNullOrEmpty(opEndSessionUrl)) {
+                html += "<a href=\"" + opEndSessionUrl + "\">Logout from OP</a><br/><br/>";
+            }
+            html += "<div style=\"display:flex;gap:12px;align-items:center;flex-wrap:wrap;\">" +
+                    "<iframe src=\"https://ghbtns.com/github-btn.html?user=JanssenProject&amp;repo=jans&amp;type=star&amp;count=true&amp;size=large\" " +
+                    "frameborder=\"0\" scrolling=\"0\" width=\"170\" height=\"30\" title=\"Star JanssenProject/jans on GitHub\"></iframe>" +
+                    "<iframe src=\"https://ghbtns.com/github-btn.html?user=JanssenProject&amp;repo=jans&amp;type=watch&amp;count=true&amp;size=large&amp;v=2\" " +
+                    "frameborder=\"0\" scrolling=\"0\" width=\"170\" height=\"30\" title=\"Watch JanssenProject/jans on GitHub\"></iframe>" +
+                    "</div>";
+        }
+
+        html += "</body>" +
                 "</html>";
         return html;
     }

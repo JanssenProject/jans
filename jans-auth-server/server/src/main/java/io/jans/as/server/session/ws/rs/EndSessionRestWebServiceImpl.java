@@ -479,7 +479,12 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         // default handling
-        final String html = EndSessionUtils.createFronthannelHtml(frontchannelUris, postLogoutRedirectUri, state);
+        String issuer = appConfiguration.getIssuer();
+        if (issuer.endsWith("/")) {
+            issuer = issuer.substring(0, issuer.length() - 1);
+        }
+        final String opEndSessionUrl = issuer + "/restv1/end_session";
+        final String html = EndSessionUtils.createFronthannelHtml(frontchannelUris, postLogoutRedirectUri, state, opEndSessionUrl);
         log.debug("Constructed html logout page: {}", html);
         return okResponse(html);
     }
