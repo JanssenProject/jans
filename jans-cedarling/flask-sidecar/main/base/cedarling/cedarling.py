@@ -18,8 +18,9 @@ from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import (
     EntityData,
-    Request,
-    AuthorizeResultResponse
+    TokenInput,
+    AuthorizeMultiIssuerRequest,
+    AuthorizeResultResponse,
 )
 from main.logger import logger
 from flask import Flask
@@ -153,15 +154,24 @@ class CedarlingInstance:
         id_token = subject["properties"].get("id_token", None)
         userinfo_token = subject["properties"].get("userinfo_token", None)
         try:
-            tokens={}
+            token_inputs = []
             if access_token is not None:
-                tokens["access_token"] = access_token
+                token_inputs.append(TokenInput(mapping="Jans::Access_token", payload=access_token))
             if id_token is not None:
-                tokens["id_token"] = id_token
+                token_inputs.append(TokenInput(mapping="Jans::Id_token", payload=id_token))
             if userinfo_token is not None:
-                tokens["userinfo_token"] = userinfo_token
-            request = Request(tokens, action_entity, resource_entity, context)
-            authorize_result = self._cedarling.authorize(request)
+                token_inputs.append(TokenInput(mapping="Jans::Userinfo_token", payload=userinfo_token))
+            if not token_inputs:
+                result_dict["decision"] = False
+                result_dict["context"] = {"id": "-1", "reason_admin": {"Exception": "No tokens provided"}}
+                return result_dict
+            request = AuthorizeMultiIssuerRequest(
+                tokens=token_inputs,
+                action=action_entity,
+                resource=resource_entity,
+                context=context,
+            )
+            authorize_result = self._cedarling.authorize_multi_issuer(request)
             request_id = authorize_result.request_id()
             tag = "Decision"
             decision_log = self._cedarling.get_logs_by_request_id_and_tag(request_id, tag)
@@ -177,7 +187,7 @@ class CedarlingInstance:
                     "Exception": f"{e}"
                 }
             }
-            logger.info(f"Exception during cedarling authorize: {e}")
+            logger.info(f"Exception during cedarling authorize_multi_issuer: {e}")
             return result_dict
         authorize_bool = authorize_result.is_allowed()
         if authorize_bool:
@@ -185,30 +195,15 @@ class CedarlingInstance:
         else:
             result_dict["decision"] = False
         if self.debug_response:
-            person_result = authorize_result.person()
-            workload_result = authorize_result.workload()
-            person_value = None
-            workload_value = None
-            if person_result is not None:
-                person_value = person_result.decision.value
-            if workload_result is not None:
-                workload_value = workload_result.decision.value
-            person_diagnostic = self.generate_report(person_result, "reason")
-            person_error = self.generate_report(person_result, "error")
-            person_reason = self.get_reason(person_result)
-            workload_diagnostic = self.generate_report(workload_result, "reason")
-            workload_error = self.generate_report(workload_result, "error")
-            workload_reason = self.get_reason(workload_result)
+            resp = authorize_result.response()
+            decision_value = resp.decision.value if resp.decision else None
+            diagnostics_reason = self.get_reason(resp)
+            diagnostics_errors = self.generate_report(resp, "error")
             result_dict["context"] = {
                 "reason_admin": {
-                    "person evaluation": person_value,
-                    "person diagnostics": person_diagnostic,
-                    "person error": person_error,
-                    "person reason": person_reason,
-                    "workload evaluation": workload_value,
-                    "workload diagnostics": workload_diagnostic,
-                    "workload error": workload_error,
-                    "workload reason": workload_reason
+                    "evaluation": decision_value,
+                    "diagnostics_reason": diagnostics_reason,
+                    "diagnostics_errors": diagnostics_errors,
                 }
             }
         logger.info(f"Cedarling evaluation result: {result_dict}")
