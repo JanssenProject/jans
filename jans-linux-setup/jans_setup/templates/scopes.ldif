@@ -152,17 +152,6 @@ jansScopeTyp: oauth
 objectClass: top
 objectClass: jansScope
 
-dn: inum=7D90,ou=scopes,o=jans
-description: revoke_session scope which is required to be able call /revoke_session endpoint
-displayName: revoke_session
-inum: 7D90
-jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: false
-jansId: revoke_session
-jansScopeTyp: openid
-objectClass: top
-objectClass: jansScope
-
 dn: inum=7D91,ou=scopes,o=jans
 description: Revoke Any Token (including tokens of other clients)
 displayName: revoke_any_token
