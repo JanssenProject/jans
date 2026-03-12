@@ -1,7 +1,7 @@
 {
     "start": 0,
     "totalEntriesCount": 4,
-    "entriesCount": 0,
+    "entriesCount": 4,
     "entries": [
         {
             "dn": "jansId=0053a54e-5bf9-414f-b436-fcfcc9b1b440,ou=fido2-metrics,o=jans",

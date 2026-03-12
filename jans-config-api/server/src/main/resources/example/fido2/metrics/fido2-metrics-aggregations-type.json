@@ -1,7 +1,7 @@
 {
     "start": 0,
     "totalEntriesCount": 1,
-    "entriesCount": 0,
+    "entriesCount": 1,
     "entries": [
         {
             "dn": "jansId=HOURLY_2026-02-20-15,ou=fido2-aggregations,o=jans",
@@ -11,6 +11,9 @@
             "endTime": "2026-02-20T16:00:00",
             "uniqueUsers": 1,
             "lastUpdated": "2026-02-20T16:05:00",
+            "fallbackEvents": 0,
+            "registrationSuccessRate": 0.25,
+            "authenticationAttempts": 0,
             "metricsData": {
                 "deviceTypes": {
                     "cross-platform": 1
@@ -25,8 +28,6 @@
                 "registrationAvgDuration": 471.0,
                 "registrationSuccessRate": 0.25
             },
-            "fallbackEvents": 0,
-            "registrationSuccessRate": 0.25,
             "period": "2026-02-20-15",
             "registrationAttempts": 4,
             "registrationSuccesses": 1,
@@ -37,7 +38,6 @@
             "deviceTypes": {
                 "cross-platform": 1
             },
-            "authenticationAttempts": 0,
             "baseDn": "jansId=HOURLY_2026-02-20-15,ou=fido2-aggregations,o=jans"
         }
     ]
