@@ -1034,10 +1034,12 @@ public class Fido2MetricsResource extends BaseResource {
             // Extract paginated data
             List<Fido2MetricsEntry> sublist = (identityProviderList == null) ? null
                     : identityProviderList.subList(startIndex, toIndex);
+            
+            int entriesCount = (sublist == null) ? 0 : sublist.size();
 
             fido2MetricsEntryPagedResult = new Fido2MetricsEntryPagedResult();
             fido2MetricsEntryPagedResult.setStart(startIndex);
-            fido2MetricsEntryPagedResult.setEntriesCount(toIndex);
+            fido2MetricsEntryPagedResult.setEntriesCount(entriesCount);
             fido2MetricsEntryPagedResult.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
             fido2MetricsEntryPagedResult.setEntries(sublist);
         }
@@ -1063,10 +1065,12 @@ public class Fido2MetricsResource extends BaseResource {
             // Extract paginated data
             List<Fido2MetricsAggregation> sublist = (identityProviderList == null) ? null
                     : identityProviderList.subList(startIndex, toIndex);
+            
+            int entriesCount = (sublist == null) ? 0 : sublist.size();
 
             fido2MetricsAggregationPagedResult = new Fido2MetricsAggregationPagedResult();
             fido2MetricsAggregationPagedResult.setStart(startIndex);
-            fido2MetricsAggregationPagedResult.setEntriesCount(toIndex);
+            fido2MetricsAggregationPagedResult.setEntriesCount(entriesCount);
             fido2MetricsAggregationPagedResult.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
             fido2MetricsAggregationPagedResult.setEntries(sublist);
         }
