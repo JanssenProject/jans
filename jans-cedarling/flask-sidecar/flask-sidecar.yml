@@ -141,6 +141,7 @@ components:
         tokens:
           items:
             $ref: '#/components/schemas/Token'
+          maxItems: 50
           type: array
       required:
       - tokens
