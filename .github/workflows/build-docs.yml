@@ -37,7 +37,7 @@ permissions:
 jobs:
   build:
     permissions:
-      contents: read  # git push uses MOAUTO_WORKFLOW_TOKEN PAT, not GITHUB_TOKEN
+      contents: read
       id-token: write  # keyless Cosign signing via Sigstore OIDC
     if: github.repository == 'JanssenProject/jans'
     name: Deploy docs
