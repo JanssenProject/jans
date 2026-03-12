@@ -89,9 +89,10 @@ case $top_cmd in
     "cleanup")
         run_cleanup "$@"
         ;;
-    # "kc-sync")
-    #     run_kc_sync
-    #     ;;
+    "kc-sync")
+        echo "kc-sync is temporarily disabled until the SAML component is available" >&2
+        exit 1
+        ;;
     *)
         show_help
 esac
