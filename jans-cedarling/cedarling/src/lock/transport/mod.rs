@@ -52,9 +52,9 @@ pub enum TransportError {
     #[cfg(feature = "grpc")]
     GrpcServer(String),
 
-    #[error("invalid gRPC endpoint URL")]
+    #[error("invalid gRPC endpoint URL: {0}")]
     #[cfg(feature = "grpc")]
-    InvalidUri,
+    InvalidUri(String),
 
     #[error("failed to parse access token: {0}")]
     #[cfg(feature = "grpc")]

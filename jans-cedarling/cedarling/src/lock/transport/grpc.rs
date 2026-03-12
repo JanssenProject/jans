@@ -85,7 +85,7 @@ impl GrpcTransport {
         #[cfg(not(target_arch = "wasm32"))]
         let client = AuditServiceClient::new(
             Channel::from_shared(endpoint.into())
-                .map_err(|_| TransportError::InvalidUri)?
+                .map_err(|e| TransportError::InvalidUri(format!("failed to construct URI: {e:?}")))?
                 .tls_config(ClientTlsConfig::new().with_native_roots())?
                 .timeout(GRPC_REQUEST_TIMEOUT)
                 .connect_lazy(),
