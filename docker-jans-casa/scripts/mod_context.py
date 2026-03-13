@@ -31,7 +31,7 @@ def extract_common_libs(persistence_type):
 
         logger.info("Downloading %s as %s", basename, dist_file)
 
-        out, err, code = exec_cmd("wget -q %s -O %s", download_url, dist_file)
+        out, err, code = exec_cmd(f"wget -q {download_url} -O {dist_file}")
 
         if code != 0:
             err = out or err
