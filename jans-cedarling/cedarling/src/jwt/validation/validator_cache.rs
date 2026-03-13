@@ -307,7 +307,6 @@ mod test {
                 principal_mapping: HashSet::default(),
                 token_id: "iss".into(),
                 user_id: None,
-                role_mapping: None,
                 workload_id: Some("aud".into()),
                 required_claims: HashSet::new(),
             },

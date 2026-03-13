@@ -423,7 +423,6 @@ mod test {
             principal_mapping: HashSet::new(),
             token_id: "jti".into(),
             user_id: None,
-            role_mapping: None,
             workload_id: None,
             required_claims: HashSet::from(["exp".into(), "nbf".into()]),
         });

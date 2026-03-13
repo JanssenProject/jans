@@ -35,10 +35,6 @@ pub struct TokenEntityMetadata {
     #[serde(deserialize_with = "parse_option_string", default)]
     #[builder(default)]
     pub(crate) user_id: Option<String>,
-    /// An optional string indicating the role mapping for the user.
-    #[serde(deserialize_with = "parse_option_string", default)]
-    #[builder(default)]
-    pub(crate) role_mapping: Option<String>,
     #[serde(deserialize_with = "parse_option_string", default)]
     #[builder(default)]
     pub(crate) workload_id: Option<String>,
@@ -65,7 +61,6 @@ impl TokenEntityMetadata {
             trusted: true,
             token_id: default_token_id(),
             user_id: None,
-            role_mapping: None,
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
             principal_mapping: HashSet::from(["Jans::Workload".into()]),
@@ -79,7 +74,6 @@ impl TokenEntityMetadata {
             trusted: true,
             token_id: default_token_id(),
             user_id: Some("aud".into()),
-            role_mapping: None,
             required_claims: HashSet::from([
                 "iss".into(),
                 "sub".into(),
@@ -98,7 +92,6 @@ impl TokenEntityMetadata {
             trusted: true,
             token_id: default_token_id(),
             user_id: Some("aud".into()),
-            role_mapping: None,
             required_claims: HashSet::from([
                 "iss".into(),
                 "sub".into(),

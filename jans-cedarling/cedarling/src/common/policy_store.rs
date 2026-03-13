@@ -269,13 +269,6 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    /// Retrieves the claim that defines the `Role` for a given token type.
-    pub(crate) fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
-        self.token_metadata
-            .get(token_name)
-            .and_then(|x| x.role_mapping.as_deref())
-    }
-
     /// Retrieves the claim that defines the `User` for a given token type.
     pub(crate) fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
         self.token_metadata
