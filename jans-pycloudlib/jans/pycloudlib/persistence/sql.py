@@ -1238,7 +1238,7 @@ def preconfigure_simple_json(dbapi_connection, connection_record):
 
     except ProgrammingError as exc:
         # missing table or column will raise ProgrammingError
-        logger.warning("Unable to detect JSON data format automatically; reason=%s; fallback to default value", exc.args[1])
+        logger.warning("Unable to detect JSON data format automatically; reason=%s; fallback to default value", exc)
 
     finally:
         # cleanup resource

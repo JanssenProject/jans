@@ -34,7 +34,7 @@ def extract_common_libs(persistence_type):
         out, err, code = exec_cmd(f"wget -q {download_url} -O {dist_file}")
 
         if code != 0:
-            err = out or err
+            err = err or out
             logger.error("Unable to download %s; reason=%s", basename, err.decode())
             sys.exit(1)
 
@@ -42,7 +42,7 @@ def extract_common_libs(persistence_type):
     logger.info("Extracting %s", dist_file)
     out, err, code = exec_cmd(f"unzip -q {dist_file} -o -d /opt/jans/jetty/common/libs/{persistence_type}/")
     if code != 0:
-        out = out or err
+        out = err or out
         logger.error("Unable to extract %s; reason=%s", dist_file, err.decode())
         sys.exit(1)
 

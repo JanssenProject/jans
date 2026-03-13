@@ -215,8 +215,8 @@ class AwsSecret(BaseSecret):
 
         if parts > 1:
             logger.warning(
-                "The secret payload size is %s bytes and is exceeding max. size of %s bytes. "
-                "It will be splitted into %s parts.", data_length, self.max_payload_size, parts
+                "The secret payload size is %s bytes and exceeds the max size of %s bytes. "
+                "It will be split into %s parts.", data_length, self.max_payload_size, parts
             )
 
         for part in range(0, parts):

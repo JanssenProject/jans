@@ -418,7 +418,7 @@ class AuthHandler:
                 # delayed jks push
                 continue
 
-            logger.info("creating backup of {name}:{jks_fn}", name, jks_fn)
+            logger.info("creating backup of %s:%s", name, jks_fn)
             self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
             logger.info("creating new %s:%s", name, jks_fn)
             self.meta_client.copy_to_container(container, jks_fn)
@@ -441,6 +441,7 @@ class AuthHandler:
                 # restore jks and jwks
                 logger.warning("failed to modify jans-auth configuration")
                 for container in auth_containers:
+                    name = self.meta_client.get_container_name(container)
                     logger.info("restoring backup of %s:%s", name, jwks_fn)
                     self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
 
@@ -448,7 +449,6 @@ class AuthHandler:
                         # delayed jks revert
                         continue
 
-                    name = self.meta_client.get_container_name(container)
                     logger.info("restoring backup of %s:%s", name, jks_fn)
                     self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
 
@@ -470,6 +470,7 @@ class AuthHandler:
                     time.sleep(self.privkey_push_delay)
 
                     for container in auth_containers:
+                        name = self.meta_client.get_container_name(container)
                         logger.info("creating backup of %s:%s", name, jks_fn)
                         self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
                         logger.info("creating new %s:%s", name, jks_fn)

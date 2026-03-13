@@ -3,6 +3,7 @@ import time
 
 import click
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -42,7 +43,7 @@ def cleanup(limit):
                         query = f"DELETE FROM {client.quoted_id(table)} WHERE doc_id IN (SELECT doc_id FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit})"  # nosec: B608
                     conn.execute(text(query), {"deleted": True})
                     logger.info("Cleanup expired entries in %s", table)
-                except Exception as exc:
+                except SQLAlchemyError as exc:
                     logger.warning("Unable to cleanup expired entries in %s; reason=%s", table, exc)
 
     finish_time = time.time()

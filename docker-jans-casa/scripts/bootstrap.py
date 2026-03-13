@@ -168,7 +168,7 @@ def main():
             logger.info("Detected CN_CASA_ADMIN_ENABLED=false; removing %s (if exists) to disable the admin console", lock_file)
             try:
                 lock_path.unlink(missing_ok=True)
-            except Exception as exc:
+            except OSError as exc:
                 logger.warning("Unable to remove %s; reason=%s", lock_file, exc)
 
     try:
