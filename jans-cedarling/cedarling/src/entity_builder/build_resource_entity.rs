@@ -24,7 +24,6 @@ impl EntityBuilder {
             &resource_data.attributes,
             &BuiltEntities::default(),
             attrs_shape,
-            None,
         )
         .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 

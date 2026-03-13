@@ -5,7 +5,6 @@
 
 #[cfg(test)]
 mod archive_security_tests;
-mod claim_mapping;
 pub(crate) mod log_entry;
 #[cfg(test)]
 mod test;
@@ -39,7 +38,6 @@ use serde::{Deserialize, Deserializer, de, de::Error};
 use std::collections::HashMap;
 use url::Url;
 
-pub(crate) use claim_mapping::ClaimMappings;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
@@ -272,30 +270,24 @@ impl Default for &TrustedIssuer {
 
 impl TrustedIssuer {
     /// Retrieves the claim that defines the `Role` for a given token type.
-    pub fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
+    pub(crate) fn get_role_mapping(&self, token_name: &str) -> Option<&str> {
         self.token_metadata
             .get(token_name)
             .and_then(|x| x.role_mapping.as_deref())
     }
 
     /// Retrieves the claim that defines the `User` for a given token type.
-    pub fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
+    pub(crate) fn get_user_mapping(&self, token_name: &str) -> Option<&str> {
         self.token_metadata
             .get(token_name)
             .and_then(|x| x.user_id.as_deref())
     }
 
-    pub fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
-        self.token_metadata
-            .get(token_name)
-            .map(|x| &x.claim_mapping)
-    }
-
-    pub fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
+    pub(crate) fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
         self.token_metadata.get(token_name)
     }
 
-    pub fn normalized_issuer(&self) -> String {
+    pub(crate) fn normalized_issuer(&self) -> String {
         let issuer_url = self.oidc_endpoint.origin().ascii_serialization();
         normalize_issuer(&issuer_url)
     }

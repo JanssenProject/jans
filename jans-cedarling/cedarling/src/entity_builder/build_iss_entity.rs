@@ -34,7 +34,6 @@ pub(super) fn build_iss_entity(
         &iss.entity_attr_srcs(),
         &BuiltEntities::default(),
         attrs_shape,
-        None,
     )
     .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 

@@ -12,8 +12,8 @@ use crate::jwt::validation::TrustedIssuerError;
 use crate::jwt::{
     Arc, JwtStatus, JwtStatusError, OwnedValidatorInfo, StatusListCache, TokenKind, ValidatorInfo,
 };
-use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use jsonwebtoken::errors::{ErrorKind, new_error};
+use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -274,17 +274,16 @@ impl JwtValidator {
         let claims = &validated_jwt.claims;
 
         if self.validation.validate_exp {
-            let exp = claims
-                .get("exp")
-                .and_then(Value::as_u64)
-                .ok_or_else(|| {
-                    ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidClaimFormat(
-                        "exp".to_string(),
-                    )))
-                })?;
+            let exp = claims.get("exp").and_then(Value::as_u64).ok_or_else(|| {
+                ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidClaimFormat(
+                    "exp".to_string(),
+                )))
+            })?;
 
             if exp < self.validation.reject_tokens_expiring_in_less_than {
-                return Err(ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidToken)));
+                return Err(ValidateJwtError::ValidateJwt(new_error(
+                    ErrorKind::InvalidToken,
+                )));
             }
 
             if exp - self.validation.reject_tokens_expiring_in_less_than
@@ -404,7 +403,7 @@ mod test {
     use std::collections::{HashMap, HashSet};
     use std::sync::LazyLock;
 
-    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
+    use crate::common::policy_store::TokenEntityMetadata;
     use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusList};
     use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
     use crate::jwt::{StatusListCache, test_utils::*};
@@ -426,7 +425,6 @@ mod test {
             user_id: None,
             role_mapping: None,
             workload_id: None,
-            claim_mapping: ClaimMappings::default(),
             required_claims: HashSet::from(["exp".into(), "nbf".into()]),
         });
 

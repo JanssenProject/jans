@@ -74,7 +74,7 @@ fn extract_attrs_from_sources(
     let (attrs, errs) = srcs
         .into_iter()
         .map(|src| match src {
-            AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape, None),
+            AttrSrc::Unsigned(src) => build_entity_attrs(src, built_entities, attrs_shape),
         })
         .partition_result();
     ExtractedAttrsResult { attrs, errs }

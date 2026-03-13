@@ -542,12 +542,12 @@ async fn insert_keys(
 
 #[cfg(test)]
 mod test {
-    use super::test_utils::*;
     use super::JwtService;
+    use super::test_utils::*;
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::request::TokenInput;
-    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
+    use crate::common::policy_store::TokenEntityMetadata;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use std::collections::{HashMap, HashSet};
@@ -591,7 +591,6 @@ mod test {
                 user_id: None,
                 role_mapping: None,
                 workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );
@@ -605,7 +604,6 @@ mod test {
                 user_id: None,
                 role_mapping: None,
                 workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );
@@ -726,7 +724,6 @@ mod test {
                 user_id: None,
                 role_mapping: None,
                 workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );
@@ -740,7 +737,6 @@ mod test {
                 user_id: None,
                 role_mapping: None,
                 workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );
@@ -809,7 +805,6 @@ mod test {
                 user_id: None,
                 role_mapping: None,
                 workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );

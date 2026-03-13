@@ -9,16 +9,16 @@ use super::{
     default_tkn_entity_name,
 };
 use crate::authz::AuthorizeEntitiesData;
-use crate::jwt::Token;
-use serde_json::Value;
-use std::sync::Arc;
 use crate::common::issuer_utils::normalize_issuer;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
+use crate::jwt::Token;
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
+use std::sync::Arc;
 
 /// Errors that can occur during multi-issuer entity building
 #[derive(Debug, thiserror::Error)]
@@ -376,7 +376,6 @@ impl EntityBuilder {
             &filtered_claims,
             built_entities,
             attrs_shape,
-            token.claim_mappings(),
         )?;
 
         // Add reserved claims to attributes

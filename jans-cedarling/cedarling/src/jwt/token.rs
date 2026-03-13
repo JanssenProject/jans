@@ -3,10 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::{
-    issuer_utils::normalize_issuer,
-    policy_store::{ClaimMappings, TrustedIssuer},
-};
+use crate::common::{issuer_utils::normalize_issuer, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
@@ -27,10 +24,6 @@ impl Token {
             iss,
             claims,
         }
-    }
-
-    pub(crate) fn claim_mappings(&self) -> Option<&ClaimMappings> {
-        self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
     pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
