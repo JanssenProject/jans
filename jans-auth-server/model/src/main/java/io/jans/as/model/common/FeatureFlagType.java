@@ -36,9 +36,6 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable token revocation endpoint",
             defaultValue = "Enabled")
     REVOKE_TOKEN("revoke_token"),
-    @DocFeatureFlag(description = "Enable/Disable session revocation endpoint",
-            defaultValue = "Enabled")
-    REVOKE_SESSION("revoke_session"),
     @DocFeatureFlag(description = "Enable/Disable global token revocation endpoint",
             defaultValue = "Enabled")
     GLOBAL_TOKEN_REVOCATION("global_token_revocation"),

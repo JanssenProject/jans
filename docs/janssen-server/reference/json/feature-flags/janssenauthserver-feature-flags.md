@@ -140,14 +140,6 @@ tags:
 - Default value: None
 
 
-### REVOKE_SESSION
-
-- Description: Enable/Disable session revocation endpoint
-
-- Required: No
-
-- Default value: None
-
 
 ### REVOKE_TOKEN
 
