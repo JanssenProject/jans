@@ -4,7 +4,7 @@
 {% block extrahead %}
 {{ super() }}
 {% if config.extra.enable_reo_flag | default(false) %}
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.reo.dev; connect-src 'self' https://api.reo.dev;">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://static.reo.dev; connect-src 'self' https://api.reo.dev;">
 {% endif %}
 {% endblock %}
 
