@@ -304,7 +304,7 @@ to evaluate the authorization request.
 5. Select `JSON` configuration type and Paste the config as given below.
    Remember to replace `<Policy Store URI>` with
    the URI of your policy store:
-   ```json
+   ```json title="Bootstrap"
          {
            "CEDARLING_APPLICATION_NAME": "My App",
            "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
@@ -342,13 +342,21 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
 3. Click the `Trigger auth flow` button
 3. Login using username and password of a user who has the `Teacher` role assigned in the IDP
 4. Click `Allow` on the consent screen
-5. If the authentication is successful, Tarp will show you a page with token details 
-6. Move to `Cedarling` tab and select `Cedarling Signed Authz Form` tab
+5. If the authentication is successful, Tarp will show you a page with token details. Store the userinfo token string.
+6. Move to `Cedarling` tab and select `Cedarling Multi-Issuer Authz Form` tab
 7. Use the details below as an input to this form:
-      - Principal: select all 3 tokens. In TBAC approach here, we are passing tokens (i.e signed JWTs) in place of JSON string.
+      - Issuer-to-token mapping: For the policies we want only userinfo token is sufficient:
+      ```json title="Token Mapping"
+      [
+          {
+            "mapping": "Jans::Userinfo_token",
+            "payload": "<token from step 5>"
+          }
+      ]
+      ```
       - Action: `Jans::Action::"Write"`
       - Resource:
-        ```json
+        ```json title="Resource"
         {
           "cedar_entity_mapping": {
             "entity_type": "Jans::SecretDocument",
