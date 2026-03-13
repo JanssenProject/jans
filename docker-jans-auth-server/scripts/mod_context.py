@@ -29,21 +29,21 @@ def extract_common_libs(persistence_type):
         download_url = f"https://jenkins.jans.io/maven/io/jans/jans-orm-{persistence_type}-libs/{version}/jans-orm-{persistence_type}-libs-{version}-distribution.zip"
         basename = os.path.basename(download_url)
 
-        logger.info(f"Downloading {basename} as {dist_file}")
+        logger.info("Downloading %s as %s", basename, dist_file)
 
         out, err, code = exec_cmd(f"wget -q {download_url} -O {dist_file}")
 
         if code != 0:
             err = out or err
-            logger.error(f"Unable to download {basename}; reason={err.decode()}")
+            logger.error("Unable to download %s; reason=%s", basename, err.decode())
             sys.exit(1)
 
     # extract
-    logger.info(f"Extracting {dist_file}")
+    logger.info("Extracting %s", dist_file)
     out, err, code = exec_cmd(f"unzip -q {dist_file} -o -d /opt/jans/jetty/common/libs/{persistence_type}/")
     if code != 0:
         out = out or err
-        logger.error(f"Unable to extract {dist_file}; reason={err.decode()}")
+        logger.error("Unable to extract %s; reason=%s", dist_file, err.decode())
         sys.exit(1)
 
 
