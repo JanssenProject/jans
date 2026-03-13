@@ -13,7 +13,7 @@ tags:
 
 This quick start guide shows how to quickly test authorization of a user action
 using the Cedarling. We will be using [the application-asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity)
-in this guide to implement role based access control(RBAC). Refer to [this section](#implement-tbac-using-cedarling) to understand how to use Cedarling
+in this guide to implement role based access control(RBAC). Refer to [this section](#implement-rbac-using-signed-tokens-tbac) to understand how to use Cedarling
 with TBAC approach.
 
 
@@ -40,8 +40,7 @@ call this approach [the application asserted identity approach](../README.md#tok
 
 ### Step-1: Create the Cedar Policy and Schema
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a
-[policy store](https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/6d9f73b2d44ad4e7aa8f1182cde9f72dcbaa244f4327.json) at
+The Cedarling needs policies and a schema to authorize access. These are bundled in a _policy store_ (a JSON file). To aid in this quick start guide, we have already created a policy store at
 [quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main).
 We will use this policy store to allow/deny the incoming authorization request.
 
@@ -61,11 +60,12 @@ We will use this policy store to allow/deny the incoming authorization request.
     - [Install Agama Lab app and allow access to forked repository](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/)
     - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
     - Click on `Change Repository`.
-    - Select the option `Manually Type Repository URL`.
-    - Paste the URL of your forked repository, then click the `Select` button.
+    - Select your forked repository.
     - This will open the dashboard with two policy stores listed. Open the policy store named `tarpUnsignedDemo`.
     - Now you can update the policy and schema using the 
       [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)
+    - After making your changes, release the policy store using Agama Lab to create a CJAR archive. 
+    - Go to the releases section of your fork, find your release and copy the URL to the `.cjar` file.
 
 ### Step-2: Configure Tarp
 
@@ -75,7 +75,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
 
 1. Open the Janssen Tarp installed in the browser
 2. Navigate to the `Cedarling` tab and click on `Add Configurations`
-3. Paste the following configuration parameters as JSON. Make sure to update the `<Policy Store URI>` value to point to your policy store
+3. Paste the following configuration parameters as JSON. Make sure to update the `<Policy Store URI>` value to point to your policy store CJAR archive.
    ```json
    {
        "CEDARLING_APPLICATION_NAME": "My App",
@@ -94,7 +94,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
          "HS256", "RS256"
        ],
-       "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+       "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
    }
    ```
 4. Click `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
@@ -228,27 +228,36 @@ For better understanding of the TBAC flow, see the diagram below.
 
 ### Step-1: Create Cedar Policy and Schema
 
-For this guide, we have created a policy store in the
-[demo GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart).
+For this guide, we have created a policy store in the [demo GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart).
 
-The policy store has two policies. The first grants access to all actions and all resources to the users with the `Teacher` role. The second allows only `Read` permission to students with the `Student` role to any resource. The two policies are as follows:
+The policy store `tarpDemo` has many demo policies. We are concerned with two: `allow_teacher_secretdocument` and `allow_student_read`. The first grants access to all actions and resources of type `SecretDocument` to the users with the `Teacher` role. The second allows only `Read` permission to students with the `Student` role to any resource. The two policies are as follows:
 
 ```cedar
-@id("allow_teacher")
+@id("allow_teacher_secretdocument")
 permit(
-  principal in Jans::Role::"Teacher",
+  principal,
   action,
-  resource
-);
+  resource is Jans::SecretDocument
+)
+when {
+  context has tokens.jans_userinfo_token &&
+  context.tokens.jans_userinfo_token.hasTag("role") &&
+  context.tokens.jans_userinfo_token.getTag("role").contains("Teacher")
+};
 ```
 
 ```cedar
 @id("allow_student_read")
-permit(
-  principal in Jans::Role::"Student",
+permit (
+  principal,
   action in [Jans::Action::"Read"],
   resource
 )
+when {
+  context has tokens.jans_userinfo_token &&
+  context.tokens.jans_userinfo_token.hasTag("role") &&
+  context.tokens.jans_userinfo_token.getTag("role").contains("Student")
+};
 ```
 
 ### Step-2 Update the IDP information
@@ -260,44 +269,22 @@ this.
 
 - Fork the [demo repository](https://github.com/JanssenProject/CedarlingQuickstart). While creating the fork, uncheck the
   `Copy the main branch only` checkbox.
-- Update the `openid_configuration_endpoint` key in the policy store JSON file
-  named `449805c83e13f332b1b35eac6ffa93187fbd1c648085.json` in the fork. 
-  Set the value to 
-  the `.well-known/openid-configuration` endpoint of your IDP. 
+- Open the forked repository in [Agama Lab](https://cloud.gluu.org/agama-lab)
+- Open the `tarpDemo` policy store and navigate to `Trusted Issuers`
+- Edit the `jans` trusted issuer, setting the value of the OpenID Configuration Endpoint to that of your IDP. 
   
     For instance:
   
     ```
-    "openid_configuration_endpoint": "https://test-jans.gluu.info/.well-known/openid-configuration"
+    "https://test-jans.gluu.info/.well-known/openid-configuration"
     ```
 
-- Copy the link of the policy store file's **raw** content. This is the same file that you edited in the step above.
-  The URI would be similar to the shown below. This URI will be used in the next step when we configure Tarp.
+- Click the `Release` button, select `pre-release` and set a version for the release. Agama Lab will create a CJAR archive of the `tarpDemo` store with your IDP.
+- Visit the `Releases` section of your forked repository and find your release. Expand the `Assets` section, right click the `.cjar` file and copy the URI. This URI will be used in the next step when we configure Tarp. It should be in the following format:
 
     ```
-    https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/refs/heads/main/449805c83e13f332b1b35eac6ffa93187fbd1c648085.json
+    https://github.com/JanssenProject/CedarlingQuickstart/releases/download/<version>/tarpDemo.cjar
     ```
-
-??? info "Agama Lab: For authoring policies and managing the policy store"
-
-    Alternatively, you can also use the Agama Lab For authoring policies and 
-    managing the policy stores. 
-
-    Agama Lab is a free web tool provided by Gluu. This tool makes it very 
-    easy to author, update policies and schema using an user interface. Follow
-    the steps below to make changes to the policy that we are using above.
-
-    - Go to the [CedarlingQuickstart repository](https://github.com/JanssenProject/CedarlingQuickstart) where the demo policy store is hosted
-        - Click on `Fork`
-        - **uncheck** the `Copy the master branch only` option 
-    - [Install Agama Lab app and allow access to forked repository](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/)
-    - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
-    - Click on `Change Repository`.
-    - Select the option `Manually Type Repository URL`.
-    - Paste the URL of your forked repository, then click the `Select` button.
-    - This will open the dashboard with two policy stores listed. Open the policy store named `tarpDemo`.
-    - Now you can update the policy and schema using the 
-      [policy designer](https://help.gluu.org/kb/article/34/authorization-policy-designer)        
 
 ### Step-3: Configure Tarp with the policy store
 
@@ -335,7 +322,7 @@ to evaluate the authorization request.
            "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
              "HS256", "RS256"
            ],
-           "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+           "CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM": false
          }
    ```
 6. Click `Save` to initialize Cedarling.
