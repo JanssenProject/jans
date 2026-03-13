@@ -269,10 +269,6 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    pub(crate) fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
-        self.token_metadata.get(token_name)
-    }
-
     pub(crate) fn normalized_issuer(&self) -> String {
         let issuer_url = self.oidc_endpoint.origin().ascii_serialization();
         normalize_issuer(&issuer_url)
