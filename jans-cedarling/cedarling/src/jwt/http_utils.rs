@@ -5,6 +5,8 @@
 
 use std::sync::LazyLock;
 
+use crate::common::issuer_utils::IssClaim;
+
 use super::key_service::JwkSet;
 use super::status_list::StatusListJwtStr;
 use async_trait::async_trait;
@@ -18,7 +20,8 @@ static HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 // so we opt out of it for the wasm bindings to compile.
 //
 // see this relevant discussion: https://github.com/rustwasm/wasm-bindgen/issues/2409
-#[async_trait(?Send)]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 pub(super) trait GetFromUrl<T> {
     /// Send a get request to receive the resource from a URL
     async fn get_from_url(url: &Url) -> Result<T, HttpError>;
@@ -26,7 +29,7 @@ pub(super) trait GetFromUrl<T> {
 
 #[derive(Deserialize)]
 pub(super) struct OpenIdConfig {
-    pub issuer: String,
+    pub issuer: IssClaim,
     #[serde(deserialize_with = "deserialize_url")]
     pub jwks_uri: Url,
     #[serde(deserialize_with = "deserialize_opt_url", default)]
@@ -58,9 +61,20 @@ where
     Ok(url)
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
+        // add delay to simulate network latency and test async behavior of trusted issuers loading
+        // it would be great to implement delay in mock server, but mockito doesn't support it.
+        #[cfg(test)]
+        {
+            use std::time::Duration;
+            use tokio::time::sleep;
+
+            sleep(Duration::from_millis(1)).await;
+        }
+
         let openid_config = HTTP_CLIENT
             .get(url.as_str())
             .send()
@@ -76,7 +90,8 @@ impl GetFromUrl<OpenIdConfig> for OpenIdConfig {
     }
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl GetFromUrl<JwkSet> for JwkSet {
     async fn get_from_url(url: &Url) -> Result<Self, HttpError> {
         let jwk_set = HTTP_CLIENT

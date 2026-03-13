@@ -23,6 +23,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
+            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig::default(),

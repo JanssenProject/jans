@@ -182,7 +182,7 @@ impl PolicyStoreTestBuilder {
         serde_json::to_string_pretty(&metadata).unwrap()
     }
 
-    /// Generate manifest.json content with computed checksums.
+    /// Generate manifest.json content with computed checksums (SHA-256).
     fn build_manifest_json(&self, files: &HashMap<String, Vec<u8>>) -> String {
         let mut manifest_files = HashMap::new();
 
@@ -190,13 +190,13 @@ impl PolicyStoreTestBuilder {
             if path != "manifest.json" {
                 let mut hasher = Sha256::new();
                 hasher.update(content);
-                let hash = hex::encode(hasher.finalize());
+                let checksum = format!("sha256:{}", hex::encode(hasher.finalize()));
 
                 manifest_files.insert(
                     path.clone(),
                     serde_json::json!({
                         "size": content.len(),
-                        "checksum": format!("sha256:{}", hash)
+                        "checksum": checksum
                     }),
                 );
             }

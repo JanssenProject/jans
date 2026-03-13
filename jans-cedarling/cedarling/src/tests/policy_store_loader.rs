@@ -34,9 +34,13 @@ use tokio::test;
 use zip::read::ZipArchive;
 
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
+
 use crate::tests::utils::cedarling_util::get_cedarling_with_callback;
 use crate::tests::utils::test_helpers::{create_test_principal, create_test_unsigned_request};
-use crate::{Cedarling, PolicyStoreSource};
+use crate::{
+    BootstrapConfig, Cedarling, DataStoreConfig, PolicyStoreConfig, PolicyStoreSource,
+    TrustedIssuerLoadingInfo,
+};
 
 // ============================================================================
 // Helper Functions
@@ -194,7 +198,6 @@ async fn test_load_from_directory_and_authorize_success() {
         )
         .expect("Failed to create resource"),
     );
-
     // Execute authorization
     let result = cedarling
         .authorize_unsigned(request)
@@ -206,6 +209,184 @@ async fn test_load_from_directory_and_authorize_success() {
         result.decision,
         "Read action should be allowed by the allow-read policy"
     );
+}
+
+/// Test that the `TrustedIssuerLoadingInfo` trait works correctly on `Cedarling`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_trusted_issuer_loading_info_on_cedarling() {
+    use crate::jwt::test_utils::MockServer;
+
+    // Create mock server for OIDC/JWKS
+    let mock_server = MockServer::new_with_defaults()
+        .await
+        .expect("Failed to create mock server");
+
+    let issuer_url = mock_server.issuer();
+    let oidc_endpoint = format!("{issuer_url}/.well-known/openid-configuration");
+
+    // Create trusted issuer JSON that points to mock server
+    let trusted_issuer_json = create_jwt_trusted_issuer_json(&oidc_endpoint);
+
+    // Build the policy store with trusted issuer
+    let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
+        .with_name("Loading Info Test Policy Store")
+        .with_schema(SCHEMA)
+        .with_policy(
+            "allow-workload-read",
+            r#"@id("allow-workload-read")
+permit(
+    principal is Jans::Workload,
+    action == Jans::Action::"Read",
+    resource is Jans::Resource
+)when{
+    principal.access_token.org_id == resource.org_id
+};"#,
+        )
+        .with_trusted_issuer("mock_issuer", trusted_issuer_json);
+
+    let archive = builder.build_archive().expect("Failed to build archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    // Configure Cedarling with JWT validation enabled
+    let config = create_jwt_cedarling_config(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        true,
+    );
+
+    let cedarling = crate::Cedarling::new(&config)
+        .await
+        .expect("Cedarling should initialize with JWT-enabled config");
+
+    // Wait a bit for trusted issuer loading to complete
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+
+    // Test TrustedIssuerLoadingInfo trait methods
+    // Should have 1 trusted issuer defined
+    assert!(cedarling.is_trusted_issuer_loaded_by_name("mock_issuer"));
+    assert!(!cedarling.is_trusted_issuer_loaded_by_name("NonExistent"));
+
+    // Check by iss claim
+    assert!(cedarling.is_trusted_issuer_loaded_by_iss(issuer_url.as_str()));
+    assert!(!cedarling.is_trusted_issuer_loaded_by_iss("https://nonexistent.com"));
+
+    // Count and percentage
+    assert_eq!(cedarling.loaded_trusted_issuers_count(), 1);
+
+    // Loaded and failed IDs
+    let loaded_ids = cedarling.loaded_trusted_issuer_ids();
+    assert_eq!(loaded_ids.len(), 1);
+    assert!(loaded_ids.contains("mock_issuer"));
+
+    let failed_ids = cedarling.failed_trusted_issuer_ids();
+    assert!(failed_ids.is_empty());
+}
+
+/// Test that the `TrustedIssuerLoadingInfo` trait correctly tracks failed issuers on `Cedarling`.
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+async fn test_trusted_issuer_loading_info_failed_issuer() {
+    use crate::jwt::test_utils::MockServer;
+    use std::time::{Duration, Instant};
+
+    // Create a working mock server for successful issuer loading
+    let working_mock_server = MockServer::new_with_defaults()
+        .await
+        .expect("Failed to create working mock server");
+    let working_issuer_url = working_mock_server.issuer();
+    let working_oidc_endpoint = format!("{working_issuer_url}/.well-known/openid-configuration");
+    let working_issuer_json =
+        create_jwt_trusted_issuer_json_with_id("working_issuer", &working_oidc_endpoint);
+
+    // Create a failing mock server that returns 500 for OIDC config
+    let failing_mock_server = MockServer::new_with_failing_oidc()
+        .await
+        .expect("Failed to create failing mock server");
+    let failing_issuer_url = failing_mock_server.issuer();
+    let failing_oidc_endpoint = format!("{failing_issuer_url}/.well-known/openid-configuration");
+    let failing_issuer_json =
+        create_jwt_trusted_issuer_json_with_id("failing_issuer", &failing_oidc_endpoint);
+
+    // Build the policy store with both working and failing trusted issuers
+    let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
+        .with_name("Mixed Loading Info Test Policy Store")
+        .with_schema(SCHEMA)
+        .with_policy(
+            "allow-workload-read",
+            r#"@id("allow-workload-read")
+permit(
+    principal is Jans::Workload,
+    action == Jans::Action::"Read",
+    resource is Jans::Resource
+)when{
+    principal.access_token.org_id == resource.org_id
+};"#,
+        )
+        .with_trusted_issuer("working_issuer", working_issuer_json)
+        .with_trusted_issuer("failing_issuer", failing_issuer_json);
+
+    let archive = builder.build_archive().expect("Failed to build archive");
+    let temp_dir = extract_archive_to_temp_dir(&archive);
+
+    // Configure Cedarling with JWT validation enabled and async loading
+    let config = create_jwt_cedarling_config_with_loader(
+        PolicyStoreSource::Directory(temp_dir.path().to_path_buf()),
+        true,
+        true,
+    );
+
+    let cedarling = crate::Cedarling::new(&config)
+        .await
+        .expect("Cedarling should initialize with JWT-enabled config");
+
+    assert_eq!(
+        cedarling.total_issuers(),
+        2,
+        "Total issuers should be 2 (working and failing)"
+    );
+
+    // Poll for loading completion with timeout
+    let start = Instant::now();
+    let timeout = Duration::from_secs(5);
+    loop {
+        let loaded = cedarling.loaded_trusted_issuers_count();
+        let failed = cedarling.failed_trusted_issuer_ids().len();
+        let total = loaded + failed;
+        if total == 2 {
+            // Both issuers have been processed (one loaded, one failed)
+            break;
+        }
+        assert!(
+            (start.elapsed() <= timeout),
+            "Timeout waiting for trusted issuers to load. Loaded: {loaded}, Failed: {failed}"
+        );
+        tokio::time::sleep(Duration::from_millis(1)).await;
+    }
+
+    // Test TrustedIssuerLoadingInfo trait methods for mixed results
+    // Working issuer should be loaded
+    assert!(cedarling.is_trusted_issuer_loaded_by_name("working_issuer"));
+    assert!(!cedarling.is_trusted_issuer_loaded_by_name("failing_issuer"));
+    assert!(!cedarling.is_trusted_issuer_loaded_by_name("NonExistent"));
+
+    // Check by iss claim
+    assert!(cedarling.is_trusted_issuer_loaded_by_iss(working_issuer_url.as_str()));
+    assert!(!cedarling.is_trusted_issuer_loaded_by_iss(failing_issuer_url.as_str()));
+
+    // Count and percentage
+    assert_eq!(cedarling.loaded_trusted_issuers_count(), 1);
+    assert_eq!(cedarling.failed_trusted_issuer_ids().len(), 1);
+
+    // Loaded and failed IDs
+    let loaded_ids = cedarling.loaded_trusted_issuer_ids();
+    assert_eq!(loaded_ids.len(), 1);
+    assert!(loaded_ids.contains("working_issuer"));
+    assert!(!loaded_ids.contains("failing_issuer"));
+
+    let failed_ids = cedarling.failed_trusted_issuer_ids();
+    assert_eq!(failed_ids.len(), 1);
+    assert!(failed_ids.contains("failing_issuer"));
+    assert!(!failed_ids.contains("working_issuer"));
 }
 
 /// Test that write action is denied for guest users when loaded from directory.
@@ -812,7 +993,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -849,7 +1030,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes)
+    let err = load_policy_store_archive_bytes(&invalid_bytes, true)
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
@@ -861,7 +1042,3 @@ async fn test_load_policy_store_archive_bytes_invalid() {
         "Expected Archive error for invalid bytes, got: {err:?}"
     );
 }
-
-// ============================================================================
-// JWT Authorization Tests (using MockServer)
-// ============================================================================

@@ -10,6 +10,7 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fmt::Display;
 use std::fs;
+use std::num::NonZeroUsize;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -21,6 +22,7 @@ use super::{
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::context_data_api::DataStoreConfig;
+use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -50,6 +52,7 @@ impl BootstrapConfig {
         };
 
         // Decode policy store
+        let validate_checksum = raw.policy_store_validate_checksum;
         let policy_store_config = match (
             raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
@@ -60,6 +63,7 @@ impl BootstrapConfig {
             // Case: get the policy store from a JSON string
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
+                validate_checksum,
             },
             // Case: get the policy store from a URI (auto-detect .cjar archives)
             (None, Some(policy_store_uri), None) => {
@@ -68,7 +72,10 @@ impl BootstrapConfig {
                 } else {
                     PolicyStoreSource::LockServer(policy_store_uri)
                 };
-                PolicyStoreConfig { source }
+                PolicyStoreConfig {
+                    source,
+                    validate_checksum,
+                }
             },
             // Case: get the policy store from a local file or directory
             (None, None, Some(raw_path)) => {
@@ -92,7 +99,10 @@ impl BootstrapConfig {
                         )?,
                     }
                 };
-                PolicyStoreConfig { source }
+                PolicyStoreConfig {
+                    source,
+                    validate_checksum,
+                }
             },
             // Case: multiple polict stores were set
             _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
@@ -118,6 +128,9 @@ impl BootstrapConfig {
             token_cache_max_ttl_secs: raw.token_cache_max_ttl,
             token_cache_capacity: raw.token_cache_capacity,
             token_cache_earliest_expiration_eviction: raw.token_cache_earliest_expiration_eviction,
+            trusted_issuer_loader: raw
+                .trusted_issuer_loader_type
+                .to_config(raw.trusted_issuer_loader_workers),
         };
 
         let authorization_config = AuthorizationConfig {

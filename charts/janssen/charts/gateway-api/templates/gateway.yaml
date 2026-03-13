@@ -1,0 +1,84 @@
+{{- $fullName := include "gateway-api.fullname" . -}}
+{{- $namespace := .Release.Namespace -}}
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.gateway.name }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-gateway
+{{- if .Values.gateway.labels }}
+{{- toYaml .Values.gateway.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.gateway.annotations }}
+  annotations:
+{{- toYaml .Values.gateway.annotations | nindent 4 }}
+{{- end }}
+spec:
+  gatewayClassName: {{ .Values.gateway.className }}
+  {{- if or (.Values.gateway.infrastructure.labels) (.Values.gateway.infrastructure.annotations) (.Values.gateway.infrastructure.parametersRef) (and (eq .Values.gateway.className "airlock-microgateway") .Values.additionalConfig.airlock.createLbService) }}
+  infrastructure:
+    {{- if .Values.gateway.infrastructure.labels }}
+    labels:
+      {{- toYaml .Values.gateway.infrastructure.labels | nindent 6 }}
+    {{- end }}
+    {{- if .Values.gateway.infrastructure.annotations }}
+    annotations:
+      {{- toYaml .Values.gateway.infrastructure.annotations | nindent 6 }}
+    {{- end }}
+    {{- if .Values.gateway.infrastructure.parametersRef }}
+    parametersRef:
+      {{- toYaml .Values.gateway.infrastructure.parametersRef | nindent 6 }}
+    {{- else if and (eq .Values.gateway.className "airlock-microgateway") (.Values.additionalConfig.airlock.createLbService) }}
+    parametersRef:
+      group: microgateway.airlock.com
+      kind: GatewayParameters
+      name: airlock-gw-params
+    {{- end }}
+  {{- end }}
+  {{- if and (.Values.gateway.attachLbIp) (.Values.global.lbIp) }}
+  addresses:
+  - type: IPAddress
+    value: {{ .Values.global.lbIp }}
+  {{- end }}
+  listeners:
+  - name: http
+    port: {{ .Values.gateway.httpPort }}
+    protocol: HTTP
+  - name: https
+    port: {{ .Values.gateway.httpsPort }}
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: {{ .Values.gateway.tlsSecretName }}
+
+{{- /* Start of GatewayParameters definition */}}
+{{- if and (eq .Values.gateway.className "airlock-microgateway") (.Values.additionalConfig.airlock.createLbService) }}
+---
+
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: airlock-gw-params
+  namespace: {{ $namespace }}
+spec:
+  kubernetes:
+    service:
+      type: LoadBalancer
+{{- end }}
+{{- /* End of GatewayParameters definition */}}
+
+{{- /* Start of GatewayClass definition */}}
+{{- if and (eq .Values.gateway.className "envoy") (.Values.additionalConfig.envoy.createGatewayClass) }}
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+{{- end }}
+{{- /* End of GatewayClass definition */}}

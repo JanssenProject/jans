@@ -33,6 +33,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
+use std::collections::HashSet;
 use std::{fmt::Write, sync::Arc};
 
 pub use crate::common::json_rules::JsonRule;
@@ -43,6 +44,9 @@ pub use crate::context_data_api::{
     ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
+pub use crate::jwt::TrustedIssuerLoadingInfo;
+#[cfg(test)]
+use authz::AuthorizeEntitiesData;
 use authz::Authz;
 pub use authz::request::{
     AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned,
@@ -69,7 +73,7 @@ pub mod bindings {
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use crate::common::policy_store::PolicyStore;
-
+    pub use crate::http::spawn_task;
     pub use serde_json;
     pub use serde_yml;
 }
@@ -202,6 +206,32 @@ impl Cedarling {
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
         self.log.shut_down().await;
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Cedarling {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.authz.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn total_issuers(&self) -> usize {
+        self.authz.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.authz.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.authz.failed_trusted_issuer_ids()
     }
 }
 
@@ -363,8 +393,11 @@ impl DataApi for Cedarling {
         let config = self.data.config();
         if config.max_entries > 0 {
             let entry_count = self.data.count();
-            let (capacity_usage_percent, memory_alert_triggered) =
-                calculate_capacity_usage(entry_count, config.max_entries, config.memory_alert_threshold);
+            let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(
+                entry_count,
+                config.max_entries,
+                config.memory_alert_threshold,
+            );
             if memory_alert_triggered {
                 let log_entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                     LogLevel::WARN,
@@ -416,8 +449,11 @@ impl DataApi for Cedarling {
         };
 
         // Calculate capacity usage percentage
-        let (capacity_usage_percent, memory_alert_triggered) =
-            calculate_capacity_usage(entry_count, config.max_entries, config.memory_alert_threshold);
+        let (capacity_usage_percent, memory_alert_triggered) = calculate_capacity_usage(
+            entry_count,
+            config.max_entries,
+            config.memory_alert_threshold,
+        );
 
         Ok(DataStoreStats {
             entry_count,

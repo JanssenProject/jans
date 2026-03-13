@@ -3,7 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::{issuer_utils::normalize_issuer, policy_store::TrustedIssuer};
+use crate::common::{
+    issuer_utils::IssClaim,
+    policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer},
+};
 use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
@@ -43,16 +46,16 @@ impl Token {
     }
 
     /// Extract normalized issuer URL from a token
-    pub(crate) fn extract_normalized_issuer(&self) -> Option<String> {
+    pub(crate) fn extract_normalized_issuer(&self) -> Option<IssClaim> {
         // Method 1: From TrustedIssuer reference (preferred)
         if let Some(trusted_issuer) = &self.iss {
-            return Some(trusted_issuer.normalized_issuer());
+            return Some(trusted_issuer.iss_claim());
         }
 
         // Method 2: From token claims (fallback)
         self.claims
             .get_claim("iss")
-            .and_then(|claim| claim.value().as_str().map(normalize_issuer))
+            .and_then(|claim| claim.value().as_str().map(IssClaim::new))
     }
 }
 

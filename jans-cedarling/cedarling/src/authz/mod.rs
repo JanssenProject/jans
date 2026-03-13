@@ -8,6 +8,7 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client* / *workload *
 
+use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
@@ -488,6 +489,36 @@ impl Authz {
                 .set_message("Result of authorize.".to_string())
         });
         self.config.log_service.log_fn(debug_log_fn);
+    }
+}
+
+impl TrustedIssuerLoadingInfo for Authz {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.config
+            .jwt_service
+            .is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.config
+            .jwt_service
+            .is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    fn total_issuers(&self) -> usize {
+        self.config.jwt_service.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.config.jwt_service.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.config.jwt_service.loaded_trusted_issuer_ids()
+    }
+
+    fn failed_trusted_issuer_ids(&self) -> HashSet<String> {
+        self.config.jwt_service.failed_trusted_issuer_ids()
     }
 }
 
