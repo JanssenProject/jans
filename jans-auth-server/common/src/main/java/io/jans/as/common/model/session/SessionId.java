@@ -6,12 +6,13 @@
 
 package io.jans.as.common.model.session;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.Deletable;
-import io.swagger.v3.oas.annotations.Hidden;
+
 import jakarta.inject.Named;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +91,7 @@ public class SessionId implements Deletable, Serializable {
     @AttributeName(name = "creationDate")
     private Date creationDate = new Date();
 
-    @Hidden
+    @JsonIgnore
     @Transient
     private transient boolean persisted;
 
@@ -263,12 +264,12 @@ public class SessionId implements Deletable, Serializable {
         this.sessionAttributes = sessionAttributes;
     }
 
-    @Hidden
+    @JsonIgnore
     public boolean isPersisted() {
         return persisted;
     }
 
-    @Hidden
+    @JsonIgnore
     public void setPersisted(boolean persisted) {
         this.persisted = persisted;
     }
