@@ -101,7 +101,6 @@ class GoogleConfig(BaseConfig):
         try:
             # Access the secret version.
             response = self.client.access_secret_version(request={"name": name})
-            logger.info("Secret %s has been found. Accessing version %s.", self.google_secret_name, self.version_id)
             payload = response.payload.data.decode("UTF-8")
             data = json.loads(payload)
         except NotFound:

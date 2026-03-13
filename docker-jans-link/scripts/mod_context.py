@@ -42,7 +42,7 @@ def extract_common_libs(persistence_type):
     logger.info("Extracting %s", dist_file)
     out, err, code = exec_cmd(f"unzip -q {dist_file} -o -d /opt/jans/jetty/common/libs/{persistence_type}/")
     if code != 0:
-        out = err or out
+        err = err or out
         logger.error("Unable to extract %s; reason=%s", dist_file, err.decode())
         sys.exit(1)
 
