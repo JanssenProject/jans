@@ -9,7 +9,6 @@
 //! - evaluate if authorization is granted for *client* / *workload *
 
 use crate::TrustedIssuerLoadingInfo;
-use crate::authorization_config::IdTokenTrustMode;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
