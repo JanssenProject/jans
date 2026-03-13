@@ -31,10 +31,6 @@ pub struct TokenEntityMetadata {
     #[serde(default = "default_token_id")]
     #[builder(default = default_token_id())]
     pub(crate) token_id: String,
-    /// The claim used to create the user id
-    #[serde(deserialize_with = "parse_option_string", default)]
-    #[builder(default)]
-    pub(crate) user_id: Option<String>,
     #[serde(deserialize_with = "parse_option_string", default)]
     #[builder(default)]
     pub(crate) workload_id: Option<String>,
@@ -60,7 +56,6 @@ impl TokenEntityMetadata {
         Self {
             trusted: true,
             token_id: default_token_id(),
-            user_id: None,
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
             principal_mapping: HashSet::from(["Jans::Workload".into()]),
@@ -73,7 +68,6 @@ impl TokenEntityMetadata {
         Self {
             trusted: true,
             token_id: default_token_id(),
-            user_id: Some("aud".into()),
             required_claims: HashSet::from([
                 "iss".into(),
                 "sub".into(),
@@ -91,7 +85,6 @@ impl TokenEntityMetadata {
         Self {
             trusted: true,
             token_id: default_token_id(),
-            user_id: Some("aud".into()),
             required_claims: HashSet::from([
                 "iss".into(),
                 "sub".into(),
@@ -139,7 +132,6 @@ mod test {
         assert_eq!(
             parsed,
             TokenEntityMetadata::builder()
-                .user_id(Some("sub".into()))
                 .entity_type_name("Jans::Access_token".into())
                 .build(),
             "Expected JSON with user_id and empty role_mapping to be parsed into \
@@ -176,7 +168,6 @@ mod test {
         assert_eq!(
             parsed,
             TokenEntityMetadata::builder()
-                .user_id(Some("sub".into()))
                 .entity_type_name("Jans::Access_token".into())
                 .build(),
             "Expected YAML with user_id and empty role_mapping to be parsed into \

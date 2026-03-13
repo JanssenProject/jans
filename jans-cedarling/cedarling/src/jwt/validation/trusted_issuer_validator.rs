@@ -253,7 +253,6 @@ mod tests {
 
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))
             .token_id("jti".to_string())
             .build();
 
@@ -271,7 +270,6 @@ mod tests {
         // Only claims in required_claims are validated
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string())) // This is just a mapping, not validated
             .token_id("jti".to_string())
             .required_claims(HashSet::from(["sub".to_string()])) // This IS validated
             .build();
@@ -345,7 +343,6 @@ mod tests {
 
         let metadata = TokenEntityMetadata::builder()
             .entity_type_name("Jans::Access_token".to_string())
-            .user_id(Some("sub".to_string()))     // Mapping only
             .token_id("jti".to_string())          // Mapping only
             .required_claims(HashSet::new())      // No required claims
             .build();

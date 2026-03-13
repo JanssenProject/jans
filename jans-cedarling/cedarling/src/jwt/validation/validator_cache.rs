@@ -306,7 +306,6 @@ mod test {
                 entity_type_name: "AccessToken".into(),
                 principal_mapping: HashSet::default(),
                 token_id: "iss".into(),
-                user_id: None,
                 workload_id: Some("aud".into()),
                 required_claims: HashSet::new(),
             },
