@@ -226,7 +226,8 @@ impl JwtService {
     ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
         const ID_TOKEN_NAME: &str = "id_token";
 
-        if self.jwt_sig_validation_required && !self.signed_authz_available && !tokens.is_empty() {
+        if self.jwt_sig_validation_required && !self.signed_authz_available() && !tokens.is_empty()
+        {
             self.logger.log_any(JwtLogEntry::new(
                 "signed authorization was attempted but Cedarling is not configured with trusted issuers or JWKS".to_string(),
                 Some(LogLevel::ERROR),
@@ -247,7 +248,7 @@ impl JwtService {
                 validated_token
             } else {
                 // validate token and save to cache
-                let validated_jwt = match self.validate_single_token(token_kind, jwt) {
+                let validated_jwt = match self.validate_single_token(&token_kind, jwt) {
                     Ok(jwt) => jwt,
                     Err(err) => {
                         if matches!(err, ValidateJwtError::MissingValidator(_)) {
@@ -268,10 +269,6 @@ impl JwtService {
                         err
                     })
                     .map_err(JwtProcessingError::StringDeserialization)?;
-
-                if token_name == ID_TOKEN_NAME {
-                    claims = fix_aud_claim_value_to_array(claims);
-                }
 
                 let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
                 self.token_cache.save(&token_kind, jwt, token.clone(), now);
@@ -577,8 +574,8 @@ impl TrustedIssuerLoadingInfo for JwtService {
 #[cfg(test)]
 mod test {
     use super::JwtService;
+    use super::TrustedIssuerLoadingInfo;
     use super::test_utils::*;
-    use super::{JwtService, Token, TrustedIssuerLoadingInfo};
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::request::TokenInput;

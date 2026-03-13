@@ -5,7 +5,7 @@
 
 use crate::common::{
     issuer_utils::IssClaim,
-    policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer},
+    policy_store::{TokenEntityMetadata, TrustedIssuer},
 };
 use serde::Deserialize;
 use serde_json::Value;

@@ -160,6 +160,177 @@ async fn get_cedarling_from_cjar_file(path: std::path::PathBuf) -> Cedarling {
     .await
 }
 
+fn create_jwt_cedarling_config(
+    policy_store_source: PolicyStoreSource,
+    jwt_sig_validation: bool,
+) -> BootstrapConfig {
+    create_jwt_cedarling_config_with_loader(policy_store_source, jwt_sig_validation, false)
+}
+
+fn create_jwt_cedarling_config_with_loader(
+    policy_store_source: PolicyStoreSource,
+    jwt_sig_validation: bool,
+    async_loading: bool,
+) -> BootstrapConfig {
+    use crate::jwt_config::{JwtConfig, TrustedIssuerLoaderConfig, WorkersCount};
+    use crate::{
+        AuthorizationConfig, BootstrapConfig, EntityBuilderConfig, JsonRule, LogConfig,
+        LogTypeConfig,
+    };
+
+    let trusted_issuer_loader = if async_loading {
+        TrustedIssuerLoaderConfig::Async {
+            workers: WorkersCount::MIN,
+        }
+    } else {
+        TrustedIssuerLoaderConfig::Sync {
+            workers: WorkersCount::MIN,
+        }
+    };
+
+    BootstrapConfig {
+        application_name: "test_app".to_string(),
+        log_config: LogConfig {
+            log_type: LogTypeConfig::Off,
+            log_level: crate::LogLevel::DEBUG,
+        },
+        policy_store_config: PolicyStoreConfig {
+            source: policy_store_source,
+            validate_checksum: true,
+        },
+        jwt_config: JwtConfig {
+            jwks: None,
+            jwt_sig_validation,
+            jwt_status_validation: false,
+            trusted_issuer_loader,
+            ..Default::default()
+        }
+        .allow_all_algorithms(),
+        authorization_config: AuthorizationConfig {
+            decision_log_default_jwt_id: "jti".to_string(),
+
+            principal_bool_operator: JsonRule::new(json!({
+                "===": [{"var": "Jans::Workload"}, "ALLOW"]
+            }))
+            .expect("Failed to create principal bool operator"),
+        },
+        entity_builder_config: EntityBuilderConfig::default(),
+        lock_config: None,
+        max_default_entities: None,
+        max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
+    }
+}
+
+fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
+    format!(
+        r#"{{
+        "id": "mock_issuer",
+        "name": "Jans",
+        "description": "Test issuer for JWT validation",
+        "configuration_endpoint": "{oidc_endpoint}",
+        "token_metadata": {{
+            "access_token": {{
+                "entity_type_name": "Jans::Access_token",
+                "workload_id": "client_id",
+                "principal_mapping": ["Jans::Workload"]
+            }},
+            "id_token": {{
+                "entity_type_name": "Jans::Id_token"
+            }},
+            "userinfo_token": {{
+                "entity_type_name": "Jans::Userinfo_token",
+                "user_id": "sub",
+                "role_mapping": "role"
+            }}
+        }}
+    }}"#
+    )
+}
+
+/// Creates a trusted issuer JSON with a custom issuer ID.
+fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) -> String {
+    format!(
+        r#"{{
+        "id": "{issuer_id}",
+        "name": "Jans",
+        "description": "Test issuer for JWT validation",
+        "configuration_endpoint": "{oidc_endpoint}",
+        "token_metadata": {{
+            "access_token": {{
+                "entity_type_name": "Jans::Access_token",
+                "workload_id": "client_id",
+                "principal_mapping": ["Jans::Workload"]
+            }},
+            "id_token": {{
+                "entity_type_name": "Jans::Id_token"
+            }},
+            "userinfo_token": {{
+                "entity_type_name": "Jans::Userinfo_token",
+                "user_id": "sub",
+                "role_mapping": "role"
+            }}
+        }}
+    }}"#
+    )
+}
+
+// Schema that works with JWT-based authorization
+// Uses Jans namespace to match the default entity builder
+const SCHEMA: &str = r#"namespace Jans {
+    type Url = {"host": String, "path": String, "protocol": String};
+    entity TrustedIssuer = {"issuer_entity_id": Url};
+    entity Access_token = {
+        aud: String,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        client_id?: String,
+        org_id?: String,
+    };
+    entity Id_token = {
+        aud: Set<String>,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        sub: String,
+    };
+    entity Userinfo_token = {
+        country?: String,
+        exp?: Long,
+        iat?: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        sub: String,
+        role?: Set<String>,
+    };
+    entity Workload {
+        iss: TrustedIssuer,
+        access_token: Access_token,
+        client_id: String,
+        org_id?: String,
+    };
+    entity User {
+        userinfo_token: Userinfo_token,
+        country?: String,
+        role?: Set<String>,
+        sub: String,
+    };
+    entity Role;
+    entity Resource {
+        org_id?: String,
+        country?: String,
+    };
+    action "Read" appliesTo {
+        principal: [Workload, User, Role],
+        resource: [Resource],
+        context: {}
+    };
+}
+"#;
+
 // ============================================================================
 // Directory-Based Loading Tests
 // ============================================================================

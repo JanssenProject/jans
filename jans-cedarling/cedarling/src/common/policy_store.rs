@@ -271,7 +271,7 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
- #[cfg(test)]
+    #[cfg(test)]
     pub(crate) fn new(
         name: String,
         description: String,
@@ -301,7 +301,7 @@ impl TrustedIssuer {
 
     pub(crate) fn iss_claim(&self) -> IssClaim {
         IssClaim::new(&self.oidc_endpoint.origin().ascii_serialization())
-
+    }
 }
 
 /// Parses the `cedar_version` field.

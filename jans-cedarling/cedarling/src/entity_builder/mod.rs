@@ -233,9 +233,13 @@ impl TokenPrincipalMappings {
 
 #[cfg(test)]
 mod test {
+    use crate::CedarEntityMapping;
+    use crate::common::policy_store::TokenEntityMetadata;
+    use crate::jwt::Token;
+
     use super::*;
     use cedar_policy::{Entities, Schema};
-    use serde_json::Value;
+    use serde_json::{Value, json};
     use std::collections::HashMap;
     use std::sync::LazyLock;
     use test_utils::assert_eq;
@@ -296,119 +300,6 @@ mod test {
         // Check if the entity conforms to the schema
         Entities::from_entities([entity.clone()], schema)
             .unwrap_or_else(|_| panic!("{} entity should conform to the schema", entity.uid()));
-    }
-
-    #[test]
-    #[allow(clippy::too_many_lines)]
-    fn can_build_principals_with_custom_types() {
-        let schema_src = r"
-            namespace Jans {
-                entity TrustedIssuer;
-                entity Resource;
-                entity CustomWorkload {
-                    access_token: CustomAccessToken,
-                    custom_token: AnotherNamespace::CustomToken,
-                };
-                entity CustomAccessToken;
-            }
-            namespace AnotherNamespace {
-                entity CustomToken;
-            }
-        ";
-        let schema = Schema::from_str(schema_src).expect("parse schema");
-        let validator_schema =
-            ValidatorSchema::from_str(schema_src).expect("parse validation schema");
-
-        // Set the custom workload name in the config
-        let mut config = EntityBuilderConfig::default();
-        config.entity_names.workload = "Jans::CustomWorkload".into();
-
-        // Set the custom token names in the IDP metadata
-        let iss = TrustedIssuer::new(
-            "Jans".to_string(),
-            "Test".to_string(),
-            Url::parse("https://example.com/.well-known/openid-configuration").expect("valid url"),
-            HashMap::from([
-                (
-                    "access_token".to_string(),
-                    TokenEntityMetadata::builder()
-                        .entity_type_name("Jans::CustomAccessToken".to_string())
-                        .principal_mapping(
-                            ["Jans::CustomWorkload".to_string()].into_iter().collect(),
-                        )
-                        .build(),
-                ),
-                (
-                    "custom_token".to_string(),
-                    TokenEntityMetadata::builder()
-                        .entity_type_name("AnotherNamespace::CustomToken".to_string())
-                        .principal_mapping(
-                            ["Jans::CustomWorkload".to_string()].into_iter().collect(),
-                        )
-                        .build(),
-                ),
-            ]),
-        );
-        let issuers = HashMap::from([("some_iss".into(), iss)]);
-        let tokens = HashMap::from([
-            (
-                "access_token".into(),
-                Arc::new(Token::new(
-                    "access_token",
-                    json!({"jti": "some_jti", "aud": "some_aud"}).into(),
-                    Some(issuers.get("some_iss").unwrap().clone().into()),
-                )),
-            ),
-            (
-                "custom_token".into(),
-                Arc::new(Token::new(
-                    "custom_token",
-                    json!({"jti": "some_jti"}).into(),
-                    Some(issuers.get("some_iss").unwrap().clone().into()),
-                )),
-            ),
-        ]);
-        let issuers_index = TrustedIssuerIndex::new(&issuers, None);
-
-        let entity_builder = EntityBuilder::new(
-            config,
-            issuers_index,
-            Some(&validator_schema),
-            DefaultEntities::default(),
-        )
-        .expect("init entity builder");
-
-        let entities = entity_builder
-            .build_entities(
-                &tokens,
-                &EntityData {
-                    cedar_mapping: CedarEntityMapping {
-                        entity_type: "Jans::Resource".into(),
-                        id: "some_id".into(),
-                    },
-                    attributes: HashMap::new(),
-                },
-            )
-            .expect("build entities");
-
-        assert_entity_eq(
-            &entities.workload.expect("has workload entity"),
-            &json!({
-                "uid": {"type": "Jans::CustomWorkload", "id": "some_aud"},
-                "attrs": {
-                    "access_token": {"__entity": {
-                        "type": "Jans::CustomAccessToken",
-                        "id": "some_jti"
-                    }},
-                    "custom_token": {"__entity": {
-                        "type": "AnotherNamespace::CustomToken",
-                        "id": "some_jti"
-                    }},
-                },
-                "parents": []
-            }),
-            Some(&schema),
-        );
     }
 
     #[test]

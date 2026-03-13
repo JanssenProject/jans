@@ -9,8 +9,8 @@
 
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
-    RequestUnsigned, TrustedIssuerLoadingInfo,
+    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, RequestUnsigned,
+    TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
