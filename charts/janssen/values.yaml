@@ -786,10 +786,6 @@ global:
       uma2ConfigEnabled: true
       # -- Enable endpoint /.well-known/webfinger
       webfingerEnabled: true
-      # -- Enable endpoint /.well-known/simple-web-discovery
-      webdiscoveryEnabled: true
-      # -- Enable endpoint /.well-known/fido-configuration
-      u2fConfigEnabled: true
       # -- Enable endpoint /.well-known/lock-server-configuration
       lockConfigEnabled: false
       # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
@@ -824,14 +820,6 @@ global:
       webfingerLabels: { }
       # -- webfinger ingress resource additional annotations.
       webfingerAdditionalAnnotations: { }
-      # -- webdiscovery ingress resource labels. key app is taken
-      webdiscoveryLabels: { }
-      # -- webdiscovery ingress resource additional annotations.
-      webdiscoveryAdditionalAnnotations: { }
-      # -- u2f config ingress resource labels. key app is taken
-      u2fConfigLabels: { }
-      # -- u2f config ingress resource additional annotations.
-      u2fAdditionalAnnotations: { }
       # -- authzen config ingress resource labels. key app is taken
       authzenConfigLabels: { }
       # -- authzen config ingress resource additional annotations.

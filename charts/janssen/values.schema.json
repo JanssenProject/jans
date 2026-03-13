@@ -421,22 +421,6 @@
                                     "description": "webfinger ingress resource additional annotations.",
                                     "type": "object"
                                 },
-                                "webdiscoveryLabels": {
-                                    "description": "webdiscovery ingress resource labels. key app is taken",
-                                    "type": "object"
-                                },
-                                "webdiscoveryAdditionalAnnotations": {
-                                    "description": "webfinger ingress resource additional annotations.",
-                                    "type": "object"
-                                },
-                                "u2fConfigLabels": {
-                                    "description": "u2f ingress resource labels. key app is taken",
-                                    "type": "object"
-                                },
-                                "u2fAdditionalAnnotations": {
-                                    "description": "u2f config ingress resource additional annotations.",
-                                    "type": "object"
-                                },
                                 "authzenConfigLabels": {
                                     "description": "authzen config ingress resource labels. key app is taken",
                                     "type": "object"
@@ -477,20 +461,12 @@
                                     "description": "Enable endpoint /.well-known/webfinger",
                                     "type": "boolean"
                                 },
-                                "webdiscoveryEnabled": {
-                                    "description": "Enable endpoint /.well-known/simple-web-discovery",
-                                    "type": "boolean"
-                                },
-                                "u2fConfigEnabled": {
-                                    "description": "Enable endpoint /.well-known/fido-configuration",
-                                    "type": "boolean"
-                                },
                                 "lockConfigEnabled": {
                                     "description": "Enable endpoint /.well-known/lock-server-configuration",
                                     "type": "boolean"
                                 },
-                                "lockEnabled": {
-                                    "description": "Enable endpoint /jans-lock",
+                                "lockAuditEnabled": {
+                                    "description": "Enable endpoint /io.jans.lock.audit.AuditService",
                                     "type": "boolean"
                                 },
                                 "authzenConfigEnabled": {

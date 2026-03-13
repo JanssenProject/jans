@@ -35,8 +35,6 @@ spec:
     match:
     - uri:
         prefix: "/.well-known/openid-configuration"
-    rewrite:
-      uri: "/jans-auth/.well-known/openid-configuration"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -50,7 +48,7 @@ spec:
     - uri:
         prefix: "/device-code"
     rewrite:
-      uri: "/jans-auth/device_authorization.htm"
+      uri: "/device_authorization.htm"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -63,8 +61,6 @@ spec:
     match:
     - uri:
         prefix: "/firebase-messaging-sw.js"
-    rewrite:
-      uri: "/jans-auth/firebase-messaging-sw.js"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -78,7 +74,7 @@ spec:
     - uri:
         prefix: "/.well-known/uma2-configuration"
     rewrite:
-      uri: "/jans-auth/restv1/uma2-configuration"
+      uri: "/restv1/uma2-configuration"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -91,22 +87,6 @@ spec:
     match:
     - uri:
         prefix: "/.well-known/webfinger"
-    rewrite:
-      uri: "/jans-auth/.well-known/webfinger"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-      weight: 100
-  {{- end }}
-  {{ if index .Values "global" "auth-server" "ingress" "webdiscoveryEnabled" -}}
-  - name: "{{ .Release.Name }}-istio-webdiscovery"
-    match:
-    - uri:
-        prefix: "/.well-known/simple-web-discovery"
-    rewrite:
-      uri: "/jans-auth/.well-known/simple-web-discovery"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -118,26 +98,16 @@ spec:
   - name: "{{ .Release.Name }}-istio-cn"
     match:
     - uri:
-        prefix: "/jans-auth"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-  {{- end }}
-  {{ if index .Values "global" "auth-server" "ingress" "u2fConfigEnabled" -}}
-  - name: "{{ .Release.Name }}-istio-u2f-config"
-    match:
+        prefix: "/jans-auth/"
     - uri:
-        prefix: "/.well-known/fido-configuration"
+        prefix: "/jans-auth"
     rewrite:
-      uri: "/jans-auth/restv1/fido-configuration"
+      uri: "/"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
         port:
           number: 8080
-      weight: 100
   {{- end }}
   {{ if index .Values "global" "auth-server" "ingress" "lockConfigEnabled" -}}
   - name: "{{ .Release.Name }}-istio-lock-config"
@@ -145,21 +115,7 @@ spec:
     - uri:
         prefix: "/.well-known/lock-server-configuration"
     rewrite:
-      uri: "/jans-auth/v1/configuration"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-      weight: 100
-  {{- end }}
-  {{ if index .Values "global" "auth-server" "ingress" "lockEnabled" -}}
-  - name: "{{ .Release.Name }}-istio-lock"
-    match:
-    - uri:
-        prefix: "/jans-lock"
-    rewrite:
-      uri: "/jans-auth"
+      uri: "/api/v1/configuration"
     route:
     - destination:
         host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -173,7 +129,7 @@ spec:
     - uri:
         prefix: "/.well-known/authzen-configuration"
     rewrite:
-      uri: "/jans-auth/restv1/authzen-configuration"
+      uri: "/restv1/authzen-configuration"
     route:
       - destination:
           host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
