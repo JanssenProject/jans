@@ -221,7 +221,7 @@ class GoogleConfig(BaseConfig):
             request={"parent": parent, "payload": {"data": payload_bytes}}
         )
 
-        logger.info("Added secret version: {}".format(response.name))
+        logger.info("Added secret version: %s", response.name)
         self._destroy_old_versions(parent)
         return bool(response)
 
