@@ -39,12 +39,7 @@
 //!
 //! ## Usage
 //!
-//! The primary interface for token validation is [`JwtService::validate_tokens`].
-//!
-//! This method accepts a [`HashMap<String, String>`] representing the tokens, typically
-//! passed in through [`Cedarling::authorize`]. Each entry in the map is a
-//! `(token_name, jwt_string)` pair.
-//!
+//! Token validation is used when evaluating requests via [`authorize_multi_issuer`](crate::Authz::authorize_multi_issuer).
 //! Only tokens that:
 //! - match a trusted issuer defined in the [`policy store`], and
 //! - have a matching token name,
@@ -122,7 +117,6 @@ pub(crate) struct JwtService {
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
-    jwt_sig_validation_required: bool,
     loading_state: Arc<TrustedIssuerLoadingState>,
 }
 
@@ -194,91 +188,8 @@ impl JwtService {
             trusted_issuer_validator,
             logger,
             token_cache,
-            jwt_sig_validation_required: jwt_config.jwt_sig_validation,
             loading_state,
         })
-    }
-
-    /// Checks if signed authorization is available (i.e., keys are loaded, at least one).
-    fn signed_authz_available(&self) -> bool {
-        self.key_service.has_keys()
-    }
-
-    /// Validates multiple JWT tokens against trusted issuers.
-    ///
-    /// This method validates each token in the provided map, checking:
-    /// - JWT signature validation (if enabled)
-    /// - Token expiration and other standard claims
-    /// - Required claims as specified in the trusted issuer configuration
-    ///
-    /// Tokens from untrusted issuers are skipped with a warning.
-    ///
-    /// # Arguments
-    ///
-    /// * `tokens` - Map of token names to JWT strings (e.g., "`access_token`" -> "eyJ...")
-    ///
-    /// # Returns
-    ///
-    /// Map of token names to validated `Token` objects, or an error if any token fails validation.
-    pub(crate) fn validate_tokens<'a>(
-        &'a self,
-        tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
-        const ID_TOKEN_NAME: &str = "id_token";
-
-        if self.jwt_sig_validation_required && !self.signed_authz_available() && !tokens.is_empty()
-        {
-            self.logger.log_any(JwtLogEntry::new(
-                "signed authorization was attempted but Cedarling is not configured with trusted issuers or JWKS".to_string(),
-                Some(LogLevel::ERROR),
-            ));
-            return Err(JwtProcessingError::SignedAuthzUnavailable);
-        }
-
-        let mut validated_tokens = HashMap::new();
-
-        let now = Utc::now();
-
-        // clear expired tokens from cache
-        self.token_cache.clear_expired();
-
-        for (token_name, jwt) in tokens {
-            let token_kind = TokenKind::AuthzRequestInput(token_name);
-            let token = if let Some(validated_token) = self.token_cache.find(&token_kind, jwt) {
-                validated_token
-            } else {
-                // validate token and save to cache
-                let validated_jwt = match self.validate_single_token(&token_kind, jwt) {
-                    Ok(jwt) => jwt,
-                    Err(err) => {
-                        if matches!(err, ValidateJwtError::MissingValidator(_)) {
-                            self.logger
-                                .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
-                            continue;
-                        }
-                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
-                    },
-                };
-
-                let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                    .map_err(|err| {
-                        self.logger.log_any(JwtLogEntry::new(
-                            format!("failed to deserialize token claims: {err}"),
-                            Some(LogLevel::ERROR),
-                        ));
-                        err
-                    })
-                    .map_err(JwtProcessingError::StringDeserialization)?;
-
-                let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
-                self.token_cache.save(&token_kind, jwt, token.clone(), now);
-                token
-            };
-
-            validated_tokens.insert(token_name.clone(), token);
-        }
-
-        Ok(validated_tokens)
     }
 
     /// Validates a single JWT and returns decoded claims and trusted issuer when valid.

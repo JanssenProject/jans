@@ -70,7 +70,6 @@ fn build_entity_attrs_with_shape(
                     },
                     _ => {},
                 }
-                continue;
             },
             AttrSrc::EntityRef(entity_ref_src) => {
                 let eid_opt = match entities.get_single(entity_ref_src) {
@@ -158,7 +157,6 @@ fn build_entity_attrs_without_schema(
             },
             _ => {},
         }
-        continue;
     }
 
     if !errs.is_empty() {

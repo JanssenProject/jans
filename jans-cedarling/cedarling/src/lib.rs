@@ -45,8 +45,6 @@ pub use crate::context_data_api::{
 };
 pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 pub use crate::jwt::TrustedIssuerLoadingInfo;
-#[cfg(test)]
-use authz::AuthorizeEntitiesData;
 use authz::Authz;
 pub use authz::request::{
     AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned,
