@@ -52,7 +52,7 @@ def configure_logging():
     try:
         custom_config = json.loads(os.environ.get("CN_CASA_APP_LOGGERS", "{}"))
     except json.decoder.JSONDecodeError as exc:
-        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        logger.warning("Unable to load logging configuration from environment variable; reason=%s; fallback to defaults", exc)
         custom_config = {}
 
     # ensure custom config is ``dict`` type
@@ -71,11 +71,11 @@ def configure_logging():
             continue
 
         if k.endswith("_log_level") and v not in log_levels:
-            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            logger.warning("Invalid %s log level for %s; fallback to defaults", v, k)
             v = config[k]
 
         if k.endswith("_log_target") and v not in log_targets:
-            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            logger.warning("Invalid %s log output for %s; fallback to defaults", v, k)
             v = config[k]
 
         # update the config
@@ -139,7 +139,7 @@ def main():
             manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
         else:
             hostname = manager.config.get("hostname")
-            logger.info(f"Pulling SSL certificate from {hostname}")
+            logger.info("Pulling SSL certificate from %s", hostname)
             get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
@@ -161,15 +161,15 @@ def main():
         lock_path = Path(lock_file)
 
         if as_boolean(os.environ.get("CN_CASA_ADMIN_ENABLED", "true")):
-            logger.info(f"Detected CN_CASA_ADMIN_ENABLED=true; creating or updating {lock_file} to enable the admin console")
+            logger.info("Detected CN_CASA_ADMIN_ENABLED=true; creating or updating %s to enable the admin console", lock_file)
             lock_path.parent.mkdir(parents=True, exist_ok=True)
             lock_path.touch(exist_ok=True)
         else:
-            logger.info(f"Detected CN_CASA_ADMIN_ENABLED=false; removing {lock_file} (if exists) to disable the admin console")
+            logger.info("Detected CN_CASA_ADMIN_ENABLED=false; removing %s (if exists) to disable the admin console", lock_file)
             try:
                 lock_path.unlink(missing_ok=True)
-            except Exception as exc:
-                logger.warning(f"Unable to remove {lock_file}; reason={exc}")
+            except OSError as exc:
+                logger.warning("Unable to remove %s; reason=%s", lock_file, exc)
 
     try:
         manager.secret.to_file(
@@ -255,7 +255,7 @@ class PersistenceSetup:
 
     def import_ldif_files(self):
         for file_ in self.ldif_files:
-            logger.info(f"Importing {file_}")
+            logger.info("Importing %s", file_)
             self.client.create_from_ldif(file_, self.ctx)
 
     def generate_scopes_ldif(self):

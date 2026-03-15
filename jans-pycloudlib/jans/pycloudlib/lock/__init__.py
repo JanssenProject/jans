@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 import random
-import socket
 import sys
 import traceback
 import threading
@@ -15,7 +14,6 @@ from datetime import timedelta
 import backoff
 
 from jans.pycloudlib.lock.sql_lock import SqlLock
-from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 if _t.TYPE_CHECKING:  # pragma: no cover
@@ -54,7 +52,7 @@ def _on_connection_backoff(details: Details) -> None:
         error = details.get("value", "Uncaught exception")
 
     # emit warning
-    logger.warning(f"Backing off {lock}(adapter={adapter}).{func}() for {details['wait']:.1f} seconds; {error=}")
+    logger.warning("Backing off %s(adapter=%s).%s() for %.1f seconds; error=%r", lock, adapter, func, details["wait"], error)
 
 
 def _on_connection_giveup(details: Details) -> None:
@@ -74,7 +72,7 @@ def _on_connection_giveup(details: Details) -> None:
         error = details.get("value", "Uncaught exception")
 
     # emit warning
-    logger.warning(f"Giving up {lock}(adapter={adapter}).{func}() after {details['tries']} tries within {details['elapsed']:.1f} seconds; {error=}")
+    logger.warning("Giving up %s(adapter=%s).%s() after %s tries within %.1f seconds; error=%r", lock, adapter, func, details["tries"], details["elapsed"], error)
 
 
 class LockNotAcquired(RuntimeError):
@@ -223,20 +221,20 @@ class LockRecord:
         return self.candidate["owner"] == record["owner"]
 
     def _renew_loop(self):
-        logger.info(f"Starting lock {self.name} update")
+        logger.info("Starting lock %s update", self.name)
 
         renew_delay = int(self.candidate["ttl"] * 2 / 3)
 
         while True:
             if self._renew_stop_event.isSet():
-                logger.info(f"Stopping lock {self.name} update")
+                logger.info("Stopping lock %s update", self.name)
                 break
 
             # delay before doing next update
             time.sleep(renew_delay)
 
             if self._update_record():
-                logger.info(f"Lock {self.name} owned by candidate {self.candidate['owner']} has been updated")
+                logger.info("Lock %s owned by candidate %s has been updated", self.name, self.candidate["owner"])
 
     def _start_renew_loop(self):
         self._renew_stop_event = threading.Event()
@@ -254,7 +252,7 @@ class LockRecord:
         Returns:
             Boolean to indicate if lock is acquired.
         """
-        logger.info(f"Trying to acquire lock {self.name}")
+        logger.info("Trying to acquire lock %s", self.name)
 
         # add random delay (if any) before starting to acquire a lock
         time.sleep(self._get_start_delay())
@@ -265,23 +263,23 @@ class LockRecord:
 
             # the most simple scenario (when lock is not found) is to create new lock
             if not record:
-                logger.warning(f"Lock {self.name} is not found")
+                logger.warning("Lock %s is not found", self.name)
 
                 if self._create_record():
                     # lock created; mark it as acquired to allow candidate to proceed
-                    logger.info(f"Lock {self.name} is created by candidate {self.candidate['owner']}")
+                    logger.info("Lock %s is created by candidate %s", self.name, self.candidate["owner"])
                     self._start_renew_loop()
                     return True
 
                 # lock not created; mark it as not acquired to allow other candidates to create lock
                 return False
 
-            logger.info(f"Found existing lock {self.name} owned by {record['owner']}")
+            logger.info("Found existing lock %s owned by %s", self.name, record["owner"])
 
             # at this point, we found an existing lock; note that a lock maybe expired
             # (owner doesn't update or delete it properly), hence we will try to take over
             if self._record_expired(record) and self._update_record():
-                logger.info(f"Lock {self.name} is expired hence taken over by candidate {self.candidate['owner']}")
+                logger.info("Lock %s is expired hence taken over by candidate %s", self.name, self.candidate["owner"])
                 self._start_renew_loop()
                 return True
 
@@ -290,7 +288,7 @@ class LockRecord:
             # 1. lock is not expired yet
             # 2. lock is still used by the owner
             # 3. candidate is the owner of lock and it has been acquired
-            logger.warning(f"Unable to acquire lock {self.name}; retrying in {self.retry_delay} seconds")
+            logger.warning("Unable to acquire lock %s; retrying in %s seconds", self.name, self.retry_delay)
 
             # delay before retrying to acquire
             time.sleep(self.retry_delay)
@@ -310,7 +308,7 @@ class LockRecord:
         # only allow deletion if lock is owned by the candidate
         if record and self._owned_by_candidate(record):
             self._delete_record()
-            logger.info(f"Lock {self.name} is released by candidate {self.candidate['owner']}")
+            logger.info("Lock %s is released by candidate %s", self.name, self.candidate["owner"])
 
     def __repr__(self):
         return f"<{self.__class__.__name__}(adapter={self.adapter.__class__.__name__})>"
