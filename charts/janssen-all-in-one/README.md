@@ -235,7 +235,6 @@ Kubernetes: `>=v1.23.0-0`
 | configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
 | configmap.lbAddr | string | `""` | Load balancer address for AWS if the FQDN is not registered. |
-| configmap.quarkusTransactionEnableRecovery | bool | `true` | Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details. |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |
 | customAnnotations.certificate | object | `{}` |  |
 | customAnnotations.clusterRoleBinding | object | `{}` |  |
