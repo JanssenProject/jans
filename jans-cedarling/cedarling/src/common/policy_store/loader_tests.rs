@@ -870,8 +870,6 @@ fn test_parse_issuer_with_token_metadata() {
     // Verify token metadata details
     let access_token = issuer.issuer.token_metadata.get("access_token").unwrap();
     assert_eq!(access_token.entity_type_name, "App::access_token");
-    assert_eq!(access_token.user_id, Some("sub".to_string()));
-    assert_eq!(access_token.role_mapping, Some("role".to_string()));
 }
 
 #[test]

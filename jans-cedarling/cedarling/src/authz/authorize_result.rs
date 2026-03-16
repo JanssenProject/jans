@@ -19,8 +19,7 @@ use crate::common::json_rules::{ApplyRuleError, JsonRule, RuleApplier};
 #[derive(Debug, Clone, Serialize)]
 pub struct AuthorizeResult {
     /// Result of authorization for all principals.
-    /// This field is useful when you want to get the authorization results for unsigned authorization requests.
-    /// Because it can be more than workload and person principals.
+    /// Maps principal type names to their Cedar authorization responses.
     #[serde(serialize_with = "serialize_hashmap_response")]
     pub principals: HashMap<SmolStr, cedar_policy::Response>,
 
@@ -83,7 +82,7 @@ impl Serialize for CedarResponse<'_> {
 }
 
 /// Result of multi-issuer authorization
-/// This is a simpler result structure that doesn't deal with workload/user principals
+/// This result structure contains a single Cedar policy evaluation response
 #[derive(Debug, Clone, Serialize)]
 pub struct MultiIssuerAuthorizeResult {
     /// Result of authorization from Cedar policy evaluation

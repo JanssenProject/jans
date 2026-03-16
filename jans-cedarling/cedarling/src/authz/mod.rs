@@ -13,7 +13,6 @@ use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
-use crate::entity_builder::BuiltEntities;
 use crate::entity_builder::{BuiltEntitiesUnsigned, EntityBuilder};
 use crate::jwt;
 use crate::log::interface::LogWriter;
@@ -623,52 +622,5 @@ impl AuthorizeEntitiesData {
         schema: Option<&cedar_policy::Schema>,
     ) -> Result<cedar_policy::Entities, Box<cedar_policy::entities_errors::EntitiesError>> {
         Entities::from_entities(self.into_iter(), schema).map_err(Box::new)
-    }
-
-    /// Returns the names and IDs of built entities for inclusion in the context.
-    ///
-    /// This includes:
-    /// - **Token Entities**: e.g., `access_token`, `id_token`, etc.
-    /// - **Principal Entities**: e.g., `Workload`, `User`, etc.
-    /// - **Role Entities**
-    /// - **Default Entities**: Entities loaded from the policy store configuration
-    ///
-    /// Only entities that have been built will be included
-    ///
-    /// Note: This method uses the same merging logic as `into_iter()` to ensure consistency
-    /// and avoid duplicate entity UIDs in the context.
-    fn built_entities(&self) -> BuiltEntities {
-        // Use the same merging logic as into_iter() to ensure consistency
-        let mut merged_entities: HashMap<EntityUid, Entity> = HashMap::new();
-
-        // Add default entities first
-        merged_entities.extend(
-            self.default_entities
-                .inner
-                .values()
-                .map(|e| (e.uid(), e.clone())),
-        );
-
-        // Add request entities, overriding any conflicting default entities
-        merged_entities.extend(
-            vec![&self.resource]
-                .into_iter()
-                .map(|e| (e.uid(), e.clone())),
-        );
-        merged_entities.extend(self.issuers.iter().map(|e| (e.uid(), e.clone())));
-        merged_entities.extend(self.roles.iter().map(|e| (e.uid(), e.clone())));
-        merged_entities.extend(self.tokens.values().map(|e| (e.uid(), e.clone())));
-        merged_entities.extend(
-            vec![&self.user, &self.workload]
-                .into_iter()
-                .flatten()
-                .map(|e| (e.uid(), e.clone())),
-        );
-
-        // Return built entities from merged collection
-        merged_entities
-            .values()
-            .map(cedar_policy::Entity::uid)
-            .collect::<BuiltEntities>()
     }
 }
