@@ -113,17 +113,12 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);            
 
             pagedResult = fido2MetricsService.getFido2MetricsEntries(null, startLocalDate, endLocalDate);
 
@@ -131,6 +126,8 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2MetricsEntry  - pagedResult:{}", pagedResult);
             }
 
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -195,23 +192,20 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+           
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
-
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+    
             pagedResult = fido2MetricsService.getFido2UserMetricsEntries(null, userId, startLocalDate, endLocalDate);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2UserMetricsEntries  - pagedResult:{}", pagedResult);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -277,17 +271,13 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+        
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+    
 
             pagedResult = fido2MetricsService.getMetricsEntriesByOperation(null, operationType, startLocalDate,
                     endLocalDate);
@@ -295,6 +285,8 @@ public class Fido2MetricsResource extends BaseResource {
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2MetricsEntriesByOperation - pagedResult:{}", pagedResult);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -359,17 +351,12 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+ 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+        
 
             pagedResult = fido2MetricsService.getFido2MetricsAggregation(null, aggregationType, startLocalDate,
                     endLocalDate);
@@ -377,6 +364,8 @@ public class Fido2MetricsResource extends BaseResource {
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2MetricsAggregation  - pagedResult:{}", pagedResult);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -435,18 +424,12 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
-
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            
             jsonNode = fido2MetricsService.getFido2MetricsAggregationSummary(null, aggregationType, startLocalDate,
                     endLocalDate);
 
@@ -454,6 +437,8 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2MetricsAggregationSummary  - jsonNode:{}", jsonNode);
             }
 
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -508,23 +493,19 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
-
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            
             jsonNode = fido2MetricsService.getAdoptionMetrics(null, startLocalDate, endLocalDate);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2AdoptionMetrics  - jsonNode:{}", jsonNode);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -579,23 +560,19 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
-
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            
             jsonNode = fido2MetricsService.getPerformanceMetrics(null, startLocalDate, endLocalDate);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2PerformanceMetrics  - jsonNode:{}", jsonNode);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -649,23 +626,19 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+      
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
-
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            
             jsonNode = fido2MetricsService.getDeviceAnalytics(null, startLocalDate, endLocalDate);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2DeviceAnalytics  - jsonNode:{}", jsonNode);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -721,23 +694,19 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+           
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
 
             jsonNode = fido2MetricsService.getErrorAnalysis(null, startLocalDate, endLocalDate);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Fido2ErrorAnalysis  - jsonNode:{}", jsonNode);
             }
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -794,17 +763,11 @@ public class Fido2MetricsResource extends BaseResource {
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = null;
-            if (StringUtils.isNotBlank(startDate)) {
-                startLocalDate = parseDate(startDate, formatter);
-            }
-
+            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = null;
-            if (StringUtils.isNotBlank(endDate)) {
-                endLocalDate = parseDate(endDate, formatter);
-            }
+            LocalDateTime endLocalDate = parseDate(endDate, formatter);
 
             jsonNode = fido2MetricsService.getTrendAnalysis(null, aggregationType, startLocalDate, endLocalDate);
 
@@ -812,6 +775,8 @@ public class Fido2MetricsResource extends BaseResource {
                 logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
             }
 
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
@@ -975,7 +940,8 @@ public class Fido2MetricsResource extends BaseResource {
             try {
                 startLocalDateTime = parseDate(startDate, formatter);
             } catch (DateTimeParseException dtpe) {
-                sb.append("Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.");
+                sb.append(
+                        "Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.");
             }
         }
 
@@ -984,7 +950,8 @@ public class Fido2MetricsResource extends BaseResource {
             try {
                 endLocalDateTime = parseDate(endDate, formatter);
             } catch (DateTimeParseException dtpe) {
-                sb.append("End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.");
+                sb.append(
+                        "End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.");
             }
         }
 
