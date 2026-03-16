@@ -58,6 +58,7 @@ nav:
   - Platform Goals: janssen-server/planning/platform-goal.md
   - Use Cases: janssen-server/planning/use-cases.md
   - Quick Start Guides:
+    - quick-start-guides/index.md
     - Docker Quick Start: janssen-server/install/docker-install/quick-start.md
     - Casa Quick Start: casa/administration/quick-start.md
     - Cedarling Quick Start: cedarling/quick-start/cedarling-quick-start.md
