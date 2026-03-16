@@ -12,6 +12,8 @@ import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 import initWasm, { init, Cedarling, MultiIssuerAuthorizeResult } from '@janssenproject/cedarling_wasm';
 import Utils from './Utils';
 import Stack from '@mui/material/Stack';
@@ -23,13 +25,33 @@ interface CedarlingMultiIssuerAuthzProps {
     data: any; // or define the actual shape of cedarlingConfig data
 }
 
+type TokenObj = {
+    mapping: string;
+    payload: string;
+};
+
+type TokenSelection = {
+    accessToken: boolean;
+    userInfo: boolean;
+    idToken: boolean;
+};
+
+type FormFields = {
+    tokens: TokenObj[];
+    action: string;
+    context: Record<string, unknown>;
+    resource: Record<string, unknown>;
+};
+
 export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuerAuthzProps) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");
-    const [formFields, setFormFields] = React.useState({ tokens: [], action: "", context: {}, resource: {} });
-
+    const [formFields, setFormFields] = React.useState<FormFields>({ tokens: [], action: "", context: {}, resource: {} });
+    const [tokenSelection, setTokenSelection] = React.useState<TokenSelection>({ accessToken: false, userInfo: false, idToken: false });
+    const [loginDetails, setLoginDetails] = React.useState({ access_token: "", id_token: "", userDetails: "" });
     React.useEffect(() => {
+        setLoginDetails(data?.loginDetails);
         chrome.storage.local.get(["multiIssueAuthz"], (result) => {
             if (result?.multiIssueAuthz) {
                 setFormFields({
@@ -93,6 +115,46 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
 
     };
 
+    const addTokens = async () => {
+        const tokenAliasMap = {
+            accessToken: "AccessToken_namespace::Access_token_entity",
+            userInfo: "UserInfoToken_namespace::Userinfo_entity",
+            idToken: "IDToken_namespace::Id_token_entity"
+        };
+
+        setFormFields((prev) => {
+            let updatedTokens = [...prev.tokens];
+
+            const tokenPayloadMap = {
+                accessToken: loginDetails?.access_token,
+                idToken: loginDetails?.id_token,
+                userInfo: loginDetails?.userDetails
+            };
+
+            (Object.keys(tokenAliasMap) as (keyof typeof tokenAliasMap)[]).forEach((key) => {
+                const mapping = tokenAliasMap[key];
+
+                if (tokenSelection[key]) {
+                    const exists = updatedTokens.some((t) => t.mapping === mapping);
+
+                    if (!exists) {
+                        updatedTokens.push({
+                            mapping,
+                            payload: tokenPayloadMap[key]
+                        });
+                    }
+                } else {
+                    updatedTokens = updatedTokens.filter((t) => t.mapping !== mapping);
+                }
+            });
+
+            return {
+                ...prev,
+                tokens: updatedTokens
+            };
+        });
+    };
+
     const createCedarlingAuthzRequestObj = async () => {
         const reqObj = {
             tokens: formFields.tokens,
@@ -127,6 +189,15 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                         </AccordionSummary>
                         <AccordionDetails>
                             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                {(loginDetails?.access_token || loginDetails?.id_token || loginDetails?.userDetails) &&
+                                    <>
+                                        <InputLabel id="principal-value-label">Add tokens from Auth Flow</InputLabel>
+                                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.accessToken} onChange={() => setTokenSelection((prev) => ({ ...prev, accessToken: !prev.accessToken }))} />} label="Access Token" />
+                                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.userInfo} onChange={() => setTokenSelection((prev) => ({ ...prev, userInfo: !prev.userInfo }))} />} label="Userinfo Token" />
+                                        <FormControlLabel control={<Checkbox color="success" checked={tokenSelection.idToken} onChange={() => setTokenSelection((prev) => ({ ...prev, idToken: !prev.idToken }))} />} label="Id Token" />
+                                        <Button variant="contained" color="success" onClick={addTokens}>Click To Add Selected Tokens In Issuer-to-Token Mapping Field</Button>
+                                    </>
+                                }
                                 <Tooltip
                                     placement="bottom-start"
                                     title={
@@ -202,19 +273,19 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                                 <JsonEditor
                                     data={formFields.resource}
                                     rootName="resource"
-                                    setData={(e) => {
+                                    setData={(e: FormFields["resource"]) => {
                                         setFormFields((prev) => ({
                                             ...prev,
-                                            ["resource"]: e
+                                            resource: e
                                         }));
                                     }} />
                                 <InputLabel id="context-value-label">Context</InputLabel>
                                 <JsonEditor
                                     data={formFields.context}
-                                    setData={(e) => {
+                                    setData={(e: FormFields["context"]) => {
                                         setFormFields((prev) => ({
                                             ...prev,
-                                            ["context"]: e
+                                            context: e
                                         }));
                                     }}
                                     rootName="context" />
