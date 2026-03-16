@@ -58,9 +58,13 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
     const [uiMessage, setUiMessage] = React.useState<string>("");
     const [formFields, setFormFields] = React.useState<FormFields>({ tokens: [], action: "", context: {}, resource: {} });
     const [tokenSelection, setTokenSelection] = React.useState<TokenSelection>({ accessToken: false, userInfo: false, idToken: false });
-    const [loginDetails, setLoginDetails] = React.useState({ access_token: "", id_token: "", userDetails: "" });
+    const [loginDetails, setLoginDetails] = React.useState<{
+            access_token?: string;
+            id_token?: string;
+            userDetails?: Record<string, unknown>;
+        } | null>(null);
     React.useEffect(() => {
-        setLoginDetails(data?.loginDetails);
+        setLoginDetails(data?.loginDetails ?? null);
         chrome.storage.local.get(["multiIssueAuthz"], (result) => {
             if (result?.multiIssueAuthz) {
                 setFormFields({

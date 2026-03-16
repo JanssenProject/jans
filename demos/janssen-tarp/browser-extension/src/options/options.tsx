@@ -7,7 +7,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import { auth } from '@modelcontextprotocol/sdk/client/auth';
 
 const theme = createTheme({
   palette: {
