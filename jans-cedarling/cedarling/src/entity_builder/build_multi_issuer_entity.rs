@@ -752,7 +752,13 @@ mod tests {
                     aud: String,
                     custom_claim: Long
                 };
-                entity TrustedIssuer = {"issuer_entity_id": String};
+                entity TrustedIssuer = {
+                    "issuer_entity_id": {
+                        "host": String,
+                        "path": String,
+                        "protocol": String
+                    }
+                };
             }
         "#;
 
@@ -934,7 +940,13 @@ mod tests {
                     sub: String,
                     scope: Set<String>
                 };
-                entity TrustedIssuer = {"issuer_entity_id": String};
+                entity TrustedIssuer = {
+                    "issuer_entity_id": {
+                        "host": String,
+                        "path": String,
+                        "protocol": String
+                    }
+                };
             }
         "#;
 

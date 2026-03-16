@@ -80,6 +80,12 @@ impl BuildAttrsErrorVec {
     }
 }
 
+impl From<Vec<BuildAttrsError>> for BuildAttrsErrorVec {
+    fn from(errs: Vec<BuildAttrsError>) -> Self {
+        Self(errs)
+    }
+}
+
 impl From<Vec<BuildAttrsError>> for BuildEntityErrorKind {
     fn from(errs: Vec<BuildAttrsError>) -> Self {
         Self::BuildAttrs(BuildAttrsErrorVec(errs))

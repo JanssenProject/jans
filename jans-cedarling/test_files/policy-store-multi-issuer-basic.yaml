@@ -185,8 +185,8 @@ policy_stores:
             exp: Long,
             sub?: String,
             scope?: Set<String>,
-            location?: String,
-            waiver?: String,
+            location?: Set<String>,
+            waiver?: Set<String>,
           } tags Set<String>;
           entity Id_Token = {
             token_type: String,
@@ -254,7 +254,7 @@ policy_stores:
             exp: Long,
             sub?: String,
             scope?: Set<String>,
-            location?: String,
+            location?: Set<String>,
           } tags Set<String>;
           entity Dolphin_Token = {
             token_type: String,
@@ -263,7 +263,7 @@ policy_stores:
             validated_at: Long,
             exp: Long,
             sub?: String,
-            waiver?: String,
+            waiver?: Set<String>,
           } tags Set<String>;
           entity Userinfo_token = {
             token_type: String,

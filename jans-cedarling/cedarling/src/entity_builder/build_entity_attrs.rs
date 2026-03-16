@@ -25,12 +25,7 @@ pub(super) fn build_entity_attrs(
     claim_mappings: Option<&ClaimMappings>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     if let Some(attrs_shape) = attrs_shape {
-        Ok(build_entity_attrs_with_shape(
-            attrs_src,
-            entities,
-            attrs_shape,
-            claim_mappings,
-        ))
+        build_entity_attrs_with_shape(attrs_src, entities, attrs_shape, claim_mappings)
     } else {
         build_entity_attrs_without_schema(attrs_src, claim_mappings)
     }
@@ -42,28 +37,20 @@ fn build_entity_attrs_with_shape(
     entities: &BuiltEntities,
     attrs_shape: &HashMap<SmolStr, AttrsShape>,
     claim_mappings: Option<&ClaimMappings>,
-) -> HashMap<String, RestrictedExpression> {
+) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
 
     for (attr_name, attr_shape) in attrs_shape {
         match attr_shape.src() {
             AttrSrc::JwtClaim(claim_src) => {
-                let mut required_missing_claims: Vec<SmolStr> = Vec::new();
-
-                // skip if the source couldn't be found and was not required
                 let Some(src) = attrs_src.get(attr_name.as_str()) else {
                     if attr_shape.is_required() {
-                        required_missing_claims.push(attr_name.to_smolstr());
+                        errs.push(BuildAttrsError::MissingClaims(vec![attr_name.to_smolstr()]));
                     }
 
                     continue;
                 };
-
-                if !required_missing_claims.is_empty() {
-                    errs.push(BuildAttrsError::MissingClaims(required_missing_claims));
-                    continue;
-                }
 
                 let Some(mapping) = claim_mappings.and_then(|m| m.mapping(attr_name)) else {
                     // without claim mapping
@@ -71,10 +58,8 @@ fn build_entity_attrs_with_shape(
                         Ok(Some(expr)) => {
                             attrs.insert(attr_name.to_string(), expr);
                         },
-                        Err(e) => {
-                            errs.push(BuildAttrsError::from(e));
-                        },
-                        _ => {},
+                        Err(e) => errs.push(BuildAttrsError::from(e)),
+                        Ok(None) => {},
                     }
                     continue;
                 };
@@ -85,10 +70,8 @@ fn build_entity_attrs_with_shape(
                     Ok(Some(expr)) => {
                         attrs.insert(attr_name.to_string(), expr);
                     },
-                    Err(e) => {
-                        errs.push(BuildAttrsError::from(e));
-                    },
-                    _ => {},
+                    Err(e) => errs.push(BuildAttrsError::from(e)),
+                    Ok(None) => {},
                 }
             },
             AttrSrc::EntityRef(entity_ref_src) => {
@@ -124,39 +107,42 @@ fn build_entity_attrs_with_shape(
                     Ok(src) => {
                         attrs.insert(attr_name.to_string(), src);
                     },
-                    Err(e) => {
-                        errs.push(BuildAttrsError::from(e));
-                    },
+                    Err(e) => errs.push(BuildAttrsError::from(e)),
                 }
             },
             AttrSrc::EntityRefSet(entity_ref_set_src) => {
-                let mut missing_refs: Vec<SmolStr> = Vec::new();
-
                 let Some(eids) = entities.get_multiple(entity_ref_set_src) else {
                     if attr_shape.is_required() {
-                        missing_refs.push((*entity_ref_set_src).clone());
+                        errs.push(BuildAttrsError::MissingEntityRefs(vec![
+                            (*entity_ref_set_src).clone(),
+                        ]));
                     }
                     continue;
                 };
-
-                if !missing_refs.is_empty() {
-                    errs.push(BuildAttrsError::MissingEntityRefs(missing_refs));
-                    continue;
-                }
 
                 match entity_ref_set_src.build_expr(eids) {
                     Ok(src) => {
                         attrs.insert(attr_name.to_string(), src);
                     },
-                    Err(e) => {
-                        errs.push(BuildAttrsError::from(e));
-                    },
+                    Err(e) => errs.push(BuildAttrsError::from(e)),
                 }
             },
         }
     }
 
-    attrs
+    // Some callers inject reserved JWT claims after this step, so only missing
+    // claims stay best-effort. Missing entity refs and expression build errors
+    // are still surfaced to the caller.
+    let errs: Vec<_> = errs
+        .into_iter()
+        .filter(|err| !matches!(err, BuildAttrsError::MissingClaims(_)))
+        .collect();
+
+    if errs.is_empty() {
+        Ok(attrs)
+    } else {
+        Err(BuildAttrsErrorVec::from(errs))
+    }
 }
 
 /// Will do it's best to create the entity without a schema
@@ -213,6 +199,112 @@ mod test {
     use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
     use std::{collections::HashSet, str::FromStr};
+
+    #[test]
+    fn builds_available_schema_attrs_without_failing_on_missing_required_claims() {
+        let schema_src = r"
+        namespace SomeNamespace {
+            entity SomeEntity {
+                present_claim: String,
+                required_claim: Long,
+            };
+        }
+        ";
+        let mapping_schema: MappingSchema = (&ValidatorSchema::from_str(schema_src)
+            .expect("builds ValidatorSchema"))
+            .try_into()
+            .expect("builds MappingSchema");
+        let attrs_shape = mapping_schema
+            .get_entity_shape("SomeNamespace::SomeEntity")
+            .expect("get entity requirements");
+        let attrs_src = HashMap::from([("present_claim".into(), json!("present"))]);
+
+        let attrs = build_entity_attrs(
+            &attrs_src,
+            &BuiltEntities::default(),
+            Some(attrs_shape),
+            None,
+        )
+        .expect("schema-guided extraction should stay best-effort for missing required attrs");
+
+        assert_eq!(
+            attrs.len(),
+            1,
+            "expected exactly one attribute after skipping missing required claims"
+        );
+        assert!(
+            attrs.contains_key("present_claim"),
+            "expected 'present_claim' to be present after building schema-guided attrs"
+        );
+    }
+
+    #[test]
+    fn fails_on_missing_required_entity_ref() {
+        let schema_src = r"
+        namespace SomeNamespace {
+            entity AnotherEntity;
+            entity SomeEntity {
+                required_ref: AnotherEntity,
+            };
+        }
+        ";
+        let mapping_schema: MappingSchema = (&ValidatorSchema::from_str(schema_src)
+            .expect("builds ValidatorSchema"))
+            .try_into()
+            .expect("builds MappingSchema");
+        let attrs_shape = mapping_schema
+            .get_entity_shape("SomeNamespace::SomeEntity")
+            .expect("get entity requirements");
+
+        let err = build_entity_attrs(
+            &HashMap::new(),
+            &BuiltEntities::default(),
+            Some(attrs_shape),
+            None,
+        )
+        .expect_err("schema-guided extraction should fail when a required entity ref is missing");
+
+        assert!(
+            err.into_inner()
+                .into_iter()
+                .any(|err| matches!(err, BuildAttrsError::MissingEntityRefs(_))),
+            "expected a MissingEntityRefs error when a required entity ref cannot be resolved"
+        );
+    }
+
+    #[test]
+    fn fails_on_schema_type_mismatch_for_present_attr() {
+        let schema_src = r"
+        namespace SomeNamespace {
+            entity SomeEntity {
+                present_claim: String,
+            };
+        }
+        ";
+        let mapping_schema: MappingSchema = (&ValidatorSchema::from_str(schema_src)
+            .expect("builds ValidatorSchema"))
+            .try_into()
+            .expect("builds MappingSchema");
+        let attrs_shape = mapping_schema
+            .get_entity_shape("SomeNamespace::SomeEntity")
+            .expect("get entity requirements");
+        let attrs_src = HashMap::from([("present_claim".into(), json!(["wrong", "type"]))]);
+
+        let err = build_entity_attrs(
+            &attrs_src,
+            &BuiltEntities::default(),
+            Some(attrs_shape),
+            None,
+        )
+        .expect_err("schema-guided extraction should reject type mismatches");
+
+        assert!(
+            err.into_inner()
+                .into_iter()
+                .any(|err| matches!(err, BuildAttrsError::BuildRestrictedExpressions(_))),
+            "type mismatches should be surfaced as build expression errors"
+        );
+    }
 
     #[test]
     fn can_build_entity_with_schema() {

@@ -80,7 +80,7 @@ fn extract_attrs_from_sources(
     built_entities: &BuiltEntities,
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
 ) -> ExtractedAttrsResult {
-    let (attrs, errs) = srcs
+    let (attrs, errs): (Vec<_>, Vec<_>) = srcs
         .into_iter()
         .map(|src| match src {
             AttrSrc::Token { claims, mappings } => {
