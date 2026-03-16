@@ -42,7 +42,7 @@ class KubernetesMeta(BaseMeta):
             except kubernetes.config.config_exception.ConfigException as exc:
                 # some cluster running restricted env (like Google Cloud Run) doesn't have
                 # required env vars `KUBERNETES_SERVICE_HOST` and `KUBERNETES_SERVICE_PORT_HTTPS`
-                logger.warning(f"Unable to load Kubernetes in-cluster config; reason={exc}")
+                logger.warning("Unable to load Kubernetes in-cluster config; reason=%s", exc)
                 config_loaded = False
 
             # try loading config from kubeconfig file
@@ -51,7 +51,7 @@ class KubernetesMeta(BaseMeta):
                     kubernetes.config.load_kube_config(self.kubeconfig_file)
                     config_loaded = True
                 except kubernetes.config.config_exception.ConfigException as exc:
-                    logger.warning(f"Unable to load Kubernetes config from {self.kubeconfig_file}; reason={exc}")
+                    logger.warning("Unable to load Kubernetes config from %s; reason=%s", self.kubeconfig_file, exc)
                     config_loaded = False
 
             # set client only if config is loaded properly
@@ -142,10 +142,10 @@ class KubernetesMeta(BaseMeta):
                 resp.update(timeout=1)
 
                 if resp.peek_stdout():
-                    logger.debug(f"STDOUT: {resp.read_stdout()}")
+                    logger.debug("STDOUT: %s", resp.read_stdout())
 
                 if resp.peek_stderr():
-                    logger.debug(f"STDERR: {resp.read_stderr()}")
+                    logger.debug("STDERR: %s", resp.read_stderr())
 
                 if commands:
                     c = commands.pop(0)

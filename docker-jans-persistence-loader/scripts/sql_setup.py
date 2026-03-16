@@ -387,7 +387,7 @@ class SQLBackend:
         for table_name, columns in table_columns.items():
             for column, data_type in columns.items():
                 if column not in table_mapping[table_name]:
-                    logger.info(f"Adding new column {table_name}.{column}")
+                    logger.info("Adding new column %s.%s", table_name, column)
                     add_column(table_name, column)
 
                 else:
@@ -408,21 +408,21 @@ class SQLBackend:
 
                     if data_type != multivalued_type and old_data_type != multivalued_type:
                         # change non-multivalued type
-                        logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to {data_type}")
+                        logger.info("Converting %s.%s column type from %s to %s", table_name, column, old_data_type, data_type)
                         change_column_type(table_name, column, old_data_type, data_type)
 
                     elif data_type == multivalued_type and old_data_type != multivalued_type:
                         # change type to multivalued (JSON type)
-                        logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to multivalued {data_type}")
+                        logger.info("Converting %s.%s column type from %s to multivalued %s", table_name, column, old_data_type, data_type)
                         column_to_multivalued(table_name, column)
 
                     elif data_type != multivalued_type and old_data_type == multivalued_type:
                         # change type from multivalued (JSON type)
-                        logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
+                        logger.info("Converting %s.%s column type from multivalued %s to %s", table_name, column, old_data_type, data_type)
                         column_from_multivalued(table_name, column)
 
     def _import_ldif(self, path, ctx, transform_column_mapping=None):
-        logger.info(f"Importing {path} file")
+        logger.info("Importing %s file", path)
         self.client.create_from_ldif(path, ctx, transform_column_mapping)
 
     def table_mapping_from_schema(self):
@@ -474,7 +474,7 @@ class SQLBackend:
         custom_dir = Path("/app/custom_ldif")
 
         for file_ in sorted(custom_dir.rglob("*.ldif")):
-            logger.info(f"Importing {file_} file")
+            logger.info("Importing %s file", file_)
             self.client.upsert_from_file(file_, ctx, self.safe_column_mapping)
 
     def safe_column_mapping(self, table_name, column_mapping):
