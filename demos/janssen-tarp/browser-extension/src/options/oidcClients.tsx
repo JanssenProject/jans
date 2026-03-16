@@ -7,22 +7,22 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import OfflineBoltIcon from '@mui/icons-material/OfflineBolt';
 import { pink, green } from '@mui/material/colors';
-import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import RegisterClient from './registerClient'
-import AuthFlowInputs from './authFlowInputs'
+import Typography from '@mui/material/Typography';
+import RegisterClient from './registerClient';
+import AuthFlowInputs from './authFlowInputs';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
-import HelpDrawer from './helpDrawer'
+import HelpDrawer from './helpDrawer';
 import Alert from '@mui/material/Alert';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -99,7 +99,12 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
     return (
         <React.Fragment>
             <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={notifyOnDataChange} />
-            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+            <TableRow
+                hover
+                sx={{
+                    '& > *': { borderBottom: 'unset' },
+                }}
+            >
                 <TableCell>
                     <Tooltip title="Delete Client from janssen-tarp">
                         <IconButton aria-label="Delete">
@@ -111,23 +116,26 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
                     {row.opHost}
                 </TableCell>
                 <TableCell align="left" component="th" scope="row">{row.clientId}</TableCell>
-                <TableCell align="left" component="th" scope="row">{row.clientSecret}</TableCell>
+                <TableCell align="left" component="th" scope="row">
+                    <Tooltip title={row.clientSecret}>
+                        <span>{row.clientSecret}</span>
+                    </Tooltip>
+                </TableCell>
                 <TableCell align="left" component="th" scope="row">
                     {row.showClientExpiry ? (!(lifetime <= 0) ? <CheckCircleOutlineIcon sx={{ color: green[500] }} /> : <HighlightOffIcon sx={{ color: pink[500] }} />) : <CheckCircleOutlineIcon sx={{ color: green[500] }} />}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                    <Grid size={{ xs:8}}>
-                        <Tooltip title="Trigger authentication flow">
-                            <IconButton aria-label="Trigger Auth Flow">
-                                <OfflineBoltIcon
-                                    sx={{ color: green[500] }}
-                                    onClick={() => {
-                                        setOpen(true);
-                                        notifyOnDataChange();
-                                    }} />
-                            </IconButton>
-                        </Tooltip>
-                    </Grid>
+                    <Tooltip title="Trigger authentication flow">
+                    <IconButton
+                            aria-label="Trigger Auth Flow"
+                            onClick={() => {
+                                setOpen(true);
+                                notifyOnDataChange();
+                            }}
+                        >
+                            <OfflineBoltIcon sx={{ color: green[500] }} />
+                        </IconButton>
+                    </Tooltip>
                 </TableCell>
             </TableRow>
         </React.Fragment>
@@ -151,33 +159,69 @@ export default function OIDCClients({ data, notifyOnDataChange }) {
             <RegisterClient isOpen={modelOpen} handleDialog={handleDialog} />
             <HelpDrawer isOpen={drawerOpen} handleDrawer={handleDrawer} />
             <Stack direction="column" spacing={2} sx={{ mb: 1 }}>
-                <Stack direction="row" spacing={2} sx={{ mb: 1 }} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button color="success" variant="outlined" startIcon={<AddIcon />} onClick={() => setModelOpen(true)} style={{ maxWidth: '200px' }}>
-                        Add Client
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{ mb: 1 }}
+                >
+                    <div>
+                        <Typography variant="h6" sx={{ mb: 0.5 }}>
+                            OIDC Clients
+                        </Typography>
+                    </div>
+                    <Button
+                        color="success" 
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={() => setModelOpen(true)}
+                        sx={{ borderRadius: 999, textTransform: 'none', maxWidth: 200 }}
+                    >
+                        Add client
                     </Button>
                 </Stack>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
                     <Table aria-label="collapsible table">
                         <TableHead>
                             <TableRow>
                                 <StyledTableCell />
                                 <StyledTableCell>Issuer</StyledTableCell>
-                                <StyledTableCell>Client Id</StyledTableCell>
+                                <StyledTableCell>Client ID</StyledTableCell>
                                 <StyledTableCell>Client Secret</StyledTableCell>
-                                <StyledTableCell>Is Active</StyledTableCell>
+                                <StyledTableCell>Active</StyledTableCell>
                                 <StyledTableCell align="right">Action</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {(data === undefined || data?.length == 0) ?
-                                <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                data.map((row) => (<Row key={row?.clientId} row={row} notifyOnDataChange={notifyOnDataChange} />))
-                            }
+                            {(data === undefined || data?.length == 0)
+                                ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6}>
+                                            <Alert severity="info">
+                                                No clients configured yet. Use &quot;Add client&quot; to get started.
+                                            </Alert>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    data.map((row) => (
+                                        <Row
+                                            key={`${row?.opHost}-${row?.clientId}`}
+                                            row={row}
+                                            notifyOnDataChange={notifyOnDataChange}
+                                        />
+                                    ))
+                                )}
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Button color="success" variant="contained" startIcon={<LiveHelpIcon />} onClick={() => handleDrawer(true)} style={{ maxWidth: '150px', float: 'left' }}>
-                    Help?
+                <Button
+                    color="secondary"
+                    variant="outlined"
+                    startIcon={<LiveHelpIcon />}
+                    onClick={() => handleDrawer(true)}
+                    sx={{ maxWidth: 180, alignSelf: 'flex-start', textTransform: 'none' }}
+                >
+                    Need help?
                 </Button>
             </Stack>
         </Container>
