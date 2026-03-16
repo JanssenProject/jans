@@ -8,7 +8,6 @@ import io.jans.configapi.plugin.fido2.util.Fido2Util;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 
-import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 
 import jakarta.inject.Inject;
@@ -37,9 +36,6 @@ public class Fido2MetricsService {
 
     @Inject
     Fido2Util fido2Util;
-
-    @Inject
-    private PersistenceEntryManager entryManager;
 
     public String getFido2MetricsUrl() {
         return fido2Util.getIssuer() + FIDO2_METRICS_BASE_URL;
@@ -416,10 +412,12 @@ public class Fido2MetricsService {
 
     private Map<String, String> buildTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         Map<String, String> data = new HashMap<>();
-        if (startTime != null)
+        if (startTime != null) {
             data.put("startTime", startTime.toString());
-        if (endTime != null)
+        }
+        if (endTime != null) {
             data.put("endTime", endTime.toString());
+        }
         return data;
     }
 
