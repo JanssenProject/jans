@@ -126,14 +126,14 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
                 </TableCell>
                 <TableCell component="th" scope="row">
                     <Tooltip title="Trigger authentication flow">
-                        <IconButton aria-label="Trigger Auth Flow">
-                            <OfflineBoltIcon
-                                sx={{ color: green[500] }}
-                                onClick={() => {
-                                    setOpen(true);
-                                    notifyOnDataChange();
-                                }}
-                            />
+                    <IconButton
+                            aria-label="Trigger Auth Flow"
+                            onClick={() => {
+                                setOpen(true);
+                                notifyOnDataChange();
+                            }}
+                        >
+                            <OfflineBoltIcon sx={{ color: green[500] }} />
                         </IconButton>
                     </Tooltip>
                 </TableCell>
@@ -205,7 +205,7 @@ export default function OIDCClients({ data, notifyOnDataChange }) {
                                 ) : (
                                     data.map((row) => (
                                         <Row
-                                            key={row?.clientId}
+                                            key={`${row?.opHost}-${row?.clientId}`}
                                             row={row}
                                             notifyOnDataChange={notifyOnDataChange}
                                         />

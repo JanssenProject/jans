@@ -92,7 +92,7 @@ const Options = () => {
       <Box
         sx={{
           height: 'auto',
-          minWidth: '100vw',
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: 'background.default',

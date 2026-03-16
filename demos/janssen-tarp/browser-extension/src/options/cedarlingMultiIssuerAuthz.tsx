@@ -155,13 +155,22 @@ export default function CedarlingMultiIssuerAuthz({ data }: CedarlingMultiIssuer
                 const mapping = tokenAliasMap[key];
 
                 if (tokenSelection[key]) {
-                    const exists = updatedTokens.some((t) => t.mapping === mapping);
+                    const payload = tokenPayloadMap[key];
+                    if (!payload) {
+                        return;
+                    }
 
-                    if (!exists) {
-                        updatedTokens.push({
-                            mapping,
-                            payload: tokenPayloadMap[key]
-                        });
+                    // TokenObj.payload is a string (JWT or JSON). If userDetails is an object, stringify it.
+                    const nextToken: TokenObj = {
+                        mapping,
+                        payload: typeof payload === "string" ? payload : JSON.stringify(payload),
+                    };
+                    const index = updatedTokens.findIndex((t) => t.mapping === mapping);
+
+                    if (index >= 0) {
+                        updatedTokens[index] = nextToken;
+                    } else {
+                        updatedTokens.push(nextToken);
                     }
                 } else {
                     updatedTokens = updatedTokens.filter((t) => t.mapping !== mapping);
