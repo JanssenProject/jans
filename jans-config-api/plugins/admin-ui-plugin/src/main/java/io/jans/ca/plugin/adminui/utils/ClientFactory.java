@@ -7,6 +7,7 @@ import jakarta.ws.rs.client.Invocation;
 public class ClientFactory {
     private final static ClientFactory INSTANCE = new ClientFactory();
     private final Client client;
+    
     private ClientFactory() {
         this.client = ClientBuilder.newClient();
     }

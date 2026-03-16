@@ -88,7 +88,7 @@ public class Fido2Util {
         HttpResponse httpResponse = serviceResponse.getHttpResponse();
         if (httpResponse != null) {
             HttpEntity entity = httpResponse.getEntity();
-            logger.info("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
+            logger.debug("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
                     httpResponse.getStatusLine().getStatusCode());
             if (entity == null) {
                 return jsonString;

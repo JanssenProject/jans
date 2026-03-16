@@ -106,24 +106,13 @@ public class Fido2MetricsService {
      */
     public PagedResult<Fido2MetricsEntry> getFido2MetricsEntries(String token, LocalDateTime startTime,
             LocalDateTime endTime) throws JsonProcessingException {
-        log.info("Get Fido2 metrics entries with token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
+        log.info("Get Fido2 metrics entries with startTime:{}, endTime:{}", startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getFido2MetricsEntriesUrl(), headers, data);
 
@@ -139,25 +128,13 @@ public class Fido2MetricsService {
      */
     public PagedResult<Fido2MetricsEntry> getFido2UserMetricsEntries(String token, String userId,
             LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
-        log.info("Get Fido2 Metrics by user - token:{}, userId:{}, startTime:{}, endTime:{}", token, userId,
-                startTime, endTime);
+        log.info("Get Fido2 Metrics by user - userId:{}, startTime:{}, endTime:{}", userId, startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getFido2MetricsPagedResult(Fido2MetricsEntry.class, this.getFido2UserMetricsEntriesUrl() + "/" + userId,
                 headers, data);
@@ -174,26 +151,14 @@ public class Fido2MetricsService {
      */
     public PagedResult<Fido2MetricsEntry> getMetricsEntriesByOperation(String token, String operationType,
             LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
-        log.info(" Get Fido2 metrics entries by operationType with - token:{}, operationType:{}, startTime:{}, endTime:{}",
-                token, operationType, startTime, endTime);
+        log.info(" Get Fido2 metrics entries by operationType with - operationType:{}, startTime:{}, endTime:{}",
+                operationType, startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getFido2MetricsPagedResult(Fido2MetricsEntry.class,
                 this.getMetricsEntriesByOperationUrl() + "/" + operationType, headers, data);
@@ -210,25 +175,14 @@ public class Fido2MetricsService {
      */
     public PagedResult<Fido2MetricsAggregation> getFido2MetricsAggregation(String token, String aggregationType,
             LocalDateTime startTime, LocalDateTime endTime) throws JsonProcessingException {
-        log.info("Get Fido2 aggregated metrics - token:{}, aggregationType:{}, startTime:{}, endTime:{}", token,
-                aggregationType, startTime, endTime);
+        log.info("Get Fido2 aggregated metrics - aggregationType:{}, startTime:{}, endTime:{}", aggregationType,
+                startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getFido2MetricsPagedResult(Fido2MetricsAggregation.class,
                 this.getMetricsAggregationsUrl() + "/" + aggregationType, headers, data);
@@ -244,25 +198,14 @@ public class Fido2MetricsService {
      */
     public JsonNode getFido2MetricsAggregationSummary(String token, String aggregationType, LocalDateTime startTime,
             LocalDateTime endTime) throws JsonProcessingException {
-        log.info("Get aggregation summary statistics - token:{}, aggregationType:{}, startTime:{}, endTime:{}",
-                token, aggregationType, startTime, endTime);
+        log.info("Get aggregation summary statistics - aggregationType:{}, startTime:{}, endTime:{}", aggregationType,
+                startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getMetricsData(this.getMetricsAggregationsUrl() + "/" + aggregationType + "/summary", headers, data);
     }
@@ -276,25 +219,13 @@ public class Fido2MetricsService {
      */
     public JsonNode getAdoptionMetrics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        log.info("Get adoption metrics with - token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
+        log.info("Get adoption metrics with - startTime:{}, endTime:{}", startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getMetricsData(this.getMetricsAnalyticsUrl() + "/adoption", headers, data);
 
@@ -309,25 +240,13 @@ public class Fido2MetricsService {
      */
     public JsonNode getPerformanceMetrics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        log.info("Get performance metrics - token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
+        log.info("Get performance metrics - startTime:{}, endTime:{}", startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getMetricsData(this.getMetricsAnalyticsPerformanceUrl(), headers, data);
     }
@@ -341,24 +260,13 @@ public class Fido2MetricsService {
      */
     public JsonNode getDeviceAnalytics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        log.info("Get device analytics - token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
+        log.info("Get device analytics - startTime:{}, endTime:{}", startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getMetricsData(this.getDeviceAnalyticsUrl(), headers, data);
     }
@@ -372,24 +280,13 @@ public class Fido2MetricsService {
      */
     public JsonNode getErrorAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        log.info("Get error analysis - token:{}, startTime:{}, endTime:{}", token, startTime, endTime);
+        log.info("Get error analysis - startTime:{}, endTime:{}", startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getMetricsData(this.getErrorAnalysisUrl(), headers, data);
     }
@@ -404,25 +301,14 @@ public class Fido2MetricsService {
      */
     public JsonNode getTrendAnalysis(String token, String aggregationType, LocalDateTime startTime,
             LocalDateTime endTime) throws JsonProcessingException {
-        log.info("Get Fido2 metrics trend analysis with - token:{}, aggregationType:{}, startTime:{}, endTime:{}",
-                token, aggregationType, startTime, endTime);
+        log.info("Get Fido2 metrics trend analysis with - aggregationType:{}, startTime:{}, endTime:{}",
+                aggregationType, startTime, endTime);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
-        // Query Parameter
-        Map<String, String> data = new HashMap<>();
-        if (startTime != null) {
-            data.put("startTime", startTime.toString());
-        }
-
-        if (endTime != null) {
-            data.put("endTime", endTime.toString());
-        }
+        // Request data
+        Map<String, String> data = buildTimeRange(startTime, endTime);
 
         return getMetricsData(this.getTrendAnalysisUrl() + "/" + aggregationType, headers, data);
     }
@@ -436,15 +322,10 @@ public class Fido2MetricsService {
      */
     public JsonNode getPeriodOverPeriodComparison(String token, String aggregationType, int periods)
             throws JsonProcessingException {
-        log.info("Get period-over-period comparison - token:{}, aggregationType:{}, periods:{}", token,
-                aggregationType, periods);
+        log.info("Get period-over-period comparison - aggregationType:{}, periods:{}", aggregationType, periods);
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
         // Query Parameter
         Map<String, String> data = new HashMap<>();
@@ -459,14 +340,10 @@ public class Fido2MetricsService {
      * @return Configuration information
      */
     public JsonNode getMetricsConfig(String token) throws JsonProcessingException {
-        log.info("Get metrics configuration - token:{}", token);
+        log.info("Get metrics configuration");
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
         return getMetricsData(this.getMetricsConfigUrl(), headers, null);
     }
@@ -478,14 +355,10 @@ public class Fido2MetricsService {
      * @return Health status
      */
     public JsonNode getMetricsHealth(String token) throws JsonProcessingException {
-        log.info("Verify health check endpoint for metrics service - token:{}", token);
+        log.info("Verify health check endpoint for metrics service");
 
         // Request headers
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        if (StringUtils.isNotBlank(token)) {
-            headers.put(AUTHORIZATION, token);
-        }
+        Map<String, String> headers = buildHeaders(token);
 
         return getMetricsData(this.getMetricsHealthUrl(), headers, null);
     }
@@ -530,6 +403,24 @@ public class Fido2MetricsService {
         log.info("Fido2Metrics Data: jsonNode:{}", jsonNode);
 
         return jsonNode;
+    }
+
+    private Map<String, String> buildHeaders(String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+        return headers;
+    }
+
+    private Map<String, String> buildTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        Map<String, String> data = new HashMap<>();
+        if (startTime != null)
+            data.put("startTime", startTime.toString());
+        if (endTime != null)
+            data.put("endTime", endTime.toString());
+        return data;
     }
 
 }

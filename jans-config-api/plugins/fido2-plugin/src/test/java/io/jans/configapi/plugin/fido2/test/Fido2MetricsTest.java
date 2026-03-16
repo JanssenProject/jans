@@ -18,49 +18,73 @@ import org.testng.annotations.Parameters;
 
 public class Fido2MetricsTest extends Fido2BaseTest {
 
-    @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2MetricsEntries"})
+    @Parameters({ "test.issuer", "fido2MetricsUrl", "fido2MetricsEntries" })
     @Test
-    public void getFido2MetricsEntry(final String issuer, final String fido2MetricsUrl, final String fido2MetricsEntries) {
-        log.debug(" getFido2MetricsEntry() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntries:{}", issuer, fido2MetricsUrl, fido2MetricsEntries);
+    public void getFido2MetricsEntryWithInvalidToken(final String issuer, final String fido2MetricsUrl,
+            final String fido2MetricsEntries) {
+        log.debug(" getFido2MetricsEntry() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntries:{}", issuer,
+                fido2MetricsUrl, fido2MetricsEntries);
+
+        String invalidToken = this.getAccessTokenForGivenScope("https://jans.io/oauth/config/attributes.readonly");
+        Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2MetricsEntries);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + invalidToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+        try (Response response = request.get()) {
+            log.info("getFido2MetricsEntry() - response:{}, response.getStatus():{}", response, response.getStatus());
+            assertEquals(response.getStatus(), Status.UNAUTHORIZED.getStatusCode());
+        }
+    }
+    
+    @Parameters({ "test.issuer", "fido2MetricsUrl", "fido2MetricsEntries" })
+    @Test
+    public void getFido2MetricsEntry(final String issuer, final String fido2MetricsUrl,
+            final String fido2MetricsEntries) {
+        log.debug(" getFido2MetricsEntry() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntries:{}", issuer,
+                fido2MetricsUrl, fido2MetricsEntries);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2MetricsEntries);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        Response response = request.get();
-        log.info("getFido2MetricsEntry() - response:{}, response.getStatus():{}", response, response.getStatus());
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        
+        try (Response response = request.get()) {
+            log.info("getFido2MetricsEntry() - response:{}, response.getStatus():{}", response, response.getStatus());
+            assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        }
     }
-    
-    @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2UserMetrics"})
+
+    @Parameters({ "test.issuer", "fido2MetricsUrl", "fido2UserMetrics" })
     @Test
     public void getFido2UserMetrics(final String issuer, final String fido2MetricsUrl, final String fido2UserMetrics) {
-        log.debug("\n\n getFido2UserMetrics() - issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", issuer, fido2MetricsUrl, fido2UserMetrics);
+        log.debug("\n\n getFido2UserMetrics() - issuer:{}, fido2MetricsUrl:{}, fido2UserMetrics:{}", issuer,
+                fido2MetricsUrl, fido2UserMetrics);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2UserMetrics);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        Response response = request.get();
-        log.info("getFido2UserMetrics() -  response:{}, response.getStatus():{}", response, response.getStatus());
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        
+        try (Response response = request.get()) {
+            log.info("getFido2UserMetrics() - response:{}, response.getStatus():{}", response, response.getStatus());
+            assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        }
     }
-    
-    @Parameters({ "test.issuer", "fido2MetricsUrl" , "fido2MetricsConfig"})
+
+    @Parameters({ "test.issuer", "fido2MetricsUrl", "fido2MetricsConfig" })
     @Test
-    public void getFido2MetricsConfig(final String issuer, final String fido2MetricsUrl, final String fido2MetricsConfig) {
-        log.debug("getFido2MetricsConfig() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsConfig:{}", issuer, fido2MetricsUrl, fido2MetricsConfig);
+    public void getFido2MetricsConfig(final String issuer, final String fido2MetricsUrl,
+            final String fido2MetricsConfig) {
+        log.debug("getFido2MetricsConfig() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsConfig:{}", issuer,
+                fido2MetricsUrl, fido2MetricsConfig);
 
         Builder request = getResteasyService().getClientBuilder(issuer + fido2MetricsUrl + fido2MetricsConfig);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        Response response = request.get();
-        log.info("getFido2MetricsConfig() - response:{}, response.getStatus():{}", response, response.getStatus());
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
-        
+        try (Response response = request.get()) {
+            log.info("getFido2MetricsEntry() - response:{}, response.getStatus():{}", response, response.getStatus());
+            assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        }
+
     }
 
 }

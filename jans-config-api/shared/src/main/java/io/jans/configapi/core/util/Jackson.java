@@ -157,22 +157,22 @@ public class Jackson {
     }
 
     public static <T> T readStringValue(String content, Class<T> clazz) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = readMapper();
         return mapper.readValue(content, clazz);
     }
 
     public static <T> List<T> readListValue(String content, Class<T> clazz) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = readMapper();
         return mapper.readValue(content, mapper.getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
-    public static <T> List<T> readList(String str, Class<T> type) throws JsonProcessingException{
+    public static <T> List<T> readList(String str, Class<T> type) throws JsonProcessingException {
         return readList(str, ArrayList.class, type);
     }
 
     public static <T> List<T> readList(String str, Class<? extends List> type, Class<T> elementType)
             throws JsonProcessingException {
-        final ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = readMapper();
         return mapper.readValue(str,
                 mapper.getTypeFactory().constructCollectionType(type.asSubclass(Collection.class), elementType));
     }
@@ -213,6 +213,12 @@ public class Jackson {
         String jsonString = objectMapper.writeValueAsString(obj);
         // Create JSONObject from the JSON string
         return new JSONObject(jsonString);
+    }
+    
+    /***** Helper Methods ******/
+    
+    private static ObjectMapper readMapper() {
+        return JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
 }

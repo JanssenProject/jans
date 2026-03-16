@@ -15689,11 +15689,11 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanAccess:
           type: boolean
         userCanView:
           type: boolean
@@ -15701,7 +15701,7 @@ components:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16619,6 +16619,8 @@ components:
           $ref: "#/components/schemas/LockMessageConfig"
         connectionServiceConfiguration:
           $ref: "#/components/schemas/ConnectionServiceConfiguration"
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16628,8 +16630,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18527,9 +18527,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
