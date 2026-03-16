@@ -150,9 +150,6 @@ config:
 persistence:
   # -- Boolean flag to enable/disable the persistence job.
   enabled: true
-alb:
-  # -- switches the service to Nodeport for ALB ingress
-  ingress: false
 # -- Parameters used globally across all services helm charts.
 auth-server:
   # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.

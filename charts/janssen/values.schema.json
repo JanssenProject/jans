@@ -247,15 +247,6 @@
             "description": "Parameters used globally across all services helm charts.",
             "type": "object",
             "properties": {
-                "alb": {
-                    "type": "object",
-                    "properties": {
-                        "ingress": {
-                            "description": "Activates ALB ingress",
-                            "type": "boolean"
-                        }
-                    }
-                },
                 "auth-server": {
                     "type": "object",
                     "properties": {

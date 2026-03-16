@@ -713,10 +713,6 @@ global:
     # -- Add custom secret envs to the service.
     # variable1: value1
     secret: {}
-  alb:
-    # -- Activates ALB ingress
-    ingress: false
-
   auth-server:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
