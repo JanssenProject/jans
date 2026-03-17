@@ -273,20 +273,20 @@ Initialize a new Cedarling instance.
 pub async fn new(config: &BootstrapConfig) -> Result<Self, CedarlingError>
 ```
 
-#### `authorize()`
-
-Perform token-based authorization.
-
-```rust
-pub async fn authorize(&self, request: Request) -> Result<AuthorizeResult, CedarlingError>
-```
-
 #### `authorize_unsigned()`
 
-Perform unsigned authorization.
+Perform unsigned authorization with directly provided principals.
 
 ```rust
 pub async fn authorize_unsigned(&self, request: RequestUnsigned) -> Result<AuthorizeResult, CedarlingError>
+```
+
+#### `authorize_multi_issuer()`
+
+Perform token-based authorization using multi-issuer tokens.
+
+```rust
+pub async fn authorize_multi_issuer(&self, request: AuthorizeMultiIssuerRequest) -> Result<AuthorizeResult, CedarlingError>
 ```
 
 #### `pop_logs()`
