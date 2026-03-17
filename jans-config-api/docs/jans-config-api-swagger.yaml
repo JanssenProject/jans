@@ -1852,16 +1852,16 @@ paths:
           default: 50
       - name: start_date
         in: query
+        description: "Start date/time for the log entries report. Accepted: dd-MM-yyyy\
+          \ or ISO-8601 date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
         schema:
           type: string
-          description: "Start date/time for the log entries report. Accepted: `dd-MM-yyyy`\
-            \ or ISO-8601 date-time (e.g. `yyyy-MM-ddTHH:mm:ssZ`)."
       - name: end_date
         in: query
+        description: "End date/time for the log entries. Accepted: dd-MM-yyyy or ISO-8601\
+          \ date-time (e.g. yyyy-MM-ddTHH:mm:ssZ)."
         schema:
           type: string
-          description: "End date/time for the log entries. Accepted: `dd-MM-yyyy`\
-            \ or ISO-8601 date-time (e.g. `yyyy-MM-ddTHH:mm:ssZ`)."
       responses:
         "200":
           description: Ok
@@ -15691,19 +15691,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -18346,10 +18346,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -18520,8 +18520,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18532,6 +18530,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
