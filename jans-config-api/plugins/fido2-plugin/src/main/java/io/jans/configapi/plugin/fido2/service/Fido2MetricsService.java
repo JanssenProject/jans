@@ -46,27 +46,27 @@ public class Fido2MetricsService {
     }
 
     public String getFido2UserMetricsEntriesUrl() {
-        return getFido2MetricsUrl() + "/entries/user/";
+        return getFido2MetricsUrl() + "/entries/user";
     }
 
     public String getMetricsEntriesByOperationUrl() {
-        return getFido2MetricsUrl() + "/entries/operation/";
+        return getFido2MetricsUrl() + "/entries/operation";
     }
 
     public String getMetricsAggregationsUrl() {
-        return getFido2MetricsUrl() + "/aggregations/";
+        return getFido2MetricsUrl() + "/aggregations";
     }
 
     public String getMetricsAnalyticsUrl() {
-        return getFido2MetricsUrl() + "/analytics/";
+        return getFido2MetricsUrl() + "/analytics";
     }
 
     public String getMetricsAnalyticsPerformanceUrl() {
-        return getFido2MetricsUrl() + "/analytics/performance/";
+        return getFido2MetricsUrl() + "/analytics/performance";
     }
 
     public String getDeviceAnalyticsUrl() {
-        return getFido2MetricsUrl() + "/analytics/devices/";
+        return getFido2MetricsUrl() + "/analytics/devices";
     }
 
     public String getErrorAnalysisUrl() {
@@ -74,19 +74,19 @@ public class Fido2MetricsService {
     }
 
     public String getTrendAnalysisUrl() {
-        return getFido2MetricsUrl() + "/analytics/trends/";
+        return getFido2MetricsUrl() + "/analytics/trends";
     }
 
     public String getPeriodOverPeriodComparisonUrl() {
-        return getFido2MetricsUrl() + "/analytics/comparison/";
+        return getFido2MetricsUrl() + "/analytics/comparison";
     }
 
     public String getMetricsConfigUrl() {
-        return getFido2MetricsUrl() + "/config/";
+        return getFido2MetricsUrl() + "/config";
     }
 
     public String getMetricsHealthUrl() {
-        return getFido2MetricsUrl() + "/health/";
+        return getFido2MetricsUrl() + "/health";
     }
 
     public String getBaseDnForFido2MetricsEntry() {
@@ -325,7 +325,7 @@ public class Fido2MetricsService {
 
         // Query Parameter
         Map<String, String> data = new HashMap<>();
-        data.put("startTime", String.valueOf(periods));
+        data.put("periods", String.valueOf(periods));
 
         return getMetricsData(this.getPeriodOverPeriodComparisonUrl() + "/" + aggregationType, headers, data);
     }

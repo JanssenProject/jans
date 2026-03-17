@@ -261,7 +261,7 @@ paths:
           default: 50
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
+        description: The 0-based index of the first query result
         schema:
           type: integer
           format: int32
@@ -441,7 +441,7 @@ paths:
           default: 50
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
+        description: The 0-based index of the first query result
         schema:
           type: integer
           format: int32
@@ -536,7 +536,7 @@ paths:
           default: 50
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
+        description: The 0-based index of the first query result
         schema:
           type: integer
           format: int32
@@ -682,7 +682,7 @@ paths:
           default: 50
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
+        description: The 0-based index of the first query result
         schema:
           type: integer
           format: int32
@@ -1648,34 +1648,27 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationSuccesses:
+        registrationFailures:
           type: integer
           format: int64
         authenticationFailures:
           type: integer
           format: int64
-        period:
-          type: string
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
         registrationSuccessRate:
           type: number
           format: double
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
         registrationAvgDuration:
           type: number
           format: double
@@ -1683,24 +1676,31 @@ components:
           type: object
           additionalProperties:
             type: object
+        fallbackEvents:
+          type: integer
+          format: int64
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         authenticationSuccessRate:
           type: number
           format: double
         authenticationAvgDuration:
           type: number
           format: double
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
+        period:
+          type: string
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

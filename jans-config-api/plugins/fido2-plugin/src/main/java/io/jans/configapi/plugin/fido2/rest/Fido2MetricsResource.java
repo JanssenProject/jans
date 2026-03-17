@@ -66,7 +66,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get metrics entries within a time range.
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
@@ -94,7 +94,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2MetricsEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Start date/time for "
                     + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
@@ -139,7 +139,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get metrics entries for a specific user.
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param userId     User ID
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
@@ -168,7 +168,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2UserMetricsEntries(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "user Id") @PathParam("userId") @NotNull String userId,
             @Parameter(description = "Start date/time for "
                     + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
@@ -217,7 +217,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get metrics entries by operation type.
      *
      * @param limit         maximum number of results to return
-     * @param startIndex    1-based index of the first result to return
+     * @param startIndex    0-based index of the first result to return
      * @param operationType Operation type
      * @param startDate     optional start date (dd-MM-yyyy) to include entries on
      *                      or after this date
@@ -246,7 +246,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getMetricsEntriesByOperation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Operation Type") @PathParam("operationType") @NotNull String operationType,
             @Parameter(description = "Start date/time for "
                     + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
@@ -296,7 +296,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get aggregated metrics data.
      *
      * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
+     * @param startIndex      0-based index of the first result to return
      * @param aggregationType Aggregation type
      * @param startDate       optional start date (dd-MM-yyyy) to include entries on
      *                        or after this date
@@ -326,7 +326,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2MetricsAggregation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = " Aggregation Type", schema = @Schema(type = "string")) @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
@@ -375,7 +375,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get aggregation summary statistics.
      *
      * @param limit           maximum number of results to return
-     * @param startIndex      1-based index of the first result to return
+     * @param startIndex      0-based index of the first result to return
      * @param aggregationType Aggregation type
      * @param startDate       optional start date (dd-MM-yyyy) to include entries on
      *                        or after this date
@@ -446,7 +446,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get adoption metrics
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
@@ -513,7 +513,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get performance metrics
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
@@ -580,7 +580,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get device analytics
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
@@ -647,7 +647,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get error analysis
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
@@ -714,7 +714,7 @@ public class Fido2MetricsResource extends BaseResource {
      * Get trend analysis for metrics over time
      *
      * @param limit      maximum number of results to return
-     * @param startIndex 1-based index of the first result to return
+     * @param startIndex 0-based index of the first result to return
      * @param startDate  optional start date (dd-MM-yyyy) to include entries on or
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
