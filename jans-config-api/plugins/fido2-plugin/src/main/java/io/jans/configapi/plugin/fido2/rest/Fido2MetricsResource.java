@@ -4,6 +4,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -967,13 +968,13 @@ public class Fido2MetricsResource extends BaseResource {
         }
         // Try ISO date only (e.g. 2024-02-13)
         try {
-            return LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
+            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
         } catch (DateTimeParseException ignored) {
             // continue
         }
 
         // Fallback to legacy dd-MM-yyyy
-        return LocalDateTime.parse(trimmed, DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT));
+        return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT)).atStartOfDay();
     }
 
     private Fido2MetricsEntryPagedResult getFido2MetricsEntryPagedResult(PagedResult<Fido2MetricsEntry> pagedResult,

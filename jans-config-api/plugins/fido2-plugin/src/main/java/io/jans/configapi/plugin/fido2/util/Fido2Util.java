@@ -120,7 +120,7 @@ public class Fido2Util {
         }
         jsonNode = Jackson.asJsonNode(jsonSring);
         if (StringUtils.isNotBlank(nodeName) && jsonNode != null && jsonNode.get(nodeName) != null) {
-            jsonNode = jsonNode.get("response");
+            jsonNode = jsonNode.get(nodeName);
         }
         return jsonNode;
     }

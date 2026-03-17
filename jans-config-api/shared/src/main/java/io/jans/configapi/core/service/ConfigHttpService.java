@@ -136,16 +136,23 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Create an HTTP client configured to use the specified trust store for TLS trust material.
+     * Create an HTTP client configured to use the specified trust store for TLS
+     * trust material.
      *
-     * @param trustStorePath     filesystem path to the trust store file (e.g., JKS or PKCS12)
+     * @param trustStorePath     filesystem path to the trust store file (e.g., JKS
+     *                           or PKCS12)
      * @param trustStorePassword password for the trust store
-     * @return a CloseableHttpClient that uses the provided trust store for SSL/TLS connections
+     * @return a CloseableHttpClient that uses the provided trust store for SSL/TLS
+     *         connections
      * @throws KeyManagementException   if the SSL context cannot be initialized
-     * @throws NoSuchAlgorithmException if a required cryptographic algorithm is not available
-     * @throws KeyStoreException        if the trust store cannot be loaded or is invalid
-     * @throws CertificateException     if any certificates in the trust store cannot be parsed
-     * @throws IOException              if an I/O error occurs while reading the trust store file
+     * @throws NoSuchAlgorithmException if a required cryptographic algorithm is not
+     *                                  available
+     * @throws KeyStoreException        if the trust store cannot be loaded or is
+     *                                  invalid
+     * @throws CertificateException     if any certificates in the trust store
+     *                                  cannot be parsed
+     * @throws IOException              if an I/O error occurs while reading the
+     *                                  trust store file
      */
     public CloseableHttpClient getHttpsClient(String trustStorePath, String trustStorePassword)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException,
@@ -162,19 +169,27 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Create a CloseableHttpClient configured with an optional TLS protocol and cipher-suite policy.
+     * Create a CloseableHttpClient configured with an optional TLS protocol and
+     * cipher-suite policy.
      *
-     * If `enabledProtocols` is null or empty, the returned client uses the JVM/default TLS configuration.
+     * If `enabledProtocols` is null or empty, the returned client uses the
+     * JVM/default TLS configuration.
      *
-     * @param enabledProtocols the TLS protocols to enable (e.g., {"TLSv1.2","TLSv1.3"}); when null or empty, default protocols are used
-     * @param allowedCipherSuites the cipher suites to enable, or null to use the default cipher suite list
-     * @return a CloseableHttpClient configured with the specified TLS protocols and cipher suites (or a default TLS configuration when `enabledProtocols` is null/empty)
-     * @throws NoSuchAlgorithmException if the requested SSL algorithm is not available when building the SSLContext
-     * @throws KeyManagementException if there is an issue initializing the SSLContext's key management
+     * @param enabledProtocols    the TLS protocols to enable (e.g.,
+     *                            {"TLSv1.2","TLSv1.3"}); when null or empty,
+     *                            default protocols are used
+     * @param allowedCipherSuites the cipher suites to enable, or null to use the
+     *                            default cipher suite list
+     * @return a CloseableHttpClient configured with the specified TLS protocols and
+     *         cipher suites (or a default TLS configuration when `enabledProtocols`
+     *         is null/empty)
+     * @throws NoSuchAlgorithmException if the requested SSL algorithm is not
+     *                                  available when building the SSLContext
+     * @throws KeyManagementException   if there is an issue initializing the
+     *                                  SSLContext's key management
      */
-    public CloseableHttpClient createHttpsClientWithTlsPolicy(String[] enabledProtocols,
-                                                              String[] allowedCipherSuites
-    ) throws NoSuchAlgorithmException, KeyManagementException {
+    public CloseableHttpClient createHttpsClientWithTlsPolicy(String[] enabledProtocols, String[] allowedCipherSuites)
+            throws NoSuchAlgorithmException, KeyManagementException {
         log.trace(CON_STATS_STR, connectionManager.getTotalStats());
         RequestConfig requestConfig = RequestConfig.custom().build();
 
@@ -182,43 +197,47 @@ public class ConfigHttpService implements Serializable {
         SSLContext sslContext = SSLContexts.custom().build();
         if (enabledProtocols == null || enabledProtocols.length == 0) {
             return HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
-                    .setConnectionManager(connectionManager)
-                    .build();
+                    .setDefaultRequestConfig(
+                            RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
+                    .setConnectionManager(connectionManager).build();
         }
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-                sslContext,
-                enabledProtocols,
-                allowedCipherSuites,
-                SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, enabledProtocols,
+                allowedCipherSuites, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-        return HttpClients.custom()
-                .setSSLSocketFactory(sslsf)
+        return HttpClients.custom().setSSLSocketFactory(sslsf)
                 .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
-                .setConnectionManager(connectionManager)
-                .build();
+                .setConnectionManager(connectionManager).build();
     }
 
     /**
-     * Builds an HTTPS CloseableHttpClient configured to use the provided trust store and key store.
+     * Builds an HTTPS CloseableHttpClient configured to use the provided trust
+     * store and key store.
      *
-     * The returned client uses an SSLContext initialized from the specified trust store and key store,
-     * and is configured with the service's connection manager and a standard cookie specification.
+     * The returned client uses an SSLContext initialized from the specified trust
+     * store and key store, and is configured with the service's connection manager
+     * and a standard cookie specification.
      *
-     * @param trustStorePath     filesystem path to the trust store file (e.g., JKS/PKCS12)
+     * @param trustStorePath     filesystem path to the trust store file (e.g.,
+     *                           JKS/PKCS12)
      * @param trustStorePassword password for the trust store
-     * @param keyStorePath       filesystem path to the key store containing client certificate/private key
+     * @param keyStorePath       filesystem path to the key store containing client
+     *                           certificate/private key
      * @param keyStorePassword   password for the key store (and key material)
-     * @return                   a CloseableHttpClient that uses the loaded SSL context
-     * @throws KeyManagementException   if the SSLContext cannot be initialized
-     * @throws NoSuchAlgorithmException if a required cryptographic algorithm is not available
-     * @throws KeyStoreException        if the key store cannot be loaded or accessed
-     * @throws CertificateException     if any certificate cannot be parsed or validated
-     * @throws IOException              if an I/O error occurs reading the store files
-     * @throws UnrecoverableKeyException if a key in the key store cannot be recovered (e.g., wrong password)
+     * @return a CloseableHttpClient that uses the loaded SSL context
+     * @throws KeyManagementException    if the SSLContext cannot be initialized
+     * @throws NoSuchAlgorithmException  if a required cryptographic algorithm is
+     *                                   not available
+     * @throws KeyStoreException         if the key store cannot be loaded or
+     *                                   accessed
+     * @throws CertificateException      if any certificate cannot be parsed or
+     *                                   validated
+     * @throws IOException               if an I/O error occurs reading the store
+     *                                   files
+     * @throws UnrecoverableKeyException if a key in the key store cannot be
+     *                                   recovered (e.g., wrong password)
      */
     public CloseableHttpClient getHttpsClient(String trustStorePath, String trustStorePassword, String keyStorePath,
-                                              String keyStorePassword) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException,
+            String keyStorePassword) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException,
             CertificateException, IOException, UnrecoverableKeyException {
         log.trace(CON_STATS_STR, connectionManager.getTotalStats());
 
@@ -236,17 +255,21 @@ public class ConfigHttpService implements Serializable {
     /**
      * Execute an HTTP POST to the given URI and return the request/response pair.
      *
-     * @param httpClient the HttpClient used to execute the request
-     * @param uri the target URI for the POST request
-     * @param authCode an authorization token to include; if blank, no Authorization header is added
-     * @param headers additional headers to include in the request; may be null
-     * @param postData the request body as a string; may be null
-     * @param contentType the content type for the request body; if null, defaults to application/json
-     * @param authType the authentication scheme prefix (for example "Bearer ") to prepend to {@code authCode}
-     * @return an HttpServiceResponse containing the executed HttpPost and HttpResponse, or {@code null} if execution failed
+     * @param httpClient  the HttpClient used to execute the request
+     * @param uri         the target URI for the POST request
+     * @param authCode    an authorization token to include; if blank, no
+     *                    Authorization header is added
+     * @param headers     additional headers to include in the request; may be null
+     * @param postData    the request body as a string; may be null
+     * @param contentType the content type for the request body; if null, defaults
+     *                    to application/json
+     * @param authType    the authentication scheme prefix (for example "Bearer ")
+     *                    to prepend to {@code authCode}
+     * @return an HttpServiceResponse containing the executed HttpPost and
+     *         HttpResponse, or {@code null} if execution failed
      */
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
-                                           Map<String, String> headers, String postData, ContentType contentType, String authType) {
+            Map<String, String> headers, String postData, ContentType contentType, String authType) {
 
         HttpPost httpPost = new HttpPost(uri);
 
@@ -279,47 +302,56 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Execute an HTTP POST to the specified URI using the provided HttpClient and payload.
+     * Execute an HTTP POST to the specified URI using the provided HttpClient and
+     * payload.
      *
      * @param httpClient the HttpClient used to execute the request
-     * @param uri the target request URI
-     * @param authCode an optional authorization value; if non-null an Authorization header is set
-     * @param headers additional request headers to include (may be null)
-     * @param postData the request body to send (may be null)
-     * @return an HttpServiceResponse wrapping the executed HttpPost and HttpResponse, or `null` if execution failed
+     * @param uri        the target request URI
+     * @param authCode   an optional authorization value; if non-null an
+     *                   Authorization header is set
+     * @param headers    additional request headers to include (may be null)
+     * @param postData   the request body to send (may be null)
+     * @return an HttpServiceResponse wrapping the executed HttpPost and
+     *         HttpResponse, or `null` if execution failed
      */
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
-                                           Map<String, String> headers, String postData) {
+            Map<String, String> headers, String postData) {
         return executePost(httpClient, uri, authCode, headers, postData, null, null);
     }
 
     /**
      * Execute an HTTP POST request using the provided HTTP client.
      *
-     * @param httpClient the HttpClient to execute the request
-     * @param uri the target URI for the POST request
-     * @param authCode optional authorization token value; when provided it will be set on the `Authorization` header
-     * @param postData the request body to send
-     * @param contentType the content type of the request body; if `null`, `application/json` is used
-     * @return an HttpServiceResponse containing the executed HttpPost and the HttpResponse, or `null` if the request failed
+     * @param httpClient  the HttpClient to execute the request
+     * @param uri         the target URI for the POST request
+     * @param authCode    optional authorization token value; when provided it will
+     *                    be set on the `Authorization` header
+     * @param postData    the request body to send
+     * @param contentType the content type of the request body; if `null`,
+     *                    `application/json` is used
+     * @return an HttpServiceResponse containing the executed HttpPost and the
+     *         HttpResponse, or `null` if the request failed
      */
     public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode, String postData,
-                                           ContentType contentType) {
+            ContentType contentType) {
         return executePost(httpClient, uri, authCode, null, postData, contentType, null);
     }
 
     /**
      * Sends an HTTP POST to the given URI using the service's default HTTPS client.
      *
-     * @param uri the target request URI
-     * @param authCode optional authorization credentials (token or credential string) to include in the Authorization header
-     * @param postData the request body to send
+     * @param uri         the target request URI
+     * @param authCode    optional authorization credentials (token or credential
+     *                    string) to include in the Authorization header
+     * @param postData    the request body to send
      * @param contentType the content type of the request body
-     * @param authType the scheme or prefix to use for the Authorization header (for example "Bearer ")
-     * @return an HttpServiceResponse containing the executed request and response, or {@code null} if the request failed
+     * @param authType    the scheme or prefix to use for the Authorization header
+     *                    (for example "Bearer ")
+     * @return an HttpServiceResponse containing the executed request and response,
+     *         or {@code null} if the request failed
      */
     public HttpServiceResponse executePost(String uri, String authCode, String postData, ContentType contentType,
-                                           String authType) {
+            String authType) {
         return executePost(this.getHttpsClient(), uri, authCode, null, postData, contentType, authType);
     }
 
@@ -338,24 +370,32 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Executes an HTTP GET against the given URI with optional headers and query parameters and returns the request/response pair.
+     * Executes an HTTP GET against the given URI with optional headers and query
+     * parameters and returns the request/response pair.
      *
-     * The method appends URL-encoded query parameters to the requestUri when provided, applies any supplied headers, and executes the request using the given HttpClient.
+     * The method appends URL-encoded query parameters to the requestUri when
+     * provided, applies any supplied headers, and executes the request using the
+     * given HttpClient.
      *
-     * @param requestUri the target URI (may be appended with URL-encoded query parameters)
-     * @param headers    optional HTTP headers to include on the request (may be null)
-     * @param parameters optional query parameters to append to the URI; entries with blank values are ignored (may be null)
-     * @return a HttpServiceResponse containing the executed HttpGet and the HttpResponse, or `null` if the request failed due to an I/O error
+     * @param requestUri the target URI (may be appended with URL-encoded query
+     *                   parameters)
+     * @param headers    optional HTTP headers to include on the request (may be
+     *                   null)
+     * @param parameters optional query parameters to append to the URI; entries
+     *                   with blank values are ignored (may be null)
+     * @return a HttpServiceResponse containing the executed HttpGet and the
+     *         HttpResponse, or `null` if the request failed due to an I/O error
+     * @throws Exception
      */
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
-                                          Map<String, String> parameters) {
+            Map<String, String> parameters) {
 
         log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
-
+        HttpServiceResponse httpServiceResponse = null;
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
-            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext(); ) {
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
                 String key = iterator.next();
                 String value = parameters.get(key);
                 if (StringUtils.isNotBlank(value)) {
@@ -378,12 +418,13 @@ public class ConfigHttpService implements Serializable {
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             log.info("httpResponse:{}", httpResponse);
-            return new HttpServiceResponse(httpGet, httpResponse);
-        } catch (IOException ex) {
+            httpServiceResponse = new HttpServiceResponse(httpGet, httpResponse);
+        } catch (Exception ex) {
             log.error("Failed to execute get request", ex);
+            throw new WebApplicationException("Failed to execute '{" + requestUri + "}'", ex);
         }
 
-        return null;
+        return httpServiceResponse;
     }
 
     public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers, Map<String, String> data) {
@@ -401,12 +442,14 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Execute an HTTP DELETE request to the given URI using the service's default HTTPS client.
+     * Execute an HTTP DELETE request to the given URI using the service's default
+     * HTTPS client.
      *
      * @param requestUri the target URI for the DELETE request
-     * @param headers optional HTTP headers to include
-     * @param data optional query parameters to append to the URI
-     * @return the HttpServiceResponse containing the executed request and response, or {@code null} if the request failed
+     * @param headers    optional HTTP headers to include
+     * @param data       optional query parameters to append to the URI
+     * @return the HttpServiceResponse containing the executed request and response,
+     *         or {@code null} if the request failed
      */
     public HttpServiceResponse executeDelete(String requestUri, Map<String, String> headers, Map<String, String> data) {
         HttpClient httpClient = this.getHttpsClient();
@@ -414,23 +457,28 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Execute an HTTP DELETE to the specified URI, applying provided headers and URL-encoded query parameters.
+     * Execute an HTTP DELETE to the specified URI, applying provided headers and
+     * URL-encoded query parameters.
      *
-     * Query parameters with blank values are skipped; keys and values are URL-encoded using UTF-8 before being
-     * appended to the URI.
+     * Query parameters with blank values are skipped; keys and values are
+     * URL-encoded using UTF-8 before being appended to the URI.
      *
-     * @param requestUri the target URI (query string will be appended if parameters are provided)
-     * @param headers    map of header names to values to set on the request; may be null
-     * @param parameters map of query parameter names to values to append to the URI; may be null
-     * @return           an HttpServiceResponse containing the executed HttpDelete and the HttpResponse, or `null` if execution failed
+     * @param requestUri the target URI (query string will be appended if parameters
+     *                   are provided)
+     * @param headers    map of header names to values to set on the request; may be
+     *                   null
+     * @param parameters map of query parameter names to values to append to the
+     *                   URI; may be null
+     * @return an HttpServiceResponse containing the executed HttpDelete and the
+     *         HttpResponse, or `null` if execution failed
      */
     public HttpServiceResponse executeDelete(HttpClient httpClient, String requestUri, Map<String, String> headers,
-                                             Map<String, String> parameters) {
+            Map<String, String> parameters) {
 
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
             int i = 0;
-            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext(); ) {
+            for (Iterator<String> iterator = parameters.keySet().iterator(); iterator.hasNext();) {
                 String key = iterator.next();
                 String value = parameters.get(key);
                 if (StringUtils.isNotBlank(value)) {
@@ -463,7 +511,7 @@ public class ConfigHttpService implements Serializable {
 
     public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
         if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
-            return null;
+            return new byte[0];
         }
 
         HttpEntity entity = httpResponse.getEntity();
@@ -579,10 +627,12 @@ public class ConfigHttpService implements Serializable {
     /**
      * Parse the JSON body of an HttpServiceResponse and return its "response" node.
      *
-     * If the provided serviceResponse is null or does not contain a parsable JSON body, this method returns null.
+     * If the provided serviceResponse is null or does not contain a parsable JSON
+     * body, this method returns null.
      *
      * @param serviceResponse the HttpServiceResponse whose entity will be parsed
-     * @return the JsonNode corresponding to the top-level "response" field, or null if unavailable
+     * @return the JsonNode corresponding to the top-level "response" field, or null
+     *         if unavailable
      * @throws JsonProcessingException if the response body cannot be parsed as JSON
      */
     public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse) throws JsonProcessingException {
@@ -596,11 +646,17 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Extracts the HTTP response body as UTF-8 text and enforces an OK (200) response status.
+     * Extracts the HTTP response body as UTF-8 text and enforces an OK (200)
+     * response status.
      *
-     * @param serviceResponse the HttpServiceResponse wrapper containing the HttpResponse to read; may be null
-     * @return the response body decoded as UTF-8, or {@code null} if {@code serviceResponse}, the contained HttpResponse, or its entity is null
-     * @throws WebApplicationException if the HttpResponse status code is not 200; the exception message is formatted as "<status>:<body>"
+     * @param serviceResponse the HttpServiceResponse wrapper containing the
+     *                        HttpResponse to read; may be null
+     * @return the response body decoded as UTF-8, or {@code null} if
+     *         {@code serviceResponse}, the contained HttpResponse, or its entity is
+     *         null
+     * @throws WebApplicationException if the HttpResponse status code is not 200;
+     *                                 the exception message is formatted as
+     *                                 "<status>:<body>"
      */
     public String getResponseEntityString(HttpServiceResponse serviceResponse) {
         String jsonString = null;
@@ -648,13 +704,17 @@ public class ConfigHttpService implements Serializable {
     /**
      * Map an HttpServiceResponse's HTTP status code to a JAX-RS Status.
      *
-     * @param serviceResponse the HttpServiceResponse whose HTTP response status will be mapped; may be null
-     * @return the `Status` corresponding to the response's HTTP status code, or `Status.INTERNAL_SERVER_ERROR` if the response is missing or the code cannot be mapped
+     * @param serviceResponse the HttpServiceResponse whose HTTP response status
+     *                        will be mapped; may be null
+     * @return the `Status` corresponding to the response's HTTP status code, or
+     *         `Status.INTERNAL_SERVER_ERROR` if the response is missing or the code
+     *         cannot be mapped
      */
     public Status getResponseStatus(HttpServiceResponse serviceResponse) {
         Status status = Status.INTERNAL_SERVER_ERROR;
 
-        if (serviceResponse == null || serviceResponse.getHttpResponse() == null || serviceResponse.getHttpResponse().getStatusLine() == null) {
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null
+                || serviceResponse.getHttpResponse().getStatusLine() == null) {
             return status;
         }
 
@@ -668,10 +728,12 @@ public class ConfigHttpService implements Serializable {
     }
 
     /**
-     * Read and return the UTF-8 text content of the given HttpEntity as a StringBuilder.
+     * Read and return the UTF-8 text content of the given HttpEntity as a
+     * StringBuilder.
      *
      * @param httpEntity the HTTP entity whose content will be read; may be null
-     * @return a StringBuilder containing the entity content (empty if the entity is null or has no content)
+     * @return a StringBuilder containing the entity content (empty if the entity is
+     *         null or has no content)
      * @throws IOException if an I/O error occurs while reading the entity content
      */
     public StringBuilder readEntity(HttpEntity httpEntity) throws IOException {
@@ -682,8 +744,8 @@ public class ConfigHttpService implements Serializable {
             return result;
         }
         try (InputStream inputStream = httpEntity.getContent();
-             BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
@@ -698,8 +760,10 @@ public class ConfigHttpService implements Serializable {
      * Read and return the UTF-8 string content of the provided HttpEntity.
      *
      * @param httpEntity the HttpEntity to read; if null, the method returns null
-     * @return the entity content decoded as a UTF-8 string, or null if {@code httpEntity} is null
-     * @throws WebApplicationException if an I/O error occurs while reading the entity
+     * @return the entity content decoded as a UTF-8 string, or null if
+     *         {@code httpEntity} is null
+     * @throws WebApplicationException if an I/O error occurs while reading the
+     *                                 entity
      */
     public String getContent(HttpEntity httpEntity) {
         String jsonString = null;
