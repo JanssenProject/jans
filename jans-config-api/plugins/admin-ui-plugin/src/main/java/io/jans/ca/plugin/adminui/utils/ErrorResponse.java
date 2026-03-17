@@ -41,7 +41,6 @@ public enum ErrorResponse {
     ERROR_IN_SAVING_LICENSE_CLIENT("There is an error when attempting to save the OpenID client configuration for accessing the license APIs in a persistence layer."),
     RETRIEVE_LICENSE_ERROR("Error in retrieving license. Check logs for further details."),
     RETRIEVE_POLICY_STORE_ERROR("Error in retrieving policy-store."),
-    REWRITING_DEFAULT_POLICY_STORE_ERROR("Error in overwriting default policy-store with remote policy-store."),
     SYNC_ROLE_SCOPES_MAPPING_ERROR("Error in syncing role-to-scope mapping from policy-store."),
     BLANK_JWT("JWT is blank or empty"),
     ISS_CLAIM_NOT_FOUND("ISS claim not found in jwt"),
@@ -74,7 +73,11 @@ public enum ErrorResponse {
     FETCH_DATA_ERROR("Error in fetching data."),
     ADMINUI_SESSION_CREATE_ERROR("Error in creating Admin UI session"),
     ADMINUI_SESSION_REMOVE_ERROR("Error in removing Admin UI session"),
-    ORG_ID_CLAIM_NOT_FOUND("org_id claim not found in jwt")
+    ORG_ID_CLAIM_NOT_FOUND("org_id claim not found in jwt"),
+    POLICY_STORE_UPLOAD_ERROR("Error in uploading policy-store"),
+    BAD_REQUEST_IN_POLICY_STORE_UPLOAD("Bad Request: No Policy Store file provided"),
+    UNSUPPORTED_POLICY_STORE_EXTENSION("Bad Request: The Policy Store extension is not .cjar and is not supported"),
+    ERROR_IN_POLICY_STORE("Bad Request: Error in reading Policy Store file")
     ;
 
     private final String description;
