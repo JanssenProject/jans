@@ -49,7 +49,7 @@ public class AdminUISecurityResource {
     @GET
     @Path(POLICY_STORE)
     @Produces(MediaType.APPLICATION_JSON)
-    //@ProtectedApi(scopes = {SECURITY_READ}, groupScopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SECURITY_READ}, groupScopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
     public Response getPolicyStore() {
         try {
             log.info("Get Admin UI policy store.");
