@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 public class Fido2MetricsResource extends BaseResource {
 
     private static final String METRICS_DATE_FORMAT = "dd-MM-yyyy";
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
     private static final String ALL_PARAM = "Search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}";
     private static final String DATE_PARAM = "Search param - startDate:{}, endDate:{}";
     private static final String ERR_MSG = "Exception while getting metric data is - ";
@@ -105,19 +106,17 @@ public class Fido2MetricsResource extends BaseResource {
 
         PagedResult<Fido2MetricsEntry> pagedResult = null;
         try {
-            // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
-            validateDate(startDate, endDate, formatter);
 
-            // Fetch Fido2 Metrics Entries
+            // validate Date
+            validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             pagedResult = fido2MetricsService.getFido2MetricsEntries(null, startLocalDate, endLocalDate);
 
@@ -183,18 +182,15 @@ public class Fido2MetricsResource extends BaseResource {
         try {
 
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
-
-            // Fetch Fido2 Metrics Entries
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             pagedResult = fido2MetricsService.getFido2UserMetricsEntries(null, userId, startLocalDate, endLocalDate);
 
@@ -260,18 +256,15 @@ public class Fido2MetricsResource extends BaseResource {
         PagedResult<Fido2MetricsEntry> pagedResult = null;
         try {
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
-
-            // Fetch Fido2 Metrics Entries
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             pagedResult = fido2MetricsService.getMetricsEntriesByOperation(null, operationType, startLocalDate,
                     endLocalDate);
@@ -339,16 +332,15 @@ public class Fido2MetricsResource extends BaseResource {
         try {
 
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             pagedResult = fido2MetricsService.getFido2MetricsAggregation(null, aggregationType, startLocalDate,
                     endLocalDate);
@@ -411,16 +403,15 @@ public class Fido2MetricsResource extends BaseResource {
         JsonNode jsonNode = null;
         try {
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             jsonNode = fido2MetricsService.getFido2MetricsAggregationSummary(null, aggregationType, startLocalDate,
                     endLocalDate);
@@ -479,16 +470,15 @@ public class Fido2MetricsResource extends BaseResource {
         JsonNode jsonNode = null;
         try {
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             jsonNode = fido2MetricsService.getAdoptionMetrics(null, startLocalDate, endLocalDate);
 
@@ -545,16 +535,15 @@ public class Fido2MetricsResource extends BaseResource {
         try {
 
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             jsonNode = fido2MetricsService.getPerformanceMetrics(null, startLocalDate, endLocalDate);
 
@@ -610,16 +599,15 @@ public class Fido2MetricsResource extends BaseResource {
         JsonNode jsonNode = null;
         try {
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             jsonNode = fido2MetricsService.getDeviceAnalytics(null, startLocalDate, endLocalDate);
 
@@ -677,16 +665,15 @@ public class Fido2MetricsResource extends BaseResource {
         try {
 
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             jsonNode = fido2MetricsService.getErrorAnalysis(null, startLocalDate, endLocalDate);
 
@@ -745,16 +732,15 @@ public class Fido2MetricsResource extends BaseResource {
         JsonNode jsonNode = null;
         try {
             // validate Date
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT);
             validateDate(startDate, endDate, formatter);
 
             // startDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime startLocalDate = parseDate(startDate, formatter);
+            LocalDateTime startLocalDate = parseDate(startDate);
 
             // endDate (supports dd-MM-yyyy and ISO-8601 date-time e.g.
             // yyyy-MM-ddTHH:mm:ssZ)
-            LocalDateTime endLocalDate = parseDate(endDate, formatter);
+            LocalDateTime endLocalDate = parseDate(endDate);
 
             jsonNode = fido2MetricsService.getTrendAnalysis(null, aggregationType, startLocalDate, endLocalDate);
 
@@ -923,7 +909,7 @@ public class Fido2MetricsResource extends BaseResource {
         // validate startDate
         if (StringUtils.isNotBlank(startDate)) {
             try {
-                startLocalDateTime = parseDate(startDate, formatter);
+                startLocalDateTime = parseDate(startDate);
             } catch (DateTimeParseException dtpe) {
                 sb.append(
                         "Start date is not valid. Use dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.");
@@ -933,7 +919,7 @@ public class Fido2MetricsResource extends BaseResource {
         // validate endDate
         if (StringUtils.isNotBlank(endDate)) {
             try {
-                endLocalDateTime = parseDate(endDate, formatter);
+                endLocalDateTime = parseDate(endDate);
             } catch (DateTimeParseException dtpe) {
                 sb.append(
                         "End date is not valid. Use dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.");
@@ -954,14 +940,13 @@ public class Fido2MetricsResource extends BaseResource {
      * yyyy-MM-ddTHH:mm:ssZ) or legacy dd-MM-yyyy format. Returns the date part as
      * LocalDate for range comparison.
      *
-     * @param dateStr           the date or date-time string from the API request
-     * @param fallbackFormatter optional configured audit log date format (e.g.
-     *                          dd-MM-yyyy)
+     * @param dateStr the date or date-time string from the API request
+     *
      * @return LocalDate for the given string, or null if dateStr is blank
      * @throws DateTimeParseException if the string cannot be parsed with any
      *                                supported format
      */
-    private LocalDateTime parseDate(String dateStr, DateTimeFormatter fallbackFormatter) throws DateTimeParseException {
+    private LocalDateTime parseDate(String dateStr) throws DateTimeParseException {
         if (StringUtils.isBlank(dateStr)) {
             return null;
         }
@@ -1002,7 +987,10 @@ public class Fido2MetricsResource extends BaseResource {
 
             validateStartIndex(identityProviderList, startIndex);
             int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
-            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit), toIndex);
+            if (logger.isInfoEnabled()) {
+                logger.info("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit),
+                        toIndex);
+            }
 
             // Extract paginated data
             List<Fido2MetricsEntry> sublist = (identityProviderList == null) ? null
@@ -1033,8 +1021,10 @@ public class Fido2MetricsResource extends BaseResource {
 
             validateStartIndex(identityProviderList, startIndex);
             int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
-            logger.info("Final listSize:{}, startIndex:{}, limit:{}, toIndex:{}", listSize, escapeLog(startIndex),
-                    escapeLog(limit), toIndex);
+            if (logger.isInfoEnabled()) {
+                logger.info("Final listSize:{}, startIndex:{}, limit:{}, toIndex:{}", listSize, escapeLog(startIndex),
+                        escapeLog(limit), toIndex);
+            }
 
             // Extract paginated data
             List<Fido2MetricsAggregation> sublist = (identityProviderList == null) ? null
