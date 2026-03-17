@@ -97,8 +97,7 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Start date/time for "
                     + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(ALL_PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
@@ -172,12 +171,11 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "user Id") @PathParam("userId") @NotNull String userId,
             @Parameter(description = "Start date/time for "
                     + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "Fido2MetricsEntry for user search param - limit:{}, startIndex:{}, userId:{}, startDate:{}, endDate:{}",
+                    "Fido2MetricsEntries for user search param - limit:{}, startIndex:{}, userId:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(userId), escapeLog(startDate),
                     escapeLog(endDate));
         }
@@ -250,8 +248,7 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "Operation Type") @PathParam("operationType") @NotNull String operationType,
             @Parameter(description = "Start date/time for "
                     + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(
@@ -329,12 +326,11 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = " Aggregation Type", schema = @Schema(type = "string")) @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "Fido2MetricsEntry search param - limit:{}, startIndex:{}, aggregationType:{}, startDate:{}, endDate:{}",
+                    "Fido2MetricsEntry aggregation search param - limit:{}, startIndex:{}, aggregationType:{}, startDate:{}, endDate:{}",
                     escapeLog(limit), escapeLog(startIndex), escapeLog(aggregationType), escapeLog(startDate),
                     escapeLog(endDate));
         }
@@ -405,11 +401,11 @@ public class Fido2MetricsResource extends BaseResource {
     public Response getFido2MetricsAggregationSummary(
             @Parameter(description = "Metrics Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2MetricsEntry search param - aggregationType:{}, startDate:{}, endDate:{}",
+            logger.info(
+                    "Fido2MetricsEntry aggregation summary search param - aggregationType:{}, startDate:{}, endDate:{}",
                     escapeLog(aggregationType), escapeLog(startDate), escapeLog(endDate));
         }
         JsonNode jsonNode = null;
@@ -474,8 +470,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAdoptionMetrics(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
@@ -541,8 +536,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPerformanceMetrics(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
@@ -565,7 +559,7 @@ public class Fido2MetricsResource extends BaseResource {
             jsonNode = fido2MetricsService.getPerformanceMetrics(null, startLocalDate, endLocalDate);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Fido2PerformanceMetrics  - jsonNode:{}", jsonNode);
+                logger.debug("Fido2 analytics performance metrics  - jsonNode:{}", jsonNode);
             }
         } catch (WebApplicationException wex) {
             throw wex;
@@ -608,8 +602,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getDeviceAnalytics(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
@@ -675,8 +668,7 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getErrorAnalysis(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
@@ -743,8 +735,7 @@ public class Fido2MetricsResource extends BaseResource {
     public Response getTrendAnalysis(
             @Parameter(description = "Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate)
-            throws Exception {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info("ErrorAnalysis search param -  aggregationType:{}, startDate:{}, endDate:{}",
@@ -809,13 +800,11 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPeriodOverPeriodComparison(
             @Parameter(description = " Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
-            @Parameter(description = "periods") @DefaultValue("2") @QueryParam(value = "periods") int periods)
-
-            throws Exception {
+            @Parameter(description = "periods") @DefaultValue("2") @QueryParam(value = "periods") int periods) {
 
         if (logger.isInfoEnabled()) {
-            logger.info("ErrorAnalysis search param - aggregationType:{}, periods:{}", escapeLog(aggregationType),
-                    escapeLog(periods));
+            logger.info("Fido2 analytics comparison search param - aggregationType:{}, periods:{}",
+                    escapeLog(aggregationType), escapeLog(periods));
         }
 
         JsonNode jsonNode = null;
@@ -824,7 +813,7 @@ public class Fido2MetricsResource extends BaseResource {
             jsonNode = fido2MetricsService.getPeriodOverPeriodComparison(null, aggregationType, periods);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+                logger.debug("Fido2 analytics comparison - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
@@ -856,7 +845,7 @@ public class Fido2MetricsResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
             Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response getMetricsConfig() throws Exception {
+    public Response getMetricsConfig() {
 
         if (logger.isInfoEnabled()) {
             logger.info("Fido2 metrics configuration");
@@ -868,7 +857,7 @@ public class Fido2MetricsResource extends BaseResource {
             jsonNode = fido2MetricsService.getMetricsConfig(null);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Fido2TrendAnalysis - jsonNode:{}", jsonNode);
+                logger.debug("Fido2 metrics configuration - jsonNode:{}", jsonNode);
             }
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
@@ -903,14 +892,14 @@ public class Fido2MetricsResource extends BaseResource {
     public Response getMetricsHealth() {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Fido2 metrics configuration");
+            logger.info("Fido2 metrics health");
         }
         JsonNode jsonNode = null;
         try {
             jsonNode = fido2MetricsService.getMetricsHealth(null);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Fido2MetricsHealth - jsonNode:{}", jsonNode);
+                logger.debug("Fido2 metrics health- jsonNode:{}", jsonNode);
             }
 
         } catch (Exception ex) {
@@ -1013,7 +1002,7 @@ public class Fido2MetricsResource extends BaseResource {
 
             validateStartIndex(identityProviderList, startIndex);
             int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
-            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", startIndex, limit, toIndex);
+            logger.info("Final startIndex:{}, limit:{}, toIndex:{}", escapeLog(startIndex), escapeLog(limit), toIndex);
 
             // Extract paginated data
             List<Fido2MetricsEntry> sublist = (identityProviderList == null) ? null
@@ -1044,7 +1033,8 @@ public class Fido2MetricsResource extends BaseResource {
 
             validateStartIndex(identityProviderList, startIndex);
             int toIndex = (startIndex + limit <= listSize) ? startIndex + limit : listSize;
-            logger.info("Final listSize:{}, startIndex:{}, limit:{}, toIndex:{}", listSize, startIndex, limit, toIndex);
+            logger.info("Final listSize:{}, startIndex:{}, limit:{}, toIndex:{}", listSize, escapeLog(startIndex),
+                    escapeLog(limit), toIndex);
 
             // Extract paginated data
             List<Fido2MetricsAggregation> sublist = (identityProviderList == null) ? null
