@@ -95,10 +95,8 @@ public class Fido2Util {
             }
             try {
                 jsonString = EntityUtils.toString(entity, "UTF-8");
-                logger.debug(
-                        " jsonString:{}, httpResponse.getStatusLine():{}, httpResponse.getStatusLine().getStatusCode():{}, Status.OK.getStatusCode():{}",
-                        jsonString, httpResponse.getStatusLine(), httpResponse.getStatusLine().getStatusCode(),
-                        Status.OK.getStatusCode());
+                logger.debug(" jsonString:{}, httpResponse.getStatusLine():{},  Status.OK.getStatusCode():{}",
+                        jsonString, httpResponse.getStatusLine(), Status.OK.getStatusCode());
             } catch (Exception ex) {
                 logger.error("Error while getting entity using EntityUtils is ", ex);
             }

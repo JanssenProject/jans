@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.configapi.core.util.Jackson;
+
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.fido2.model.metric.Fido2MetricsAggregation;

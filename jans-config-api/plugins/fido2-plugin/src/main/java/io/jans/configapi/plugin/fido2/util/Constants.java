@@ -26,13 +26,8 @@ public class Constants {
     public static final String FIDO2_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/fido2.write";
     public static final String FIDO2_CONFIG_DELETE_ACCESS = "https://jans.io/oauth/config/fido2.delete";
     
-    public static final String FIDO2_READ_ACCESS = "https://jans.io/oauth/fido2.readonly";
-    public static final String FIDO2_WRITE_ACCESS = "https://jans.io/oauth/fido2.write";
-    public static final String FIDO2_DELETE_ACCESS = "https://jans.io/oauth/fido2.delete";
-    
     public static final String FIDO2_ADMIN_ACCESS = "https://jans.io/oauth/config/fido2.admin";
     
-    public static final String FIDO2_METRICS_READ_ACCESS = "https://jans.io/oauth/fido2-metrics.readonly";
-    
-    public static final int DEFAULT_MAX_COUNT = 200;  
+    public static final String FIDO2_METRICS_READ_ACCESS = "https://jans.io/oauth/config/fido2-metrics.readonly";
+
 }

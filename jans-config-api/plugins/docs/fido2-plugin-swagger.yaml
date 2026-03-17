@@ -121,9 +121,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -179,9 +179,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -235,9 +235,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -350,9 +350,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -415,9 +415,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -510,9 +510,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -609,9 +609,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -656,9 +656,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -779,9 +779,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -819,9 +819,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -874,9 +874,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -929,9 +929,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -1020,9 +1020,9 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/fido2-metrics.readonly
+        - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/fido2.readonly
+        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -1648,18 +1648,15 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
         period:
           type: string
         metricsData:
           type: object
           additionalProperties:
             type: object
+        fallbackEvents:
+          type: integer
+          format: int64
         deviceTypes:
           type: object
           additionalProperties:
@@ -1670,34 +1667,37 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        registrationAttempts:
+          type: integer
+          format: int64
         registrationSuccessRate:
           type: number
           format: double
-        registrationSuccesses:
-          type: integer
-          format: int64
         registrationFailures:
           type: integer
           format: int64
         authenticationAttempts:
           type: integer
           format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        registrationAttempts:
-          type: integer
-          format: int64
         authenticationFailures:
           type: integer
           format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
         authenticationSuccesses:
           type: integer
           format: int64
@@ -2002,11 +2002,8 @@ components:
               information
             https://jans.io/oauth/config/fido2.delete: Delete fido2 config related
               information
-            https://jans.io/oauth/fido2.readonly: View fido2 related information
-            https://jans.io/oauth/fido2.write: Manage fido2 related information
-            https://jans.io/oauth/fido2.delete: Delete fido2 related information
-            https://jans.io/oauth/fido2-metrics.readonly: View fido2 metrics related
-              information
+            https://jans.io/oauth/config/fido2-metrics.readonly: View fido2 metrics
+              related information
             https://jans.io/oauth/config/fido2.admin: Admin to manage fido2 related
               information
             https://jans.io/oauth/config/read-all: Super admin for viewing application

@@ -81,7 +81,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get a list of Fido2 Metrics by time range.", description = "Get a list of Fido2 Metrics by time range.", operationId = "get-fido2-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -92,7 +92,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/entries")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2MetricsEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -152,7 +152,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get a list of Fido2 metrics for a specific user by time range.", description = "Get a list of Fido2 metrics for a specific user by time range.", operationId = "get-fido2-metrics-by-user", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -163,7 +163,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/entries/user/{userId}")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2UserMetricsEntries(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -175,8 +175,8 @@ public class Fido2MetricsResource extends BaseResource {
 
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "Fido2MetricsEntries for user search param - limit:{}, startIndex:{}, userId:{}, startDate:{}, endDate:{}",
-                    escapeLog(limit), escapeLog(startIndex), escapeLog(userId), escapeLog(startDate),
+                    "Fido2MetricsEntries for user search param - limit:{}, startIndex:{}, startDate:{}, endDate:{}",
+                    escapeLog(limit), escapeLog(startIndex), escapeLog(startDate),
                     escapeLog(endDate));
         }
         PagedResult<Fido2MetricsEntry> pagedResult = null;
@@ -226,7 +226,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get a list of Fido2 metrics for a operation type by time range.", description = "Get a list of Fido2 metrics for a operation type by time range.", operationId = "get-fido2-metrics-by-operation", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -237,7 +237,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/entries/operation/{operationType}")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getMetricsEntriesByOperation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -302,7 +302,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get a list of Fido2 aggregated metrics by time range.", description = "Get a list of Fido2 aggregated metrics by time range.", operationId = "get-fido2-metrics-aggregated", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -313,7 +313,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/aggregations/{aggregationType}")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2MetricsAggregation(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -378,7 +378,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 aggregation summary by time range.", description = "Get Fido2 aggregation summary by time range.", operationId = "get-fido2-aggregation-summary-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -389,7 +389,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/aggregations/{aggregationType}/summary")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getFido2MetricsAggregationSummary(
             @Parameter(description = "Metrics Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
@@ -447,7 +447,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 adoption metrics by time range.", description = "Get Fido2 adoption metrics by time range.", operationId = "get-fido2-adoption-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -458,7 +458,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/analytics/adoption")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getAdoptionMetrics(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
@@ -512,7 +512,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 analytics performance metrics by time range.", description = "Get Fido2 analytics performance metrics by time range.", operationId = "get-fido2-analytics-performance-metrics", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -523,7 +523,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/analytics/performance")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPerformanceMetrics(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
@@ -577,7 +577,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 devices analytics metrics by time range.", description = "Get Fido2 devices analytics metrics by time range.", operationId = "get-fido2-metrics-analytics-devices", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -588,7 +588,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/analytics/devices")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getDeviceAnalytics(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
@@ -642,7 +642,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-metrics-analytics-errors", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -653,7 +653,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/analytics/errors")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getErrorAnalysis(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
@@ -707,7 +707,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 analytics trends by aggregationType for metrics over time.", description = "Get Fido2 analytics trends by aggregationType for metrics over time.", operationId = "get-fido2-analytics-trends-aggregationType", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -718,7 +718,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/analytics/trends/{aggregationType}")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getTrendAnalysis(
             @Parameter(description = "Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
@@ -772,7 +772,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 period-over-period comparison.", description = "Get Fido2 period-over-period comparison.", operationId = "get-fido2-period-over-period-comparison", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -783,7 +783,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/analytics/comparison/{aggregationType}")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getPeriodOverPeriodComparison(
             @Parameter(description = " Aggregation Type") @DefaultValue("") @PathParam("aggregationType") @NotNull String aggregationType,
@@ -819,7 +819,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 metrics configuration.", description = "Get Fido2 metrics configuration.", operationId = "get-fido2-metrics-configuration", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -830,7 +830,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/config")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getMetricsConfig() {
 
@@ -863,7 +863,7 @@ public class Fido2MetricsResource extends BaseResource {
     @Operation(summary = "Get Fido2 metrics health check endpoint.", description = "Get Fido2 metrics health check endpoint.", operationId = "get-fido2-metrics-health-check", tags = {
             "Fido2 - Metrics" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_METRICS_READ_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
@@ -874,7 +874,7 @@ public class Fido2MetricsResource extends BaseResource {
     @GET
     @Path("/health")
     @ProtectedApi(scopes = { Constants.FIDO2_METRICS_READ_ACCESS }, groupScopes = {
-            Constants.FIDO2_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getMetricsHealth() {
 
@@ -1049,6 +1049,10 @@ public class Fido2MetricsResource extends BaseResource {
     private void validateStartIndex(List<?> entriesList, int startIndex) {
         if (logger.isDebugEnabled()) {
             logger.debug("Validate startIndex entriesList:{}, startIndex:{}", entriesList, escapeLog(startIndex));
+        }
+
+        if (entriesList == null || entriesList.isEmpty() || startIndex < 0) {
+            return;
         }
 
         if (entriesList != null && !entriesList.isEmpty()) {

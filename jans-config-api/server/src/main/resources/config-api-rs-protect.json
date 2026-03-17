@@ -1054,10 +1054,6 @@
             {
               "inum": "1800.01.20",
               "name": "https://jans.io/oauth/config/fido2.write"
-            },
-            {
-              "inum": "1800.01.101",
-              "name": "https://jans.io/oauth/fido2.readonly"
             }
           ],
           "superScopes": [
@@ -1085,12 +1081,7 @@
               "name": "https://jans.io/oauth/config/fido2.write"
             }
           ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.102",
-              "name": "https://jans.io/oauth/fido2.write"
-            }
-          ],
+          "groupScopes": [],
           "superScopes": [
             {
               "inum": "1800.05.8",
@@ -1121,10 +1112,6 @@
             {
               "inum": "1800.01.20",
               "name": "https://jans.io/oauth/config/fido2.write"
-            },
-            {
-              "inum": "1800.01.101",
-              "name": "https://jans.io/oauth/fido2.readonly"
             }
           ],
           "superScopes": [
@@ -1153,12 +1140,7 @@
               "name": "https://jans.io/oauth/config/fido2.write"
             }
           ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.102",
-              "name": "https://jans.io/oauth/fido2.write"
-            }
-          ],
+          "groupScopes": [],
           "superScopes": [
             {
               "inum": "1800.05.8",
@@ -1180,12 +1162,7 @@
               "name": "https://jans.io/oauth/config/fido2.delete"
             }
           ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.103",
-              "name": "https://jans.io/oauth/fido2.delete"
-            }
-          ],
+          "groupScopes": [],
           "superScopes": [
             {
               "inum": "1800.05.8",
@@ -4603,13 +4580,13 @@
           "scopes": [
             {
               "inum": "1800.01.100",
-              "name": "https://jans.io/oauth/fido2-metrics.readonly"
+              "name": "https://jans.io/oauth/config/fido2-metrics.readonly"
             }
           ],
           "groupScopes": [
             {
-              "inum": "1800.01.101",
-              "name": "https://jans.io/oauth/fido2.readonly"
+              "inum": "1800.01.20",
+              "name": "https://jans.io/oauth/config/fido2.write"
             }
           ],
           "superScopes": [
