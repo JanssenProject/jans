@@ -35,7 +35,7 @@ Cedarling creates a Trusted Issuer entity at startup for each trusted issuer def
 
 ## Workload Entity
 
-Cedarling creates a **Workload** entity for each request when the `CEDARLING_WORKLOAD_AUTHZ`  [bootstrap property](./cedarling-properties.md) is set to `enabled`.
+Cedarling can create a **Workload** entity when using `authorize_multi_issuer` with tokens that have `principal_mapping` configured to include `Workload` in the policy store's [token metadata](./cedarling-policy-store.md#token-metadata-schema).
 
 - *Default Type Name:* `Jans::Workload`
 - *Entity ID:* Determined by the `workload_id` attribute from the [Token Entity Metadata Schema (TEMS)](./cedarling-policy-store.md#token-metadata-schema).
@@ -91,7 +91,7 @@ The following entity Workload Entity could be created:
 
 ## User Entity
 
-Cedarling creates a **User** entity for each request when the `CEDARLING_USER_AUTHZ`  [bootstrap property](./cedarling-properties.md) is set to `enabled`.
+Cedarling can create a **User** entity when using `authorize_multi_issuer` with tokens that have `principal_mapping` configured to include `User` in the policy store's [token metadata](./cedarling-policy-store.md#token-metadata-schema).
 
 - *Default Type Name:* `Jans::User`
 - *Entity ID:* Determined by the `user_id` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema).
