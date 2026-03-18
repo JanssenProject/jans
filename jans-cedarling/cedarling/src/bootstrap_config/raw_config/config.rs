@@ -7,16 +7,19 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
-use super::default_values::{default_jti, default_token_cache_capacity, default_true};
+use super::default_values::{
+    default_jti, default_log_channel_capacity, default_log_max_retries,
+    default_token_cache_capacity, default_true,
+};
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
 use crate::JwtConfig;
-use crate::UnsignedRoleIdSrc;
 use crate::common::json_rules::JsonRule;
 use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
+use crate::{LockTransport, UnsignedRoleIdSrc};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -298,6 +301,35 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
     pub accept_invalid_certs: FeatureToggle,
 
+    /// Transport protocol for Lock Server communication ("grpc" or "rest").
+    #[serde(
+        rename = "CEDARLING_LOCK_TRANSPORT",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
+    pub lock_transport: LockTransport,
+
+    /// Channel capacity for buffering log entries before they are sent to the lock server.
+    /// Higher values allow more logs to be buffered in memory when the lock server is slow,
+    /// but also increase memory usage.
+    /// Default value is 100.
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_CHANNEL_CAPACITY",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default = "default_log_channel_capacity"
+    )]
+    pub lock_log_channel_capacity: usize,
+
+    /// Maximum number of retry attempts for sending logs to the lock server.
+    /// Uses exponential backoff strategy for retrying.
+    /// Default value is 5.
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_MAX_RETRIES",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default = "default_log_max_retries"
+    )]
+    pub lock_log_max_retries: u32,
+
     /// Allows to limit maximum token cache TTL in seconds.
     /// Zero means no token cache TTL limit.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
@@ -534,6 +566,11 @@ mod tests {
                 config.principal_bool_operation,
                 JsonRule::default(),
                 "Default user-workload boolean operator should default"
+            );
+            assert_eq!(
+                config.lock_transport,
+                LockTransport::Rest,
+                "Default transport should be REST"
             );
         });
     }
