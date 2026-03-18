@@ -359,15 +359,15 @@ else:
   print("Access denied")
 ```
 
-**Key Differences from standard authentication**:
+**Key Differences between authorization methods**:
 
-| Feature         | authorize                                                     | authorize_multi_issuer       |
-| --------------- | ------------------------------------------------------------- | ---------------------------- |
-| Principal Model | User/Workload entities                                        | No principals - token-based  |
-| Token Sources   | Single issuer expected                                        | Multiple issuers supported   |
-| Result Type     | `AuthorizeResult`                                             | `MultiIssuerAuthorizeResult` |
-| Decision Access | `result.is_allowed()`, `result.principals` map | `result.decision` (boolean)  |
-| Use Case        | Standard RBAC/ABAC                                            | Federation, multi-org access |
+| Feature         | authorize_unsigned                              | authorize_multi_issuer                    |
+| --------------- | ----------------------------------------------- | ----------------------------------------- |
+| Principal Model | Directly provided entities                      | Token-derived (from `token_metadata`)     |
+| Token Sources   | No tokens required                              | Multiple issuers supported                |
+| Result Type     | `AuthorizeResult`                               | `MultiIssuerAuthorizeResult`              |
+| Decision Access | `result.decision`, `result.principals` map      | `result.decision` (boolean)               |
+| Use Case        | Internal data, custom principals                | Federation, OIDC, multi-org access        |
 
 ### Logging
 

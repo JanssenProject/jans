@@ -26,7 +26,7 @@ participant Sidecar
 
 User->Gateway: GET /protected\nAuthorization: Bearer ...
 Gateway->Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"access_token": "..."} }}
-Sidecar->Sidecar: cedarling.authorize(access_token)
+Sidecar->Sidecar: cedarling.authorize_multi_issuer(tokens)
 
 alt ALLOW
     Sidecar->Gateway: {"decision": true}

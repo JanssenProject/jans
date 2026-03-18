@@ -132,16 +132,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             signature_algorithms_supported: HashSet::new(),
         }.allow_all_algorithms(),
         authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
             principal_bool_operator: JsonRule::new(serde_json::json!(
                 {"===": [{"var": "Jans::User"}, "ALLOW"]}
             )).unwrap(),
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default()
-            .with_user()
-            .with_workload(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
     }).await?;
 
@@ -212,19 +208,6 @@ pub struct BootstrapConfig {
     pub authorization_config: AuthorizationConfig,
     pub entity_builder_config: EntityBuilderConfig,
     pub lock_config: Option<LockConfig>,
-}
-```
-
-#### `Request`
-
-Token-based authorization request.
-
-```rust
-pub struct Request {
-    pub tokens: HashMap<String, String>,
-    pub action: String,
-    pub resource: EntityData,
-    pub context: serde_json::Value,
 }
 ```
 
