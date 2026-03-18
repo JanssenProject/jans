@@ -130,3 +130,6 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 - **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Server (0 to turn off transmission).
 - **`CEDARLING_LOCK_LISTEN_SSE`** : `enabled` | `disabled`: controls whether Cedarling should listen for updates from the Lock Server. Default is `disabled`.
 - **`CEDARLING_LOCK_ACCEPT_INVALID_CERTS`** : `enabled` | `disabled`: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Default is `disabled`.
+- **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Default value is `rest`.
+- **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
+- **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.

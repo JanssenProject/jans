@@ -8,7 +8,7 @@
 use serde::Serialize;
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogLevel};
+use crate::log::{BaseLogEntry, LogLevel, LogType};
 
 /// Log entry for policy store operations.
 #[derive(Serialize, Clone)]
@@ -58,6 +58,10 @@ impl PolicyStoreLogEntry {
 impl Loggable for PolicyStoreLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
     }
 }
 

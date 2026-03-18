@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::log::interface::{Indexed, Loggable};
-use crate::log::{BaseLogEntry, LogLevel};
+use crate::log::{BaseLogEntry, LogLevel, LogType};
 use serde::Serialize;
 
 #[derive(Serialize, Clone)]
@@ -27,6 +27,10 @@ impl JwtLogEntry {
 impl Loggable for JwtLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
     }
 }
 

@@ -103,6 +103,10 @@ impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
+    }
 }
 
 /// Type of log entry
@@ -372,6 +376,10 @@ impl Loggable for DecisionLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
+    }
 }
 
 fn get_std_rng() -> StdRng {
@@ -540,6 +548,10 @@ impl Indexed for BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        Some(self.log_kind)
     }
 }
 
