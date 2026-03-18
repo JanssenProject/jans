@@ -229,18 +229,7 @@ public class Fido2MetricsService {
      */
     public JsonNode getAdoptionMetrics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        if (log.isInfoEnabled()) {
-            log.info("Get adoption metrics with - startTime:{}, endTime:{}", escapeLog(startTime), escapeLog(endTime));
-        }
-
-        // Request headers
-        Map<String, String> headers = buildHeaders(token);
-
-        // Request data
-        Map<String, String> data = buildTimeRange(startTime, endTime);
-
-        return getMetricsData(this.getMetricsAnalyticsUrl() + "/adoption", headers, data);
-
+        return getAnalyticsMetrics(token, this.getMetricsAnalyticsUrl() + "/adoption", startTime, endTime);
     }
 
     /**
@@ -252,17 +241,7 @@ public class Fido2MetricsService {
      */
     public JsonNode getPerformanceMetrics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        if (log.isInfoEnabled()) {
-            log.info("Get performance metrics - startTime:{}, endTime:{}", escapeLog(startTime), escapeLog(endTime));
-        }
-
-        // Request headers
-        Map<String, String> headers = buildHeaders(token);
-
-        // Request data
-        Map<String, String> data = buildTimeRange(startTime, endTime);
-
-        return getMetricsData(this.getMetricsAnalyticsPerformanceUrl(), headers, data);
+        return getAnalyticsMetrics(token, this.getMetricsAnalyticsPerformanceUrl(), startTime, endTime);
     }
 
     /**
@@ -274,17 +253,7 @@ public class Fido2MetricsService {
      */
     public JsonNode getDeviceAnalytics(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        if (log.isInfoEnabled()) {
-            log.info("Get device analytics - startTime:{}, endTime:{}", escapeLog(startTime), escapeLog(endTime));
-        }
-
-        // Request headers
-        Map<String, String> headers = buildHeaders(token);
-
-        // Request data
-        Map<String, String> data = buildTimeRange(startTime, endTime);
-
-        return getMetricsData(this.getDeviceAnalyticsUrl(), headers, data);
+        return getAnalyticsMetrics(token, this.getDeviceAnalyticsUrl(), startTime, endTime);
     }
 
     /**
@@ -296,17 +265,7 @@ public class Fido2MetricsService {
      */
     public JsonNode getErrorAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
-        if (log.isInfoEnabled()) {
-            log.info("Get error analysis - startTime:{}, endTime:{}", escapeLog(startTime), escapeLog(endTime));
-        }
-
-        // Request headers
-        Map<String, String> headers = buildHeaders(token);
-
-        // Request data
-        Map<String, String> data = buildTimeRange(startTime, endTime);
-
-        return getMetricsData(this.getErrorAnalysisUrl(), headers, data);
+        return getAnalyticsMetrics(token, this.getErrorAnalysisUrl(), startTime, endTime);
     }
 
     /**
@@ -410,6 +369,13 @@ public class Fido2MetricsService {
         log.info("Fido2MetricsEntry Three pagedResultEntry:{}", pagedResultEntry);
 
         return pagedResultEntry;
+    }
+
+    private JsonNode getAnalyticsMetrics(String token, String url, LocalDateTime startTime, LocalDateTime endTime)
+            throws JsonProcessingException {
+        Map<String, String> headers = buildHeaders(token);
+        Map<String, String> data = buildTimeRange(startTime, endTime);
+        return getMetricsData(url, headers, data);
     }
 
     private JsonNode getMetricsData(String url, Map<String, String> headers, Map<String, String> data)

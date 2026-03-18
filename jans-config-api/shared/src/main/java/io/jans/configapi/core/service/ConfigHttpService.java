@@ -384,7 +384,7 @@ public class ConfigHttpService implements Serializable {
      * @param parameters optional query parameters to append to the URI; entries
      *                   with blank values are ignored (may be null)
      * @return a HttpServiceResponse containing the executed HttpGet and the
-     *         HttpResponse, or `null` if the request failed due to an I/O error
+     *         HttpResponse, or throws WebApplicationException.
      * @throws WebApplicationException
      */
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,

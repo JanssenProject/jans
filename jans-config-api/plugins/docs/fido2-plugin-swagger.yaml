@@ -222,13 +222,9 @@ paths:
               examples:
                 Response example:
                   description: Response example
-                  value: |
-                    {
-                        "errorCategories": {},
-                        "failureRate": 0.75,
-                        "successRate": 0.25,
-                        "topErrors": {}
-                    }
+                  value: "{\n    \"errorCategories\": {},\n    \"failureRate\": 0.75,\n\
+                    \    \"successRate\": 0.25,\n\t\"completionRate\": 0.48,\n\t\"\
+                    dropOffRate\": 0.52,\n    \"topErrors\": {}\n}\n"
         "401":
           description: Unauthorized
         "500":
@@ -864,9 +860,9 @@ paths:
                   description: Response example
                   value: |
                     {
-                        "registrationAvgDuration": 471,
-                        "registrationMaxDuration": 471,
-                        "registrationMinDuration": 471
+                        "registrationAvgDuration": 420,
+                        "registrationMaxDuration": 890,
+                        "registrationMinDuration": 210
                     }
         "401":
           description: Unauthorized
@@ -982,37 +978,39 @@ paths:
                   description: Response example
                   value: |
                     {
-                        "insights": {
-                            "avgRegistrationSuccessRate": 0.25,
-                            "avgAuthenticationSuccessRate": 0,
-                            "peakUsage": {
-                                "period": "2026-02-20",
-                                "totalOperations": 4
-                            }
-                        },
-                        "growthRate": 0,
-                        "trendDirection": "STABLE",
-                        "dataPoints": [
-                            {
-                                "period": "2026-02-20",
-                                "metrics": {
-                                    "deviceTypes": {
-                                        "cross-platform": 1
-                                    },
-                                    "errorCounts": {},
-                                    "fallbackEvents": 0,
-                                    "registrationAttempts": 4,
-                                    "registrationFailures": 3,
-                                    "registrationSuccesses": 1,
-                                    "authenticationAttempts": 0,
-                                    "authenticationFailures": 0,
-                                    "authenticationSuccesses": 0,
-                                    "registrationAvgDuration": 471,
-                                    "registrationSuccessRate": 0.25
-                                },
-                                "timestamp": 1771545600000
-                            }
-                        ]
+                      "insights": {
+                        "avgRegistrationSuccessRate": 0.25,
+                        "avgAuthenticationSuccessRate": 0.67,
+                        "peakUsage": {
+                          "period": "2026-02-20",
+                          "totalOperations": 7
+                        }
+                      },
+                      "growthRate": 0.1,
+                      "trendDirection": "STABLE",
+                      "dataPoints": [
+                        {
+                          "period": "2026-02-20",
+                          "metrics": {
+                            "deviceTypes": {
+                              "cross-platform": 1
+                            },
+                            "errorCounts": {},
+                            "fallbackEvents": 1,
+                            "registrationAttempts": 4,
+                            "registrationFailures": 3,
+                            "registrationSuccesses": 1,
+                            "authenticationAttempts": 3,
+                            "authenticationFailures": 1,
+                            "authenticationSuccesses": 2,
+                            "registrationAvgDuration": 420,
+                            "registrationMinDuration": 210,
+                            "registrationMaxDuration": 880,
+                            "registrationSuccessRate": 0.25
+                          },
+                          "timestamp": 1771545600000
+                        }
+                      ]
                     }
         "401":
           description: Unauthorized
@@ -1648,59 +1646,59 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        registrationAvgDuration:
-          type: number
-          format: double
-        fallbackEvents:
+        authenticationAttempts:
           type: integer
           format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationAttempts:
+        authenticationFailures:
           type: integer
           format: int64
         registrationFailures:
           type: integer
           format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
         registrationSuccesses:
           type: integer
           format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        registrationAttempts:
+        authenticationSuccesses:
           type: integer
           format: int64
         registrationSuccessRate:
           type: number
           format: double
-        authenticationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         period:
           type: string
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

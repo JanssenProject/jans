@@ -21,6 +21,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
@@ -61,10 +62,12 @@ public class Fido2Util {
 
     public JsonNode executeGetRequest(String requestUri, Map<String, String> headers, Map<String, String> data)
             throws WebApplicationException, JsonProcessingException {
+        validateFido2Url(requestUri);
         return getResponseJsonNode(configHttpService.executeGet(requestUri, headers, data));
     }
 
     public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers, Map<String, String> data) {
+        validateFido2Url(requestUri);
         return configHttpService.executeGet(requestUri, headers, data);
     }
 
@@ -126,5 +129,12 @@ public class Fido2Util {
             jsonNode = jsonNode.get(nodeName);
         }
         return jsonNode;
+    }
+
+    public void validateFido2Url(String url) {
+        String issuer = getIssuer();
+        if (!url.startsWith(issuer)) {
+            throw new WebApplicationException("Invalid target URL", Response.Status.BAD_REQUEST);
+        }
     }
 }
