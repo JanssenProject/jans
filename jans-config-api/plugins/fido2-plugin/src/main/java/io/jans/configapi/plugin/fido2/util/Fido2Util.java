@@ -88,8 +88,11 @@ public class Fido2Util {
         HttpResponse httpResponse = serviceResponse.getHttpResponse();
         if (httpResponse != null) {
             HttpEntity entity = httpResponse.getEntity();
-            logger.debug("entity:{}, httpResponse.getStatusLine().getStatusCode():{}", entity,
-                    httpResponse.getStatusLine().getStatusCode());
+
+            int statusCode = httpResponse.getStatusLine() != null ? httpResponse.getStatusLine().getStatusCode()
+                    : Status.INTERNAL_SERVER_ERROR.getStatusCode();
+            logger.debug("entity:{}, statusCode:{}", entity, statusCode);
+
             if (entity == null) {
                 return jsonString;
             }
@@ -99,13 +102,15 @@ public class Fido2Util {
                         jsonString, httpResponse.getStatusLine(), Status.OK.getStatusCode());
             } catch (Exception ex) {
                 logger.error("Error while getting entity using EntityUtils is ", ex);
+                throw new WebApplicationException("Unable to read upstream response entity", ex);
             }
-            if (httpResponse.getStatusLine() != null
-                    && httpResponse.getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+
+            if (statusCode == Status.OK.getStatusCode()) {
                 return jsonString;
             } else {
-                throw new WebApplicationException(jsonString, httpResponse.getStatusLine().getStatusCode());
+                throw new WebApplicationException(jsonString, statusCode);
             }
+
         }
         return jsonString;
     }

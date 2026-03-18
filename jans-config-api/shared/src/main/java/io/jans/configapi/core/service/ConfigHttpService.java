@@ -385,12 +385,14 @@ public class ConfigHttpService implements Serializable {
      *                   with blank values are ignored (may be null)
      * @return a HttpServiceResponse containing the executed HttpGet and the
      *         HttpResponse, or `null` if the request failed due to an I/O error
-     * @throws Exception
+     * @throws WebApplicationException
      */
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
 
-        log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+        log.debug("requestUri:{}, headerKeys:{}, parameterKeys:{}", requestUri,
+                headers == null ? null : headers.keySet(), parameters == null ? null : parameters.keySet());
+
         HttpServiceResponse httpServiceResponse = null;
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
@@ -406,7 +408,7 @@ public class ConfigHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.info("\n\n\n Final requestUri:{}", requestUri);
+            log.info("Final requestUri:{}", requestUri);
         }
 
         HttpGet httpGet = new HttpGet(requestUri);
@@ -489,7 +491,7 @@ public class ConfigHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.info("\n\n\n Final Delete requestUri:{}", requestUri);
+            log.info("Final Delete requestUri:{}", requestUri);
         }
 
         HttpDelete httpDelete = new HttpDelete(requestUri);
