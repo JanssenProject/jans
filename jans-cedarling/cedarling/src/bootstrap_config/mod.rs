@@ -86,7 +86,6 @@ impl Default for BootstrapConfig {
             },
             policy_store_config: PolicyStoreConfig {
                 source: PolicyStoreSource::Yaml("cedar_version: v4.0.0\npolicy_stores: {}\n".to_string()),
-                validate_checksum: true,
             },
             jwt_config: JwtConfig::new_without_validation(),
             authorization_config: AuthorizationConfig::default(),
