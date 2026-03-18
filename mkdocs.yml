@@ -53,6 +53,7 @@ nav:
 # 1. GET STARTED
 # ====================
 - Get Started:
+  - Overview: getting-started/index.md
   - Welcome: index.md
   - Introduction: janssen-server/README.md
   - Platform Goals: janssen-server/planning/platform-goal.md
