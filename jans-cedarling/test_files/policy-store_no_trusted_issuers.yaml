@@ -29,15 +29,9 @@ policy_stores:
       content_type: cedar
       body: |-
         namespace Jans {
-        type Url = {"host": String, "path": String, "protocol": String};
-        entity TrustedIssuer = {"issuer_entity_id": Url};
         entity Issue = {"country": String, "org_id": String};
         entity Role;
-        entity User in [Role] = {
-          sub: String,
-          role?: Set<String>,
-          country: String,
-        };
+        entity User in [Role];
         entity TestPrincipal1  = {"is_ok": Bool};
         entity TestPrincipal2  = {"is_ok": Bool};
         entity TestPrincipal3  = {"is_ok": Bool};
