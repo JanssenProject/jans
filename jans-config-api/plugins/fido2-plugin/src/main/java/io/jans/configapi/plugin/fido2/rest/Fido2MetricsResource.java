@@ -99,8 +99,7 @@ public class Fido2MetricsResource extends BaseResource {
     public Response getFido2MetricsEntry(
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Start date/time for "
-                    + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
+            @Parameter(description = "Start date/time for entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
@@ -168,8 +167,7 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "user Id") @PathParam("userId") @NotNull String userId,
-            @Parameter(description = "Start date/time for "
-                    + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
+            @Parameter(description = "Start date/time for entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
@@ -233,8 +231,7 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Operation Type") @PathParam("operationType") @NotNull String operationType,
-            @Parameter(description = "Start date/time for "
-                    + " entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
+            @Parameter(description = "Start date/time for entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull String endDate) {
 
         if (logger.isInfoEnabled()) {
@@ -895,13 +892,13 @@ public class Fido2MetricsResource extends BaseResource {
         }
         // Try ISO date only (e.g. 2024-02-13)
         try {
-            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+            return LocalDateTime.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException ignored) {
             // continue
         }
 
         // Fallback to legacy dd-MM-yyyy
-        return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT)).atStartOfDay();
+        return LocalDateTime.parse(trimmed, DateTimeFormatter.ofPattern(METRICS_DATE_FORMAT));
     }
 
     private Fido2MetricsEntryPagedResult getFido2MetricsEntryPagedResult(PagedResult<Fido2MetricsEntry> pagedResult,
@@ -982,16 +979,15 @@ public class Fido2MetricsResource extends BaseResource {
             return;
         }
 
-        if (entriesList != null && !entriesList.isEmpty()) {
-            logger.debug("Validate startIndex  entriesList.size():{}", entriesList.size());
-            try {
-                entriesList.get(startIndex);
-            } catch (IndexOutOfBoundsException ioe) {
-                logger.error("Error while getting data startIndex:{}", startIndex, ioe);
-                throwBadRequestException("Page start index incorrect, total entries:{" + entriesList.size()
-                        + "}, but provided:{" + startIndex + "} ");
-            }
+        logger.debug("Validate startIndex  entriesList.size():{}", entriesList.size());
+        try {
+            entriesList.get(startIndex);
+        } catch (IndexOutOfBoundsException ioe) {
+            logger.error("Error while getting data startIndex:{}", startIndex, ioe);
+            throwBadRequestException("Page start index incorrect, total entries:{" + entriesList.size()
+                    + "}, but provided:{" + startIndex + "} ");
         }
+
     }
 
     private <T> PagedResult<T> builPagedResult(String startDate, String endDate, DateTimeFormatter fmt,

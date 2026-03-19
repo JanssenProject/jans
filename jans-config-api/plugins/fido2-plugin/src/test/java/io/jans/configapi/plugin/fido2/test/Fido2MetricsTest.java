@@ -22,7 +22,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
     @Test
     public void getFido2MetricsEntryWithInvalidToken(final String issuer, final String fido2MetricsUrl,
             final String fido2MetricsEntriesUrl) {
-        log.debug(" getFido2MetricsEntry() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntriesUrl:{}", issuer,
+        log.debug(" getFido2MetricsEntryWithInvalidToken() - issuer:{}, fido2MetricsUrl:{}, fido2MetricsEntriesUrl:{}", issuer,
                 fido2MetricsUrl, fido2MetricsEntriesUrl);
 
         String invalidToken = this.getAccessTokenForGivenScope("https://jans.io/oauth/config/attributes.readonly");
@@ -31,7 +31,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         try (Response response = request.get()) {
-            log.info("getFido2MetricsEntry() - response:{}, response.getStatus():{}", response, response.getStatus());
+            log.info("getFido2MetricsEntryWithInvalidToken() - response:{}, response.getStatus():{}", response, response.getStatus());
             assertEquals(response.getStatus(), Status.UNAUTHORIZED.getStatusCode());
         }
     }
@@ -151,7 +151,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
     public void getAnalyticsPerformanceMetric(final String issuer, final String fido2MetricsUrl,
             final String fido2AnalyticsPerformanceMetricsUrl) {
         log.debug(
-                "\n\n getAnalyticsAdoptionMetrics() - issuer:{}, fido2MetricsUrl:{}, fido2AnalyticsPerformanceMetricsUrl:{}",
+                "\n\n getAnalyticsPerformanceMetric() - issuer:{}, fido2MetricsUrl:{}, fido2AnalyticsPerformanceMetricsUrl:{}",
                 issuer, fido2MetricsUrl, fido2AnalyticsPerformanceMetricsUrl);
 
         Builder request = getResteasyService()
@@ -160,7 +160,7 @@ public class Fido2MetricsTest extends Fido2BaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         try (Response response = request.get()) {
-            log.info("getAnalyticsAdoptionMetrics() - response:{}, response.getStatus():{}", response,
+            log.info("getAnalyticsPerformanceMetric() - response:{}, response.getStatus():{}", response,
                     response.getStatus());
             assertEquals(response.getStatus(), Status.OK.getStatusCode());
         }

@@ -380,7 +380,7 @@ public class Fido2MetricsService {
 
     private JsonNode getMetricsData(String url, Map<String, String> headers, Map<String, String> data)
             throws JsonProcessingException {
-        log.info("Fido2Metrics Data: url:{}, headers:{}, data:{}", url, headers, data);
+        log.debug("Fido2Metrics Data: url:{}, headers:{}, data:{}", url, headers, data);
         JsonNode jsonNode = null;
 
         if (StringUtils.isBlank(url)) {

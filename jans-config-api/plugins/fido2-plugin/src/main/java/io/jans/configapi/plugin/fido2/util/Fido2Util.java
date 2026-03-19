@@ -133,6 +133,9 @@ public class Fido2Util {
 
     public void validateFido2Url(String url) {
         String issuer = getIssuer();
+        if (StringUtils.isBlank(issuer)) {
+            throw new WebApplicationException("Fido issuer is not configured", Response.Status.INTERNAL_SERVER_ERROR);
+        }
         if (!url.startsWith(issuer)) {
             throw new WebApplicationException("Invalid target URL", Response.Status.BAD_REQUEST);
         }
