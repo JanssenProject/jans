@@ -61,7 +61,6 @@ async fn init_cedarling() -> Cedarling {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,

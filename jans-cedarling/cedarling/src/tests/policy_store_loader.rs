@@ -503,112 +503,6 @@ async fn test_load_from_cjar_file_and_authorize_success() {
 }
 
 // ============================================================================
-// Manifest Validation Tests
-// ============================================================================
-
-/// Test that manifest validation detects checksum mismatches.
-///
-/// This test uses `load_policy_store_directory` which performs manifest validation.
-/// An invalid checksum format in the manifest should cause initialization to fail.
-#[test]
-#[cfg(not(target_arch = "wasm32"))]
-async fn test_manifest_validation_invalid_checksum_format() {
-    use super::utils::cedarling_util::get_config;
-    use crate::common::policy_store::test_utils::fixtures;
-
-    let mut builder = fixtures::minimal_valid();
-
-    // Add manifest with invalid checksum format (missing sha256: prefix)
-    builder.extra_files.insert(
-        "manifest.json".to_string(),
-        r#"{
-            "policy_store_id": "abc123def456",
-            "generated_date": "2024-01-01T00:00:00Z",
-            "files": {
-                "metadata.json": {
-                    "size": 100,
-                    "checksum": "invalid_format_no_sha256_prefix"
-                }
-            }
-        }"#
-        .to_string(),
-    );
-
-    let archive = builder
-        .build_archive()
-        .expect("Failed to build test archive");
-    let temp_dir = extract_archive_to_temp_dir(&archive);
-
-    // Attempt to create Cedarling - should fail due to invalid checksum format
-    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
-
-    let err = Cedarling::new(&config)
-        .await
-        .err()
-        .expect("Cedarling initialization should fail with invalid checksum format");
-
-    // Verify the error is a Directory error containing the checksum format message
-    assert!(
-        matches!(
-            &err,
-            crate::InitCedarlingError::ServiceConfig(
-                crate::init::service_config::ServiceConfigError::PolicyStore(
-                    crate::init::policy_store::PolicyStoreLoadError::Directory(msg)
-                )
-            ) if msg.contains("Invalid checksum format")
-        ),
-        "Expected Directory error with 'Invalid checksum format', got: {err:?}"
-    );
-}
-
-/// Test that manifest validation detects policy store ID mismatches.
-#[test]
-#[cfg(not(target_arch = "wasm32"))]
-async fn test_manifest_validation_policy_store_id_mismatch() {
-    use super::utils::cedarling_util::get_config;
-    use crate::common::policy_store::test_utils::fixtures;
-
-    let mut builder = fixtures::minimal_valid();
-
-    // Add manifest with wrong policy_store_id (metadata has "abc123def456")
-    builder.extra_files.insert(
-        "manifest.json".to_string(),
-        r#"{
-            "policy_store_id": "wrong_id_12345",
-            "generated_date": "2024-01-01T00:00:00Z",
-            "files": {}
-        }"#
-        .to_string(),
-    );
-
-    let archive = builder
-        .build_archive()
-        .expect("Failed to build test archive");
-    let temp_dir = extract_archive_to_temp_dir(&archive);
-
-    // Attempt to create Cedarling - should fail due to ID mismatch
-    let config = get_config(PolicyStoreSource::Directory(temp_dir.path().to_path_buf()));
-
-    let err = Cedarling::new(&config)
-        .await
-        .err()
-        .expect("Cedarling initialization should fail with policy store ID mismatch");
-
-    // Verify the error is a Directory error containing the ID mismatch message
-    assert!(
-        matches!(
-            &err,
-            crate::InitCedarlingError::ServiceConfig(
-                crate::init::service_config::ServiceConfigError::PolicyStore(
-                    crate::init::policy_store::PolicyStoreLoadError::Directory(msg)
-                )
-            ) if msg.contains("Policy store ID mismatch")
-        ),
-        "Expected Directory error with 'Policy store ID mismatch', got: {err:?}"
-    );
-}
-
-// ============================================================================
 // Policy Store with Entities Tests
 // ============================================================================
 
@@ -1012,7 +906,7 @@ async fn test_load_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Load directly using the bytes loader
-    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes)
         .expect("Should load policy store from bytes");
 
     // Verify the loaded policy store
@@ -1049,7 +943,7 @@ async fn test_load_policy_store_archive_bytes_invalid() {
 
     // Try to load invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = load_policy_store_archive_bytes(&invalid_bytes, true)
+    let err = load_policy_store_archive_bytes(&invalid_bytes)
         .expect_err("Should fail to load invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
@@ -1235,7 +1129,6 @@ fn create_jwt_cedarling_config_with_loader(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_store_source,
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
