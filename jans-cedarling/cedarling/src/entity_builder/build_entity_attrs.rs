@@ -23,11 +23,7 @@ pub(super) fn build_entity_attrs(
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     if let Some(attrs_shape) = attrs_shape {
-        Ok(build_entity_attrs_with_shape(
-            attrs_src,
-            entities,
-            attrs_shape,
-        )?)
+        build_entity_attrs_with_shape(attrs_src, entities, attrs_shape)
     } else {
         build_entity_attrs_without_schema(attrs_src)
     }
@@ -60,11 +56,8 @@ fn build_entity_attrs_with_shape(
                     Ok(Some(expr)) => {
                         attrs.insert(attr_name.to_string(), expr);
                     },
-                    Err(e) => {
-                        if attr_shape.is_required() {
-                            errs.push(BuildAttrsError::from(e));
-                        }
-                        // optional attributes with type mismatches are silently skipped
+                    Err(e) if attr_shape.is_required() => {
+                        errs.push(BuildAttrsError::from(e));
                     },
                     _ => {},
                 }
