@@ -18,7 +18,6 @@ Learn more about each part of the validation process:
 
 - [Signature Validation](#jwt-signature-validation): Verifies the token's origin using trusted issuer keys.
 - [Content Validation](#jwt-content-validation): Ensures required claims like `exp` or `client_id` are present.
-- [ID Token Trust Mode](#id-token-trust-mode): Validates relationships between different token types.
 - [JWT Status Validation](#jwt-status-validation): Checks if a token has been explicitly revoked.
 - [Local JWKS](#local-jwks): Using local key stores for testing.
 
@@ -26,7 +25,6 @@ Learn more about each part of the validation process:
 
 - `CEDARLING_JWT_SIG_VALIDATION`: Controls JWT signature validation
 - `CEDARLING_JWT_STATUS_VALIDATION`: Controls JWT revocation checks  
-- `CEDARLING_ID_TOKEN_TRUST_MODE`: Controls ID token trust validation
 - `CEDARLING_LOCAL_JWKS`: Local key store for testing
 
 See the complete [bootstrap properties reference](./cedarling-properties.md) for all available configuration options.
@@ -91,12 +89,12 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
 2. The token must be provided under a **token name** defined in the corresponding `token_metadata`
 
   ```js
-  // Example authorize call
-  cedarling.authorize({
-    "tokens": {
-      "access_token": "<access_token>", // will be validated and used for entity creation
-      "id_token": "<id_token>",         // will be ignored unless defined in token_metadata
-    },
+  // Example authorize_multi_issuer call
+  cedarling.authorize_multi_issuer({
+    tokens: [
+      { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
+      { mapping: "Jans::Id_Token", payload: "<id_token>" },         // will be ignored unless defined in token_metadata
+    ],
     // ...
   })
   ```
@@ -136,29 +134,6 @@ You can specify additional required claims in your token metadata configuration:
 ```
 
 The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Additionally, *registered claims* like the `exp` will also be validated according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) standards.
-
-## ID Token Trust Mode
-
-Cedarling supports an optional strict trust mode for validating relationships between different token types—primarily ID tokens, Access tokens, and Userinfo tokens.
-
-This behavior is controlled via the `CEDARLING_ID_TOKEN_TRUST_MODE` [bootstrap property](./cedarling-properties.md).
-
-> **Implementation Status:** Currently, only `strict` and `never` modes are implemented. Additional modes (`always`, `ifpresent`) are defined in the enum but not yet supported in the validation logic.
-
-### `strict` Mode
-
-If `CEDARLING_ID_TOKEN_TRUST_MODE` is set to `strict`, Cedarling will enforce the following:
-
-1. The `id_token`'s `aud` (Audience) must match the `access_token`'s `client_id`;
-2. If a `userinfo_token` is also provided:
-   - Its `sub` (Subject) must match that of the `id_token`
-   - Its `aud` must also match the `access_token`'s `client_id`.
-
-These additional checks add another layer of identity assurance across tokens.
-
-### `never` Mode
-
-Setting the validation level to `never` will not check for the conditions outlined in [`strict` Mode](#strict-mode).
 
 ## JWT Status Validation
 
