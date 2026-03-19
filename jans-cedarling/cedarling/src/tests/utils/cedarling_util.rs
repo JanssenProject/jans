@@ -24,7 +24,6 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
-            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
@@ -84,7 +83,6 @@ pub(crate) async fn get_cedarling_with_authorization_conf(
         },
         policy_store_config: PolicyStoreConfig {
             source: policy_source,
-            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: auth_conf,

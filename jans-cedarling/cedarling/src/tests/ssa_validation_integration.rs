@@ -9,8 +9,8 @@ use crate::common::json_rules::JsonRule;
 use crate::log::StdOutLoggerMode;
 use crate::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    IdTokenTrustMode, JwtConfig, LockServiceConfig, LogConfig, LogLevel, LogTypeConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    IdTokenTrustMode, JwtConfig, LockServiceConfig, LockTransport, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -36,6 +36,8 @@ async fn test_cedarling_with_valid_ssa() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        ..Default::default()
     };
 
     let result = Cedarling::new(&BootstrapConfig {
@@ -46,7 +48,6 @@ async fn test_cedarling_with_valid_ssa() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -97,6 +98,8 @@ async fn test_cedarling_without_ssa() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        ..Default::default()
     };
 
     let result = Cedarling::new(&BootstrapConfig {
@@ -107,7 +110,6 @@ async fn test_cedarling_without_ssa() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -266,6 +268,8 @@ async fn test_ssa_configuration_validation() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        ..Default::default()
     };
 
     // Verify that the SSA JWT is properly set
@@ -285,6 +289,8 @@ async fn test_ssa_configuration_validation() {
         telemetry_interval: None,
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        ..Default::default()
     };
 
     // Verify that the SSA JWT is not set

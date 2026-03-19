@@ -116,7 +116,6 @@ async fn prepare_cedarling_without_jwt_validation() -> Result<Cedarling, InitCed
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig {
@@ -163,7 +162,6 @@ async fn prepare_cedarling_with_jwt_validation(
             source: PolicyStoreSource::Yaml(
                 serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
