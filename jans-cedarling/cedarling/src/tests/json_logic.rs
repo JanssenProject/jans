@@ -66,11 +66,7 @@ fn get_result(
             ),
         );
     }
-    AuthorizeResult::new_for_many_principals(
-        rule,
-        principal_responses,
-        gen_uuid4(),
-    )
+    AuthorizeResult::new_for_many_principals(rule, principal_responses, gen_uuid4())
 }
 
 /// Test JSON Rule with `and` operator
@@ -459,12 +455,8 @@ fn test_with_multiple_principals() {
         ),
     ]);
 
-    let result = AuthorizeResult::new_for_many_principals(
-        &rule,
-        principal_responses,
-        gen_uuid4(),
-    )
-    .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
+    let result = AuthorizeResult::new_for_many_principals(&rule, principal_responses, gen_uuid4())
+        .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
 
     assert_eq!(result.decision, true, "Decision should be ALLOW");
 

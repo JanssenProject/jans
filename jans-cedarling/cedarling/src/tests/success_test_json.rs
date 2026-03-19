@@ -14,8 +14,7 @@ use tokio::test;
 #[test]
 async fn success_test_json() {
     // Use policy store that has UpdateForTestPrincipals and TestPrincipal types
-    static POLICY_STORE_RAW_JSON: &str =
-        include_str!("../../../test_files/policy-store_ok_2.yaml");
+    static POLICY_STORE_RAW_JSON: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_JSON.to_string()),

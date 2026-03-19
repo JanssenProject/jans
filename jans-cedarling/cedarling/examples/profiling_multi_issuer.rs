@@ -20,7 +20,7 @@ use jsonwebtoken::Algorithm;
 #[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
 use test_utils::token_claims::generate_token_using_claims_and_keypair;
 #[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
-use test_utils::{gen_mock_server, MockServer};
+use test_utils::{MockServer, gen_mock_server};
 
 const POLICY_STORE_RAW: &str =
     include_str!("../../test_files/policy-store-multi-issuer-basic.yaml");
@@ -33,8 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cedarling = init_cedarling_multi_issuer(&mock1.base_idp_url, &mock2.base_idp_url).await?;
 
-    let request =
-        prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
+    let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
 
     // Validate that the authorization request executes correctly before profiling
     let validation_result = cedarling
@@ -80,11 +79,10 @@ async fn init_cedarling_multi_issuer(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store =
-        serde_yml::from_str::<serde_yml::Value>(POLICY_STORE_RAW).expect("a valid YAML policy store");
+    let mut policy_store = serde_yml::from_str::<serde_yml::Value>(POLICY_STORE_RAW)
+        .expect("a valid YAML policy store");
 
-    policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]
-        ["openid_configuration_endpoint"] =
+    policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
         format!("{base_idp_url1}/.well-known/openid-configuration").into();
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["DolphinIssuer"]
@@ -101,7 +99,6 @@ async fn init_cedarling_multi_issuer(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,
@@ -179,10 +176,7 @@ fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
 }
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
-async fn call_authorize_multi_issuer(
-    cedarling: &Cedarling,
-    request: &AuthorizeMultiIssuerRequest,
-) {
+async fn call_authorize_multi_issuer(cedarling: &Cedarling, request: &AuthorizeMultiIssuerRequest) {
     let _result = cedarling.authorize_multi_issuer(request.clone()).await;
 }
 

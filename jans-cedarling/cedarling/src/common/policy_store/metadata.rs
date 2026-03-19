@@ -7,7 +7,6 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 /// Helper module for serializing Optional [`DateTime`]
 mod datetime_option {
@@ -39,29 +38,6 @@ mod datetime_option {
                 .map_err(serde::de::Error::custom),
             None => Ok(None),
         }
-    }
-}
-
-/// Helper module for serializing [`DateTime`]
-mod datetime {
-    use chrono::{DateTime, Utc};
-    use serde::{Deserialize, Deserializer, Serializer};
-
-    pub(super) fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&date.to_rfc3339())
-    }
-
-    pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s: String = String::deserialize(deserializer)?;
-        DateTime::parse_from_rfc3339(&s)
-            .map(|dt| dt.with_timezone(&Utc))
-            .map_err(serde::de::Error::custom)
     }
 }
 
@@ -106,29 +82,6 @@ pub(crate) struct PolicyStoreInfo {
     pub updated_date: Option<DateTime<Utc>>,
 }
 
-/// Manifest file for policy store integrity validation.
-///
-/// Contains checksums and metadata for all files in the policy store.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub(crate) struct PolicyStoreManifest {
-    /// Reference to the policy store ID this manifest belongs to
-    pub policy_store_id: String,
-    /// ISO 8601 timestamp when the manifest was generated
-    #[serde(with = "datetime")]
-    pub generated_date: DateTime<Utc>,
-    /// Map of file paths to their metadata
-    pub files: HashMap<String, FileInfo>,
-}
-
-/// Information about a file in the policy store manifest.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub(crate) struct FileInfo {
-    /// File size in bytes
-    pub size: u64,
-    /// SHA-256 checksum of the file content (format: "sha256:<hex>")
-    pub checksum: String,
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -163,37 +116,5 @@ mod tests {
         // Test deserialization - compare whole structure
         let deserialized: PolicyStoreMetadata = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, metadata);
-    }
-
-    #[test]
-    fn test_policy_store_manifest_serialization() {
-        // Use a fixed timestamp for deterministic comparison
-        let generated = DateTime::parse_from_rfc3339("2024-01-01T12:00:00Z")
-            .unwrap()
-            .with_timezone(&Utc);
-
-        let mut files = HashMap::new();
-        files.insert(
-            "metadata.json".to_string(),
-            FileInfo {
-                size: 245,
-                checksum: "sha256:abc123".to_string(),
-            },
-        );
-
-        let manifest = PolicyStoreManifest {
-            policy_store_id: "test123".to_string(),
-            generated_date: generated,
-            files,
-        };
-
-        // Test serialization
-        let json = serde_json::to_string(&manifest).unwrap();
-        assert!(json.contains("policy_store_id"));
-        assert!(json.contains("test123"));
-
-        // Test deserialization - compare whole structure
-        let deserialized: PolicyStoreManifest = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, manifest);
     }
 }

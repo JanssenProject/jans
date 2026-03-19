@@ -82,7 +82,7 @@ class AdminUiPlugin:
         )
 
     def pull_token_server_cert(self, base_url, cert_file):
-        logger.info(f"Downloading certificate from {base_url}")
+        logger.info("Downloading certificate from %s", base_url)
 
         parsed_url = urlparse(base_url)
         host = parsed_url.hostname

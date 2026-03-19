@@ -59,7 +59,7 @@ def main():
             manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
         else:
             hostname = manager.config.get("hostname")
-            logger.info(f"Pulling SSL certificate from {hostname}")
+            logger.info("Pulling SSL certificate from %s", hostname)
             get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
@@ -118,7 +118,7 @@ def configure_logging():
     try:
         custom_config = json.loads(os.environ.get("CN_AUTH_APP_LOGGERS", "{}"))
     except json.decoder.JSONDecodeError as exc:
-        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        logger.warning("Unable to load logging configuration from environment variable; reason=%s; fallback to defaults", exc)
         custom_config = {}
 
     # ensure custom config is ``dict`` type
@@ -137,11 +137,11 @@ def configure_logging():
             continue
 
         if k.endswith("_log_level") and v not in log_levels:
-            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            logger.warning("Invalid %s log level for %s; fallback to defaults", v, k)
             v = config[k]
 
         if k.endswith("_log_target") and v not in log_targets:
-            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            logger.warning("Invalid %s log output for %s; fallback to defaults", v, k)
             v = config[k]
 
         # update the config
@@ -182,8 +182,8 @@ def copy_lock_libs():
 
     if not lock_jars:
         logger.warning(
-            f"Required JAR files to run jans-lock plugin were not found in {libs_path}. "
-            "The plugin may not run properly and affect jans-auth server."
+            "Required JAR files to run jans-lock plugin were not found in %s. "
+            "The plugin may not run properly and affect jans-auth server.", libs_path
         )
         return
 

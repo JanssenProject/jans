@@ -11,8 +11,8 @@
 
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
-    JwtConfig, LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource, log_config::StdOutLoggerMode,
+    JwtConfig, LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    PolicyStoreSource, log_config::StdOutLoggerMode,
 };
 use std::env;
 
@@ -54,7 +54,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig::default(),

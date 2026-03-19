@@ -10,7 +10,7 @@ use tokio::time::sleep;
 pub struct Backoff {
     attempts: u32,
     max_attempts: Option<u32>,
-    backoff_duration: Box<dyn Fn(u32) -> Duration>,
+    backoff_duration: Box<dyn Fn(u32) -> Duration + Send>,
 }
 
 impl Backoff {

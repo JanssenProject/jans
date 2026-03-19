@@ -103,7 +103,6 @@ async fn prepare_cedarling_with_jwt_validation(
             source: cedarling::PolicyStoreSource::Yaml(
                 serde_yml::to_string(&policy_store).expect("serialize policy store to YAML"),
             ),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,

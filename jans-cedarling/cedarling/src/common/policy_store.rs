@@ -24,7 +24,6 @@ pub(crate) mod errors;
 pub(crate) mod issuer_parser;
 pub(crate) mod loader;
 pub(crate) mod manager;
-pub(crate) mod manifest_validator;
 pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;

@@ -3,10 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::{
-    issuer_utils::IssClaim,
-    policy_store::TrustedIssuer,
-};
+use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};

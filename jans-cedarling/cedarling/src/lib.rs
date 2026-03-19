@@ -47,8 +47,7 @@ pub use crate::init::policy_store::{PolicyStoreLoadError, load_policy_store};
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned,
-    TokenInput,
+    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
