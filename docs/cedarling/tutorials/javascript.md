@@ -296,7 +296,7 @@ const request = {
 
 **6. Perform Authorization**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```js
 const result = await cedarling.authorize_unsigned(request);

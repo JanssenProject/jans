@@ -205,7 +205,7 @@ Similarly, create and initialize String variables with action, resource, context
 
 **2. Authorize**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorizeUnsigned` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```java
         List<EntityData> principals = List.of(EntityData.Companion.fromJson(principals));

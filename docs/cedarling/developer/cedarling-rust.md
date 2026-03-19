@@ -78,11 +78,11 @@ cargo doc -p cedarling --no-deps --open
 **5. Build examples**
 
 ```bash
-# Run JWT validation example
-cargo run -p cedarling --example authorize_with_jwt_validation
-
 # Run unsigned authorization example
 cargo run -p cedarling --example authorize_unsigned
+
+# Run multi-issuer profiling example
+cargo run -p cedarling --example profiling_multi_issuer
 
 # Stdout logging
 cargo run -p cedarling --example log_init -- stdout
@@ -269,7 +269,7 @@ pub async fn authorize_unsigned(&self, request: RequestUnsigned) -> Result<Autho
 Perform token-based authorization using multi-issuer tokens.
 
 ```rust
-pub async fn authorize_multi_issuer(&self, request: AuthorizeMultiIssuerRequest) -> Result<AuthorizeResult, CedarlingError>
+pub async fn authorize_multi_issuer(&self, request: AuthorizeMultiIssuerRequest) -> Result<MultiIssuerAuthorizeResult, AuthorizeError>
 ```
 
 #### `pop_logs()`
