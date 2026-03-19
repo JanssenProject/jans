@@ -107,11 +107,12 @@ public class Fido2MetricsResource extends BaseResource {
             logger.info(ALL_PARAM, escapeLog(limit), escapeLog(startIndex), escapeLog(startDate), escapeLog(endDate));
         }
 
-        logger.error(" \n\n NEW implementation -----------------\n\n");
+        logger.error(" \n\n FINAL NEW implementation -----------------\n\n");
         PagedResult<Fido2MetricsEntry> pagedResult = null;
-        try {
+           try {
             
-            return buildPagedResponse(
+               
+               pagedResult = builPagedResult(
                     limit,
                     startIndex,
                     startDate,
@@ -120,20 +121,18 @@ public class Fido2MetricsResource extends BaseResource {
 
                     // 🔹 supplier: fetch data
                     (start, end) -> {
+                        PagedResult<Fido2MetricsEntry> result = null;
                         try {
-                            return fido2MetricsService.getFido2MetricsEntries(null, start, end);
+                            result = fido2MetricsService.getFido2MetricsEntries(null, start, end);
                         } catch (JsonProcessingException jex) {
                             throwInternalServerException(jex);
                         }
-                        return pagedResult;
-                    },
-                    // 🔹 mapper: transform result
-                    result -> {
-                        return getFido2MetricsEntryPagedResult(result, limit, startIndex);
+                        return result;
                     }
+                    
                 );
                 
-
+            logger.error(" \n\n FINAL NEW implementation ----------------- pagedResult:{}, {}", pagedResult, "\n\n");
                 /*
                  * // validate Date validateDate(startDate, endDate, formatter,
                  * fido2MetricsService.getFido2MetricsEntries(null, startLocalDate,
@@ -1092,6 +1091,18 @@ public class Fido2MetricsResource extends BaseResource {
                         + "}, but provided:{" + startIndex + "} ");
             }
         }
+    }
+    
+    private <T> PagedResult<T> builPagedResult(
+            int limit, int startIndex, String startDate, String endDate,
+            DateTimeFormatter fmt,
+            BiFunction<LocalDateTime, LocalDateTime, PagedResult<T>> supplier) throws Exception {
+        validateDate(startDate, endDate, fmt);
+        LocalDateTime start = parseDate(startDate);
+        LocalDateTime end = parseDate(endDate);
+        PagedResult<T> result = supplier.apply(start, end);
+        logger.error("\n\n NEW PagedResult  result :{}" , result);
+        return result;
     }
     
     
