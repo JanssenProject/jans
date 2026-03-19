@@ -36,7 +36,7 @@ pub use entity_builder_config::{
     EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc,
 };
 pub use jwt_config::JwtConfig;
-pub use lock_config::{LockServiceConfig, LockServiceConfigRaw};
+pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
 pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
@@ -86,7 +86,6 @@ impl Default for BootstrapConfig {
             },
             policy_store_config: PolicyStoreConfig {
                 source: PolicyStoreSource::Yaml("cedar_version: v4.0.0\npolicy_stores: {}\n".to_string()),
-                validate_checksum: true,
             },
             jwt_config: JwtConfig::new_without_validation(),
             authorization_config: AuthorizationConfig::default(),
@@ -266,6 +265,12 @@ pub enum BootstrapConfigLoadingError {
         "cjar_url is missing or empty. A valid URL is required for CjarUrl policy store source."
     )]
     MissingCjarUrl,
+
+    /// Error returned when transport is set to gRPC but no gRPC endpoint is configured.
+    #[error(
+        "`CEDARLING_LOCK_TRANSPORT` is set to `grpc` but `CEDARLING_LOCK_GRPC_ENDPOINT` is not set."
+    )]
+    MissingGrpcEndpoint,
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {

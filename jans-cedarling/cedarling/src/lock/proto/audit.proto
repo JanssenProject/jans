@@ -1,0 +1,94 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+syntax = "proto3";
+
+package io.jans.lock.audit;
+
+import "google/protobuf/timestamp.proto";
+
+// Health Entry Message
+message HealthEntry {
+  google.protobuf.Timestamp creation_date = 1;
+  google.protobuf.Timestamp event_time = 2;
+  string service = 3;
+  string node_name = 4;
+  string status = 5;
+  map<string, string> engine_status = 6;
+}
+
+message HealthRequest {
+  HealthEntry entry = 1;
+}
+
+message BulkHealthRequest {
+  repeated HealthEntry entries = 1;
+}
+
+// Log Entry Message
+message LogEntry {
+  google.protobuf.Timestamp creation_date = 1;
+  google.protobuf.Timestamp event_time = 2;
+  string service = 3;
+  string node_name = 4;
+  string event_type = 5;
+  string severity_level = 6;
+  string action = 7;
+  string decision_result = 8;
+  string requested_resource = 9;
+  string principal_id = 10;
+  string client_id = 11;
+  string jti = 12;
+  map<string, string> context_information = 13;
+}
+
+message LogRequest {
+  LogEntry entry = 1;
+}
+
+message BulkLogRequest {
+  repeated LogEntry entries = 1;
+}
+
+// Telemetry Entry Message
+message TelemetryEntry {
+  google.protobuf.Timestamp creation_date = 1;
+  google.protobuf.Timestamp event_time = 2;
+  string service = 3;
+  string node_name = 4;
+  string status = 5;
+  int64 last_policy_load_size = 6;
+  int64 policy_success_load_counter = 7;
+  int64 policy_failed_load_counter = 8;
+  int64 last_policy_evaluation_time_ns = 9;
+  int64 avg_policy_evaluation_time_ns = 10;
+  int64 memory_usage = 11;
+  int64 evaluation_requests_count = 12;
+  map<string, int64> policy_stats = 13;
+}
+
+message TelemetryRequest {
+  TelemetryEntry entry = 1;
+}
+
+message BulkTelemetryRequest {
+  repeated TelemetryEntry entries = 1;
+}
+
+// Common Response
+message AuditResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Audit Service
+service AuditService {
+  rpc ProcessHealth(HealthRequest) returns (AuditResponse);
+  rpc ProcessBulkHealth(BulkHealthRequest) returns (AuditResponse);
+  rpc ProcessLog(LogRequest) returns (AuditResponse);
+  rpc ProcessBulkLog(BulkLogRequest) returns (AuditResponse);
+  rpc ProcessTelemetry(TelemetryRequest) returns (AuditResponse);
+  rpc ProcessBulkTelemetry(BulkTelemetryRequest) returns (AuditResponse);
+}

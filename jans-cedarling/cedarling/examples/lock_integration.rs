@@ -9,7 +9,8 @@ use cedarling::log_config::StdOutLoggerMode;
 use cedarling::{
     AuthorizationConfig, BootstrapConfig, CedarEntityMapping, Cedarling, DataStoreConfig,
     EntityBuilderConfig, EntityData, IdTokenTrustMode, JsonRule, JwtConfig, LockServiceConfig,
-    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    LockTransport, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
+    RequestUnsigned,
 };
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
@@ -36,6 +37,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         telemetry_interval: None,                   // don't send telemetry
         listen_sse: false,
         accept_invalid_certs: true,
+        transport: LockTransport::Rest,
+        ..Default::default()
     };
 
     let cedarling = Cedarling::new(&BootstrapConfig {
@@ -46,7 +49,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
-            validate_checksum: true,
         },
         jwt_config: JwtConfig {
             jwks: None,

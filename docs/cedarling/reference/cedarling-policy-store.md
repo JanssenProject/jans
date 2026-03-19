@@ -45,7 +45,6 @@ The new directory-based format uses human-readable Cedar files organized in a st
 ```text
 policy-store/
 ├── metadata.json           # Required: Store identification and versioning
-├── manifest.json           # Optional: File checksums for integrity validation
 ├── schema.cedarschema      # Required: Cedar schema in human-readable format
 ├── policies/               # Required: Directory containing .cedar policy files
 │   ├── allow-read.cedar
@@ -72,33 +71,6 @@ Contains policy store identification and versioning:
   }
 }
 ```
-
-#### manifest.json (Optional)
-
-Provides integrity validation with file checksums:
-
-```json
-{
-  "policy_store_id": "abc123def456",
-  "generated_date": "2024-01-01T12:00:00Z",
-  "files": {
-    "metadata.json": {
-      "size": 245,
-      "checksum": "sha256:abc123..."
-    },
-    "schema.cedarschema": {
-      "size": 1024,
-      "checksum": "sha256:def456..."
-    }
-  }
-}
-```
-
-When a manifest is present, Cedarling validates:
-
-- File checksums match (SHA-256)
-- File sizes match
-- Policy store ID matches between manifest and metadata
 
 #### Policy Files
 
