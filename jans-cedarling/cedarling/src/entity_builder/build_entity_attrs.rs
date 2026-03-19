@@ -61,7 +61,10 @@ fn build_entity_attrs_with_shape(
                         attrs.insert(attr_name.to_string(), expr);
                     },
                     Err(e) => {
-                        errs.push(BuildAttrsError::from(e));
+                        if attr_shape.is_required() {
+                            errs.push(BuildAttrsError::from(e));
+                        }
+                        // optional attributes with type mismatches are silently skipped
                     },
                     _ => {},
                 }
