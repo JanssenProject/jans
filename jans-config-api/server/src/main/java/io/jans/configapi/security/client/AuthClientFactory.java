@@ -13,8 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
-import io.jans.as.client.RevokeSessionResponse;
-import io.jans.as.client.RevokeSessionRequest;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.service.IntrospectionService;
@@ -209,36 +207,7 @@ public class AuthClientFactory {
         }
         return null;
     }
-
-    public static RevokeSessionResponse revokeSession(String url, String token, String userId) {
-        log.debug("Request for Access Token -  url:{}, token:{}, userId:{} ", url, token, userId);
-        Response response = null;
-        try {
-            RevokeSessionRequest revokeSessionRequest = new RevokeSessionRequest("uid", "test");
-
-            Builder request = getClientBuilder(url);
-            request.header(AUTHORIZATION, "Basic " + token);
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
-                    revokeSessionRequest.getParameters());
-            response = request.post(Entity.form(multivaluedHashMap));
-            log.trace("Response for Access Token -  response:{}", response);
-            if (response.getStatus() == 200) {
-                String entity = response.readEntity(String.class);
-                RevokeSessionResponse revokeSessionResponse = new RevokeSessionResponse();
-                revokeSessionResponse.setEntity(entity);
-                revokeSessionResponse.injectDataFromJson(entity);
-                return revokeSessionResponse;
-            }
-        } finally {
-
-            if (response != null) {
-                response.close();
-            }
-        }
-        return null;
-    }
-
+    
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }
