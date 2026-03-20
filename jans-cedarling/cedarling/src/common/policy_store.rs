@@ -5,7 +5,6 @@
 
 #[cfg(test)]
 mod archive_security_tests;
-mod claim_mapping;
 pub(crate) mod log_entry;
 #[cfg(test)]
 mod test;
@@ -25,7 +24,6 @@ pub(crate) mod errors;
 pub(crate) mod issuer_parser;
 pub(crate) mod loader;
 pub(crate) mod manager;
-pub(crate) mod manifest_validator;
 pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
@@ -39,7 +37,6 @@ use serde::{Deserialize, Deserializer, de, de::Error};
 use std::collections::HashMap;
 use url::Url;
 
-pub(crate) use claim_mapping::ClaimMappings;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
@@ -299,16 +296,6 @@ impl TrustedIssuer {
     /// If you need comparison with `iss` claim, use `iss_claim` method instead.
     pub(crate) fn get_oidc_endpoint(&self) -> &Url {
         &self.oidc_endpoint
-    }
-
-    pub(crate) fn get_claim_mapping(&self, token_name: &str) -> Option<&ClaimMappings> {
-        self.token_metadata
-            .get(token_name)
-            .map(|x| &x.claim_mapping)
-    }
-
-    pub(crate) fn get_token_metadata(&self, token_name: &str) -> Option<&TokenEntityMetadata> {
-        self.token_metadata.get(token_name)
     }
 
     pub(crate) fn iss_claim(&self) -> IssClaim {

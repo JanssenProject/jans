@@ -16,12 +16,6 @@ These Bootstrap Properties control default application level behavior.
 
 - **`CEDARLING_APPLICATION_NAME`** : Human friendly identifier for this Cedarling instance.
 
-To enable usage of principals at least one of the following keys must be provided:
-
-- **`CEDARLING_WORKLOAD_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a Workload principal. Default is `disabled`.
-
-- **`CEDARLING_USER_AUTHZ`** : When `enabled`, Cedar engine authorization is queried for a User principal. Default is `disabled`.
-
 To load policy store one of the following keys must be provided:
 
 - **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
@@ -74,8 +68,6 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 
 - **`CEDARLING_LOG_TYPE`** : `off`, `memory`, `std_out`. Default is `off`.
 - **`CEDARLING_LOG_LEVEL`** : System Log Level [See here](./cedarling-logs.md). Default to `WARN`
-- **`CEDARLING_DECISION_LOG_USER_CLAIMS`** : List of claims to map from user entity, such as ["sub", "email", "username", ...]
-- **`CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS`** : List of claims to map from workload entity, such as ["client_id", "rp_id", ...]
 - **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
 - **`CEDARLING_LOG_TTL`** : in case of `memory` store, TTL (time to live) of log entities in seconds.
 - **`CEDARLING_LOG_MAX_ITEMS`** : Maximum number of log entities that can be stored using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
@@ -91,14 +83,6 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 - **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. This requires an `iss` is present. Default is `disabled`.
 - **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `disabled`.
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
-- **`CEDARLING_ID_TOKEN_TRUST_MODE`** : `strict` | `never` | `always` | `ifpresent`. Varying levels of validations based on the preference of the developer.
-
-  - **`strict`** (default): Enforces strict validation rules:
-    - ID token `aud` must contain the access token `client_id` (the `aud` field is an array that must contain the `client_id`)
-    - If userinfo token is present, its `sub` must match the ID token `sub`
-  - **`never`**: Disables ID token validation entirely (useful for testing)
-  - **`always`**: Always validates ID tokens when present (less strict than `strict` mode) - **Not yet implemented**
-  - **`ifpresent`**: Validates ID tokens only if they are provided - **Not yet implemented**
 
 **The following bootstrap properties are for advanced configuration:**
 
@@ -130,3 +114,6 @@ All other fields are optional and can be omitted. If a field is not provided, Ce
 - **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Server (0 to turn off transmission).
 - **`CEDARLING_LOCK_LISTEN_SSE`** : `enabled` | `disabled`: controls whether Cedarling should listen for updates from the Lock Server. Default is `disabled`.
 - **`CEDARLING_LOCK_ACCEPT_INVALID_CERTS`** : `enabled` | `disabled`: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Default is `disabled`.
+- **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Default value is `rest`.
+- **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
+- **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is `5`.
