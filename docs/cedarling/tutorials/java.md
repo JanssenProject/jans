@@ -195,7 +195,7 @@ The _context_ represents additional data that may affect the authorization decis
               "entity_type": "Jans::User",
               "id": "random_user_id"
             },
-            "roles": ["admin", "manager"]
+            "role": ["admin", "manager"]
           },
         ];
         """;
@@ -238,5 +238,5 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)

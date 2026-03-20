@@ -244,7 +244,7 @@ let principals = vec![
       id: "random_user_id".to_string(),
     },
     payload: HashMap::from_iter([
-      ("roles".to_string(), json!(["admin", "manager"])),
+      ("role".to_string(), json!(["admin", "manager"])),
     ]),
   },
 ]
@@ -350,6 +350,6 @@ Please refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#
 ## See Also
 
 - [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
-- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
