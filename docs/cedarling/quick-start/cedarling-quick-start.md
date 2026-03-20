@@ -157,7 +157,7 @@ this.
 
     - Go to the [CedarlingQuickstart repository](https://github.com/JanssenProject/CedarlingQuickstart) where the demo policy store is hosted
         - Click on `Fork`
-        - **uncheck** the `Copy the master branch only` option
+        - **uncheck** the `Copy the main branch only` option
     - [Install Agama Lab app and allow access to forked repository](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/)
     - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
     - Click on `Change Repository`.
@@ -291,7 +291,7 @@ Host the `.cjar` file somewhere accessible (e.g., GitHub release, web server, cl
 
     - Go to the [CedarlingQuickstart repository](https://github.com/JanssenProject/CedarlingQuickstart) where the demo policy store is hosted
         - Click on `Fork`
-        - **uncheck** the `Copy the master branch only` option
+        - **uncheck** the `Copy the main branch only` option
     - [Install Agama Lab app and allow access to forked repository](https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/)
     - Open the [Agama Lab policy designer](https://cloud.gluu.org/agama-lab/dashboard/policy_store).
     - Click on `Change Repository`.

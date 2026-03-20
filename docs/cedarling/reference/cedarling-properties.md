@@ -107,7 +107,7 @@ These properties apply to both `authorize_multi_issuer` and `authorize_unsigned`
 
 - **`CEDARLING_DATA_STORE_DEFAULT_TTL`** : Default TTL (Time To Live) in seconds for entries that don't specify a TTL. Default value is `None` (entries will not expire). When set, entries without an explicit TTL will use this value.
 
-- **`CEDARLING_DATA_STORE_MAX_TTL`** : Maximum allowed TTL in seconds. Default value is `3600` (1 hour). Entries with TTL exceeding this value will be rejected. Set to `0` to allow unlimited TTL.
+- **`CEDARLING_DATA_STORE_MAX_TTL`** : Maximum allowed TTL in seconds. Default value is `3600` (1 hour). Entries with TTL exceeding this value will be rejected. Note: setting to `0` results in a zero-second max TTL (immediate expiry), not unlimited. There is currently no way to configure unlimited max TTL — omitting the property uses the default (1 hour).
 
 - **`CEDARLING_DATA_STORE_ENABLE_METRICS`** : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is `true`.
 

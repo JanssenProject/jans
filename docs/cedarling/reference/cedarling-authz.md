@@ -398,7 +398,7 @@ With this schema, you only need to provide the fields that are not automatically
 
 ```js
 let context = {
-  time: 1719266610.98636,
+  time: 1719266610,
 };
 ```
 

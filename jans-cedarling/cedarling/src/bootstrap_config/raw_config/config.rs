@@ -325,6 +325,8 @@ pub struct BootstrapConfigRaw {
 
     /// Maximum allowed TTL for data entries in seconds.
     /// Default: 3600 (1 hour). Entries with TTL exceeding this value will be rejected.
+    /// Note: `0` means a zero-second max TTL (immediate expiry), not unlimited.
+    /// Omitting this property uses the default (1 hour).
     #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub data_store_max_ttl: Option<u64>,
