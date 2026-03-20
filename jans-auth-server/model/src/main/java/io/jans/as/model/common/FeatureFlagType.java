@@ -86,7 +86,10 @@ public enum FeatureFlagType {
     RATE_LIMIT("rate_limit"),
     @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature",
             defaultValue = "Enabled")
-    SSA("ssa");
+    SSA("ssa"),
+    @DocFeatureFlag(description = "Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)",
+            defaultValue = "Disabled")
+    CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document");
 
     private final String value;
 
