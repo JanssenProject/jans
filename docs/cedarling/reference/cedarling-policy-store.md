@@ -182,8 +182,7 @@ Trusted issuer configuration files in the `trusted-issuers/` directory define id
       "id_token": {
         "trusted": true,
         "entity_type_name": "Jans::Id_token",
-        "user_id": "sub",
-        "role_mapping": "role"
+        "token_id": "jti"
       }
     }
   }
@@ -461,109 +460,25 @@ This record contains the information needed to validate tokens from this issuer:
 
 ### Token Metadata Schema
 
-The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.
+The Token Entity Metadata Schema defines how tokens are mapped and validated within Cedarling. It specifies the Cedar entity type for each token, which claim to use as the entity ID, and which claims are required.
 
 ```json
 {
   "trusted": true,
-  "entity_type_name": "Jans::Access_token",
+  "entity_type_name": "Acme::Access_token",
   "token_id": "jti",
-  "workload_id": "aud | client_id",
-  "user_id": "sub | uid | email",
-  "principal_mapping": ["Jans::Workload"],
-  "role_mapping": "role | group | memberOf",
-  "required_claims": ["iss", "exp", "some_custom_claim", ...],
-  "claim_mapping": {
-    "mapping_target": {
-      "parser": "<type of parser ('regex' or 'json')>",
-      "type": "<type identifier (e.g., 'Acme::Email')>",
-      "...": "Additional configurations specific to the parser"
-    },
-  },
+  "workload_id": "aud",
+  "principal_mapping": ["Acme::Workload"],
+  "required_claims": ["iss", "exp", "some_custom_claim"]
 }
 ```
 
-- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object.
-- `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".
-- `"principal_mapping"` (array[string], Default: []): Describes where references of the created token entity should be included.
-- `"token_id"` (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.
-- `"user_id"` (string, Default: "sub"): The JWT claim that will be used as the ID for the User Entity.
-- `"role_mapping"` (string, Default: "role"): The JWT claim that will be used as the ID for any Role Entities. For more info, see: [role mapping](#role-mapping).
-- `"workload_id"` (string, Default: "aud"): The JWT claim that will be used as the ID for the Workload Entity.
-- `"required_claims"` (array[string], Default: []): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under RFC 7519 Section 4.1, the claim will also be validated.
-- `"claim_mapping"` (object, Default: {}): Applies a transformation on a JWT's claim to types defined in the Cedar schema before creating the Token Entity's attribute. This enables creating a Cedar Type that has multiple attributes from a single JWT claim. For more info, see [claim mapping](#claim-mapping).
-
-#### Role mapping
-
-- **role_mapping**: (String OR Array of String, _Optional_) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
-
-You can include a `role_mapping` in each token, all of them will be executed by Cedarling.
-If none `role_mapping` defined the `Cedarling` will try to find role in `userinfo` token in field `role`.
-
-#### Claim mapping
-
-- **claim_mapping:** Defines how to extract and transform specific claims from the token. Each claim can have its own parser (`regex` or `json`) and type (`Acme::email_address`, `Acme::Url`, etc.).
-
-In regex attribute mapping like `"UID": {"attr": "uid", "type":"String"},`, `type` field can contain possible variants:
-
-- `String` - to string without transformation,
-- `Number` - parse string to float64 (JSON number) if error returns default value
-- `Boolean` - if string NOT empty map to true else false
-
-Note, use of regex **named capture groups** which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, `(?P<name>...)` defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.
-
-When you use `(?x)` modifier in regexp, ensure that you escaped character `#` => `\#`.
-
-example of mapping `email_address` and `Url`:
-
-```json
-...
-  "claim_mapping": {
-    "email": {
-      "parser": "regex",
-      "type": "Test::email_address",
-      "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
-      "UID": {
-        "attr": "uid",
-        "type": "String"
-      },
-      "DOMAIN": {
-        "attr": "domain",
-        "type": "String"
-      }
-    },
-    "profile": {
-      "parser": "regex",
-      "type": "Test::Url",
-      "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P<HOST>[^\\/:\\#?]+)(?::(?<PORT>\\d+))?(?P<PATH>\\/[^?\\#]*)?(?:\\?(?P<QUERY>[^\\#]*))?(?:(?P<FRAGMENT>.*))?",
-      "SCHEME": {
-        "attr": "scheme",
-        "type": "String"
-      },
-      "HOST": {
-        "attr": "host",
-        "type": "String"
-      },
-      "PORT": {
-        "attr": "port",
-        "type": "String"
-      },
-      "PATH": {
-        "attr": "path",
-        "type": "String"
-      },
-      "QUERY": {
-        "attr": "query",
-        "type": "String"
-      },
-      "FRAGMENT": {
-        "attr": "fragment",
-        "type": "String"
-      }
-    }
-  }
-...
-```
+- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object. When set to `false`, tokens of this type will be ignored.
+- `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`.
+- `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
+- `"workload_id"` (string, optional): The JWT claim that will be used as the ID for the Workload Entity.
+- `"principal_mapping"` (array[string], Default: `[]`): Describes where references of the created token entity should be included.
+- `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
 
 ## Example Policy store
 
@@ -594,14 +509,12 @@ Here is a non-normative example of a `cedarling_store.json` file:
         "id_token": {
           "trusted": true,
           "entity_type_name": "Jans::Id_token",
-          "token_id": "jti",
-          "role_mapping": "role"
+          "token_id": "jti"
         },
         "userinfo_token": {
           "trusted": true,
           "entity_type_name": "Jans::Userinfo_token",
-          "token_id": "jti",
-          "role_mapping": "role"
+          "token_id": "jti"
         }
       }
     }
