@@ -177,7 +177,8 @@ pub struct BootstrapConfigRaw {
 
     /// Whether to check the signature of all JWT tokens.
     ///
-    /// This requires that an `iss` (Issuer) claim is present on each token.
+    /// When enabled, this requires the `iss` (Issuer) claim to be present in
+    /// all tokens and the issuer URL must use the `https` scheme.
     #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
@@ -323,7 +324,7 @@ pub struct BootstrapConfigRaw {
     pub data_store_default_ttl: Option<u64>,
 
     /// Maximum allowed TTL for data entries in seconds.
-    /// Default: 3600 (1 hour). If not set, no upper limit (10 years max).
+    /// Default: 3600 (1 hour). Entries with TTL exceeding this value will be rejected.
     #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub data_store_max_ttl: Option<u64>,
