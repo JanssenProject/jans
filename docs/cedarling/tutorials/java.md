@@ -60,7 +60,6 @@ We need to initialize Cedarling first.
         String bootstrapJsonStr = """
             {
             "CEDARLING_APPLICATION_NAME":   "MyApp",
-            "CEDARLING_POLICY_STORE_ID":    "your-policy-store-id",
             "CEDARLING_LOG_LEVEL":          "INFO",
             "CEDARLING_LOG_TYPE":           "std_out",
             "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json"

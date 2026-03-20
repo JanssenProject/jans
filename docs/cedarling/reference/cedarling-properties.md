@@ -84,14 +84,9 @@ These properties apply to both `authorize_multi_issuer` and `authorize_unsigned`
 
 **Cedar entity mapping:**
 
-- **`CEDARLING_MAPPING_USER`** : Name of Cedar User schema entity if we don't want to use default. When specified Cedarling try build defined entity (from schema) as user instead of default `User` entity defined in `cedar` schema. Works in namespace defined in the policy store. Default value: `Jans::User`.
-- **`CEDARLING_MAPPING_WORKLOAD`** : Name of Cedar Workload schema entity. Default value: `Jans::Workload`.
 - **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity. Default value: `Jans::Role`.
-- **`CEDARLING_MAPPING_TRUSTED_ISSUER`** : Mapping name of cedar schema TrustedIssuer entity. Default value: `Jans::TrustedIssuer`.
 
 **Policy store:**
-
-- **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy store in case there is more than one policy_store_id in the policy store.
 
 **Log behavior:**
 

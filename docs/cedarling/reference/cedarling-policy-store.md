@@ -19,7 +19,7 @@ The Policy Store provides:
 
 For a comprehensive JSON schema defining the structure of the policy store, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].
 
-**Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK`; `CEDARLING_POLICY_STORE_URI`; and `CEDARLING_POLICY_STORE_ID` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
+**Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK` and `CEDARLING_POLICY_STORE_URI` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
 
 ## Policy Store Formats
 

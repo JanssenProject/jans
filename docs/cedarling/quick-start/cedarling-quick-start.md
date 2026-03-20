@@ -193,8 +193,6 @@ to evaluate the authorization request.
            "CEDARLING_LOG_LEVEL": "INFO",
            "CEDARLING_JWT_SIG_VALIDATION": "enabled",
            "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-           "CEDARLING_MAPPING_USER": "Jans::User",
-           "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
            "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
              "HS256", "RS256"
            ]
@@ -323,8 +321,6 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        },
        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-       "CEDARLING_MAPPING_USER": "Jans::User",
-       "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
          "HS256", "RS256"
        ]

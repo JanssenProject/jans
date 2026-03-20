@@ -17,7 +17,7 @@ Cedarling automatically creates the following entities:
 - [Role](#role-entity)
 - [JWT Entities](#jwt-entities)
 
-The entity type names of the Workload and User entities can be customized via the `CEDARLING_MAPPING_USER` and `CEDARLING_MAPPING_WORKLOAD` [properties](./cedarling-properties.md) respectively.
+The entity type names are defined in the Cedar schema within the policy store.
 
 > ***Notes***
 >
