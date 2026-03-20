@@ -11,7 +11,7 @@
     "pack": "node pack.js"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.253",
+    "@types/chrome": "^0.1.38",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "clean-webpack-plugin": "^4.0.0",
