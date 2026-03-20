@@ -31,10 +31,8 @@ use std::{io, path::Path};
 use crate::context_data_api::DataStoreConfig;
 
 // Re-export types that need to be public
-pub use authorization_config::{AuthorizationConfig, AuthorizationConfigRaw};
-pub use entity_builder_config::{
-    EntityBuilderConfig, EntityBuilderConfigRaw, EntityNames, UnsignedRoleIdSrc,
-};
+pub use authorization_config::AuthorizationConfig;
+pub use entity_builder_config::{EntityBuilderConfig, UnsignedRoleIdSrc};
 pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};

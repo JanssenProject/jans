@@ -47,10 +47,6 @@ pub struct BootstrapConfigRaw {
     )]
     pub policy_store_uri: Option<String>,
 
-    /// An identifier for the policy store.
-    #[serde(rename = "CEDARLING_POLICY_STORE_ID", default)]
-    pub policy_store_id: String,
-
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
@@ -129,26 +125,11 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
-    /// Mapping name of cedar schema `TrustedIssuer` entity
-    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_iss: Option<String>,
-
-    /// Mapping name of cedar schema User entity
-    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_user: Option<String>,
-
-    /// Mapping name of cedar schema Workload entity.
-    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_workload: Option<String>,
-
     /// Mapping name of cedar schema Role entity.
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
 
-    /// Mapping name of cedar schema Role entity.
+    /// Source attribute for unsigned role entity ID.
     #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
@@ -485,10 +466,6 @@ mod tests {
             assert_eq!(
                 config.policy_store_uri, None,
                 "Policy store URI should be None by default"
-            );
-            assert_eq!(
-                config.policy_store_id, "",
-                "Policy store ID should be empty by default"
             );
             assert_eq!(
                 config.log_type,
