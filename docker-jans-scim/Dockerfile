@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjdk-alpine:17.0.18@sha256:307b95033a52c3ebcebcb883048f6ffd6c6019cf7cda06fad8febb9d1caf39a3
+FROM bellsoft/liberica-openjdk-alpine:26-37@sha256:e029fbdd89e69c9c111c4bf013612a2b8b2001e8c4c6cd437b44521746231e7d
 
 # ===============
 # Alpine packages
