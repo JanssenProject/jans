@@ -609,8 +609,8 @@ context.tokens.acme_access_token.hasTag("aud") &&
 context.tokens.acme_access_token.getTag("aud").contains("my-client-id")
 
 // Custom claim
-context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
-context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed")
+context.tokens.dolphin_dolphintoken.hasTag("waiver") &&
+context.tokens.dolphin_dolphintoken.getTag("waiver").contains("signed")
 ```
 
 ### Token Collection in Context
@@ -623,7 +623,7 @@ entity Tokens = {
   "acme_access_token": Token,           // Access token from Acme
   "acme_id_token": Token,               // ID token from Acme
   "google_id_token": Token,             // ID token from Google
-  "dolphin_acme_dolphin_token": Token,  // Custom token type from Dolphin
+  "dolphin_dolphintoken": Token,  // Custom token type from Dolphin
   "total_token_count": Long,            // Number of validated tokens
 };
 ```
@@ -877,11 +877,11 @@ permit(
   action == Acme::Action::"SwimWithDolphin",
   resource == Acme::Aquarium::"Miami"
 ) when {
-  context has tokens.dolphin_acme_dolphin_token &&
-  context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
-  context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed") &&
-  context.tokens.dolphin_acme_dolphin_token.hasTag("clearance_level") &&
-  context.tokens.dolphin_acme_dolphin_token.getTag("clearance_level").contains(5)
+  context has tokens.dolphin_dolphintoken &&
+  context.tokens.dolphin_dolphintoken.hasTag("waiver") &&
+  context.tokens.dolphin_dolphintoken.getTag("waiver").contains("signed") &&
+  context.tokens.dolphin_dolphintoken.hasTag("clearance_level") &&
+  context.tokens.dolphin_dolphintoken.getTag("clearance_level").contains(5)
 };
 ```
 
@@ -903,7 +903,7 @@ The `name` field in trusted issuer configuration is critical for multi-issuer au
     }
   },
   "dolphin_issuer_id": {
-    "name": "Dolphin",  // Used in token collection naming: "dolphin_acme_dolphin_token" and depict namespace for `TrustedIssuer` cedar type
+    "name": "Dolphin",  // Used in token collection naming: "dolphin_dolphintoken" and depict namespace for `TrustedIssuer` cedar type
     "description": "Dolphin Service Provider",
     "openid_configuration_endpoint": "https://idp.dolphin.sea/.well-known/openid-configuration",
     "token_metadata": {
