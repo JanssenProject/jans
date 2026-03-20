@@ -864,7 +864,6 @@ mixed_tokens_result = cedarling.authorize_multi_issuer(mixed_tokens_request)
 
 - [Cedarling Authorization](./cedarling-authz.md)
 - [Cedarling Interfaces](./cedarling-interfaces.md)
-- [JWT Mapping](./cedarling-jwt-mapping.md)
 - [Policy Store Configuration](./cedarling-policy-store.md)
 - [Python Examples](./python/usage.md)
 - [Go Examples](./getting-started/go.md)

@@ -282,7 +282,6 @@ nav:
       - Properties: cedarling/reference/cedarling-properties.md
       - Boolean Operations: cedarling/reference/cedarling-principal-boolean-operations.md
       - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
-      - JWT Mapping: cedarling/reference/cedarling-jwt-mapping.md
       - Entities: cedarling/reference/cedarling-entities.md
       - Logs: cedarling/reference/cedarling-logs.md
       - Lock Server: cedarling/reference/cedarling-lock-server.md

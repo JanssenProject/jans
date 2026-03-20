@@ -422,5 +422,4 @@ Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/git
 ## See Also
 
 - [Multi-Issuer Authorization Details](../reference/cedarling-authz.md)
-- [JWT Mapping for Multi-Issuer](../reference/cedarling-jwt-mapping.md)
 - [Policy Store Configuration](../reference/cedarling-policy-store.md)
