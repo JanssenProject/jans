@@ -638,15 +638,37 @@ The naming follows this pattern:
 
 #### 1. Token Entity Schema
 
-All token entities **must** include these five required attributes and declare tags:
+All token entities **must** include these five required attributes and declare tags.
+
+Each trusted issuer gets its own Cedar namespace. The `TrustedIssuer` entity type must be defined in each issuer's namespace separately, since Cedar namespaces are independent. Token entities reference their own namespace's `TrustedIssuer` via the `iss` attribute.
+
+For example, if you have two issuers (Acme and Dolphin), you will have `Acme::TrustedIssuer` and `Dolphin::TrustedIssuer` — each with the same structure but in separate namespaces:
 
 ```cedar
+// Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity Access_token = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
-    token_type?: String,        // Entity type (e.g., "Jans::Access_Token")
+    token_type?: String,        // Entity type (e.g., "Acme::Access_token")
     jti?: String,               // JWT ID - unique token identifier
-    iss?: Jans::TrustedIssuer,  // Issuer entity (for standard authz)
+    iss?: TrustedIssuer,        // Issuer entity reference
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Validation timestamp
 
@@ -663,7 +685,7 @@ namespace Jans {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    iss?: Jans::TrustedIssuer,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -671,7 +693,7 @@ namespace Jans {
     aud?: Set<String>,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     phone_number?: String,
     role?: Set<String>,
@@ -686,7 +708,7 @@ namespace Jans {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    iss?: Jans::TrustedIssuer,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -694,18 +716,34 @@ namespace Jans {
     aud?: String,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     birthdate?: String,
     phone_number?: String,
     role?: Set<String>,
     // Add other claims as needed
   } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
+};
 
+// Dolphin namespace: token entities for the Dolphin IDP.
+// Note: TrustedIssuer is defined again — each namespace needs its own copy.
+namespace Dolphin {
   entity TrustedIssuer = {
-    issuer_entity_id: Url
+    issuer_entity_id: Jans::Url
   };
-}
+
+  entity Access_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+    aud?: String,
+    iat?: Long,
+    scope?: Set<String>,
+    // Add other claims as needed
+  } tags Set<String>;
+};
 ```
 
 #### 2. Custom Token Types
@@ -713,12 +751,26 @@ namespace Jans {
 For custom token types, follow the same pattern:
 
 ```cedar
-namespace Acme {
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Dolphin namespace: custom token entities for the Dolphin service.
+namespace Dolphin {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity DolphinToken = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    iss?: Acme::TrustedIssuer,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -727,11 +779,7 @@ namespace Acme {
     location?: String,
     clearance_level?: Long,
   } tags Set<String>;           // *** REQUIRED: For dynamic claims ***
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 ```
 
 #### 3. Context Type Schema
@@ -881,60 +929,46 @@ The easiest way to author your policy store is to use the Policy Designer in
 [Agama Lab](https://cloud.gluu.org/agama-lab). This tool helps you define the policies, schema and
 trusted IDPs and to publish a policy store to a Github repository.
 
-### Minimum supported `cedar-policy schema`
+### Minimum Cedar Schema
 
-Here is example of a minimum supported `cedar-policy schema`:
+There are no mandatory entity types — your schema depends on which authorization interface you use:
 
-```cedar-policy_schema
+- **`authorize_unsigned`**: Define any principal, resource, and action types your application needs. Entity types and attributes are entirely up to you.
+- **`authorize_multi_issuer`**: Token entities require specific attributes and `tags Set<String>` declaration. See [Schema Requirements for Multi-Issuer](#schema-requirements-for-multi-issuer).
+
+Here is an example of a minimal schema for `authorize_unsigned`:
+
+```cedarschema
+// Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
-  entity id_token = {"aud": Set<String>,"iss": String, "sub": String, iss?: Jans::TrustedIssuer};
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// MyApp namespace: your business entities.
+namespace MyApp {
   entity Role;
-  entity User in [Role] = {};
-  entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String, iss?: Jans::TrustedIssuer};
-  entity Workload = {};
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
+  entity User in [Role] = {
+    sub: String,
+    email?: String,
   };
 
-  entity Issue = {};
-  action "Update" appliesTo {
-    principal: [Workload, User, Role],
-    resource: [Issue],
+  entity Document = {
+    owner: String,
+  };
+
+  action "Read" appliesTo {
+    principal: [User, Role],
+    resource: [Document],
     context: {}
   };
-}
+};
 ```
 
-**Note**: The principal you use may vary depending on the authorization method.
-
-You can extend all of this entites and add your own.
-
-Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.
-`Issue` entity and `Update` action are optinal. Is created for example, you can create others for your needs.
-
-`Context` and `Resource` entities you can pass during authorization request and next entites creating based on the JWT tokens:
-
-- `id_token` - entity based on the `id` JWT token fields.
-
-  - ID for entity based in `jti` field.
-
-- `Role` - define role of user.
-
-  - Mapping defined in `Token Metadata Schema`.
-  - Claim in JWT usually is string or array of string.
-  - Each `Role` is parent for `User`. So to check role in policy use operator `in` to check hierarchy.
-
-- `User` - entity based on the `id`and `userinfo` JWT token fields.
-
-  - If `id`and `userinfo` JWT token fields has different `sub` value, `userinfo` JWT token will be ignored.
-  - ID for entity based in `sub` field. (will be changed in future)
-
-- `Access_token` - entity based on the `access` JWT token fields.
-
-  - ID for entity based in `jti` field.
-
-- `Workload` - entity based on the `access` JWT token fields.
-  - ID for entity based in `client_id` field.
+For `authorize_multi_issuer`, add token entities with the required structure. See the [Multi-Issuer Token Entities](#multi-issuer-token-entities) section for a complete example.
 
 ## Note on test fixtures
 
