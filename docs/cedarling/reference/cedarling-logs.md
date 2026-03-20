@@ -118,7 +118,9 @@ The JSON in this document is formatted for readability but is not prettified in 
 
 ### Decision Log
 
-Example of decision log.
+#### `authorize_unsigned` example
+
+In the unsigned flow, `principal` contains the Cedar entity type names of each principal. The `tokens` field is omitted since no JWTs are involved.
 
 ```json
 {
@@ -130,8 +132,7 @@ Example of decision log.
     "policystore_id": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
     "policystore_version": "undefined",
     "principal": [
-        "User",
-        "Workload"
+        "Jans::User"
     ],
     "diagnostics": {
         "reason": [
@@ -145,15 +146,39 @@ Example of decision log.
     "action": "Jans::Action::\"Update\"",
     "resource": "Jans::Issue::\"random_id\"",
     "decision": "ALLOW",
+    "decision_time_micro_sec": 3
+}
+```
+
+#### `authorize_multi_issuer` example
+
+In the multi-issuer flow, `principal` is empty (no principal entities are created). The `tokens` field contains JWT claim information for each validated token.
+
+```json
+{
+    "id": "019394db-f52b-7b06-88b8-a288670a32c3",
+    "request_id": "019394db-f52b-7b06-88b8-a288670a32c4",
+    "timestamp": "2024-12-05T05:27:43.403Z",
+    "log_kind": "Decision",
+    "pdp_id": "9e189c4b-96ae-4818-8e7f-75a42186af15",
+    "policystore_id": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+    "policystore_version": "undefined",
+    "principal": [],
+    "diagnostics": {
+        "reason": [
+            {
+                "id": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
+                "description": "policy for token access"
+            }
+        ],
+        "errors": []
+    },
+    "action": "Acme::Action::\"GetFood\"",
+    "resource": "Acme::Resource::\"approved_foods\"",
+    "decision": "ALLOW",
     "tokens": {
-        "id_token": {
-            "jti": "id_tkn_jti"
-        },
-        "Userinfo": {
-            "jti": "usrinfo_tkn_jti"
-        },
-        "access": {
-            "jti": "access_tkn_jti"
+        "Acme::Access_Token": {
+            "jti": "token_abc"
         }
     },
     "decision_time_micro_sec": 3
@@ -169,7 +194,7 @@ Example of decision log.
 * `pdp_id`: unique identifier for the Cedarling
 * `policystore_id`: What policystore this Cedarling instance is using
 * `policystore_version`: What version of the policystore the Cedarling is using
-* `principal`: List of principal entity type names used in the authorization request (e.g. `["User", "Workload"]`)
+* `principal`: List of principal entity type names used in the authorization request (e.g. `["Jans::User"]` for unsigned; empty `[]` for multi-issuer)
 * `diagnostics`: Summary of policies that contributed to the decision and any evaluation errors
 * `lock_client_id`: If this Cedarling has registered with a Lock Server, what is the client_id it received (omitted if not registered)
 * `action`: From the request
@@ -184,6 +209,8 @@ Whenever a request ends with a `DENY` and Cedar diagnostics contain errors, Ceda
 ### Debug Log Sample
 
 The result of the authorization is quite extensive because we log all `cedar-policy` entity information for forensic analysis. We cannot truncate the data, as it may contain critical information.
+
+Below is an example from `authorize_unsigned` with a single User principal:
 
 ```json
 {
@@ -217,10 +244,10 @@ The result of the authorization is quite extensive because we log all `cedar-pol
         {
             "uid": {
                 "type": "Jans::User",
-                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                "id": "user_123"
             },
             "attrs": {
-                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                "sub": "user_123",
                 "role": [
                     "CasaAdmin"
                 ],
@@ -238,24 +265,10 @@ The result of the authorization is quite extensive because we log all `cedar-pol
         },
         {
             "uid": {
-                "type": "Jans::id_token",
-                "id": "ijLZO1ooRyWrgIn7cIdNyA"
+                "type": "Jans::Role",
+                "id": "CasaAdmin"
             },
-            "attrs": {
-                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                "acr": "simple_password_auth",
-                "exp": 1731956630,
-                "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-                "amr": [],
-                "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                "iss": {
-                    "__entity": {
-                        "type": "Jans::TrustedIssuer",
-                        "id": "https://account.gluu.org"
-                    }
-                },
-                "iat": 1731953030
-            },
+            "attrs": {},
             "parents": []
         },
 
@@ -272,25 +285,12 @@ The result of the authorization is quite extensive because we log all `cedar-pol
     ],
     "authorize_info": [
         {
-            "principal": "Jans::User::\"qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\"",
+            "principal": "Jans::User::\"user_123\"",
             "diagnostics": {
                 "reason": [
                     {
                         "id": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
                         "description": "simple policy example for principal user"
-                    }
-                ],
-                "errors": []
-            },
-            "decision": "ALLOW"
-        },
-        {
-            "principal": "Jans::Workload::\"d7f71bea-c38d-4caf-a1ba-e43c74a11a62\"",
-            "diagnostics": {
-                "reason": [
-                    {
-                        "id": "444da5d85403f35ea76519ed1a18a33989f855bf1cf8",
-                        "description": "simple policy example for principal workload"
                     }
                 ],
                 "errors": []
