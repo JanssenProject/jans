@@ -16,6 +16,7 @@ public class GenericResponse {
     }
 
     private JsonNode responseObject;
+    private byte[] responseBytes;
 
     public String getResponseMessage() {
         return responseMessage;
@@ -39,6 +40,14 @@ public class GenericResponse {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public byte[] getResponseBytes() {
+        return responseBytes;
+    }
+
+    public void setResponseBytes(byte[] responseBytes) {
+        this.responseBytes = responseBytes;
     }
 
     @Override

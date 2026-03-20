@@ -9,10 +9,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import jakarta.inject.Inject;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
-import jakarta.json.JsonValue;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +83,15 @@ public class CommonUtils {
         genericResponse.setResponseMessage(responseMessage);
         genericResponse.setSuccess(result);
         genericResponse.setResponseObject(node);
+        return genericResponse;
+    }
+
+    public static GenericResponse createResponseWithByteArray(boolean result, int responseCode, String responseMessage, byte[] byteArray) {
+        GenericResponse genericResponse = new GenericResponse();
+        genericResponse.setResponseCode(responseCode);
+        genericResponse.setResponseMessage(responseMessage);
+        genericResponse.setSuccess(result);
+        genericResponse.setResponseBytes(byteArray);
         return genericResponse;
     }
 

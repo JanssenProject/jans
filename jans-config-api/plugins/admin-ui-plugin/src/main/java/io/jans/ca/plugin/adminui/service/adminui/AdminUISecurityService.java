@@ -5,31 +5,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
+import io.jans.ca.plugin.adminui.model.adminui.AdminUIPolicyStore;
 import io.jans.ca.plugin.adminui.model.adminui.AdminUIResourceScopesMapping;
-import io.jans.ca.plugin.adminui.model.auth.AppConfigResponse;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
-import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
-import io.jans.ca.plugin.adminui.utils.security.PolicyStoreMapperHelper;
+import io.jans.ca.plugin.adminui.utils.security.PolicyToScopeMapper;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
-import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
+import io.jans.service.document.store.model.Document;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
+
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipFile;
 
+/**
+ * Service responsible for managing Admin UI security related operations such as
+ * retrieving, uploading, synchronizing and updating the Cedarling policy store.
+ *
+ * <p>This service interacts with:
+ * <ul>
+ *     <li>Local policy store files</li>
+ *     <li>Remote policy store endpoints</li>
+ *     <li>Jans persistence layer</li>
+ *     <li>Admin UI role and permission configuration</li>
+ * </ul>
+ *
+ * <p>It also supports synchronization between Cedar policy definitions and
+ * Admin UI role-to-scope mappings.</p>
+ */
 
 @Singleton
 public class AdminUISecurityService {
@@ -46,61 +63,42 @@ public class AdminUISecurityService {
     @Inject
     AdminUIService adminUIService;
 
+    @Inject
+    PolicyToScopeMapper policyToScopeMapper;
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
-     * Retrieves the policy store configuration for the Admin UI.
-     * <p>
-     * This method checks if a remote policy store URL is configured and enabled.
-     * If so, it fetches the policy store from the remote URL using a GET request.
-     * Otherwise, it loads the local default policy store JSON file from the configured file path.
-     * </p>
+     * Retrieves the current policy store from the configured local file system path.
      *
-     * <p>
-     * The method returns a {@link GenericResponse} containing the policy store as a {@link JsonNode}
-     * if successful, or an error response if the retrieval fails.
-     * </p>
+     * <p>The policy store path is resolved using the following precedence:</p>
+     * <ol>
+     *    <li>Configured value in {@link AUIConfiguration#getAuiCedarlingDefaultPolicyStorePath()}</li>
+     *     <li>{@link AppConstants#DEFAULT_POLICY_STORE_FILE_PATH}</li>
+     * </ol>
      *
-     * @return {@link GenericResponse} containing the policy store data or an error message.
-     * @throws ApplicationException if any unexpected error occurs while fetching or parsing the policy store.
+     * <p>If the file exists, the method returns the binary content of the policy store
+     * (typically a .cjar archive). If the file does not exist, a 404 response is returned.</p>
+     *
+     * @return {@link GenericResponse} containing the policy store file as a byte array
+     * @throws ApplicationException if an unexpected error occurs while retrieving the file
      */
-
     public GenericResponse getPolicyStore() throws ApplicationException {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            // If the remote Policy Store URL is configured and enabled
-            if(auiConfiguration.getCedarlingPolicyStoreRetrievalPoint() == CedarlingPolicyStrRetrievalPoint.REMOTE &&
-                    !Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
-                Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
-                request.header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
-                Response response = request.get();
-
-                log.info("policy store request status code: {}", response.getStatus());
-
-                if (response.getStatus() == 200) {
-                    String entity = response.readEntity(String.class);
-                    JsonNode policyStoreJsonNode = MAPPER.readValue(entity, JsonNode.class);
-                    return CommonUtils.createGenericResponse(true, 200, "Policy store fetched successfully.", policyStoreJsonNode);
-                }
-                // Handle non-200 responses
-                String jsonData = response.readEntity(String.class);
-                log.error("{}: {}", ErrorResponse.RETRIEVE_POLICY_STORE_ERROR, jsonData);
-                return CommonUtils.createGenericResponse(false, response.getStatus(), jsonData);
-            } else {
-                // Load policy store from default local file path
-                String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
-                        .filter(path -> !Strings.isNullOrEmpty(path))
-                        .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-
-                Path path = Paths.get(policyStorePath);
-
-                log.debug("Absolute path of policy-store file: {}", path.toAbsolutePath());
-                // Read file content as bytes
-                byte[] jsonBytes = Files.readAllBytes(path);
-                // Parse bytes into JsonNode
-                JsonNode policyStoreJsonNode = MAPPER.readTree(jsonBytes);
-                return CommonUtils.createGenericResponse(true, 200, "Policy store fetched successfully.", policyStoreJsonNode);
+            // Resolve path for local policy store file
+            String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
+                    .filter(path -> !Strings.isNullOrEmpty(path))
+                    .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+            Path path = Paths.get(policyStorePath);
+            if (!Files.exists(path)) {
+                throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), "Policy store not found.");
             }
+            byte[] zipBytes = Files.readAllBytes(path);
+
+            return CommonUtils.createResponseWithByteArray(true, 200, "Policy store fetched successfully.", zipBytes);
+        } catch (ApplicationException e) {
+            throw e; // Re-throw ApplicationException as is
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription());
@@ -108,99 +106,101 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Fetches the remote policy store and overwrites the local default policy-store file if
-     * remote policy-store is enabled and configured in AUI configuration.
+     * Uploads a new Cedar policy store file and overwrites the existing local policy store.
      *
-     * @return GenericResponse indicating success or failure along with details.
-     * @throws ApplicationException if there is any error during the operation.
+     * <p>The uploaded file must:</p>
+     * <ul>
+     *     <li>Not be null</li>
+     *     <li>Contain a valid file name</li>
+     *     <li>Have the <code>.cjar</code> extension</li>
+     * </ul>
+     *
+     * <p>If a policy store already exists at the configured location, a backup is created
+     * by renaming the existing file with a <code>.bak</code> extension before overwriting.</p>
+     *
+     * @param adminUIPolicyStore multipart form containing the uploaded policy store file
+     * @return {@link GenericResponse} indicating success or failure of the upload operation
+     * @throws ApplicationException if an unexpected server error occurs
      */
-    public GenericResponse setRemotePolicyStoreAsDefault() throws ApplicationException {
+
+    public GenericResponse uploadPolicyStore(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
+            // validation
+            if (adminUIPolicyStore == null) {
+                log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+            }
+            Document cjarDocument = adminUIPolicyStore.getDocument();
+            if (cjarDocument == null || cjarDocument.getFileName() == null) {
+                log.error("Document details not provided.");
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+            }
+
+            if (!cjarDocument.getFileName().endsWith(".cjar")) {
+                log.error(ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription());
+            }
+            log.info(" Upload policy-store : {} ", cjarDocument.getFileName());
+            InputStream cjarStream = adminUIPolicyStore.getPolicyStore();
+            if (cjarStream == null || cjarStream.available() <= 0) {
+                log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+            }
+
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
-            // Validate if remote policy store usage is enabled and URL is configured
-            if (auiConfiguration.getCedarlingPolicyStoreRetrievalPoint() == CedarlingPolicyStrRetrievalPoint.DEFAULT ||
-                    Strings.isNullOrEmpty(auiConfiguration.getAuiCedarlingPolicyStoreUrl())) {
-
-                return CommonUtils.createGenericResponse(
-                        false, 500,
-                        "Either remote policy-store URL is not configured or it is not enabled for use."
-                );
+            // Resolve path for local policy store file
+            String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
+                    .filter(path -> !Strings.isNullOrEmpty(path))
+                    .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+            Path path = Paths.get(policyStorePath);
+            //take backup of the last policy store if exist
+            if (Files.exists(path)) {
+                Path backupPath = Paths.get(policyStorePath + ".bak");
+                Files.move(path, backupPath, StandardCopyOption.REPLACE_EXISTING);
             }
+            //upload the policy store on server location
+            Files.copy(cjarStream, path);
 
-            // Build the client request for the remote policy store
-            Invocation.Builder request = ClientFactory.instance()
-                    .getClientBuilder(auiConfiguration.getAuiCedarlingPolicyStoreUrl())
-                    .header(AppConstants.CONTENT_TYPE, AppConstants.APPLICATION_JSON);
+            return CommonUtils.createGenericResponse(true, 200,
+                    "Policy store overwritten successfully.");
 
-            // Execute GET request
-            try (Response response = request.get()) {
-                int status = response.getStatus();
-                log.info("Policy store request status code: {}", status);
-
-                if (status == 200) {
-                    // Parse response entity into JsonNode
-                    String responseEntity = response.readEntity(String.class);
-                    JsonNode policyStoreJson = MAPPER.readTree(responseEntity);
-
-                    // Resolve path for local policy store file
-                    String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
-                            .filter(path -> !Strings.isNullOrEmpty(path))
-                            .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-
-                    // Overwrite local policy store file with remote JSON
-                    Path path = Paths.get(policyStorePath);
-                    MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), policyStoreJson);
-                    //set Cedarling-Policy-Store-Retrieval-Point to default
-                    AppConfigResponse appConfigResponse = new AppConfigResponse();
-                    appConfigResponse.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.DEFAULT);
-                    adminUIService.editAdminUIEditableConfiguration(appConfigResponse);
-
-                    log.info("Default policy-store overwritten successfully from remote source: {}", policyStorePath);
-
-                    return CommonUtils.createGenericResponse(true, 200,
-                            "Policy store fetched and overwritten successfully.");
-                }
-
-                // Handle non-200 HTTP responses
-                String errorResponse = response.readEntity(String.class);
-                log.error("{}: {}", ErrorResponse.REWRITING_DEFAULT_POLICY_STORE_ERROR, errorResponse);
-
-                return CommonUtils.createGenericResponse(false, status, errorResponse);
-            }
-
+        } catch (ApplicationException e) {
+            throw e; // Re-throw ApplicationException as is
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
             throw new ApplicationException(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                    ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription()
+                    e.getMessage()
             );
         }
     }
 
     /**
-     * Synchronizes role-to-scope mappings in the Admin UI configuration based on the latest policy-store definitions.
-     * <p>
-     * This method performs the following operations:
-     * <ul>
-     *     <li>Fetches all resource-to-scope mappings from persistence (via {@link AdminUIResourceScopesMapping}).</li>
-     *     <li>Retrieves the current policy-store JSON, either from a remote source or local file, using {@link #getPolicyStore()}.</li>
-     *     <li>Uses {@code mapPrincipalsToScopes()} to generate a mapping of principals (roles) to corresponding scopes.</li>
-     *     <li>Creates or updates {@link AdminRole} entries for each principal found in the policy-store.</li>
-     *     <li>Generates {@link RolePermissionMapping} objects that map each role to its associated scopes (permissions).</li>
-     *     <li>Removes any duplicate permissions and updates the Admin UI configuration with the new mappings.</li>
-     * </ul>
-     * </p>
+     * Synchronizes Admin UI role-to-scope mappings using the currently configured Cedar policy store.
      *
-     * <p>
-     * This synchronization ensures that access control roles and their permissions within the Admin UI
-     * remain aligned with the definitions specified in the external policy-store.
-     * </p>
+     * <p>The synchronization process includes:</p>
+     * <ol>
+     *     <li>Retrieving resource-to-scope mappings from persistence</li>
+     *     <li>Parsing the Cedar policy store archive (.cjar)</li>
+     *     <li>Deriving principal-to-scope mappings from policies</li>
+     *     <li>Generating Admin UI roles from the principals</li>
+     *     <li>Generating role-permission mappings</li>
+     *     <li>Removing duplicate permissions</li>
+     *     <li>Updating Admin UI roles and permissions</li>
+     * </ol>
      *
-     * @return {@link GenericResponse} indicating success or failure of the synchronization process.
-     *         On success, it includes a message stating that the sync completed successfully.
-     * @throws ApplicationException if any error occurs while fetching, parsing, or updating the role-to-scope mappings.
+     * <p>This ensures that Admin UI access control remains consistent with
+     * Cedar authorization policies.</p>
+     *
+     * @return {@link GenericResponse} indicating success or failure of the synchronization process
+     * @throws ApplicationException if synchronization fails due to validation or system errors
      */
+
     public GenericResponse syncRoleScopeMapping() throws ApplicationException {
         try {
             // Retrieve all Admin UI resource-scope mappings from persistence
@@ -211,33 +211,42 @@ public class AdminUISecurityService {
 
             // Convert resource-scope mappings to JSON safely
             JsonNode resourceScopesJson = CommonUtils.toJsonNode(adminUIResourceScopesMappings);
-            JsonNode policyStoreJson = getPolicyStore().getResponseObject();
 
             // Validate inputs
-            if (resourceScopesJson == null || policyStoreJson == null) {
+            if (resourceScopesJson == null) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                         "Invalid input data for synchronization");
             }
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
+                    .filter(path -> !Strings.isNullOrEmpty(path))
+                    .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
 
-            Map<String, Set<String>> principalsToScopesMap = PolicyStoreMapperHelper.mapPrincipalsToScopes(policyStoreJson, resourceScopesJson);
+            try (ZipFile zipFile = new ZipFile(policyStorePath)) {
+                Map<String, Set<String>> principalsToScopesMap = policyToScopeMapper.processZipFile(zipFile, resourceScopesJson);
 
-            // Validate mapping results
-            if (principalsToScopesMap.isEmpty()) {
-                log.warn("No principal-to-scope mappings found during synchronization");
+                // Validate mapping results
+                if (principalsToScopesMap.isEmpty()) {
+                    log.warn("No role-to-scope mappings found during synchronization");
+                }
+
+                List<AdminRole> roles = createAdminRoles(principalsToScopesMap.keySet());
+                List<RolePermissionMapping> rolePermissionMappings = createRolePermissionMappings(principalsToScopesMap);
+
+                // Remove duplicate permissions efficiently
+                List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
+
+                // Update services
+                adminUIService.resetRoles(roles);
+                adminUIService.resetPermissionsToRole(updatedMappings);
+
+                return CommonUtils.createGenericResponse(true, 200,
+                        "Sync of role-to-scope mappings from the policy store completed successfully.");
+            } catch (Exception e) {
+                log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
             }
-
-            List<AdminRole> roles = createAdminRoles(principalsToScopesMap.keySet());
-            List<RolePermissionMapping> rolePermissionMappings = createRolePermissionMappings(principalsToScopesMap);
-
-            // Remove duplicate permissions efficiently
-            List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
-
-            // Update services
-            adminUIService.resetRoles(roles);
-            adminUIService.resetPermissionsToRole(updatedMappings);
-
-            return CommonUtils.createGenericResponse(true, 200,
-                    "Sync of role-to-scope mappings from the policy store completed successfully.");
 
         } catch (ApplicationException e) {
             throw e; // Re-throw ApplicationException as is
