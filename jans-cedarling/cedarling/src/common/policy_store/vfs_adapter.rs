@@ -60,7 +60,6 @@ pub(super) trait VfsFileSystem: Send + Sync + 'static {
 
     /// Check if a path is a directory.
     fn is_dir(&self, path: &str) -> bool;
-
 }
 
 /// Physical filesystem implementation for native platforms.

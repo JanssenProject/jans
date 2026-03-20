@@ -5,7 +5,6 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
-use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
     default_jti, default_log_channel_capacity, default_log_max_retries,
@@ -104,16 +103,6 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub stdout_buffer_limit: usize,
 
-    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_user_claims: Vec<String>,
-
-    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_workload_claims: Vec<String>,
-
     /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(
@@ -121,14 +110,6 @@ pub struct BootstrapConfigRaw {
         default = "default_jti"
     )]
     pub decision_log_default_jwt_id: String,
-
-    /// When `enabled`, Cedar engine authorization is queried for a User principal.
-    #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
-    pub user_authz: FeatureToggle,
-
-    /// When `enabled`, Cedar engine authorization is queried for a Workload principal.
-    #[serde(rename = "CEDARLING_WORKLOAD_AUTHZ", default)]
-    pub workload_authz: FeatureToggle,
 
     /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
     /// making authz (authorization) decisions.
@@ -231,17 +212,6 @@ pub struct BootstrapConfigRaw {
     )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
-
-    /// Varying levels of validations based on the preference of the developer.
-    ///
-    /// # Strict Mode
-    ///
-    /// Strict mode requires:
-    ///     1. `id_token` aud matches the `access_token` `client_id`;
-    ///     2. if a Userinfo token is present, the sub matches the `id_token`, and that
-    ///         the aud matches the access token `client_id`.
-    #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
-    pub id_token_trust_mode: IdTokenTrustMode,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -531,27 +501,9 @@ mod tests {
                 "Default log level should be WARN"
             );
             assert_eq!(config.log_ttl, None, "Log TTL should be None by default");
-            assert!(
-                config.decision_log_user_claims.is_empty(),
-                "Decision log user claims should be empty by default"
-            );
-            assert!(
-                config.decision_log_workload_claims.is_empty(),
-                "Decision log workload claims should be empty by default"
-            );
             assert_eq!(
                 config.decision_log_default_jwt_id, "jti",
                 "Default JWT ID for decision logging should be 'jti'"
-            );
-            assert_eq!(
-                config.user_authz,
-                FeatureToggle::Disabled,
-                "User authorization should be disabled by default"
-            );
-            assert_eq!(
-                config.workload_authz,
-                FeatureToggle::Disabled,
-                "Workload authorization should be disabled by default"
             );
             assert_eq!(
                 config.principal_bool_operation,

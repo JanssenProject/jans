@@ -50,7 +50,7 @@ This interface is used to interact with the memory log storage. It provides meth
 
 Tags are used to filter logs. It can be `log_kind` and `log_level` values from log entry data.
 
-You can obtain the `request_id` from the result structure of the `authorize` method call.
+You can obtain the `request_id` from the result structure of the `authorize_unsigned` or `authorize_multi_issuer` method call.
 
 ```rust
 /// Log Storage

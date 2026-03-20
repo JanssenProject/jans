@@ -121,7 +121,7 @@ mod test {
         });
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),

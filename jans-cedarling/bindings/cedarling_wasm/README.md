@@ -46,14 +46,14 @@ After building WASM bindings in folder `pkg` you can find where you can find `ce
 In `index.html` described simple usage of `cedarling wasm` API:
 
 ```js
-import { BOOTSTRAP_CONFIG, REQUEST } from "/example_data.js"; // Import js objects: bootstrap config and request
+import { BOOTSTRAP_CONFIG, REQUEST_UNSIGNED } from "/example_data.js"; // Import js objects: bootstrap config and request
 import initWasm, { init } from "/pkg/cedarling_wasm.js";
 
 async function main() {
   await initWasm(); // Initialize the WebAssembly module
 
   let instance = await init(BOOTSTRAP_CONFIG);
-  let result = await instance.authorize(REQUEST);
+  let result = await instance.authorize_unsigned(REQUEST_UNSIGNED);
   console.log("result:", result);
 }
 main().catch(console.error);
@@ -103,11 +103,6 @@ export class Cedarling {
    * Assume that config is `Map`
    */
   static new_from_map(config: Map<any, any>): Promise<Cedarling>;
-  /**
-   * Authorize request
-   * makes authorization decision based on the [`Request`]
-   */
-  authorize(request: any): Promise<AuthorizeResult>;
   /**
    * Authorize request for unsigned principals.
    * makes authorization decision based on the [`RequestUnsigned`]
@@ -257,13 +252,9 @@ export class AuthorizeResult {
    */
   json_string(): string;
   /**
-   * Result of authorization where principal is `Jans::Workload`
+   * Get authorization responses for all principals
    */
-  workload?: AuthorizeResultResponse;
-  /**
-   * Result of authorization where principal is `Jans::User`
-   */
-  person?: AuthorizeResultResponse;
+  principals: Record<string, AuthorizeResultResponse>;
   /**
    * Get result for a specific principal
    */
@@ -453,17 +444,6 @@ cd policy-store && zip -r ../policy-store.cjar .
 
 See [Policy Store Formats](../../../docs/cedarling/reference/cedarling-policy-store.md#policy-store-formats) for details on the directory structure and metadata.json format.
 
-### ID Token Trust Mode
-
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
-
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
-
 ### Testing Configuration
 
 For testing scenarios, you may want to disable JWT validation. You can configure this in your bootstrap configuration:
@@ -472,7 +452,6 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 const BOOTSTRAP_CONFIG = {
   CEDARLING_JWT_SIG_VALIDATION: "disabled",
   CEDARLING_JWT_STATUS_VALIDATION: "disabled",
-  CEDARLING_ID_TOKEN_TRUST_MODE: "never",
 };
 ```
 

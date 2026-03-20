@@ -6,7 +6,6 @@
     "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
     "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
     "CEDARLING_DYNAMIC_CONFIGURATION": "disabled",
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
     "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
     "HS256",
     "RS256"
@@ -29,8 +28,6 @@
             "ALLOW"
         ]
     },
-    "CEDARLING_USER_AUTHZ": "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "id": "7a962b6e-aa45-4418-a94a-ee382d20a723"
 }
 ```

@@ -107,27 +107,15 @@ pub async fn load_policy_store(
             extract_first_policy_store(&agama_policy_store)?
         },
         #[cfg(not(target_arch = "wasm32"))]
-        PolicyStoreSource::CjarFile(path) => {
-            load_policy_store_from_cjar_file(path).await?
-        },
+        PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path).await?,
         #[cfg(target_arch = "wasm32")]
-        PolicyStoreSource::CjarFile(path) => {
-            load_policy_store_from_cjar_file(path)?
-        },
-        PolicyStoreSource::CjarUrl(url) => {
-            load_policy_store_from_cjar_url(url).await?
-        },
+        PolicyStoreSource::CjarFile(path) => load_policy_store_from_cjar_file(path)?,
+        PolicyStoreSource::CjarUrl(url) => load_policy_store_from_cjar_url(url).await?,
         #[cfg(not(target_arch = "wasm32"))]
-        PolicyStoreSource::Directory(path) => {
-            load_policy_store_from_directory(path).await?
-        },
+        PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path).await?,
         #[cfg(target_arch = "wasm32")]
-        PolicyStoreSource::Directory(path) => {
-            load_policy_store_from_directory(path)?
-        },
-        PolicyStoreSource::ArchiveBytes(bytes) => {
-            load_policy_store_from_archive_bytes(bytes)?
-        },
+        PolicyStoreSource::Directory(path) => load_policy_store_from_directory(path)?,
+        PolicyStoreSource::ArchiveBytes(bytes) => load_policy_store_from_archive_bytes(bytes)?,
     };
 
     Ok(policy_store)

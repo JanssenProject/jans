@@ -44,10 +44,6 @@ These methods are called to create an authorization request, run authorization, 
 
         Creates a `Principal` or a `Resource` entity from a dictionary.
 
-- `Request(tokens, action, resource, context)`
-
-    Creates a `Request` object which contains inputs for the Cedarling's authorization call.
-
 - `RequestUnsigned(principals, action, resource, context)`
 
     Creates a `RequestUnsigned` object which contains inputs for Cedarling's unsigned authorization call.
@@ -68,35 +64,30 @@ These methods are called to create an authorization request, run authorization, 
     - `resource`: The resource entity being accessed (required)
     - `context`: Optional additional context for policy evaluation
 
-- `authorize(request)`
-
-    Runs authorization against the provided `Request` object.
-
 - `authorize_unsigned(request)`
 
     Runs unsigned authorization against the provided `RequestUnsigned` object. A trusted issuer is not required for this call.
 
 - `authorize_multi_issuer(request)`
 
-    Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities without requiring traditional user/workload principals.
+    Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.
 
 ### Authz Result
 
 The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.
 
-#### AuthorizeResult (for `authorize` and `authorize_unsigned`)
+#### AuthorizeResult (for `authorize_unsigned`)
 
 - `is_allowed()`
 
     Returns `true` only if the overall decision of the Cedarling is `true`.
 
-- `workload()`
+- `principals`
 
-    Returns the decision of the `Workload` authorization
-
-- `principal()`
-
-    Returns the decision of the `Principal` authorization
+    A map of principal entity IDs to their authorization decisions. Each entry contains:
+    
+    - `decision`: Whether this principal was allowed or denied
+    - `diagnostics`: Detailed information about the decision
 
 - `request_id()`
 
