@@ -169,11 +169,11 @@ use std::collections::HashMap;
 use serde_json::json;
 
 let resource = EntityData {
-  cedar_entity_mapping: CedarEntityMapping {
+  cedar_mapping: CedarEntityMapping {
     entity_type: "Jans::Application".to_string(),
     id: "app_id_001".to_string(),
   },
-  payload: HashMap::from_iter([
+  attributes: HashMap::from_iter([
     ("protocol".to_string(), json!("https")),
     ("host".to_string(), json!("example.com")),
     ("path".to_string(), json!("/admin-dashboard")),
@@ -230,20 +230,20 @@ use serde_json::json;
 
 let principals = vec![
   EntityData {
-    cedar_entity_mapping: CedarEntityMapping {
+    cedar_mapping: CedarEntityMapping {
       entity_type: "Jans::Workload".to_string(),
       id: "some_workload_id".to_string(),
     },
-    payload: HashMap::from_iter([
+    attributes: HashMap::from_iter([
       ("client_id".to_string(), json!("some_client_id")),
     ]),
   },
   EntityData {
-    cedar_entity_mapping: CedarEntityMapping {
+    cedar_mapping: CedarEntityMapping {
       entity_type: "Jans::User".to_string(),
       id: "random_user_id".to_string(),
     },
-    payload: HashMap::from_iter([
+    attributes: HashMap::from_iter([
       ("role".to_string(), json!(["admin", "manager"])),
     ]),
   },
@@ -259,11 +259,11 @@ use std::collections::HashMap;
 use serde_json::json;
 
 let resource = EntityData {
-  cedar_entity_mapping: CedarEntityMapping {
+  cedar_mapping: CedarEntityMapping {
     entity_type: "Jans::Application".to_string(),
     id: "app_id_001".to_string(),
   },
-  payload: HashMap::from_iter([
+  attributes: HashMap::from_iter([
     ("protocol".to_string(), json!("https")),
     ("host".to_string(), json!("example.com")),
     ("path".to_string(), json!("/admin-dashboard")),
