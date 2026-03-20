@@ -447,7 +447,7 @@ let result = await cedarling.authorize_unsigned(input);
 
 Each principal in `principals` uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes. Roles are extracted from the attribute specified by `CEDARLING_UNSIGNED_ROLE_ID_SRC` (default: `"role"`).
 
-The result contains per-principal Cedar responses combined using the `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` logic:
+The result contains per-principal Cedar responses combined using the [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](./cedarling-principal-boolean-operations.md) logic:
 
 ```js
 {

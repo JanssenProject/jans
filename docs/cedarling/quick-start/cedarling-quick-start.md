@@ -326,6 +326,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        ]
    }
    ```
+   `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` controls how per-principal decisions are combined in `authorize_unsigned`. Here it checks only the `Jans::User` principal. See [Principal Boolean Operations](../reference/cedarling-principal-boolean-operations.md) for details.
 4. Click `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
 initialization.
 

@@ -73,8 +73,8 @@ These properties are relevant when using `authorize_multi_issuer` with signed JW
 
 These properties are specifically relevant when using `authorize_unsigned` with raw entity data (no JWT validation).
 
-- **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : property specifies whether to authorize the `USER`, `WORKLOAD` or both when making authorization decisions.
-  Use `"===": [{"var": "Jans::User"}, "ALLOW"]` if you only want user authorization. Use `"===": [{"var": "Jans::Workload"}, "ALLOW"]` if you only want workload authorization. [See here](./cedarling-principal-boolean-operations.md) if you want anything more complicated.
+- **`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`** : JSON Logic rule that combines per-principal authorization decisions into a final result. Variable names must match the full Cedar principal type (e.g., `MyApp::User`, `MyApp::Workload`). Only applies to `authorize_unsigned`.
+  Use `{"===": [{"var": "MyApp::User"}, "ALLOW"]}` if you only want user authorization. Use `{"===": [{"var": "MyApp::Workload"}, "ALLOW"]}` if you only want workload authorization. [See here](./cedarling-principal-boolean-operations.md) for combining multiple principals.
 
 - **`CEDARLING_UNSIGNED_ROLE_ID_SRC`** : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to `"role"`.
 

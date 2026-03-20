@@ -107,10 +107,17 @@ pub struct BootstrapConfigRaw {
     )]
     pub decision_log_default_jwt_id: String,
 
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
-    /// making authz (authorization) decisions.
+    /// Specifies what boolean operation to use when combining per-principal
+    /// authorization decisions in `authorize_unsigned`.
+    ///
+    /// This setting only applies to [`authorize_unsigned`] — the
+    /// `authorize_multi_issuer` method does not use principals and ignores
+    /// this configuration entirely.
     ///
     /// Use [JsonLogic](https://jsonlogic.com/).
+    /// Variable names must match the full Cedar principal type identifier
+    /// (`<Namespace>::<EntityType>`) used in your schema. Values are compared
+    /// against the strings `"ALLOW"` or `"DENY"`.
     ///
     /// Default value:
     /// ```json

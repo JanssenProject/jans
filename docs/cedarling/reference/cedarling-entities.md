@@ -40,6 +40,8 @@ Principals are created only in the `authorize_unsigned` interface. The caller pr
 
 There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include `User` and `Workload`, but these are just conventions defined in your schema.
 
+When multiple principals are provided, Cedarling evaluates each one independently and combines results using [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](./cedarling-principal-boolean-operations.md).
+
 ### EntityData Structure
 
 Each principal is passed as an `EntityData`:
