@@ -1433,10 +1433,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Token-Based Authorization (Multi-Issuer)
       
     </span>
   </a>
@@ -2457,10 +2457,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Token-Based Authorization (Multi-Issuer)
       
     </span>
   </a>
@@ -2698,16 +2698,13 @@ repository:</p>
 <span class="c1">// initialize the WASM binary</span>
 <span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="c1">// make sure to update this with your own policy store</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/...&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="s2">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_ID_TOKEN_TRUST_MODE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;never&quot;</span><span class="p">,</span>
 <span class="p">});</span>
 </code></pre></div>
 <h3 id="policy-store-sources-wasm">Policy Store Sources (WASM)<a class="headerlink" href="#policy-store-sources-wasm" title="Permanent link">#</a></h3>
@@ -2745,14 +2742,16 @@ repository:</p>
 <li><a href="#token-based-authorization"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
-<h4 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h4>
-<p>To perform an authorization check, follow these steps:</p>
+<h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
+<p>For token-based authorization, use <code>authorize_multi_issuer</code> which processes JWT tokens and maps them to Cedar entities based on the <code>token_metadata</code> configuration in your policy store.</p>
 <p><strong>1. Prepare tokens</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">access_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="p">;</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">id_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="p">;</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">userinfo_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;userinfo_token&gt;&quot;</span><span class="p">;</span>
+<p>Tokens are provided as an array of <code>TokenInput</code> objects, each specifying a mapping name and the JWT payload:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token_jwt&gt;&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token_jwt&gt;&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="p">];</span>
 </code></pre></div>
-<p>Your <em>principals</em> will be built from these tokens.</p>
+<p>The <code>mapping</code> field corresponds to the entity type name defined in your policy store's <code>token_metadata</code>.</p>
 <p><strong>2. Define the resource</strong></p>
 <p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -2772,36 +2771,23 @@ repository:</p>
 <p>An <em>action</em> represents what the principal is trying to do to the resource. For example, read, write, or delete operations.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">;</span>
 </code></pre></div>
-<p><strong>4. Define Context</strong></p>
-<p>The <em>context</em> represents additional data that may affect the authorization decision, such as time, location, or user-agent.</p>
+<p><strong>4. Define Context (optional)</strong></p>
+<p>The <em>context</em> represents additional data that may affect the authorization decision.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">current_time</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
-<span class="w">  </span><span class="nx">device_health</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">fraud_indicators</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">geolocation</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">network</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">network_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">operating_system</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">user_agent</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
 <span class="p">};</span>
 </code></pre></div>
-<p><strong>5. Build the request</strong></p>
-<p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principals</em>, <em>action</em>, and <em>context</em>.</p>
+<p><strong>5. Build and execute the request</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">access_token</span><span class="o">:</span><span class="w"> </span><span class="nx">access_token</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">id_token</span><span class="o">:</span><span class="w"> </span><span class="nx">id_token</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">userinfo_token</span><span class="o">:</span><span class="w"> </span><span class="nx">userinfo_token</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
 <span class="p">};</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
 </code></pre></div>
-<p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">authorize_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
-</code></pre></div>
+<p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
 <p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
 <p><strong>1. Define the Principals</strong></p>
@@ -2861,7 +2847,7 @@ repository:</p>
 <span class="p">};</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
+<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
 </code></pre></div>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
@@ -2885,23 +2871,17 @@ export class AuthorizeResult {
    * Convert `AuthorizeResult` to json string value
    */
   json_string(): string;
+  /**
+   * Get the authorization result for a specific principal by entity type.
+   * @param principal - The entity type (e.g., &quot;Jans::User&quot;, &quot;Jans::Workload&quot;)
+   * @returns The authorization response for the specified principal, or undefined if not found
+   */
   principal(principal: string): AuthorizeResultResponse | undefined;
   /**
-   * Result of authorization where principal is `Jans::Workload`
+   * Get the map of all principals and their authorization results.
+   * Keys are entity type strings (e.g., &quot;Jans::User&quot;), values are AuthorizeResultResponse.
    */
-  get workload(): AuthorizeResultResponse | undefined;
-  /**
-   * Result of authorization where principal is `Jans::Workload`
-   */
-  set workload(value: AuthorizeResultResponse | null | undefined);
-  /**
-   * Result of authorization where principal is `Jans::User`
-   */
-  get person(): AuthorizeResultResponse | undefined;
-  /**
-   * Result of authorization where principal is `Jans::User`
-   */
-  set person(value: AuthorizeResultResponse | null | undefined);
+  get principals(): Map&lt;string, AuthorizeResultResponse&gt;;
   /**
    * Result of authorization
    * true means `ALLOW`
@@ -2946,15 +2926,15 @@ export class Cedarling {
    */
   static new_from_map(config: Map&lt;any, any&gt;): Promise&lt;Cedarling&gt;;
   /**
-   * Authorize request
-   * makes authorization decision based on the [`Request`]
-   */
-  authorize(request: any): Promise&lt;AuthorizeResult&gt;;
-  /**
    * Authorize request for unsigned principals.
    * makes authorization decision based on the [`RequestUnsigned`]
    */
   authorize_unsigned(request: any): Promise&lt;AuthorizeResult&gt;;
+  /**
+   * Authorize request using multi-issuer tokens.
+   * makes authorization decision based on the [`AuthorizeMultiIssuerRequest`]
+   */
+  authorize_multi_issuer(request: any): Promise&lt;AuthorizeResult&gt;;
   /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`
@@ -3058,7 +3038,7 @@ export class PolicyEvaluationError {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 6, 2026 11:24:01 UTC"><span class="timeago" datetime="2026-01-06T11:24:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 6, 2026 11:24:01 UTC">2026-01-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

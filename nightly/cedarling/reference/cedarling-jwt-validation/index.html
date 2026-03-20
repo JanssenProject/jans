@@ -1636,45 +1636,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#id-token-trust-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ID Token Trust Mode
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ID Token Trust Mode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#strict-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        strict Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#never-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        never Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#jwt-status-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2522,45 +2483,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#id-token-trust-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ID Token Trust Mode
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ID Token Trust Mode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#strict-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        strict Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#never-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        never Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#jwt-status-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2734,7 +2656,6 @@
 <ul>
 <li><a href="#jwt-signature-validation">Signature Validation</a>: Verifies the token's origin using trusted issuer keys.</li>
 <li><a href="#jwt-content-validation">Content Validation</a>: Ensures required claims like <code>exp</code> or <code>client_id</code> are present.</li>
-<li><a href="#id-token-trust-mode">ID Token Trust Mode</a>: Validates relationships between different token types.</li>
 <li><a href="#jwt-status-validation">JWT Status Validation</a>: Checks if a token has been explicitly revoked.</li>
 <li><a href="#local-jwks">Local JWKS</a>: Using local key stores for testing.</li>
 </ul>
@@ -2742,7 +2663,6 @@
 <ul>
 <li><code>CEDARLING_JWT_SIG_VALIDATION</code>: Controls JWT signature validation</li>
 <li><code>CEDARLING_JWT_STATUS_VALIDATION</code>: Controls JWT revocation checks  </li>
-<li><code>CEDARLING_ID_TOKEN_TRUST_MODE</code>: Controls ID token trust validation</li>
 <li><code>CEDARLING_LOCAL_JWKS</code>: Local key store for testing</li>
 </ul>
 <p>See the complete <a href="../cedarling-properties/">bootstrap properties reference</a> for all available configuration options.</p>
@@ -2791,12 +2711,12 @@
 <li>The <code>iss</code> (Issuer) claim must match the <strong>host</strong> of an <code>openid_configuration_endpoint</code> in the policy store.</li>
 <li>The token must be provided under a <strong>token name</strong> defined in the corresponding <code>token_metadata</code></li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="c1">// Example authorize call</span>
-<span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize</span><span class="p">({</span>
-<span class="w">  </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// will be validated and used for entity creation</span>
-<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// will be ignored unless defined in token_metadata</span>
-<span class="w">  </span><span class="p">},</span>
+<div class="highlight"><pre><span></span><code><span class="c1">// Example authorize_multi_issuer call</span>
+<span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="c1">// will be validated</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w">         </span><span class="c1">// will be ignored unless defined in token_metadata</span>
+<span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="c1">// ...</span>
 <span class="p">})</span>
 </code></pre></div>
@@ -2828,23 +2748,6 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>The above configuration means that any <code>access_token</code> must contain both the <code>exp</code> and <code>client_id</code> claims, or it will be rejected. Additionally, <em>registered claims</em> like the <code>exp</code> will also be validated according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> standards.</p>
-<h2 id="id-token-trust-mode">ID Token Trust Mode<a class="headerlink" href="#id-token-trust-mode" title="Permanent link">#</a></h2>
-<p>Cedarling supports an optional strict trust mode for validating relationships between different token types—primarily ID tokens, Access tokens, and Userinfo tokens.</p>
-<p>This behavior is controlled via the <code>CEDARLING_ID_TOKEN_TRUST_MODE</code> <a href="../cedarling-properties/">bootstrap property</a>.</p>
-<blockquote>
-<p><strong>Implementation Status:</strong> Currently, only <code>strict</code> and <code>never</code> modes are implemented. Additional modes (<code>always</code>, <code>ifpresent</code>) are defined in the enum but not yet supported in the validation logic.</p>
-</blockquote>
-<h3 id="strict-mode"><code>strict</code> Mode<a class="headerlink" href="#strict-mode" title="Permanent link">#</a></h3>
-<p>If <code>CEDARLING_ID_TOKEN_TRUST_MODE</code> is set to <code>strict</code>, Cedarling will enforce the following:</p>
-<ol>
-<li>The <code>id_token</code>'s <code>aud</code> (Audience) must match the <code>access_token</code>'s <code>client_id</code>;</li>
-<li>If a <code>userinfo_token</code> is also provided:</li>
-<li>Its <code>sub</code> (Subject) must match that of the <code>id_token</code></li>
-<li>Its <code>aud</code> must also match the <code>access_token</code>'s <code>client_id</code>.</li>
-</ol>
-<p>These additional checks add another layer of identity assurance across tokens.</p>
-<h3 id="never-mode"><code>never</code> Mode<a class="headerlink" href="#never-mode" title="Permanent link">#</a></h3>
-<p>Setting the validation level to <code>never</code> will not check for the conditions outlined in <a href="#strict-mode"><code>strict</code> Mode</a>.</p>
 <h2 id="jwt-status-validation">JWT Status Validation<a class="headerlink" href="#jwt-status-validation" title="Permanent link">#</a></h2>
 <p>Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a> draft.</p>
 <p>This feature is toggled with the <code>CEDARLING_JWT_STATUS_VALIDATION</code> property.</p>
@@ -2889,7 +2792,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

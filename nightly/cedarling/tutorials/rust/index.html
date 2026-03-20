@@ -1478,10 +1478,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Token-Based Authorization (Multi-Issuer)
       
     </span>
   </a>
@@ -2446,10 +2446,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Token-Based Authorization (Multi-Issuer)
       
     </span>
   </a>
@@ -2765,14 +2765,16 @@ cargo<span class="w"> </span>--version
 <li><a href="#token-based-authorization"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
-<h4 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h4>
-<p>To perform an authorization check, follow these steps:</p>
+<h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
+<p>For token-based authorization, use <code>authorize_multi_issuer</code> which processes JWT tokens and maps them to Cedar entities.</p>
 <p><strong>1. Prepare tokens</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">access_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;your_access_token_here&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
-<span class="kd">let</span><span class="w"> </span><span class="n">id_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;your_id_token_here&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
-<span class="kd">let</span><span class="w"> </span><span class="n">userinfo_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;your_userinfo_token_here&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::</span><span class="n">TokenInput</span><span class="p">;</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
+<span class="w">    </span><span class="n">TokenInput</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="s">&quot;Jans::Access_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">access_token_jwt</span><span class="p">),</span>
+<span class="w">    </span><span class="n">TokenInput</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="s">&quot;Jans::Id_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">id_token_jwt</span><span class="p">),</span>
+<span class="p">];</span>
 </code></pre></div>
-<p>Your <em>principals</em> will be built from these tokens.</p>
 <p><strong>2. Define the resource</strong></p>
 <div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
 <span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
@@ -2787,48 +2789,34 @@ cargo<span class="w"> </span>--version
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;example.com&quot;</span><span class="p">)),</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;path&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">)),</span>
 <span class="w">  </span><span class="p">]),</span>
-<span class="p">}</span>
+<span class="p">};</span>
 </code></pre></div>
 <p><strong>3. Define the action</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">r#&quot;Jans::Action::&quot;Read&quot;&quot;#</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
 </code></pre></div>
-<p><strong>4. Define Context</strong></p>
-<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">time</span><span class="p">::{</span><span class="n">SystemTime</span><span class="p">,</span><span class="w"> </span><span class="n">UNIX_EPOCH</span><span class="p">};</span>
-<span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
+<p><strong>4. Define Context (optional)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
-<span class="w">    </span><span class="s">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="nc">SystemTime</span><span class="p">::</span><span class="n">now</span><span class="p">().</span><span class="n">duration_since</span><span class="p">(</span><span class="n">UNIX_EPOCH</span><span class="p">).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">as_millis</span><span class="p">(),</span>
-<span class="w">    </span><span class="s">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;user_agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Linux&quot;</span>
-<span class="p">});</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({});</span>
 </code></pre></div>
-<p><strong>5. Build the request</strong></p>
-<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
+<p><strong>5. Build and execute the request</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::</span><span class="n">AuthorizeMultiIssuerRequest</span><span class="p">;</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Request</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">tokens</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from</span><span class="p">([</span>
-<span class="w">        </span><span class="p">(</span><span class="s">&quot;access_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">access_token</span><span class="p">),</span>
-<span class="w">        </span><span class="p">(</span><span class="s">&quot;id_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">id_token</span><span class="p">),</span>
-<span class="w">        </span><span class="p">(</span><span class="s">&quot;userinfo_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">userinfo_token</span><span class="p">),</span>
-<span class="w">    </span><span class="p">]),</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AuthorizeMultiIssuerRequest</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">tokens</span><span class="p">,</span>
 <span class="w">    </span><span class="n">action</span><span class="p">,</span>
 <span class="w">    </span><span class="n">resource</span><span class="p">,</span>
-<span class="w">    </span><span class="n">context</span><span class="p">,</span>
+<span class="w">    </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">context</span><span class="p">),</span>
 <span class="p">};</span>
-</code></pre></div>
-<p><strong>6. Authorize</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
 
 <span class="k">match</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">decision</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kc">true</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Access granted&quot;</span><span class="p">),</span>
-<span class="w">    </span><span class="kc">false</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Access denied: {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">diagnostics</span><span class="p">),</span>
+<span class="w">    </span><span class="kc">false</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Access denied&quot;</span><span class="p">),</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
 <p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
 <p><strong>1. Define the Principals</strong></p>
@@ -2954,7 +2942,7 @@ for a complete code example.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 6, 2026 11:24:01 UTC"><span class="timeago" datetime="2026-01-06T11:24:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 6, 2026 11:24:01 UTC">2026-01-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

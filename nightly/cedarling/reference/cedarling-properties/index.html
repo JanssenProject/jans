@@ -2411,15 +2411,6 @@
 <ul>
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this Cedarling instance.</li>
 </ul>
-<p>To enable usage of principals at least one of the following keys must be provided:</p>
-<ul>
-<li>
-<p><strong><code>CEDARLING_WORKLOAD_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a Workload principal. Default is <code>disabled</code>.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_USER_AUTHZ</code></strong> : When <code>enabled</code>, Cedar engine authorization is queried for a User principal. Default is <code>disabled</code>.</p>
-</li>
-</ul>
 <p>To load policy store one of the following keys must be provided:</p>
 <ul>
 <li>
@@ -2484,8 +2475,6 @@
 <ul>
 <li><strong><code>CEDARLING_LOG_TYPE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code>. Default is <code>off</code>.</li>
 <li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : System Log Level <a href="../cedarling-logs/">See here</a>. Default to <code>WARN</code></li>
-<li><strong><code>CEDARLING_DECISION_LOG_USER_CLAIMS</code></strong> : List of claims to map from user entity, such as ["sub", "email", "username", ...]</li>
-<li><strong><code>CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS</code></strong> : List of claims to map from workload entity, such as ["client_id", "rp_id", ...]</li>
 <li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.</li>
 <li><strong><code>CEDARLING_LOG_TTL</code></strong> : in case of <code>memory</code> store, TTL (time to live) of log entities in seconds.</li>
 <li><strong><code>CEDARLING_LOG_MAX_ITEMS</code></strong> : Maximum number of log entities that can be stored using Memory logger. If used <code>0</code> value means no limit. And If missed or None, default value is applied.</li>
@@ -2504,19 +2493,6 @@
 </li>
 <li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info. Default is <code>disabled</code>.</li>
 <li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.</li>
-<li>
-<p><strong><code>CEDARLING_ID_TOKEN_TRUST_MODE</code></strong> : <code>strict</code> | <code>never</code> | <code>always</code> | <code>ifpresent</code>. Varying levels of validations based on the preference of the developer.</p>
-</li>
-<li>
-<p><strong><code>strict</code></strong> (default): Enforces strict validation rules:</p>
-<ul>
-<li>ID token <code>aud</code> must contain the access token <code>client_id</code> (the <code>aud</code> field is an array that must contain the <code>client_id</code>)</li>
-<li>If userinfo token is present, its <code>sub</code> must match the ID token <code>sub</code></li>
-</ul>
-</li>
-<li><strong><code>never</code></strong>: Disables ID token validation entirely (useful for testing)</li>
-<li><strong><code>always</code></strong>: Always validates ID tokens when present (less strict than <code>strict</code> mode) - <strong>Not yet implemented</strong></li>
-<li><strong><code>ifpresent</code></strong>: Validates ID tokens only if they are provided - <strong>Not yet implemented</strong></li>
 </ul>
 <p><strong>The following bootstrap properties are for advanced configuration:</strong></p>
 <ul>
@@ -2581,7 +2557,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 18, 2026 11:28:07 UTC"><span class="timeago" datetime="2026-03-18T11:28:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 18, 2026 11:28:07 UTC">2026-03-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

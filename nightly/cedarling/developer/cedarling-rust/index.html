@@ -1537,17 +1537,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#request" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Request
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#requestunsigned" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1609,10 +1598,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#authorize" class="md-nav__link">
+  <a href="#authorize_unsigned" class="md-nav__link">
     <span class="md-ellipsis">
       
-        authorize()
+        authorize_unsigned()
       
     </span>
   </a>
@@ -1620,10 +1609,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#authorize_unsigned" class="md-nav__link">
+  <a href="#authorize_multi_issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        authorize_unsigned()
+        authorize_multi_issuer()
       
     </span>
   </a>
@@ -2600,17 +2589,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#request" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Request
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#requestunsigned" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2672,10 +2650,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#authorize" class="md-nav__link">
+  <a href="#authorize_unsigned" class="md-nav__link">
     <span class="md-ellipsis">
       
-        authorize()
+        authorize_unsigned()
       
     </span>
   </a>
@@ -2683,10 +2661,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#authorize_unsigned" class="md-nav__link">
+  <a href="#authorize_multi_issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        authorize_unsigned()
+        authorize_multi_issuer()
       
     </span>
   </a>
@@ -3029,11 +3007,11 @@ use cases. Follow the steps below to build these examples.</p>
 <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>doc<span class="w"> </span>-p<span class="w"> </span>cedarling<span class="w"> </span>--no-deps<span class="w"> </span>--open
 </code></pre></div>
 <p><strong>5. Build examples</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Run JWT validation example</span>
-cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span>cedarling<span class="w"> </span>--example<span class="w"> </span>authorize_with_jwt_validation
-
-<span class="c1"># Run unsigned authorization example</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run unsigned authorization example</span>
 cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span>cedarling<span class="w"> </span>--example<span class="w"> </span>authorize_unsigned
+
+<span class="c1"># Run multi-issuer profiling example</span>
+cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span>cedarling<span class="w"> </span>--example<span class="w"> </span>profiling_multi_issuer
 
 <span class="c1"># Stdout logging</span>
 cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span>cedarling<span class="w"> </span>--example<span class="w"> </span>log_init<span class="w"> </span>--<span class="w"> </span>stdout
@@ -3079,16 +3057,12 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">            </span><span class="n">signature_algorithms_supported</span><span class="p">:</span><span class="w"> </span><span class="nc">HashSet</span><span class="p">::</span><span class="n">new</span><span class="p">(),</span>
 <span class="w">        </span><span class="p">}.</span><span class="n">allow_all_algorithms</span><span class="p">(),</span>
 <span class="w">        </span><span class="n">authorization_config</span><span class="p">:</span><span class="w"> </span><span class="nc">AuthorizationConfig</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">use_user_principal</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="p">,</span>
-<span class="w">            </span><span class="n">use_workload_principal</span><span class="p">:</span><span class="w"> </span><span class="nc">true</span><span class="p">,</span>
 <span class="w">            </span><span class="n">principal_bool_operator</span><span class="p">:</span><span class="w"> </span><span class="nc">JsonRule</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="o">!</span><span class="p">(</span>
 <span class="w">                </span><span class="p">{</span><span class="s">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="s">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s">&quot;ALLOW&quot;</span><span class="p">]}</span>
 <span class="w">            </span><span class="p">)).</span><span class="n">unwrap</span><span class="p">(),</span>
 <span class="w">            </span><span class="o">..</span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">()</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="n">entity_builder_config</span><span class="p">:</span><span class="w"> </span><span class="nc">EntityBuilderConfig</span><span class="p">::</span><span class="n">default</span><span class="p">()</span>
-<span class="w">            </span><span class="p">.</span><span class="n">with_user</span><span class="p">()</span>
-<span class="w">            </span><span class="p">.</span><span class="n">with_workload</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">entity_builder_config</span><span class="p">:</span><span class="w"> </span><span class="nc">EntityBuilderConfig</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
 <span class="w">        </span><span class="n">lock_config</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
 <span class="w">    </span><span class="p">}).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
 
@@ -3155,15 +3129,6 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">lock_config</span><span class="p">:</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">LockConfig</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="request"><code>Request</code><a class="headerlink" href="#request" title="Permanent link">#</a></h4>
-<p>Token-based authorization request.</p>
-<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">Request</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">tokens</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">resource</span><span class="p">:</span><span class="w"> </span><span class="nc">EntityData</span><span class="p">,</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nc">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>
 <h4 id="requestunsigned"><code>RequestUnsigned</code><a class="headerlink" href="#requestunsigned" title="Permanent link">#</a></h4>
 <p>Unsigned authorization request.</p>
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">RequestUnsigned</span><span class="w"> </span><span class="p">{</span>
@@ -3192,13 +3157,13 @@ cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </spa
 <p>Initialize a new Cedarling instance.</p>
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span><span class="n">config</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">BootstrapConfig</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="bp">Self</span><span class="p">,</span><span class="w"> </span><span class="n">CedarlingError</span><span class="o">&gt;</span>
 </code></pre></div>
-<h4 id="authorize"><code>authorize()</code><a class="headerlink" href="#authorize" title="Permanent link">#</a></h4>
-<p>Perform token-based authorization.</p>
-<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">authorize</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">:</span><span class="w"> </span><span class="nc">Request</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">AuthorizeResult</span><span class="p">,</span><span class="w"> </span><span class="n">CedarlingError</span><span class="o">&gt;</span>
-</code></pre></div>
 <h4 id="authorize_unsigned"><code>authorize_unsigned()</code><a class="headerlink" href="#authorize_unsigned" title="Permanent link">#</a></h4>
-<p>Perform unsigned authorization.</p>
+<p>Perform unsigned authorization with directly provided principals.</p>
 <div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">authorize_unsigned</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">:</span><span class="w"> </span><span class="nc">RequestUnsigned</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">AuthorizeResult</span><span class="p">,</span><span class="w"> </span><span class="n">CedarlingError</span><span class="o">&gt;</span>
+</code></pre></div>
+<h4 id="authorize_multi_issuer"><code>authorize_multi_issuer()</code><a class="headerlink" href="#authorize_multi_issuer" title="Permanent link">#</a></h4>
+<p>Perform token-based authorization using multi-issuer tokens.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">authorize_multi_issuer</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">:</span><span class="w"> </span><span class="nc">AuthorizeMultiIssuerRequest</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">MultiIssuerAuthorizeResult</span><span class="p">,</span><span class="w"> </span><span class="n">AuthorizeError</span><span class="o">&gt;</span>
 </code></pre></div>
 <h4 id="pop_logs"><code>pop_logs()</code><a class="headerlink" href="#pop_logs" title="Permanent link">#</a></h4>
 <p>Retrieve and clear all logs.</p>
@@ -3303,7 +3268,7 @@ cargo<span class="w"> </span>run<span class="w"> </span>--example<span class="w"
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     
