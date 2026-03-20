@@ -2545,332 +2545,32 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 </blockquote>
 <p>When using Cedarling, <strong>Action</strong> and <strong>Resource</strong> are typically defined in the <a href="../../reference/cedarling-policy-store/">policy store</a>, while <strong>Principal</strong> and <strong>Context</strong> are supplied at runtime via the <code>authz</code> interface.</p>
 <p>Cedarling currently provides two modes of authorization:</p>
-<p><strong>Standard (Token-based) Interface</strong></p>
+<p><strong>Multi-Issuer Authorization (Token-based)</strong></p>
 <ul>
-<li>Extracts the <strong>Principal</strong> from a JWT.</li>
-<li>Accepts the <strong>Context</strong> as a structured map.</li>
-</ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">JavaScript</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">Rust</label><label for="__tabbed_2_4">Kotlin</label><label for="__tabbed_2_5">Swift</label><label for="__tabbed_2_6">Go</label><label for="__tabbed_2_7">Java</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">access_token</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">id_token</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">userinfo_token</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;userinfo_token&gt;&quot;</span><span class="p">,</span>
-<span class="p">};</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">;</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">protocol</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="p">};</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">current_time</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">(),</span>
-<span class="w">  </span><span class="nx">device_health</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">fraud_indicators</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">geolocation</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">network</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">network_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">operating_system</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="p">};</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">tokens</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">action</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">resource</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">context</span><span class="p">,</span>
-<span class="p">});</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-
-<span class="n">tokens</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;id_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;userinfo_token&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;userinfo_token&gt;&quot;</span>
-<span class="p">}</span>
-
-<span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
-
-<span class="n">resource</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;app_id_001&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;https&quot;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;current_time&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">),</span>
-    <span class="s2">&quot;device_health&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;fraud_indicators&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;geolocation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;network_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Local&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;operating_system&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">Request</span><span class="p">(</span>
-    <span class="n">tokens</span><span class="p">,</span>
-    <span class="n">action</span><span class="p">,</span>
-    <span class="n">resource</span><span class="p">,</span>
-    <span class="n">context</span><span class="p">,</span>
-<span class="p">))</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
-<span class="k">use</span><span class="w"> </span><span class="n">chrono</span><span class="p">::</span><span class="n">Utc</span><span class="p">;</span>
-<span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HashMap</span><span class="p">::</span><span class="n">from</span><span class="p">([</span>
-<span class="w">    </span><span class="p">(</span><span class="s">&quot;access_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;&lt;access_token&gt;&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">()),</span>
-<span class="w">    </span><span class="p">(</span><span class="s">&quot;id_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;&lt;id_token&gt;&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">()),</span>
-<span class="w">    </span><span class="p">(</span><span class="s">&quot;userinfo_token&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;&lt;userinfo_token&gt;&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">()),</span>
-<span class="p">]);</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Jans::Action::</span><span class="se">\&quot;</span><span class="s">Read</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
-<span class="w">    </span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Some Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">});</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">({</span>
-<span class="w">    </span><span class="s">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="nc">Utc</span><span class="p">::</span><span class="n">now</span><span class="p">().</span><span class="n">timestamp_millis</span><span class="p">(),</span>
-<span class="w">    </span><span class="s">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="p">});</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">Request</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">tokens</span><span class="p">,</span>
-<span class="w">    </span><span class="n">action</span><span class="p">,</span>
-<span class="w">    </span><span class="n">resource</span><span class="p">,</span>
-<span class="w">    </span><span class="n">context</span><span class="p">,</span>
-<span class="p">});</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="nv">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mapOf</span><span class="p">(</span>
-<span class="w">    </span><span class="s">&quot;access_token&quot;</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="s">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;id_token&quot;</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="s">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;userinfo_token&quot;</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="s">&quot;&lt;userinfo_token&gt;&quot;</span>
-<span class="p">)</span>
-
-<span class="kd">val</span><span class="w"> </span><span class="nv">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;Jans::Action::&quot;Read&quot;&quot;&quot;&quot;</span>
-
-<span class="s">val resource = mapOf(</span>
-<span class="s">    &quot;</span><span class="n">cedar_entity_mapping</span><span class="s">&quot; to mapOf(</span>
-<span class="s">        &quot;</span><span class="n">entity_type</span><span class="s">&quot; to &quot;</span><span class="n">Jans</span><span class="o">::</span><span class="n">Application</span><span class="s">&quot;,</span>
-<span class="s">        &quot;</span><span class="n">id</span><span class="s">&quot; to &quot;</span><span class="n">app_id_001</span><span class="s">&quot;</span>
-<span class="s">    ),</span>
-<span class="s">    &quot;</span><span class="n">name</span><span class="s">&quot; to &quot;</span><span class="n">Some</span><span class="w"> </span><span class="n">Application</span><span class="s">&quot;,</span>
-<span class="s">    &quot;</span><span class="n">url</span><span class="s">&quot; to mapOf(</span>
-<span class="s">        &quot;</span><span class="n">host</span><span class="s">&quot; to &quot;</span><span class="n">example</span><span class="p">.</span><span class="na">com</span><span class="s">&quot;,</span>
-<span class="s">        &quot;</span><span class="n">path</span><span class="s">&quot; to &quot;</span><span class="o">/</span><span class="n">admin</span><span class="o">-</span><span class="n">dashboard</span><span class="s">&quot;,</span>
-<span class="s">        &quot;</span><span class="n">protocol</span><span class="s">&quot; to &quot;</span><span class="n">https</span><span class="s">&quot;</span>
-<span class="s">    )</span>
-<span class="s">)</span>
-
-<span class="s">val context = mapOf(</span>
-<span class="s">    &quot;</span><span class="n">current_time</span><span class="s">&quot; to System.currentTimeMillis(),</span>
-<span class="s">    &quot;</span><span class="n">device_health</span><span class="s">&quot; to listOf(&quot;</span><span class="n">Healthy</span><span class="s">&quot;),</span>
-<span class="s">    &quot;</span><span class="n">fraud_indicators</span><span class="s">&quot; to listOf(&quot;</span><span class="n">Allowed</span><span class="s">&quot;),</span>
-<span class="s">    &quot;</span><span class="n">geolocation</span><span class="s">&quot; to listOf(&quot;</span><span class="n">America</span><span class="s">&quot;),</span>
-<span class="s">    &quot;</span><span class="n">network</span><span class="s">&quot; to &quot;</span><span class="m">127.0</span><span class="p">.</span><span class="m">0.1</span><span class="s">&quot;,</span>
-<span class="s">    &quot;</span><span class="n">network_type</span><span class="s">&quot; to &quot;</span><span class="n">Local</span><span class="s">&quot;,</span>
-<span class="s">    &quot;</span><span class="n">operating_system</span><span class="s">&quot; to &quot;</span><span class="n">Linux</span><span class="s">&quot;</span>
-<span class="s">)</span>
-
-<span class="s">val result = cedarling?.authorize(</span>
-<span class="s">    tokens,</span>
-<span class="s">    action,</span>
-<span class="s">    resource[&quot;</span><span class="n">cedar_entity_mapping</span><span class="s">&quot;]?.get(&quot;</span><span class="n">entity_type</span><span class="s">&quot;) as String,</span>
-<span class="s">    resource[&quot;</span><span class="n">cedar_entity_mapping</span><span class="s">&quot;]?.get(&quot;</span><span class="n">id</span><span class="s">&quot;) as String,</span>
-<span class="s">    anyToJson(resource),</span>
-<span class="s">    context</span>
-<span class="s">)</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">tokens</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;userinfo_token&gt;&quot;</span>
-<span class="p">]</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="nv">action</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">#</span><span class="s">&quot;Jans::Action::&quot;</span><span class="n">Read</span><span class="s">&quot;&quot;</span><span class="p">#</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="nv">resource</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Some Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https&quot;</span>
-<span class="w">    </span><span class="p">]</span>
-<span class="p">]</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="nv">context</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">(</span><span class="n">Date</span><span class="p">().</span><span class="n">timeIntervalSince1970</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">),</span>
-<span class="w">    </span><span class="s">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Linux&quot;</span>
-<span class="p">]</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="nv">payloadJsonString</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">JSONSerialization</span><span class="p">.</span><span class="n">data</span><span class="p">(</span>
-<span class="w">    </span><span class="n">withJSONObject</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">,</span>
-<span class="w">    </span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
-<span class="p">).</span><span class="n">toUtf8String</span><span class="p">()</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="nv">result</span><span class="p">:</span><span class="w"> </span><span class="n">AuthorizeResult</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize</span><span class="p">(</span>
-<span class="w">    </span><span class="n">tokens</span><span class="p">:</span><span class="w"> </span><span class="n">tokens</span><span class="p">,</span>
-<span class="w">    </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="n">action</span><span class="p">,</span>
-<span class="w">    </span><span class="n">resourceType</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">[</span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">]?.</span><span class="kr">get</span><span class="p">(</span><span class="s">&quot;entity_type&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">    </span><span class="n">resourceId</span><span class="p">:</span><span class="w"> </span><span class="n">resource</span><span class="p">[</span><span class="s">&quot;cedar_entity_mapping&quot;</span><span class="p">]?.</span><span class="kr">get</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="p">!</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
-<span class="w">    </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="n">payloadJsonString</span><span class="p">,</span>
-<span class="w">    </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="n">context</span>
-<span class="p">)</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nx">tokens</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;userinfo_token&gt;&quot;</span>
-<span class="p">}</span>
-<span class="nx">action</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span>
-<span class="nx">resource</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
-<span class="w">    </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
-<span class="w">        </span><span class="nx">EntityType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Some Application&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="p">}</span>
-<span class="nx">context</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
-<span class="w">    </span><span class="s">&quot;current_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">().</span><span class="nx">Unix</span><span class="p">(),</span>
-<span class="w">    </span><span class="s">&quot;device_health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;fraud_indicators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;Allowed&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;geolocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;America&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="s">&quot;network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Local&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;operating_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-<span class="nx">request</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">Request</span><span class="p">{</span>
-<span class="w">    </span><span class="nx">Tokens</span><span class="p">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">Action</span><span class="p">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">Resource</span><span class="p">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">Context</span><span class="p">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
-<span class="p">}</span>
-<span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_instance</span><span class="p">.</span><span class="nx">Authorize</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span>
-<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">panic</span><span class="p">!(</span><span class="nx">err</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">    {</span>
-<span class="s">      &quot;cedar_entity_mapping&quot;: {</span>
-<span class="s">        &quot;entity_type&quot;: &quot;Jans::Application&quot;,</span>
-<span class="s">        &quot;id&quot;: &quot;app_id_001&quot;</span>
-<span class="s">      },</span>
-<span class="s">      &quot;name&quot;: &quot;Some Application&quot;,</span>
-<span class="s">      &quot;url&quot;: {</span>
-<span class="s">        &quot;host&quot;: &quot;example.com&quot;,</span>
-<span class="s">        &quot;path&quot;: &quot;/admin-dashboard&quot;,</span>
-<span class="s">        &quot;protocol&quot;: &quot;https&quot;</span>
-<span class="s">      }</span>
-<span class="s">    }</span>
-<span class="s">&quot;&quot;&quot;</span><span class="p">;</span>
-
-<span class="n">String</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Jans::Action::\&quot;Update\&quot;&quot;</span><span class="p">;</span>
-
-<span class="n">String</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span>
-<span class="s">    {</span>
-<span class="s">      &quot;device_health&quot;: [&quot;Healthy&quot;],</span>
-<span class="s">      &quot;fraud_indicators&quot;: [&quot;Allowed&quot;],</span>
-<span class="s">      &quot;geolocation&quot;: [&quot;America&quot;],</span>
-<span class="s">      &quot;network&quot;: &quot;127.0.0.1&quot;,</span>
-<span class="s">      &quot;network_type&quot;: &quot;Local&quot;,</span>
-<span class="s">      &quot;operating_system&quot;: &quot;Linux&quot;,</span>
-<span class="s">      &quot;user_agent&quot;: &quot;Linux&quot;</span>
-<span class="s">    }</span>
-<span class="s">&quot;&quot;&quot;</span><span class="p">;</span>
-
-<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
-<span class="w">    </span><span class="s">&quot;access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;access_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;id_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;id_token&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;userinfo_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;userinfo_token&gt;&quot;</span>
-<span class="p">);</span>
-
-<span class="c1">// Perform authorization</span>
-<span class="n">AuthorizeResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">adapter</span><span class="p">.</span><span class="na">authorize</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span><span class="w"> </span><span class="n">action</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(</span><span class="n">resource</span><span class="p">),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">JSONObject</span><span class="p">(</span><span class="n">context</span><span class="p">));</span>
-<span class="k">if</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getDecision</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Access granted&quot;</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Access denied&quot;</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-<p><strong>Unsigned Authorization</strong></p>
-<ul>
-<li>Accepts the <strong>Principal</strong> directly without requiring a JWT.</li>
-<li>This makes authorization decisions by passing a set of <strong>Principals</strong> directly.</li>
-<li>Similar to the standard interface, the <strong>Context</strong> is passed in as-is in a map-like structure.</li>
-</ul>
-<p><strong>Multi-Issuer Authorization</strong></p>
-<ul>
-<li>Doesn't use principal and all token information is stored in context.</li>
-<li>This makes authorization decisions by rules based on context values (token payloads).</li>
+<li>Uses <code>authorize_multi_issuer</code> to process JWT tokens from multiple issuers.</li>
+<li>Token data is mapped to Cedar entities based on <code>token_metadata</code> configuration in the policy store.</li>
+<li>Authorization decisions are made based on context values derived from token payloads.</li>
 </ul>
 <p><a href="../../reference/cedarling-multi-issuer/">More information</a></p>
+<p><strong>Unsigned Authorization</strong></p>
+<ul>
+<li>Uses <code>authorize_unsigned</code> to accept <strong>Principals</strong> directly without requiring JWTs.</li>
+<li>This makes authorization decisions by passing a set of <strong>Principals</strong> directly.</li>
+<li>The <strong>Context</strong> is passed in as-is in a map-like structure.</li>
+</ul>
+<p>See the language-specific tutorials for detailed examples of both authorization methods:</p>
+<ul>
+<li><a href="../javascript/">JavaScript</a></li>
+<li><a href="../python/">Python</a></li>
+<li><a href="../rust/">Rust</a></li>
+<li><a href="../kotlin/">Kotlin</a></li>
+<li><a href="../swift/">Swift</a></li>
+<li><a href="../go/">Go</a></li>
+<li><a href="../java/">Java</a></li>
+</ul>
 <h3 id="context-data-api">Context Data API<a class="headerlink" href="#context-data-api" title="Permanent link">#</a></h3>
 <p>The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace. This enables dynamic, runtime-based authorization decisions.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">JavaScript</label><label for="__tabbed_3_2">Python</label><label for="__tabbed_3_3">Rust</label><label for="__tabbed_3_4">Kotlin</label><label for="__tabbed_3_5">Swift</label><label for="__tabbed_3_6">Go</label><label for="__tabbed_3_7">Java</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">JavaScript</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">Rust</label><label for="__tabbed_2_4">Kotlin</label><label for="__tabbed_2_5">Swift</label><label for="__tabbed_2_6">Go</label><label for="__tabbed_2_7">Java</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// Push data with optional TTL (5 minutes = 300 seconds)</span>
@@ -3065,7 +2765,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 27, 2026 15:52:36 UTC"><span class="timeago" datetime="2026-02-27T15:52:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 27, 2026 15:52:36 UTC">2026-02-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

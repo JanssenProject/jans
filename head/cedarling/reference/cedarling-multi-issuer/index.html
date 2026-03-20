@@ -1818,45 +1818,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-from-standard-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migration from Standard Authorization
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Migration from Standard Authorization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#before-standard-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Before (Standard Authorization)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#after-multi-issuer-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        After (Multi-Issuer Authorization)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3144,45 +3105,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-from-standard-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migration from Standard Authorization
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Migration from Standard Authorization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#before-standard-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Before (Standard Authorization)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#after-multi-issuer-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        After (Multi-Issuer Authorization)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4081,58 +4003,6 @@ permit(
 <span class="c1"># Test with invalid tokens mixed in</span>
 <span class="n">mixed_tokens_result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">mixed_tokens_request</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="migration-from-standard-authorization">Migration from Standard Authorization<a class="headerlink" href="#migration-from-standard-authorization" title="Permanent link">#</a></h2>
-<p>Migrating from <code>authorize()</code> to <code>authorize_multi_issuer()</code>:</p>
-<h3 id="before-standard-authorization">Before (Standard Authorization)<a class="headerlink" href="#before-standard-authorization" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
-    <span class="n">tokens</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="n">access_token</span><span class="p">,</span>
-        <span class="s2">&quot;id_token&quot;</span><span class="p">:</span> <span class="n">id_token</span>
-    <span class="p">},</span>
-    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">,</span>
-    <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
-    <span class="n">context</span><span class="o">=</span><span class="n">context</span>
-<span class="p">)</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">():</span>
-    <span class="c1"># Access granted</span>
-</code></pre></div>
-<p><strong>Policy</strong>:</p>
-<div class="highlight"><pre><span></span><code>permit(
-  principal is Jans::User,
-  action == Jans::Action::&quot;Read&quot;,
-  resource in Jans::Document
-) when {
-  principal.email == resource.owner
-};
-</code></pre></div>
-<h3 id="after-multi-issuer-authorization">After (Multi-Issuer Authorization)<a class="headerlink" href="#after-multi-issuer-authorization" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">request</span> <span class="o">=</span> <span class="n">AuthorizeMultiIssuerRequest</span><span class="p">(</span>
-    <span class="n">tokens</span><span class="o">=</span><span class="p">[</span>
-        <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">access_token</span><span class="p">),</span>
-        <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">id_token</span><span class="p">)</span>
-    <span class="p">],</span>
-    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">,</span>
-    <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
-    <span class="n">context</span><span class="o">=</span><span class="n">context</span>
-<span class="p">)</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">decision</span><span class="p">:</span>
-    <span class="c1"># Access granted</span>
-</code></pre></div>
-<p><strong>Policy</strong>:</p>
-<div class="highlight"><pre><span></span><code>permit(
-  principal,
-  action == Jans::Action::&quot;Read&quot;,
-  resource in Jans::Document
-) when {
-  context has tokens.jans_id_token &amp;&amp;
-  context.tokens.jans_id_token.hasTag(&quot;email&quot;) &amp;&amp;
-  context.tokens.jans_id_token.getTag(&quot;email&quot;).contains(resource.owner)
-};
-</code></pre></div>
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="../cedarling-authz/">Cedarling Authorization</a></li>
@@ -4164,7 +4034,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

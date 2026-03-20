@@ -1368,6 +1368,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#authorization-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authorization Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-issuer-authorization-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Issuer Authorization Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#automatically-adding-entity-references-to-the-context" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1408,10 +1436,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#when-to-use-authorize_unsigned-vs-authorize" class="md-nav__link">
+  <a href="#when-to-use-authorize_unsigned-vs-authorize_multi_issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use authorize_unsigned vs authorize
+        When to use authorize_unsigned vs authorize_multi_issuer
       
     </span>
   </a>
@@ -1436,10 +1464,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#key-differences-from-standard-authorization" class="md-nav__link">
+  <a href="#key-features" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Key Differences from Standard Authorization
+        Key Features
       
     </span>
   </a>
@@ -2400,6 +2428,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#authorization-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authorization Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-issuer-authorization-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Issuer Authorization Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#automatically-adding-entity-references-to-the-context" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2440,10 +2496,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#when-to-use-authorize_unsigned-vs-authorize" class="md-nav__link">
+  <a href="#when-to-use-authorize_unsigned-vs-authorize_multi_issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use authorize_unsigned vs authorize
+        When to use authorize_unsigned vs authorize_multi_issuer
       
     </span>
   </a>
@@ -2468,10 +2524,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#key-differences-from-standard-authorization" class="md-nav__link">
+  <a href="#key-features" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Key Differences from Standard Authorization
+        Key Features
       
     </span>
   </a>
@@ -2688,11 +2744,9 @@ grain access controls needed to implement the business rules of their applicatio
 to define schema and policies is to use the <a href="https://cloud.gluu.org/agama-lab">AgamaLab</a> Policy
 Designer. This is a free developer tool hosted by <a href="https://gluu.org">Gluu</a>.</p>
 <p><img alt="Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context" src="../../../assets/lock-cedarling-diagram-2.jpg" /></p>
-<p>The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities
-are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create
-User and Role entities; the OAuth access token is used to create a Workload entity, which is the
-software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
-given its policies, Role, Person and Workload are authorized. If one of Role or Person and Workload is authorized then the request is allowed to proceed.</p>
+<p>The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
+User, Workload, and Role entities based on token claims.</p>
 <p>The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
 of saying "User can perform action", we can say "Role can perform action"--a convenient way to
 implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
@@ -2705,41 +2759,53 @@ but the other conditions are ABAC. Policy evaluation is fast because Cedar uses 
 "slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.</p>
 <p>The OIDC <code>id_token</code> JWT represents a Person authentication event. The access token JWT represents a
 Workload authentication event. These tokens contain other interesting contextual data. The <code>id_token</code>
-tells you who authenticated, when they authenticated, how they authenticatated, and optionally other
+tells you who authenticated, when they authenticated, how they authenticated, and optionally other
 claims like the User's roles. An OAuth access token can tell you information about the Workload that
 obtained the JWT, its extent of access as defined by the OAuth Authorization Server (<em>i.e.</em> the
 values of the <code>scope</code> claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.</p>
-<p>The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, (<code>person_allowed</code> AND <code>workload_allowed</code>) must be <code>True</code>. The JWT's,
-Action, Resource and Context is sent by the application in the authorization request. For example,
-this is a sample request from a hypothetical application:</p>
+<h2 id="authorization-methods">Authorization Methods<a class="headerlink" href="#authorization-methods" title="Permanent link">#</a></h2>
+<p>Cedarling provides two authorization methods:</p>
+<ol>
+<li><strong><code>authorize_unsigned</code></strong>: For authorization with raw entity data (no JWT validation)</li>
+<li><strong><code>authorize_multi_issuer</code></strong>: For JWT-based authorization with multiple issuers</li>
+</ol>
+<h3 id="multi-issuer-authorization-example">Multi-Issuer Authorization Example<a class="headerlink" href="#multi-issuer-authorization-example" title="Permanent link">#</a></h3>
+<p>For JWT-based authorization, use <code>authorize_multi_issuer</code> which validates tokens from trusted issuers:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">bootstrap_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{...};</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">(</span><span class="nx">bootstrap_config</span><span class="p">);</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;tokens&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGc....&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;View&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="s2">&quot;entity_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="s2">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;org_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;ip_address&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;network_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VPN&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;user_agent&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1719266610.98636&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
 
-<span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGc....&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;View\&quot;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">owner</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">org_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ip_address</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">network_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VPN&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">user_agent</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="mf">1719266610</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">(</span><span class="nx">request</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="automatically-adding-entity-references-to-the-context">Automatically Adding Entity References to the Context<a class="headerlink" href="#automatically-adding-entity-references-to-the-context" title="Permanent link">#</a></h2>
 <p>Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context.</p>
@@ -2859,12 +2925,12 @@ action &quot;View&quot; appliesTo {
 
 <span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
 </code></pre></div>
-<h3 id="when-to-use-authorize_unsigned-vs-authorize">When to use authorize_unsigned vs authorize<a class="headerlink" href="#when-to-use-authorize_unsigned-vs-authorize" title="Permanent link">#</a></h3>
+<h3 id="when-to-use-authorize_unsigned-vs-authorize_multi_issuer">When to use authorize_unsigned vs authorize_multi_issuer<a class="headerlink" href="#when-to-use-authorize_unsigned-vs-authorize_multi_issuer" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
 <th>Feature</th>
-<th>authorize</th>
+<th>authorize_multi_issuer</th>
 <th>authorize_unsigned</th>
 </tr>
 </thead>
@@ -2892,50 +2958,34 @@ action &quot;View&quot; appliesTo {
 </tbody>
 </table>
 <h2 id="multi-issuer-authorization-authorize_multi_issuer">Multi-Issuer Authorization (authorize_multi_issuer)<a class="headerlink" href="#multi-issuer-authorization-authorize_multi_issuer" title="Permanent link">#</a></h2>
-<p>The <code>authorize_multi_issuer</code> method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. Unlike the standard <code>authorize</code> method which creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.</p>
-<h3 id="key-differences-from-standard-authorization">Key Differences from Standard Authorization<a class="headerlink" href="#key-differences-from-standard-authorization" title="Permanent link">#</a></h3>
+<p>The <code>authorize_multi_issuer</code> method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. This method evaluates policies based on token entities with flexible principal configuration.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
 <th>Feature</th>
-<th>authorize</th>
-<th>authorize_multi_issuer</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Principal Model</td>
-<td>User/Workload entities</td>
-<td>No principals - token-based context</td>
-</tr>
-<tr>
 <td>Token Sources</td>
-<td>Single issuer expected</td>
 <td>Multiple issuers supported</td>
 </tr>
 <tr>
 <td>Token Types</td>
-<td>Fixed (access, id, userinfo)</td>
 <td>Flexible with explicit mapping</td>
 </tr>
 <tr>
 <td>Context Structure</td>
-<td>User/Workload in context</td>
-<td>Individual token entities in context.tokens</td>
+<td>Individual token entities in <code>context.tokens</code></td>
 </tr>
 <tr>
 <td>Use Case</td>
-<td>Standard RBAC/ABAC flows</td>
 <td>Federation, API gateways, multi-issuer apps</td>
 </tr>
 <tr>
-<td>Policy Principal</td>
-<td><code>principal is User/Workload</code></td>
-<td>Not applicable (principal-less)</td>
-</tr>
-<tr>
 <td>Policy Context Access</td>
-<td><code>context.user</code>, <code>context.workload</code></td>
 <td><code>context.tokens.{issuer}_{token_type}</code></td>
 </tr>
 </tbody>
@@ -3125,7 +3175,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

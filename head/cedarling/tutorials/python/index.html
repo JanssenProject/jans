@@ -1433,10 +1433,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Token-Based Authorization (Multi-Issuer)
       
     </span>
   </a>
@@ -2401,10 +2401,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Token-Based Authorization (Multi-Issuer)
       
     </span>
   </a>
@@ -2656,14 +2656,17 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <li><a href="#token-based-authorization"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
-<h4 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h4>
-<p>To perform an authorization check, follow these steps:</p>
+<h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
+<p>For token-based authorization, use <code>authorize_multi_issuer</code> which processes JWT tokens and maps them to Cedar entities based on the <code>token_metadata</code> configuration in your policy store.</p>
 <p><strong>1. Prepare tokens</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">access_token</span> <span class="o">=</span> <span class="s2">&quot;&lt;access_token&gt;&quot;</span>
-<span class="n">id_token</span> <span class="o">=</span> <span class="s2">&quot;&lt;id_token&gt;&quot;</span>
-<span class="n">userinfo_token</span> <span class="o">=</span> <span class="s2">&quot;&lt;userinfo_token&gt;&quot;</span>
+<p>Tokens are provided as a list of <code>TokenInput</code> objects:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">cedarling_python</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenInput</span>
+
+<span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;&lt;access_token_jwt&gt;&quot;</span><span class="p">),</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;&lt;id_token_jwt&gt;&quot;</span><span class="p">),</span>
+<span class="p">]</span>
 </code></pre></div>
-<p>Your <em>principals</em> will be built from these tokens.</p>
 <p><strong>2. Define the resource</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">resource</span> <span class="o">=</span> <span class="n">EntityData</span><span class="p">(</span>
   <span class="n">cedar_entity_mapping</span><span class="o">=</span><span class="n">CedarEntityMapping</span><span class="p">(</span>
@@ -2681,33 +2684,23 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <p><strong>3. Define the action</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
 </code></pre></div>
-<p><strong>4. Define Context</strong></p>
+<p><strong>4. Define Context (optional)</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s2">&quot;current_time&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span>
-  <span class="s2">&quot;device_health&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-  <span class="s2">&quot;fraud_indicators&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
-  <span class="s2">&quot;geolocation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
-  <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;network_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Local&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;operating_system&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;user_agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>5. Build the request</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
-  <span class="n">tokens</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="n">access_token</span><span class="p">,</span>
-    <span class="s2">&quot;id_token&quot;</span><span class="p">:</span> <span class="n">id_token</span><span class="p">,</span>
-    <span class="s2">&quot;userinfo_token&quot;</span><span class="p">:</span> <span class="n">userinfo_token</span><span class="p">,</span>
-  <span class="p">},</span>
-  <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
-  <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
-  <span class="n">context</span><span class="o">=</span><span class="n">context</span>
+<p><strong>5. Authorize</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">cedarling_python</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthorizeMultiIssuerRequest</span>
+
+<span class="n">request</span> <span class="o">=</span> <span class="n">AuthorizeMultiIssuerRequest</span><span class="p">(</span>
+    <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
+    <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
+    <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="n">context</span>
 <span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>6. Authorize</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">authorize_result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-</code></pre></div>
+<p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
 <p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
 <p><strong>1. Define the Principals</strong></p>
@@ -2767,8 +2760,8 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <span class="p">)</span>
 </code></pre></div>
 <p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorize</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
-<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+<p>Finally, call the <code>authorize_unsigned</code> function to check whether the principals are allowed to perform the specified action on the resource.</p>
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="multi-issuer-authorization">Multi-Issuer Authorization<a class="headerlink" href="#multi-issuer-authorization" title="Permanent link">#</a></h4>
 <p>Multi-issuer authorization allows you to make authorization decisions based on multiple JWT tokens from different issuers without requiring traditional User/Workload principals.</p>
@@ -2829,24 +2822,24 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <span class="k">else</span><span class="p">:</span>
   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Access denied&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Key Differences from standard authentication</strong>:</p>
+<p><strong>Key Differences between authorization methods</strong>:</p>
 <table>
 <thead>
 <tr>
 <th>Feature</th>
-<th>authorize</th>
+<th>authorize_unsigned</th>
 <th>authorize_multi_issuer</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Principal Model</td>
-<td>User/Workload entities</td>
-<td>No principals - token-based</td>
+<td>Directly provided entities</td>
+<td>Token-derived (from <code>token_metadata</code>)</td>
 </tr>
 <tr>
 <td>Token Sources</td>
-<td>Single issuer expected</td>
+<td>No tokens required</td>
 <td>Multiple issuers supported</td>
 </tr>
 <tr>
@@ -2856,13 +2849,13 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 </tr>
 <tr>
 <td>Decision Access</td>
-<td><code>result.is_allowed()</code>, <code>result.workload()</code>, <code>result.person()</code></td>
+<td><code>result.decision</code>, <code>result.principals</code> map</td>
 <td><code>result.decision</code> (boolean)</td>
 </tr>
 <tr>
 <td>Use Case</td>
-<td>Standard RBAC/ABAC</td>
-<td>Federation, multi-org access</td>
+<td>Internal data, custom principals</td>
+<td>Federation, OIDC, multi-org access</td>
 </tr>
 </tbody>
 </table>
@@ -2905,7 +2898,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 6, 2026 11:24:01 UTC"><span class="timeago" datetime="2026-01-06T11:24:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 6, 2026 11:24:01 UTC">2026-01-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

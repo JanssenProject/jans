@@ -1517,10 +1517,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#multi-issuer-authorization" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Multi-Issuer Authorization
       
     </span>
   </a>
@@ -1539,7 +1539,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#multi-issuer-authorization" class="md-nav__link">
+  <a href="#multi-issuer-authorization_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Multi-Issuer Authorization
@@ -2468,10 +2468,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#token-based-authorization" class="md-nav__link">
+  <a href="#multi-issuer-authorization" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token-Based Authorization
+        Multi-Issuer Authorization
       
     </span>
   </a>
@@ -2490,7 +2490,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#multi-issuer-authorization" class="md-nav__link">
+  <a href="#multi-issuer-authorization_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Multi-Issuer Authorization
@@ -2762,12 +2762,10 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 
 <span class="c1">// Example configuration (populate dynamically in production)</span>
 <span class="nx">config</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
-<span class="w">    </span><span class="s">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;your-policy-store-id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w">     </span><span class="s">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w">          </span><span class="s">&quot;INFO&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w">           </span><span class="s">&quot;std_out&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w">      </span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;CEDARLING_POLICY_STORE_ID&quot;</span><span class="p">:</span><span class="w">       </span><span class="s">&quot;your-policy-store-id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w">             </span><span class="s">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w">              </span><span class="s">&quot;std_out&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s">&quot;CEDARLING_POLICY_STORE_LOCAL_FN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/policy-store.json&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
@@ -2802,12 +2800,12 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 </code></pre></div>
 <p>See <a href="../../reference/cedarling-policy-store/#policy-store-formats">Policy Store Formats</a> for more details.</p>
 <h3 id="authorization">Authorization<a class="headerlink" href="#authorization" title="Permanent link">#</a></h3>
-<p>Cedarling provides two main interfaces for performing authorization checks: <strong>Token-Based Authorization</strong> and <strong>Unsigned Authorization</strong>. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.</p>
+<p>Cedarling provides two main interfaces for performing authorization checks:</p>
 <ul>
-<li><a href="#token-based-authorization"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
-<li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
+<li><a href="#multi-issuer-authorization"><strong>Multi-Issuer Authorization</strong></a> processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on <code>token_metadata</code> configuration.</li>
+<li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.</li>
 </ul>
-<h4 id="token-based-authorization">Token-Based Authorization<a class="headerlink" href="#token-based-authorization" title="Permanent link">#</a></h4>
+<h4 id="multi-issuer-authorization">Multi-Issuer Authorization<a class="headerlink" href="#multi-issuer-authorization" title="Permanent link">#</a></h4>
 <p><strong>1. Define the resource:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nx">resource</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">EntityData</span><span class="p">{</span>
 <span class="w">    </span><span class="nx">CedarMapping</span><span class="p">:</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">CedarMapping</span><span class="p">{</span>
@@ -2824,18 +2822,19 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nx">action</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">`Jans::Action::&quot;Update&quot;`</span>
 </code></pre></div>
 <p><strong>3. Build the request with tokens:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nx">request</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">Request</span><span class="p">{</span>
-<span class="w">    </span><span class="nx">Tokens</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;access_token&quot;</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;your.jwt.token&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;id_token&quot;</span><span class="p">:</span><span class="w">       </span><span class="s">&quot;your.id.token&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your.userinfo.token&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">},</span>
+<div class="highlight"><pre><span></span><code><span class="nx">tokens</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">TokenInput</span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="nx">Mapping</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your.jwt.token&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nx">Mapping</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Id_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your.id.token&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="nx">request</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">AuthorizeMultiIssuerRequest</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Tokens</span><span class="p">:</span><span class="w">   </span><span class="nx">tokens</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">Action</span><span class="p">:</span><span class="w">   </span><span class="nx">action</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">Resource</span><span class="p">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>4. Authorize:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">Authorize</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">AuthorizeMultiIssuer</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span>
 <span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// Handle error</span>
 <span class="p">}</span>
@@ -2846,6 +2845,7 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 <span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Access denied&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
 <h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
 <p>In unsigned authorization, you pass a set of Principals directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available.</p>
 <p><strong>1. Define the principals:</strong></p>
@@ -2881,7 +2881,7 @@ cp<span class="w"> </span>target/release/libcedarling_go.dylib<span class="w"> <
 <span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Access denied&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="multi-issuer-authorization">Multi-Issuer Authorization<a class="headerlink" href="#multi-issuer-authorization" title="Permanent link">#</a></h4>
+<h4 id="multi-issuer-authorization_1">Multi-Issuer Authorization<a class="headerlink" href="#multi-issuer-authorization_1" title="Permanent link">#</a></h4>
 <p>Multi-issuer authorization allows you to make authorization decisions based on multiple JWT tokens from different issuers in a single request without requiring traditional User/Workload principals.</p>
 <p><strong>1. Create tokens with explicit type mappings:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nx">tokens</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">TokenInput</span><span class="p">{</span>
@@ -3022,7 +3022,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     
