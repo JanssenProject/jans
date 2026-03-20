@@ -213,11 +213,11 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
       - Check the `Display access and ID token after authentication` checkbox
 
 3. Click the `Trigger auth flow` button
-3. Login using username and password of a user who has the `Teacher` role assigned in the IDP
-4. Click `Allow` on the consent screen
-5. If the authentication is successful, Tarp will show you a page with token details
-6. Move to `Cedarling` tab and select `Cedarling Signed Authz Form` tab
-7. Use the details below as an input to this form:
+4. Login using username and password of a user who has the `Teacher` role assigned in the IDP
+5. Click `Allow` on the consent screen
+6. If the authentication is successful, Tarp will show you a page with token details
+7. Move to `Cedarling` tab and select `Cedarling Signed Authz Form` tab
+8. Use the details below as an input to this form:
       - Principal: select all 3 tokens. In TBAC approach here, we are passing tokens (i.e signed JWTs) in place of JSON string.
       - Action: `Jans::Action::"Write"`
       - Resource:
