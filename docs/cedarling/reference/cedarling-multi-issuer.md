@@ -75,7 +75,7 @@ A multi-issuer authorization request consists of:
 ┌─────────────────────────────────────────────────────────┐
 │ 2. Token Validation                                     │
 │    - Signature verification                             │
-│    - Time-based validation (exp, nbf, iat)             │
+│    - Time-based validation (exp, nbf)                   │
 │    - Status validation (revocation check)               │
 │    - Trusted issuer verification                        │
 └────────────────────┬────────────────────────────────────┘
@@ -111,11 +111,11 @@ Each validated token becomes a Cedar entity:
 
 ```cedar
 entity Token = {
-  "token_type": String,        // e.g., "Jans::Access_Token"
-  "jti": String,               // Token ID
+  "token_type"?: String,        // e.g., "Jans::Access_Token"
+  "jti"?: String,               // Token ID
   "iss"?: Jans::TrustedIssuer,  // JWT iss claim
-  "exp": Long,                 // Expiration timestamp
-  "validated_at": Long         // Validation timestamp
+  "exp"?: Long,                 // Expiration timestamp
+  "validated_at"?: Long         // Validation timestamp
 } tags Set<String>;
 ```
 
@@ -151,7 +151,7 @@ Tokens are organized in the context using a deterministic naming algorithm:
 | ------------------------------ | ------------------- | -------------------- | ---------------------------- |
 | `https://idp.acme.com/auth`    | `"Acme"`            | `Jans::Access_Token` | `acme_access_token`          |
 | `https://accounts.google.com`  | `"Google"`          | `Jans::Id_Token`     | `google_id_token`            |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_acme_dolphin_token` |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"`         | `Acme::DolphinToken` | `dolphin_dolphintoken`       |
 
 ## Use Cases
 
