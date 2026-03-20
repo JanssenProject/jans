@@ -113,9 +113,13 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key2".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result2.is_some(), "result should not be None");
-    let value2: serde_json::Value = serde_json::from_str(&result2.unwrap().0)
-        .expect("result should be deserializable to JSON");
-    assert_eq!(value2, serde_json::json!({"nested": "data"}), "retrieved nested object should match pushed value");
+    let value2: serde_json::Value =
+        serde_json::from_str(&result2.unwrap().0).expect("result should be deserializable to JSON");
+    assert_eq!(
+        value2,
+        serde_json::json!({"nested": "data"}),
+        "retrieved nested object should match pushed value"
+    );
 
     // Push array
     cedarling
@@ -132,7 +136,11 @@ fn test_data_api_push_and_get() {
     assert!(result3.is_some(), "result should not be None");
     let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().0)
         .expect("result should be deserializable to array");
-    assert_eq!(value3, vec![1, 2, 3], "retrieved array should match pushed value");
+    assert_eq!(
+        value3,
+        vec![1, 2, 3],
+        "retrieved array should match pushed value"
+    );
 }
 
 #[test]

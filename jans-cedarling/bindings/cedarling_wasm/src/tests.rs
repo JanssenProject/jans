@@ -214,8 +214,8 @@ async fn test_run_cedarling() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request =
-        serde_wasm_bindgen::to_value(&request).expect("RequestUnsigned should be converted to JsValue");
+    let js_request = serde_wasm_bindgen::to_value(&request)
+        .expect("RequestUnsigned should be converted to JsValue");
 
     let result = instance
         .authorize_unsigned(js_request)
@@ -304,8 +304,8 @@ async fn test_memory_log_interface() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request =
-        serde_wasm_bindgen::to_value(&request).expect("RequestUnsigned should be converted to JsValue");
+    let js_request = serde_wasm_bindgen::to_value(&request)
+        .expect("RequestUnsigned should be converted to JsValue");
 
     let _result = instance
         .authorize_unsigned(js_request)

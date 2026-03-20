@@ -366,10 +366,7 @@ impl EntityBuilder {
         // Build claims map with all JWT claims plus synthetic reserved claims
         // (token_type, validated_at) that are expected by the schema but not present in the JWT
         let mut all_claims = token.claims_value().clone();
-        all_claims.insert(
-            "token_type".to_string(),
-            Value::String(token.name.clone()),
-        );
+        all_claims.insert("token_type".to_string(), Value::String(token.name.clone()));
         all_claims.insert(
             "validated_at".to_string(),
             Value::Number(chrono::Utc::now().timestamp().into()),
