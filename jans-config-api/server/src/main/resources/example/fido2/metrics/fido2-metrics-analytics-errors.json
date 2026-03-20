@@ -1,0 +1,8 @@
+{
+    "errorCategories": {},
+    "failureRate": 0.75,
+    "successRate": 0.25,
+	"completionRate": 0.48,
+	"dropOffRate": 0.52,
+    "topErrors": {}
+}

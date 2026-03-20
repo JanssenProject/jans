@@ -1,0 +1,31 @@
+{
+    "start": 1,
+    "totalEntriesCount": 10,
+    "entriesCount": 2,
+    "entries": [
+        {
+            "dn": "jansId=086088ff-7a03-4e63-94b9-f4ab760edce2,ou=fido2-metrics,o=jans",
+            "id": "086088ff-7a03-4e63-94b9-f4ab760edce2",
+            "timestamp": "2026-02-17T06:26:39",
+            "userId": "e9e63718-7909-49c6-9feb-eeadd0c839b9",
+            "username": "test",
+            "operationType": "AUTHENTICATION",
+            "status": "ATTEMPT",
+            "nodeId": "12-63-57-5A-C8-E1",
+            "baseDn": "jansId=086088ff-7a03-4e63-94b9-f4ab760edce2,ou=fido2-metrics,o=jans"
+        },
+        {
+            "dn": "jansId=9655ee6b-eaf3-43e4-930f-b19478dc0dad,ou=fido2-metrics,o=jans",
+            "id": "9655ee6b-eaf3-43e4-930f-b19478dc0dad",
+            "timestamp": "2026-02-17T06:26:45",
+            "userId": "e9e63718-7909-49c6-9feb-eeadd0c839b9",
+            "username": "test",
+            "operationType": "AUTHENTICATION",
+            "status": "SUCCESS",
+            "durationMs": 109,
+            "authenticatorType": "platform",
+            "nodeId": "12-63-57-5A-C8-E1",
+            "baseDn": "jansId=9655ee6b-eaf3-43e4-930f-b19478dc0dad,ou=fido2-metrics,o=jans"
+        }
+    ]
+}

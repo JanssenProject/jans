@@ -18,12 +18,12 @@ import org.testng.annotations.Parameters;
 
 public class Fido2ResourceTest extends Fido2BaseTest {
 
-    @Parameters({ "test.issuer", "fido2Url" })
+    @Parameters({ "test.issuer", "fido2ConfigUrl" })
     @Test
-    public void getFido2Configuration(final String issuer, final String fido2Url) {
-        log.error("\n\n getFido2Configuration() - accessToken:{}, issuer:{}, fido2Url:{}", accessToken, issuer, fido2Url);
+    public void getFido2Configuration(final String issuer, final String fido2ConfigUrl) {
+        log.error("\n\n getFido2Configuration() - issuer:{}, fido2ConfigUrl:{}", issuer, fido2ConfigUrl);
 
-        Builder request = getResteasyService().getClientBuilder(issuer + fido2Url);
+        Builder request = getResteasyService().getClientBuilder(issuer + fido2ConfigUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
