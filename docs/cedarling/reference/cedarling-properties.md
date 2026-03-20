@@ -78,15 +78,11 @@ These properties are specifically relevant when using `authorize_unsigned` with 
 
 - **`CEDARLING_UNSIGNED_ROLE_ID_SRC`** : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to `"role"`.
 
+- **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity used when creating Role entities for principals. Default value: `Jans::Role`. Not used by `authorize_multi_issuer`.
+
 ## Properties for both methods
 
 These properties apply to both `authorize_multi_issuer` and `authorize_unsigned`.
-
-**Cedar entity mapping:**
-
-- **`CEDARLING_MAPPING_ROLE`** : Name of Cedar Role schema entity. Default value: `Jans::Role`.
-
-**Policy store:**
 
 **Log behavior:**
 
