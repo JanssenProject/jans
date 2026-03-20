@@ -3,88 +3,84 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use cedarling::{
     AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
     EntityBuilderConfig, EntityData, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel,
     LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
-use jsonwebtoken::Algorithm;
 use serde_json::json;
-use std::hint::black_box;
-use std::{collections::HashSet, time::Duration};
+use std::collections::HashSet;
+use std::fs::File;
+
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
+use jsonwebtoken::Algorithm;
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
 use test_utils::token_claims::generate_token_using_claims_and_keypair;
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
 use test_utils::{MockServer, gen_mock_server};
-use tokio::runtime::Runtime;
 
-const POLICY_STORE: &str = include_str!("../../test_files/policy-store-multi-issuer-basic.yaml");
+const POLICY_STORE_RAW: &str =
+    include_str!("../../test_files/policy-store-multi-issuer-basic.yaml");
 
-fn authorize_multi_issuer(c: &mut Criterion) {
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mock1 = gen_mock_server();
     let mock2 = gen_mock_server();
 
-    let runtime = Runtime::new().expect("init tokio runtime");
-
-    let cedarling = runtime
-        .block_on(prepare_cedarling_with_jwt_validation(
-            &mock1.base_idp_url,
-            &mock2.base_idp_url,
-        ))
-        .expect("should initialize Cedarling");
+    let cedarling = init_cedarling_multi_issuer(&mock1.base_idp_url, &mock2.base_idp_url).await?;
 
     let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
 
-    // Validate that the authorization request executes correctly before benchmarking
-    let validation_result = runtime
-        .block_on(cedarling.authorize_multi_issuer(request.clone()))
+    // Validate that the authorization request executes correctly before profiling
+    let validation_result = cedarling
+        .authorize_multi_issuer(request.clone())
+        .await
         .expect("authorization validation should succeed");
     assert!(
         validation_result.decision,
         "authorization validation should return Allow decision"
     );
 
-    c.bench_with_input(
-        BenchmarkId::new("authorize_multi_issuer", "tokio runtime"),
-        &runtime,
-        |b, rt| {
-            b.to_async(rt).iter(|| {
-                let req = black_box(request.clone());
-                async {
-                    let result = cedarling.authorize_multi_issuer(req).await;
-                    match result {
-                        Ok(v) => {
-                            assert!(v.decision, "should be true");
-                        },
-                        Err(e) => {
-                            panic!("{e}, {e:?}")
-                        },
-                    }
-                }
-            });
-        },
-    );
+    // init profiler guard
+    let guard = pprof::ProfilerGuardBuilder::default()
+        .frequency(1000)
+        .blocklist(&["libc", "libgcc", "pthread", "vdso"])
+        .build()
+        .unwrap();
+
+    for _ in 0..1000 {
+        call_authorize_multi_issuer(&cedarling, &request).await;
+    }
+
+    if let Ok(report) = guard.report().build() {
+        println!("report: {:?}", &report);
+
+        // write output flamegraph to an SVG file
+        let file = File::create(format!(
+            "{}/../{}",
+            env!("CARGO_MANIFEST_DIR"),
+            "cedarling_profiling_multi_issuer_flamegraph.svg",
+        ))
+        .unwrap();
+        let mut options = pprof::flamegraph::Options::default();
+        options.image_width = Some(3000);
+        report.flamegraph_with_options(file, &mut options).unwrap();
+    }
+
+    Ok(())
 }
 
-fn measurement_config() -> Criterion {
-    Criterion::default()
-        .measurement_time(Duration::from_secs(5))
-        .warm_up_time(Duration::from_secs(5))
-}
-
-criterion_group! {
-    name = authz_authorize_multi_issuer_benchmark;
-    config = measurement_config();
-    targets = authorize_multi_issuer
-}
-
-criterion_main!(authz_authorize_multi_issuer_benchmark);
-
-async fn prepare_cedarling_with_jwt_validation(
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
+async fn init_cedarling_multi_issuer(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store =
-        serde_yml::from_str::<serde_yml::Value>(POLICY_STORE).expect("a valid YAML policy store");
+    let mut policy_store = serde_yml::from_str::<serde_yml::Value>(POLICY_STORE_RAW)
+        .expect("a valid YAML policy store");
 
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
         format!("{base_idp_url1}/.well-known/openid-configuration").into();
@@ -125,10 +121,8 @@ async fn prepare_cedarling_with_jwt_validation(
     Cedarling::new(&bootstrap_config).await
 }
 
-/// # Panics
-///
-/// Panics if the JSON is not valid.
-pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
+fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
     mock1: &MockServer,
     mock2: &MockServer,
 ) -> AuthorizeMultiIssuerRequest {
@@ -179,4 +173,16 @@ pub fn prepare_cedarling_request_for_multi_issuer_jwt_validation(
         "Acme::Action::\"ReadProfile\"".to_string(),
         None,
     )
+}
+
+#[cfg(not(any(target_arch = "wasm32", target_os = "windows")))]
+async fn call_authorize_multi_issuer(cedarling: &Cedarling, request: &AuthorizeMultiIssuerRequest) {
+    let _result = cedarling.authorize_multi_issuer(request.clone()).await;
+}
+
+/// just define a main function to satisfy the compiler.
+#[cfg(any(target_arch = "wasm32", target_os = "windows"))]
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    unimplemented!("Profiling is not supported on wasm32 or windows.")
 }

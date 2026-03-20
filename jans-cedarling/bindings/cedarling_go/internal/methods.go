@@ -51,11 +51,6 @@ func DropInstance(instance_id uint) {
 	G2R.drop_instance(&instance_id)
 }
 
-func CallAuthorize(instance_id uint, request_json string) Result {
-	result := G2R.authorize(&instance_id, &request_json)
-	return result
-}
-
 func CallAuthorizeUnsigned(instance_id uint, request_json string) Result {
 	result := G2R.authorize_unsigned(&instance_id, &request_json)
 	return result

@@ -160,7 +160,7 @@ cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/re
  mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization using `authorizeUnsigned` with sample principals, resource and context inputs, and call the log interface to print authorization logs on the console. The sample `principals`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
 
 ## Configuration
 
@@ -215,16 +215,14 @@ Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribut
 - Works across all platforms
 - Supports integrity validation via manifest
 
-### ID Token Trust Mode
+### Authorization APIs
 
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+The UniFFI binding exposes two authorization methods:
 
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
+- **`authorizeUnsigned`**: Pass a list of principal entity data, action, resource, and context. Use when you have principal attributes (e.g. from your app or session) and no JWTs.
+- **`authorizeMultiIssuer`**: Pass a list of token inputs (mapping + JWT payload), action, resource, and optional context. Use when you have multiple JWTs from different issuers.
+
+`AuthorizeResult` contains `principals` (per-principal decisions), `decision`, and `requestId` (for log correlation). The legacy token-based `authorize` API has been removed.
 
 ### Testing Configuration
 
@@ -233,8 +231,7 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```json
 {
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled"
 }
 ```
 

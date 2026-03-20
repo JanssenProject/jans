@@ -9,8 +9,6 @@ use cedarling::{self as core, bindings::cedar_policy};
 
 #[derive(Debug, uniffi::Record)]
 pub struct AuthorizeResult {
-    pub workload: Option<Response>,
-    pub person: Option<Response>,
     pub principals: HashMap<String, Response>,
     pub decision: bool,
     pub request_id: String,
@@ -65,8 +63,6 @@ impl From<cedar_policy::Response> for Response {
 impl From<core::AuthorizeResult> for AuthorizeResult {
     fn from(result: core::AuthorizeResult) -> Self {
         AuthorizeResult {
-            workload: result.workload.map(Into::into),
-            person: result.person.map(Into::into),
             principals: result
                 .principals
                 .into_iter()

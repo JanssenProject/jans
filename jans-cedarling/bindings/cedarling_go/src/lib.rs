@@ -144,12 +144,6 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         BINDINGS_RUNTIME.drop_instance(instance_id);
     }
 
-    fn authorize(instance_id: usize, request_json: String) -> Result {
-        let request = from_json_str!(request_json);
-        let instance = get_instance!(instance_id);
-        execute_in_runtime!(instance.authorize(request))
-    }
-
     fn authorize_unsigned(instance_id: usize, request_json: String) -> Result {
         let request = from_json_str!(request_json);
         let instance = get_instance!(instance_id);

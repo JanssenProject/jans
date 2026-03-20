@@ -5,7 +5,7 @@
 
 use super::{
     BuildEntityError, BuildEntityErrorKind, BuiltEntities, Entity, EntityBuilder, HashSet,
-    build_cedar_entity, build_entity_attrs,
+    build_cedar_entity, build_cedar_uid, build_entity_attrs,
 };
 use crate::EntityData;
 
@@ -16,6 +16,14 @@ impl EntityBuilder {
     ) -> Result<Entity, BuildEntityError> {
         let resource_type_name = &resource_data.cedar_mapping.entity_type;
 
+        // Check for default entity first when attributes are empty
+        if resource_data.attributes.is_empty() {
+            let uid = build_cedar_uid(resource_type_name, &resource_data.cedar_mapping.id)?;
+            if let Some(resource_default_entity) = self.default_entities.get(&uid) {
+                return Ok(resource_default_entity.clone());
+            }
+        }
+
         let attrs_shape = self
             .schema
             .as_ref()
@@ -24,22 +32,15 @@ impl EntityBuilder {
             &resource_data.attributes,
             &BuiltEntities::default(),
             attrs_shape,
-            None,
         )
         .map_err(|e| BuildEntityErrorKind::from(e).while_building(resource_type_name))?;
 
-        let mut resource = build_cedar_entity(
+        let resource = build_cedar_entity(
             resource_type_name,
             &resource_data.cedar_mapping.id,
             attrs,
             HashSet::new(),
         )?;
-
-        if let Some(resource_default_entity) = self.default_entities.get(&resource.uid())
-            && resource_data.attributes.is_empty()
-        {
-            resource = resource_default_entity.clone();
-        }
 
         Ok(resource)
     }
@@ -107,20 +108,31 @@ mod test {
             DefaultEntities::default(),
         )
         .expect("should init entity builder");
+        // Provide required attributes but omit the optional "Accept" header
         let resource_data = EntityData {
             cedar_mapping: CedarEntityMapping {
                 entity_type: "Jans::HTTP_Request".to_string(),
                 id: "some_request".to_string(),
             },
-            attributes: HashMap::new(),
+            attributes: HashMap::from([
+                (
+                    "url".to_string(),
+                    json!({"host": "protected.host", "protocol": "http", "path": "/protected"}),
+                ),
+                ("header".to_string(), json!({})),
+            ]),
         };
         let entity = builder
             .build_resource_entity(&resource_data)
             .expect("expected to build resource entity");
 
         assert!(
-            entity.attr("url").is_none(),
-            "entity should not have a `url` attribute"
+            entity.attr("url").is_some(),
+            "entity should have a `url` attribute"
+        );
+        assert!(
+            entity.attr("header").is_some(),
+            "entity should have a `header` attribute"
         );
     }
 }

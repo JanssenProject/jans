@@ -22,10 +22,6 @@ pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
 pub struct EntityBuilderConfig {
     /// The names of the buildable Cedar entity type names
     pub entity_names: EntityNames,
-    /// Toggles building the `Workload` entity
-    pub build_workload: bool,
-    /// Toggles building the `User` entity
-    pub build_user: bool,
     /// The attribute to use when creating Role entities in the unsigned interface
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
 }
@@ -33,10 +29,6 @@ pub struct EntityBuilderConfig {
 /// Raw entity builder config
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EntityBuilderConfigRaw {
-    /// Toggles building the `Workload` entity
-    pub workload_authz: bool,
-    /// Toggles building the `User` entity
-    pub user_authz: bool,
     /// The attribute to use when creating Role entities in the unsigned interface
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
     /// Mapping name of cedar schema User entity
@@ -78,40 +70,8 @@ impl Default for EntityBuilderConfig {
                 workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
                 role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
             },
-            build_workload: true,
-            build_user: true,
             unsigned_role_id_src: UnsignedRoleIdSrc(DEFAULT_UNSIGNED_ROLE_ID_SRC.to_string()),
         }
-    }
-}
-
-impl EntityBuilderConfig {
-    /// Enables building the `Workload` entity
-    #[must_use]
-    pub fn with_workload(mut self) -> Self {
-        self.build_workload = true;
-        self
-    }
-
-    /// Disables building the `Workload` entity
-    #[must_use]
-    pub fn with_no_workload(mut self) -> Self {
-        self.build_workload = false;
-        self
-    }
-
-    /// Enables building the `User` entity
-    #[must_use]
-    pub fn with_user(mut self) -> Self {
-        self.build_user = true;
-        self
-    }
-
-    /// Disables building the `User` entity
-    #[must_use]
-    pub fn with_no_user(mut self) -> Self {
-        self.build_user = false;
-        self
     }
 }
 
@@ -131,8 +91,6 @@ impl From<EntityBuilderConfigRaw> for EntityBuilderConfig {
 
         Self {
             entity_names,
-            build_workload: raw.workload_authz,
-            build_user: raw.user_authz,
             unsigned_role_id_src: raw.unsigned_role_id_src,
         }
     }
@@ -141,8 +99,6 @@ impl From<EntityBuilderConfigRaw> for EntityBuilderConfig {
 impl From<&BootstrapConfigRaw> for EntityBuilderConfig {
     fn from(raw: &BootstrapConfigRaw) -> Self {
         let raw_entity = EntityBuilderConfigRaw {
-            workload_authz: raw.workload_authz.is_enabled(),
-            user_authz: raw.user_authz.is_enabled(),
             unsigned_role_id_src: raw.unsigned_role_id_src.clone(),
             mapping_user: raw.mapping_user.clone(),
             mapping_workload: raw.mapping_workload.clone(),
