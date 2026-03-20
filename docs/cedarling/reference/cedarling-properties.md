@@ -10,7 +10,7 @@ tags:
 
 # Cedarling Properties
 
-These Bootstrap Properties control default application level behavior. Properties are grouped below by which authorization method they apply to, so you can quickly find what you need for your chosen approach.
+These Bootstrap Properties control default application-level behavior. Properties are grouped below by which authorization method they apply to, so you can quickly find what you need for your chosen approach.
 
 Not sure which authorization method to use? See the [decision guide](../quick-start/cedarling-quick-start.md#which-authorization-method-should-i-use).
 

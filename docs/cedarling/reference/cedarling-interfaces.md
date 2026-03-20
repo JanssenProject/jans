@@ -46,6 +46,8 @@ These methods are called to create an authorization request, run authorization, 
     - `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
     - `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
 
+    **Note on field naming:** The Rust struct field is named `cedar_mapping`, but it serializes to `cedar_entity_mapping` in JSON (via `#[serde(rename)]`). When constructing in Rust, use `cedar_mapping`. When passing JSON (via `from_json`) or a Python dict (via `from_dict`), use `cedar_entity_mapping` as the key.
+
 - `RequestUnsigned(principals, action, resource, context)`
 
     Creates a `RequestUnsigned` object which contains inputs for Cedarling's unsigned authorization call.

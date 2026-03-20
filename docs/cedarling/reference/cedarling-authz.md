@@ -189,9 +189,9 @@ permit(
   action == Acme::Action::"SwimWithDolphin",
   resource == Acme::Resource::"MiamiAcquarium"
 ) when {
-  context has tokens.dolphin_acme_dolphin_token &&
-  context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
-  context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed")
+  context has tokens.dolphin_dolphintoken &&
+  context.tokens.dolphin_dolphintoken.hasTag("waiver") &&
+  context.tokens.dolphin_dolphintoken.getTag("waiver").contains("signed")
 };
 ```
 
@@ -407,7 +407,7 @@ let context = {
 The `authorize_unsigned` method allows making authorization decisions without JWT token verification. Use this when:
 
 - Your application has already verified the principals through other means
-- You need to make authorization decisions for non-token based scenarios
+- You need to make authorization decisions for non-token-based scenarios
 - You're implementing custom authentication flows
 - You're testing or prototyping without an IDP
 

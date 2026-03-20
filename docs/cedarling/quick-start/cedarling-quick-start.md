@@ -256,7 +256,7 @@ To test the negative case, we will do the following:
 In this section, we will see how to implement role-based access control
 using the Cedarling when
 the information about the principal is supplied by the host application. We can
-call this approach [the application asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity).
+call this approach [the application-asserted identity approach](../README.md#token-based-access-control-tbac-v-application-asserted-identity).
 
 This method uses `authorize_unsigned` — no JWT validation is performed. Use this when your application has already authenticated the principal through other means, or for testing and prototyping.
 
