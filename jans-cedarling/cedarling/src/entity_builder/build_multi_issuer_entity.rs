@@ -363,26 +363,36 @@ impl EntityBuilder {
             .as_ref()
             .and_then(|schema| schema.get_entity_shape(&entity_type));
 
-        // Filter out reserved claims before building attributes
-        // iss, jti, exp are handled separately (iss as entity reference, jti as entity ID, exp as timestamp)
-        let filtered_claims = filter_reserved_claims(token.claims_value());
+        // Build claims map with all JWT claims plus synthetic reserved claims
+        // (token_type, validated_at) that are expected by the schema but not present in the JWT
+        let mut all_claims = token.claims_value().clone();
+        all_claims.insert(
+            "token_type".to_string(),
+            Value::String(token.name.clone()),
+        );
+        all_claims.insert(
+            "validated_at".to_string(),
+            Value::Number(chrono::Utc::now().timestamp().into()),
+        );
 
         // Build entity attributes using the same logic as regular entity builder
         // This handles schema-based processing, claim mappings, and entity references
         let mut attrs = super::build_entity_attrs::build_entity_attrs(
-            &filtered_claims,
+            &all_claims,
             built_entities,
             attrs_shape,
         )?;
 
-        // Add reserved claims to attributes
+        // Overwrite reserved claims with correctly-typed values
+        // (e.g. iss as entity UID in no-schema case, jti as entity_id, etc.)
         add_reserved_claims(&mut attrs, token, &entity_id, attrs_shape)?;
 
         // Create entity tags for non-reserved JWT claims
+        let filtered_claims = filter_reserved_claims(token.claims_value());
         let mut tags = HashMap::new();
-        for (claim_key, claim_value) in filtered_claims {
-            let value = convert_claim_to_string_set(&claim_value);
-            tags.insert(claim_key, value);
+        for (claim_key, claim_value) in &filtered_claims {
+            let value = convert_claim_to_string_set(claim_value);
+            tags.insert(claim_key.clone(), value);
         }
 
         // Create the Cedar entity using the existing build_cedar_entity function
@@ -753,7 +763,8 @@ mod tests {
                     aud: String,
                     custom_claim: Long
                 };
-                entity TrustedIssuer = {"issuer_entity_id": String};
+                type Url = {"host": String, "path": String, "protocol": String};
+                entity TrustedIssuer = {"issuer_entity_id": Url};
             }
         "#;
 
@@ -933,7 +944,8 @@ mod tests {
                     sub: String,
                     scope: Set<String>
                 };
-                entity TrustedIssuer = {"issuer_entity_id": String};
+                type Url = {"host": String, "path": String, "protocol": String};
+                entity TrustedIssuer = {"issuer_entity_id": Url};
             }
         "#;
 

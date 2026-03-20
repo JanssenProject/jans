@@ -23,11 +23,7 @@ pub(super) fn build_entity_attrs(
     attrs_shape: Option<&HashMap<SmolStr, AttrsShape>>,
 ) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     if let Some(attrs_shape) = attrs_shape {
-        Ok(build_entity_attrs_with_shape(
-            attrs_src,
-            entities,
-            attrs_shape,
-        ))
+        build_entity_attrs_with_shape(attrs_src, entities, attrs_shape)
     } else {
         build_entity_attrs_without_schema(attrs_src)
     }
@@ -38,15 +34,15 @@ fn build_entity_attrs_with_shape(
     attrs_src: &HashMap<String, Value>,
     entities: &BuiltEntities,
     attrs_shape: &HashMap<SmolStr, AttrsShape>,
-) -> HashMap<String, RestrictedExpression> {
+) -> Result<HashMap<String, RestrictedExpression>, BuildAttrsErrorVec> {
     let mut errs = Vec::new();
     let mut attrs = HashMap::new();
+    let mut required_missing_claims: Vec<SmolStr> = Vec::new();
+    let mut missing_entity_ref_sets: Vec<SmolStr> = Vec::new();
 
     for (attr_name, attr_shape) in attrs_shape {
         match attr_shape.src() {
             AttrSrc::JwtClaim(claim_src) => {
-                let mut required_missing_claims: Vec<SmolStr> = Vec::new();
-
                 // skip if the source couldn't be found and was not required
                 let Some(src) = attrs_src.get(attr_name.as_str()) else {
                     if attr_shape.is_required() {
@@ -56,16 +52,11 @@ fn build_entity_attrs_with_shape(
                     continue;
                 };
 
-                if !required_missing_claims.is_empty() {
-                    errs.push(BuildAttrsError::MissingClaims(required_missing_claims));
-                    continue;
-                }
-
                 match claim_src.build_expr(src) {
                     Ok(Some(expr)) => {
                         attrs.insert(attr_name.to_string(), expr);
                     },
-                    Err(e) => {
+                    Err(e) if attr_shape.is_required() => {
                         errs.push(BuildAttrsError::from(e));
                     },
                     _ => {},
@@ -110,19 +101,12 @@ fn build_entity_attrs_with_shape(
                 }
             },
             AttrSrc::EntityRefSet(entity_ref_set_src) => {
-                let mut missing_refs: Vec<SmolStr> = Vec::new();
-
                 let Some(eids) = entities.get_multiple(entity_ref_set_src) else {
                     if attr_shape.is_required() {
-                        missing_refs.push((*entity_ref_set_src).clone());
+                        missing_entity_ref_sets.push((*entity_ref_set_src).clone());
                     }
                     continue;
                 };
-
-                if !missing_refs.is_empty() {
-                    errs.push(BuildAttrsError::MissingEntityRefs(missing_refs));
-                    continue;
-                }
 
                 match entity_ref_set_src.build_expr(eids) {
                     Ok(src) => {
@@ -136,7 +120,17 @@ fn build_entity_attrs_with_shape(
         }
     }
 
-    attrs
+    if !required_missing_claims.is_empty() {
+        errs.push(BuildAttrsError::MissingClaims(required_missing_claims));
+    }
+    if !missing_entity_ref_sets.is_empty() {
+        errs.push(BuildAttrsError::MissingEntityRefs(missing_entity_ref_sets));
+    }
+
+    if !errs.is_empty() {
+        return Err(BuildAttrsErrorVec(errs));
+    }
+    Ok(attrs)
 }
 
 /// Will do it's best to create the entity without a schema
