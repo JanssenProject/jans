@@ -16,7 +16,7 @@
     "@types/react-dom": "^19.2.3",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^11.0.0",
-    "css-loader": "^6.7.1",
+    "css-loader": "^7.1.4",
     "html-webpack-plugin": "^5.5.0",
     "postcss-loader": "^8.2.1",
     "react": "^19.2.4",
