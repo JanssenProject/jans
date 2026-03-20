@@ -36,13 +36,15 @@ These methods are used to create a `BootstrapConfig` object, which is needed to 
 
 These methods are called to create an authorization request, run authorization, and get decisions back.
 
-- `Entity(entity_type, id, payload)`
+- `EntityData(cedar_mapping, attributes)`
 
-    Creates a `Principal` or a `Resource` entity.
+    Creates a principal or resource entity.
 
-    - `from_dict(value)`
+    - `cedar_mapping`: A `CedarEntityMapping` object with `entity_type` (Cedar type name) and `id` (entity ID).
+    - `attributes`: A map of attribute names to values.
 
-        Creates a `Principal` or a `Resource` entity from a dictionary.
+    - `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
+    - `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
 
 - `RequestUnsigned(principals, action, resource, context)`
 
@@ -78,36 +80,24 @@ The following methods are called on the result obtained from the authorization c
 
 #### AuthorizeResult (for `authorize_unsigned`)
 
-- `is_allowed()`
+- `decision`
 
-    Returns `true` only if the overall decision of the Cedarling is `true`.
+    A boolean field representing the overall authorization decision (`true` = allow, `false` = deny). The decision is computed by applying the `principal_bool_operator` across all principal results.
 
 - `principals`
 
-    A map of principal entity IDs to their authorization decisions. Each entry contains:
-    
-    - `decision`: Whether this principal was allowed or denied
-    - `diagnostics`: Detailed information about the decision
+    A map of principal type names and entity UIDs to their Cedar `Response` objects. Each response provides:
 
-- `request_id()`
+    - `decision()`: Whether this principal was allowed or denied
+    - `diagnostics()`: Detailed information including `reason()` (set of policy IDs) and `errors()` (list of evaluation errors)
 
-    Returns the request ID of this authorization call. This is used to retrieve logs if the Cedarling is running in memory log mode.
+- `request_id`
 
-- `decision`
+    The request ID for this authorization call, used for log retrieval when running in memory log mode.
 
-    This field represents the decision of this authorization call (allow/deny)
+- `cedar_decision()`
 
-- `diagnostics`
-
-    This field contains additional information regarding the decision reached by Cedarling.
-
-    - `reason`
-
-      This field is a set of policy IDs used to reach an `allow` decision, if they exist
-
-    - `errors`
-
-      This field contains a list of errors during authorization, if they exist.
+    Returns the Cedar `Decision` enum (`Allow` or `Deny`) based on the `decision` field.
 
 #### MultiIssuerAuthorizeResult (for `authorize_multi_issuer`)
 
