@@ -71,7 +71,7 @@ Given the following `authorize_unsigned` request with a User principal:
   "principals": [
     {
       "cedar_mapping": {
-        "entity_type": "Jans::User",
+        "entity_type": "MyApp::User",
         "id": "some_sub"
       },
       "attributes": {
@@ -81,10 +81,10 @@ Given the following `authorize_unsigned` request with a User principal:
       }
     }
   ],
-  "action": "Jans::Action::\"Read\"",
+  "action": "MyApp::Action::\"Read\"",
   "resource": {
     "cedar_mapping": {
-      "entity_type": "Jans::Application",
+      "entity_type": "MyApp::Application",
       "id": "app_1"
     },
     "attributes": {
@@ -100,14 +100,24 @@ Given the following `authorize_unsigned` request with a User principal:
 and Cedar schema:
 
 ```cedarschema
+// Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
   type email_address = {
     domain: String,
     uid: String
   };
+};
+
+// MyApp namespace: your business entities.
+namespace MyApp {
   entity Role;
   entity User in [Role] = {
-    email?: email_address,
+    email?: Jans::email_address,
     phone_number?: String,
     role: Set<String>,
     sub: String,
@@ -122,15 +132,15 @@ Cedarling builds the following entities:
 
 ```json
 {
-  "uid": {"type": "Jans::User", "id": "some_sub"},
+  "uid": {"type": "MyApp::User", "id": "some_sub"},
   "attrs": {
     "sub": "some_sub",
     "email": {"domain": "email.com", "uid": "bob"},
     "role": ["Admin", "Editor"]
   },
   "parents": [
-    {"type": "Jans::Role", "id": "Admin"},
-    {"type": "Jans::Role", "id": "Editor"}
+    {"type": "MyApp::Role", "id": "Admin"},
+    {"type": "MyApp::Role", "id": "Editor"}
   ]
 }
 ```
@@ -139,8 +149,8 @@ Cedarling builds the following entities:
 
 ```json
 [
-  {"uid": {"type": "Jans::Role", "id": "Admin"}, "attrs": {}, "parents": []},
-  {"uid": {"type": "Jans::Role", "id": "Editor"}, "attrs": {}, "parents": []}
+  {"uid": {"type": "MyApp::Role", "id": "Admin"}, "attrs": {}, "parents": []},
+  {"uid": {"type": "MyApp::Role", "id": "Editor"}, "attrs": {}, "parents": []}
 ]
 ```
 
@@ -151,7 +161,7 @@ Cedarling builds the following entities:
   "principals": [
     {
       "cedar_mapping": {
-        "entity_type": "Jans::Workload",
+        "entity_type": "MyApp::Workload",
         "id": "my_client"
       },
       "attributes": {
@@ -160,7 +170,7 @@ Cedarling builds the following entities:
       }
     }
   ],
-  "action": "Jans::Action::\"Read\"",
+  "action": "MyApp::Action::\"Read\"",
   "resource": { "..." : "..." },
   "context": {}
 }
@@ -170,7 +180,7 @@ Cedarling builds:
 
 ```json
 {
-  "uid": {"type": "Jans::Workload", "id": "my_client"},
+  "uid": {"type": "MyApp::Workload", "id": "my_client"},
   "attrs": {
     "client_id": "my_client",
     "name": "Backend Service"
@@ -183,7 +193,7 @@ Cedarling builds:
 
 Cedarling automatically creates **Role** entities when building principals in the `authorize_unsigned` interface.
 
-- **Type Name:** Configurable via `mapping_role` bootstrap property (defaults to `Jans::Role`).
+- **Type Name:** Configurable via `mapping_role` bootstrap property. Must match the Role entity type in your Cedar schema.
 - **Entity ID:** Extracted from the attribute configured in `unsigned_role_id_src` (defaults to `role`). The value can be a single string or an array of strings, each becoming a separate Role entity.
 - **Relationship:** Role entities are added as **parents** of the principal entity, enabling RBAC policies.
 
@@ -193,8 +203,8 @@ Since Role entities are automatically assigned as parents of principals, you can
 
 ```cedar
 permit (
-   principal == Jans::Role::"Admin",
-   action in [Jans::Action::"Compare", Jans::Action::"Execute"],
+   principal == MyApp::Role::"Admin",
+   action in [MyApp::Action::"Compare", MyApp::Action::"Execute"],
    resource
 );
 ```

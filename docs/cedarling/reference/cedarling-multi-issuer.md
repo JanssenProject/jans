@@ -514,11 +514,25 @@ Multi-issuer authorization creates token entities dynamically and places them in
 Token entities must have these required attributes:
 
 ```cedar
-namespace Jans{
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity Access_token = {
     token_type?: String,        // Required for multi-issuer
     jti?: String,               // Required for multi-issuer
-    iss?: Jans::TrustedIssuer,  // Required for multi-issuer
+    iss?: TrustedIssuer,        // Required for multi-issuer
     exp?: Long,                 // Required for multi-issuer
     validated_at?: Long,        // Required for multi-issuer
     // Other JWT claims as optional attributes
@@ -526,12 +540,8 @@ namespace Jans{
     iat?: Long,
     scope?: Set<String>,
     // ...
-  } tags Set<String>;         // Required for dynamic JWT claims
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+  } tags Set<String>;           // Required for dynamic JWT claims
+};
 ```
 
 **2. Context Structure**
@@ -617,13 +627,31 @@ Configure trusted issuers with the `name` field for predictable token naming:
 Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:
 
 ```cedar
+// Jans namespace: shared infrastructure types used across namespaces.
 namespace Jans {
-  // Core token entity structure compatible with both standard and multi-issuer authorization
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  // Core token entity structure compatible with multi-issuer authorization
   entity Access_token = {
     // Required multi-issuer attributes
-    token_type?: String,        // Entity type name (e.g., "Jans::Access_Token")
+    token_type?: String,        // Entity type name (e.g., "Acme::Access_token")
     jti?: String,               // JWT ID - unique token identifier
-    iss?: TrustedIssuer,        // Issuer entity reference (for standard authz)
+    iss?: TrustedIssuer,        // Issuer entity reference
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Timestamp when token was validated
 
@@ -648,7 +676,7 @@ namespace Jans {
     aud?: Set<String>,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     phone_number?: String,
     role?: Set<String>,
@@ -669,18 +697,14 @@ namespace Jans {
     aud?: String,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     birthdate?: String,
     phone_number?: String,
     role?: Set<String>,
     // Add other JWT claims as needed
   } tags Set<String>;
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 
 ```
 
@@ -689,12 +713,26 @@ namespace Jans {
 For custom token types, follow the same pattern:
 
 ```cedar
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Custom namespace: custom service token entities.
 namespace Custom {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity ServiceToken = {
     // Required multi-issuer attributes
     token_type?: String,
     jti?: String,
-    iss?: Custom::TrustedIssuer,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -703,11 +741,7 @@ namespace Custom {
     permissions?: Set<String>,
     service_tier?: String,
   } tags Set<String>;
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 ```
 
 #### Complete Context Schema

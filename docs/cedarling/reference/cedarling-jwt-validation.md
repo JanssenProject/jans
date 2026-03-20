@@ -152,21 +152,25 @@ For example, if the `name` claim is not always present in access tokens:
 
 ```cedarschema
 // Correct: name is optional
-entity Access_token = {
+namespace Acme {
+  entity Access_token = {
     jti?: String,
     iss?: TrustedIssuer,
     exp?: Long,
     name?: String,
+  };
 };
 ```
 
 ```cedarschema
 // Wrong: name is required but may be missing from JWT
-entity Access_token = {
+namespace Acme {
+  entity Access_token = {
     jti?: String,
     iss?: TrustedIssuer,
     exp?: Long,
     name: String,
+  };
 };
 ```
 
