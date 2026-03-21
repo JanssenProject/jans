@@ -215,6 +215,41 @@ Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribut
 - Works across all platforms
 - Supports integrity validation via manifest
 
+### Initializing Cedarling (UniFFI)
+
+Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`) so these constructors match your checkout. Exact method names and argument labels are in the generated `cedarling_uniffi.kt` / `cedarling_uniffi.swift`; the table below is a rough map from the Rust API:
+
+| Rust constructor | Kotlin (typical) | Swift (typical) |
+| --- | --- | --- |
+| `load_from_json` | `Cedarling.loadFromJson(...)` | `Cedarling.loadFromJson(config:)` |
+| `load_from_file` | `Cedarling.loadFromFile(...)` | `Cedarling.loadFromFile(path:)` |
+| `load_from_json_with_archive_bytes` | `Cedarling.loadFromJsonWithArchiveBytes(...)` | `Cedarling.loadFromJsonWithArchiveBytes(config:archiveBytes:)` |
+
+- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL`), same as core Cedarling bootstrap rules.
+- **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
+- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+
+**Kotlin (Android assets):**
+
+```kotlin
+val bootstrapJson =
+    assets.open("bootstrap.json").bufferedReader().use { it.readText() }
+val archiveBytes = assets.open("policy-store.cjar").readBytes()
+val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, archiveBytes)
+```
+
+**Swift (bundle resources):**
+
+```swift
+let bootstrapUrl = Bundle.main.url(forResource: "bootstrap", withExtension: "json")!
+let cjarUrl = Bundle.main.url(forResource: "policy-store", withExtension: "cjar")!
+let bootstrapJson = try String(contentsOf: bootstrapUrl)
+let archiveBytes = try Data(contentsOf: cjarUrl)
+let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
+    config: bootstrapJson,
+    archiveBytes: archiveBytes
+)
+```
 ### Authorization APIs
 
 The UniFFI binding exposes two authorization methods:
