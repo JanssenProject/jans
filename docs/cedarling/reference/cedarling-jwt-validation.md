@@ -18,6 +18,7 @@ Learn more about each part of the validation process:
 
 - [Signature Validation](#jwt-signature-validation): Verifies the token's origin using trusted issuer keys.
 - [Content Validation](#jwt-content-validation): Ensures required claims like `exp` or `client_id` are present.
+- [Schema and Claims Compatibility](#schema-and-claims-compatibility): How Cedar schema must match JWT payload structure.
 - [JWT Status Validation](#jwt-status-validation): Checks if a token has been explicitly revoked.
 - [Local JWKS](#local-jwks): Using local key stores for testing.
 
@@ -105,14 +106,7 @@ Cedarling also supports validating the contents of a JWT by enforcing the presen
 
 ### Required Claims
 
-If timestamps are provided in the context, Cedarling always verifies:
-
-- `exp` (expiration)
-- `nbf` (not before)
-
-### Custom Required Claims
-
-You can specify additional required claims in your token metadata configuration:
+You can specify required claims in your token metadata configuration. If `exp` or `nbf` are included in `required_claims`, Cedarling will validate them according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (checking expiration and not-before timestamps against the current time).
 
 ```json
 {
@@ -133,7 +127,67 @@ You can specify additional required claims in your token metadata configuration:
 }
 ```
 
-The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Additionally, *registered claims* like the `exp` will also be validated according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) standards.
+The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Registered claims like `exp` and `nbf` will also be validated according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) standards (e.g., checking that the token is not expired).
+
+## Schema and Claims Compatibility
+
+When building token entities, Cedarling maps JWT claims to Cedar entity attributes based on the Cedar schema. The schema must be compatible with the JWT payload structure, otherwise entity creation will fail.
+
+### Behavior Rules
+
+| Scenario | Behavior |
+| --- | --- |
+| Required schema attribute missing from JWT | **Error**: entity creation fails with `MissingClaims` |
+| Optional schema attribute missing from JWT | Silently skipped, attribute is not added |
+| JWT claim present but not defined in schema | Ignored as attribute; added as entity tag in multi-issuer flow |
+| Type mismatch on required attribute | **Error**: entity creation fails with `TypeMismatchError` |
+| Type mismatch on optional attribute | Silently skipped |
+| No schema defined for entity type | All JWT claims are added as attributes |
+
+### Optionality
+
+If a JWT claim may or may not be present in the token payload, the corresponding Cedar schema attribute **must** be marked as optional (with `?`). Otherwise, Cedarling will return an error when the claim is absent.
+
+For example, if the `name` claim is not always present in access tokens:
+
+```cedarschema
+// Correct: name is optional
+namespace Acme {
+  entity Access_token = {
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    name?: String,
+  };
+};
+```
+
+```cedarschema
+// Wrong: name is required but may be missing from JWT
+namespace Acme {
+  entity Access_token = {
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    name: String,
+  };
+};
+```
+
+### Type Matching
+
+Cedar schema types must match the JWT claim value types:
+
+| Cedar Type | Expected JWT Value |
+| --- | --- |
+| `String` | JSON string |
+| `Long` | JSON number |
+| `Bool` | JSON boolean |
+| `Set<T>` | JSON array of `T` |
+| Record (`{ field: Type }`) | JSON object |
+| Entity reference | Resolved from built entities |
+
+A type mismatch on a **required** attribute causes an error. A type mismatch on an **optional** attribute causes the attribute to be silently skipped.
 
 ## JWT Status Validation
 
@@ -147,7 +201,7 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 
 ## JWT Validation Flow Diagram
 
-JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
+JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
 
 ![Cedarling JWT validation flow diagram showing token verification process](../../assets/lock-cedarling-diagram-4.jpg)
 

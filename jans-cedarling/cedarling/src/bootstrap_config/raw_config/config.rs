@@ -47,10 +47,6 @@ pub struct BootstrapConfigRaw {
     )]
     pub policy_store_uri: Option<String>,
 
-    /// An identifier for the policy store.
-    #[serde(rename = "CEDARLING_POLICY_STORE_ID", default)]
-    pub policy_store_id: String,
-
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
     pub log_type: LoggerType,
@@ -111,10 +107,17 @@ pub struct BootstrapConfigRaw {
     )]
     pub decision_log_default_jwt_id: String,
 
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
-    /// making authz (authorization) decisions.
+    /// Specifies what boolean operation to use when combining per-principal
+    /// authorization decisions in `authorize_unsigned`.
+    ///
+    /// This setting only applies to [`authorize_unsigned`] — the
+    /// `authorize_multi_issuer` method does not use principals and ignores
+    /// this configuration entirely.
     ///
     /// Use [JsonLogic](https://jsonlogic.com/).
+    /// Variable names must match the full Cedar principal type identifier
+    /// (`<Namespace>::<EntityType>`) used in your schema. Values are compared
+    /// against the strings `"ALLOW"` or `"DENY"`.
     ///
     /// Default value:
     /// ```json
@@ -129,26 +132,11 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
-    /// Mapping name of cedar schema `TrustedIssuer` entity
-    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_iss: Option<String>,
-
-    /// Mapping name of cedar schema User entity
-    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_user: Option<String>,
-
-    /// Mapping name of cedar schema Workload entity.
-    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_workload: Option<String>,
-
     /// Mapping name of cedar schema Role entity.
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
 
-    /// Mapping name of cedar schema Role entity.
+    /// Source attribute for unsigned role entity ID.
     #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
@@ -189,7 +177,8 @@ pub struct BootstrapConfigRaw {
 
     /// Whether to check the signature of all JWT tokens.
     ///
-    /// This requires that an `iss` (Issuer) claim is present on each token.
+    /// When enabled, this requires the `iss` (Issuer) claim to be present in
+    /// all tokens and the issuer URL must use the `https` scheme.
     #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
@@ -291,8 +280,8 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_log_max_retries: u32,
 
-    /// Allows to limit maximum token cache TTL in seconds.
-    /// Zero means no token cache TTL limit.
+    /// Maximum token cache TTL in seconds.
+    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
@@ -335,7 +324,9 @@ pub struct BootstrapConfigRaw {
     pub data_store_default_ttl: Option<u64>,
 
     /// Maximum allowed TTL for data entries in seconds.
-    /// Default: 3600 (1 hour). If not set, no upper limit (10 years max).
+    /// Default: 3600 (1 hour). Entries with TTL exceeding this value will be rejected.
+    /// Note: `0` means a zero-second max TTL (immediate expiry), not unlimited.
+    /// Omitting this property uses the default (1 hour).
     #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub data_store_max_ttl: Option<u64>,
@@ -485,10 +476,6 @@ mod tests {
             assert_eq!(
                 config.policy_store_uri, None,
                 "Policy store URI should be None by default"
-            );
-            assert_eq!(
-                config.policy_store_id, "",
-                "Policy store ID should be empty by default"
             );
             assert_eq!(
                 config.log_type,

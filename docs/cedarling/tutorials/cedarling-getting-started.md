@@ -151,13 +151,14 @@ The authorization, or `authz`, interface is used to evaluate access control deci
 
 When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](../reference/cedarling-policy-store.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
 
-Cedarling currently provides two modes of authorization:
+Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](../quick-start/cedarling-quick-start.md#which-authorization-method-should-i-use).
 
-**Multi-Issuer Authorization (Token-based)**
+**Multi-Issuer Authorization (Token-based) — Recommended**
 
 - Uses `authorize_multi_issuer` to process JWT tokens from multiple issuers.
 - Token data is mapped to Cedar entities based on `token_metadata` configuration in the policy store.
 - Authorization decisions are made based on context values derived from token payloads.
+- **Recommended for most production deployments** where you have JWT tokens from trusted identity providers.
 
 [More information](../reference/cedarling-multi-issuer.md)
 
@@ -166,6 +167,8 @@ Cedarling currently provides two modes of authorization:
 - Uses `authorize_unsigned` to accept **Principals** directly without requiring JWTs.
 - This makes authorization decisions by passing a set of **Principals** directly.
 - The **Context** is passed in as-is in a map-like structure.
+- When using multiple principals, configure [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](../reference/cedarling-principal-boolean-operations.md) to control how per-principal decisions are combined.
+- Use when your application has already authenticated the principal, for testing, or for service-to-service calls with upstream verification.
 
 See the language-specific tutorials for detailed examples of both authorization methods:
 
@@ -365,8 +368,7 @@ Cedarling supports logging of both **decision** and **system** events, useful fo
 
 You're now ready to dive deeper into Cedarling. From here, you could either:
 
-- See how you can use [RBAC with Cedarling using signed tokens](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac).
-- Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-cedarling).
+- See how you can use [RBAC with Cedarling using signed tokens (TBAC)](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) — the recommended starting point.
+- Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity) for custom auth flows or testing.
 - Use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](../README.md#why-zero-trust-needs-cedarlings) and the problems it solves.
- RBAC using signed tokens (TBAC)

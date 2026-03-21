@@ -199,8 +199,6 @@ impl Authz {
             &DecisionLogMetadata {
                 action: request.action.clone(),
                 resource: resource_uid.to_string(),
-                user_claims: None,     // No user claims for multi-issuer
-                workload_claims: None, // No workload claims for multi-issuer
                 decision_diagnostics: &multi_diagnostics,
                 decision_time: decision_time_micro_sec,
                 principal: DecisionLogEntry::principal(
@@ -352,8 +350,6 @@ impl Authz {
                 decision_time: decision_time_micro_sec,
                 decision_diagnostics: &diagnostics,
                 principal: DecisionLogEntry::all_principals(&principal_uids),
-                user_claims: None,
-                workload_claims: None,
                 pushed_data: pushed_data_info,
             },
         );
@@ -453,8 +449,6 @@ impl Authz {
             policystore_id: self.config.policy_store.id.as_str().into(),
             policystore_version: self.config.policy_store.get_store_version().into(),
             principal: metadata.principal.clone(),
-            user: metadata.user_claims.clone(),
-            workload: metadata.workload_claims.clone(),
             lock_client_id: None,
             action: metadata.action.clone(),
             resource: metadata.resource.clone(),
@@ -546,8 +540,6 @@ struct DecisionLogMetadata<'a> {
     resource: String,
     principal: Vec<smol_str::SmolStr>,
     tokens_logging_info: LogTokensInfo,
-    user_claims: Option<HashMap<String, serde_json::Value>>,
-    workload_claims: Option<HashMap<String, serde_json::Value>>,
     decision_diagnostics: &'a [Diagnostics],
     decision_time: i64,
     decision: bool,

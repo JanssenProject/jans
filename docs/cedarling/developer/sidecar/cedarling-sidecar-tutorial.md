@@ -127,7 +127,6 @@ To begin using Cedarling, you need to set up a policy store. We'll use this [Aga
 Create a file named `bootstrap.json`. You may use the [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file.
 
 - Set `CEDARLING_POLICY_STORE_URI` to the URL you copied from Agama Lab.
-- Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
 
 Pull the Docker image:
 
