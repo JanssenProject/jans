@@ -142,7 +142,7 @@ this.
 
     Then host the `.cjar` file (e.g., as a GitHub release asset, on a web server, or in cloud storage) and use its URL in the next step. For example:
 
-    ```
+    ```text
     https://github.com/<your-username>/CedarlingQuickstart/releases/download/v1/tarpDemo.cjar
     ```
 
