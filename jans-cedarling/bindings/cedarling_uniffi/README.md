@@ -250,6 +250,7 @@ let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
     archiveBytes: archiveBytes
 )
 ```
+
 ### Authorization APIs
 
 The UniFFI binding exposes two authorization methods:
