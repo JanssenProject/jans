@@ -121,9 +121,6 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $configmapSchema "auth_sig_keys" (index .Values "global" "auth-server" "authSigKeys") }}
 {{- $_ := set $configmapSchema "auth_enc_keys" (index .Values "global" "auth-server" "authEncKeys") }}
 {{- $_ := set $configmapSchema "optional_scopes" (include "config.optionalScopes" . | trim) }}
-{{- if .Values.global.saml.enabled }}
-{{- $_ := set $configmapSchema "kc_admin_username" .Values.configmap.kcAdminUsername }}
-{{- end }}
 {{- $_ := set $configmapSchema "init_keys_exp" (index .Values "global" "auth-server-key-rotation" "initKeysLife") }}
 
 {{- $secretSchema := dict }}
@@ -146,10 +143,6 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $secretSchema "aws_credentials" (include "config.aws-shared-credentials" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_config" (include "config.aws-config" . | b64enc) }}
 {{- $_ := set $secretSchema "aws_replica_regions" (toJson .Values.configmap.cnAwsSecretsReplicaRegions | b64enc) }}
-{{- end }}
-{{- if .Values.global.saml.enabled }}
-{{- $_ := set $secretSchema "kc_db_password" .Values.configmap.kcDbPassword }}
-{{- $_ := set $secretSchema "kc_admin_password" .Values.configmap.kcAdminPassword }}
 {{- end }}
 {{- $_ := set $secretSchema "encoded_salt" .Values.salt }}
 

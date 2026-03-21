@@ -247,15 +247,6 @@
             "description": "Parameters used globally across all services helm charts.",
             "type": "object",
             "properties": {
-                "alb": {
-                    "type": "object",
-                    "properties": {
-                        "ingress": {
-                            "description": "Activates ALB ingress",
-                            "type": "boolean"
-                        }
-                    }
-                },
                 "auth-server": {
                     "type": "object",
                     "properties": {
@@ -421,22 +412,6 @@
                                     "description": "webfinger ingress resource additional annotations.",
                                     "type": "object"
                                 },
-                                "webdiscoveryLabels": {
-                                    "description": "webdiscovery ingress resource labels. key app is taken",
-                                    "type": "object"
-                                },
-                                "webdiscoveryAdditionalAnnotations": {
-                                    "description": "webfinger ingress resource additional annotations.",
-                                    "type": "object"
-                                },
-                                "u2fConfigLabels": {
-                                    "description": "u2f ingress resource labels. key app is taken",
-                                    "type": "object"
-                                },
-                                "u2fAdditionalAnnotations": {
-                                    "description": "u2f config ingress resource additional annotations.",
-                                    "type": "object"
-                                },
                                 "authzenConfigLabels": {
                                     "description": "authzen config ingress resource labels. key app is taken",
                                     "type": "object"
@@ -477,20 +452,12 @@
                                     "description": "Enable endpoint /.well-known/webfinger",
                                     "type": "boolean"
                                 },
-                                "webdiscoveryEnabled": {
-                                    "description": "Enable endpoint /.well-known/simple-web-discovery",
-                                    "type": "boolean"
-                                },
-                                "u2fConfigEnabled": {
-                                    "description": "Enable endpoint /.well-known/fido-configuration",
-                                    "type": "boolean"
-                                },
                                 "lockConfigEnabled": {
                                     "description": "Enable endpoint /.well-known/lock-server-configuration",
                                     "type": "boolean"
                                 },
-                                "lockEnabled": {
-                                    "description": "Enable endpoint /jans-lock",
+                                "lockAuditEnabled": {
+                                    "description": "Enable endpoint /io.jans.lock.audit.AuditService",
                                     "type": "boolean"
                                 },
                                 "authzenConfigEnabled": {
@@ -1095,67 +1062,6 @@
                         }
                     }
                 },
-                "saml": {
-                    "type": "object",
-                    "properties": {
-                        "customAnnotations": {
-                            "type": "object",
-                            "properties": {
-                                "destinationRule": {
-                                    "type": "object"
-                                },
-                                "podDisruptionBudget": {
-                                    "type": "object"
-                                },
-                                "virtualService": {
-                                    "type": "object"
-                                },
-                                "pod": {
-                                    "type": "object"
-                                },
-                                "deployment": {
-                                    "type": "object"
-                                },
-                                "horizontalPodAutoscaler": {
-                                    "type": "object"
-                                },
-                                "service": {
-                                    "type": "object"
-                                },
-                                "secret": {
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "samlServiceName": {
-                            "description": "Name of the saml service. Please keep it as default.",
-                            "type": "string",
-                            "pattern": "^[a-z0-9-]+$"
-                        },
-                        "enabled": {
-                            "description": "Boolean flag to enable/disable the saml chart.",
-                            "type": "boolean"
-                        },
-                        "ingress": {
-                            "description": "Endpoint control",
-                            "type": "object",
-                            "properties": {
-                                "samlEnabled": {
-                                    "description": " Enable SAML endpoints /kc",
-                                    "type": "boolean"
-                                },
-                                "samlLabels": {
-                                    "description": "SAML config ingress resource labels. key app is taken",
-                                    "type": "object"
-                                },
-                                "samlAdditionalAnnotations": {
-                                    "description": "SAML ingress resource additional annotations.",
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
                 "cnSqlPasswordFile": {
                     "description": "The location of file contains password for the SQL user config.configmap.cnSqlDbUser. The file path must end with sql_password.",
                     "type": "string",
@@ -1180,16 +1086,6 @@
         },
         "scim": {
             "description": "System for Cross-domain Identity Management (SCIM) version 2.0",
-            "type": "object",
-            "properties": {}
-        },
-        "saml": {
-            "description": "Jans SAML",
-            "type": "object",
-            "properties": {}
-        },
-        "kc-scheduler": {
-            "description": "Responsible for synchronizing Keycloak SAML clients",
             "type": "object",
             "properties": {}
         }
@@ -1218,12 +1114,6 @@
         },
         {
             "$ref": "#/definitions/scim-enabled"
-        },
-        {
-            "$ref": "#/definitions/saml-enabled"
-        },
-        {
-            "$ref": "#/definitions/kc-scheduler-enabled"
         }
     ],
     "definitions": {
@@ -2284,270 +2174,6 @@
                                 }
                             }
                         }
-                    }
-                }
-            },
-            "else": true
-        },
-        "saml-enabled": {
-            "if": {
-                "properties": {
-                    "global": {
-                        "properties": {
-                            "saml": {
-                                "properties": {
-                                    "enabled": {
-                                        "const": "true"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "then": {
-                "properties": {
-                    "saml": {
-                        "required": [
-                            "image",
-                            "replicas",
-                            "resources",
-                            "service"
-                        ],
-                        "type": "object",
-                        "properties": {
-                            "hpa": {
-                                "description": "Configure the HorizontalPodAutoscaler",
-                                "type": "object",
-                                "properties": {
-                                    "enabled": {
-                                        "type": "boolean"
-                                    },
-                                    "minReplicas": {
-                                        "type": "integer"
-                                    },
-                                    "maxReplicas": {
-                                        "type": "integer"
-                                    },
-                                    "targetCPUUtilizationPercentage": {
-                                        "type": "integer"
-                                    },
-                                    "metrics": {
-                                        "description": "metrics if targetCPUUtilizationPercentage is not set",
-                                        "type": "array"
-                                    },
-                                    "behavior": {
-                                        "description": "Scaling Policies",
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "usrEnvs": {
-                                "description": "Add custom normal and secret envs to the service",
-                                "type": "object",
-                                "properties": {
-                                    "normal": {
-                                        "description": "Add custom normal envs to the service",
-                                        "type": "object"
-                                    },
-                                    "secret": {
-                                        "description": "Add custom secret envs to the service",
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "dnsPolicy": {
-                                "description": "Add custom dns policy",
-                                "type": "string",
-                                "pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
-                            },
-                            "dnsConfig": {
-                                "description": "Add custom dns config",
-                                "type": "object"
-                            },
-                            "image": {
-                                "type": "object",
-                                "properties": {
-                                    "pullPolicy": {
-                                        "description": "Image pullPolicy to use for deploying.",
-                                        "type": "string",
-                                        "pattern": "^(Always|Never|IfNotPresent)$"
-                                    },
-                                    "repository": {
-                                        "description": "Image  to use for deploying",
-                                        "type": "string"
-                                    },
-                                    "tag": {
-                                        "description": "Image  tag to use for deploying.",
-                                        "type": "string",
-                                        "pattern": "^[a-z0-9-_.]+$"
-                                    }
-                                }
-                            },
-                            "replicas": {
-                                "description": "Service replica number.",
-                                "type": "integer"
-                            },
-                            "resources": {
-                                "description": "Resource specs.",
-                                "type": "object",
-                                "properties": {
-                                    "limits": {
-                                        "type": "object",
-                                        "properties": {
-                                            "cpu": {
-                                                "description": "CPU limit.",
-                                                "type": "string",
-                                                "pattern": "^[0-9m]+$"
-                                            },
-                                            "memory": {
-                                                "description": "Memory limit.",
-                                                "type": "string",
-                                                "pattern": "^[0-9Mi]+$"
-                                            }
-                                        }
-                                    },
-                                    "requests": {
-                                        "type": "object",
-                                        "properties": {
-                                            "cpu": {
-                                                "description": "CPU request.",
-                                                "type": "string",
-                                                "pattern": "^[0-9m]+$"
-                                            },
-                                            "memory": {
-                                                "description": "Memory request.",
-                                                "type": "string",
-                                                "pattern": "^[0-9Mi]+$"
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "service": {
-                                "type": "object",
-                                "properties": {
-                                    "scimServiceName": {
-                                        "description": "Name of the SAML service. Please keep it as default.",
-                                        "type": "string",
-                                        "pattern": "^[a-z0-9-]+$"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "else": true
-        },
-        "kc-scheduler-enabled": {
-            "if": {
-                "properties": {
-                    "global": {
-                        "properties": {
-                            "kc-scheduler": {
-                                "properties": {
-                                    "enabled": {
-                                        "const": "true"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "then": {
-                "properties": {
-                    "kc-scheduler": {
-                        "properties": {
-                            "usrEnvs": {
-                                "description": "Add custom normal and secret envs to the service",
-                                "type": "object",
-                                "properties": {
-                                    "normal": {
-                                        "description": "Add custom normal envs to the service",
-                                        "type": "object"
-                                    },
-                                    "secret": {
-                                        "description": "Add custom secret envs to the service",
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "dnsPolicy": {
-                                "description": "Add custom dns policy",
-                                "type": "string",
-                                "pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
-                            },
-                            "dnsConfig": {
-                                "description": "Add custom dns config",
-                                "type": "object"
-                            },
-                            "image": {
-                                "type": "object",
-                                "properties": {
-                                    "pullPolicy": {
-                                        "description": "Image pullPolicy to use for deploying.",
-                                        "type": "string",
-                                        "pattern": "^(Always|Never|IfNotPresent)$"
-                                    },
-                                    "repository": {
-                                        "description": "Image  to use for deploying",
-                                        "type": "string"
-                                    },
-                                    "tag": {
-                                        "description": "Image  tag to use for deploying.",
-                                        "type": "string",
-                                        "pattern": "^[a-z0-9-_.]+$"
-                                    }
-                                }
-                            },
-                            "interval": {
-                                "description": "Interval of running the scheduler (in minutes)",
-                                "type": "integer"
-                            },
-                            "resources": {
-                                "description": "Resource specs.",
-                                "type": "object",
-                                "properties": {
-                                    "limits": {
-                                        "type": "object",
-                                        "properties": {
-                                            "cpu": {
-                                                "description": "CPU limit.",
-                                                "type": "string",
-                                                "pattern": "^[0-9m]+$"
-                                            },
-                                            "memory": {
-                                                "description": "Memory limit.",
-                                                "type": "string",
-                                                "pattern": "^[0-9Mi]+$"
-                                            }
-                                        }
-                                    },
-                                    "requests": {
-                                        "type": "object",
-                                        "properties": {
-                                            "cpu": {
-                                                "description": "CPU request.",
-                                                "type": "string",
-                                                "pattern": "^[0-9m]+$"
-                                            },
-                                            "memory": {
-                                                "description": "Memory request.",
-                                                "type": "string",
-                                                "pattern": "^[0-9Mi]+$"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "required": [
-                            "image",
-                            "resources",
-                            "interval"
-                        ]
                     }
                 }
             },
