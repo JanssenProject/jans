@@ -15,7 +15,7 @@
 
   	<jans.version>${project.version}</jans.version>
 		<weld.version>4.0.3.Final</weld.version>
-		<resteasy.version>6.2.3.Final</resteasy.version>
+		<resteasy.version>6.2.11.Final</resteasy.version>
 		<org.hibernate.validator.version>6.2.0.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>6.2.0.Final</org.hibernate.validator.cdi.version>
 	</properties>
