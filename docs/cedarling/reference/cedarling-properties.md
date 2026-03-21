@@ -56,7 +56,7 @@ These properties are relevant when using `authorize_multi_issuer` with signed JW
 
 **Token cache:**
 
-- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Allows to limit maximum token cache TTL in seconds. (Token cache is used to avoid decoding and validation same token twice, so it is optimization.) Default value is zero what means disable maximum TTL and will be used `exp` token field to calculate TTL.
+- **`CEDARLING_TOKEN_CACHE_MAX_TTL`** : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is `0`, which disables the maximum TTL — in that case, the token's `exp` claim is used to compute the cache entry TTL.
 - **`CEDARLING_TOKEN_CACHE_CAPACITY`** : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.
 - **`CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION`** : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is `true`.
 

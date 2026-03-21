@@ -280,8 +280,8 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_log_max_retries: u32,
 
-    /// Allows to limit maximum token cache TTL in seconds.
-    /// Zero means no token cache TTL limit.
+    /// Maximum token cache TTL in seconds.
+    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
