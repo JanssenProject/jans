@@ -67,7 +67,7 @@ These properties are relevant when using `authorize_multi_issuer` with signed JW
 
 **Decision logging for tokens:**
 
-- **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.
+- **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim or you need a different identifier.
 
 ## Properties for `authorize_unsigned` (application-asserted identity)
 
