@@ -198,6 +198,9 @@ to evaluate the authorization request.
            ]
          }
    ```
+   !!! note
+       `CEDARLING_JWT_STATUS_VALIDATION` is disabled here because most quick-start setups don't have a token status list endpoint configured. In production, enable it for full token revocation checking.
+
 6. Click `Save` to initialize Cedarling.
 
 This will start the embedded Cedarling instance in the Tarp.
