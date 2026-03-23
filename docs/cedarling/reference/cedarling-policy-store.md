@@ -177,7 +177,6 @@ Trusted issuer configuration files in the `trusted-issuers/` directory define id
         "trusted": true,
         "entity_type_name": "Jans::Access_token",
         "token_id": "jti",
-        "workload_id": "aud"
       },
       "id_token": {
         "trusted": true,
@@ -467,7 +466,6 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
   "trusted": true,
   "entity_type_name": "Acme::Access_token",
   "token_id": "jti",
-  "workload_id": "aud",
   "principal_mapping": ["Acme::Workload"],
   "required_claims": ["iss", "exp", "some_custom_claim"]
 }
@@ -476,7 +474,7 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
 - `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object. When set to `false`, tokens of this type will be ignored.
 - `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`.
 - `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
-- `"workload_id"` (string, optional): The JWT claim that will be used as the ID for the Workload Entity.
+
 - `"principal_mapping"` (array[string], Default: `[]`): Describes where references of the created token entity should be included.
 - `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
 

@@ -531,7 +531,6 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
                 required_claims: HashSet::new(),
             },
         );
@@ -542,7 +541,6 @@ mod test {
                 entity_type_name: "Jans::Id_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
                 required_claims: HashSet::new(),
             },
         );
@@ -660,7 +658,7 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
+
                 required_claims: HashSet::new(),
             },
         );
@@ -671,7 +669,7 @@ mod test {
                 entity_type_name: "Jans::Id_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
+
                 required_claims: HashSet::new(),
             },
         );
@@ -737,7 +735,7 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
+
                 required_claims: HashSet::new(),
             },
         );

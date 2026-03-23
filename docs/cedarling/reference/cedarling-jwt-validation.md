@@ -71,7 +71,6 @@ You **MUST** define a trusted issuer in your policy store with a matching `openi
         "access_token": { 
           "entity_type_name": "Jans::Access_token",
           "token_id": "jti",
-          "workload_id": "client_id",
           "required_claims": ["exp", "client_id"]
         }
       }
