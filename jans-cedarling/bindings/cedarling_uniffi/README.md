@@ -34,7 +34,7 @@ cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} 
 3. Building the iOS binaries and adding these targets to Rust.
 
 ```bash
-rustup target add aarch64-apple-ios-sim aarch64-apple-ios
+rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
 ```
 
 4. Build the library for Swift.

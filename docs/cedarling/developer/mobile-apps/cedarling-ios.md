@@ -28,7 +28,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
 
 4. Building the iOS binaries and adding these targets to Rust.
    ```bash
-   rustup target add aarch64-apple-ios-sim aarch64-apple-ios
+   rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
    ```
 
 5. Build the library for Swift.
