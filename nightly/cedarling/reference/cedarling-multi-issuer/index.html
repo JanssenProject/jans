@@ -1254,8 +1254,6 @@
       
         
       
-        
-      
     
     
     
@@ -1964,34 +1962,6 @@
     
   
     JWT Validation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    JWT Mapping
   
 
     
@@ -3311,7 +3281,7 @@
 ┌─────────────────────────────────────────────────────────┐
 │ 2. Token Validation                                     │
 │    - Signature verification                             │
-│    - Time-based validation (exp, nbf, iat)             │
+│    - Time-based validation (exp, nbf)                   │
 │    - Status validation (revocation check)               │
 │    - Trusted issuer verification                        │
 └────────────────────┬────────────────────────────────────┘
@@ -3343,11 +3313,11 @@
 <h3 id="3-token-entity-structure">3. Token Entity Structure<a class="headerlink" href="#3-token-entity-structure" title="Permanent link">#</a></h3>
 <p>Each validated token becomes a Cedar entity:</p>
 <div class="highlight"><pre><span></span><code>entity Token = {
-  &quot;token_type&quot;: String,        // e.g., &quot;Jans::Access_Token&quot;
-  &quot;jti&quot;: String,               // Token ID
+  &quot;token_type&quot;?: String,        // e.g., &quot;Jans::Access_Token&quot;
+  &quot;jti&quot;?: String,               // Token ID
   &quot;iss&quot;?: Jans::TrustedIssuer,  // JWT iss claim
-  &quot;exp&quot;: Long,                 // Expiration timestamp
-  &quot;validated_at&quot;: Long         // Validation timestamp
+  &quot;exp&quot;?: Long,                 // Expiration timestamp
+  &quot;validated_at&quot;?: Long         // Validation timestamp
 } tags Set&lt;String&gt;;
 </code></pre></div>
 <p><strong>All JWT claims are stored as tags</strong> and accessed using Cedar's tag operations:</p>
@@ -3397,7 +3367,7 @@ context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:p
 <td><code>https://idp.dolphin.sea/auth</code></td>
 <td><code>"Dolphin"</code></td>
 <td><code>Acme::DolphinToken</code></td>
-<td><code>dolphin_acme_dolphin_token</code></td>
+<td><code>dolphin_dolphintoken</code></td>
 </tr>
 </tbody>
 </table>
@@ -3713,11 +3683,25 @@ permit(
 <p>Multi-issuer authorization creates token entities dynamically and places them in the Cedar context. Your schema must support:</p>
 <p><strong>1. Token Entity Structure</strong></p>
 <p>Token entities must have these required attributes:</p>
-<div class="highlight"><pre><span></span><code>namespace Jans{
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity Access_token = {
     token_type?: String,        // Required for multi-issuer
     jti?: String,               // Required for multi-issuer
-    iss?: Jans::TrustedIssuer,  // Required for multi-issuer
+    iss?: TrustedIssuer,        // Required for multi-issuer
     exp?: Long,                 // Required for multi-issuer
     validated_at?: Long,        // Required for multi-issuer
     // Other JWT claims as optional attributes
@@ -3725,12 +3709,8 @@ permit(
     iat?: Long,
     scope?: Set&lt;String&gt;,
     // ...
-  } tags Set&lt;String&gt;;         // Required for dynamic JWT claims
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+  } tags Set&lt;String&gt;;           // Required for dynamic JWT claims
+};
 </code></pre></div>
 <p><strong>2. Context Structure</strong></p>
 <p>The Context type must include a <code>tokens</code> field:</p>
@@ -3799,13 +3779,31 @@ type TokensContext = {
 <h3 id="cedar-schema-for-multi-issuer-tokens">Cedar Schema for Multi-Issuer Tokens<a class="headerlink" href="#cedar-schema-for-multi-issuer-tokens" title="Permanent link">#</a></h3>
 <h4 id="core-token-schema-structure">Core Token Schema Structure<a class="headerlink" href="#core-token-schema-structure" title="Permanent link">#</a></h4>
 <p>Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:</p>
-<div class="highlight"><pre><span></span><code>namespace Jans {
-  // Core token entity structure compatible with both standard and multi-issuer authorization
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+  type email_address = {
+    domain: String,
+    uid: String
+  };
+};
+
+// Acme namespace: token entities for the Acme IDP.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  // Core token entity structure compatible with multi-issuer authorization
   entity Access_token = {
     // Required multi-issuer attributes
-    token_type?: String,        // Entity type name (e.g., &quot;Jans::Access_Token&quot;)
+    token_type?: String,        // Entity type name (e.g., &quot;Acme::Access_token&quot;)
     jti?: String,               // JWT ID - unique token identifier
-    iss?: TrustedIssuer,        // Issuer entity reference (for standard authz)
+    iss?: TrustedIssuer,        // Issuer entity reference
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Timestamp when token was validated
 
@@ -3830,7 +3828,7 @@ type TokensContext = {
     aud?: Set&lt;String&gt;,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     phone_number?: String,
     role?: Set&lt;String&gt;,
@@ -3851,27 +3849,37 @@ type TokensContext = {
     aud?: String,
     iat?: Long,
     sub?: String,
-    email?: email_address,
+    email?: Jans::email_address,
     name?: String,
     birthdate?: String,
     phone_number?: String,
     role?: Set&lt;String&gt;,
     // Add other JWT claims as needed
   } tags Set&lt;String&gt;;
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 </code></pre></div>
 <h4 id="custom-token-types">Custom Token Types<a class="headerlink" href="#custom-token-types" title="Permanent link">#</a></h4>
 <p>For custom token types, follow the same pattern:</p>
-<div class="highlight"><pre><span></span><code>namespace Custom {
+<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+};
+
+// Custom namespace: custom service token entities.
+namespace Custom {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
   entity ServiceToken = {
     // Required multi-issuer attributes
     token_type?: String,
     jti?: String,
-    iss?: Custom::TrustedIssuer,
+    iss?: TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -3880,11 +3888,7 @@ type TokensContext = {
     permissions?: Set&lt;String&gt;,
     service_tier?: String,
   } tags Set&lt;String&gt;;
-
-  entity TrustedIssuer = {
-    issuer_entity_id: Url
-  };
-}
+};
 </code></pre></div>
 <h4 id="complete-context-schema">Complete Context Schema<a class="headerlink" href="#complete-context-schema" title="Permanent link">#</a></h4>
 <p>Define the Context type to include the tokens field:</p>
@@ -4007,7 +4011,6 @@ permit(
 <ul>
 <li><a href="../cedarling-authz/">Cedarling Authorization</a></li>
 <li><a href="../cedarling-interfaces/">Cedarling Interfaces</a></li>
-<li><a href="../cedarling-jwt-mapping/">JWT Mapping</a></li>
 <li><a href="../cedarling-policy-store/">Policy Store Configuration</a></li>
 <li><a href="./python/usage.md">Python Examples</a></li>
 <li><a href="./getting-started/go.md">Go Examples</a></li>
@@ -4034,7 +4037,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
   </span>
 
     

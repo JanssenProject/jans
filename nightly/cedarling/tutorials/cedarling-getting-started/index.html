@@ -1605,8 +1605,6 @@
       
         
       
-        
-      
     
     
     
@@ -2544,12 +2542,13 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <p>Is this <strong>Action</strong>, on this <strong>Resource</strong>, in this <strong>Context</strong>, allowed for these <strong>Principals</strong>?</p>
 </blockquote>
 <p>When using Cedarling, <strong>Action</strong> and <strong>Resource</strong> are typically defined in the <a href="../../reference/cedarling-policy-store/">policy store</a>, while <strong>Principal</strong> and <strong>Context</strong> are supplied at runtime via the <code>authz</code> interface.</p>
-<p>Cedarling currently provides two modes of authorization:</p>
-<p><strong>Multi-Issuer Authorization (Token-based)</strong></p>
+<p>Cedarling provides two authorization methods. Not sure which to use? See the <a href="../../quick-start/cedarling-quick-start/#which-authorization-method-should-i-use">quick start decision guide</a>.</p>
+<p><strong>Multi-Issuer Authorization (Token-based) — Recommended</strong></p>
 <ul>
 <li>Uses <code>authorize_multi_issuer</code> to process JWT tokens from multiple issuers.</li>
 <li>Token data is mapped to Cedar entities based on <code>token_metadata</code> configuration in the policy store.</li>
 <li>Authorization decisions are made based on context values derived from token payloads.</li>
+<li><strong>Recommended for most production deployments</strong> where you have JWT tokens from trusted identity providers.</li>
 </ul>
 <p><a href="../../reference/cedarling-multi-issuer/">More information</a></p>
 <p><strong>Unsigned Authorization</strong></p>
@@ -2557,6 +2556,8 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <li>Uses <code>authorize_unsigned</code> to accept <strong>Principals</strong> directly without requiring JWTs.</li>
 <li>This makes authorization decisions by passing a set of <strong>Principals</strong> directly.</li>
 <li>The <strong>Context</strong> is passed in as-is in a map-like structure.</li>
+<li>When using multiple principals, configure <a href="../../reference/cedarling-principal-boolean-operations/"><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></a> to control how per-principal decisions are combined.</li>
+<li>Use when your application has already authenticated the principal, for testing, or for service-to-service calls with upstream verification.</li>
 </ul>
 <p>See the language-specific tutorials for detailed examples of both authorization methods:</p>
 <ul>
@@ -2737,11 +2738,10 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
 <h2 id="whats-next">What's next?<a class="headerlink" href="#whats-next" title="Permanent link">#</a></h2>
 <p>You're now ready to dive deeper into Cedarling. From here, you could either:</p>
 <ul>
-<li>See how you can use <a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">RBAC with Cedarling using signed tokens</a>.</li>
-<li>Explore how to use <a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-cedarling">Cedarling's Unsigned interface</a>.</li>
+<li>See how you can use <a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">RBAC with Cedarling using signed tokens (TBAC)</a> — the recommended starting point.</li>
+<li>Explore how to use <a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-application-asserted-identity">Cedarling's Unsigned interface</a> for custom auth flows or testing.</li>
 <li>Use the <a href="../../developer/sidecar/cedarling-sidecar-overview/">Cedarling Sidecar</a> for a quick, zero-code deployment.</li>
-<li>Learn more about <a href="../../#why-zero-trust-needs-cedarlings">why Cedarling exists</a> and the problems it solves.
- RBAC using signed tokens (TBAC)</li>
+<li>Learn more about <a href="../../#why-zero-trust-needs-cedarlings">why Cedarling exists</a> and the problems it solves.</li>
 </ul>
 
 
@@ -2765,7 +2765,7 @@ val cedarling: Cedarling? = Cedarling.loadFromJson(bootstrapConfig);
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
   </span>
 
     

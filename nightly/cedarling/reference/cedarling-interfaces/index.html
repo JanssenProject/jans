@@ -1254,8 +1254,6 @@
       
         
       
-        
-      
     
     
     
@@ -1714,34 +1712,6 @@
     
   
     JWT Validation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    JWT Mapping
   
 
     
@@ -2769,14 +2739,19 @@ These are described below.</p>
 <p>These methods are called to create an authorization request, run authorization, and get decisions back.</p>
 <ul>
 <li>
-<p><code>Entity(entity_type, id, payload)</code></p>
-<p>Creates a <code>Principal</code> or a <code>Resource</code> entity.</p>
+<p><code>EntityData(cedar_mapping, attributes)</code></p>
+<p>Creates a principal or resource entity.</p>
 <ul>
+<li><code>cedar_mapping</code>: A <code>CedarEntityMapping</code> object with <code>entity_type</code> (Cedar type name) and <code>id</code> (entity ID).</li>
 <li>
-<p><code>from_dict(value)</code></p>
-<p>Creates a <code>Principal</code> or a <code>Resource</code> entity from a dictionary.</p>
+<p><code>attributes</code>: A map of attribute names to values.</p>
 </li>
+<li>
+<p><code>from_json(json_str)</code> — Creates an <code>EntityData</code> from a JSON string (Rust).</p>
+</li>
+<li><code>from_dict(value)</code> — Creates an <code>EntityData</code> from a dictionary (Python bindings).</li>
 </ul>
+<p><strong>Note on field naming:</strong> The Rust struct field is named <code>cedar_mapping</code>, but it serializes to <code>cedar_entity_mapping</code> in JSON (via <code>#[serde(rename)]</code>). When constructing in Rust, use <code>cedar_mapping</code>. When passing JSON (via <code>from_json</code>) or a Python dict (via <code>from_dict</code>), use <code>cedar_entity_mapping</code> as the key.</p>
 </li>
 <li>
 <p><code>RequestUnsigned(principals, action, resource, context)</code></p>
@@ -2814,36 +2789,24 @@ These are described below.</p>
 <h4 id="authorizeresult-for-authorize_unsigned">AuthorizeResult (for <code>authorize_unsigned</code>)<a class="headerlink" href="#authorizeresult-for-authorize_unsigned" title="Permanent link">#</a></h4>
 <ul>
 <li>
-<p><code>is_allowed()</code></p>
-<p>Returns <code>true</code> only if the overall decision of the Cedarling is <code>true</code>.</p>
+<p><code>decision</code></p>
+<p>A boolean field representing the overall authorization decision (<code>true</code> = allow, <code>false</code> = deny). The decision is computed by applying the <code>principal_bool_operator</code> across all principal results.</p>
 </li>
 <li>
 <p><code>principals</code></p>
-<p>A map of principal entity IDs to their authorization decisions. Each entry contains:</p>
+<p>A map of principal type names and entity UIDs to their Cedar <code>Response</code> objects. Each response provides:</p>
 <ul>
-<li><code>decision</code>: Whether this principal was allowed or denied</li>
-<li><code>diagnostics</code>: Detailed information about the decision</li>
+<li><code>decision()</code>: Whether this principal was allowed or denied</li>
+<li><code>diagnostics()</code>: Detailed information including <code>reason()</code> (set of policy IDs) and <code>errors()</code> (list of evaluation errors)</li>
 </ul>
 </li>
 <li>
-<p><code>request_id()</code></p>
-<p>Returns the request ID of this authorization call. This is used to retrieve logs if the Cedarling is running in memory log mode.</p>
+<p><code>request_id</code></p>
+<p>The request ID for this authorization call, used for log retrieval when running in memory log mode.</p>
 </li>
 <li>
-<p><code>decision</code></p>
-<p>This field represents the decision of this authorization call (allow/deny)</p>
-</li>
-<li>
-<p><code>diagnostics</code></p>
-<p>This field contains additional information regarding the decision reached by Cedarling.</p>
-<ul>
-<li><code>reason</code></li>
-</ul>
-<p>This field is a set of policy IDs used to reach an <code>allow</code> decision, if they exist</p>
-<ul>
-<li><code>errors</code></li>
-</ul>
-<p>This field contains a list of errors during authorization, if they exist.</p>
+<p><code>cedar_decision()</code></p>
+<p>Returns the Cedar <code>Decision</code> enum (<code>Allow</code> or <code>Deny</code>) based on the <code>decision</code> field.</p>
 </li>
 </ul>
 <h4 id="multiissuerauthorizeresult-for-authorize_multi_issuer">MultiIssuerAuthorizeResult (for <code>authorize_multi_issuer</code>)<a class="headerlink" href="#multiissuerauthorizeresult-for-authorize_multi_issuer" title="Permanent link">#</a></h4>
@@ -3017,7 +2980,7 @@ These are described below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
   </span>
 
     
