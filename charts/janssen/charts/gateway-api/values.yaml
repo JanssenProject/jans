@@ -3,6 +3,8 @@ fullnameOverride: ""
 
 # -- Configuration for Gateway resource
 gateway:
+  # -- Enable Gateway API and create a Gateway resource (if disabled, you will have to create and manage the Gateway resource externally).
+  enabled: true
   # -- Set the gatewayClassName corresponding to your installed controller.
   className: nginx
   # -- The name of the Gateway resource to be created
@@ -30,6 +32,11 @@ gateway:
     annotations: {}
 # -- Configuration for HTTPRoute and its related resources
 routes:
+  # -- Namespace where the Gateway resource resides. Set this ONLY if the Gateway is externally managed in a different namespace than this Helm release. If set, ensure the target namespace exists and your Gateway controller has the required cross-namespace RBAC permissions.
+  gatewayNamespace: ""
+  # -- Only set the httpSectionName and httpsSectionName if it doesn't work with the default values, according to your installed controller (e.g. some controller may require the listener name to be `default`).
+  httpSectionName: http
+  httpsSectionName: https
   # -- Specific labels for the HTTPRoute resource
   labels: {}
   # -- Specific annotations for the HTTPRoute resource
