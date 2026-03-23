@@ -5,6 +5,10 @@
 
 import Foundation
 
+enum TokenError: Error {
+    case fileNotFound
+    case dataCorrupted
+}
 class Helper{
     static func loadJSON<T: Decodable>(filename: String, type: T.Type) -> T? {
         guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
@@ -53,6 +57,29 @@ class Helper{
             print("Error reading or decoding JSON file: \(error)")
         }
         return ["": ""]
+    }
+    
+    static func loadTokens(fromFileName fileName: String) -> [TokenMapping] {
+        // 1. Locate the file in the App Bundle
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else {
+            print("Token file not found: \(fileName).json")
+            return []
+        }
+
+        do {
+            // 2. Read the raw data from the file
+            let data = try Data(contentsOf: url)
+
+            // 3. Decode the JSON into our array of structs
+            let decoder = JSONDecoder()
+            let tokens = try decoder.decode([TokenMapping].self, from: data)
+
+            return tokens
+
+        } catch {
+            print("Failed to load tokens from \(fileName).json: \(error)")
+            return []
+        }
     }
 
     static func dictionaryFromFile(filename: String) -> [String: String] {
@@ -106,5 +133,26 @@ class Helper{
     
     static func removeNewLines(from text: String) -> String {
         return text.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
+    }
+    
+    static func zipToBytes(fileName: String) -> [UInt8]? {
+        // 1. Convert String filename to URL from the Bundle
+        // This handles cases where the user includes ".zip" or leaves it off
+        let name = (fileName as NSString).deletingPathExtension
+        let extensionName = (fileName as NSString).pathExtension.isEmpty ? "zip" : (fileName as NSString).pathExtension
+        
+        guard let fileURL = Bundle.main.url(forResource: name, withExtension: extensionName) else {
+            print("File not found in bundle.")
+            return nil
+        }
+
+        // 2. Load and convert
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return [UInt8](data)
+        } catch {
+            print("Error reading data: \(error)")
+            return nil
+        }
     }
 }
