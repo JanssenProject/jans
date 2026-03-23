@@ -91,9 +91,7 @@ fun CardListScreen() {
             )
         }
         tokens?.let {
-            val map: List<TokenInput> = remember(it) {
-                Gson().fromJson(it, object : TypeToken<List<TokenInput>>() {}.type)
-            }
+            val map: List<TokenInput> = remember(it) { jsonToTokenInputList(it) }
             map.forEach { (key, value) ->
                 DataCard(
                     key,
