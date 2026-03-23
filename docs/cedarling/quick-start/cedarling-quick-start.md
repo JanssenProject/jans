@@ -122,14 +122,14 @@ this.
 
 - Fork the [demo repository](https://github.com/JanssenProject/CedarlingQuickstart). While creating the fork, uncheck the
   `Copy the main branch only` checkbox.
-- Update the `configuration_endpoint` value in the trusted issuer file
+- Update the `openid_configuration_endpoint` value in the trusted issuer file
   [`tarpDemo/trusted-issuers/jans.json`](https://github.com/JanssenProject/CedarlingQuickstart/blob/main/tarpDemo/trusted-issuers/jans.json) in the fork.
   Set it to the `.well-known/openid-configuration` endpoint of your IDP.
 
     For instance:
 
     ```json
-    "configuration_endpoint": "https://your-idp.example.com/.well-known/openid-configuration"
+    "openid_configuration_endpoint": "https://your-idp.example.com/.well-known/openid-configuration"
     ```
 
 - Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires either a `.cjar` URL or a legacy JSON URL — it does not support raw directory URLs.

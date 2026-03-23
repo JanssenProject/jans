@@ -220,6 +220,7 @@ pub struct TrustedIssuer {
     // attribute is private to force usage `iss_claim` method to get normalized iss claim
     #[serde(
         rename = "openid_configuration_endpoint",
+        alias = "configuration_endpoint",
         deserialize_with = "de_oidc_endpoint_url"
     )]
     oidc_endpoint: Url,
