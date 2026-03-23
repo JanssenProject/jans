@@ -615,16 +615,6 @@ where
     Ok(policy)
 }
 
-/// Custom parser for an Option<String> which returns `None` if the string is empty.
-fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = Option::<String>::deserialize(deserializer)?;
-
-    Ok(value.filter(|s| !s.is_empty()))
-}
-
 /// Custom deserializer for `PolicyStore` that provides better error messages
 impl<'de> Deserialize<'de> for PolicyStore {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
