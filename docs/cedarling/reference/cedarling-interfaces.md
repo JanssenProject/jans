@@ -239,6 +239,44 @@ The Context Data API allows you to push external data into the Cedarling evaluat
   - `memory_alert_threshold`: Memory usage threshold percentage (from config)
   - `memory_alert_triggered`: Whether memory usage exceeds the alert threshold
 
+### Schema Requirements
+
+To use the Context Data API, your Cedar schema must include a `data` field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.
+
+```cedar
+namespace MyApp {
+  // Define the structure of nested data objects
+  type DataConfig = {
+    "enabled": Bool
+  };
+
+  // Define all possible fields that can be pushed via push_data_ctx
+  // Use optional fields (?) since not all keys may be present at evaluation time
+  type DataContext = {
+    "user_level"?: String,
+    "feature_enabled"?: Bool,
+    "config"?: DataConfig
+  };
+
+  action "read" appliesTo {
+    principal: [User],
+    resource: [Document],
+    context: {
+      "data"?: DataContext,
+      // ... other context fields
+    }
+  };
+}
+```
+
+The `data` field should be optional (`"data"?`) since it is only present when data has been pushed via `push_data_ctx`. Each key you plan to push must be declared in the `DataContext` type — Cedar will reject values with undeclared fields.
+
+Always use `has` checks in policies before accessing data fields, since they are optional:
+
+```cedar
+context has data && context.data has user_level && context.data.user_level == "premium"
+```
+
 ### Using Data in Cedar Policies
 
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace. The `context.data` values follow a three-tier resolution precedence:
