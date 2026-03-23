@@ -122,7 +122,7 @@ struct ContentView: View {
             let diagnosticsErrors = Array(result.response.diagnostics.errors).sorted().joined(separator: ", ")
             modelJsonField = """
             {
-                "decision": "\(result.decision)",
+                "decision": \(result.decision),
                 "requestId": "\(result.requestId)",
                 "diagnosticsReason": "\(diagnosticsReason)",
                 "diagnosticsErrors": "\(diagnosticsErrors)"
