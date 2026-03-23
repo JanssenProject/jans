@@ -19,7 +19,7 @@ fun jsonToTokenInputList(jsonString: String): List<TokenInput> {
         val type = object : TypeToken<List<TokenInput>>() {}.type
         Gson().fromJson<List<TokenInput>>(jsonString, type) ?: emptyList()
     } catch (e: Exception) {
-        ex.printStackTrace()
+        e.printStackTrace()
         emptyList()
     }
 }

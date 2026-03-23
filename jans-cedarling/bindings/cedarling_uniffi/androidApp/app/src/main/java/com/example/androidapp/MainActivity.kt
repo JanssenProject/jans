@@ -125,7 +125,7 @@ fun CardListScreen() {
         // Display the modal dialog
         if (showDialog) {
             val instance: Cedarling? = bootstrapConfig?.let {
-                Cedarling.loadFromJsonWithArchiveBytes(it, policyStoreByteArray);
+                policyStoreByteArray?.let { it1 -> Cedarling.loadFromJsonWithArchiveBytes(it, it1) };
             };
 
             val tokenList: List<TokenInput>? = tokens?.let { jsonToTokenInputList(it) };
@@ -134,8 +134,8 @@ fun CardListScreen() {
             val nonNullableAction: String = action.orEmpty()
 
             val nonNullableResource: String = resource.orEmpty();
-            val nonNullableConext: String = context.orEmpty();
-            val jsonContext: JsonValue = nonNullableConext;
+            val nonNullableContext: String = context.orEmpty();
+            val jsonContext: JsonValue = nonNullableContext;
             val result: MultiIssuerAuthorizeResult? = tokenList?.let {
                 instance?.authorizeMultiIssuer(
                     it,
