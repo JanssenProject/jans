@@ -213,7 +213,7 @@ principals = [
       entity_type="Jans::User",
       id="random_user_id"
     ),
-    roles=["admin", "manager"]
+    role=["admin", "manager"]
   ),
 ]
 ```
