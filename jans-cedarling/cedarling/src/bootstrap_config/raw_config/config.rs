@@ -282,6 +282,8 @@ pub struct BootstrapConfigRaw {
 
     /// Maximum token cache TTL in seconds.
     /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
+    /// If the token has no `exp` claim and this is `0`, the token is not cached at all.
+    /// If the token has no `exp` claim and this is > 0, this value is used as the cache TTL.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
