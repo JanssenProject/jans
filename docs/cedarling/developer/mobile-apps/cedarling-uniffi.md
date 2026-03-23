@@ -45,7 +45,34 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
   **Usage in Kotlin:**
 
   ```declarative
-  val cedarling: Cedarling = Cedarling.loadFromJson("/path/to/config.json")
+  val cedarling: Cedarling = Cedarling.loadFromFile("/path/to/config.json")
+  ```
+
+- **Cedarling::load_from_json_with_archive_bytes**
+
+   Loads a Cedarling instance from a bootstrap JSON string plus the raw bytes of a Cedar archive (`.cjar`). Use this when the host cannot pass a policy store path—for example **Android `assets/`** read via `AssetManager`. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are ignored; the archive bytes are the policy source (same idea as WASM `init_from_archive_bytes`).
+
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_json_with_archive_bytes(
+       config: String,
+       archive_bytes: Vec<u8>,
+   ) -> Result<Self, CedarlingError>
+   ```
+
+   **Usage in Swift:**
+
+   ```declarative
+   let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
+       config: configJson,
+       archiveBytes: cjarData
+   )
+   ```
+
+  **Usage in Kotlin:**
+
+  ```declarative
+  val cedarling = Cedarling.loadFromJsonWithArchiveBytes(configJson, cjarBytes)
   ```
 
 - **Cedarling::authorizeUnsigned**
