@@ -6,7 +6,7 @@
 
 use cedarling::{
     self as core, BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CoreDataEntry,
-    DataStoreStats as CoreDataStoreStats, LogStorage,
+    DataStoreStats as CoreDataStoreStats, LogStorage, PolicyStoreSource,
 };
 use std::sync::Arc;
 mod result;
@@ -285,6 +285,43 @@ impl Cedarling {
 
         // Create a new `Cedarling` instance
         let cedarling = core::blocking::Cedarling::new(&config).map_err(|e| {
+            CedarlingError::InitializationFailed {
+                error_msg: e.to_string(),
+            }
+        })?;
+
+        Ok(Self { inner: cedarling })
+    }
+
+    /// Loads Cedarling from bootstrap JSON plus a Cedar archive (`.cjar`) as raw bytes.
+    ///
+    /// host cannot pass a filesystem path—for example Android assets loaded via `AssetManager`.
+    #[uniffi::constructor]
+    pub fn load_from_json_with_archive_bytes(
+        config: String,
+        archive_bytes: Vec<u8>,
+    ) -> Result<Self, CedarlingError> {
+        let mut raw_config: BootstrapConfigRaw =
+            serde_json::from_str(&config).map_err(|e| CedarlingError::InitializationFailed {
+                error_msg: e.to_string(),
+            })?;
+
+        raw_config.local_policy_store = None;
+        raw_config.policy_store_uri = None;
+        // Set a dummy .cjar file path to satisfy validation (will be overridden below)
+        raw_config.policy_store_local_fn = Some("dummy.cjar".to_string());
+
+        let mut bootstrap_config = BootstrapConfig::from_raw_config(&raw_config).map_err(|e| {
+            CedarlingError::InitializationFailed {
+                error_msg: e.to_string(),
+            }
+        })?;
+
+        // Override the policy store source with the archive bytes
+        bootstrap_config.policy_store_config.source =
+            PolicyStoreSource::ArchiveBytes(archive_bytes);
+
+        let cedarling = core::blocking::Cedarling::new(&bootstrap_config).map_err(|e| {
             CedarlingError::InitializationFailed {
                 error_msg: e.to_string(),
             }
