@@ -1,3 +1,8 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -49,6 +54,16 @@ pub(super) struct LockServerLogEntry {
 
 impl From<CedarlingLogEntry> for LockServerLogEntry {
     fn from(value: CedarlingLogEntry) -> Self {
+        let mut extra = value.extra;
+        let client_id = extra
+            .remove("lock_client_id")
+            .and_then(|v| v.as_str().map(String::from));
+        let context_information = if extra.is_empty() {
+            None
+        } else {
+            Some(Value::Object(extra.into_iter().collect()))
+        };
+
         Self {
             creation_date: value.timestamp.clone(),
             event_time: value.timestamp,
@@ -64,15 +79,8 @@ impl From<CedarlingLogEntry> for LockServerLogEntry {
             } else {
                 Some(value.principal.join(", "))
             },
-            client_id: value
-                .extra
-                .get("lock_client_id")
-                .and_then(|v| v.as_str().map(String::from)),
-            context_information: if value.extra.is_empty() {
-                None
-            } else {
-                Some(Value::Object(value.extra.into_iter().collect()))
-            },
+            client_id,
+            context_information,
         }
     }
 }
