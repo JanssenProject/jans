@@ -89,7 +89,9 @@ pub(crate) async fn load_policy_store_archive(
         use super::archive_handler::ArchiveVfs;
         let archive_vfs = ArchiveVfs::from_file(&path)?;
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-        loader.load_directory(".")
+        let loaded_directory = loader.load_directory(".")?;
+
+        Ok(loaded_directory)
     })
     .await
     .map_err(|e| {

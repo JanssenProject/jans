@@ -23,11 +23,9 @@ Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
 ![Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context](../../assets/lock-cedarling-diagram-2.jpg)
 
-The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities
-are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create
-User and Role entities; the OAuth access token is used to create a Workload entity, which is the
-software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
-given its policies, Role, Person and Workload are authorized. If one of Role or Person and Workload is authorized then the request is allowed to proceed.
+The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
+User, Workload, and Role entities based on token claims.
 
 The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
 of saying "User can perform action", we can say "Role can perform action"--a convenient way to
@@ -43,44 +41,58 @@ but the other conditions are ABAC. Policy evaluation is fast because Cedar uses 
 
 The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a
 Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
-tells you who authenticated, when they authenticated, how they authenticatated, and optionally other
+tells you who authenticated, when they authenticated, how they authenticated, and optionally other
 claims like the User's roles. An OAuth access token can tell you information about the Workload that
 obtained the JWT, its extent of access as defined by the OAuth Authorization Server (_i.e._ the
 values of the `scope` claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.
 
-The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, (`person_allowed` AND `workload_allowed`) must be `True`. The JWT's,
-Action, Resource and Context is sent by the application in the authorization request. For example,
-this is a sample request from a hypothetical application:
+## Authorization Methods
+
+Cedarling provides two authorization methods:
+
+1. **`authorize_unsigned`**: For authorization with raw entity data (no JWT validation)
+2. **`authorize_multi_issuer`**: For JWT-based authorization with multiple issuers
+
+### Multi-Issuer Authorization Example
+
+For JWT-based authorization, use `authorize_multi_issuer` which validates tokens from trusted issuers:
 
 ```js
 const bootstrap_config = {...};
 const cedarling = await init(bootstrap_config);
-let input = {
-  "tokens": {
-    "access_token": "eyJhbGc....",
-    "id_token": "eyJjbGc...",
-    "userinfo_token": "eyJjbGc...",
-  },
-  "action": "View",
-  "resource": {
-    "cedar_entity_mapping": {
-      "entity_type": "Ticket",
-      "id": "ticket-10101"
-    },
-    "owner": "bob@acme.com",
-    "org_id": "Acme"
-  },
-  "context": {
-    "ip_address": "54.9.21.201",
-    "network_type": "VPN",
-    "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
-    "time": "1719266610.98636",
-  }
-}
 
-decision_result = await cedarling.authorize(input)
+let tokens = [
+  {
+    mapping: "Jans::Access_Token",
+    payload: "eyJhbGc...."
+  },
+  {
+    mapping: "Jans::Id_Token",
+    payload: "eyJjbGc..."
+  }
+];
+
+let request = {
+  tokens: tokens,
+  action: "Jans::Action::\"View\"",
+  resource: {
+    cedar_entity_mapping: {
+      entity_type: "Ticket",
+      id: "ticket-10101"
+    },
+    owner: "bob@acme.com",
+    org_id: "Acme"
+  },
+  context: {
+    ip_address: "54.9.21.201",
+    network_type: "VPN",
+    user_agent: "Chrome 125.0.6422.77 (Official Build) (arm64)",
+    time: 1719266610
+  }
+};
+
+let result = await cedarling.authorize_multi_issuer(request);
 ```
 
 ## Automatically Adding Entity References to the Context
@@ -215,30 +227,28 @@ let input = {
 decision_result = await cedarling.authorize_unsigned(input);
 ```
 
-### When to use authorize_unsigned vs authorize
+### When to use authorize_unsigned vs authorize_multi_issuer
 
-| Feature            | authorize           | authorize_unsigned   |
-| ------------------ | ------------------- | -------------------- |
-| JWT validation     | Yes                 | No                   |
-| Token requirements | Requires valid JWTs | Accepts raw entities |
-| Use case           | Standard auth flows | Custom auth flows    |
-| Security           | Higher (validates)  | Lower (trusts input) |
+| Feature            | authorize_multi_issuer | authorize_unsigned   |
+| ------------------ | ---------------------- | -------------------- |
+| JWT validation     | Yes                    | No                   |
+| Token requirements | Requires valid JWTs    | Accepts raw entities |
+| Use case           | Standard auth flows    | Custom auth flows    |
+| Security           | Higher (validates)     | Lower (trusts input) |
 
 ## Multi-Issuer Authorization (authorize_multi_issuer)
 
-The `authorize_multi_issuer` method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.
+The `authorize_multi_issuer` method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. This method evaluates policies based on token entities with flexible principal configuration.
 
-### Key Differences from Standard Authorization
+### Key Features
 
-| Feature                | authorize                          | authorize_multi_issuer                      |
-| ---------------------- | ---------------------------------- | ------------------------------------------- |
-| Principal Model        | User/Workload entities             | No principals - token-based context         |
-| Token Sources          | Single issuer expected             | Multiple issuers supported                  |
-| Token Types            | Fixed (access, id, userinfo)       | Flexible with explicit mapping              |
-| Context Structure      | User/Workload in context           | Individual token entities in context.tokens |
-| Use Case               | Standard RBAC/ABAC flows           | Federation, API gateways, multi-issuer apps |
-| Policy Principal       | `principal is User/Workload`       | Not applicable (principal-less)             |
-| Policy Context Access  | `context.user`, `context.workload` | `context.tokens.{issuer}_{token_type}`      |
+| Feature                | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| Token Sources          | Multiple issuers supported                              |
+| Token Types            | Flexible with explicit mapping                          |
+| Context Structure      | Individual token entities in `context.tokens`           |
+| Use Case               | Federation, API gateways, multi-issuer apps             |
+| Policy Context Access  | `context.tokens.{issuer}_{token_type}`                  |
 
 ### How It Works
 

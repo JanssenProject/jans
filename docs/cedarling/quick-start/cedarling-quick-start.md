@@ -82,8 +82,6 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
        "CEDARLING_LOG_TYPE": "std_out",
        "CEDARLING_LOG_LEVEL": "INFO",
-       "CEDARLING_USER_AUTHZ": "enabled",
-       "CEDARLING_WORKLOAD_AUTHZ": "disabled",
        "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
          "===": [{"var": "Jans::User"}, "ALLOW"]
        },
@@ -93,8 +91,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
        "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
          "HS256", "RS256"
-       ],
-       "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+       ]
    }
    ```
 4. Click `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
@@ -323,8 +320,6 @@ to evaluate the authorization request.
            "CEDARLING_POLICY_STORE_URI": "<Policy Store URI>",
            "CEDARLING_LOG_TYPE": "std_out",
            "CEDARLING_LOG_LEVEL": "INFO",
-           "CEDARLING_USER_AUTHZ": "enabled",
-           "CEDARLING_WORKLOAD_AUTHZ": "disabled",
            "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
              "===": [{"var": "Jans::User"}, "ALLOW"]
            },
@@ -334,8 +329,7 @@ to evaluate the authorization request.
            "CEDARLING_MAPPING_WORKLOAD": "Jans::Workload",
            "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
              "HS256", "RS256"
-           ],
-           "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+           ]
          }
    ```
 6. Click `Save` to initialize Cedarling.

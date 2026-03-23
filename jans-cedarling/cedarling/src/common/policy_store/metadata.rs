@@ -117,5 +117,4 @@ mod tests {
         let deserialized: PolicyStoreMetadata = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, metadata);
     }
-
 }
