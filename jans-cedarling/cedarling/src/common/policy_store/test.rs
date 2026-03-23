@@ -6,9 +6,7 @@
 use std::str::FromStr;
 
 use base64::prelude::*;
-use serde::Deserialize;
 use serde_json::json;
-use test_utils::assert_eq;
 
 use super::{AgamaPolicyStore, ParsePolicySetMessage, PolicyStore};
 use crate::common::policy_store::parse_cedar_version;
