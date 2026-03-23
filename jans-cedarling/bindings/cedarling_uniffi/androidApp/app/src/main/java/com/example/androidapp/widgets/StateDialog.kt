@@ -32,9 +32,9 @@ fun StateDialog(
                 Text("Authorization Result:", style = MaterialTheme.typography.titleMedium)
                 Text("${result?.decision ?: "N/A"}", modifier = Modifier.padding(4.dp))
 
-                result?.response?.diagnostics.let {
-                    Text("Person:", style = MaterialTheme.typography.titleMedium)
-                    JsonTreeView(toJsonString(it))
+                result?.response?.diagnostics?.let { diagnostics ->
+                    Text("Diagnostics:", style = MaterialTheme.typography.titleMedium)
+                    JsonTreeView(toJsonString(diagnostics))
                 }
                 Text("Logs:", style = MaterialTheme.typography.titleMedium)
                 logs?.forEach { log ->

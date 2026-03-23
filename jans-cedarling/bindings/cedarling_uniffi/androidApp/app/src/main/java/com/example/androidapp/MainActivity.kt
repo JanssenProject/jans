@@ -69,7 +69,9 @@ fun CardListScreen() {
     val tokens by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "tokens.json")) }
     var logType by rememberSaveable { mutableStateOf("Decision") }
     val action by rememberSaveable { mutableStateOf(readJsonFromAssets(contextApplication, "action.txt")) }
-    val policyStoreByteArray by rememberSaveable {mutableStateOf(readZipFromAssets(contextApplication, "MyStore.cjar"))}
+    val policyStoreByteArray = remember(contextApplication) {
+        readZipFromAssets(contextApplication, "MyStore.cjar")
+    }
     var showDialog by remember { mutableStateOf(false) } // Controls modal visibility
 
 

@@ -19,6 +19,7 @@ fun jsonToTokenInputList(jsonString: String): List<TokenInput> {
         val type = object : TypeToken<List<TokenInput>>() {}.type
         Gson().fromJson<List<TokenInput>>(jsonString, type) ?: emptyList()
     } catch (e: Exception) {
+        ex.printStackTrace()
         emptyList()
     }
 }
@@ -32,9 +33,14 @@ fun readJsonFromAssets(context: Context, fileName: String): String? {
     }
 }
 
-fun readZipFromAssets(context: Context, fileName: String): ByteArray {
-    return context.assets.open(fileName).use { inputStream ->
-        inputStream.readBytes()
+fun readZipFromAssets(context: Context, fileName: String): ByteArray? {
+    return try {
+        context.assets.open(fileName).use { inputStream ->
+            inputStream.readBytes()
+        }
+    } catch (ex: IOException) {
+        ex.printStackTrace()
+        null
     }
 }
 

@@ -88,9 +88,15 @@ struct ContentView: View {
         do {
             
             let bootstrapConfigStr = Helper.dictionaryToString(bootstrapConfig)
-            let data = Data(cjarBytes ?? [])
-            let instance = try Cedarling.loadFromJsonWithArchiveBytes(config: bootstrapConfigStr, archiveBytes: data)
-            //loadFromJson(config: bootstrapConfigStr)
+            
+            guard let cjarBytes else {
+                resultMessage = "Policy archive MyStore.cjar is missing or unreadable."
+                return
+            }
+            let instance = try Cedarling.loadFromJsonWithArchiveBytes(
+                config: bootstrapConfigStr,
+                archiveBytes: Data(cjarBytes)
+            )
             
             let resourceStr = Helper.dictionaryToString(resource)
             let resourceEntity = try EntityData.fromJson(jsonString: resourceStr)
