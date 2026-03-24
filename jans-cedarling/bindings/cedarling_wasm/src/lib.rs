@@ -7,7 +7,7 @@ use cedarling::bindings::cedar_policy;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
     DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
-    RequestUnsigned,
+    RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
@@ -430,6 +430,38 @@ impl Cedarling {
             .get_stats_ctx()
             .map(|stats| stats.into())
             .map_err(Error::new)
+    }
+
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    pub fn total_issuers(&self) -> usize {
+        self.instance.total_issuers()
+    }
+
+    pub fn loaded_trusted_issuers_count(&self) -> usize {
+        self.instance.loaded_trusted_issuers_count()
+    }
+
+    pub fn loaded_trusted_issuer_ids(&self) -> Array {
+        let result = Array::new();
+        for id in self.instance.loaded_trusted_issuer_ids() {
+            result.push(&id.into());
+        }
+        result
+    }
+
+    pub fn failed_trusted_issuer_ids(&self) -> Array {
+        let result = Array::new();
+        for id in self.instance.failed_trusted_issuer_ids() {
+            result.push(&id.into());
+        }
+        result
     }
 }
 
