@@ -18,7 +18,7 @@ These methods are used to create a `BootstrapConfig` object, which is needed to 
 
 - `load_from_file(path)`
   
-    Creates a `BootstrapConfig` object by loading properties from a file 
+    Creates a `BootstrapConfig` object by loading properties from a file
 
 - `load_from_json(config_json)`
 
@@ -30,7 +30,7 @@ These methods are used to create a `BootstrapConfig` object, which is needed to 
 
 - `Cedarling(bootstrap_config)`
 
-    Initializes an instance of the Cedarling engine by reading the bootstrap configuration. 
+    Initializes an instance of the Cedarling engine by reading the bootstrap configuration.
 
 ## Authz
 
@@ -40,11 +40,11 @@ These methods are called to create an authorization request, run authorization, 
 
     Creates a principal or resource entity.
 
-    - `cedar_mapping`: A `CedarEntityMapping` object with `entity_type` (Cedar type name) and `id` (entity ID).
-    - `attributes`: A map of attribute names to values.
+  - `cedar_mapping`: A `CedarEntityMapping` object with `entity_type` (Cedar type name) and `id` (entity ID).
+  - `attributes`: A map of attribute names to values.
 
-    - `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
-    - `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
+  - `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
+  - `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
 
     **Note on field naming:** The Rust struct field is named `cedar_mapping`, but it serializes to `cedar_entity_mapping` in JSON (via `#[serde(rename)]`). When constructing in Rust, use `cedar_mapping`. When passing JSON (via `from_json`) or a Python dict (via `from_dict`), use `cedar_entity_mapping` as the key.
 
@@ -55,18 +55,18 @@ These methods are called to create an authorization request, run authorization, 
 - `TokenInput(mapping, payload)`
 
     Creates a `TokenInput` object representing a JWT token with an explicit type mapping. Used for multi-issuer authorization.
-    
-    - `mapping`: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
-    - `payload`: The JWT token string
+
+  - `mapping`: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+  - `payload`: The JWT token string
 
 - `AuthorizeMultiIssuerRequest(tokens, action, resource, context)`
 
-    Creates an `AuthorizeMultiIssuerRequest` object for multi-issuer authorization. 
-    
-    - `tokens`: Array of `TokenInput` objects
-    - `action`: The action to be authorized (required)
-    - `resource`: The resource entity being accessed (required)
-    - `context`: Optional additional context for policy evaluation
+    Creates an `AuthorizeMultiIssuerRequest` object for multi-issuer authorization.
+
+  - `tokens`: Array of `TokenInput` objects
+  - `action`: The action to be authorized (required)
+  - `resource`: The resource entity being accessed (required)
+  - `context`: Optional additional context for policy evaluation
 
 - `authorize_unsigned(request)`
 
@@ -90,8 +90,8 @@ The following methods are called on the result obtained from the authorization c
 
     A map of principal type names and entity UIDs to their Cedar `Response` objects. Each response provides:
 
-    - `decision()`: Whether this principal was allowed or denied
-    - `diagnostics()`: Detailed information including `reason()` (set of policy IDs) and `errors()` (list of evaluation errors)
+  - `decision()`: Whether this principal was allowed or denied
+  - `diagnostics()`: Detailed information including `reason()` (set of policy IDs) and `errors()` (list of evaluation errors)
 
 - `request_id`
 
@@ -111,10 +111,10 @@ The following methods are called on the result obtained from the authorization c
 
     The Cedar policy engine response containing detailed decision information
 
-    - `decision()` - Returns the decision (Allow/Deny)
-    - `diagnostics()` - Returns diagnostics including reasons and errors
-        - `reason()` - Set of policy IDs that contributed to an Allow decision
-        - `errors()` - List of errors encountered during policy evaluation
+  - `decision()` - Returns the decision (Allow/Deny)
+  - `diagnostics()` - Returns diagnostics including reasons and errors
+    - `reason()` - Set of policy IDs that contributed to an Allow decision
+    - `errors()` - List of errors encountered during policy evaluation
 
 - `request_id`
 
@@ -124,27 +124,27 @@ The following methods are called on the result obtained from the authorization c
 
 These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode.
 
-  - `pop_logs()`
+- `pop_logs()`
 
     Removes and returns the latest log from the memory of the Cedarling instance
 
-  - `get_log_by_id(id)`
+- `get_log_by_id(id)`
 
-    Retrieves a log given the ID of an active log entry. 
+    Retrieves a log given the ID of an active log entry.
 
-  - `get_log_ids()`
+- `get_log_ids()`
 
     Returns the list of all active log entries in Cedarling's memory.
 
-  - `get_logs_by_tag(tag)`
+- `get_logs_by_tag(tag)`
 
     Returns the list of all logs with a given tag. A tag can be either the type of log (System, Decision, Metric) or the [log level](./cedarling-logs.md#system-log-levels)
 
-  - `get_logs_by_request_id(request_id)`
+- `get_logs_by_request_id(request_id)`
 
     Returns the list of all logs with a given request ID. This request ID is obtained from an authorization result.
 
-  - `get_logs_by_request_id_and_tag(request_id, tag)`
+- `get_logs_by_request_id_and_tag(request_id, tag)`
 
     Returns the list of all logs with a given request ID **and** tag.
 
@@ -302,3 +302,40 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.
+
+## Trusted Issuer Loading Info
+
+The `TrustedIssuerLoadingInfo` trait provides information about the loading status of trusted issuers. This is useful for health checks, diagnostics, and verifying that Cedarling has successfully loaded the expected issuers before processing authorization requests.
+
+This interface is particularly useful when `CEDARLING_TRUSTED_ISSUER_LOADER_TYPE` is set to `ASYNC`. In async mode, Cedarling starts accepting requests immediately while issuers load in the background. Use these methods to check whether all issuers are ready before relying on authorization results.
+
+### Methods
+
+- `is_trusted_issuer_loaded_by_name(issuer_id)` — Returns `true` if the trusted issuer with the given policy store key is loaded.
+
+- `is_trusted_issuer_loaded_by_iss(iss_claim)` — Returns `true` if the trusted issuer with the given `iss` claim value is loaded.
+
+- `total_issuers()` — Returns the total number of trusted issuers expected to be loaded (from the policy store configuration).
+
+- `loaded_trusted_issuers_count()` — Returns the number of trusted issuers that have been successfully loaded.
+
+- `loaded_trusted_issuer_ids()` — Returns the set of issuer IDs that have been successfully loaded.
+
+- `failed_trusted_issuer_ids()` — Returns the set of issuer IDs that encountered errors during loading. Failed issuers are still counted toward total processing count.
+
+### Example
+
+```rust
+use cedarling::{Cedarling, TrustedIssuerLoadingInfo};
+
+fn check_health(cedarling: &Cedarling) {
+    let total = cedarling.total_issuers();
+    let loaded = cedarling.loaded_trusted_issuers_count();
+    let failed = cedarling.failed_trusted_issuer_ids();
+
+    println!("Issuers: {loaded}/{total} loaded");
+    if !failed.is_empty() {
+        println!("Failed issuers: {:?}", failed);
+    }
+}
+```
