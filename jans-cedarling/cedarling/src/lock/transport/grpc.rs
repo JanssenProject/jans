@@ -22,7 +22,9 @@ use crate::{
     lock::{
         LockLogEntry,
         proto::{BulkLogRequest, LogEntry, audit_service_client::AuditServiceClient},
-        transport::{AuditTransport, SerializedLogEntry, TransportError, TransportResult},
+        transport::{
+            AuditKind, AuditTransport, SerializedAuditEntry, TransportError, TransportResult,
+        },
     },
     log::{LogWriter, Logger},
 };
@@ -102,7 +104,11 @@ impl GrpcTransport {
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for GrpcTransport {
-    async fn send_logs(&self, entries: &[SerializedLogEntry]) -> TransportResult<()> {
+    async fn send(
+        &self,
+        entries: &[SerializedAuditEntry],
+        audit_kind: &AuditKind,
+    ) -> TransportResult<()> {
         if entries.is_empty() {
             return Ok(());
         }
@@ -401,7 +407,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -418,7 +427,10 @@ mod test {
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         transport
-            .send_logs(&[])
+            .send(
+                &[],
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -434,7 +446,10 @@ mod test {
         let entries = vec!["not valid json".to_string().into_boxed_str()];
 
         let error = transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect_err("this should cause a serialization error");
         assert!(
@@ -459,7 +474,10 @@ mod test {
         ];
 
         let error = transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect_err("this should cause a server error");
 
@@ -499,7 +517,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -531,7 +552,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully despite malformed entries");
 
@@ -570,7 +594,10 @@ mod test {
         ];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -602,7 +629,10 @@ mod test {
         let entries = vec![r#"{ "service": "minimal" }"#.to_string().into_boxed_str()];
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 
@@ -630,7 +660,10 @@ mod test {
             .collect();
 
         transport
-            .send_logs(&entries)
+            .send(
+                &entries,
+                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+            )
             .await
             .expect("logs should be sent successfully");
 

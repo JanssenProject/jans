@@ -8,7 +8,7 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::lock::transport::{AuditTransport, SerializedLogEntry};
+use crate::lock::transport::{AuditKind, AuditTransport, SerializedAuditEntry};
 use crate::log::LoggerWeak;
 
 use super::WORKER_HTTP_RETRY_DUR;
@@ -22,34 +22,31 @@ use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 
 /// Responsible for sending logs to the lock server
-pub(super) struct LogWorker<T: AuditTransport> {
-    // it would be nice to store a struct here but we can't really store
-    // `VecDeque<dyn Loggable>` so we just serialize the logs before storing them in the
-    // buffer.
-    //
-    // TODO: should we cap the capacity? what to do with the excess logs if the buffer
-    // becomes full?
-    log_buffer: VecDeque<SerializedLogEntry>,
-    log_interval: Duration,
+pub(super) struct AuditWorker<T: AuditTransport> {
+    buffer: VecDeque<SerializedAuditEntry>,
+    audit_interval: Duration,
     transport: Arc<T>,
+    kind: AuditKind,
     logger: Option<LoggerWeak>,
     max_retries: u32,
 }
 
-impl<T> LogWorker<T>
+impl<T> AuditWorker<T>
 where
     T: AuditTransport + 'static,
 {
     pub(super) fn new(
-        log_interval: Duration,
+        audit_interval: Duration,
         transport: Arc<T>,
+        kind: AuditKind,
         logger: Option<LoggerWeak>,
         max_retries: u32,
     ) -> Self {
         Self {
-            log_interval,
-            log_buffer: VecDeque::new(),
+            audit_interval,
+            buffer: VecDeque::new(),
             transport,
+            kind,
             logger,
             max_retries,
         }
@@ -57,68 +54,72 @@ where
 
     pub(super) async fn run(
         &mut self,
-        mut log_rx: mpsc::Receiver<SerializedLogEntry>,
+        mut rx: mpsc::Receiver<SerializedAuditEntry>,
         cancel_tkn: CancellationToken,
     ) {
         loop {
             tokio::select! {
-                // Append log to the buffer
-                log_entry = log_rx.next() => {
-                    let Some(log_entry) = log_entry else {
-                        break;
-                    };
-                    self.log_buffer.push_back(log_entry);
+                entry = rx.next() => {
+                    let Some(entry) = entry else { break; };
+                    self.buffer.push_back(entry);
                 },
 
                 // Send logs to the server
-                () = sleep(self.log_interval) => {
-                    self.flush_logs(&cancel_tkn).await;
+                () = sleep(self.audit_interval) => {
+                    self.flush(&cancel_tkn).await;
                 },
 
                 () = cancel_tkn.cancelled() => {
-                    let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
-                    self.flush_logs(&cancel_tkn).await;
-                    logger.log_any(LockLogEntry::info(
-                        "gracefully shutting down lock log worker",
-                    ));
+                    self.flush(&cancel_tkn).await;
+                    self.logger
+                        .as_ref()
+                        .and_then(std::sync::Weak::upgrade)
+                        .log_any(LockLogEntry::info(format!(
+                            "audit worker ({}) shut down cleanly, flushed {} entries",
+                            self.kind.url(),
+                            self.buffer.len(), // will be 0 if flush succeeded
+                        )));
                     break;
                 }
             }
         }
     }
 
-    async fn flush_logs(&mut self, cancel_tkn: &CancellationToken) {
+    async fn flush(&mut self, cancel_tkn: &CancellationToken) {
         // save the length at the time the function is called
-        let batch_size = self.log_buffer.len();
+        let batch_size = self.buffer.len();
         if batch_size == 0 {
             return;
         }
 
-        let entries: Vec<SerializedLogEntry> = self.log_buffer.drain(0..batch_size).collect();
+        let entries: Vec<SerializedAuditEntry> = self.buffer.drain(..).collect();
 
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
 
         loop {
-            match self.transport.send_logs(&entries).await {
+            match self.transport.send(&entries, &self.kind).await {
                 Ok(()) => {
                     logger.log_any(LockLogEntry::info(format!(
-                        "sent {batch_size} log entries to lock server",
+                        "sent {batch_size} entries to {} audit endpoint",
+                        self.kind.url(),
                     )));
-                    break;
+                    return;
                 },
                 Err(err) => {
                     logger.log_any(LockLogEntry::error(format!(
-                        "failed to send logs to lock server: {err}"
+                        "failed to send to {} audit endpoint: {err}",
+                        self.kind.url(),
                     )));
+
                     tokio::select! {
                         _ = backoff.snooze() => {},
                         () = cancel_tkn.cancelled() => {
-                            logger.log_any(LockLogEntry::warn(
-                                "cancellation requested during retry; dropping batch"
-                            ));
+                            logger.log_any(LockLogEntry::warn(format!(
+                                "cancellation requested during retry; dropping {batch_size} entries"
+                            )));
                             break;
-                        }
+                        },
                     }
                 },
             }
@@ -126,14 +127,15 @@ where
     }
 }
 
-impl<T: AuditTransport> Drop for LogWorker<T> {
+impl<T: AuditTransport> Drop for AuditWorker<T> {
     fn drop(&mut self) {
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
 
-        if !self.log_buffer.is_empty() {
-            logger.log_any(LockLogEntry::warn(
-                "log worker still has some log entries that were not sent to the lock server. did you forget to call Cedarling.shut_down()?",
-            ));
+        if !self.buffer.is_empty() {
+            logger.log_any(LockLogEntry::warn(format!(
+                "{} entries dropped on worker teardown — did you call shut_down()?",
+                self.buffer.len(),
+            )));
         }
     }
 }

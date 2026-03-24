@@ -126,7 +126,7 @@ use crate::{LockServiceConfig, LockTransport, LogWriter};
 use futures::channel::mpsc;
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
-use log_worker::LogWorker;
+use log_worker::AuditWorker;
 use register_client::{ClientRegistrationError, register_client};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -134,14 +134,14 @@ use ssa_validation::validate_ssa_jwt;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio_util::sync::CancellationToken;
-use transport::{SerializedLogEntry, rest::RestTransport};
+use transport::{AuditKind, SerializedAuditEntry, rest::RestTransport};
 
 /// The base duration to wait for if an http request fails for workers.
 pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
 #[derive(Debug)]
 struct WorkerSenderAndHandle {
-    tx: RwLock<mpsc::Sender<SerializedLogEntry>>,
+    tx: RwLock<mpsc::Sender<SerializedAuditEntry>>,
     handle: crate::http::JoinHandle<()>,
 }
 
@@ -149,6 +149,7 @@ struct WorkerSenderAndHandle {
 #[derive(Debug)]
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
+    telemetry_worker: Option<WorkerSenderAndHandle>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
 }
@@ -220,9 +221,9 @@ impl LockService {
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
             (Some(log_interval), Some(log_endpoint)) => {
-                let worker = create_log_worker(
+                let worker = create_worker(
                     bootstrap_conf,
-                    log_endpoint,
+                    AuditKind::Log(log_endpoint.0),
                     &client_creds.access_token,
                     log_interval,
                     logger.clone(),
@@ -234,8 +235,27 @@ impl LockService {
             _ => None,
         };
 
+        let telemetry_worker = match (
+            bootstrap_conf.telemetry_interval,
+            lock_config.audit_endpoints.telemetry,
+        ) {
+            (Some(telemetry_interval), Some(telemetry_endpoint)) => {
+                let worker = create_worker(
+                    bootstrap_conf,
+                    AuditKind::Telemetry(telemetry_endpoint.0),
+                    &client_creds.access_token,
+                    telemetry_interval,
+                    logger.clone(),
+                    cancel_tkn.clone(),
+                )?;
+                Some(worker)
+            },
+            _ => None,
+        };
+
         Ok(Self {
             log_worker,
+            telemetry_worker,
             logger,
             cancel_tkn,
         })
@@ -243,21 +263,57 @@ impl LockService {
 
     pub(crate) async fn shut_down(&mut self) {
         self.cancel_tkn.cancel();
-        if let Some(log_worker) = self.log_worker.take() {
-            () = log_worker.handle.await_result().await;
+        if let Some(worker) = self.log_worker.take() {
+            () = worker.handle.await_result().await;
+        }
+        if let Some(worker) = self.telemetry_worker.take() {
+            () = worker.handle.await_result().await;
         }
     }
 }
 
-fn create_log_worker(
+impl LockService {
+    fn dispatch_entry<T: Loggable>(
+        &self,
+        worker: Option<&WorkerSenderAndHandle>,
+        entry: &T,
+        worker_name: &str,
+    ) {
+        let Some(WorkerSenderAndHandle { tx, .. }) = worker.as_ref() else {
+            return;
+        };
+
+        let serialized = serde_json::to_string(entry)
+            .expect("log entry must be serializable")
+            .into_boxed_str();
+
+        let mut sender = match tx.write() {
+            Ok(s) => s,
+            Err(err) => {
+                self.logger.log_any(LockLogEntry::error(format!(
+                    "failed to acquire write lock on {worker_name} sender: {err}"
+                )));
+                return;
+            },
+        };
+
+        if let Err(err) = sender.try_send(serialized) {
+            self.logger.log_any(LockLogEntry::error(format!(
+                "{worker_name} channel send failed (full or closed): {err}"
+            )));
+        }
+    }
+}
+
+fn create_worker(
     bootstrap_conf: &LockServiceConfig,
-    log_endpoint: lock_config::Url,
+    audit_kind: AuditKind,
     access_token: &str,
-    log_interval: Duration,
+    audit_interval: Duration,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
 ) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
-    let (log_tx, log_rx) = mpsc::channel::<SerializedLogEntry>(bootstrap_conf.log_channel_capacity);
+    let (tx, rx) = mpsc::channel::<SerializedAuditEntry>(bootstrap_conf.log_channel_capacity);
 
     match bootstrap_conf.transport {
         LockTransport::Rest => {
@@ -275,21 +331,20 @@ fn create_log_worker(
 
             let transport = Arc::new(RestTransport::new(
                 http_client,
-                log_endpoint.0,
                 logger.as_ref().and_then(std::sync::Weak::upgrade),
             ));
 
-            let mut log_worker = LogWorker::new(
-                log_interval,
+            let mut worker = AuditWorker::new(
+                audit_interval,
                 transport,
+                audit_kind,
                 logger,
                 bootstrap_conf.log_max_retries,
             );
-            let handle =
-                crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+            let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
             Ok(WorkerSenderAndHandle {
-                tx: log_tx.into(),
+                tx: tx.into(),
                 handle,
             })
         },
@@ -298,21 +353,23 @@ fn create_log_worker(
             use transport::grpc::GrpcTransport;
 
             let transport = Arc::new(GrpcTransport::new(
-                log_endpoint.0.origin().ascii_serialization(),
+                audit_kind.url().origin().ascii_serialization(),
                 access_token,
                 logger.as_ref().and_then(std::sync::Weak::upgrade),
             )?);
-            let mut log_worker = LogWorker::new(
-                log_interval,
+
+            let mut worker = AuditWorker::new(
+                audit_interval,
                 transport,
+                audit_kind,
                 logger,
                 bootstrap_conf.log_max_retries,
             );
-            let handle =
-                crate::http::spawn_task(async move { log_worker.run(log_rx, cancel_tkn).await });
+
+            let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
             Ok(WorkerSenderAndHandle {
-                tx: log_tx.into(),
+                tx: tx.into(),
                 handle,
             })
         },
@@ -321,36 +378,12 @@ fn create_log_worker(
 
 impl LogWriter for LockService {
     fn log_any<T: Loggable>(&self, entry: T) {
-        if let Some(log_kind) = entry.get_log_kind() {
-            match log_kind {
-                LogType::Decision => {
-                    let Some(WorkerSenderAndHandle { tx: tx_lock, .. }) = self.log_worker.as_ref()
-                    else {
-                        return;
-                    };
-
-                    let entry = serde_json::to_string(&entry)
-                        .expect("entry should serialize successfully")
-                        .into_boxed_str();
-
-                    let mut log_tx = match tx_lock.write() {
-                        Ok(log_tx) => log_tx,
-                        Err(err) => {
-                            self.logger.log_any(LockLogEntry::error(format!(
-                                "failed to acquire write lock for the LockLogSender. cedarling will not be able to send this entry to the lock server: {err}"
-                            )));
-                            return;
-                        },
-                    };
-
-                    if let Err(err) = log_tx.try_send(entry) {
-                        self.logger.log_any(LockLogEntry::error(format!(
-                            "failed to send log entry to LogWorker, the thread may have unexpectedly closed or is full: {err}"
-                        )));
-                    }
-                },
-                LogType::System | LogType::Metric => (),
-            }
+        match entry.get_log_kind() {
+            Some(LogType::Decision) => self.dispatch_entry(self.log_worker.as_ref(), &entry, "log"),
+            Some(LogType::Metric) => {
+                self.dispatch_entry(self.telemetry_worker.as_ref(), &entry, "telemetry");
+            },
+            _ => {},
         }
     }
 
