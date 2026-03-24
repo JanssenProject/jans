@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::Cedarling;
+use crate::CedarlingError;
 use crate::{EntityData, JsonValue};
 use serde_json::json;
 use std::sync::Arc;
@@ -77,6 +78,19 @@ fn create_test_cedarling() -> Cedarling {
         "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
     ))
     .expect("Error in initializing Cedarling")
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_rejects_invalid() {
+    let config =
+        std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable");
+    let result = Cedarling::load_from_json_with_archive_bytes(config, vec![0x00, 0x01, 0x02, 0x03]);
+    assert!(
+        matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
+        "invalid archive bytes should yield InitializationFailed, is_ok={}",
+        result.is_ok()
+    );
 }
 
 #[test]

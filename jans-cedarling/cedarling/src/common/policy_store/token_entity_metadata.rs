@@ -6,7 +6,6 @@
 
 use std::collections::HashSet;
 
-use super::parse_option_string;
 use serde::Deserialize;
 use typed_builder::TypedBuilder;
 
@@ -31,9 +30,6 @@ pub(crate) struct TokenEntityMetadata {
     #[serde(default = "default_token_id")]
     #[builder(default = default_token_id())]
     pub(crate) token_id: String,
-    #[serde(deserialize_with = "parse_option_string", default)]
-    #[builder(default)]
-    pub(crate) workload_id: Option<String>,
     /// The claims in this Vec will be required on token validation and will be
     /// validated if it is a registered claim listed in [`RFC 7519, Section 4.1`] (<https://datatracker.ietf.org/doc/html/rfc7519#section-4.1>)
     #[serde(default)]
@@ -60,7 +56,6 @@ impl TokenEntityMetadata {
             required_claims: HashSet::from(["iss".into(), "exp".into(), "jti".into()]),
             entity_type_name: "Jans::Access_token".into(),
             principal_mapping: HashSet::from(["Jans::Workload".into()]),
-            workload_id: Some("aud".into()),
         }
     }
 
@@ -77,7 +72,6 @@ impl TokenEntityMetadata {
             ]),
             entity_type_name: "Jans::Id_token".into(),
             principal_mapping: HashSet::from(["Jans::User".into()]),
-            workload_id: None,
         }
     }
 
@@ -94,7 +88,6 @@ impl TokenEntityMetadata {
             ]),
             entity_type_name: "Jans::Userinfo_token".into(),
             principal_mapping: HashSet::from(["Jans::User".into()]),
-            workload_id: None,
         }
     }
 }

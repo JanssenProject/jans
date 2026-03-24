@@ -136,7 +136,7 @@ impl JwtService {
     /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
     /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
     /// * `logger` - Optional logger for diagnostic messages
-    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 to disable caching)
+    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 means no TTL limit — the token's `exp` claim is used instead)
     ///
     /// # Errors
     ///
@@ -531,7 +531,6 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
                 required_claims: HashSet::new(),
             },
         );
@@ -542,7 +541,6 @@ mod test {
                 entity_type_name: "Jans::Id_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
                 required_claims: HashSet::new(),
             },
         );
@@ -660,7 +658,7 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
+
                 required_claims: HashSet::new(),
             },
         );
@@ -671,7 +669,7 @@ mod test {
                 entity_type_name: "Jans::Id_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
+
                 required_claims: HashSet::new(),
             },
         );
@@ -737,7 +735,7 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                workload_id: None,
+
                 required_claims: HashSet::new(),
             },
         );

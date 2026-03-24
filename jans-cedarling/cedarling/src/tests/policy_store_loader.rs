@@ -231,7 +231,6 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
         "token_metadata": {{
             "access_token": {{
                 "entity_type_name": "Jans::Access_token",
-                "workload_id": "client_id",
                 "principal_mapping": ["Jans::Workload"]
             }},
             "id_token": {{
@@ -258,7 +257,6 @@ fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) 
         "token_metadata": {{
             "access_token": {{
                 "entity_type_name": "Jans::Access_token",
-                "workload_id": "client_id",
                 "principal_mapping": ["Jans::Workload"]
             }},
             "id_token": {{
