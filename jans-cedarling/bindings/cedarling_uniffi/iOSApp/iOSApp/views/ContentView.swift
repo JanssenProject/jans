@@ -89,8 +89,16 @@ struct ContentView: View {
             
             let bootstrapConfigStr = Helper.dictionaryToString(bootstrapConfig)
             
-            guard let cjarBytes else {
-                resultMessage = "Policy archive MyStore.cjar is missing or unreadable."
+            guard let cjarBytes, !cjarBytes.isEmpty else {
+                let message = "Policy archive MyStore.cjar is missing or unreadable."
+                resultMessage = message
+                modelTitle = "Authorization Error"
+                modelTextField = message
+                modelJsonField = ""
+                modelJsonLogField = ""
+                isAuthzRequest = false
+                self.authzRequestType = .none
+                showModal = true
                 return
             }
             let instance = try Cedarling.loadFromJsonWithArchiveBytes(
@@ -136,8 +144,16 @@ struct ContentView: View {
             showModal = true
             
         } catch {
-            print("❌ Unexpected error: \(error)")
-            resultMessage = "Unexpected error occurred: \(error)"
+            let message = "Unexpected error occurred: \(error)"
+            print("❌ \(message)")
+            resultMessage = message
+            modelTitle = "Authorization Error"
+            modelTextField = message
+            modelJsonField = ""
+            modelJsonLogField = ""
+            isAuthzRequest = false
+            self.authzRequestType = .none
+            showModal = true
         }
     }
     
