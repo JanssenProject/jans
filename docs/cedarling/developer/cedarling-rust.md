@@ -390,6 +390,6 @@ let config = BootstrapConfig {
 
 - [Getting Started with Cedarling Rust](../tutorials/rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
 - [Cedarling Properties](../reference/cedarling-properties.md)
