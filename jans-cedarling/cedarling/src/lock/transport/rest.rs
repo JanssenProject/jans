@@ -47,19 +47,16 @@ impl AuditTransport for RestTransport {
             return Ok(());
         }
 
-        let mut skipped = 0usize;
         let logs: Vec<LockServerLogEntry> = entries
             .iter()
             .filter_map(|v| {
-                if let Ok(entry) = serde_json::from_str::<CedarlingLogEntry>(v) {
-                    Some(LockServerLogEntry::from(entry))
-                } else {
-                    skipped += 1;
-                    None
-                }
+                serde_json::from_str::<CedarlingLogEntry>(v)
+                    .ok()
+                    .and_then(|entry| LockServerLogEntry::try_from(entry).ok())
             })
             .collect();
 
+        let skipped = entries.len() - logs.len();
         if skipped > 0 {
             self.logger.log_any(LockLogEntry::warn(format!(
                 "skipped {skipped} entries because they were malformed"

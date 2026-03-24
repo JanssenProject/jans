@@ -77,19 +77,17 @@ impl AuditTransport for GrpcTransport {
             return Ok(());
         }
 
-        let mut skipped = 0usize;
         let proto_entries: Vec<_> = entries
             .iter()
             .filter_map(|v| {
-                if let Ok(entry) = serde_json::from_str::<CedarlingLogEntry>(v) {
-                    Some(json_to_proto(LockServerLogEntry::from(entry)))
-                } else {
-                    skipped += 1;
-                    None
-                }
+                serde_json::from_str::<CedarlingLogEntry>(v)
+                    .ok()
+                    .and_then(|entry| LockServerLogEntry::try_from(entry).ok())
+                    .map(json_to_proto)
             })
             .collect();
 
+        let skipped = entries.len() - proto_entries.len();
         if skipped > 0 {
             self.logger.log_any(LockLogEntry::warn(format!(
                 "skipped {skipped} entries because they were malformed"
@@ -289,7 +287,8 @@ mod test {
         }"#;
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let proto_entry = json_to_proto(LockServerLogEntry::from(json_entry));
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date,
@@ -326,15 +325,18 @@ mod test {
             "timestamp": "2026-03-23T11:50:37.504Z",
             "application_id": "minimal-service",
             "pdp_id": "node-1",
-            "log_kind": "test"
+            "log_kind": "Decision",
+            "decision": "ALLOW",
+            "action": "Test::Action",
+            "resource": "Test::Resource"
         }"#;
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::from(json_entry);
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
         let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(proto_entry.service, "minimal-service");
-        assert_eq!(proto_entry.event_type, "test");
+        assert_eq!(proto_entry.event_type, "Decision");
         assert_eq!(proto_entry.node_name, "node-1");
         assert!(proto_entry.creation_date.is_some());
     }
@@ -416,7 +418,10 @@ mod test {
                 "timestamp": "2026-03-23T11:50:37.504Z",
                 "application_id": "test",
                 "pdp_id": "node",
-                "log_kind": "test"
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -443,7 +448,10 @@ mod test {
                 "timestamp": "2026-03-23T11:50:37.504Z",
                 "application_id": "valid-service-1",
                 "pdp_id": "node-1",
-                "log_kind": "event-1"
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -452,7 +460,10 @@ mod test {
                 "timestamp": "2026-03-23T11:50:37.506Z",
                 "application_id": "valid-service-2",
                 "pdp_id": "node-2",
-                "log_kind": "event-2"
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -479,7 +490,10 @@ mod test {
                 "timestamp": "2026-03-23T11:50:37.504Z",
                 "application_id": "service-1",
                 "pdp_id": "node-1",
-                "log_kind": "event-1"
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -487,7 +501,10 @@ mod test {
                 "timestamp": "2026-03-23T11:50:37.505Z",
                 "application_id": "service-2",
                 "pdp_id": "node-2",
-                "log_kind": "event-2"
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -495,7 +512,10 @@ mod test {
                 "timestamp": "2026-03-23T11:50:37.506Z",
                 "application_id": "service-3",
                 "pdp_id": "node-3",
-                "log_kind": "event-3"
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -566,7 +586,11 @@ mod test {
             r#"{
             "timestamp": "2026-03-23T11:50:37.504Z",
             "application_id": "minimal",
-            "pdp_id": "test-pdp"
+            "pdp_id": "test-pdp",
+            "log_kind": "Decision",
+            "decision": "ALLOW",
+            "action": "Test::Action",
+            "resource": "Test::Resource"
         }"#
             .to_string()
             .into_boxed_str(),
@@ -630,7 +654,7 @@ mod test {
         }"#;
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::from(json_entry);
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
         let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(
@@ -653,13 +677,16 @@ mod test {
     fn test_large_negative_timestamp() {
         let json_str = r#"{
             "timestamp": "1900-01-01T00:00:00Z",
-            "log_kind": "System",
+            "log_kind": "Decision",
+            "action": "Test",
+            "decision": "ALLOW",
+            "resource": "Test::Resource",
             "application_id": "historical-service",
             "pdp_id": "node-1"
         }"#;
 
         let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
-        let lock_entry = LockServerLogEntry::from(json_entry);
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
         let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(

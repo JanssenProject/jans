@@ -455,7 +455,7 @@ mod test {
         let log_entry = MockLogEntry {
             timestamp: "2026-03-23T11:50:37.504Z".to_string(),
             level: LogLevel::TRACE,
-            kind: LogType::Decision,
+            log_kind: LogType::Decision,
             decision: "ALLOW".to_string(),
             action: "Test".to_string(),
             principal: vec!["Jans::User".to_string()],
@@ -513,7 +513,7 @@ mod test {
         let log_entry = MockLogEntry {
             timestamp: "2026-03-23T11:50:37.504Z".to_string(),
             level: LogLevel::TRACE,
-            kind: LogType::Decision,
+            log_kind: LogType::Decision,
             decision: "ALLOW".to_string(),
             action: "Test".to_string(),
             principal: vec!["Jans::User".to_string()],
@@ -752,7 +752,7 @@ mod test {
     struct MockLogEntry {
         timestamp: String,
         level: LogLevel,
-        kind: LogType,
+        log_kind: LogType,
         decision: String,
         action: String,
         principal: Vec<String>,
@@ -767,7 +767,7 @@ mod test {
         }
 
         fn get_log_kind(&self) -> Option<crate::log::LogType> {
-            Some(self.kind)
+            Some(self.log_kind)
         }
     }
 

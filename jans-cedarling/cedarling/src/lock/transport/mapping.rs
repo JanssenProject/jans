@@ -8,20 +8,22 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+#[derive(Debug, thiserror::Error)]
+pub(super) enum MappingValidationError {
+    #[error("missing required field")]
+    MissingField,
+}
+
 #[derive(Debug, Deserialize)]
 pub(super) struct CedarlingLogEntry {
     pub timestamp: String,
-    #[serde(default)]
     pub log_kind: String,
-    #[serde(default)]
     pub decision: String,
-    #[serde(default)]
     pub action: String,
     pub level: Option<String>,
     // Cedarling emits principal as an array of entity strings
     #[serde(default)]
     pub principal: Vec<String>,
-    #[serde(default)]
     pub resource: String,
     pub application_id: String,
     pub pdp_id: String,
@@ -52,8 +54,18 @@ pub(super) struct LockServerLogEntry {
     pub context_information: Option<Value>,
 }
 
-impl From<CedarlingLogEntry> for LockServerLogEntry {
-    fn from(value: CedarlingLogEntry) -> Self {
+impl TryFrom<CedarlingLogEntry> for LockServerLogEntry {
+    type Error = MappingValidationError;
+
+    fn try_from(value: CedarlingLogEntry) -> Result<Self, Self::Error> {
+        if value.log_kind.is_empty()
+            || value.decision.is_empty()
+            || value.action.is_empty()
+            || value.resource.is_empty()
+        {
+            return Err(MappingValidationError::MissingField);
+        }
+
         let mut extra = value.extra;
         let client_id = extra
             .remove("lock_client_id")
@@ -64,7 +76,7 @@ impl From<CedarlingLogEntry> for LockServerLogEntry {
             Some(Value::Object(extra.into_iter().collect()))
         };
 
-        Self {
+        Ok(Self {
             creation_date: value.timestamp.clone(),
             event_time: value.timestamp,
             service: Some(value.application_id),
@@ -81,6 +93,6 @@ impl From<CedarlingLogEntry> for LockServerLogEntry {
             },
             client_id,
             context_information,
-        }
+        })
     }
 }
