@@ -33,16 +33,16 @@ The Cedarling can be:
 The Cedarling is not merely a library--it is an embeddable Policy Decision Point (PDP),
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
-Janssen Lock Server to centralize collection of decision logs--a record of allowed or denied 
-access to a capability. Lock Server can enable enterprises to perform threat detection and 
+Janssen Lock Server to centralize collection of decision logs--a record of allowed or denied
+access to a capability. Lock Server can enable enterprises to perform threat detection and
 stream the logs to a SIEM or ITDR.
 
-The Cedarling supports JWT validation and claims mapping. Validation includes checking the 
-signature against a list of trusted issuers, validating the contents of the token (e.g. 
-check the `exp` and `nbf`), and checking if the JWT is active or revoked via the 
-[OAuth Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-19.html) 
-specification. Claims mapping provides a mechanism to map data from the JWT payload to Cedar 
-entities, making the data available for policy evaluation. 
+The Cedarling supports JWT validation and claims mapping. Validation includes checking the
+signature against a list of trusted issuers, validating the contents of the token (e.g.
+check the `exp` and `nbf`), and checking if the JWT is active or revoked via the
+[OAuth Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-19.html)
+specification. Claims mapping provides a mechanism to map data from the JWT payload to Cedar
+entities, making the data available for policy evaluation.
 
 !!! tip "About Cedar"
 
@@ -104,17 +104,17 @@ The following diagram is a high-level picture of the Cedarling components:
 * **Lock Engine** is used for enterprise deployments to load the Policy Store from a 
   trusted source and send logs for central storage. 
 
-## Proof-based authorization: Token Based Access Control (TBAC) 
+## Proof-based authorization: Token-Based Access Control (TBAC)
 
 TBAC helps developers implement security based on JWTs from trusted issuers like identity
-providers, hardware platforms, and federations. 
+providers, hardware platforms, and federations.
 
 The Cedarling `authorize_multi_issuer` interface allows the developer to pass not one
-token, but several tokens--even if they are signed by different issuers. This enables 
-the developer to assert not only the human identity, for example an `id_token`, but 
+token, but several tokens--even if they are signed by different issuers. This enables
+the developer to assert not only the human identity, for example an `id_token`, but
 other tokens like access tokens or transaction tokens, or whatever new kind of tokens
-may next evovle. The Cedarling answers this question: *"Given this bundle of tokens, is this action on this resource allowed in this context?"* 
-Or you could say more simply, *"Does this bundle of tokens authorize this capability?"* 
+may next evolve. The Cedarling answers this question: *"Given this bundle of tokens, is this action on this resource allowed in this context?"*
+Or you could say more simply, *"Does this bundle of tokens authorize this capability?"*
 
 ## Cedarling and Zero Trust
 
