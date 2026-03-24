@@ -429,7 +429,6 @@ mod test {
             entity_type_name: "Jans::AccessToken".into(),
             principal_mapping: HashSet::new(),
             token_id: "jti".into(),
-            workload_id: None,
             required_claims: HashSet::from(["exp".into(), "nbf".into()]),
         });
 

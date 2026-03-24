@@ -8,9 +8,11 @@ tags:
   - operations
 ---
 
-# User-Workload Boolean Operation
+# Principal Boolean Operation
 
-The `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` property specifies what boolean operation to use when combining authorization decisions for `USER` and `WORKLOAD` principals. This JSON Logic rule determines the final authorization outcome based on individual principal decisions.
+The `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` property specifies what boolean operation to use when combining per-principal authorization decisions. This JSON Logic rule determines the final authorization outcome based on individual principal decisions.
+
+> **Important:** This configuration only applies to `authorize_unsigned`. The `authorize_multi_issuer` method does not use principals and ignores this setting entirely. If you are using `authorize_multi_issuer`, you do not need to configure this property.
 
 We use [JsonLogic](https://jsonlogic.com/) to define the boolean operation. The rule is evaluated against each principal decision, and the final result is determined based on the specified operation.
 
