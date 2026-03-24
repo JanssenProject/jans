@@ -3,10 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::{
-    issuer_utils::IssClaim,
-    policy_store::{ClaimMappings, TokenEntityMetadata, TrustedIssuer},
-};
+use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
@@ -27,14 +24,6 @@ impl Token {
             iss,
             claims,
         }
-    }
-
-    pub(crate) fn get_metadata(&self) -> Option<&TokenEntityMetadata> {
-        self.iss.as_ref()?.get_token_metadata(&self.name)
-    }
-
-    pub(crate) fn claim_mappings(&self) -> Option<&ClaimMappings> {
-        self.iss.as_ref()?.get_claim_mapping(&self.name)
     }
 
     pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
@@ -88,10 +77,7 @@ impl From<Value> for TokenClaims {
 
 impl TokenClaims {
     pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
-        self.claims.get(name).map(|value| TokenClaim {
-            key: name.to_string(),
-            value,
-        })
+        self.claims.get(name).map(|value| TokenClaim { value })
     }
 
     pub(crate) fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
@@ -102,67 +88,14 @@ impl TokenClaims {
             .map(|value| HashMap::from([(claim.to_string(), value.clone())]))
             .unwrap_or_default()
     }
-
-    // Update TokenClaims claim value by consuming itself.
-    // Consuming allows to be sure that only one instance exist.
-    pub(crate) fn with_claim(self, k: String, v: Value) -> Self {
-        let mut claims = self;
-        claims.claims.insert(k, v);
-
-        claims
-    }
 }
 
 pub(crate) struct TokenClaim<'a> {
-    key: String,
     value: &'a serde_json::Value,
 }
 
 impl TokenClaim<'_> {
-    pub(crate) fn as_str(&self) -> Result<&str, TokenClaimTypeError> {
-        self.value
-            .as_str()
-            .ok_or(TokenClaimTypeError::type_mismatch(
-                &self.key, "String", self.value,
-            ))
-    }
-
     pub(crate) fn value(&self) -> &Value {
         self.value
-    }
-}
-
-#[derive(Debug, thiserror::Error, PartialEq)]
-#[error(
-    "type mismatch for token claim '{key}'. expected: '{expected_type}', but found: '{actual_type}'"
-)]
-pub struct TokenClaimTypeError {
-    pub key: String,
-    pub expected_type: String,
-    pub actual_type: String,
-}
-
-impl TokenClaimTypeError {
-    /// Returns the JSON type name of the given value.
-    pub fn json_value_type_name(value: &Value) -> String {
-        match value {
-            Value::Null => "null".to_string(),
-            Value::Bool(_) => "bool".to_string(),
-            Value::Number(_) => "number".to_string(),
-            Value::String(_) => "string".to_string(),
-            Value::Array(_) => "array".to_string(),
-            Value::Object(_) => "object".to_string(),
-        }
-    }
-
-    /// Constructs a `TypeMismatch` error with detailed information about the expected and actual types.
-    pub fn type_mismatch(key: &str, expected_type_name: &str, got_value: &Value) -> Self {
-        let got_value_type_name = Self::json_value_type_name(got_value);
-
-        Self {
-            key: key.to_string(),
-            expected_type: expected_type_name.to_string(),
-            actual_type: got_value_type_name,
-        }
     }
 }

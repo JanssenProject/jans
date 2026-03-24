@@ -39,12 +39,7 @@
 //!
 //! ## Usage
 //!
-//! The primary interface for token validation is [`JwtService::validate_tokens`].
-//!
-//! This method accepts a [`HashMap<String, String>`] representing the tokens, typically
-//! passed in through [`Cedarling::authorize`]. Each entry in the map is a
-//! `(token_name, jwt_string)` pair.
-//!
+//! Token validation is used when evaluating requests via [`authorize_multi_issuer`](crate::Authz::authorize_multi_issuer).
 //! Only tokens that:
 //! - match a trusted issuer defined in the [`policy store`], and
 //! - have a matching token name,
@@ -84,7 +79,7 @@ pub(crate) mod test_utils;
 pub(crate) use decode::*;
 pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
-pub(crate) use token::{Token, TokenClaimTypeError, TokenClaims};
+pub(crate) use token::{Token, TokenClaims};
 pub(crate) use token_cache::TokenCache;
 pub(crate) use validation::TrustedIssuerError;
 
@@ -103,7 +98,6 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
-use serde_json::json;
 use status_list::{JwtStatus, JwtStatusError, StatusListCache};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -123,7 +117,6 @@ pub(crate) struct JwtService {
     trusted_issuer_validator: TrustedIssuerValidator,
     logger: Option<Logger>,
     token_cache: TokenCache,
-    jwt_sig_validation_required: bool,
     loading_state: Arc<TrustedIssuerLoadingState>,
 }
 
@@ -143,7 +136,7 @@ impl JwtService {
     /// * `jwt_config` - JWT validation configuration (signature validation, algorithms, etc.)
     /// * `trusted_issuers` - Optional map of trusted issuer configurations from the policy store
     /// * `logger` - Optional logger for diagnostic messages
-    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 to disable caching)
+    /// * `token_cache_max_ttl_sec` - Maximum TTL for cached validated tokens (0 means no TTL limit — the token's `exp` claim is used instead)
     ///
     /// # Errors
     ///
@@ -195,97 +188,11 @@ impl JwtService {
             trusted_issuer_validator,
             logger,
             token_cache,
-            jwt_sig_validation_required: jwt_config.jwt_sig_validation,
             loading_state,
         })
     }
 
-    /// Checks if signed authorization is available (i.e., keys are loaded, at least one).
-    fn signed_authz_available(&self) -> bool {
-        self.key_service.has_keys()
-    }
-
-    /// Validates multiple JWT tokens against trusted issuers.
-    ///
-    /// This method validates each token in the provided map, checking:
-    /// - JWT signature validation (if enabled)
-    /// - Token expiration and other standard claims
-    /// - Required claims as specified in the trusted issuer configuration
-    ///
-    /// Tokens from untrusted issuers are skipped with a warning.
-    ///
-    /// # Arguments
-    ///
-    /// * `tokens` - Map of token names to JWT strings (e.g., "`access_token`" -> "eyJ...")
-    ///
-    /// # Returns
-    ///
-    /// Map of token names to validated `Token` objects, or an error if any token fails validation.
-    pub(crate) fn validate_tokens<'a>(
-        &'a self,
-        tokens: &'a HashMap<String, String>,
-    ) -> Result<HashMap<String, Arc<Token>>, JwtProcessingError> {
-        const ID_TOKEN_NAME: &str = "id_token";
-
-        if self.jwt_sig_validation_required && !self.signed_authz_available() && !tokens.is_empty()
-        {
-            self.logger.log_any(JwtLogEntry::new(
-                "signed authorization was attempted but Cedarling is not configured with trusted issuers or JWKS, or it is not loaded".to_string(),
-                Some(LogLevel::ERROR),
-            ));
-            return Err(JwtProcessingError::SignedAuthzUnavailable);
-        }
-
-        let mut validated_tokens = HashMap::new();
-
-        let now = Utc::now();
-
-        // clear expired tokens from cache
-        self.token_cache.clear_expired();
-
-        for (token_name, jwt) in tokens {
-            let token_kind = TokenKind::AuthzRequestInput(token_name);
-            let token = if let Some(validated_token) = self.token_cache.find(&token_kind, jwt) {
-                validated_token
-            } else {
-                // validate token and save to cache
-                let validated_jwt = match self.validate_single_token(&token_kind, jwt) {
-                    Ok(jwt) => jwt,
-                    Err(err) => {
-                        if matches!(err, ValidateJwtError::MissingValidator(_)) {
-                            self.logger
-                                .log_any(JwtLogEntry::new(err.to_string(), Some(LogLevel::WARN)));
-                            continue;
-                        }
-                        return Err(JwtProcessingError::ValidateJwt(token_name.clone(), err));
-                    },
-                };
-
-                let mut claims = serde_json::from_value::<TokenClaims>(validated_jwt.claims)
-                    .map_err(|err| {
-                        self.logger.log_any(JwtLogEntry::new(
-                            format!("failed to deserialize token claims: {err}"),
-                            Some(LogLevel::ERROR),
-                        ));
-                        err
-                    })
-                    .map_err(JwtProcessingError::StringDeserialization)?;
-
-                if token_name == ID_TOKEN_NAME {
-                    claims = fix_aud_claim_value_to_array(claims);
-                }
-
-                let token = Arc::new(Token::new(token_name, claims, validated_jwt.trusted_iss));
-                self.token_cache.save(&token_kind, jwt, token.clone(), now);
-                token
-            };
-
-            validated_tokens.insert(token_name.clone(), token);
-        }
-
-        Ok(validated_tokens)
-    }
-
+    /// Validates a single JWT and returns decoded claims and trusted issuer when valid.
     fn validate_single_token(
         &self,
         token_kind: &TokenKind,
@@ -575,139 +482,19 @@ impl TrustedIssuerLoadingInfo for JwtService {
     }
 }
 
-// Fix String `aud` claim value to array
-fn fix_aud_claim_value_to_array(claims: TokenClaims) -> TokenClaims {
-    const AUD_KEY: &str = "aud";
-
-    // make owned value mutable
-    let mut claims = claims;
-    let mut aud_value = serde_json::Value::Null;
-
-    if let Some(claim) = claims.get_claim(AUD_KEY) {
-        if let Some(claim_str_value) = claim.value().as_str() {
-            // convert String to Array for backward compatibility
-            aud_value = json!([claim_str_value]);
-        } else {
-            aud_value = claim.value().clone();
-        }
-    }
-
-    if aud_value != serde_json::Value::Null {
-        claims = claims.with_claim(AUD_KEY.to_string(), aud_value);
-    }
-
-    claims
-}
-
 #[cfg(test)]
 mod test {
+    use super::JwtService;
+    use super::TrustedIssuerLoadingInfo;
     use super::test_utils::*;
-    use super::{JwtService, Token, TrustedIssuerLoadingInfo};
     use crate::JwtConfig;
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::request::TokenInput;
-    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
+    use crate::common::policy_store::TokenEntityMetadata;
     use jsonwebtoken::Algorithm;
-    use serde_json::{Value, json};
+    use serde_json::json;
     use std::collections::{HashMap, HashSet};
-    use std::sync::Arc;
     use tokio::test;
-
-    #[test]
-    async fn can_validate_token() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
-
-        // create tokens
-        let mut access_tkn_claims = json!({
-            "iss": server.issuer(),
-            "sub": "some_sub",
-            "jti": 1_231_231_231,
-            "exp": u64::MAX,
-            "client_id": "test123",
-        });
-        let access_tkn = server
-            .generate_token_with_hs256sig(&mut access_tkn_claims, None)
-            .unwrap();
-        let mut id_tkn_claims = json!({
-            "iss": server.issuer(),
-            "aud": ["test123"],
-            "sub": "some_sub",
-            "name": "John Doe",
-            "exp": u64::MAX,
-        });
-        let id_tkn = server
-            .generate_token_with_hs256sig(&mut id_tkn_claims, None)
-            .unwrap();
-        let mut userinfo_tkn_claims = json!({
-            "iss": server.issuer(),
-            "aud": "test123",
-            "sub": "some_sub",
-            "name": "John Doe",
-            "exp": u64::MAX,
-        });
-        let userinfo_tkn = server
-            .generate_token_with_hs256sig(&mut userinfo_tkn_claims, None)
-            .unwrap();
-
-        let iss = server.trusted_issuer();
-
-        let jwt_service = JwtService::new(
-            &JwtConfig {
-                jwks: None,
-                jwt_sig_validation: true,
-                jwt_status_validation: false,
-                signature_algorithms_supported: HashSet::from_iter([Algorithm::HS256]),
-                ..Default::default()
-            },
-            Some(HashMap::from([("Jans".into(), iss.clone())])),
-            None,
-        )
-        .await
-        .expect("Should create JwtService");
-        let iss = Arc::new(iss);
-
-        let tokens = HashMap::from([
-            ("access_token".to_string(), access_tkn),
-            ("id_token".to_string(), id_tkn),
-            ("userinfo_token".to_string(), userinfo_tkn),
-        ]);
-        let validated_tokens = jwt_service
-            .validate_tokens(&tokens)
-            .expect("should validate tokens");
-
-        // Test access_token
-        let token = validated_tokens
-            .get("access_token")
-            .expect("should have an access_token");
-        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(access_tkn_claims)
-            .expect("Should create expected access_token claims");
-        assert_eq!(
-            token.as_ref(),
-            &Token::new("access_token", expected_claims.into(), Some(iss.clone()))
-        );
-
-        // Test id_token
-        let token = validated_tokens
-            .get("id_token")
-            .expect("should have an id_token");
-        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(id_tkn_claims)
-            .expect("Should create expected id_token claims");
-        assert_eq!(
-            token.as_ref(),
-            &Token::new("id_token", expected_claims.into(), Some(iss.clone()))
-        );
-
-        // Test userinfo_token
-        let token = validated_tokens
-            .get("userinfo_token")
-            .expect("should have an userinfo_token");
-        let expected_claims = serde_json::from_value::<HashMap<String, Value>>(userinfo_tkn_claims)
-            .expect("Should create expected userinfo_token claims");
-        assert_eq!(
-            token.as_ref(),
-            &Token::new("userinfo_token", expected_claims.into(), Some(iss))
-        );
-    }
 
     #[test]
     async fn test_validate_multi_issuer_tokens_success() {
@@ -744,10 +531,6 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                user_id: None,
-                role_mapping: None,
-                workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );
@@ -758,10 +541,6 @@ mod test {
                 entity_type_name: "Jans::Id_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                user_id: None,
-                role_mapping: None,
-                workload_id: None,
-                claim_mapping: ClaimMappings::default(),
                 required_claims: HashSet::new(),
             },
         );
@@ -879,10 +658,7 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                user_id: None,
-                role_mapping: None,
-                workload_id: None,
-                claim_mapping: ClaimMappings::default(),
+
                 required_claims: HashSet::new(),
             },
         );
@@ -893,10 +669,7 @@ mod test {
                 entity_type_name: "Jans::Id_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                user_id: None,
-                role_mapping: None,
-                workload_id: None,
-                claim_mapping: ClaimMappings::default(),
+
                 required_claims: HashSet::new(),
             },
         );
@@ -962,10 +735,7 @@ mod test {
                 entity_type_name: "Jans::Access_Token".to_string(),
                 principal_mapping: HashSet::new(),
                 token_id: "jti".to_string(),
-                user_id: None,
-                role_mapping: None,
-                workload_id: None,
-                claim_mapping: ClaimMappings::default(),
+
                 required_claims: HashSet::new(),
             },
         );

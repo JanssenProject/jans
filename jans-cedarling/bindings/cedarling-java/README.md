@@ -136,17 +136,6 @@ policy-store/
 
 Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribution.
 
-### ID Token Trust Mode
-
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
-
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
-
 ### Testing Configuration
 
 For testing scenarios, you may want to disable JWT validation. You can configure this in your bootstrap configuration:
@@ -154,8 +143,7 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```json
 {
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled"
 }
 ```
 

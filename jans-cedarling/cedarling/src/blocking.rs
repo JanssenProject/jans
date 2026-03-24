@@ -9,8 +9,8 @@
 
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, Request,
-    RequestUnsigned, TrustedIssuerLoadingInfo,
+    DataStoreStats, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, RequestUnsigned,
+    TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -45,13 +45,6 @@ impl Cedarling {
                 instance: async_instance,
                 runtime: Arc::new(rt),
             })
-    }
-
-    /// Authorize request
-    /// makes authorization decision based on the [`Request`]
-    #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
-    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        self.instance.authz.authorize(&request)
     }
 
     /// Authorize request with unsigned data.

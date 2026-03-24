@@ -5,8 +5,6 @@
     "CEDARLING_LOG_TYPE": "std_out",
     "CEDARLING_LOG_LEVEL": "INFO",
     "CEDARLING_LOG_TTL": null,
-    "CEDARLING_USER_AUTHZ": "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ": "enabled",
     "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
         "and": [
             {
@@ -36,7 +34,6 @@
         "HS256",
         "RS256"
     ],
-    "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
     "CEDARLING_LOCK": "disabled",
     "CEDARLING_LOCK_SERVER_CONFIGURATION_URI": null,
     "CEDARLING_LOCK_DYNAMIC_CONFIGURATION": "disabled",

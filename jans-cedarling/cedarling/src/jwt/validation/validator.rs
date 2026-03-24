@@ -410,7 +410,7 @@ mod test {
     use std::sync::LazyLock;
 
     use crate::common::issuer_utils::IssClaim;
-    use crate::common::policy_store::{ClaimMappings, TokenEntityMetadata};
+    use crate::common::policy_store::TokenEntityMetadata;
     use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusList};
     use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
     use crate::jwt::{StatusListCache, test_utils::*};
@@ -429,10 +429,6 @@ mod test {
             entity_type_name: "Jans::AccessToken".into(),
             principal_mapping: HashSet::new(),
             token_id: "jti".into(),
-            user_id: None,
-            role_mapping: None,
-            workload_id: None,
-            claim_mapping: ClaimMappings::default(),
             required_claims: HashSet::from(["exp".into(), "nbf".into()]),
         });
 
