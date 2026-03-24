@@ -12,7 +12,6 @@ use pyo3::prelude::*;
 use crate::authorize::authorize_result::AuthorizeResult;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
-use crate::authorize::request::Request;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::config::bootstrap_config::BootstrapConfig;
@@ -41,11 +40,6 @@ use std::time::Duration;
 ///     Initializes the Cedarling instance with the provided configuration.
 ///
 ///     :param config: A `BootstrapConfig` object with startup settings.
-///
-/// .. method:: authorize(self, request: Request) -> AuthorizeResult
-///
-///     Execute authorize request
-///     :param request: Request struct for authorize.
 ///
 /// .. method:: authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult
 ///
@@ -175,15 +169,6 @@ impl Cedarling {
         let inner = cedarling::blocking::Cedarling::new(config.inner())
             .map_err(|err| PyValueError::new_err(err.to_string()))?;
         Ok(Self { inner })
-    }
-
-    /// Authorize request
-    fn authorize(&self, request: Bound<'_, Request>) -> Result<AuthorizeResult, PyErr> {
-        let cedarling_instance = self
-            .inner
-            .authorize(request.borrow().to_cedarling()?)
-            .map_err(authorize_error_to_py)?;
-        Ok(cedarling_instance.into())
     }
 
     /// Authorize request with unsigned data.

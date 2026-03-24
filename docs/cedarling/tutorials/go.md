@@ -132,12 +132,9 @@ import "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 
 // Example configuration (populate dynamically in production)
 config := map[string]any{
-    "CEDARLING_APPLICATION_NAME":   "MyApp",
-    "CEDARLING_POLICY_STORE_ID":    "your-policy-store-id",
-    "CEDARLING_USER_AUTHZ":         "enabled",
-    "CEDARLING_WORKLOAD_AUTHZ":     "enabled",
-    "CEDARLING_LOG_LEVEL":          "INFO",
-    "CEDARLING_LOG_TYPE":           "std_out",
+    "CEDARLING_APPLICATION_NAME":      "MyApp",
+    "CEDARLING_LOG_LEVEL":             "INFO",
+    "CEDARLING_LOG_TYPE":              "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
 }
 
@@ -180,12 +177,12 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 ### Authorization
 
-Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
+Cedarling provides two main interfaces for performing authorization checks:
 
-- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
-- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
+- [**Multi-Issuer Authorization**](#multi-issuer-authorization) processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on `token_metadata` configuration.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.
 
-#### Token-Based Authorization
+#### Multi-Issuer Authorization
 
 **1. Define the resource:**
 
@@ -211,12 +208,13 @@ action := `Jans::Action::"Update"`
 **3. Build the request with tokens:**
 
 ```go
-request := cedarling_go.Request{
-    Tokens: map[string]string{
-        "access_token":   "your.jwt.token",
-        "id_token":       "your.id.token",
-        "userinfo_token": "your.userinfo.token",
-    },
+tokens := []cedarling_go.TokenInput{
+    {Mapping: "Jans::Access_token", Payload: "your.jwt.token"},
+    {Mapping: "Jans::Id_token", Payload: "your.id.token"},
+}
+
+request := cedarling_go.AuthorizeMultiIssuerRequest{
+    Tokens:   tokens,
     Action:   action,
     Resource: resource,
 }
@@ -225,7 +223,7 @@ request := cedarling_go.Request{
 **4. Authorize:**
 
 ```go
-result, err := instance.Authorize(request)
+result, err := instance.AuthorizeMultiIssuer(request)
 if err != nil {
     // Handle error
 }
@@ -236,6 +234,8 @@ if result.Decision {
     fmt.Println("Access denied")
 }
 ```
+
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -422,5 +422,4 @@ Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/git
 ## See Also
 
 - [Multi-Issuer Authorization Details](../reference/cedarling-authz.md)
-- [JWT Mapping for Multi-Issuer](../reference/cedarling-jwt-mapping.md)
 - [Policy Store Configuration](../reference/cedarling-policy-store.md)

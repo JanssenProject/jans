@@ -62,7 +62,7 @@ impl EntityBuilder {
         let mut role_entities = Vec::with_capacity(role_ids.len());
         for id in &role_ids {
             let role_entity = build_cedar_entity(
-                &self.config.entity_names.role,
+                &self.config.role_entity_name,
                 id,
                 HashMap::new(),
                 HashSet::new(),
@@ -121,7 +121,7 @@ mod test {
         });
 
         let builder = EntityBuilder::new(
-            EntityBuilderConfig::default().with_workload(),
+            EntityBuilderConfig::default(),
             TrustedIssuerIndex::new(&HashMap::new(), None),
             Some(&validator_schema),
             DefaultEntities::default(),
