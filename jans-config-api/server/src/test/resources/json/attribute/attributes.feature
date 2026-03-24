@@ -124,6 +124,7 @@ Scenario: Delete a non-existion attribute by inum
 	Then status 404 
 	
 
+
 Scenario: Get an attribute by inum(unexisting attribute) 
 	Given url mainUrl + '/53553532727272772'
 	And header Authorization = 'Bearer ' + accessToken 
@@ -194,5 +195,3 @@ Scenario: Patch jansHideOnDiscovery configuration for Country attribute
     When method PATCH
     Then status 200
     And print response
-  
-	

@@ -343,7 +343,7 @@ tags:
 | jansAttrSystemEditTyp | character varying | 64                       | YES  | None    | TODO - still required?                                                                                                       |
 | jansAttrTyp           | character varying | 64                       | YES  | None    | Data type of attribute. Values can be string, photo, numeric, date                                                           |
 | jansClaimName         | character varying | 64                       | YES  | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in LDAP.                                       |
-| jansAttrUsgTyp        | character varying | 64                       | YES  | None    | TODO - Usg? Value can be OpenID                                                                                              |
+| jansAttrUsgTyp        | jsonb             | None                     | YES  | None    | TODO - Usg? Value can be OpenID                                                                                              |
 | jansAttrViewTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can view an attribute, admin or user                                                                  |
 | jansSAML1URI          | character varying | 64                       | YES  | None    | SAML 1 uri of attribute                                                                                                      |
 | jansSAML2URI          | character varying | 64                       | YES  | None    | SAML 2 uri of attribute                                                                                                      |

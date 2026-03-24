@@ -14,6 +14,9 @@
     "origin": "jansPerson",
     "jansMultivaluedAttr": false,
     "status": "active",
+    "usageType": [
+        "openid"
+    ],
     "urn": "urn:mace:dir:attribute-def:qaattribute",
     "userCanAccess": true,
     "userCanEdit": true,

@@ -319,6 +319,120 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         return col_def
 
+    def get_column_data_type(self, table_name, column_name):
+        if Config.rdbm_type == 'pgsql':
+            query = (
+                "SELECT data_type FROM information_schema.columns "
+                "WHERE table_schema = current_schema() "
+                "AND table_name = '{}' AND column_name = '{}';"
+            ).format(table_name, column_name)
+        else:
+            query = (
+                "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS "
+                "WHERE TABLE_SCHEMA = '{}' AND TABLE_NAME = '{}' AND COLUMN_NAME = '{}';"
+            ).format(Config.rdbm_db, table_name, column_name)
+
+        result = self.dbUtils.exec_rdbm_query(query, getresult=1)
+        return result[0].upper() if result and result[0] else None
+
+    def column_exists(self, table_name, column_name):
+        return self.get_column_data_type(table_name, column_name) is not None
+
+    def is_existing_json_column(self, table_name, column_name):
+        data_type = self.get_column_data_type(table_name, column_name)
+        if data_type in ('JSON', 'JSONB'):
+            return True
+
+        if Config.rdbm_type == 'mysql' and self.dbUtils.mariadb:
+            query = (
+                "SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS "
+                "WHERE CONSTRAINT_SCHEMA = '{}' AND TABLE_NAME = '{}' "
+                "AND CONSTRAINT_NAME = '{}' AND LOWER(CHECK_CLAUSE) LIKE '%json_valid%';"
+            ).format(Config.rdbm_db, table_name, column_name)
+            result = self.dbUtils.exec_rdbm_query(query, getresult=1)
+            return result is not None
+
+        return False
+
+    def run_sql_commands(self, sql_cmds, tables):
+        for sql_cmd in sql_cmds:
+            self.dbUtils.exec_rdbm_query(sql_cmd)
+            tables.append(sql_cmd)
+
+    def migrate_multivalued_column(self, table_name, attrname, tables):
+        data_type = self.get_sql_col_type(attrname, table_name)
+        if data_type not in ('JSON', 'JSONB'):
+            return
+
+        if not self.column_exists(table_name, attrname) or self.is_existing_json_column(table_name, attrname):
+            return
+
+        self.logIt("Migrating multivalued column {}.{} to {}".format(table_name, attrname, data_type))
+        sql_cmds = []
+        if Config.rdbm_type == 'pgsql':
+            sql_cmds.append(
+                'ALTER TABLE "{0}" ALTER COLUMN "{1}" TYPE JSONB USING CASE '
+                'WHEN "{1}" IS NULL THEN NULL '
+                'WHEN "{1}" = \'\' THEN \'[]\'::jsonb '
+                'ELSE jsonb_build_array("{1}") END;'.format(table_name, attrname)
+            )
+            desc = self.get_attr_description(attrname)
+            if desc:
+                sql_cmds.append(
+                    '''COMMENT ON COLUMN "{}"."{}" IS '{}';'''.format(
+                        table_name,
+                        attrname,
+                        desc.replace("'", "''"),
+                    )
+                )
+        else:
+            temp_column = '{}_tmp_json'.format(attrname)
+            if self.column_exists(table_name, temp_column):
+                sql_cmds.append('ALTER TABLE `{}` DROP COLUMN `{}`;'.format(table_name, temp_column))
+
+            sql_cmds.extend(
+                [
+                    'ALTER TABLE `{}` ADD COLUMN `{}` JSON;'.format(table_name, temp_column),
+                    (
+                        "UPDATE `{0}` SET `{1}` = CASE "
+                        "WHEN `{2}` IS NULL THEN NULL "
+                        "WHEN `{2}` = '' THEN JSON_ARRAY() "
+                        "ELSE JSON_ARRAY(`{2}`) END;"
+                    ).format(table_name, temp_column, attrname),
+                    'ALTER TABLE `{}` DROP COLUMN `{}`;'.format(table_name, attrname),
+                ]
+            )
+
+            desc = self.get_attr_description(attrname)
+            if desc:
+                escaped_desc = desc.replace('\\', '\\\\').replace('"', '\\"')
+                sql_cmds.append(
+                    'ALTER TABLE `{0}` CHANGE COLUMN `{1}` `{2}` JSON COMMENT "{3}";'.format(
+                        table_name,
+                        temp_column,
+                        attrname,
+                        escaped_desc,
+                    )
+                )
+            else:
+                sql_cmds.append(
+                    'ALTER TABLE `{0}` CHANGE COLUMN `{1}` `{2}` JSON;'.format(
+                        table_name,
+                        temp_column,
+                        attrname,
+                    )
+                )
+
+            if self.dbUtils.mariadb:
+                sql_cmds.append(
+                    'ALTER TABLE `{0}` ADD CONSTRAINT `{1}` CHECK (JSON_VALID(`{1}`));'.format(
+                        table_name,
+                        attrname,
+                    )
+                )
+
+        self.run_sql_commands(sql_cmds, tables)
+
     def create_tables(self, jans_schema_files):
         self.logIt("Creating tables for {}".format(jans_schema_files))
         tables = []
@@ -383,6 +497,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     tables.append(comment_sql)
 
                 tables.append(sql_cmd)
+            else:
+                for attrname in cols_:
+                    if all_attribs.get(attrname, {}).get('multivalued'):
+                        self.migrate_multivalued_column(sql_tbl_name, attrname, tables)
 
         for attrname in all_attribs:
             attr = all_attribs[attrname]
@@ -566,4 +684,3 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def installed(self):
         # to be implemented
         return True
-

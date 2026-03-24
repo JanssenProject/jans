@@ -389,7 +389,7 @@ jans cli --operation-id post-attributes --data /tmp/custom-claim.json
     "user"
   ],
   "usageType": [
-    null
+    "openid"
   ],
   "claimName": "string",
   "seeAlso": "string",

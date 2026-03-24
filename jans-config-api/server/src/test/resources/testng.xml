@@ -22,20 +22,32 @@
     </test>
 
 	<test name="Auth Server Config" enabled="true">
-        <classes>
-            <class name="io.jans.configapi.test.auth.AuthConfigResourceTest" />
-        </classes>
-    </test>
+	    <classes>
+	        <class name="io.jans.configapi.test.auth.AuthConfigResourceTest" />
+	    </classes>
+	</test>
 
-    <test name="Openid Client" enabled="true">
-        <classes>
-             <class name="io.jans.configapi.test.auth.ClientResourceTest" />
-        </classes>
-    </test>
+	<test name="Attributes" enabled="true">
+	    <classes>
+	        <class name="io.jans.configapi.test.auth.AttributesResourceTest" />
+	    </classes>
+	</test>
 
-	<test name="Config" enabled="true">
-        <classes>
-            <class name="io.jans.configapi.test.auth.ConfigResourceTest" />
+	    <test name="Openid Client" enabled="true">
+	        <classes>
+	             <class name="io.jans.configapi.test.auth.ClientResourceTest" />
+	        </classes>
+	    </test>
+
+	<test name="Jackson Patch" enabled="true">
+	    <classes>
+	        <class name="io.jans.configapi.test.util.JacksonPatchTest" />
+	    </classes>
+	</test>
+
+	    <test name="Config" enabled="true">
+	        <classes>
+	            <class name="io.jans.configapi.test.auth.ConfigResourceTest" />
         </classes>
     </test>
 
