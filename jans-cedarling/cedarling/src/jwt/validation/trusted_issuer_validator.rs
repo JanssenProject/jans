@@ -105,7 +105,7 @@ impl TrustedIssuerValidator {
 /// - `entity_type_name` is not empty (configuration validation)
 /// - All claims in `required_claims` set exist
 ///
-/// Note: Mapping fields like `user_id`, `role_mapping`, `workload_id`, and `token_id`
+/// Note: Mapping fields like `user_id`, `role_mapping`, and `token_id`
 /// are configuration hints for claim extraction, not strictly required claims.
 /// They are validated only if explicitly included in `required_claims`.
 ///
