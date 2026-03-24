@@ -1650,11 +1650,6 @@ components:
           type: object
           additionalProperties:
             type: object
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         fallbackEvents:
           type: integer
           format: int64
@@ -1663,28 +1658,30 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         period:
           type: string
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccesses:
+        registrationFailures:
           type: integer
           format: int64
         registrationAttempts:
           type: integer
           format: int64
-        registrationSuccesses:
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccesses:
           type: integer
           format: int64
-        registrationFailures:
+        registrationSuccesses:
           type: integer
           format: int64
         authenticationAttempts:
@@ -1696,7 +1693,10 @@ components:
         registrationSuccessRate:
           type: number
           format: double
-        registrationAvgDuration:
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccessRate:
           type: number
           format: double
         baseDn:
