@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service;
 
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -24,15 +25,20 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,6 +70,13 @@ public class ClientIdMetadataService {
 
     @Inject
     private RegisterParamsValidator registerParamsValidator;
+
+    /**
+     * Per-URL locks to serialize concurrent fetch+persist operations for the same client_id.
+     * Prevents duplicate-write failures when multiple requests arrive simultaneously for the
+     * same uncached (or expired) URL-based client_id.
+     */
+    private final ConcurrentHashMap<String, Object> fetchLocks = new ConcurrentHashMap<>();
 
     /**
      * Token endpoint authentication methods forbidden by the CIMD spec (Section 4.1).
@@ -145,55 +158,76 @@ public class ClientIdMetadataService {
             log.debug("Persisted CIMD client for {} has expired, re-downloading", clientIdUrl);
         }
 
-        // Fetch document from the URL
-        FetchResult result = doFetch(clientIdUrl);
+        // Serialize concurrent fetch+persist for the same client_id to avoid duplicate writes.
+        Object lock = fetchLocks.computeIfAbsent(id, k -> new Object());
+        synchronized (lock) {
+            // Re-check after acquiring lock — another thread may have already fetched and persisted.
+            Client reChecked = clientService.getClientByDn(dn);
+            if (reChecked != null && reChecked.getAttributes() != null && reChecked.getAttributes().isCimdClient()) {
+                if (!reChecked.getAttributes().isCimdExpired()) {
+                    log.debug("Returning CIMD client fetched by concurrent thread for: {}", clientIdUrl);
+                    reChecked.setClientId(clientIdUrl);
+                    return reChecked;
+                }
+            }
 
-        // Parse the metadata document via RegisterRequest (comprehensive RFC 7591 parsing)
-        RegisterRequest registerRequest = parseRegisterRequest(result.body);
+            // Fetch document from the URL
+            FetchResult result = doFetch(clientIdUrl);
 
-        // Validate that no forbidden symmetric-secret auth method is used (CIMD spec Section 4.1)
-        validateTokenEndpointAuthMethod(registerRequest);
+            // Parse the metadata document via RegisterRequest (comprehensive RFC 7591 parsing)
+            RegisterRequest registerRequest = parseRegisterRequest(result.body);
 
-        // Validate redirect_uris using the same logic as DCR
-        validateRedirectUris(registerRequest);
+            // Validate that the document contains client_id matching the fetch URL (§4.1)
+            validateClientIdBinding(registerRequest, clientIdUrl);
 
-        // Build Client from RegisterRequest using the same DCR mapping path
-        Client client = buildClientFromRequest(registerRequest, clientIdUrl);
+            // Validate that client_secret / client_secret_expires_at are absent (§4.1)
+            validateNoClientSecret(registerRequest);
 
-        // Set the hash-based id as the persistent key (LDAP-safe)
-        client.setClientId(id);
-        client.setDn(dn);
+            // Validate that no forbidden symmetric-secret auth method is used (§4.1)
+            validateTokenEndpointAuthMethod(registerRequest);
 
-        // Set CIMD attributes
-        ClientAttributes attrs = client.getAttributes() != null ? client.getAttributes() : new ClientAttributes();
-        attrs.setCimdClient(true);
-        attrs.setCimdOriginalClientId(clientIdUrl);
+            // Validate redirect_uris using the same logic as DCR
+            validateRedirectUris(registerRequest);
 
-        int ttlSeconds = calculateTtl(result.cacheControl);
-        attrs.setCimdExpiresAt(System.currentTimeMillis() + (ttlSeconds * 1000L));
-        client.setAttributes(attrs);
+            // Build Client from RegisterRequest using the same DCR mapping path
+            Client client = buildClientFromRequest(registerRequest, clientIdUrl);
 
-        // Execute external DCR script (allows server operators to customize/reject CIMD clients).
-        // httpRequest is null since this is not an HTTP registration request.
-        final boolean scriptResult = externalDynamicClientRegistrationService
-                .executeExternalCreateClientMethods(registerRequest, client, null);
-        if (!scriptResult) {
-            throw badRequest("Client creation rejected by external script for: " + clientIdUrl);
+            // Set the hash-based id as the persistent key (safe)
+            client.setClientId(id);
+            client.setDn(dn);
+
+            // Set CIMD attributes
+            ClientAttributes attrs = client.getAttributes() != null ? client.getAttributes() : new ClientAttributes();
+            attrs.setCimdClient(true);
+            attrs.setCimdOriginalClientId(clientIdUrl);
+
+            int ttlSeconds = calculateTtl(result.cacheControl);
+            attrs.setCimdExpiresAt(System.currentTimeMillis() + (ttlSeconds * 1000L));
+            client.setAttributes(attrs);
+
+            // Execute external DCR script (allows server operators to customize/reject CIMD clients).
+            // httpRequest is null since this is not an HTTP registration request.
+            final boolean scriptResult = externalDynamicClientRegistrationService
+                    .executeExternalCreateClientMethods(registerRequest, client, null);
+            if (!scriptResult) {
+                throw badRequest("Client creation rejected by external script for: " + clientIdUrl);
+            }
+
+            // Persist (or update) the client
+            final Client existingAtLockTime = reChecked != null ? reChecked : existing;
+            if (existingAtLockTime != null) {
+                clientService.merge(client);
+                log.debug("Re-persisted (merged) CIMD client for: {}", clientIdUrl);
+            } else {
+                clientService.persist(client);
+                log.debug("Persisted new CIMD client for: {}", clientIdUrl);
+            }
+
+            // Override the id-based clientId with the actual URL for the caller
+            client.setClientId(clientIdUrl);
+
+            return client;
         }
-
-        // Persist (or update) the client
-        if (existing != null) {
-            clientService.merge(client);
-            log.debug("Re-persisted (merged) CIMD client for: {}", clientIdUrl);
-        } else {
-            clientService.persist(client);
-            log.debug("Persisted new CIMD client for: {}", clientIdUrl);
-        }
-
-        // Override the id-based clientId with the actual URL for the caller
-        client.setClientId(clientIdUrl);
-
-        return client;
     }
 
     // ==================== Validation ====================
@@ -214,6 +248,9 @@ public class ClientIdMetadataService {
             // Domain allowlist/blocklist
             validateDomain(uri);
 
+            // §3: structural constraints on the client_id URL
+            validateUrlStructure(uri);
+
             // Private IP blocking
             if (Boolean.TRUE.equals(appConfiguration.getCimdBlockPrivateIp())) {
                 validateNotPrivateIp(uri.getHost());
@@ -221,6 +258,40 @@ public class ClientIdMetadataService {
 
         } catch (URISyntaxException e) {
             throw badRequest("Invalid client_id URL syntax: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Enforce §3 structural constraints on the client_id URL:
+     * <ul>
+     *   <li>MUST contain a path component</li>
+     *   <li>MUST NOT contain single-dot or double-dot path segments</li>
+     *   <li>MUST NOT contain a fragment component</li>
+     *   <li>MUST NOT contain a username or password</li>
+     * </ul>
+     */
+    void validateUrlStructure(URI uri) {
+        // MUST contain a path component
+        String path = uri.getPath();
+        if (StringUtils.isBlank(path)) {
+            throw badRequest("Client ID URL must contain a path component");
+        }
+
+        // MUST NOT contain single-dot or double-dot path segments
+        for (String segment : path.split("/")) {
+            if (".".equals(segment) || "..".equals(segment)) {
+                throw badRequest("Client ID URL must not contain dot or double-dot path segments");
+            }
+        }
+
+        // MUST NOT contain a fragment component
+        if (uri.getFragment() != null) {
+            throw badRequest("Client ID URL must not contain a fragment component");
+        }
+
+        // MUST NOT contain a username or password
+        if (uri.getUserInfo() != null) {
+            throw badRequest("Client ID URL must not contain a username or password");
         }
     }
 
@@ -242,26 +313,37 @@ public class ClientIdMetadataService {
             throw badRequest("Client ID URL must have a host");
         }
 
+        // Normalize to lowercase for case-insensitive comparison
+        String normalizedHost = host.toLowerCase();
+
         List<String> blocklist = appConfiguration.getCimdDomainBlocklist();
-        if (blocklist != null && blocklist.contains(host)) {
-            throw badRequest("Domain is blocked: " + host);
+        if (blocklist != null && blocklist.contains(normalizedHost)) {
+            throw badRequest("Domain is blocked: " + normalizedHost);
         }
 
         List<String> allowlist = appConfiguration.getCimdDomainAllowlist();
-        if (allowlist != null && !allowlist.isEmpty() && !allowlist.contains(host)) {
-            throw badRequest("Domain not in allowlist: " + host);
+        if (allowlist != null && !allowlist.isEmpty() && !allowlist.contains(normalizedHost)) {
+            throw badRequest("Domain not in allowlist: " + normalizedHost);
         }
     }
 
+    /**
+     * Resolve all IP addresses for the host and reject if any resolves to a private/loopback address.
+     * Checking all records (not just the first) mitigates DNS round-robin evasion.
+     * Note: a small DNS-rebinding window remains between this check and the actual fetch;
+     * for stronger protection, configure a network-level egress firewall.
+     */
     void validateNotPrivateIp(String host) {
         if (StringUtils.isBlank(host)) {
             throw badRequest("Cannot validate empty host");
         }
 
         try {
-            InetAddress address = InetAddress.getByName(host);
-            if (isPrivateAddress(address)) {
-                throw badRequest("Client ID URL resolves to private/local address");
+            InetAddress[] addresses = InetAddress.getAllByName(host);
+            for (InetAddress address : addresses) {
+                if (isPrivateAddress(address)) {
+                    throw badRequest("Client ID URL resolves to private/local address");
+                }
             }
         } catch (UnknownHostException e) {
             throw badRequest("Cannot resolve client_id host: " + host);
@@ -279,6 +361,43 @@ public class ClientIdMetadataService {
                 address.isSiteLocalAddress() ||
                 address.isLinkLocalAddress() ||
                 address.isAnyLocalAddress();
+    }
+
+    /**
+     * Validate that the metadata document contains a {@code client_id} field (§4.1 MUST)
+     * and that its value matches the URL used to fetch it (simple string comparison).
+     * client_id is read from the raw JSON object since RegisterRequest does not expose it
+     * as a parsed field (it is a server-assigned value in normal DCR).
+     */
+    void validateClientIdBinding(RegisterRequest registerRequest, String clientIdUrl) {
+        if (registerRequest.getJsonObject() == null) {
+            throw badRequest("Client metadata document must contain a client_id property");
+        }
+        String documentClientId = registerRequest.getJsonObject().optString("client_id", null);
+        if (documentClientId == null) {
+            throw badRequest("Client metadata document must contain a client_id property");
+        }
+        if (!documentClientId.equals(clientIdUrl)) {
+            throw badRequest("client_id in metadata document does not match the URL used to fetch it. " +
+                    "Expected: " + clientIdUrl + ", got: " + documentClientId);
+        }
+    }
+
+    /**
+     * Validate that the metadata document does not include {@code client_secret} or
+     * {@code client_secret_expires_at} (§4.1 MUST NOT). These properties are meaningless
+     * for CIMD clients since no shared secret can be pre-established.
+     */
+    void validateNoClientSecret(RegisterRequest registerRequest) {
+        if (registerRequest.getJsonObject() == null) {
+            return;
+        }
+        if (registerRequest.getJsonObject().has("client_secret")) {
+            throw badRequest("client_secret must not be present in a client metadata document");
+        }
+        if (registerRequest.getJsonObject().has("client_secret_expires_at")) {
+            throw badRequest("client_secret_expires_at must not be present in a client metadata document");
+        }
     }
 
     /**
@@ -314,11 +433,13 @@ public class ClientIdMetadataService {
     // ==================== HTTP Fetching ====================
 
     protected FetchResult doFetch(String url) {
-
         try (jakarta.ws.rs.client.Client httpClient = ClientBuilder.newBuilder()
                 .connectTimeout(appConfiguration.getCimdConnectTimeoutMs(), TimeUnit.MILLISECONDS)
                 .readTimeout(appConfiguration.getCimdReadTimeoutMs(), TimeUnit.MILLISECONDS)
+                // §4: MUST NOT automatically follow HTTP redirects
+                .property(ResteasyClientBuilder.PROPERTY_FOLLOW_REDIRECTS, false)
                 .build()) {
+
             Response response = httpClient.target(url)
                     .request(MediaType.APPLICATION_JSON)
                     .get();
@@ -327,13 +448,22 @@ public class ClientIdMetadataService {
                 throw badRequest("Failed to fetch client metadata: HTTP " + response.getStatus() + " for client_id: " + url);
             }
 
-            String body = response.readEntity(String.class);
-            if (body == null) {
-                throw badRequest("Empty response from client metadata URL");
-            }
-
-            if (body.length() > appConfiguration.getCimdMaxResponseSize()) {
-                throw badRequest("Client metadata document exceeds maximum size");
+            // Stream the body and enforce the byte limit before buffering the full payload.
+            // readEntity(String.class) would buffer the entire response first; streaming avoids
+            // unbounded heap allocation from oversized or malicious responses.
+            int maxBytes = appConfiguration.getCimdMaxResponseSize();
+            String body;
+            try (InputStream is = response.readEntity(InputStream.class)) {
+                byte[] bytes = is.readNBytes(maxBytes + 1);
+                if (bytes.length > maxBytes) {
+                    throw badRequest("Client metadata document exceeds maximum size");
+                }
+                if (bytes.length == 0) {
+                    throw badRequest("Empty response from client metadata URL");
+                }
+                body = new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw badRequest("Failed to read client metadata response: " + e.getMessage());
             }
 
             String cacheControl = response.getHeaderString("Cache-Control");
@@ -388,6 +518,13 @@ public class ClientIdMetadataService {
             return defaultTtl;
         }
 
+        // Honour no-store and no-cache directives: treat as TTL=0 so the entry is
+        // considered immediately expired and re-fetched on the next request.
+        String lowerCacheControl = cacheControl.toLowerCase();
+        if (lowerCacheControl.contains("no-store") || lowerCacheControl.contains("no-cache")) {
+            return 0;
+        }
+
         // Parse max-age from Cache-Control header
         try {
             if (cacheControl.contains("max-age=")) {
@@ -396,7 +533,8 @@ public class ClientIdMetadataService {
                 return Math.min(maxAge, maxTtl);
             }
         } catch (Exception e) {
-            log.trace("Failed to parse Cache-Control header: " + cacheControl, e);
+            log.trace("Failed to parse Cache-Control header: {}", cacheControl);
+            log.trace(e.getMessage(), e);
         }
 
         return defaultTtl;
@@ -416,8 +554,12 @@ public class ClientIdMetadataService {
 
     public WebApplicationException badRequest(String msg) {
         log.debug("CIMD validation error: {}", msg);
+        // Use JsonStringEncoder to properly escape the message, preventing JSON injection
+        // from exception text or untrusted input that may contain quotes or backslashes.
+        char[] escaped = JsonStringEncoder.getInstance().quoteAsString(msg);
+        String body = "{\"error\":\"invalid_request\",\"error_description\":\"" + new String(escaped) + "\"}";
         return new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                .entity("{\"error\":\"invalid_request\",\"error_description\":\"" + msg + "\"}")
+                .entity(body)
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
     }
