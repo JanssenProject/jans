@@ -55,7 +55,6 @@ pub trait G2RCall {
     fn new_with_env_instance(boostrap_config_raw_json: String) -> ResultInstance;
     fn drop_instance(instance_id: usize);
 
-    fn authorize(instance_id: usize, request_json: String) -> Result;
     fn authorize_unsigned(instance_id: usize, request_json: String) -> Result;
     fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result;
 

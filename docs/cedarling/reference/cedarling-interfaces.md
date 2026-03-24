@@ -36,17 +36,17 @@ These methods are used to create a `BootstrapConfig` object, which is needed to 
 
 These methods are called to create an authorization request, run authorization, and get decisions back.
 
-- `Entity(entity_type, id, payload)`
+- `EntityData(cedar_mapping, attributes)`
 
-    Creates a `Principal` or a `Resource` entity.
+    Creates a principal or resource entity.
 
-    - `from_dict(value)`
+    - `cedar_mapping`: A `CedarEntityMapping` object with `entity_type` (Cedar type name) and `id` (entity ID).
+    - `attributes`: A map of attribute names to values.
 
-        Creates a `Principal` or a `Resource` entity from a dictionary.
+    - `from_json(json_str)` — Creates an `EntityData` from a JSON string (Rust).
+    - `from_dict(value)` — Creates an `EntityData` from a dictionary (Python bindings).
 
-- `Request(tokens, action, resource, context)`
-
-    Creates a `Request` object which contains inputs for the Cedarling's authorization call.
+    **Note on field naming:** The Rust struct field is named `cedar_mapping`, but it serializes to `cedar_entity_mapping` in JSON (via `#[serde(rename)]`). When constructing in Rust, use `cedar_mapping`. When passing JSON (via `from_json`) or a Python dict (via `from_dict`), use `cedar_entity_mapping` as the key.
 
 - `RequestUnsigned(principals, action, resource, context)`
 
@@ -68,55 +68,38 @@ These methods are called to create an authorization request, run authorization, 
     - `resource`: The resource entity being accessed (required)
     - `context`: Optional additional context for policy evaluation
 
-- `authorize(request)`
-
-    Runs authorization against the provided `Request` object.
-
 - `authorize_unsigned(request)`
 
     Runs unsigned authorization against the provided `RequestUnsigned` object. A trusted issuer is not required for this call.
 
 - `authorize_multi_issuer(request)`
 
-    Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities without requiring traditional user/workload principals.
+    Runs multi-issuer authorization against the provided `AuthorizeMultiIssuerRequest` object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.
 
 ### Authz Result
 
 The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.
 
-#### AuthorizeResult (for `authorize` and `authorize_unsigned`)
-
-- `is_allowed()`
-
-    Returns `true` only if the overall decision of the Cedarling is `true`.
-
-- `workload()`
-
-    Returns the decision of the `Workload` authorization
-
-- `principal()`
-
-    Returns the decision of the `Principal` authorization
-
-- `request_id()`
-
-    Returns the request ID of this authorization call. This is used to retrieve logs if the Cedarling is running in memory log mode.
+#### AuthorizeResult (for `authorize_unsigned`)
 
 - `decision`
 
-    This field represents the decision of this authorization call (allow/deny)
+    A boolean field representing the overall authorization decision (`true` = allow, `false` = deny). The decision is computed by applying the `principal_bool_operator` across all principal results.
 
-- `diagnostics`
+- `principals`
 
-    This field contains additional information regarding the decision reached by Cedarling.
+    A map of principal type names and entity UIDs to their Cedar `Response` objects. Each response provides:
 
-    - `reason`
+    - `decision()`: Whether this principal was allowed or denied
+    - `diagnostics()`: Detailed information including `reason()` (set of policy IDs) and `errors()` (list of evaluation errors)
 
-      This field is a set of policy IDs used to reach an `allow` decision, if they exist
+- `request_id`
 
-    - `errors`
+    The request ID for this authorization call, used for log retrieval when running in memory log mode.
 
-      This field contains a list of errors during authorization, if they exist.
+- `cedar_decision()`
+
+    Returns the Cedar `Decision` enum (`Allow` or `Deny`) based on the `decision` field.
 
 #### MultiIssuerAuthorizeResult (for `authorize_multi_issuer`)
 

@@ -110,13 +110,10 @@ def get_multi_issuer_config():
     def configure_for_multi_issuer(config) -> None:
         config["CEDARLING_JWT_SIG_VALIDATION"] = "disabled"
         config["CEDARLING_JWT_STATUS_VALIDATION"] = "disabled"
-        config["CEDARLING_ID_TOKEN_TRUST_MODE"] = "never"
         # Use the multi-issuer test policy store
         config["CEDARLING_POLICY_STORE_LOCAL_FN"] = (
             "../../test_files/policy-store-multi-issuer-test.yaml"
         )
-        config["CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL"] = "false"
-        config["CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL"] = "false"
 
     return configure_for_multi_issuer
 

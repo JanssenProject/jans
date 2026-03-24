@@ -68,12 +68,11 @@ application.
 
 ### Cedarling Interfaces
 
-At a high level, developers interact with the Cedarling using six core interfaces:
+At a high level, developers interact with the Cedarling using five core interfaces:
 
 * **Initialization** (`init`) – Loads the policy store and retrieves configuration settings.
-* **Authorization** (`authorize`) – Evaluates policies by sending a bundle of JWTs to specify the principal.
-* **Authorization** (`authorize_unsigned`) – Evaluates policies with an application asserted principal.
-* **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on multiple JWT tokens from different issuers without requiring traditional user/workload principals.
+* **Authorization** (`authorize_unsigned`) – Evaluates policies with an application-asserted principal.
+* **Multi-Issuer Authorization** (`authorize_multi_issuer`) – Evaluates policies based on JWT tokens from one or more issuers.
 * **Context Data API** (`data`) – Pushes external data into the evaluation context, making it available in Cedar policies through the `context.data` namespace.
 * **Logging** (`log`) – Retrieves decision and system logs for auditing. 
 
@@ -82,17 +81,9 @@ Cedarling to read its [bootstrap properties](./reference/cedarling-properties.md
 [policy store](./reference/cedarling-policy-store.md). If configured for JWT validation, the Cedarling
 will fetch the most recent issuer public keys and metadata.
 
-The standard `authorize` method answers the question: "Is this action, on this resource,
-given this context, allowed with these JWTs?". The Cedarling returns the
-decision--*allow* or *deny*. If denied, the Cedarling returns "diagnostics"--additional
-context to clarify why the decision was not allowed. During `authz`, the Cedarling can
-perform two more important jobs: (1) validate JWT tokens; (2) log the resulting decision.
+The `authorize_unsigned` method is used when the application asserts the principal identity directly. This is useful when JWTs have already been validated by the application, or when working with non-token based principals. It answers the question: "Is this action, on this resource, given this context, allowed for this principal?" The Cedarling returns the decision--*allow* or *deny*. If denied, the Cedarling returns "diagnostics"--additional context to clarify why the decision was not allowed.
 
-The `authorize_unsigned` variant is used when JWTs have already been validated by the
-application, or when working with non-token based principals. It follows the same
-evaluation logic but skips JWT validation steps.
-
-The `authorize_multi_issuer` method is designed for scenarios where applications need to evaluate authorization based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates traditional User and Workload principals, this method evaluates policies based purely on the token entities themselves. Each token is validated, converted to a Cedar entity, and made available in the policy evaluation context. This approach is particularly useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers rather than a single user identity. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
+The `authorize_multi_issuer` method is designed for JWT-based authorization. Applications provide one or more JWT tokens, and the Cedarling validates each token, converts them to Cedar entities, and evaluates policies based on the token entities. This approach is useful for federation scenarios, API gateways handling tokens from multiple identity providers, or applications where authorization depends on capabilities asserted by different issuers. Policies can reference individual tokens using predictable naming conventions like `context.tokens.acme_access_token` or `context.tokens.google_id_token`.
 
 The `data` interface enables developers to push external data into the Cedarling's evaluation context. This data is automatically injected under the `context.data` namespace during policy evaluation, allowing policies to make decisions based on dynamically pushed data. Data can be stored with optional TTL (Time To Live) for automatic expiration. See the Cedarling [interfaces](./reference/cedarling-interfaces.md#context-data-api) documentation for more information.
 
