@@ -286,16 +286,23 @@ impl CedarValueMapper {
                     let after_dot = &value[dot_pos + 1..];
                     // Require at least one ASCII digit in before_dot (optionally preceded by a single '+' or '-')
                     let before_has_digit = before_dot.chars().any(|c| c.is_ascii_digit());
-                    let before_valid = if before_dot.is_empty() || before_dot == "+" || before_dot == "-" {
-                        false // Must have at least one digit, not just sign or empty
-                    } else {
-                        // Must have at least one digit, and all chars are digits or a single leading sign
-                        let has_leading_sign = before_dot.starts_with('+') || before_dot.starts_with('-');
-                        let sign_count = before_dot.chars().filter(|c| *c == '+' || *c == '-').count();
-                        before_has_digit
-                            && before_dot.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-')
-                            && (!has_leading_sign || sign_count == 1)
-                    };
+                    let before_valid =
+                        if before_dot.is_empty() || before_dot == "+" || before_dot == "-" {
+                            false // Must have at least one digit, not just sign or empty
+                        } else {
+                            // Must have at least one digit, and all chars are digits or a single leading sign
+                            let has_leading_sign =
+                                before_dot.starts_with('+') || before_dot.starts_with('-');
+                            let sign_count = before_dot
+                                .chars()
+                                .filter(|c| *c == '+' || *c == '-')
+                                .count();
+                            before_has_digit
+                                && before_dot
+                                    .chars()
+                                    .all(|c| c.is_ascii_digit() || c == '+' || c == '-')
+                                && (!has_leading_sign || sign_count == 1)
+                        };
                     // Require at least one ASCII digit in after_dot, and all chars are digits
                     let after_ok = !after_dot.is_empty()
                         && after_dot.chars().all(|c| c.is_ascii_digit())

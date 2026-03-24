@@ -23,11 +23,9 @@ Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
 ![Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context](../../assets/lock-cedarling-diagram-2.jpg)
 
-The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities
-are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create
-User and Role entities; the OAuth access token is used to create a Workload entity, which is the
-software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
-given its policies, Role, Person and Workload are authorized. If one of Role or Person and Workload is authorized then the request is allowed to proceed.
+The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
+User, Workload, and Role entities based on token claims.
 
 The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
 of saying "User can perform action", we can say "Role can perform action"--a convenient way to
@@ -43,202 +41,40 @@ but the other conditions are ABAC. Policy evaluation is fast because Cedar uses 
 
 The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a
 Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
-tells you who authenticated, when they authenticated, how they authenticatated, and optionally other
+tells you who authenticated, when they authenticated, how they authenticated, and optionally other
 claims like the User's roles. An OAuth access token can tell you information about the Workload that
 obtained the JWT, its extent of access as defined by the OAuth Authorization Server (_i.e._ the
 values of the `scope` claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.
 
-The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, (`person_allowed` AND `workload_allowed`) must be `True`. The JWT's,
-Action, Resource and Context is sent by the application in the authorization request. For example,
-this is a sample request from a hypothetical application:
+## Which authorization method should I use?
 
-```js
-const bootstrap_config = {...};
-const cedarling = await init(bootstrap_config);
-let input = {
-  "tokens": {
-    "access_token": "eyJhbGc....",
-    "id_token": "eyJjbGc...",
-    "userinfo_token": "eyJjbGc...",
-  },
-  "action": "View",
-  "resource": {
-    "cedar_entity_mapping": {
-      "entity_type": "Ticket",
-      "id": "ticket-10101"
-    },
-    "owner": "bob@acme.com",
-    "org_id": "Acme"
-  },
-  "context": {
-    "ip_address": "54.9.21.201",
-    "network_type": "VPN",
-    "user_agent": "Chrome 125.0.6422.77 (Official Build) (arm64)",
-    "time": "1719266610.98636",
-  }
-}
+Cedarling provides two authorization methods. Choose the one that fits your deployment:
 
-decision_result = await cedarling.authorize(input)
-```
+| | `authorize_multi_issuer` | `authorize_unsigned` |
+|---|---|---|
+| **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
+| **JWT validation** | Yes — full signature, expiration, and status validation | No — accepts raw entity data as-is |
+| **Principal source** | Derived from JWT token claims | Supplied directly by the application |
+| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
+| **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
+| **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |
 
-## Automatically Adding Entity References to the Context
+## Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
 
-Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The following entities are automatically added to the context.
+The `authorize_multi_issuer` method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. This is the recommended method for most production deployments.
 
-- Workload Entity
-- User Entity
-- Resource Entity
-- Access Token Entity
-- ID Token Entity
-- Userinfo Token Entity
+This method does **not** use a principal entity — authorization decisions are based solely on token claims placed in the context. Each validated token becomes a Cedar entity accessible via `context.tokens.{issuer_name}_{token_type}`.
 
-Additionally, any [default entities](./cedarling-policy-store.md#default-entities) defined in the policy store are available for all authorization decisions without needing to be explicitly passed in the request. **Entity merging automatically resolves conflicts**, ensuring that request entities take precedence over default entities when UIDs match.
+### Key Features
 
-### Example Policy
-
-Below is an example policy schema that illustrates how entities are used:
-
-```cedarschema
-type Context = {
-  "access_token": Access_token,
-  "time": Long,
-  "user": User,
-  "workload": Workload
-};
-
-type Url = {
-  "host": String,
-  "path": String,
-  "protocol": String
-};
-
-entity Access_token = {
-  "exp": Long,
-  "iss": Jans::TrustedIssuer
-};
-
-entity Issue = {
-  "country": String,
-  "org_id": String
-};
-
-entity Role;
-
-namespace Jans{
-  entity TrustedIssuer = {
-    "issuer_entity_id": Url
-  };
-}
-
-
-entity User in [Role] = {
-  "country": String,
-  "email": String,
-  "sub": String,
-  "username": String
-};
-
-entity Workload = {
-  "client_id": String,
-  "iss": Jans::TrustedIssuer,
-  "name": String,
-  "org_id": String
-};
-
-action "Update" appliesTo {
-  principal: [Role, Workload, User],
-  resource: [Issue],
-  context: {
-    "access_token": Access_token,
-    "time": Long,
-    "user": User,
-    "workload": Workload
-  }
-};
-
-action "View" appliesTo {
-  principal: [Role, Workload, User],
-  resource: [Issue],
-  context: Context
-};
-```
-
-Note: The `TrustedIssuer` namespace corresponds to its name.
-
-With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
-
-```js
-let context = {
-  time: 1719266610.98636,
-};
-```
-
-## Unsigned Authorization (authorize_unsigned)
-
-The `authorize_unsigned` method allows making authorization decisions without JWT token verification. This is useful when:
-
-- You already have verified the principals through other means
-- You need to make authorization decisions for non-token based scenarios
-- You're implementing custom authentication flows
-
-Example usage:
-
-```js
-let input = {
-  principals: [
-    {
-      id: "user123",
-      type: "User",
-      email: "user@example.com",
-      roles: ["admin"],
-    },
-  ],
-  action: "View",
-  resource: {
-    cedar_entity_mapping: {
-      entity_type: "Ticket",
-      id: "ticket-10101",
-    },
-    owner: "bob@acme.com",
-    org_id: "Acme",
-  },
-  context: {
-    ip_address: "54.9.21.201",
-    network_type: "VPN",
-    user_agent: "Chrome 125.0.6422.77 (Official Build) (arm64)",
-    time: "1719266610.98636",
-  },
-};
-
-decision_result = await cedarling.authorize_unsigned(input);
-```
-
-### When to use authorize_unsigned vs authorize
-
-| Feature            | authorize           | authorize_unsigned   |
-| ------------------ | ------------------- | -------------------- |
-| JWT validation     | Yes                 | No                   |
-| Token requirements | Requires valid JWTs | Accepts raw entities |
-| Use case           | Standard auth flows | Custom auth flows    |
-| Security           | Higher (validates)  | Lower (trusts input) |
-
-## Multi-Issuer Authorization (authorize_multi_issuer)
-
-The `authorize_multi_issuer` method enables authorization decisions based on multiple JWT tokens from different issuers in a single request. Unlike the standard `authorize` method which creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.
-
-### Key Differences from Standard Authorization
-
-| Feature                | authorize                          | authorize_multi_issuer                      |
-| ---------------------- | ---------------------------------- | ------------------------------------------- |
-| Principal Model        | User/Workload entities             | No principals - token-based context         |
-| Token Sources          | Single issuer expected             | Multiple issuers supported                  |
-| Token Types            | Fixed (access, id, userinfo)       | Flexible with explicit mapping              |
-| Context Structure      | User/Workload in context           | Individual token entities in context.tokens |
-| Use Case               | Standard RBAC/ABAC flows           | Federation, API gateways, multi-issuer apps |
-| Policy Principal       | `principal is User/Workload`       | Not applicable (principal-less)             |
-| Policy Context Access  | `context.user`, `context.workload` | `context.tokens.{issuer}_{token_type}`      |
+| Feature                | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| Token Sources          | Multiple issuers supported                              |
+| Token Types            | Flexible with explicit mapping                          |
+| Context Structure      | Individual token entities in `context.tokens`           |
+| Use Case               | Federation, API gateways, multi-issuer apps             |
+| Policy Context Access  | `context.tokens.{issuer}_{token_type}`                  |
 
 ### How It Works
 
@@ -267,6 +103,9 @@ The `authorize_multi_issuer` method enables authorization decisions based on mul
 ### Example Usage
 
 ```js
+const bootstrap_config = {...};
+const cedarling = await init(bootstrap_config);
+
 // Create tokens array with explicit mappings
 let tokens = [
   {
@@ -274,7 +113,7 @@ let tokens = [
     payload: "eyJhbGciOiJIUzI1NiIs..."
   },
   {
-    mapping: "Jans::Id_Token", 
+    mapping: "Jans::Id_Token",
     payload: "eyJhbGciOiJFZERTQSIs..."
   },
   {
@@ -304,7 +143,7 @@ let request = {
 // Execute authorization
 let result = await cedarling.authorize_multi_issuer(request);
 
-// Check decision
+// Check result — single decision (no per-principal breakdown)
 if (result.decision) {
   console.log("Access allowed");
 } else {
@@ -350,35 +189,62 @@ permit(
   action == Acme::Action::"SwimWithDolphin",
   resource == Acme::Resource::"MiamiAcquarium"
 ) when {
-  context has tokens.dolphin_acme_dolphin_token &&
-  context.tokens.dolphin_acme_dolphin_token.hasTag("waiver") &&
-  context.tokens.dolphin_acme_dolphin_token.getTag("waiver").contains("signed")
+  context has tokens.dolphin_dolphintoken &&
+  context.tokens.dolphin_dolphintoken.hasTag("waiver") &&
+  context.tokens.dolphin_dolphintoken.getTag("waiver").contains("signed")
 };
 ```
 
 ### Token Collection Naming Convention
 
-The Cedarling uses a predictable algorithm to create token collection field names:
+The Cedarling uses a deterministic algorithm to generate token collection field names. The final key is always **lowercase** and uses only **underscores** as separators, making it a valid Cedar identifier.
 
 **Pattern**: `{issuer_name}_{token_type}`
 
-**Issuer Name Resolution**:
+Both components are individually normalized, then joined with a single underscore.
 
-1. Look up issuer in trusted issuer metadata and use the `name` field
-2. If no `name` field, use hostname from JWT `iss` claim
-3. Convert to lowercase and replace special characters with underscores
+**Step 1 — Issuer Name Resolution**:
 
-**Token Type Resolution**:
+1. Look up the JWT's `iss` claim in the trusted issuer configuration from the policy store
+2. If a matching trusted issuer is found, use its `name` field (e.g., `"Acme"`)
+3. If no trusted issuer matches, extract the hostname from the `iss` URL:
+    - Strip the protocol (`https://`, `http://`)
+    - Take everything before the first `/`
+    - Strip port numbers (everything after `:`)
+    - Example: `https://unknown.issuer.com:8080/auth` → `unknown.issuer.com`
+4. **Sanitize**: replace all `.` (dots), ` ` (spaces), and `-` (hyphens) with `_`, then convert to **lowercase**
 
-1. Extract from mapping field (e.g., "Jans::Access_Token")
-2. Split by namespace separator ("::")
-3. Convert to lowercase, preserving underscores
+**Step 2 — Token Type Simplification**:
+
+1. Take the `mapping` field from the `TokenInput` (e.g., `"Jans::Access_Token"`)
+2. Split by the Cedar namespace separator `::` and take only the **last segment**
+3. Convert to **lowercase**
+4. Underscores within the token type name are preserved
+
+**Step 3 — Combine**:
+
+Join the sanitized issuer name and simplified token type with `_`:
+
+```text
+{sanitized_issuer}_{simplified_token_type}
+```
 
 **Examples**:
 
-- JWT issuer: `https://idp.acme.com/auth`, Trusted issuer name: `"Acme"`, Mapping: `Jans::Access_Token` → `acme_access_token`
-- JWT issuer: `https://login.microsoftonline.com/tenant`, Trusted issuer name: `"Microsoft"`, Mapping: `Jans::Id_Token` → `microsoft_id_token`
-- JWT issuer: `https://idp.dolphin.sea/auth`, Trusted issuer name: `"Dolphin"`, Mapping: `Acme::DolphinToken` → `dolphin_acme_dolphin_token`
+| JWT `iss` claim | Trusted issuer `name` | Token `mapping` | Resulting key |
+|---|---|---|---|
+| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Access_Token` | `acme_access_token` |
+| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Id_Token` | `acme_id_token` |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Jans::Access_Token` | `dolphin_access_token` |
+| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
+| `https://unknown.issuer.com/auth` | _(not configured)_ | `Custom::Employee_Token` | `unknown_issuer_com_employee_token` |
+| `https://login.microsoftonline.com/tenant` | `"Microsoft"` | `Jans::Id_Token` | `microsoft_id_token` |
+
+Tokens are then accessible in Cedar policies as `context.tokens.{key}`, e.g.:
+
+```cedar
+context.tokens.acme_access_token.hasTag("scope")
+```
 
 ### Error Handling
 
@@ -401,3 +267,194 @@ The Cedarling uses a predictable algorithm to create token collection field name
 3. **Multi-Organization Access**: Requiring tokens from different organizations for collaborative workflows
 4. **Capability-Based Authorization**: Decisions based on capabilities asserted by different issuers rather than single user identity
 5. **Zero Trust Architectures**: Each token represents a verification from a different trust boundary
+
+## Automatically Adding Entity References to the Context
+
+Cedarling simplifies context creation by automatically including certain entities. This means you don't need to manually pass their references when using them in your policies. The entities that are auto-added depend on which authorization method you use.
+
+**For `authorize_unsigned`:**
+
+Entities are added based on the Cedar schema's context requirements for the requested action. If the schema defines that an action's context includes a `user` field of type `User`, Cedarling will automatically populate it from the built entities. Typically:
+
+- User Entity
+- Workload Entity
+- Resource Entity
+
+**For `authorize_multi_issuer`:**
+
+All validated token entities are placed under the `context.tokens` namespace. Each token is accessible via `context.tokens.{issuer_name}_{token_type}`. Additionally:
+
+- `context.tokens.total_token_count` — the number of validated tokens
+
+**Both methods** also include:
+
+- Any [default entities](./cedarling-policy-store.md#default-entities) defined in the policy store
+- Any data pushed via the [Context Data API](../tutorials/cedarling-getting-started.md#context-data-api) under `context.data`
+
+**Entity merging automatically resolves conflicts**, ensuring that request entities take precedence over default entities when UIDs match.
+
+### Example Policy
+
+Below is an example policy schema that illustrates how entities are used:
+
+```cedarschema
+// Jans namespace: shared infrastructure types used across namespaces.
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+}
+
+// Acme namespace: trusted issuer and token entities for the Acme IDP.
+// Token entities use `tags Set<String>` for claim-based access in policies.
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity Access_token = {
+    aud?: String,
+    exp?: Long,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    jti?: String,
+    scope?: Set<String>,
+    token_type?: String,
+    validated_at?: Long
+  } tags Set<String>;
+
+  entity id_token = {
+    acr?: String,
+    aud?: Set<String>,
+    exp?: Long,
+    iat?: Long,
+    iss?: TrustedIssuer,
+    jti?: String,
+    sub?: String,
+    role?: Set<String>,
+    token_type?: String,
+    validated_at?: Long
+  } tags Set<String>;
+}
+
+// MyApp namespace: your business entities, principals, resources, and actions.
+namespace MyApp {
+  entity Role;
+
+  entity User in [Role] = {
+    country: String,
+    email: String,
+    sub: String,
+    username: String
+  };
+
+  entity Workload = {
+    client_id: String,
+    iss: Acme::TrustedIssuer,
+    name: String,
+    org_id: String
+  };
+
+  entity Issue = {
+    country: String,
+    org_id: String
+  };
+
+  action "Update" appliesTo {
+    principal: [Role, Workload, User],
+    resource: [Issue],
+    context: {
+      access_token: Acme::Access_token,
+      time: Long,
+      user: User,
+      workload: Workload
+    }
+  };
+
+  action "View" appliesTo {
+    principal: [Role, Workload, User],
+    resource: [Issue],
+    context: {
+      access_token: Acme::Access_token,
+      time: Long,
+      user: User,
+      workload: Workload
+    }
+  };
+}
+```
+
+This example uses three namespaces to illustrate how they can be organized:
+
+- **`Jans`** — shared infrastructure types (`Url`) managed by Cedarling
+- **`Acme`** — trusted issuer and token entities for a specific IDP. Token entities use `tags Set<String>` to enable claim-based access in policies (e.g., `hasTag("scope")`, `getTag("scope")`)
+- **`MyApp`** — your application's business entities (`User`, `Role`, `Issue`), principals, resources, and actions
+
+Cross-namespace references use fully qualified names (e.g., `Jans::Url`, `Acme::TrustedIssuer`, `Acme::Access_token`). You can use as many namespaces as makes sense for your domain.
+
+With this schema, you only need to provide the fields that are not automatically included. For instance, to define the `time` in the context:
+
+```js
+let context = {
+  time: 1719266610,
+};
+```
+
+## Unsigned Authorization (authorize_unsigned)
+
+The `authorize_unsigned` method allows making authorization decisions without JWT token verification. Use this when:
+
+- Your application has already verified the principals through other means
+- You need to make authorization decisions for non-token-based scenarios
+- You're implementing custom authentication flows
+- You're testing or prototyping without an IDP
+
+Example usage:
+
+```js
+let input = {
+  principals: [
+    {
+      cedar_entity_mapping: {
+        entity_type: "Jans::User",
+        id: "user123"
+      },
+      email: "user@example.com",
+      role: ["admin"]
+    }
+  ],
+  action: "Jans::Action::\"View\"",
+  resource: {
+    cedar_entity_mapping: {
+      entity_type: "Jans::Issue",
+      id: "ticket-10101"
+    },
+    owner: "bob@acme.com",
+    org_id: "Acme"
+  },
+  context: {
+    ip_address: "54.9.21.201",
+    network_type: "VPN",
+    user_agent: "Chrome 125.0.6422.77 (Official Build) (arm64)",
+    time: 1719266610
+  }
+};
+
+let result = await cedarling.authorize_unsigned(input);
+```
+
+Each principal in `principals` uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes. Roles are extracted from the attribute specified by `CEDARLING_UNSIGNED_ROLE_ID_SRC` (default: `"role"`).
+
+The result contains per-principal Cedar responses combined using the [`CEDARLING_PRINCIPAL_BOOLEAN_OPERATION`](./cedarling-principal-boolean-operations.md) logic:
+
+```js
+{
+  decision: true,           // Combined boolean decision
+  request_id: "...",        // Tracing ID
+  principals: {             // Per-principal Cedar responses
+    "Jans::User": { ... }
+  }
+}
+```

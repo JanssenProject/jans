@@ -643,7 +643,7 @@ def get_password_from_file(password_file: str) -> str:
 
         try:
             passwd = sprig_decrypt_aes(raw_passwd, salt).decode()
-            logger.info(f"Using sprig-aes to load password from {password_file}")
+            logger.info("Using sprig-aes to load password from %s", password_file)
         except ValueError as exc:
             raise ValueError(
                 f"Unable to load password from {password_file} using sprig-aes "
@@ -655,14 +655,14 @@ def get_password_from_file(password_file: str) -> str:
         try:
             # maybe vanilla base64
             passwd = base64.b64decode(raw_passwd).decode()
-            logger.warning(f"Using base64 to load password from {password_file}")
+            logger.warning("Using base64 to load password from %s", password_file)
         except (UnicodeDecodeError, binascii.Error) as exc:
             raise ValueError(f"Unable to load password from {password_file} using base64; error={exc}")
 
     # other formats
     else:
         passwd = raw_passwd
-        logger.warning(f"Using simple method to load password from {password_file}")
+        logger.warning("Using simple method to load password from %s", password_file)
 
     # returns plain text
     return passwd.strip()

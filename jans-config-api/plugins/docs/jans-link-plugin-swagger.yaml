@@ -153,6 +153,8 @@ components:
           type: boolean
         disableJdkLogger:
           type: boolean
+        disableExternalLoggerConfiguration:
+          type: boolean
         cleanServiceInterval:
           type: integer
           format: int32

@@ -1,0 +1,44 @@
+{
+    "start": 0,
+    "totalEntriesCount": 1,
+    "entriesCount": 1,
+    "entries": [
+        {
+            "dn": "jansId=HOURLY_2026-02-20-15,ou=fido2-aggregations,o=jans",
+            "id": "HOURLY_2026-02-20-15",
+            "aggregationType": "HOURLY",
+            "startTime": "2026-02-20T15:00:00",
+            "endTime": "2026-02-20T16:00:00",
+            "uniqueUsers": 1,
+            "lastUpdated": "2026-02-20T16:05:00",
+            "fallbackEvents": 0,
+            "registrationSuccessRate": 0.25,
+            "authenticationAttempts": 0,
+            "metricsData": {
+                "deviceTypes": {
+                    "cross-platform": 1
+                },
+                "fallbackEvents": 0,
+                "registrationAttempts": 4,
+                "registrationFailures": 3,
+                "registrationSuccesses": 1,
+                "authenticationAttempts": 0,
+                "authenticationFailures": 0,
+                "authenticationSuccesses": 0,
+                "registrationAvgDuration": 471.0,
+                "registrationSuccessRate": 0.25
+            },
+            "period": "2026-02-20-15",
+            "registrationAttempts": 4,
+            "registrationSuccesses": 1,
+            "registrationFailures": 3,
+            "authenticationSuccesses": 0,
+            "authenticationFailures": 0,
+            "registrationAvgDuration": 471.0,
+            "deviceTypes": {
+                "cross-platform": 1
+            },
+            "baseDn": "jansId=HOURLY_2026-02-20-15,ou=fido2-aggregations,o=jans"
+        }
+    ]
+}
