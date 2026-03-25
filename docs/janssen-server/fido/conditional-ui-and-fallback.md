@@ -19,7 +19,7 @@ without typing a username or password. The browser detects registered passkeys a
 as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the
 flow falls back gracefully to traditional authentication methods.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │                     Authentication Flow                              │
 │                                                                      │
@@ -41,7 +41,7 @@ flow falls back gracefully to traditional authentication methods.
 
 ### Authentication Sequence
 
-```
+```text
 User   ──▶  Browser: Page loads with username field (autocomplete="username webauthn")
 Browser ──▶  JS: isConditionalMediationAvailable() check
 JS      ──▶  FIDO Server: POST /assertion/options (with allowCredentials from cookie)
@@ -60,7 +60,7 @@ Before initiating Conditional UI, the login page checks whether the browser supp
 ```javascript
 // login.xhtml — window.onload
 if (assertion_request != null) {
-    if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
+    if (window.PublicKeyCredential && await PublicKeyCredential.isConditionalMediationAvailable()) {
         startAssertion();
     } else {
         // Browser does not support Conditional UI — standard form remains active
@@ -71,8 +71,10 @@ if (assertion_request != null) {
 
 The check requires two conditions:
 1. `window.PublicKeyCredential` — WebAuthn API is available
-2. `PublicKeyCredential.isConditionalMediationAvailable` — the browser specifically supports
-   conditional mediation (autofill-driven passkey prompts)
+2. `await PublicKeyCredential.isConditionalMediationAvailable()` — the browser specifically
+   supports conditional mediation (autofill-driven passkey prompts). This is a static method
+   returning `Promise<boolean>` per the WebAuthn Level 3 spec; it must be awaited, not just
+   checked for existence.
 
 ### Step 2 — Preparing Assertion Options
 
@@ -193,6 +195,7 @@ coo = Cookie("allowList", value)
 coo.setSecure(True)    # HTTPS-only transmission
 coo.setHttpOnly(True)  # Not accessible via JavaScript
 coo.setMaxAge(7 * 24 * 60 * 60)  # 7-day expiry
+coo.setSameSite("Strict")  # CSRF protection — use "Lax" if cross-site navigation is needed
 ```
 
 - **No PII stored**: the cookie contains only credential IDs and transport hints — no
@@ -244,8 +247,9 @@ Detection is performed in `DeviceInfoExtractor.java` using User-Agent string pat
 
 ### Client-Side Capability Check
 
-On the client, the `PublicKeyCredential.isConditionalMediationAvailable` property is the
-definitive signal for Conditional UI support. Browsers that support it (as of 2024):
+On the client, `PublicKeyCredential.isConditionalMediationAvailable()` is the definitive
+signal for Conditional UI support — it is a static async method that resolves to `true`
+when the browser supports conditional mediation. Currently supported browsers:
 
 | Browser | Minimum Version |
 |---|---|
@@ -266,7 +270,7 @@ When Conditional UI is unavailable or fails, Janssen provides a layered fallback
 ### Fallback 1 — Browser Does Not Support Conditional UI
 
 **Trigger**: `window.PublicKeyCredential` is `undefined`, or
-`PublicKeyCredential.isConditionalMediationAvailable` is `false` or `undefined`.
+`await PublicKeyCredential.isConditionalMediationAvailable()` resolves to `false`.
 
 **Behavior**: The `startAssertion()` call is never made. The login page stays on the
 standard username/password form. The user logs in with credentials and proceeds to
@@ -277,7 +281,7 @@ passkey autofill in the browser's UI. No error is shown.
 
 ```javascript
 // login.xhtml — conditional check
-if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
+if (window.PublicKeyCredential && await PublicKeyCredential.isConditionalMediationAvailable()) {
     startAssertion();  // Conditional UI path
 } else {
     // Silent fallback — standard form is used
@@ -564,8 +568,9 @@ Cookie requirements:
 On the login page:
 
 1. Add `autocomplete="username webauthn"` to the username input
-2. On page load, call `PublicKeyCredential.isConditionalMediationAvailable` — note this
-   is a property check (not a method call) in the current implementation
+2. On page load, `await PublicKeyCredential.isConditionalMediationAvailable()` — this is
+   a static async method (WebAuthn Level 3); it must be called and awaited, not just checked
+   for existence
 3. If supported, call `webauthn.getAssertionConditional(assertionRequest)` with
    `mediation: "conditional"` and an `AbortController` signal
 4. Handle the promise result by submitting `tokenResponse` and `authMethod` to the server
@@ -601,7 +606,7 @@ For standard FIDO authentication (step 2 of the non-Conditional UI flow):
 | `allowList` cookie | Open DevTools → Application → Cookies; verify `allowList` exists |
 | `assertion_request` | Check the page source; `fido2_assertion_request` must not be `null` |
 | HTTPS | Conditional UI only works on HTTPS (or `localhost`) |
-| `isConditionalMediationAvailable` | Run `PublicKeyCredential.isConditionalMediationAvailable` in console — must be truthy |
+| `isConditionalMediationAvailable` | Run `await PublicKeyCredential.isConditionalMediationAvailable()` in console — must resolve to `true` |
 
 ### Authentication Fails After Passkey Selection
 
