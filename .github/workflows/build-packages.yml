@@ -583,7 +583,12 @@ jobs:
             brew install protobuf
           elif [ "$RUNNER_OS" == "Windows" ]; then
             winget install --id=Google.Protobuf -e --accept-package-agreements --accept-source-agreements
-            echo "C:\Program Files\Protobuf\bin" >> $GITHUB_PATH
+            PROTOC_PATH=$(find /c/Users/runneradmin/AppData/Local/Microsoft/WinGet/Packages -name protoc.exe | head -n 1)
+            if [ -z "$PROTOC_PATH" ]; then
+              PROTOC_PATH="/c/Program Files/Protobuf/bin/protoc.exe"
+            fi
+            echo "PROTOC=$PROTOC_PATH" >> $GITHUB_ENV
+            echo "$(dirname "$PROTOC_PATH")" >> $GITHUB_PATH
           fi      
       - name: Install Cosign
         uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
