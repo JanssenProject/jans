@@ -630,7 +630,7 @@ class JCA_CLI:
             if response.status_code == 200:
                 return response.json()
             self.cli_logger.warning(f"Token introspection returned status {response.status_code}")
-        except requests.RequestException as e:
+        except requests.RequestException:
             self.cli_logger.exception("Error during token introspection")
         return {}
 

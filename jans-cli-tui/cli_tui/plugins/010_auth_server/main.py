@@ -115,7 +115,7 @@ class Plugin(DialogUtils):
 
         try:
             self.app.app_configuration = response.json()
-        except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+        except (ConnectionError, TimeoutError, ValueError, RequestException):
             common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.app.center_frame)
             return
 
@@ -813,7 +813,7 @@ class Plugin(DialogUtils):
 
             try:
                 self.jwks_keys = response.json()
-            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+            except (ConnectionError, TimeoutError, ValueError, RequestException):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=common_data.app.center_frame)
                 return
 

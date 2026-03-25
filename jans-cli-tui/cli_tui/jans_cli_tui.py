@@ -350,7 +350,7 @@ class JansCliApp(Application):
         try:
             response = await get_event_loop().run_in_executor(self.executor, cli_object, cli_args)
             return response
-        except Exception as e:
+        except:
             self.logger.exception("Config API operation failed")
             raise
         finally:

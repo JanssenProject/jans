@@ -239,7 +239,7 @@ class SSA(DialogUtils):
 
                 try:
                     ssa = result.json()
-                except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+                except (ConnectionError, TimeoutError, ValueError, RequestException):
                     common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.working_container)
                     return
 
@@ -623,7 +623,7 @@ class SSA(DialogUtils):
 
             try:
                 ssa = response.json()
-            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+            except (ConnectionError, TimeoutError, ValueError, RequestException):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=dialog)
                 return
 

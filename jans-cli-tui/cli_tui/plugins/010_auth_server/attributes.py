@@ -347,7 +347,7 @@ class Attributes(DialogUtils):
 
             try:
                 data = response.json()
-            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError):
                 self.app.show_message(_(common_strings.error), HTML(_("Server reterned non json data <i>{}</i>").format(response.text)), tobefocused=self.app.center_container)
                 return
 

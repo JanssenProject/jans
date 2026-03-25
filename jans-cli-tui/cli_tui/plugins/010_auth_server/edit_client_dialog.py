@@ -1126,7 +1126,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
             try:
                 result = response.json()
-            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.tabs['Active Tokens'])
                 return
 
