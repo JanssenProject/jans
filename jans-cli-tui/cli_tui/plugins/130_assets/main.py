@@ -2,6 +2,9 @@ import os
 import copy
 import asyncio
 
+from json import JSONDecodeError
+from requests.exceptions import RequestException
+
 from typing import Any, Optional
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, FormattedTextControl

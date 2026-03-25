@@ -21,8 +21,10 @@ async def get_attributes_coroutine(app) -> None:
     while True:
 
         cli_args = {'operation_id': 'get-attributes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
-        response = await common_data.app.run_config_api_operation(cli_args)
-
+        response = await common_data.app.run_config_api_operation(
+            cli_args,
+            _("Retreiving attributes from server..."),
+        )
         if response.status_code == 200:
             try:
                 data = response.json()
@@ -53,8 +55,10 @@ async def retrieve_enabled_scripts() -> None:
     common_data.app.logger.info("Backrgound Task: retreiving enabled scripts")
 
     cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:enabled=true'}
-    response = await common_data.app.run_config_api_operation(cli_args)
-
+    response = await common_data.app.run_config_api_operation(
+        cli_args,
+        _("Retreiving enabled scripts from server..."),
+    )
     if response.status_code not in (200, 201):
         common_data.app.show_message(_("Error getting scripts"), str(response.text), tobefocused=common_data.app.center_frame)
         return

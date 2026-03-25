@@ -345,11 +345,17 @@ class JansCliApp(Application):
             msg = _("Calling Config API operation ") + cli_args['operation_id']
         if not cli_object:
             cli_object = self.cli_requests
-        self.start_progressing(msg)
-        response = await get_event_loop().run_in_executor(self.executor, cli_object, cli_args)
-        self.stop_progressing()
 
-        return response
+        self.start_progressing(msg)
+
+        try:
+            response = await get_event_loop().run_in_executor(self.executor, cli_object, cli_args)
+            return response
+        except Exception as e:
+            self.logger.exception(f"Config API operation failed: {e}")
+            raise
+        finally:
+            self.stop_progressing()
 
 
     def start_progressing(self, message: Optional[str] = "Progressing") -> None:
@@ -435,7 +441,7 @@ class JansCliApp(Application):
         self.logger.debug('JANS CLI Started')
 
 
-    async def do_authentication(self, next_step=None) -> None:
+    async def do_authentication(self) -> None:
         """This function does the authentication process."""
         self.auth_retry_count += 1
 
@@ -456,7 +462,7 @@ class JansCliApp(Application):
                 tobefocused=self.center_container)
             return
 
-        if not 'verification_uri_complete' in result:
+        if 'verification_uri_complete' not in result:
             self.cli_object_ok = False
             self.show_message(
                 _(common_strings.error),
@@ -532,7 +538,7 @@ class JansCliApp(Application):
 
         self.invalidate()
 
-        if status not in (True, 'ID Token is expired'):
+        if status not in (True, config_cli.id_token_expired):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
             self.show_message(_("Error connecting to Auth Server"), status, buttons=buttons)
 

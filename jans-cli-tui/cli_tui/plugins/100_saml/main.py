@@ -23,7 +23,7 @@ from wui_components.jans_label_container import JansLabelContainer
 from edit_tr_dialog import EditTRDialog
 from edit_identity_provider_dialog import EditIdentityProvideDialog
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
 
 class Plugin(DialogUtils):

@@ -138,7 +138,7 @@ class ConfigApiAuditLogs(DialogUtils):
             processing_message = _("Searching auidit logs")
             if search_pattern:
                 processing_message += ' ' + _("for patters %s" % search_pattern)
-            msg = search_pattern
+            msg = processing_message
             response = await common_data.app.run_config_api_operation(cli_args, msg)
 
 

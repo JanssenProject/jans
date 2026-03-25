@@ -65,6 +65,7 @@ success_color = 10
 bold_color = 15
 grey_color = 242
 file_data_type = '/path/to/file'
+id_token_expired = "ID Token is expired"
 
 def clear():
     if not debug:
@@ -528,10 +529,10 @@ class JCA_CLI:
             result = self.get_access_token_details()
             if not result.get('active'):
                 self.access_token = ''
-                return "Access token expired"
+                return id_token_expired
             if 'exp' in result and result['exp'] - int(time.time()) < 60*60:
                 self.access_token = ''
-                return "Access token will expire soon. Needs authentication."
+                return id_token_expired
 
         url = urljoin(self.auth_url, self.auth_url_token_endpoint_postfix)
         self.cli_logger.debug("Checking connection with url: %s", url)
@@ -628,9 +629,9 @@ class JCA_CLI:
                 )
             if response.status_code == 200:
                 return response.json()
-        except Exception as e:
-            self.cli_logger.error(str(e))
-
+            self.cli_logger.warning(f"Token introspection returned status {response.status_code}")
+        except requests.RequestException as e:
+            self.cli_logger.exception(f"Error during token introspection: {e}")
         return {}
 
     def check_access_token(self):
@@ -971,7 +972,7 @@ class JCA_CLI:
             return response
 
         if response.status_code in (404, 401):
-            if response.text == 'ID Token is expired' or 'unauthorized' in response.text.lower():
+            if response.text == id_token_expired or 'unauthorized' in response.text.lower():
                 self.access_token = None
                 self.get_access_token(security)
                 return self.get_requests(endpoint, params)
