@@ -55,9 +55,8 @@ class Plugin():
         async def coroutine():
             # retreive auth ldap servers
             cli_args = {'operation_id': 'get-custom-script-type'}
-            self.app.start_progressing(_("Retreiving Script Types..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Retreiving Script Types...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             if response.status_code == 200:
                 common_data.script_types = response.json()
@@ -108,9 +107,8 @@ class Plugin():
                     'endpoint_args': endpoint_args}
 
         async def coroutine():
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            msg = _("Getting custom scripts")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
             self.data = response.json()
 
             if not self.data.get('entries'):
@@ -231,10 +229,10 @@ class Plugin():
 
         async def coroutine():
             operation_id = 'put-config-scripts' if dialog.new_data.get('baseDn') else 'post-config-scripts'
+            msg = _("Saving custom scripts")
             cli_args = {'operation_id': operation_id, 'data': dialog.new_data}
-            self.app.start_progressing()
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code == 500:
                 self.app.show_message(
                     _('Error'), response.text + '\n' + response.reason)
@@ -265,8 +263,8 @@ class Plugin():
                 cli_args = {'operation_id': 'delete-config-scripts-by-inum',
                             'url_suffix': 'inum:{}'.format(kwargs['selected'][0])}
                 self.app.start_progressing()
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
+                msg = _("Deleting custom script")
+                response = await common_data.app.run_config_api_operation(cli_args, msg)
                 if response:
                     self.app.show_message(_("Error"), _("Deletion was not completed {}".format(
                         response)), tobefocused=self.scripts_listbox)

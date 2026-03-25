@@ -72,9 +72,9 @@ class Message(DialogUtils):
 
         async def provider_type_coroutine():
             cli_args = {'operation_id': 'patch-config-message', 'data':[{'op':'replace', 'path': 'messageProviderType', 'value': provider_type}]}
-            common_data.app.start_progressing(_("Saving provider type"))
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
+            msg = _("Saving provider type")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code not in (200, 201):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.main_container)
             else:
@@ -85,9 +85,9 @@ class Message(DialogUtils):
         # save prpvider data
 
         async def provider_coroutine(pcli_args):
-            common_data.app.start_progressing(_("Saving message configuration"))
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, pcli_args)
-            common_data.app.stop_progressing()
+            msg = _("Saving message configuration")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code not in (200, 201):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.main_container)
             else:
@@ -109,9 +109,8 @@ class Message(DialogUtils):
         async def coroutine():
 
             cli_args = {'operation_id': 'get-config-message'}
-            common_data.app.start_progressing(_(f"Retreiving data for Messages"))
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
+            msg = _("Retreiving data for Messages")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
 
             if response.status_code not in (200, 201):
                 common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.main_container)

@@ -340,9 +340,9 @@ class EditUserDialog(JansGDialog, DialogUtils):
         async def coroutine():
             operation_id = 'put-user' if self.data.get('baseDn') else 'post-user'
             cli_args = {'operation_id': operation_id, 'data': user_info}
-            common_data.app.start_progressing(_("Saving user ..."))
-            response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
+            msg = _("Saving user ...")
+            response = await common_data.app.run_config_api_operation(cli_args, msg)
+
             if response.status_code not in (200, 201):
                 common_data.app.show_message(_('Error'), response.text + '\n' + response.reason)
             else:
