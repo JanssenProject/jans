@@ -59,14 +59,16 @@ Before initiating Conditional UI, the login page checks whether the browser supp
 
 ```javascript
 // login.xhtml — window.onload
-if (assertion_request != null) {
-    if (window.PublicKeyCredential && await PublicKeyCredential.isConditionalMediationAvailable()) {
-        startAssertion();
-    } else {
-        // Browser does not support Conditional UI — standard form remains active
-        console.log("PublicKeyCredential not ConditionalMediationAvailable");
+window.onload = async function () {
+    if (assertion_request != null) {
+        if (window.PublicKeyCredential && await PublicKeyCredential.isConditionalMediationAvailable()) {
+            startAssertion();
+        } else {
+            // Browser does not support Conditional UI — standard form remains active
+            console.log("PublicKeyCredential not ConditionalMediationAvailable");
+        }
     }
-}
+};
 ```
 
 The check requires two conditions:
@@ -223,7 +225,7 @@ The cookie is read at the start of each session to build the `allowCredentials` 
 # Fido2ExternalAuthenticator.py — getCookieValue
 for cookie in httpRequest.getCookies():
     if cookie.getName() == "allowList":
-        value = Base64Util.base64urldecodeToString(coo.getValue())
+        value = Base64Util.base64urldecodeToString(cookie.getValue())
         value = json.loads(value)
 ```
 
@@ -281,12 +283,14 @@ passkey autofill in the browser's UI. No error is shown.
 
 ```javascript
 // login.xhtml — conditional check
-if (window.PublicKeyCredential && await PublicKeyCredential.isConditionalMediationAvailable()) {
-    startAssertion();  // Conditional UI path
-} else {
-    // Silent fallback — standard form is used
-    console.log("PublicKeyCredential not ConditionalMediationAvailable");
-}
+window.onload = async function () {
+    if (window.PublicKeyCredential && await PublicKeyCredential.isConditionalMediationAvailable()) {
+        startAssertion();  // Conditional UI path
+    } else {
+        // Silent fallback — standard form is used
+        console.log("PublicKeyCredential not ConditionalMediationAvailable");
+    }
+};
 ```
 
 **Recommendation**: Display a subtle informational message such as
