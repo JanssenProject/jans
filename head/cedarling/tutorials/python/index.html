@@ -2651,7 +2651,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <h3 id="authorization">Authorization<a class="headerlink" href="#authorization" title="Permanent link">#</a></h3>
 <p>Cedarling provides two main interfaces for performing authorization checks: <strong>Token-Based Authorization</strong> and <strong>Unsigned Authorization</strong>. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.</p>
 <ul>
-<li><a href="#token-based-authorization"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
+<li><a href="#token-based-authorization-multi-issuer"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
 <h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
@@ -2872,7 +2872,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
 <li><a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">Cedarling TBAC quickstart</a></li>
 <li><a href="../../quick-start/cedarling-quick-start/#step-1-create-the-cedar-policy-and-schema">Cedarling Unsigned quickstart</a></li>
 <li><a href="../../developer/sidecar/cedarling-sidecar-tutorial/">Cedarling Sidecar Tutorial</a></li>
-<li><a href="../../reference/cedarling-authz/#multi-issuer-authorization-authorize_multi_issuer">Multi-Issuer Authorization Details</a></li>
+<li><a href="../../reference/cedarling-authz/#multi-issuer-authorization-authorize_multi_issuer-recommended">Multi-Issuer Authorization Details</a></li>
 </ul>
 
 
@@ -2896,7 +2896,7 @@ cedarling_python = {path = &quot;path/to/wheel.whl&quot;}
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
   </span>
 
     
