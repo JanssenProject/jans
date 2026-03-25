@@ -4,7 +4,7 @@
 
 ## Contents:
 
-- [Overview](#overview)
+- [Prerequisites](#prerequisites)
 - [Using Kubernetes?](#kubernetes)
 
 

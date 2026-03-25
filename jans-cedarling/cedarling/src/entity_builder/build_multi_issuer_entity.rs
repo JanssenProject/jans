@@ -455,7 +455,7 @@ mod tests {
     use crate::common::default_entities::DefaultEntities;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::TrustedIssuerIndex;
-    use crate::entity_builder_config::{EntityBuilderConfig, EntityNames, UnsignedRoleIdSrc};
+    use crate::entity_builder_config::{EntityBuilderConfig, UnsignedRoleIdSrc};
     use crate::jwt::{Token, TokenClaims};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
@@ -465,11 +465,7 @@ mod tests {
 
     fn create_test_entity_builder() -> EntityBuilder {
         let config = EntityBuilderConfig {
-            entity_names: EntityNames {
-                user: "User".to_string(),
-                role: "Role".to_string(),
-                workload: "Workload".to_string(),
-            },
+            role_entity_name: "Role".to_string(),
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
@@ -769,12 +765,7 @@ mod tests {
             .expect("should parse schema");
 
         let config = EntityBuilderConfig {
-            entity_names: EntityNames {
-                // user, role and workload is unused
-                user: "User".to_string(),
-                role: "Role".to_string(),
-                workload: "Workload".to_string(),
-            },
+            role_entity_name: "Role".to_string(),
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 
@@ -950,11 +941,7 @@ mod tests {
             .expect("should parse schema");
 
         let config = EntityBuilderConfig {
-            entity_names: EntityNames {
-                user: "User".to_string(),
-                role: "Role".to_string(),
-                workload: "Workload".to_string(),
-            },
+            role_entity_name: "Role".to_string(),
             unsigned_role_id_src: UnsignedRoleIdSrc::default(),
         };
 

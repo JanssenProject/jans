@@ -10,7 +10,7 @@ tags:
 
 ## Including in the project
 
-The Cedarling library is not yet uploaded to [crates.io](jans-cedarling), so the only way to use it right now is by including it directly from the source in your project.
+The Cedarling library is not yet uploaded to [crates.io](https://crates.io), so the only way to use it right now is by including it directly from the source in your project.
 
 **1. Clone the Jans repository**
 
@@ -390,6 +390,6 @@ let config = BootstrapConfig {
 
 - [Getting Started with Cedarling Rust](../tutorials/rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
 - [Cedarling Properties](../reference/cedarling-properties.md)
