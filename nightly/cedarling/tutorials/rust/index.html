@@ -1711,8 +1711,6 @@
       
         
       
-        
-      
     
     
     
@@ -2762,7 +2760,7 @@ cargo<span class="w"> </span>--version
 <h3 id="authorization">Authorization<a class="headerlink" href="#authorization" title="Permanent link">#</a></h3>
 <p>Cedarling provides two main interfaces for performing authorization checks: <strong>Token-Based Authorization</strong> and <strong>Unsigned Authorization</strong>. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.</p>
 <ul>
-<li><a href="#token-based-authorization"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
+<li><a href="#token-based-authorization-multi-issuer"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
 <li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
 </ul>
 <h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
@@ -2780,11 +2778,11 @@ cargo<span class="w"> </span>--version
 <span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">    </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
+<span class="w">  </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;protocol&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;https&quot;</span><span class="p">)),</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;example.com&quot;</span><span class="p">)),</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;path&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">)),</span>
@@ -2826,21 +2824,21 @@ cargo<span class="w"> </span>--version
 
 <span class="kd">let</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
 <span class="w">  </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Workload&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">      </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;some_workload_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
+<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">      </span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;some_client_id&quot;</span><span class="p">)),</span>
 <span class="w">    </span><span class="p">]),</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">      </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;random_user_id&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
-<span class="w">      </span><span class="p">(</span><span class="s">&quot;roles&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;manager&quot;</span><span class="p">])),</span>
+<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
+<span class="w">      </span><span class="p">(</span><span class="s">&quot;role&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">([</span><span class="s">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;manager&quot;</span><span class="p">])),</span>
 <span class="w">    </span><span class="p">]),</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="p">]</span>
@@ -2851,11 +2849,11 @@ cargo<span class="w"> </span>--version
 <span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
 
 <span class="kd">let</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">cedar_entity_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Application&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">    </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app_id_001&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
+<span class="w">  </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="p">::</span><span class="n">from_iter</span><span class="p">([</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;protocol&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;https&quot;</span><span class="p">)),</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;example.com&quot;</span><span class="p">)),</span>
 <span class="w">    </span><span class="p">(</span><span class="s">&quot;path&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;/admin-dashboard&quot;</span><span class="p">)),</span>
@@ -2907,7 +2905,7 @@ cargo<span class="w"> </span>--version
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">pop_logs</span><span class="p">();</span>
 <span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{:#?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">logs</span><span class="p">);</span>
 </code></pre></div>
-<p>For more detailed logging capabilities, see the <a href="../../developer/cedarling-rust/#log-retrieval">Cedarling Rust Developer Guide</a>.</p>
+<p>For more detailed logging capabilities, see the <a href="../../developer/cedarling-rust/">Cedarling Rust Developer Guide</a>.</p>
 <h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h2>
 <p>Refer to <a href="../../developer/cedarling-rust/#complete-example">Cedarling Rust Developer Guide</a>
 for a complete code example.</p>
@@ -2916,8 +2914,8 @@ for a complete code example.</p>
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="../../developer/cedarling-rust/">Cedarling Rust Developer Guide</a></li>
-<li><a href="../../quick-start/cedarling-quick-start/#implement-tbac-using-cedarling">Cedarling TBAC quickstart</a></li>
-<li><a href="../../quick-start/cedarling-quick-start/#authorization-using-the-cedarling">Cedarling Unsigned quickstart</a></li>
+<li><a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">Cedarling TBAC quickstart</a></li>
+<li><a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-application-asserted-identity">Cedarling Unsigned quickstart</a></li>
 <li><a href="../../developer/sidecar/cedarling-sidecar-tutorial/">Cedarling Sidecar Tutorial</a></li>
 </ul>
 
@@ -2942,7 +2940,7 @@ for a complete code example.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
   </span>
 
     

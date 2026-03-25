@@ -2592,7 +2592,7 @@ This same CLA will be signed digitally by following the steps below:</p>
 <p>Janssen Project documentation uses Markdown. Guidelines below are intended to bring consistency in writing and formatting documents.</p>
 <div class="admonition testing">
 <p class="admonition-title">Testing</p>
-<p><a href="https://docs.jans.io">Janssen Project documentation site</a> is published using MkDocs. Markdown parsers used by GitHub and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and <a href="https://docs.jans.io">Janssen Project documentation site</a>. Hence it is critical to <a href="../contribute/testing/#testing-documentation-changes-locally">test documentation</a> changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.</p>
+<p><a href="https://docs.jans.io">Janssen Project documentation site</a> is published using MkDocs. Markdown parsers used by GitHub and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between GitHub and <a href="https://docs.jans.io">Janssen Project documentation site</a>. Hence it is critical to <a href="../contribute/testing/#contributing-to-the-documentation">test documentation</a> changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.</p>
 </div>
 <h4 id="document-title">Document Title<a class="headerlink" href="#document-title" title="Permanent link">#</a></h4>
 <p>The document title summarises what the document aims to achieve and at the same time, it plays a critical role in making the document easy to find via search. Below are a few guidelines to write good titles for documents.</p>
@@ -2637,11 +2637,11 @@ In this guide, the following command is documented:</p>
 <p>Above command contains references to the release number at two places. <code>v1.1.4</code> in the URL and <code>1.1.4</code> as part of the file
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.</p>
-<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>0.0.0-nightly</code> instead
+<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>replace-janssen-version</code> instead
 of writing actual release numbers in the <code>head</code>(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the <code>head</code> version)
 so that it stays up-to-date release after release.</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb<span class="w"> </span>-P<span class="w"> </span>/tmp
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -2920,7 +2920,7 @@ docs: no docs modification
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 21, 2026 14:24:05 UTC"><span class="timeago" datetime="2026-01-21T14:24:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 21, 2026 14:24:05 UTC">2026-01-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
   </span>
 
     

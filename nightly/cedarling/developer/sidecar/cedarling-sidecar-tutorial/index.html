@@ -1252,8 +1252,6 @@
       
         
       
-        
-      
     
     
     
@@ -2627,7 +2625,7 @@ participant Gateway
 participant Sidecar
 
 User-&gt;Gateway: GET /protected\nAuthorization: Bearer ...
-Gateway-&gt;Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"access_token": "..."} }}
+Gateway-&gt;Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"tokens": []} }}
 Sidecar-&gt;Sidecar: cedarling.authorize_multi_issuer(tokens)
 
 alt ALLOW
@@ -2646,14 +2644,14 @@ end
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_bundle&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">&lt;SHA</span><span class="mi">256</span><span class="w"> </span><span class="err">hash</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="kc">t</span><span class="err">he</span><span class="w"> </span><span class="err">proper</span><span class="kc">t</span><span class="err">ies</span><span class="w"> </span><span class="err">dic</span><span class="kc">t</span><span class="err">io</span><span class="kc">nar</span><span class="err">y&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">      </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Request&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">&lt;SHA</span><span class="mi">256</span><span class="w"> </span><span class="err">hash</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="kc">t</span><span class="err">he</span><span class="w"> </span><span class="err">proper</span><span class="kc">t</span><span class="err">ies</span><span class="w"> </span><span class="err">dic</span><span class="kc">t</span><span class="err">io</span><span class="kc">nar</span><span class="err">y&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
@@ -2689,41 +2687,59 @@ end
    <img alt="image" src="../../../../assets/cedarling-select-repo.png" /></li>
 <li>After initialization, create a policy store named <code>gatewayDemo</code>.
    <img alt="image" src="../../../../assets/cedarling-policy-store-name.png" /></li>
-<li>Open the policy store and navigate to Policies.</li>
-<li>Click <code>Add Policy</code>, select <code>Text Editor</code>.
-   <img alt="image" src="../../../../assets/cedarling-add-policy.png" /></li>
-<li>Paste the following Cedar policy:</li>
-</ol>
-<div class="highlight"><pre><span></span><code>@id<span class="o">(</span><span class="s2">&quot;allow_one&quot;</span><span class="o">)</span>
-permit<span class="o">(</span>
-<span class="w">  </span>principal<span class="w"> </span>is<span class="w"> </span>Jans::Workload,
-<span class="w">  </span><span class="nv">action</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>Jans::Action::<span class="s2">&quot;GET&quot;</span>,
-<span class="w">  </span>resource<span class="w"> </span>is<span class="w"> </span>Jans::HTTP_Request
-<span class="o">)</span>
-when<span class="w"> </span><span class="o">{</span>
-<span class="w">  </span>principal<span class="w"> </span>has<span class="w"> </span>access_token.scope<span class="w"> </span><span class="o">&amp;&amp;</span>
-<span class="w">  </span>principal.access_token.scope.contains<span class="o">(</span><span class="s2">&quot;openid&quot;</span><span class="o">)</span>
-<span class="o">}</span><span class="p">;</span>
-</code></pre></div>
-<ol>
-<li>Click <code>Save</code>. Agama Lab will validate your policy.</li>
+<li>Open the policy store and navigate to <code>Schema</code></li>
+<li>
+<p>Under <code>Common Types</code>, find <code>TokensContext</code>. Open it and add the following:</p>
+<ul>
+<li>Attribute name: <code>jans_access_token</code></li>
+<li>Type: <code>EntityOrCommon</code></li>
+<li>Entity name: <code>Access_token</code></li>
+<li>Mandatory: No</li>
+</ul>
+</li>
+<li>
+<p>Save your schema channges</p>
+</li>
+<li>Navigate to Policies.</li>
+<li>Click <code>Add Policy</code></li>
+<li>
+<p>Paste the following Cedar policy:</p>
+<p><code>bash
+@id("allow_one")
+permit(
+  principal,
+  action,
+  resource is Jans::HTTP_Request
+)
+when {
+  context has tokens.jans_access_token &amp;&amp;
+  context.tokens.jans_access_token.hasTag("scope") &amp;&amp;
+  context.tokens.jans_access_token.getTag("scope").contains("openid")
+};</code></p>
+</li>
+<li>
+<p>Name it <code>add_one</code> and click <code>Save</code>. Agama Lab will validate your policy.</p>
+</li>
 <li>
 <p>Next, click on <code>Trusted Issuers</code> and add the following issuer:</p>
+<ul>
+<li>Name: <code>Jans</code></li>
+<li>Description: <code>Jans</code></li>
+<li>OpenID Configuration Endpoint: <code>https://account.gluu.org/.well-known/openid-configuration</code></li>
+<li>Base Schema: <code>Jans</code></li>
+<li>Save your changes</li>
+</ul>
 </li>
 <li>
-<p>Name: <code>Gluu</code></p>
+<p>Click on <code>Release</code>, choose <code>pre-release</code> and give it a version number.</p>
 </li>
-<li>Description: <code>Gluu</code></li>
-<li>OpenID Configuration Endpoint: <code>https://account.gluu.org/.well-known/openid-configuration</code></li>
-<li>Copy the URL for your policy store; you'll need it for the sidecar setup.
-     <img alt="image" src="../../../../assets/cedarling-copylink.png" /></li>
+<li>Navigate to the releases section of your Github repository, find your pre-release and copy the URL to the CJAR asset. </li>
 </ol>
 <h2 id="deploy-cedarling-sidecar">Deploy Cedarling Sidecar<a class="headerlink" href="#deploy-cedarling-sidecar" title="Permanent link">#</a></h2>
 <h3 id="docker-instructions">Docker Instructions<a class="headerlink" href="#docker-instructions" title="Permanent link">#</a></h3>
 <p>Create a file named <code>bootstrap.json</code>. You may use the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json">sample</a> file.</p>
 <ul>
-<li>Set <code>CEDARLING_POLICY_STORE_URI</code> to the URL you copied from Agama Lab.</li>
-<li>Set <code>CEDARLING_MAPPING_WORKLOAD</code> to <code>Jans::Workload</code></li>
+<li>Set <code>CEDARLING_POLICY_STORE_URI</code> to the URL you copied.</li>
 </ul>
 <p>Pull the Docker image:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -2733,7 +2749,6 @@ when<span class="w"> </span><span class="o">{</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">APP_MODE</span><span class="o">=</span><span class="s1">&#39;development&#39;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">CEDARLING_BOOTSTRAP_CONFIG_FILE</span><span class="o">=</span>/bootstrap.json<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">SIDECAR_DEBUG_RESPONSE</span><span class="o">=</span>True<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-e<span class="w"> </span><span class="nv">DISABLE_HASH_CHECK</span><span class="o">=</span>False<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span>&lt;/absolute/path/to/bootstrap.json&gt;,dst<span class="o">=</span>/bootstrap.json<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">5000</span>:5000<span class="se">\</span>
 <span class="w">  </span>ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -2767,7 +2782,6 @@ it is your Docker container ID.</p>
 <div class="highlight"><pre><span></span><code>APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
-DISABLE_HASH_CHECK=False
 </code></pre></div>
 <ul>
 <li>
@@ -2797,13 +2811,6 @@ DISABLE_HASH_CHECK=False
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">request</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hashlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">sha256</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_hash</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">encoded_str</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-    <span class="n">digest</span> <span class="o">=</span> <span class="n">sha256</span><span class="p">(</span><span class="n">encoded_str</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">digest</span>
-
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -2813,11 +2820,11 @@ DISABLE_HASH_CHECK=False
     <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
     <span class="n">token_jwt</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">token_jwt</span><span class="p">)</span>
     <span class="n">subject_properties</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;access_token&quot;</span><span class="p">:</span> <span class="n">token_jwt</span>
+        <span class="s2">&quot;tokens&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">{</span><span class="s2">&quot;mapping&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span> <span class="s2">&quot;payload&quot;</span><span class="p">:</span> <span class="n">token_jwt</span><span class="p">}</span>
+        <span class="p">]</span>
     <span class="p">}</span>
-    <span class="n">subject_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">subject_properties</span><span class="p">)</span>
     <span class="n">resource_properties</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::HTTP_Request&quot;</span><span class="p">,</span>
@@ -2830,16 +2837,15 @@ DISABLE_HASH_CHECK=False
             <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/protected&quot;</span>
         <span class="p">}</span>
     <span class="p">}</span>
-    <span class="n">resource_hash</span> <span class="o">=</span> <span class="n">generate_hash</span><span class="p">(</span><span class="n">resource_properties</span><span class="p">)</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;token_bundle&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">subject_hash</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">subject_properties</span> 
         <span class="p">},</span>
         <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">resource_hash</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">resource_properties</span> 
         <span class="p">},</span>
         <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -2968,19 +2974,27 @@ json should be similar to the one below:</p>
 <span class="w">        </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Set&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;element&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EntityOrCommon&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Let's make the corresponding changes in the policy.</p>
 <div class="highlight"><pre><span></span><code>@id(&quot;allow_one&quot;)
 permit(
-  principal is Jans::Workload,
-  action == Jans::Action::&quot;GET&quot;,
+  principal,
+  action,
   resource is Jans::HTTP_Request
 )
 when {
-  principal has access_token.acr &amp;&amp;
-  principal.acr == &quot;simple_password_auth&quot;
+  context has tokens.jans_access_token &amp;&amp;
+  context.tokens.jans_access_token.hasTag(&quot;acr&quot;) &amp;&amp;
+  context.tokens.jans_access_token.getTag(&quot;acr&quot;).contains(&quot;simple_password_auth&quot;)
 };
 </code></pre></div>
 <p>The policy now checks whether the <code>acr</code> value in the access token is present and matches <code>simple_password_auth</code>.</p>
@@ -3006,7 +3020,7 @@ when {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
   </span>
 
     

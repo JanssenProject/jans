@@ -197,10 +197,6 @@
          <lastmod>2026-03-25</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/cedarling/reference/cedarling-jwt-mapping/</loc>
-         <lastmod>2026-03-25</lastmod>
-    </url>
-    <url>
          <loc>https://docs.jans.io/nightly/cedarling/reference/cedarling-jwt-validation/</loc>
          <lastmod>2026-03-25</lastmod>
     </url>
@@ -226,10 +222,6 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/</loc>
-         <lastmod>2026-03-25</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/nightly/cedarling/reference/cedarling-terms/</loc>
          <lastmod>2026-03-25</lastmod>
     </url>
     <url>
@@ -953,10 +945,6 @@
          <lastmod>2026-03-25</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/developer/interception-scripts-debug-ce/</loc>
-         <lastmod>2026-03-25</lastmod>
-    </url>
-    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/developer/managed-beans/</loc>
          <lastmod>2026-03-25</lastmod>
     </url>
@@ -1010,6 +998,14 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/janssen-server/developer/scripts/</loc>
+         <lastmod>2026-03-25</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/developer/scripts/interception-scripts-debug-ce/</loc>
+         <lastmod>2026-03-25</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/developer/scripts/interception-scripts-debug/</loc>
          <lastmod>2026-03-25</lastmod>
     </url>
     <url>
@@ -1698,10 +1694,6 @@
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/script-catalog/introspection/</loc>
-         <lastmod>2026-03-25</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/nightly/script-catalog/introspection/interception-scripts-debug/</loc>
          <lastmod>2026-03-25</lastmod>
     </url>
     <url>
