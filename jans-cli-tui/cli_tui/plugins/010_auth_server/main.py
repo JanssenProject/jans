@@ -111,11 +111,11 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Error getting Jans configuration"), str(response.text), tobefocused=self.app.center_frame)
             return
 
-            try:
-                self.app.app_configuration = response.json()
-            except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
-                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.app.center_frame)
-                return
+        try:
+            self.app.app_configuration = response.json()
+        except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
+            common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.app.center_frame)
+            return
 
         self.ssa.ssa_custom_attributes = self.app.app_configuration.get('ssaConfiguration', {}).get('ssaCustomAttributes', [])
         self.oauth_logging()
