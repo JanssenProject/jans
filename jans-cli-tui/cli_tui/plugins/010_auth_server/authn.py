@@ -223,7 +223,7 @@ class Authn(DialogUtils):
             try:
                 self.ldap_servers = result.json()
             except (ConnectionError, TimeoutError, ValueError, RequestException, JSONDecodeError) as e:
-                common_data.app.show_message(common_strings.error, str(response.text), tobefocused=self.ldap_servers_container)
+                common_data.app.show_message(common_strings.error, str(result), tobefocused=self.ldap_servers_container)
                 return
 
             acr_values_supported = self.app.cli_object.openid_configuration.get('acr_values_supported', [])[:]
