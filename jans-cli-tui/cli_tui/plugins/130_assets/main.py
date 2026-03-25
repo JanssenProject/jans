@@ -153,7 +153,6 @@ class Plugin(DialogUtils):
 
                 else:
                     common_data.app.show_message(_(common_strings.error), _("Save failed: Status {} - {}\n").format(response.status_code, response.text), tobefocused=dialog)
-                    common_data.app.stop_progressing(_("Failed to save Trust Relationship."))
 
                 await self.get_assets()
 

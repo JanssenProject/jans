@@ -631,7 +631,7 @@ class JCA_CLI:
                 return response.json()
             self.cli_logger.warning(f"Token introspection returned status {response.status_code}")
         except requests.RequestException as e:
-            self.cli_logger.exception(f"Error during token introspection: {e}")
+            self.cli_logger.exception("Error during token introspection")
         return {}
 
     def check_access_token(self):

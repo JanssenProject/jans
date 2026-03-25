@@ -1,6 +1,8 @@
 import time
 import json
 import asyncio
+from json import JSONDecodeError
+from requests.exceptions import RequestException
 from functools import partial
 from typing import Any, Optional
 from prompt_toolkit.application.current import get_app
@@ -387,10 +389,6 @@ class Plugin(DialogUtils):
             cli_args = {'operation_id': 'get-oauth-openid-clients', 'endpoint_args': endpoint_args}
 
             response = await self.app.run_config_api_operation(cli_args)
-
-            #self.app.start_progressing(_("Retreiving clients from server..."))
-            #response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            #self.app.stop_progressing()
 
             if response.status_code not in (200, 201):
                 self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])

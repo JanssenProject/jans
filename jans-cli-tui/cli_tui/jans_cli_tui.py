@@ -218,7 +218,6 @@ class JansCliApp(Application):
         self.app_configuration = {}
         self.current_page = None
         self.jans_help = get_help_with()
-        self.access_token_expire_check = False
         self.auth_retry_count = 0
 
         self.not_implemented = Frame(
@@ -352,7 +351,7 @@ class JansCliApp(Application):
             response = await get_event_loop().run_in_executor(self.executor, cli_object, cli_args)
             return response
         except Exception as e:
-            self.logger.exception(f"Config API operation failed: {e}")
+            self.logger.exception("Config API operation failed")
             raise
         finally:
             self.stop_progressing()

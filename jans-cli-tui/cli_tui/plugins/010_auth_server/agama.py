@@ -223,7 +223,6 @@ class Agama(DialogUtils):
                 cli_args = {'operation_id': 'get-agama-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
                 msg = _("Retrieving project configuration...")
                 response = await common_data.app.run_config_api_operation(cli_args, msg)
-                self.app.stop_progressing()
 
                 result = None
                 try:
