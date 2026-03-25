@@ -258,7 +258,10 @@ when the browser supports conditional mediation. Currently supported browsers:
 | Chrome / Chromium | 108+ |
 | Safari | 16+ |
 | Edge | 108+ |
-| Firefox | Limited — check [passkeys.dev](https://passkeys.dev/device-support/) for current status |
+| Firefox | 122+ |
+
+> **Last validated:** March 2026. Browser support evolves quickly — verify against
+> [passkeys.dev/device-support/](https://passkeys.dev/device-support/) for the latest.
 
 > For an up-to-date browser and device compatibility matrix, refer to
 > [passkeys.dev/device-support/](https://passkeys.dev/device-support/).
