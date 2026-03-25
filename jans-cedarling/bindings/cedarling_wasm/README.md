@@ -247,8 +247,8 @@ export class Cedarling {
   is_trusted_issuer_loaded_by_iss(iss_claim: string): boolean;
   total_issuers(): number;
   loaded_trusted_issuers_count(): number;
-  loaded_trusted_issuer_ids(): Array<any>;
-  failed_trusted_issuer_ids(): Array<any>;
+  loaded_trusted_issuer_ids(): Array<string>;
+  failed_trusted_issuer_ids(): Array<string>;
 }
 
 /**
