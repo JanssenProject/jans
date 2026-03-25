@@ -145,7 +145,7 @@ Select the deployment method that best fits your environment and requirements.
     wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
     ```
     
-    [Complete Kubernetes Setup Guide](janssen-server/install/helm-install/)
+    [Complete Kubernetes Setup Guide](janssen-server/install/helm-install/README.md)
 
 === "Docker"
 
@@ -155,7 +155,7 @@ Select the deployment method that best fits your environment and requirements.
     wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL "" main
     ```
     
-    [Complete Docker Setup Guide](janssen-server/install/docker-install/)
+    [Complete Docker Setup Guide](janssen-server/install/docker-install/quick-start.md)
 
 === "VM Installation"
 
@@ -166,7 +166,7 @@ Select the deployment method that best fits your environment and requirements.
     sudo python3 install.py
     ```
     
-    [Complete VM Setup Guide](janssen-server/install/vm-install/)
+    [Complete VM Setup Guide](janssen-server/install/vm-install/README.md)
 
 ### 2. Initial Configuration
 

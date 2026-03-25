@@ -133,7 +133,6 @@ import "github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
 // Example configuration (populate dynamically in production)
 config := map[string]any{
     "CEDARLING_APPLICATION_NAME":      "MyApp",
-    "CEDARLING_POLICY_STORE_ID":       "your-policy-store-id",
     "CEDARLING_LOG_LEVEL":             "INFO",
     "CEDARLING_LOG_TYPE":              "std_out",
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
@@ -423,5 +422,4 @@ Auto-generated documentation is available on [pkg.go.dev](https://pkg.go.dev/git
 ## See Also
 
 - [Multi-Issuer Authorization Details](../reference/cedarling-authz.md)
-- [JWT Mapping for Multi-Issuer](../reference/cedarling-jwt-mapping.md)
 - [Policy Store Configuration](../reference/cedarling-policy-store.md)

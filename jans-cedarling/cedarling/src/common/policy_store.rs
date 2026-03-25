@@ -220,6 +220,7 @@ pub struct TrustedIssuer {
     // attribute is private to force usage `iss_claim` method to get normalized iss claim
     #[serde(
         rename = "openid_configuration_endpoint",
+        alias = "configuration_endpoint",
         deserialize_with = "de_oidc_endpoint_url"
     )]
     oidc_endpoint: Url,
@@ -612,16 +613,6 @@ where
     };
 
     Ok(policy)
-}
-
-/// Custom parser for an Option<String> which returns `None` if the string is empty.
-fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = Option::<String>::deserialize(deserializer)?;
-
-    Ok(value.filter(|s| !s.is_empty()))
 }
 
 /// Custom deserializer for `PolicyStore` that provides better error messages
