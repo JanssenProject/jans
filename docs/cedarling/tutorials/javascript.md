@@ -92,16 +92,13 @@ import initWasm, { init } from "@janssenproject/cedarling_wasm";
 // initialize the WASM binary
 await initWasm();
 
-let cedarling = init(
+let cedarling = await init({
   "CEDARLING_APPLICATION_NAME": "My App",
   // make sure to update this with your own policy store
   "CEDARLING_POLICY_STORE_URI": "https://raw.githubusercontent.com/...",
   "CEDARLING_LOG_TYPE": "std_out",
   "CEDARLING_LOG_LEVEL": "DEBUG",
-  "CEDARLING_USER_AUTHZ": "enabled",
-  "CEDARLING_WORKLOAD_AUTHZ": "disabled",
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
 });
 ```
 
@@ -146,22 +143,25 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
-- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
 
-#### Token-Based Authorization
+#### Token-Based Authorization (Multi-Issuer)
 
-To perform an authorization check, follow these steps:
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
 
 **1. Prepare tokens**
 
+Tokens are provided as an array of `TokenInput` objects, each specifying a mapping name and the JWT payload:
+
 ```js
-const access_token = "<access_token>";
-const id_token = "<id_token>";
-const userinfo_token = "<userinfo_token>";
+const tokens = [
+  { mapping: "Jans::Access_token", payload: "<access_token_jwt>" },
+  { mapping: "Jans::Id_token", payload: "<id_token_jwt>" },
+];
 ```
 
-Your _principals_ will be built from these tokens.
+The `mapping` field corresponds to the entity type name defined in your policy store's `token_metadata`.
 
 **2. Define the resource**
 
@@ -190,47 +190,30 @@ An _action_ represents what the principal is trying to do to the resource. For e
 const action = 'Jans::Action::"Read"';
 ```
 
-**4. Define Context**
+**4. Define Context (optional)**
 
-The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision.
 
 ```js
 const context = {
   current_time: Math.floor(Date.now() / 1000),
-  device_health: ["Healthy"],
-  fraud_indicators: ["Allowed"],
-  geolocation: ["America"],
-  network: "127.0.0.1",
-  network_type: "Local",
-  operating_system: "Linux",
-  user_agent: "Linux",
 };
 ```
 
-**5. Build the request**
-
-Now you'll construct the **_request_** by including the _principals_, _action_, and _context_.
+**5. Build and execute the request**
 
 ```js
 const request = {
-  tokens: {
-    access_token: access_token,
-    id_token: id_token,
-    userinfo_token: userinfo_token,
-  },
+  tokens: tokens,
   action: action,
   resource: resource,
   context: context,
 };
+
+const result = await cedarling.authorize_multi_issuer(request);
 ```
 
-**6. Perform Authorization**
-
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
-
-```js
-const authorize_result = await cedarling.authorize(request);
-```
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -313,7 +296,7 @@ const request = {
 
 **6. Perform Authorization**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```js
 const result = await cedarling.authorize_unsigned(request);
@@ -346,23 +329,17 @@ export class AuthorizeResult {
    * Convert `AuthorizeResult` to json string value
    */
   json_string(): string;
+  /**
+   * Get the authorization result for a specific principal by entity type.
+   * @param principal - The entity type (e.g., "Jans::User", "Jans::Workload")
+   * @returns The authorization response for the specified principal, or undefined if not found
+   */
   principal(principal: string): AuthorizeResultResponse | undefined;
   /**
-   * Result of authorization where principal is `Jans::Workload`
+   * Get the map of all principals and their authorization results.
+   * Keys are entity type strings (e.g., "Jans::User"), values are AuthorizeResultResponse.
    */
-  get workload(): AuthorizeResultResponse | undefined;
-  /**
-   * Result of authorization where principal is `Jans::Workload`
-   */
-  set workload(value: AuthorizeResultResponse | null | undefined);
-  /**
-   * Result of authorization where principal is `Jans::User`
-   */
-  get person(): AuthorizeResultResponse | undefined;
-  /**
-   * Result of authorization where principal is `Jans::User`
-   */
-  set person(value: AuthorizeResultResponse | null | undefined);
+  get principals(): Map<string, AuthorizeResultResponse>;
   /**
    * Result of authorization
    * true means `ALLOW`
@@ -407,15 +384,15 @@ export class Cedarling {
    */
   static new_from_map(config: Map<any, any>): Promise<Cedarling>;
   /**
-   * Authorize request
-   * makes authorization decision based on the [`Request`]
-   */
-  authorize(request: any): Promise<AuthorizeResult>;
-  /**
    * Authorize request for unsigned principals.
    * makes authorization decision based on the [`RequestUnsigned`]
    */
   authorize_unsigned(request: any): Promise<AuthorizeResult>;
+  /**
+   * Authorize request using multi-issuer tokens.
+   * makes authorization decision based on the [`AuthorizeMultiIssuerRequest`]
+   */
+  authorize_multi_issuer(request: any): Promise<AuthorizeResult>;
   /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`

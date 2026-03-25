@@ -5,35 +5,6 @@ import (
 	"fmt"
 )
 
-// Represents a cedarling request
-type Request struct {
-	Tokens   map[string]string
-	Action   string
-	Resource EntityData
-	Context  any
-}
-
-func (r Request) MarshalJSON() ([]byte, error) {
-	context := r.Context
-	if context == nil {
-		context = json.RawMessage(`{}`)
-	}
-
-	aux := struct {
-		Tokens   map[string]string `json:"tokens"`
-		Action   string            `json:"action"`
-		Resource EntityData        `json:"resource"`
-		Context  any               `json:"context"`
-	}{
-		Tokens:   r.Tokens,
-		Action:   r.Action,
-		Resource: r.Resource,
-		Context:  context,
-	}
-	return json.Marshal(aux)
-
-}
-
 // Represents a cedarling principal or resource entity
 type EntityData struct {
 	CedarMapping CedarEntityMapping
@@ -79,8 +50,6 @@ func (e *EntityData) UnmarshalJSON(data []byte) error {
 
 // Represents the result of an authorization request
 type AuthorizeResult struct {
-	Workload   *CedarResponse           `json:"workload,omitempty"`
-	Person     *CedarResponse           `json:"person,omitempty"`
 	Principals map[string]CedarResponse `json:"principals"`
 	Decision   bool                     `json:"decision"`
 	RequestID  string                   `json:"request_id"`

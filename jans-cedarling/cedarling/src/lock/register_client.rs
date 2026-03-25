@@ -95,7 +95,6 @@ pub(super) async fn register_client(
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[allow(dead_code)]
 pub(super) struct ClientCredentials {
     pub client_id: String,
     pub client_secret: String,

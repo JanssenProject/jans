@@ -60,9 +60,6 @@ We need to initialize Cedarling first.
         String bootstrapJsonStr = """
             {
             "CEDARLING_APPLICATION_NAME":   "MyApp",
-            "CEDARLING_POLICY_STORE_ID":    "your-policy-store-id",
-            "CEDARLING_USER_AUTHZ":         "enabled",
-            "CEDARLING_WORKLOAD_AUTHZ":     "enabled",
             "CEDARLING_LOG_LEVEL":          "INFO",
             "CEDARLING_LOG_TYPE":           "std_out",
             "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json"
@@ -116,29 +113,26 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 ### Authorization
 
-Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
+Cedarling provides authorization interfaces for evaluating access requests based on principals (entities), actions, resources, and context.
 
-- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
-- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
+- [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly without JWTs. This is useful when you need to authorize based on internal application data.
+- [**Custom Principal Authorization**](#custom-principal-authorization-unsigned) is an alternative approach for defining custom principals.
 
-#### Token-Based Authorization
+#### Unsigned Authorization
+
+For unsigned authorization, use `authorizeUnsigned` which accepts principals directly without JWTs.
 
 **1. Define the resource:**
 
 This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
 ```java
-    String resource = """
-        {
-          "app_id": "app_id_001",
-          "cedar_entity_mapping": {
-            "entity_type": "Jans::Issue",
-            "id": "admin_ui_id"
-          },
-          "name": "App Name",
-          "permission": "view_clients"
-        }
-        """;
+    JSONObject resource = new JSONObject();
+    resource.put("cedar_entity_mapping", new JSONObject()
+        .put("entity_type", "Jans::Issue")
+        .put("id", "admin_ui_id"));
+    resource.put("name", "App Name");
+    resource.put("permission", "view_clients");
 ```
 
 **2. Define the action:**
@@ -151,44 +145,29 @@ String action = "Jans::Action::\"Update\"";
 
 **3. Define Context**
 
-The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision.
 
 ```java
-    String context = """
-        {
-          "device_health": ["Healthy"],
-          "fraud_indicators": ["Allowed"],
-          "geolocation": ["America"],
-          "network": "127.0.0.1",
-          "network_type": "Local",
-          "operating_system": "Linux",
-          "user_agent": "Linux"
-        }
-    """;
+    JSONObject context = new JSONObject();
 ```
 
-**4. Prepare tokens**
+**4. Define Principals**
 
 ```java
-    String accessToken = "<access_token>";
-    String idToken = "<id_token>";
-    String userinfoToken = "<userinfo_token>";
+    List<EntityData> principals = List.of(
+        EntityData.Companion.fromJson(new JSONObject()
+            .put("cedar_entity_mapping", new JSONObject()
+                .put("entity_type", "Jans::Workload")
+                .put("id", "workload_123"))
+            .put("client_id", "my_client")
+            .toString())
+    );
 ```
 
 **5. Authorize**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
-
 ```java
-    //Generate Map containing tokens
-    Map<String, String> tokens = Map.of(
-        "access_token", accessToken,
-        "id_token", idToken,
-        "userinfo_token", userinfoToken
-    );
-
-    // Perform authorization
-    AuthorizeResult result = adapter.authorize(tokens, action, new JSONObject(resource), new JSONObject(context));
+    AuthorizeResult result = adapter.authorizeUnsigned(principals, action, resource, context);
     if(result.getDecision()) {
         System.out.println("Access granted");
     } else {
@@ -215,17 +194,17 @@ Finally, call the `authorize` function to check whether the principals are allow
               "entity_type": "Jans::User",
               "id": "random_user_id"
             },
-            "roles": ["admin", "manager"]
+            "role": ["admin", "manager"]
           },
         ];
         """;
 ```
 
-Similarly, create and initialize String variables with action, resource, context as done in [Token-Based Authorization](#token-based-authorization).
+Similarly, create and initialize String variables with action, resource, context.
 
 **2. Authorize**
 
-Finally, call the `authorize` function to check whether the principals are allowed to perform the specified action on the resource.
+Finally, call the `authorizeUnsigned` function to check whether the principals are allowed to perform the specified action on the resource.
 
 ```java
         List<EntityData> principals = List.of(EntityData.Companion.fromJson(principals));
@@ -258,5 +237,5 @@ Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/j
 
 ## See Also
 
-- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
