@@ -96,7 +96,7 @@ class LockPersistenceSetup:
 
     def import_ldif_files(self) -> None:
         for file_ in self.ldif_files:
-            logger.info(f"Importing {file_}")
+            logger.info("Importing %s", file_)
             self.client.create_from_ldif(file_, self.ctx)
 
     def generate_scopes_ldif(self):

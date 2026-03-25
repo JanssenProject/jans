@@ -197,7 +197,7 @@ class Upgrade:
 
         # marker to determine whether we need to update persistence if asset is changed
         if entry and assets_md5 != self.manager.config.get("casa_agama_md5sum"):
-            logger.info(f"Detected changes of casa-agama-project assets; synchronizing changes from {proj_archive} to persistence.")
+            logger.info("Detected changes of casa-agama-project assets; synchronizing changes from %s to persistence.", proj_archive)
             # overwrite the project assets
             entry.attrs["adsPrjAssets"] = get_ads_project_base64(proj_archive)
             # mark entry is updated at specified time
