@@ -19,7 +19,7 @@
         <link rel="prev" href="../cedarling-principal-boolean-operations/">
       
       
-        <link rel="next" href="../cedarling-entities/">
+        <link rel="next" href="../cedarling-jwt-mapping/">
       
       
         
@@ -1254,6 +1254,8 @@
       
         
       
+        
+      
     
     
     
@@ -1617,50 +1619,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#schema-and-claims-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema and Claims Compatibility
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Schema and Claims Compatibility">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#behavior-rules" class="md-nav__link">
+  <a href="#custom-required-claims" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Behavior Rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optionality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optionality
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#type-matching" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Type Matching
+        Custom Required Claims
       
     </span>
   </a>
@@ -1709,6 +1672,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2475,50 +2466,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#schema-and-claims-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema and Claims Compatibility
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Schema and Claims Compatibility">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#behavior-rules" class="md-nav__link">
+  <a href="#custom-required-claims" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Behavior Rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optionality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optionality
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#type-matching" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Type Matching
+        Custom Required Claims
       
     </span>
   </a>
@@ -2704,7 +2656,6 @@
 <ul>
 <li><a href="#jwt-signature-validation">Signature Validation</a>: Verifies the token's origin using trusted issuer keys.</li>
 <li><a href="#jwt-content-validation">Content Validation</a>: Ensures required claims like <code>exp</code> or <code>client_id</code> are present.</li>
-<li><a href="#schema-and-claims-compatibility">Schema and Claims Compatibility</a>: How Cedar schema must match JWT payload structure.</li>
 <li><a href="#jwt-status-validation">JWT Status Validation</a>: Checks if a token has been explicitly revoked.</li>
 <li><a href="#local-jwks">Local JWKS</a>: Using local key stores for testing.</li>
 </ul>
@@ -2745,6 +2696,7 @@
 <span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
 <span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">]</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
@@ -2771,7 +2723,13 @@
 <h2 id="jwt-content-validation">JWT Content Validation<a class="headerlink" href="#jwt-content-validation" title="Permanent link">#</a></h2>
 <p>Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the <code>token_metadata</code> section of the policy store.</p>
 <h3 id="required-claims">Required Claims<a class="headerlink" href="#required-claims" title="Permanent link">#</a></h3>
-<p>You can specify required claims in your token metadata configuration. If <code>exp</code> or <code>nbf</code> are included in <code>required_claims</code>, Cedarling will validate them according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> (checking expiration and not-before timestamps against the current time).</p>
+<p>If timestamps are provided in the context, Cedarling always verifies:</p>
+<ul>
+<li><code>exp</code> (expiration)</li>
+<li><code>nbf</code> (not before)</li>
+</ul>
+<h3 id="custom-required-claims">Custom Required Claims<a class="headerlink" href="#custom-required-claims" title="Permanent link">#</a></h3>
+<p>You can specify additional required claims in your token metadata configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="c1">// ... other fields have been omitted for brevity</span>
 <span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -2789,104 +2747,7 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The above configuration means that any <code>access_token</code> must contain both the <code>exp</code> and <code>client_id</code> claims, or it will be rejected. Registered claims like <code>exp</code> and <code>nbf</code> will also be validated according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> standards (e.g., checking that the token is not expired).</p>
-<h2 id="schema-and-claims-compatibility">Schema and Claims Compatibility<a class="headerlink" href="#schema-and-claims-compatibility" title="Permanent link">#</a></h2>
-<p>When building token entities, Cedarling maps JWT claims to Cedar entity attributes based on the Cedar schema. The schema must be compatible with the JWT payload structure, otherwise entity creation will fail.</p>
-<h3 id="behavior-rules">Behavior Rules<a class="headerlink" href="#behavior-rules" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Scenario</th>
-<th>Behavior</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Required schema attribute missing from JWT</td>
-<td><strong>Error</strong>: entity creation fails with <code>MissingClaims</code></td>
-</tr>
-<tr>
-<td>Optional schema attribute missing from JWT</td>
-<td>Silently skipped, attribute is not added</td>
-</tr>
-<tr>
-<td>JWT claim present but not defined in schema</td>
-<td>Ignored as attribute; added as entity tag in multi-issuer flow</td>
-</tr>
-<tr>
-<td>Type mismatch on required attribute</td>
-<td><strong>Error</strong>: entity creation fails with <code>TypeMismatchError</code></td>
-</tr>
-<tr>
-<td>Type mismatch on optional attribute</td>
-<td>Silently skipped</td>
-</tr>
-<tr>
-<td>No schema defined for entity type</td>
-<td>All JWT claims are added as attributes</td>
-</tr>
-</tbody>
-</table>
-<h3 id="optionality">Optionality<a class="headerlink" href="#optionality" title="Permanent link">#</a></h3>
-<p>If a JWT claim may or may not be present in the token payload, the corresponding Cedar schema attribute <strong>must</strong> be marked as optional (with <code>?</code>). Otherwise, Cedarling will return an error when the claim is absent.</p>
-<p>For example, if the <code>name</code> claim is not always present in access tokens:</p>
-<div class="highlight"><pre><span></span><code>// Correct: name is optional
-namespace Acme {
-  entity Access_token = {
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    name?: String,
-  };
-};
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>// Wrong: name is required but may be missing from JWT
-namespace Acme {
-  entity Access_token = {
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    name: String,
-  };
-};
-</code></pre></div>
-<h3 id="type-matching">Type Matching<a class="headerlink" href="#type-matching" title="Permanent link">#</a></h3>
-<p>Cedar schema types must match the JWT claim value types:</p>
-<table>
-<thead>
-<tr>
-<th>Cedar Type</th>
-<th>Expected JWT Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>String</code></td>
-<td>JSON string</td>
-</tr>
-<tr>
-<td><code>Long</code></td>
-<td>JSON number</td>
-</tr>
-<tr>
-<td><code>Bool</code></td>
-<td>JSON boolean</td>
-</tr>
-<tr>
-<td><code>Set&lt;T&gt;</code></td>
-<td>JSON array of <code>T</code></td>
-</tr>
-<tr>
-<td>Record (<code>{ field: Type }</code>)</td>
-<td>JSON object</td>
-</tr>
-<tr>
-<td>Entity reference</td>
-<td>Resolved from built entities</td>
-</tr>
-</tbody>
-</table>
-<p>A type mismatch on a <strong>required</strong> attribute causes an error. A type mismatch on an <strong>optional</strong> attribute causes the attribute to be silently skipped.</p>
+<p>The above configuration means that any <code>access_token</code> must contain both the <code>exp</code> and <code>client_id</code> claims, or it will be rejected. Additionally, <em>registered claims</em> like the <code>exp</code> will also be validated according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> standards.</p>
 <h2 id="jwt-status-validation">JWT Status Validation<a class="headerlink" href="#jwt-status-validation" title="Permanent link">#</a></h2>
 <p>Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a> draft.</p>
 <p>This feature is toggled with the <code>CEDARLING_JWT_STATUS_VALIDATION</code> property.</p>
@@ -2895,7 +2756,7 @@ namespace Acme {
 <p>Enforcing token revocation can help mitigate account takeover risks by allowing for near-instant invalidation of compromised tokens.</p>
 </blockquote>
 <h2 id="jwt-validation-flow-diagram">JWT Validation Flow Diagram<a class="headerlink" href="#jwt-validation-flow-diagram" title="Permanent link">#</a></h2>
-<p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the <code>authorize_multi_issuer</code> flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
+<p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct the Principal entities. In order to verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status(active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
 <p><img alt="Cedarling JWT validation flow diagram showing token verification process" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
 <h2 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h2>
 <p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
@@ -2931,7 +2792,7 @@ namespace Acme {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

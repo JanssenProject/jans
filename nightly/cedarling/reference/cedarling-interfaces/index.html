@@ -1254,6 +1254,8 @@
       
         
       
+        
+      
     
     
     
@@ -1589,60 +1591,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#schema-requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema Requirements
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#using-data-in-cedar-policies" class="md-nav__link">
     <span class="md-ellipsis">
       
         Using Data in Cedar Policies
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#trusted-issuer-loading-info" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Trusted Issuer Loading Info
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Trusted Issuer Loading Info">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Methods
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example
       
     </span>
   </a>
@@ -1762,6 +1714,34 @@
     
   
     JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Mapping
   
 
     
@@ -2620,60 +2600,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#schema-requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema Requirements
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#using-data-in-cedar-policies" class="md-nav__link">
     <span class="md-ellipsis">
       
         Using Data in Cedar Policies
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#trusted-issuer-loading-info" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Trusted Issuer Loading Info
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Trusted Issuer Loading Info">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Methods
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example
       
     </span>
   </a>
@@ -2820,7 +2750,7 @@ These are described below.</p>
 <ul>
 <li>
 <p><code>load_from_file(path)</code></p>
-<p>Creates a <code>BootstrapConfig</code> object by loading properties from a file</p>
+<p>Creates a <code>BootstrapConfig</code> object by loading properties from a file </p>
 </li>
 <li>
 <p><code>load_from_json(config_json)</code></p>
@@ -2832,28 +2762,21 @@ These are described below.</p>
 </li>
 <li>
 <p><code>Cedarling(bootstrap_config)</code></p>
-<p>Initializes an instance of the Cedarling engine by reading the bootstrap configuration.</p>
+<p>Initializes an instance of the Cedarling engine by reading the bootstrap configuration. </p>
 </li>
 </ul>
 <h2 id="authz">Authz<a class="headerlink" href="#authz" title="Permanent link">#</a></h2>
 <p>These methods are called to create an authorization request, run authorization, and get decisions back.</p>
 <ul>
 <li>
-<p><code>EntityData(cedar_mapping, attributes)</code></p>
-<p>Creates a principal or resource entity.</p>
-</li>
+<p><code>Entity(entity_type, id, payload)</code></p>
+<p>Creates a <code>Principal</code> or a <code>Resource</code> entity.</p>
+<ul>
 <li>
-<p><code>cedar_mapping</code>: A <code>CedarEntityMapping</code> object with <code>entity_type</code> (Cedar type name) and <code>id</code> (entity ID).</p>
+<p><code>from_dict(value)</code></p>
+<p>Creates a <code>Principal</code> or a <code>Resource</code> entity from a dictionary.</p>
 </li>
-<li>
-<p><code>attributes</code>: A map of attribute names to values.</p>
-</li>
-<li>
-<p><code>from_json(json_str)</code> — Creates an <code>EntityData</code> from a JSON string (Rust).</p>
-</li>
-<li>
-<p><code>from_dict(value)</code> — Creates an <code>EntityData</code> from a dictionary (Python bindings).</p>
-<p><strong>Note on field naming:</strong> The Rust struct field is named <code>cedar_mapping</code>, but it serializes to <code>cedar_entity_mapping</code> in JSON (via <code>#[serde(rename)]</code>). When constructing in Rust, use <code>cedar_mapping</code>. When passing JSON (via <code>from_json</code>) or a Python dict (via <code>from_dict</code>), use <code>cedar_entity_mapping</code> as the key.</p>
+</ul>
 </li>
 <li>
 <p><code>RequestUnsigned(principals, action, resource, context)</code></p>
@@ -2862,24 +2785,20 @@ These are described below.</p>
 <li>
 <p><code>TokenInput(mapping, payload)</code></p>
 <p>Creates a <code>TokenInput</code> object representing a JWT token with an explicit type mapping. Used for multi-issuer authorization.</p>
-</li>
-<li>
-<p><code>mapping</code>: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")</p>
-</li>
-<li>
-<p><code>payload</code>: The JWT token string</p>
+<ul>
+<li><code>mapping</code>: A string specifying the Cedar entity type (e.g., "Jans::Access_Token", "Acme::DolphinToken")</li>
+<li><code>payload</code>: The JWT token string</li>
+</ul>
 </li>
 <li>
 <p><code>AuthorizeMultiIssuerRequest(tokens, action, resource, context)</code></p>
-<p>Creates an <code>AuthorizeMultiIssuerRequest</code> object for multi-issuer authorization.</p>
-</li>
-<li>
-<p><code>tokens</code>: Array of <code>TokenInput</code> objects</p>
-</li>
+<p>Creates an <code>AuthorizeMultiIssuerRequest</code> object for multi-issuer authorization. </p>
+<ul>
+<li><code>tokens</code>: Array of <code>TokenInput</code> objects</li>
 <li><code>action</code>: The action to be authorized (required)</li>
 <li><code>resource</code>: The resource entity being accessed (required)</li>
-<li>
-<p><code>context</code>: Optional additional context for policy evaluation</p>
+<li><code>context</code>: Optional additional context for policy evaluation</li>
+</ul>
 </li>
 <li>
 <p><code>authorize_unsigned(request)</code></p>
@@ -2895,26 +2814,36 @@ These are described below.</p>
 <h4 id="authorizeresult-for-authorize_unsigned">AuthorizeResult (for <code>authorize_unsigned</code>)<a class="headerlink" href="#authorizeresult-for-authorize_unsigned" title="Permanent link">#</a></h4>
 <ul>
 <li>
-<p><code>decision</code></p>
-<p>A boolean field representing the overall authorization decision (<code>true</code> = allow, <code>false</code> = deny). The decision is computed by applying the <code>principal_bool_operator</code> across all principal results.</p>
+<p><code>is_allowed()</code></p>
+<p>Returns <code>true</code> only if the overall decision of the Cedarling is <code>true</code>.</p>
 </li>
 <li>
 <p><code>principals</code></p>
-<p>A map of principal type names and entity UIDs to their Cedar <code>Response</code> objects. Each response provides:</p>
+<p>A map of principal entity IDs to their authorization decisions. Each entry contains:</p>
+<ul>
+<li><code>decision</code>: Whether this principal was allowed or denied</li>
+<li><code>diagnostics</code>: Detailed information about the decision</li>
+</ul>
 </li>
 <li>
-<p><code>decision()</code>: Whether this principal was allowed or denied</p>
+<p><code>request_id()</code></p>
+<p>Returns the request ID of this authorization call. This is used to retrieve logs if the Cedarling is running in memory log mode.</p>
 </li>
 <li>
-<p><code>diagnostics()</code>: Detailed information including <code>reason()</code> (set of policy IDs) and <code>errors()</code> (list of evaluation errors)</p>
+<p><code>decision</code></p>
+<p>This field represents the decision of this authorization call (allow/deny)</p>
 </li>
 <li>
-<p><code>request_id</code></p>
-<p>The request ID for this authorization call, used for log retrieval when running in memory log mode.</p>
-</li>
-<li>
-<p><code>cedar_decision()</code></p>
-<p>Returns the Cedar <code>Decision</code> enum (<code>Allow</code> or <code>Deny</code>) based on the <code>decision</code> field.</p>
+<p><code>diagnostics</code></p>
+<p>This field contains additional information regarding the decision reached by Cedarling.</p>
+<ul>
+<li><code>reason</code></li>
+</ul>
+<p>This field is a set of policy IDs used to reach an <code>allow</code> decision, if they exist</p>
+<ul>
+<li><code>errors</code></li>
+</ul>
+<p>This field contains a list of errors during authorization, if they exist.</p>
 </li>
 </ul>
 <h4 id="multiissuerauthorizeresult-for-authorize_multi_issuer">MultiIssuerAuthorizeResult (for <code>authorize_multi_issuer</code>)<a class="headerlink" href="#multiissuerauthorizeresult-for-authorize_multi_issuer" title="Permanent link">#</a></h4>
@@ -2926,15 +2855,13 @@ These are described below.</p>
 <li>
 <p><code>response</code></p>
 <p>The Cedar policy engine response containing detailed decision information</p>
-</li>
-<li>
-<p><code>decision()</code> - Returns the decision (Allow/Deny)</p>
-</li>
-<li>
-<p><code>diagnostics()</code> - Returns diagnostics including reasons and errors</p>
 <ul>
+<li><code>decision()</code> - Returns the decision (Allow/Deny)</li>
+<li><code>diagnostics()</code> - Returns diagnostics including reasons and errors<ul>
 <li><code>reason()</code> - Set of policy IDs that contributed to an Allow decision</li>
 <li><code>errors()</code> - List of errors encountered during policy evaluation</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>
@@ -2951,7 +2878,7 @@ These are described below.</p>
 </li>
 <li>
 <p><code>get_log_by_id(id)</code></p>
-<p>Retrieves a log given the ID of an active log entry.</p>
+<p>Retrieves a log given the ID of an active log entry. </p>
 </li>
 <li>
 <p><code>get_log_ids()</code></p>
@@ -3048,36 +2975,6 @@ These are described below.</p>
   - <code>capacity_usage_percent</code>: Percentage of capacity used (0.0-100.0)
   - <code>memory_alert_threshold</code>: Memory usage threshold percentage (from config)
   - <code>memory_alert_triggered</code>: Whether memory usage exceeds the alert threshold</p>
-<h3 id="schema-requirements">Schema Requirements<a class="headerlink" href="#schema-requirements" title="Permanent link">#</a></h3>
-<p>To use the Context Data API, your Cedar schema must include a <code>data</code> field in the action's context. You must explicitly define the expected structure of the data — Cedar does not support arbitrary/untyped records.</p>
-<div class="highlight"><pre><span></span><code>namespace MyApp {
-  // Define the structure of nested data objects
-  type DataConfig = {
-    &quot;enabled&quot;: Bool
-  };
-
-  // Define all possible fields that can be pushed via push_data_ctx
-  // Use optional fields (?) since not all keys may be present at evaluation time
-  type DataContext = {
-    &quot;user_level&quot;?: String,
-    &quot;feature_enabled&quot;?: Bool,
-    &quot;config&quot;?: DataConfig
-  };
-
-  action &quot;read&quot; appliesTo {
-    principal: [User],
-    resource: [Document],
-    context: {
-      &quot;data&quot;?: DataContext,
-      // ... other context fields
-    }
-  };
-}
-</code></pre></div>
-<p>The <code>data</code> field should be optional (<code>"data"?</code>) since it is only present when data has been pushed via <code>push_data_ctx</code>. Each key you plan to push must be declared in the <code>DataContext</code> type — Cedar will reject values with undeclared fields.</p>
-<p>Always use <code>has</code> checks in policies before accessing data fields, since they are optional:</p>
-<div class="highlight"><pre><span></span><code>context has data &amp;&amp; context.data has user_level &amp;&amp; context.data.user_level == &quot;premium&quot;
-</code></pre></div>
 <h3 id="using-data-in-cedar-policies">Using Data in Cedar Policies<a class="headerlink" href="#using-data-in-cedar-policies" title="Permanent link">#</a></h3>
 <p>Data pushed via the Context Data API is automatically available in Cedar policies under the <code>context.data</code> namespace. The <code>context.data</code> values follow a three-tier resolution precedence:</p>
 <ol>
@@ -3098,44 +2995,6 @@ These are described below.</p>
 };
 </code></pre></div>
 <p>The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data without requiring policy changes.</p>
-<h2 id="trusted-issuer-loading-info">Trusted Issuer Loading Info<a class="headerlink" href="#trusted-issuer-loading-info" title="Permanent link">#</a></h2>
-<p>The <code>TrustedIssuerLoadingInfo</code> trait provides information about the loading status of trusted issuers. This is useful for health checks, diagnostics, and verifying that Cedarling has successfully loaded the expected issuers before processing authorization requests.</p>
-<p>This interface is particularly useful when <code>CEDARLING_TRUSTED_ISSUER_LOADER_TYPE</code> is set to <code>ASYNC</code>. In async mode, Cedarling starts accepting requests immediately while issuers load in the background. Use these methods to check whether all issuers are ready before relying on authorization results.</p>
-<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p><code>is_trusted_issuer_loaded_by_name(issuer_id)</code> — Returns <code>true</code> if the trusted issuer with the given policy store key is loaded.</p>
-</li>
-<li>
-<p><code>is_trusted_issuer_loaded_by_iss(iss_claim)</code> — Returns <code>true</code> if the trusted issuer with the given <code>iss</code> claim value is loaded.</p>
-</li>
-<li>
-<p><code>total_issuers()</code> — Returns the total number of trusted issuers expected to be loaded (from the policy store configuration).</p>
-</li>
-<li>
-<p><code>loaded_trusted_issuers_count()</code> — Returns the number of trusted issuers that have been successfully loaded.</p>
-</li>
-<li>
-<p><code>loaded_trusted_issuer_ids()</code> — Returns the set of issuer IDs that have been successfully loaded.</p>
-</li>
-<li>
-<p><code>failed_trusted_issuer_ids()</code> — Returns the set of issuer IDs that encountered errors during loading. Failed issuers are still counted toward total processing count.</p>
-</li>
-</ul>
-<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">Cedarling</span><span class="p">,</span><span class="w"> </span><span class="n">TrustedIssuerLoadingInfo</span><span class="p">};</span>
-
-<span class="k">fn</span><span class="w"> </span><span class="nf">check_health</span><span class="p">(</span><span class="n">cedarling</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">Cedarling</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">total_issuers</span><span class="p">();</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">loaded_trusted_issuers_count</span><span class="p">();</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">failed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">failed_trusted_issuer_ids</span><span class="p">();</span>
-
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Issuers: {loaded}/{total} loaded&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">failed</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Failed issuers: {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">failed</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
 
 
 
@@ -3158,7 +3017,7 @@ These are described below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 24, 2026 12:51:50 UTC"><span class="timeago" datetime="2026-03-24T12:51:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 24, 2026 12:51:50 UTC">2026-03-24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

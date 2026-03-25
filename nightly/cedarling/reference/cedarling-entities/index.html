@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://docs.jans.io/nightly/cedarling/reference/cedarling-entities/">
       
       
-        <link rel="prev" href="../cedarling-jwt-validation/">
+        <link rel="prev" href="../cedarling-jwt-mapping/">
       
       
         <link rel="next" href="../cedarling-logs/">
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-entity-mappings" class="md-skip">
+        <a href="#cedarling-principal-mappings" class="md-skip">
           Skip to content
         </a>
       
@@ -1254,6 +1254,8 @@
       
         
       
+        
+      
     
     
     
@@ -1499,6 +1501,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1573,44 +1603,50 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#principal-entities" class="md-nav__link">
+  <a href="#workload-entity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Principal Entities
+        Workload Entity
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Principal Entities">
+    <nav class="md-nav" aria-label="Workload Entity">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#entitydata-structure" class="md-nav__link">
+  <a href="#example-workload-entity-creation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        EntityData Structure
+        Example Workload Entity Creation
       
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#example-user-principal" class="md-nav__link">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-entity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: User Principal
+        User Entity
       
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="User Entity">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-workload-principal" class="md-nav__link">
+  <a href="#example-user-entity-creation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: Workload Principal
+        Example User Entity Creation
       
     </span>
   </a>
@@ -1651,22 +1687,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#token-entities" class="md-nav__link">
+  <a href="#jwt-entities" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token Entities
+        JWT Entities
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Token Entities">
+    <nav class="md-nav" aria-label="JWT Entities">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-multi-issuer-token-entity" class="md-nav__link">
+  <a href="#attribute-mappings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: Multi-Issuer Token Entity
+        Attribute Mappings
       
     </span>
   </a>
@@ -1675,17 +1711,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resource-entity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Entity
-      
-    </span>
-  </a>
   
 </li>
       
@@ -2398,44 +2423,50 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#principal-entities" class="md-nav__link">
+  <a href="#workload-entity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Principal Entities
+        Workload Entity
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Principal Entities">
+    <nav class="md-nav" aria-label="Workload Entity">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#entitydata-structure" class="md-nav__link">
+  <a href="#example-workload-entity-creation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        EntityData Structure
+        Example Workload Entity Creation
       
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#example-user-principal" class="md-nav__link">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-entity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: User Principal
+        User Entity
       
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="User Entity">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-workload-principal" class="md-nav__link">
+  <a href="#example-user-entity-creation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: Workload Principal
+        Example User Entity Creation
       
     </span>
   </a>
@@ -2476,22 +2507,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#token-entities" class="md-nav__link">
+  <a href="#jwt-entities" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Token Entities
+        JWT Entities
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Token Entities">
+    <nav class="md-nav" aria-label="JWT Entities">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-multi-issuer-token-entity" class="md-nav__link">
+  <a href="#attribute-mappings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: Multi-Issuer Token Entity
+        Attribute Mappings
       
     </span>
   </a>
@@ -2500,17 +2531,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resource-entity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Entity
-      
-    </span>
-  </a>
   
 </li>
       
@@ -2680,271 +2700,158 @@
   
 
 
-<h1 id="cedarling-entity-mappings">Cedarling Entity Mappings<a class="headerlink" href="#cedarling-entity-mappings" title="Permanent link">#</a></h1>
-<p>Cedarling creates Cedar entities automatically based on the authorization interface used. The two interfaces build different sets of entities:</p>
-<table>
-<thead>
-<tr>
-<th>Entity Type</th>
-<th><code>authorize_unsigned</code></th>
-<th><code>authorize_multi_issuer</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="#trusted-issuer">Trusted Issuer</a></td>
-<td>Created at startup</td>
-<td>Created at startup</td>
-</tr>
-<tr>
-<td><a href="#principal-entities">Principal (User, Workload, etc.)</a></td>
-<td>Built from <code>EntityData</code></td>
-<td>Not created</td>
-</tr>
-<tr>
-<td><a href="#role-entity">Role</a></td>
-<td>Built as parent of principals</td>
-<td>Not created</td>
-</tr>
-<tr>
-<td><a href="#token-entities">Token (JWT)</a></td>
-<td>Not created</td>
-<td>Built from JWT claims</td>
-</tr>
-<tr>
-<td><a href="#resource-entity">Resource</a></td>
-<td>Built from <code>EntityData</code></td>
-<td>Built from <code>EntityData</code></td>
-</tr>
-</tbody>
-</table>
-<p>The entity type names are defined in the Cedar schema within the policy store.</p>
+<h1 id="cedarling-principal-mappings">Cedarling Principal Mappings<a class="headerlink" href="#cedarling-principal-mappings" title="Permanent link">#</a></h1>
+<p>Cedarling automatically creates the following entities:</p>
+<ul>
+<li><a href="#trusted-issuer-entity">Trusted Issuer</a></li>
+<li><a href="#workload-entity">Workload</a></li>
+<li><a href="#user-entity">User</a></li>
+<li><a href="#role-entity">Role</a></li>
+<li><a href="#jwt-entities">JWT Entities</a></li>
+</ul>
+<p>The entity type names of the Workload and User entities can be customized via the <code>CEDARLING_MAPPING_USER</code> and <code>CEDARLING_MAPPING_WORKLOAD</code> <a href="../cedarling-properties/">properties</a> respectively.</p>
 <blockquote>
 <p><strong><em>Notes</em></strong></p>
 <ul>
-<li>Attribute presence depends on the data provided and the Cedar schema in the policy store.</li>
+<li>All entity creation and attribute population logic is configurable via the <a href="../cedarling-policy-store/#token-metadata-schema">Token Metadata Schema (TEMS)</a> and <a href="../cedarling-properties/">Cedarling bootstrap properties</a>.</li>
+<li>Attribute presence depends on token contents and policy store configuration.</li>
 <li>Role inheritance simplifies <strong>user-role mapping</strong> for RBAC policy enforcement.</li>
 </ul>
 </blockquote>
 <h2 id="trusted-issuer">Trusted Issuer<a class="headerlink" href="#trusted-issuer" title="Permanent link">#</a></h2>
 <p>Cedarling creates a Trusted Issuer entity at startup for each trusted issuer defined in the <a href="../cedarling-policy-store/#trusted-issuers-schema">policy store</a>.</p>
 <ul>
-<li><em>Namespace:</em> Corresponds to the trusted issuer name in the policy store.</li>
+<li><em>Namespace:</em> Corresponds to the trusted issuer name of the trusted issuer object in the policy store..</li>
 <li><em>Type Name:</em> <code>TrustedIssuer</code></li>
-<li><em>Entity ID:</em> Set using the issuer URL (corresponds to <code>iss</code> in tokens).</li>
+<li><em>Entity ID:</em>  Set using issuer url and corresponds iss in token.</li>
 </ul>
-<h2 id="principal-entities">Principal Entities<a class="headerlink" href="#principal-entities" title="Permanent link">#</a></h2>
-<p>Principals are created only in the <code>authorize_unsigned</code> interface. The caller provides one or more principals as <code>EntityData</code>, each specifying the Cedar entity type, ID, and attributes explicitly.</p>
-<p>There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include <code>User</code> and <code>Workload</code>, but these are just conventions defined in your schema.</p>
-<p>When multiple principals are provided, Cedarling evaluates each one independently and combines results using <a href="../cedarling-principal-boolean-operations/"><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></a>.</p>
-<h3 id="entitydata-structure">EntityData Structure<a class="headerlink" href="#entitydata-structure" title="Permanent link">#</a></h3>
-<p>Each principal is passed as an <code>EntityData</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_123&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_123&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob@email.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">]</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+<h2 id="workload-entity">Workload Entity<a class="headerlink" href="#workload-entity" title="Permanent link">#</a></h2>
+<p>Cedarling can create a <strong>Workload</strong> entity when using <code>authorize_multi_issuer</code> with tokens that have <code>principal_mapping</code> configured to include <code>Workload</code> in the policy store's <a href="../cedarling-policy-store/#token-metadata-schema">token metadata</a>.</p>
 <ul>
-<li><em>Type Name:</em> Defined in <code>cedar_mapping.entity_type</code>. Must match a type in the Cedar schema.</li>
-<li><em>Entity ID:</em> Defined in <code>cedar_mapping.id</code>.</li>
-<li><em>Entity Attributes:</em> Cedarling checks the Cedar schema and maps the provided attributes to the entity's schema shape.</li>
+<li><em>Default Type Name:</em> <code>Jans::Workload</code></li>
+<li><em>Entity ID:</em> Determined by the <code>workload_id</code> attribute from the <a href="../cedarling-policy-store/#token-metadata-schema">Token Entity Metadata Schema (TEMS)</a>.</li>
+<li>If <code>workload_id</code> is <strong>not set</strong>, Cedarling will fall back to the following claims (in order):</li>
+<li><code>aud</code> from the <code>access_token</code></li>
+<li><code>client_id</code> from the <code>access_token</code></li>
+<li><code>aud</code> from the <code>id_token</code> -- note that the Workload attributes that will be created from this will still be from the <code>access_token</code></li>
+<li><em>Entity Attributes</em>: Extracted from by the claims of the <code>access_token</code>. Cedarling will check the schema and use the JWT claims with the same names as the Workload attributes.</li>
 </ul>
-<h3 id="example-user-principal">Example: User Principal<a class="headerlink" href="#example-user-principal" title="Permanent link">#</a></h3>
-<p>Given the following <code>authorize_unsigned</code> request with a User principal:</p>
+<h3 id="example-workload-entity-creation">Example Workload Entity Creation<a class="headerlink" href="#example-workload-entity-creation" title="Permanent link">#</a></h3>
+<p>With the following <code>access_token</code> claims:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;principals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::User&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">]</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Application&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app_1&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app_1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myapp.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.com/&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_aud&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_jti&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>and Cedar schema:</p>
-<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
-namespace Jans {
-  type Url = {
-    host: String,
-    path: String,
-    protocol: String
-  };
-  type email_address = {
-    domain: String,
-    uid: String
-  };
+<div class="highlight"><pre><span></span><code>namespace Jans{
+  entity TrustedIssuer;
 };
 
-// MyApp namespace: your business entities.
-namespace MyApp {
-  entity Role;
-  entity User in [Role] = {
-    email?: Jans::email_address,
-    phone_number?: String,
-    role: Set&lt;String&gt;,
-    sub: String,
-    &quot;username&quot;?: String,
-  };
+entity Workload = {
+  iss: Jans::TrustedIssuer,
+  client_id?: String,
+  aud?: String,
+  name?: String,
+  rp_id?: String,
+  spiffe_id?: String,
+  access_token?: Access_token,
 };
 </code></pre></div>
-<p>Cedarling builds the following entities:</p>
-<p><strong>User entity:</strong></p>
+<p>The following entity Workload Entity could be created:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::User&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Workload&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_aud&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;__entity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::TrustedIssuer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.com/&quot;</span><span class="p">}},</span>
+<span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;some_aud&quot;</span>
+<span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;__entity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_jti&quot;</span><span class="p">}},</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="user-entity">User Entity<a class="headerlink" href="#user-entity" title="Permanent link">#</a></h2>
+<p>Cedarling can create a <strong>User</strong> entity when using <code>authorize_multi_issuer</code> with tokens that have <code>principal_mapping</code> configured to include <code>User</code> in the policy store's <a href="../cedarling-policy-store/#token-metadata-schema">token metadata</a>.</p>
+<ul>
+<li><em>Default Type Name:</em> <code>Jans::User</code></li>
+<li><em>Entity ID:</em> Determined by the <code>user_id</code> attribute from the <a href="../cedarling-policy-store/#token-metadata-schema">TEMS</a>.</li>
+<li>If <code>user_id</code> is <strong>not set</strong>, Cedarling will fall back to the following claims (in order):</li>
+<li><code>sub</code> from the <code>userinfo_token</code></li>
+<li><code>sub</code> from the <code>id_token</code></li>
+<li><em>Entity Attributes</em>: Determined by the combined claims of the <code>id_token</code> and <code>userinfo_token</code>. Cedarling will check the schema and use the JWT claims with the same names as the User attributes.</li>
+</ul>
+<h3 id="example-user-entity-creation">Example User Entity Creation<a class="headerlink" href="#example-user-entity-creation" title="Permanent link">#</a></h3>
+<p>With the following <code>id_token</code> claims:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.com/&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob@email.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_tkn_jti&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role1&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>and <code>userinfo_token</code> claims:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.com/&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;userinfo_tkn_jti&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;role2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;role3&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>and Cedar schema:</p>
+<div class="highlight"><pre><span></span><code>entity Role;
+entity User in [Role] = {
+  sub: String,
+  email: String,
+  name: String,
+};
+</code></pre></div>
+<p>The following entity Workload Entity could be created:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email@email.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bob&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role1&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role2&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role3&quot;</span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>Role entities</strong> (created automatically as parents):</p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Role&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Editor&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]}</span>
-<span class="p">]</span>
-</code></pre></div>
-<h3 id="example-workload-principal">Example: Workload Principal<a class="headerlink" href="#example-workload-principal" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;principals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Workload&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Backend Service&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;...&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Cedarling builds:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyApp::Workload&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_client&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Backend Service&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
-<span class="p">}</span>
-</code></pre></div>
 <h2 id="role-entity">Role Entity<a class="headerlink" href="#role-entity" title="Permanent link">#</a></h2>
-<p>Cedarling automatically creates <strong>Role</strong> entities when building principals in the <code>authorize_unsigned</code> interface.</p>
+<p>Cedarling automatically attempts to create <strong>Role</strong> entities for each request.</p>
 <ul>
-<li><strong>Type Name:</strong> Configurable via <code>mapping_role</code> bootstrap property. Must match the Role entity type in your Cedar schema.</li>
-<li><strong>Entity ID:</strong> Extracted from the attribute configured in <code>unsigned_role_id_src</code> (defaults to <code>role</code>). The value can be a single string or an array of strings, each becoming a separate Role entity.</li>
-<li><strong>Relationship:</strong> Role entities are added as <strong>parents</strong> of the principal entity, enabling RBAC policies.</li>
+<li><strong>Default Type Name:</strong> <code>Jans::Role</code></li>
+<li><strong>Entity ID:</strong> Determined by the <code>role_mapping</code> attribute from the <a href="../cedarling-policy-store/#token-metadata-schema">TEMS</a>.</li>
+<li>If <code>role_mapping</code> is <strong>not set</strong>, Cedarling will try to create Role entities based on the following claims (in order):</li>
+<li><code>role</code> from the <code>userinfo_token</code></li>
+<li><code>role</code> from the <code>id_token</code></li>
 </ul>
 <h3 id="rbac-support">RBAC Support<a class="headerlink" href="#rbac-support" title="Permanent link">#</a></h3>
-<p>Since Role entities are automatically assigned as parents of principals, you can define RBAC policies like:</p>
+<p>Since Role entities are automatically assigned as parents of User entities, you can easily define RBAC policies like:</p>
 <div class="highlight"><pre><span></span><code>permit (
-   principal == MyApp::Role::&quot;Admin&quot;,
-   action in [MyApp::Action::&quot;Compare&quot;, MyApp::Action::&quot;Execute&quot;],
-   resource
-);
+   principal == Jans::Role::&quot;Admin&quot;,
+   action in [Jans::Action::&quot;Compare&quot;,Jans::Action::&quot;Execute&quot;],
+)
 </code></pre></div>
-<h2 id="token-entities">Token Entities<a class="headerlink" href="#token-entities" title="Permanent link">#</a></h2>
-<p>Token entities are created only in the <code>authorize_multi_issuer</code> interface. Cedarling builds one entity per JWT token provided in the request.</p>
+<h2 id="jwt-entities">JWT Entities<a class="headerlink" href="#jwt-entities" title="Permanent link">#</a></h2>
+<p>Cedarling creates <strong>JWT entities</strong> for each token defined in the <a href="../cedarling-properties/#trusted-issuers-schema">trusted issuers schema</a>.</p>
 <ul>
-<li><em>Type Name:</em> Determined by the <code>entity_type_name</code> attribute from the <a href="../cedarling-policy-store/#token-metadata-schema">TEMS</a>, or derived from the token's mapping name.</li>
-<li><em>Entity ID:</em> Extracted from the <code>jti</code> (JWT ID) claim by default, configurable via <code>token_id</code> in TEMS.</li>
-<li><em>Attributes:</em> JWT claims are mapped to entity attributes based on the Cedar schema. Reserved claims (<code>iss</code>, <code>jti</code>, <code>exp</code>) are typed correctly (entity reference, string, long). Synthetic attributes <code>token_type</code> and <code>validated_at</code> are added automatically.</li>
-<li><em>Tags:</em> Non-reserved JWT claims are also added as entity tags (<code>Set&lt;String&gt;</code>), enabling <code>hasTag</code>/<code>getTag</code> operations in policies.</li>
+<li><em>Type Name:</em> Determined by the <code>entity_type_name</code> attribute from the <a href="../cedarling-policy-store/#token-metadata-schema">TEMS</a>.</li>
+<li><em>Entity ID:</em> Determined by the <code>token_id</code> attribute from the <a href="../cedarling-policy-store/#token-metadata-schema">TEMS</a>.</li>
 </ul>
-<h3 id="example-multi-issuer-token-entity">Example: Multi-Issuer Token Entity<a class="headerlink" href="#example-multi-issuer-token-entity" title="Permanent link">#</a></h3>
-<p>Given the following <code>authorize_multi_issuer</code> request:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_Token&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;signed JWT&gt;&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Action::\&quot;GetFood\&quot;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;cedar_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Resource&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;approved_foods&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Approved Foods&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Where the JWT payload decodes to:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/auth&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_123&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_abc&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000000000</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Cedarling builds the following token entity:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_abc&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_Token&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_abc&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;__entity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::TrustedIssuer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/auth&quot;</span><span class="p">}},</span>
-<span class="w">    </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000000000</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;validated_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1710892800</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_123&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="p">]</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;user_123&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="p">]</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Token entities are accessible in policies via the context (e.g., <code>context.tokens.acme_access_token</code>).</p>
-<h2 id="resource-entity">Resource Entity<a class="headerlink" href="#resource-entity" title="Permanent link">#</a></h2>
-<p>Resource entities are built in both authorization interfaces from the <code>EntityData</code> provided in the request. The structure is identical to <a href="#entitydata-structure">principal entities</a>, but resources have no parent entities.</p>
-<p>If no attributes are provided and a default entity with the same UID exists in the policy store, the default entity's attributes are used.</p>
+<h3 id="attribute-mappings">Attribute Mappings<a class="headerlink" href="#attribute-mappings" title="Permanent link">#</a></h3>
+<p>Each <strong>claim</strong> in the JWT is automatically added to the JWT entity's attributes.</p>
 <h2 id="entity-merging-and-conflict-resolution">Entity Merging and Conflict Resolution<a class="headerlink" href="#entity-merging-and-conflict-resolution" title="Permanent link">#</a></h2>
 <p>Cedarling automatically merges entities from multiple sources during authorization requests. The merging process follows specific rules to ensure consistency and handle conflicts appropriately.</p>
 <h3 id="merging-order-and-precedence">Merging Order and Precedence<a class="headerlink" href="#merging-order-and-precedence" title="Permanent link">#</a></h3>
 <ol>
 <li><strong>Default Entities</strong>: Loaded first from policy store configuration</li>
-<li><strong>Request Entities</strong>: Resource, issuers, roles, tokens, and principal entities</li>
+<li><strong>Request Entities</strong>: Resource, issuers, roles, tokens, user, and workload entities</li>
 <li><strong>Conflict Resolution</strong>: Request entities override default entities when UID conflicts occur</li>
 </ol>
 <h3 id="example-entity-override-scenario">Example: Entity Override Scenario<a class="headerlink" href="#example-entity-override-scenario" title="Permanent link">#</a></h3>
@@ -2971,8 +2878,8 @@ namespace MyApp {
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org1&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;attrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Updated Organization&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;is_active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Updated Organization&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Different name</span>
+<span class="w">    </span><span class="nt">&quot;is_active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="c1">// Different status</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;parents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="p">}</span>
@@ -3000,7 +2907,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

@@ -1254,6 +1254,8 @@
       
         
       
+        
+      
     
     
     
@@ -1478,54 +1480,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#required-properties-both-methods" class="md-nav__link">
+  <a href="#required-properties-for-startup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required properties (both methods)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-for-authorize_multi_issuer-jwt-based-tbac" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for authorize_multi_issuer (JWT-based / TBAC)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-for-authorize_unsigned-application-asserted-identity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for authorize_unsigned (application-asserted identity)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-for-both-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for both methods
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#lock-server-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lock Server integration
+        Required properties for startup
       
     </span>
   </a>
@@ -1584,6 +1542,34 @@
     
   
     JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Mapping
   
 
     
@@ -2275,54 +2261,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#required-properties-both-methods" class="md-nav__link">
+  <a href="#required-properties-for-startup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required properties (both methods)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-for-authorize_multi_issuer-jwt-based-tbac" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for authorize_multi_issuer (JWT-based / TBAC)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-for-authorize_unsigned-application-asserted-identity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for authorize_unsigned (application-asserted identity)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-for-both-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Properties for both methods
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#lock-server-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lock Server integration
+        Required properties for startup
       
     </span>
   </a>
@@ -2464,10 +2406,8 @@
 
 
 <h1 id="cedarling-properties">Cedarling Properties<a class="headerlink" href="#cedarling-properties" title="Permanent link">#</a></h1>
-<p>These Bootstrap Properties control default application-level behavior. Properties are grouped below by which authorization method they apply to, so you can quickly find what you need for your chosen approach.</p>
-<p>Not sure which authorization method to use? See the <a href="../../quick-start/cedarling-quick-start/#which-authorization-method-should-i-use">decision guide</a>.</p>
-<h2 id="required-properties-both-methods">Required properties (both methods)<a class="headerlink" href="#required-properties-both-methods" title="Permanent link">#</a></h2>
-<p>These properties are required regardless of which authorization method you use.</p>
+<p>These Bootstrap Properties control default application level behavior.</p>
+<h2 id="required-properties-for-startup">Required properties for startup<a class="headerlink" href="#required-properties-for-startup" title="Permanent link">#</a></h2>
 <ul>
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this Cedarling instance.</li>
 </ul>
@@ -2498,50 +2438,44 @@
 <p class="admonition-title">Note</p>
 </div>
 <p>All other fields are optional and can be omitted. If a field is not provided, Cedarling will use the default value specified in the property definition.</p>
-<h2 id="properties-for-authorize_multi_issuer-jwt-based-tbac">Properties for <code>authorize_multi_issuer</code> (JWT-based / TBAC)<a class="headerlink" href="#properties-for-authorize_multi_issuer-jwt-based-tbac" title="Permanent link">#</a></h2>
-<p>These properties are relevant when using <code>authorize_multi_issuer</code> with signed JWT tokens from trusted identity providers. This is the recommended authorization method for most production deployments.</p>
-<p><strong>JWT and cryptographic behavior:</strong></p>
-<ul>
-<li><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. When enabled, this requires the <code>iss</code> claim to be present in all tokens and the issuer URL must use the <code>https</code> scheme. Default is <code>disabled</code>.</li>
-<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info. Default is <code>disabled</code>.</li>
-<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.</li>
-<li><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when <code>CEDARLING_JWT_SIG_VALIDATION</code> is <code>enabled</code>.</li>
-</ul>
-<p><strong>Token cache:</strong></p>
-<ul>
-<li><strong><code>CEDARLING_TOKEN_CACHE_MAX_TTL</code></strong> : Maximum token cache TTL in seconds. The token cache avoids decoding and validating the same token twice. Default is <code>0</code>, which disables the maximum TTL — in that case, the token's <code>exp</code> claim is used to compute the cache entry TTL. If the token has no <code>exp</code> claim and this is <code>0</code>, the token is not cached at all. If the token has no <code>exp</code> claim and this is &gt; 0, this value is used as the cache TTL fallback.</li>
-<li><strong><code>CEDARLING_TOKEN_CACHE_CAPACITY</code></strong> : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.</li>
-<li><strong><code>CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION</code></strong> : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is <code>true</code>.</li>
-</ul>
-<p><strong>Trusted issuer loading:</strong></p>
-<ul>
-<li><strong><code>CEDARLING_TRUSTED_ISSUER_LOADER_TYPE</code></strong> : <code>SYNC</code> | <code>ASYNC</code> -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. Async loader means that trusted issuers will be loaded in background. Default is <code>SYNC</code>. When using <code>ASYNC</code>, see <a href="../cedarling-interfaces/#trusted-issuer-loading-info">Trusted Issuer Loading Info</a> to check loading status.</li>
-<li><strong><code>CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS</code></strong> : Number of concurrent workers to use when loading trusted issuers. Applies to both <code>SYNC</code> (parallel loading during initialization) and <code>ASYNC</code> (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.</li>
-</ul>
-<p><strong>Decision logging for tokens:</strong></p>
-<ul>
-<li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : JWT claim name used to identify tokens in decision logs. Default is <code>jti</code>. Override with any claim name (e.g., <code>sub</code>, <code>sid</code>) if your tokens lack a <code>jti</code> claim or you need a different identifier.</li>
-</ul>
-<h2 id="properties-for-authorize_unsigned-application-asserted-identity">Properties for <code>authorize_unsigned</code> (application-asserted identity)<a class="headerlink" href="#properties-for-authorize_unsigned-application-asserted-identity" title="Permanent link">#</a></h2>
-<p>These properties are specifically relevant when using <code>authorize_unsigned</code> with raw entity data (no JWT validation).</p>
+<p><strong>Auxiliary properties</strong></p>
 <ul>
 <li>
-<p><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : JSON Logic rule that combines per-principal authorization decisions into a final result. Variable names must match the full Cedar principal type (e.g., <code>MyApp::User</code>, <code>MyApp::Workload</code>). Only applies to <code>authorize_unsigned</code>.
-  Use <code>{"===": [{"var": "MyApp::User"}, "ALLOW"]}</code> if you only want user authorization. Use <code>{"===": [{"var": "MyApp::Workload"}, "ALLOW"]}</code> if you only want workload authorization. <a href="../cedarling-principal-boolean-operations/">See here</a> for combining multiple principals.</p>
+<p><strong><code>CEDARLING_POLICY_STORE_ID</code></strong> : The identifier of the policy store in case there is more than one policy_store_id in the policy store.</p>
 </li>
 <li>
-<p><strong><code>CEDARLING_UNSIGNED_ROLE_ID_SRC</code></strong> : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to <code>"role"</code>.</p>
+<p><strong><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code></strong> : property specifies whether to authorize the <code>USER</code>, <code>WORKLOAD</code> or both when making authorization decisions.
+  Use <code>"===": [{"var": "Jans::User"}, "ALLOW"]</code> if you only want user authorization. Use <code>"===": [{"var": "Jans::Workload"}, "ALLOW"]</code> if you only want workload authorization. <a href="../cedarling-principal-boolean-operations/">See here</a> if you want anything more complicated.</p>
 </li>
 <li>
-<p><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity used when creating Role entities for principals. Default value: <code>Jans::Role</code>. Not used by <code>authorize_multi_issuer</code>.</p>
+<p><strong><code>CEDARLING_TOKEN_CACHE_MAX_TTL</code></strong> : Allows to limit maximum token cache TTL in seconds. (Token cache is used to avoid decoding and validation same token twice, so it is optimization.) Default value is zero what means disable maximum TTL and will be used <code>exp</code> token field to calculate TTL.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_TOKEN_CACHE_CAPACITY</code></strong> : Maximum number of tokens the cache can store. Default value is 100. 0 means no limit.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION</code></strong> : Enables eviction policy based on the earliest expiration time. When the cache reaches its capacity, the entry with the nearest expiration timestamp will be removed to make room for a new one. Default value is <code>true</code>.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_TRUSTED_ISSUER_LOADER_TYPE</code></strong> : <code>SYNC</code> | <code>ASYNC</code> -- Type of trusted issuer loader. If not set, synchronous loader is used. Sync loader means that trusted issuers will be loaded on initialization. Async loader means that trusted issuers will be loaded in background. Default is <code>SYNC</code>.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS</code></strong> : Number of concurrent workers to use when loading trusted issuers. Applies to both <code>SYNC</code> (parallel loading during initialization) and <code>ASYNC</code> (parallel background loading) modes. Default is 10 for native targets (max 1000) or 2 for WASM targets (max 6). Values are clamped between 1 and the target-specific maximum. Zero becomes 1.</p>
 </li>
 </ul>
-<h2 id="properties-for-both-methods">Properties for both methods<a class="headerlink" href="#properties-for-both-methods" title="Permanent link">#</a></h2>
-<p>These properties apply to both <code>authorize_multi_issuer</code> and <code>authorize_unsigned</code>.</p>
-<p><strong>Log behavior:</strong></p>
+<p><strong>Cedar Entity Mapping properties</strong></p>
+<ul>
+<li><strong><code>CEDARLING_MAPPING_USER</code></strong> : Name of Cedar User schema entity if we don't want to use default. When specified Cedarling try build defined entity (from schema) as user instead of default <code>User</code> entity defined in <code>cedar</code> schema. Works in namespace defined in the policy store. Default value: <code>Jans::User</code>.</li>
+<li><strong><code>CEDARLING_MAPPING_WORKLOAD</code></strong> : Name of Cedar Workload schema entity. Default value: <code>Jans::Workload</code>.</li>
+<li><strong><code>CEDARLING_MAPPING_ROLE</code></strong> : Name of Cedar Role schema entity. Default value: <code>Jans::Role</code>.</li>
+<li><strong><code>CEDARLING_UNSIGNED_ROLE_ID_SRC</code></strong> : The attribute that will be used to create the Role entity when using the unsigned interface. Defaults to <code>"role"</code>.</li>
+<li><strong><code>CEDARLING_MAPPING_TRUSTED_ISSUER</code></strong> : Mapping name of cedar schema TrustedIssuer entity. Default value: <code>Jans::TrustedIssuer</code>.</li>
+</ul>
+<p><strong>The following bootstrap properties are needed to configure log behavior:</strong></p>
 <ul>
 <li><strong><code>CEDARLING_LOG_TYPE</code></strong> : <code>off</code>, <code>memory</code>, <code>std_out</code>. Default is <code>off</code>.</li>
 <li><strong><code>CEDARLING_LOG_LEVEL</code></strong> : System Log Level <a href="../cedarling-logs/">See here</a>. Default to <code>WARN</code></li>
+<li><strong><code>CEDARLING_DECISION_LOG_DEFAULT_JWT_ID</code></strong> : Token claims that will be used for decision logging. Default is "jti", but perhaps some other claim is needed.</li>
 <li><strong><code>CEDARLING_LOG_TTL</code></strong> : in case of <code>memory</code> store, TTL (time to live) of log entities in seconds.</li>
 <li><strong><code>CEDARLING_LOG_MAX_ITEMS</code></strong> : Maximum number of log entities that can be stored using Memory logger. If used <code>0</code> value means no limit. And If missed or None, default value is applied.</li>
 <li><strong><code>CEDARLING_LOG_MAX_ITEM_SIZE</code></strong> : Maximum size of a single log entity in bytes using Memory logger. If used <code>0</code> value means no limit. And If missed or None, default value is applied.</li>
@@ -2549,7 +2483,23 @@
 <li><strong><code>CEDARLING_STDOUT_TIMEOUT_MILLIS</code></strong> : Flush timeout in milliseconds for async stdout logging. Only applicable for native targets (not WASM). Defaults to 100 ms.</li>
 <li><strong><code>CEDARLING_STDOUT_BUFFER_LIMIT</code></strong> : Buffer size limit in bytes for async stdout logging. Only applicable for native targets (not WASM). Defaults to 1 MB (2^20 bytes).</li>
 </ul>
-<p><strong>Context Data API:</strong></p>
+<p><strong>The following bootstrap properties are needed to configure JWT and cryptographic behavior:</strong></p>
+<ul>
+<li>
+<p><strong><code>CEDARLING_LOCAL_JWKS</code></strong> : Path to a local file containing a JWKS</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_JWT_SIG_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the signature of all JWT tokens. This requires an <code>iss</code> is present. Default is <code>disabled</code>.</p>
+</li>
+<li><strong><code>CEDARLING_JWT_STATUS_VALIDATION</code></strong> : <code>enabled</code> | <code>disabled</code> -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the <code>.well-known/openid-configuration</code> via the <code>status_list_endpoint</code> claim and cache it. See the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">IETF Draft</a> for more info. Default is <code>disabled</code>.</li>
+<li><strong><code>CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</code></strong> : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.</li>
+</ul>
+<p><strong>The following bootstrap properties are for advanced configuration:</strong></p>
+<ul>
+<li><strong><code>CEDARLING_MAX_BASE64_SIZE</code></strong> : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)</li>
+<li><strong><code>CEDARLING_MAX_DEFAULT_ENTITIES</code></strong> : Maximum number of default entities that can be loaded from the policy store.</li>
+</ul>
+<p><strong>The following bootstrap properties are needed to configure the Context Data API:</strong></p>
 <ul>
 <li>
 <p><strong><code>CEDARLING_DATA_STORE_MAX_ENTRIES</code></strong> : Maximum number of entries that can be stored in the data store. Default value is <code>10000</code>. Set to <code>0</code> for unlimited entries.</p>
@@ -2561,7 +2511,7 @@
 <p><strong><code>CEDARLING_DATA_STORE_DEFAULT_TTL</code></strong> : Default TTL (Time To Live) in seconds for entries that don't specify a TTL. Default value is <code>None</code> (entries will not expire). When set, entries without an explicit TTL will use this value.</p>
 </li>
 <li>
-<p><strong><code>CEDARLING_DATA_STORE_MAX_TTL</code></strong> : Maximum allowed TTL in seconds. Default value is <code>3600</code> (1 hour). Entries with TTL exceeding this value will be rejected. Note: setting to <code>0</code> results in a zero-second max TTL (immediate expiry), not unlimited. There is currently no way to configure unlimited max TTL — omitting the property uses the default (1 hour).</p>
+<p><strong><code>CEDARLING_DATA_STORE_MAX_TTL</code></strong> : Maximum allowed TTL in seconds. Default value is <code>3600</code> (1 hour). Entries with TTL exceeding this value will be rejected. Omit this property for unlimited TTL.</p>
 </li>
 <li>
 <p><strong><code>CEDARLING_DATA_STORE_ENABLE_METRICS</code></strong> : Whether to enable metrics tracking for data entries (access counts, etc.). Default value is <code>true</code>.</p>
@@ -2570,13 +2520,7 @@
 <p><strong><code>CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD</code></strong> : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is <code>80.0</code>. When capacity usage exceeds this threshold, <code>memory_alert_triggered</code> will be <code>true</code> in statistics.</p>
 </li>
 </ul>
-<p><strong>Advanced configuration:</strong></p>
-<ul>
-<li><strong><code>CEDARLING_MAX_BASE64_SIZE</code></strong> : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)</li>
-<li><strong><code>CEDARLING_MAX_DEFAULT_ENTITIES</code></strong> : Maximum number of default entities that can be loaded from the policy store.</li>
-</ul>
-<h2 id="lock-server-integration">Lock Server integration<a class="headerlink" href="#lock-server-integration" title="Permanent link">#</a></h2>
-<p>The following bootstrap properties are only needed for the Lock Server Integration. These apply to both authorization methods.</p>
+<p><strong>The following bootstrap properties are only needed for the Lock Server Integration.</strong></p>
 <ul>
 <li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events. Default is <code>disabled</code>.</li>
 <li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-master-configuration</code>.</li>
@@ -2613,7 +2557,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 24, 2026 12:51:50 UTC"><span class="timeago" datetime="2026-03-24T12:51:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 24, 2026 12:51:50 UTC">2026-03-24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 20, 2026 11:35:45 UTC"><span class="timeago" datetime="2026-03-20T11:35:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 20, 2026 11:35:45 UTC">2026-03-20</span>
   </span>
 
     

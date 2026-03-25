@@ -1254,6 +1254,8 @@
       
         
       
+        
+      
     
     
     
@@ -1698,6 +1700,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Token Metadata Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#role-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#claim-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Claim mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1884,10 +1914,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#minimum-cedar-schema" class="md-nav__link">
+  <a href="#minimum-supported-cedar-policy-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Minimum Cedar Schema
+        Minimum supported cedar-policy schema
       
     </span>
   </a>
@@ -1990,6 +2020,34 @@
     
   
     JWT Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JWT Mapping
   
 
     
@@ -2929,6 +2987,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Token Metadata Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#role-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#claim-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Claim mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -3115,10 +3201,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#minimum-cedar-schema" class="md-nav__link">
+  <a href="#minimum-supported-cedar-policy-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Minimum Cedar Schema
+        Minimum supported cedar-policy schema
       
     </span>
   </a>
@@ -3284,7 +3370,7 @@
 <li><strong>Default Entities</strong>: Optional static entities that are loaded at startup and available for all policy evaluations (see <a href="#default-entities">below</a>).</li>
 </ol>
 <p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
-<p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code> and <code>CEDARLING_POLICY_STORE_URI</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
+<p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code>; <code>CEDARLING_POLICY_STORE_URI</code>; and <code>CEDARLING_POLICY_STORE_ID</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
 <h2 id="policy-store-formats">Policy Store Formats<a class="headerlink" href="#policy-store-formats" title="Permanent link">#</a></h2>
 <p>Cedarling supports two policy store formats and automatically detects the correct format based on file extension or URL:</p>
 <table>
@@ -3434,11 +3520,13 @@ permit(
 <span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aud&quot;</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">        </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
@@ -3664,26 +3752,102 @@ permit(
 <li><strong>token_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
 </ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
-<p>The Token Entity Metadata Schema defines how tokens are mapped and validated within Cedarling. It specifies the Cedar entity type for each token, which claim to use as the entity ID, and which claims are required.</p>
+<p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_token&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;principal_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Acme::Workload&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;some_custom_claim&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">&quot;workload_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aud | client_id&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub | uid | email&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;principal_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Jans::Workload&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role | group | memberOf&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;some_custom_claim&quot;</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;mapping_target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type of parser (&#39;regex&#39; or &#39;json&#39;)&gt;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type identifier (e.g., &#39;Acme::Email&#39;)&gt;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional configurations specific to the parser&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><code>"trusted"</code> (bool, Default: true): Allows toggling configuration without deleting the object. When set to <code>false</code>, tokens of this type will be ignored.</li>
-<li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: <code>"Acme::Access_token"</code>.</li>
-<li>
-<p><code>"token_id"</code> (string, Default: <code>"jti"</code>): The JWT claim that will be used as the ID for the Token Entity.</p>
-</li>
-<li>
-<p><code>"principal_mapping"</code> (array[string], Default: <code>[]</code>): Describes where references of the created token entity should be included.</p>
-</li>
-<li><code>"required_claims"</code> (array[string], Default: <code>[]</code>): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519 Section 4.1</a> (e.g., <code>exp</code>, <code>nbf</code>), the claim will also be validated according to the standard.</li>
+<li><code>"trusted"</code> (bool, Default: true): Allows toggling configuration without deleting the object.</li>
+<li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: "Jans::Access_token".</li>
+<li><code>"principal_mapping"</code> (array[string], Default: []): Describes where references of the created token entity should be included.</li>
+<li><code>"token_id"</code> (string, Default: "jti"): The JWT claim that will be used as the ID for the Token Entity.</li>
+<li><code>"user_id"</code> (string, Default: "sub"): The JWT claim that will be used as the ID for the User Entity.</li>
+<li><code>"role_mapping"</code> (string, Default: "role"): The JWT claim that will be used as the ID for any Role Entities. For more info, see: <a href="#role-mapping">role mapping</a>.</li>
+<li><code>"workload_id"</code> (string, Default: "aud"): The JWT claim that will be used as the ID for the Workload Entity.</li>
+<li><code>"required_claims"</code> (array[string], Default: []): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under RFC 7519 Section 4.1, the claim will also be validated.</li>
+<li><code>"claim_mapping"</code> (object, Default: {}): Applies a transformation on a JWT's claim to types defined in the Cedar schema before creating the Token Entity's attribute. This enables creating a Cedar Type that has multiple attributes from a single JWT claim. For more info, see <a href="#claim-mapping">claim mapping</a>.</li>
 </ul>
+<h4 id="role-mapping">Role mapping<a class="headerlink" href="#role-mapping" title="Permanent link">#</a></h4>
+<ul>
+<li><strong>role_mapping</strong>: (String OR Array of String, <em>Optional</em>) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (<code>""</code>).</li>
+</ul>
+<p>You can include a <code>role_mapping</code> in each token, all of them will be executed by Cedarling.
+If none <code>role_mapping</code> defined the <code>Cedarling</code> will try to find role in <code>userinfo</code> token in field <code>role</code>.</p>
+<h4 id="claim-mapping">Claim mapping<a class="headerlink" href="#claim-mapping" title="Permanent link">#</a></h4>
+<ul>
+<li><strong>claim_mapping:</strong> Defines how to extract and transform specific claims from the token. Each claim can have its own parser (<code>regex</code> or <code>json</code>) and type (<code>Acme::email_address</code>, <code>Acme::Url</code>, etc.).</li>
+</ul>
+<p>In regex attribute mapping like <code>"UID": {"attr": "uid", "type":"String"},</code>, <code>type</code> field can contain possible variants:</p>
+<ul>
+<li><code>String</code> - to string without transformation,</li>
+<li><code>Number</code> - parse string to float64 (JSON number) if error returns default value</li>
+<li><code>Boolean</code> - if string NOT empty map to true else false</li>
+</ul>
+<p>Note, use of regex <strong>named capture groups</strong> which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, <code>(?P&lt;name&gt;...)</code> defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.</p>
+<p>When you use <code>(?x)</code> modifier in regexp, ensure that you escaped character <code>#</code> =&gt; <code>\#</code>.</p>
+<p>example of mapping <code>email_address</code> and <code>Url</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="err">...</span>
+<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::email_address&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^(?P&lt;UID&gt;[^@]+)@(?P&lt;DOMAIN&gt;.+)$&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;UID&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;DOMAIN&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;domain&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::Url&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(?x) ^(?P&lt;SCHEME&gt;[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P&lt;HOST&gt;[^\\/:\\#?]+)(?::(?&lt;PORT&gt;\\d+))?(?P&lt;PATH&gt;\\/[^?\\#]*)?(?:\\?(?P&lt;QUERY&gt;[^\\#]*))?(?:(?P&lt;FRAGMENT&gt;.*))?&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;SCHEME&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scheme&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;HOST&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;PORT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;port&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;QUERY&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;query&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;FRAGMENT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fragment&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="err">...</span>
+</code></pre></div>
 <h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
 <p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -3710,12 +3874,14 @@ permit(
 <span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
@@ -3797,8 +3963,8 @@ context.tokens.acme_access_token.hasTag(&quot;aud&quot;) &amp;&amp;
 context.tokens.acme_access_token.getTag(&quot;aud&quot;).contains(&quot;my-client-id&quot;)
 
 // Custom claim
-context.tokens.dolphin_dolphintoken.hasTag(&quot;waiver&quot;) &amp;&amp;
-context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;)
+context.tokens.dolphin_acme_dolphin_token.hasTag(&quot;waiver&quot;) &amp;&amp;
+context.tokens.dolphin_acme_dolphin_token.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;)
 </code></pre></div>
 <h3 id="token-collection-in-context">Token Collection in Context<a class="headerlink" href="#token-collection-in-context" title="Permanent link">#</a></h3>
 <p>Validated tokens are organized into a <code>tokens</code> collection in the Cedar context using predictable naming:</p>
@@ -3807,7 +3973,7 @@ context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;si
   &quot;acme_access_token&quot;: Token,           // Access token from Acme
   &quot;acme_id_token&quot;: Token,               // ID token from Acme
   &quot;google_id_token&quot;: Token,             // ID token from Google
-  &quot;dolphin_dolphintoken&quot;: Token,  // Custom token type from Dolphin
+  &quot;dolphin_acme_dolphin_token&quot;: Token,  // Custom token type from Dolphin
   &quot;total_token_count&quot;: Long,            // Number of validated tokens
 };
 </code></pre></div>
@@ -3819,33 +3985,13 @@ context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;si
 </ul>
 <h3 id="schema-requirements-for-multi-issuer">Schema Requirements for Multi-Issuer<a class="headerlink" href="#schema-requirements-for-multi-issuer" title="Permanent link">#</a></h3>
 <h4 id="1-token-entity-schema">1. Token Entity Schema<a class="headerlink" href="#1-token-entity-schema" title="Permanent link">#</a></h4>
-<p>All token entities <strong>must</strong> include these five required attributes and declare tags.</p>
-<p>Each trusted issuer gets its own Cedar namespace. The <code>TrustedIssuer</code> entity type must be defined in each issuer's namespace separately, since Cedar namespaces are independent. Token entities reference their own namespace's <code>TrustedIssuer</code> via the <code>iss</code> attribute.</p>
-<p>For example, if you have two issuers (Acme and Dolphin), you will have <code>Acme::TrustedIssuer</code> and <code>Dolphin::TrustedIssuer</code> — each with the same structure but in separate namespaces:</p>
-<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
-namespace Jans {
-  type Url = {
-    host: String,
-    path: String,
-    protocol: String
-  };
-  type email_address = {
-    domain: String,
-    uid: String
-  };
-};
-
-// Acme namespace: token entities for the Acme IDP.
-namespace Acme {
-  entity TrustedIssuer = {
-    issuer_entity_id: Jans::Url
-  };
-
+<p>All token entities <strong>must</strong> include these five required attributes and declare tags:</p>
+<div class="highlight"><pre><span></span><code>namespace Jans {
   entity Access_token = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
-    token_type?: String,        // Entity type (e.g., &quot;Acme::Access_token&quot;)
+    token_type?: String,        // Entity type (e.g., &quot;Jans::Access_Token&quot;)
     jti?: String,               // JWT ID - unique token identifier
-    iss?: TrustedIssuer,        // Issuer entity reference
+    iss?: Jans::TrustedIssuer,  // Issuer entity (for standard authz)
     exp?: Long,                 // Token expiration timestamp
     validated_at?: Long,        // Validation timestamp
 
@@ -3862,7 +4008,7 @@ namespace Acme {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    iss?: TrustedIssuer,
+    iss?: Jans::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -3870,7 +4016,7 @@ namespace Acme {
     aud?: Set&lt;String&gt;,
     iat?: Long,
     sub?: String,
-    email?: Jans::email_address,
+    email?: email_address,
     name?: String,
     phone_number?: String,
     role?: Set&lt;String&gt;,
@@ -3885,7 +4031,7 @@ namespace Acme {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    iss?: TrustedIssuer,
+    iss?: Jans::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -3893,57 +4039,27 @@ namespace Acme {
     aud?: String,
     iat?: Long,
     sub?: String,
-    email?: Jans::email_address,
+    email?: email_address,
     name?: String,
     birthdate?: String,
     phone_number?: String,
     role?: Set&lt;String&gt;,
     // Add other claims as needed
   } tags Set&lt;String&gt;;           // *** REQUIRED: For dynamic claims ***
-};
 
-// Dolphin namespace: token entities for the Dolphin IDP.
-// Note: TrustedIssuer is defined again — each namespace needs its own copy.
-namespace Dolphin {
   entity TrustedIssuer = {
-    issuer_entity_id: Jans::Url
+    issuer_entity_id: Url
   };
-
-  entity Access_token = {
-    token_type?: String,
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    validated_at?: Long,
-    aud?: String,
-    iat?: Long,
-    scope?: Set&lt;String&gt;,
-    // Add other claims as needed
-  } tags Set&lt;String&gt;;
-};
+}
 </code></pre></div>
 <h4 id="2-custom-token-types">2. Custom Token Types<a class="headerlink" href="#2-custom-token-types" title="Permanent link">#</a></h4>
 <p>For custom token types, follow the same pattern:</p>
-<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
-namespace Jans {
-  type Url = {
-    host: String,
-    path: String,
-    protocol: String
-  };
-};
-
-// Dolphin namespace: custom token entities for the Dolphin service.
-namespace Dolphin {
-  entity TrustedIssuer = {
-    issuer_entity_id: Jans::Url
-  };
-
+<div class="highlight"><pre><span></span><code>namespace Acme {
   entity DolphinToken = {
     // *** REQUIRED ATTRIBUTES FOR MULTI-ISSUER ***
     token_type?: String,
     jti?: String,
-    iss?: TrustedIssuer,
+    iss?: Acme::TrustedIssuer,
     exp?: Long,
     validated_at?: Long,
 
@@ -3952,7 +4068,11 @@ namespace Dolphin {
     location?: String,
     clearance_level?: Long,
   } tags Set&lt;String&gt;;           // *** REQUIRED: For dynamic claims ***
-};
+
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
+  };
+}
 </code></pre></div>
 <h4 id="3-context-type-schema">3. Context Type Schema<a class="headerlink" href="#3-context-type-schema" title="Permanent link">#</a></h4>
 <p>The Context type <strong>must</strong> include a <code>tokens</code> field:</p>
@@ -4035,11 +4155,11 @@ type TokensContext = {
   action == Acme::Action::&quot;SwimWithDolphin&quot;,
   resource == Acme::Aquarium::&quot;Miami&quot;
 ) when {
-  context has tokens.dolphin_dolphintoken &amp;&amp;
-  context.tokens.dolphin_dolphintoken.hasTag(&quot;waiver&quot;) &amp;&amp;
-  context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;) &amp;&amp;
-  context.tokens.dolphin_dolphintoken.hasTag(&quot;clearance_level&quot;) &amp;&amp;
-  context.tokens.dolphin_dolphintoken.getTag(&quot;clearance_level&quot;).contains(5)
+  context has tokens.dolphin_acme_dolphin_token &amp;&amp;
+  context.tokens.dolphin_acme_dolphin_token.hasTag(&quot;waiver&quot;) &amp;&amp;
+  context.tokens.dolphin_acme_dolphin_token.getTag(&quot;waiver&quot;).contains(&quot;signed&quot;) &amp;&amp;
+  context.tokens.dolphin_acme_dolphin_token.hasTag(&quot;clearance_level&quot;) &amp;&amp;
+  context.tokens.dolphin_acme_dolphin_token.getTag(&quot;clearance_level&quot;).contains(5)
 };
 </code></pre></div>
 <h3 id="trusted-issuer-configuration-for-multi-issuer">Trusted Issuer Configuration for Multi-Issuer<a class="headerlink" href="#trusted-issuer-configuration-for-multi-issuer" title="Permanent link">#</a></h3>
@@ -4057,7 +4177,7 @@ type TokensContext = {
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;dolphin_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Used in token collection naming: &quot;dolphin_dolphintoken&quot; and depict namespace for `TrustedIssuer` cedar type</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Used in token collection naming: &quot;dolphin_acme_dolphin_token&quot; and depict namespace for `TrustedIssuer` cedar type</span>
 <span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin Service Provider&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.dolphin.sea/.well-known/openid-configuration&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -4078,42 +4198,68 @@ Make sure you run the cedar command line tool to validate both your schema and p
 <p>The easiest way to author your policy store is to use the Policy Designer in
 <a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>. This tool helps you define the policies, schema and
 trusted IDPs and to publish a policy store to a Github repository.</p>
-<h3 id="minimum-cedar-schema">Minimum Cedar Schema<a class="headerlink" href="#minimum-cedar-schema" title="Permanent link">#</a></h3>
-<p>There are no mandatory entity types — your schema depends on which authorization interface you use:</p>
-<ul>
-<li><strong><code>authorize_unsigned</code></strong>: Define any principal, resource, and action types your application needs. Entity types and attributes are entirely up to you.</li>
-<li><strong><code>authorize_multi_issuer</code></strong>: Token entities require specific attributes and <code>tags Set&lt;String&gt;</code> declaration. See <a href="#schema-requirements-for-multi-issuer">Schema Requirements for Multi-Issuer</a>.</li>
-</ul>
-<p>Here is an example of a minimal schema for <code>authorize_unsigned</code>:</p>
-<div class="highlight"><pre><span></span><code>// Jans namespace: shared infrastructure types used across namespaces.
-namespace Jans {
-  type Url = {
-    host: String,
-    path: String,
-    protocol: String
-  };
-};
-
-// MyApp namespace: your business entities.
-namespace MyApp {
+<h3 id="minimum-supported-cedar-policy-schema">Minimum supported <code>cedar-policy schema</code><a class="headerlink" href="#minimum-supported-cedar-policy-schema" title="Permanent link">#</a></h3>
+<p>Here is example of a minimum supported <code>cedar-policy schema</code>:</p>
+<div class="highlight"><pre><span></span><code>namespace Jans {
+  entity id_token = {&quot;aud&quot;: Set&lt;String&gt;,&quot;iss&quot;: String, &quot;sub&quot;: String, iss?: Jans::TrustedIssuer};
   entity Role;
-  entity User in [Role] = {
-    sub: String,
-    email?: String,
+  entity User in [Role] = {};
+  entity Access_token = {&quot;aud&quot;: String,&quot;iss&quot;: String, &quot;jti&quot;: String, &quot;client_id&quot;: String, iss?: Jans::TrustedIssuer};
+  entity Workload = {};
+  entity TrustedIssuer = {
+    issuer_entity_id: Url
   };
 
-  entity Document = {
-    owner: String,
-  };
-
-  action &quot;Read&quot; appliesTo {
-    principal: [User, Role],
-    resource: [Document],
+  entity Issue = {};
+  action &quot;Update&quot; appliesTo {
+    principal: [Workload, User, Role],
+    resource: [Issue],
     context: {}
   };
-};
+}
 </code></pre></div>
-<p>For <code>authorize_multi_issuer</code>, add token entities with the required structure. See the <a href="#multi-issuer-token-entities">Multi-Issuer Token Entities</a> section for a complete example.</p>
+<p><strong>Note</strong>: The principal you use may vary depending on the authorization method.</p>
+<p>You can extend all of this entites and add your own.</p>
+<p>Mandatory entities is: <code>id_token</code>, <code>Role</code>, <code>User</code>, <code>Access_token</code>, <code>Workload</code>.
+<code>Issue</code> entity and <code>Update</code> action are optinal. Is created for example, you can create others for your needs.</p>
+<p><code>Context</code> and <code>Resource</code> entities you can pass during authorization request and next entites creating based on the JWT tokens:</p>
+<ul>
+<li>
+<p><code>id_token</code> - entity based on the <code>id</code> JWT token fields.</p>
+</li>
+<li>
+<p>ID for entity based in <code>jti</code> field.</p>
+</li>
+<li>
+<p><code>Role</code> - define role of user.</p>
+</li>
+<li>
+<p>Mapping defined in <code>Token Metadata Schema</code>.</p>
+</li>
+<li>Claim in JWT usually is string or array of string.</li>
+<li>
+<p>Each <code>Role</code> is parent for <code>User</code>. So to check role in policy use operator <code>in</code> to check hierarchy.</p>
+</li>
+<li>
+<p><code>User</code> - entity based on the <code>id</code>and <code>userinfo</code> JWT token fields.</p>
+</li>
+<li>
+<p>If <code>id</code>and <code>userinfo</code> JWT token fields has different <code>sub</code> value, <code>userinfo</code> JWT token will be ignored.</p>
+</li>
+<li>
+<p>ID for entity based in <code>sub</code> field. (will be changed in future)</p>
+</li>
+<li>
+<p><code>Access_token</code> - entity based on the <code>access</code> JWT token fields.</p>
+</li>
+<li>
+<p>ID for entity based in <code>jti</code> field.</p>
+</li>
+<li>
+<p><code>Workload</code> - entity based on the <code>access</code> JWT token fields.</p>
+</li>
+<li>ID for entity based in <code>client_id</code> field.</li>
+</ul>
 <h2 id="note-on-test-fixtures">Note on test fixtures<a class="headerlink" href="#note-on-test-fixtures" title="Permanent link">#</a></h2>
 <p>You will notice that test fixtures in the cedarling code base are quite often in yaml rather than in json.</p>
 <p>yaml is intended for <strong>cedarling internal use only</strong>.</p>
@@ -4140,7 +4286,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 19, 2026 10:29:42 UTC"><span class="timeago" datetime="2026-03-19T10:29:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 19, 2026 10:29:42 UTC">2026-03-19</span>
   </span>
 
     
