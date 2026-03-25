@@ -56,7 +56,7 @@ class Plugin:
 
         async def coroutine():
             msg = _("Revoking sessions")
-            response = await common_data.app.run_config_api_operation(cli_args, msg, self.app.cli_object.revoke_session)
+            await common_data.app.run_config_api_operation(cli_args, msg, self.app.cli_object.revoke_session)
 
         asyncio.ensure_future(coroutine())
 
