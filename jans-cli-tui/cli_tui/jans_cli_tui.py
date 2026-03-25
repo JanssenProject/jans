@@ -481,7 +481,7 @@ class JansCliApp(Application):
 
         self.start_progressing()
         try:
-            response = await self.loop.run_in_executor(
+            await self.loop.run_in_executor(
                             self.executor,
                             self.cli_object.get_jwt_access_token,
                             result
