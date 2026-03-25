@@ -19,14 +19,6 @@ public class CedarlingAdapter implements AutoCloseable {
         this.cedarling = Cedarling.Companion.loadFromFile(path);
     }
 
-    public AuthorizeResult authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context)
-            throws AuthorizeException, EntityException {
-        // Build EntityData from resource JSON
-        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-
-        return this.cedarling.authorize(tokens, action, resourceObj, context.toString());
-    }
-
     public AuthorizeResult authorizeUnsigned(List<EntityData> principals, String action, JSONObject resource, JSONObject context)
             throws AuthorizeException, EntityException {
         // Build EntityData from resource JSON

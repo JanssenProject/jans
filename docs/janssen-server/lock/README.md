@@ -109,13 +109,13 @@ The Lock Server uses its own embedded Cedarling instance to make authorization d
 
 - **[Standalone Deployment](./lock-server.md#standalone-deployment)**: Independent Lock Server instance
 - **[Integrated Deployment](./lock-server.md#integrated-deployment)**: Embedded in Jans Auth Server
-- **[High Availability Setup](./lock-server.md#high-availability)**: Load-balanced multi-instance deployment
+- **[High Availability Setup](./lock-server.md#high-availability-setup)**: Load-balanced multi-instance deployment
 
 ### Management Interfaces
 
 - **[CLI Commands](./lock-server.md#cli-management)**: Command-line policy and client management
 - **[TUI Interface](./lock-server.md#tui-interface)**: Text-based user interface for administration
-- **[REST API](./lock-server.md#rest-api)**: Programmatic access to Lock Server functionality
+- **[REST API](./lock-server.md#rest-api-endpoints)**: Programmatic access to Lock Server functionality
 
 ## Use Cases
 
