@@ -8,5 +8,4 @@ to participate in the development of the Janssen Project.
 - [Run integration tests locally](./run-integration-tests.md)
 - [Useful tools and techniques](./useful-tools.md)
 
-Explore left navigation bar on the
-[documentation site](docs.jans.io) for complete list.
+Explore left navigation bar on the [documentation site](https://docs.jans.io) for complete list.
