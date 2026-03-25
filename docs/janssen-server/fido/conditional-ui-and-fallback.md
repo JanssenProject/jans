@@ -261,10 +261,8 @@ when the browser supports conditional mediation. Currently supported browsers:
 | Firefox | 122+ |
 
 > **Last validated:** March 2026. Browser support evolves quickly — verify against
-> [passkeys.dev/device-support/](https://passkeys.dev/device-support/) for the latest.
-
-> For an up-to-date browser and device compatibility matrix, refer to
-> [passkeys.dev/device-support/](https://passkeys.dev/device-support/).
+> [passkeys.dev/device-support/](https://passkeys.dev/device-support/) for the latest
+> up-to-date browser and device compatibility matrix.
 
 ---
 
@@ -608,7 +606,7 @@ For standard FIDO authentication (step 2 of the non-Conditional UI flow):
 
 | Check | Action |
 |---|---|
-| Browser version | Verify Chrome 108+, Safari 16+, or Edge 108+ |
+| Browser version | Verify Chrome 108+, Safari 16+, Edge 108+, or Firefox 122+ |
 | `autocomplete` attribute | Confirm `autocomplete="username webauthn"` on the input |
 | `allowList` cookie | Open DevTools → Application → Cookies; verify `allowList` exists |
 | `assertion_request` | Check the page source; `fido2_assertion_request` must not be `null` |
