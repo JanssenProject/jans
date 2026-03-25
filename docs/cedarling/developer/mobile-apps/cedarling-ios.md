@@ -20,7 +20,7 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    make ios
    ```
    
-3. Open `./jans-cedarling/bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework `bindings/ios/Mobile.xcframework` and the Swift file bindings `bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
+3. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
 4. Run iOS project on simulator.
 

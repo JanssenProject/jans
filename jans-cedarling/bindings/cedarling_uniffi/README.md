@@ -18,7 +18,7 @@ Read [this article](./docs/DetailBuildSteps.md) for detail steps.
 ```bash
 make ios
 ```
-2. Open `./jans-cedarling/bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework from `bindings/ios/Mobile.xcframework` and the Swift file bindings `bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
+2. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework from `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
 3. Run iOS project (./bindings/cedarling_uniffi/iOSApp) on simulator.
 
@@ -37,7 +37,7 @@ make ios
 make android
 ```
 
-2. Open the `androidApp` project on Android Studio and run the project on simulator.
+2. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
 
 ## Kotlin Binding
 
