@@ -374,7 +374,7 @@ jobs:
           fi
       - name: Run Trivy vulnerability scanner (All-in-One only)
         if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           image-ref: ghcr.io/${{ github.repository }}/all-in-one:${{ steps.prep.outputs.version }}
           format: 'json'
@@ -383,7 +383,7 @@ jobs:
 
       - name: Generate Trivy Table Report (All-in-One only)
         if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           image-ref: ghcr.io/${{ github.repository }}/all-in-one:${{ steps.prep.outputs.version }}
           format: 'table'
