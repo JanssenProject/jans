@@ -103,14 +103,13 @@
     },
     {
       "desc": "TODO - Usg? Value can be OpenID",
-      "equality": "caseIgnoreMatch",
+      "equality": "distinguishedNameMatch",
       "names": [
         "jansAttrUsgTyp"
       ],
 	  "multivalued": true,
       "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
       "x_origin": "Jans created attribute"
     },
     {
