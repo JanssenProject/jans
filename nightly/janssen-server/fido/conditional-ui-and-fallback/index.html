@@ -1,0 +1,3802 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/fido/conditional-ui-and-fallback/">
+      
+      
+        <link rel="prev" href="../passwordlessLoginExperience/">
+      
+      
+        <link rel="next" href="../types-of-creds/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Conditional UI and Fallback - Janssen Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#conditional-ui-and-fallback-authentication" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Conditional UI and Fallback
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Get Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture & Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../auth-server/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Integrate & Authenticate
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../config-guide/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Configure Identity & Policies
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../test-debug/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Test & Debug
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Deploy & Operate
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../CHANGELOG/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Product & Releases
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="logo">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Concepts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../auth-server/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate & Authenticate
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrate & Authenticate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../auth-server/oauth-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth 2.0
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../auth-server/openid-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenID Connect
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FIDO2 / Passkeys
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FIDO2 / Passkeys
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vendor-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vendor Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../passwordlessLoginExperience/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passwordless Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conditional UI and Fallback
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conditional UI and Fallback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-conditional-ui-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Conditional UI Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Conditional UI Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-1-browser-capability-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Browser Capability Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-preparing-assertion-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Preparing Assertion Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-conditional-mediation-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Conditional Mediation Request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-username-field-binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Username Field Binding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-server-side-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — Server-Side Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-steps-conditional-ui-vs-standard-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Steps: Conditional UI vs. Standard Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-allowlist-cookie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The allowList Cookie
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The allowList Cookie">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-the-cookie-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing the Cookie (Registration)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-cookie-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the Cookie (Authentication)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#browser-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser Detection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Browser Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detected-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detected Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-side-capability-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-Side Capability Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fallback-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fallback Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fallback-1-browser-does-not-support-conditional-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 1 — Browser Does Not Support Conditional UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-2-no-passkeys-registered-empty-allowlist-cookie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 2 — No Passkeys Registered (Empty allowList Cookie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-3-user-cancels-the-conditional-ui-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 3 — User Cancels the Conditional UI Prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-4-authenticator-not-registered-invalidstateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 4 — Authenticator Not Registered (InvalidStateError)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-5-no-platform-authenticator-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 5 — No Platform Authenticator Available
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-6-biometric-unavailable-biometric-locked-or-not-enrolled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 6 — Biometric Unavailable (Biometric Locked or Not Enrolled)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-7-security-key-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 7 — Security Key Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-summary-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback Summary Table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conditional-ui-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conditional UI-Specific
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-path-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback Path Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attestation-and-authenticator-trust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation and Authenticator Trust
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abortcontroller-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AbortController Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-experience-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Experience Guidelines
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Experience Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#messaging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messaging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-guide-for-relying-parties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Guide for Relying Parties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Guide for Relying Parties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-registration-writing-the-allowlist-cookie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Registration (Writing the allowList Cookie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-authentication-starting-conditional-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Authentication (Starting Conditional UI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-server-side-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Server-Side Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-assertionrequest-correctly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Configure assertionRequest Correctly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passkey-autofill-does-not-appear" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkey Autofill Does Not Appear
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-fails-after-passkey-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Fails After Passkey Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-login-form-broken-after-conditional-ui-abort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard Login Form Broken After Conditional UI Abort
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token_response-is-null-on-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        token_response Is Null on the Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-fallback-rate-in-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Fallback Rate in Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../types-of-creds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types of Credentials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../shibboleth-idp/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agama (Auth Flows)
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../cedarling/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cedarling (Authorization)
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../auth-server/uma-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UMA
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../recipes/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes & How-To
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../config-guide/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Identity & Policies
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../test-debug/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test & Debug
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy & Operate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../CHANGELOG/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product & Releases
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-conditional-ui-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Conditional UI Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Conditional UI Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-1-browser-capability-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Browser Capability Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-preparing-assertion-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Preparing Assertion Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-conditional-mediation-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Conditional Mediation Request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-username-field-binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Username Field Binding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-server-side-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — Server-Side Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-steps-conditional-ui-vs-standard-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Steps: Conditional UI vs. Standard Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-allowlist-cookie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The allowList Cookie
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The allowList Cookie">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-the-cookie-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing the Cookie (Registration)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-cookie-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the Cookie (Authentication)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#browser-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser Detection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Browser Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detected-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detected Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-side-capability-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-Side Capability Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fallback-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fallback Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fallback-1-browser-does-not-support-conditional-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 1 — Browser Does Not Support Conditional UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-2-no-passkeys-registered-empty-allowlist-cookie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 2 — No Passkeys Registered (Empty allowList Cookie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-3-user-cancels-the-conditional-ui-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 3 — User Cancels the Conditional UI Prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-4-authenticator-not-registered-invalidstateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 4 — Authenticator Not Registered (InvalidStateError)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-5-no-platform-authenticator-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 5 — No Platform Authenticator Available
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-6-biometric-unavailable-biometric-locked-or-not-enrolled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 6 — Biometric Unavailable (Biometric Locked or Not Enrolled)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-7-security-key-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback 7 — Security Key Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-summary-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback Summary Table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conditional-ui-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conditional UI-Specific
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-path-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback Path Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attestation-and-authenticator-trust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation and Authenticator Trust
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#abortcontroller-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AbortController Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-experience-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Experience Guidelines
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Experience Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#messaging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messaging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-guide-for-relying-parties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Guide for Relying Parties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Guide for Relying Parties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-registration-writing-the-allowlist-cookie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Registration (Writing the allowList Cookie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-authentication-starting-conditional-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Authentication (Starting Conditional UI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-server-side-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Server-Side Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-configure-assertionrequest-correctly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Configure assertionRequest Correctly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passkey-autofill-does-not-appear" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkey Autofill Does Not Appear
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-fails-after-passkey-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Fails After Passkey Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-login-form-broken-after-conditional-ui-abort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard Login Form Broken After Conditional UI Abort
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token_response-is-null-on-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        token_response Is Null on the Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-fallback-rate-in-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Fallback Rate in Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../auth-server/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Integrate & Authenticate
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    FIDO2 / Passkeys
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">conditional-ui</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">fido</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">passkeys</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="conditional-ui-and-fallback-authentication">Conditional UI and Fallback Authentication<a class="headerlink" href="#conditional-ui-and-fallback-authentication" title="Permanent link">#</a></h1>
+<p>This guide provides a complete reference for Conditional UI (usernameless passkey authentication)
+and all fallback strategies in Janssen's FIDO2 implementation. It consolidates information from
+the authentication scripts, login UI, and server-side services into one place.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>Conditional UI lets users authenticate with a passkey directly from the browser's autofill
+without typing a username or password. The browser detects registered passkeys and shows them
+as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the
+flow falls back gracefully to traditional authentication methods.</p>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────────┐
+│                     Authentication Flow                              │
+│                                                                      │
+│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
+│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
+│  └─────────────┘         Yes            └──────────────────────┘    │
+│         │                                          │                 │
+│         │ No                               Success │ Failure         │
+│         ▼                                          ▼                 │
+│  ┌─────────────────────┐            ┌─────────────────────────┐     │
+│  │ Username + Password │            │   Fallback Strategies   │     │
+│  └─────────────────────┘            └─────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="how-conditional-ui-works">How Conditional UI Works<a class="headerlink" href="#how-conditional-ui-works" title="Permanent link">#</a></h2>
+<h3 id="authentication-sequence">Authentication Sequence<a class="headerlink" href="#authentication-sequence" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>User   ──▶  Browser: Page loads with username field (autocomplete=&quot;username webauthn&quot;)
+Browser ──▶  JS: isConditionalMediationAvailable() check
+JS      ──▶  FIDO Server: POST /assertion/options (with allowCredentials from cookie)
+FIDO Server ──▶ JS: PublicKeyCredentialRequestOptions
+JS      ──▶  Browser: credentials.get({ mediation: &quot;conditional&quot; })
+Browser ──▶  User: Show passkey autofill suggestions
+User    ──▶  Browser: Select passkey, authenticate (Face ID / Touch ID / PIN)
+Browser ──▶  FIDO Server: POST /assertion/result (authenticator response)
+FIDO Server ──▶  RP: Logged in (returns username from credential)
+</code></pre></div>
+<h3 id="step-1-browser-capability-check">Step 1 — Browser Capability Check<a class="headerlink" href="#step-1-browser-capability-check" title="Permanent link">#</a></h3>
+<p>Before initiating Conditional UI, the login page checks whether the browser supports it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// login.xhtml — window.onload</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">onload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">assertion_request</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">PublicKeyCredential</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">PublicKeyCredential</span><span class="p">.</span><span class="nx">isConditionalMediationAvailable</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">startAssertion</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Browser does not support Conditional UI — standard form remains active</span>
+<span class="w">            </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;PublicKeyCredential not ConditionalMediationAvailable&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The check requires two conditions:
+1. <code>window.PublicKeyCredential</code> — WebAuthn API is available
+2. <code>await PublicKeyCredential.isConditionalMediationAvailable()</code> — the browser specifically
+   supports conditional mediation (autofill-driven passkey prompts). This is a static method
+   returning <code>Promise&lt;boolean&gt;</code> per the WebAuthn Level 3 spec; it must be awaited, not just
+   checked for existence.</p>
+<h3 id="step-2-preparing-assertion-options">Step 2 — Preparing Assertion Options<a class="headerlink" href="#step-2-preparing-assertion-options" title="Permanent link">#</a></h3>
+<p><code>Fido2ExternalAuthenticator.py</code> prepares the assertion request in <code>prepareForStep</code> (step 1).
+It reads the <code>allowList</code> cookie to populate <code>allowCredentials</code>, which tells the browser which
+passkeys to surface in autofill:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — prepareForStep, step 1</span>
+<span class="n">assertionRequest</span> <span class="o">=</span> <span class="n">AssertionOptions</span><span class="p">()</span>
+<span class="n">assertionRequest</span><span class="o">.</span><span class="n">setRpId</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
+<span class="n">assertionRequest</span><span class="o">.</span><span class="n">setAllowCredentials</span><span class="p">(</span><span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="n">allowList</span><span class="p">))</span>  <span class="c1"># from cookie</span>
+<span class="n">assertionResponse</span> <span class="o">=</span> <span class="n">assertionService</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">assertionRequest</span><span class="p">)</span><span class="o">.</span><span class="n">readEntity</span><span class="p">(</span><span class="n">java</span><span class="o">.</span><span class="n">lang</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
+<span class="n">identity</span><span class="o">.</span><span class="n">setWorkingParameter</span><span class="p">(</span><span class="s2">&quot;fido2_assertion_request&quot;</span><span class="p">,</span> <span class="n">ServerUtil</span><span class="o">.</span><span class="n">asJson</span><span class="p">(</span><span class="n">assertionResponse</span><span class="p">))</span>
+</code></pre></div>
+<p>When <code>allowList</code> is empty (no registered passkeys found in the cookie), <code>allowCredentials</code>
+will be an empty list, which is acceptable — the browser may still show discoverable
+credentials it knows about.</p>
+<h3 id="step-3-conditional-mediation-request">Step 3 — Conditional Mediation Request<a class="headerlink" href="#step-3-conditional-mediation-request" title="Permanent link">#</a></h3>
+<p><code>webauthn.js</code> makes the WebAuthn API call with <code>mediation: "conditional"</code> and an
+<code>AbortController</code> signal:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// webauthn.js — getAssertionConditional</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">getAssertionConditional</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">authAbortSignal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authAbortController</span><span class="p">.</span><span class="nx">signal</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">navigator</span><span class="p">.</span><span class="nx">credentials</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span>
+<span class="w">        </span><span class="nx">publicKey</span><span class="o">:</span><span class="w"> </span><span class="nx">decodePublicKeyCredentialRequestOptions</span><span class="p">(</span><span class="nx">request</span><span class="p">),</span>
+<span class="w">        </span><span class="nx">mediation</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;conditional&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="nx">authAbortSignal</span><span class="p">,</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>mediation: "conditional"</code> flag is what makes this Conditional UI. Without it, the browser
+would show a modal dialog instead of using autofill.</p>
+<h3 id="step-4-username-field-binding">Step 4 — Username Field Binding<a class="headerlink" href="#step-4-username-field-binding" title="Permanent link">#</a></h3>
+<p>The username input must carry the <code>autocomplete="username webauthn"</code> attribute so the browser
+knows to use it as the anchor for passkey autofill suggestions:</p>
+<div class="highlight"><pre><span></span><code><span class="cm">&lt;!-- login.xhtml --&gt;</span>
+<span class="nt">&lt;h:inputText</span><span class="w"> </span><span class="na">placeholder=</span><span class="s">&quot;#{msgs[&#39;login.username&#39;]}&quot;</span>
+<span class="w">    </span><span class="na">id=</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="na">required=</span><span class="s">&quot;true&quot;</span>
+<span class="w">    </span><span class="na">value=</span><span class="s">&quot;#{credentials.username}&quot;</span><span class="w"> </span><span class="na">styleClass=</span><span class="s">&quot;form-control&quot;</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;f:passThroughAttribute</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;autocomplete&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;username webauthn&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/h:inputText&gt;</span>
+</code></pre></div>
+<h3 id="step-5-server-side-verification">Step 5 — Server-Side Verification<a class="headerlink" href="#step-5-server-side-verification" title="Permanent link">#</a></h3>
+<p>When the user selects a passkey, the browser returns a credential response. The login page
+submits this to the server, and <code>Fido2ExternalAuthenticator.py</code> verifies it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — authenticate, step 1</span>
+<span class="k">if</span> <span class="n">token_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">identity</span><span class="o">.</span><span class="n">setWorkingParameter</span><span class="p">(</span><span class="s2">&quot;conditionalUI&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
+    <span class="n">assertionService</span> <span class="o">=</span> <span class="n">Fido2ClientFactory</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">createAssertionService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaDataConfiguration</span><span class="p">)</span>
+    <span class="n">assertionResult</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">readValue</span><span class="p">(</span><span class="n">token_response</span><span class="p">,</span> <span class="n">AssertionResult</span><span class="p">)</span>
+    <span class="n">assertionStatus</span> <span class="o">=</span> <span class="n">assertionService</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">assertionResult</span><span class="p">)</span>
+    <span class="c1"># ...</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">assertionResponse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+    <span class="n">logged_in</span> <span class="o">=</span> <span class="n">authenticationService</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="authentication-steps-conditional-ui-vs-standard-flow">Authentication Steps: Conditional UI vs. Standard Flow<a class="headerlink" href="#authentication-steps-conditional-ui-vs-standard-flow" title="Permanent link">#</a></h3>
+<p><code>getCountAuthenticationSteps</code> returns 1 for Conditional UI (single step, no separate FIDO
+challenge page needed) and 2 for the standard username/password + FIDO flow:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">getCountAuthenticationSteps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+    <span class="n">identity</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">Identity</span><span class="p">)</span>
+    <span class="n">conditionalUI</span> <span class="o">=</span> <span class="n">identity</span><span class="o">.</span><span class="n">getWorkingParameter</span><span class="p">(</span><span class="s2">&quot;conditionalUI&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conditionalUI</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>   <span class="c1"># Passkey directly authenticated — done</span>
+    <span class="k">return</span> <span class="mi">2</span>       <span class="c1"># Username/password step, then FIDO step</span>
+</code></pre></div>
+<hr />
+<h2 id="the-allowlist-cookie">The allowList Cookie<a class="headerlink" href="#the-allowlist-cookie" title="Permanent link">#</a></h2>
+<p>The <code>allowList</code> cookie is the mechanism that makes usernameless authentication possible.
+It stores credential descriptors on the client without linking them to a username or email.</p>
+<h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;base64url-encoded credential id&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public-key&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;transports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;internal&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;base64url-encoded credential id&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public-key&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;transports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;usb&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ble&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;nfc&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<h3 id="security-properties">Security Properties<a class="headerlink" href="#security-properties" title="Permanent link">#</a></h3>
+<p>The cookie is set with the following protections:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — persistCookie</span>
+<span class="n">coo</span> <span class="o">=</span> <span class="n">Cookie</span><span class="p">(</span><span class="s2">&quot;allowList&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<span class="n">coo</span><span class="o">.</span><span class="n">setSecure</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># HTTPS-only transmission</span>
+<span class="n">coo</span><span class="o">.</span><span class="n">setHttpOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Not accessible via JavaScript</span>
+<span class="n">coo</span><span class="o">.</span><span class="n">setMaxAge</span><span class="p">(</span><span class="mi">7</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>  <span class="c1"># 7-day expiry</span>
+<span class="n">coo</span><span class="o">.</span><span class="n">setSameSite</span><span class="p">(</span><span class="s2">&quot;Strict&quot;</span><span class="p">)</span>  <span class="c1"># CSRF protection — use &quot;Lax&quot; if cross-site navigation is needed</span>
+</code></pre></div>
+<ul>
+<li><strong>No PII stored</strong>: the cookie contains only credential IDs and transport hints — no
+  usernames, email addresses, or other identifying data</li>
+<li><strong>Base64url encoded</strong>: the JSON array is base64url-encoded before storage</li>
+<li><strong>Deduplication</strong>: <code>add_credential_if_not_exists</code> prevents duplicate entries when
+  registering new credentials</li>
+</ul>
+<h3 id="writing-the-cookie-registration">Writing the Cookie (Registration)<a class="headerlink" href="#writing-the-cookie-registration" title="Permanent link">#</a></h3>
+<p>After a successful registration (attestation), the new credential is added to the cookie:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — authenticate, step 2 (enroll path)</span>
+<span class="n">attestationResponse</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">attestationStatusEntity</span><span class="p">)</span>
+<span class="n">new_credential</span> <span class="o">=</span> <span class="n">attestationResponse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;credential&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">persistCookie</span><span class="p">(</span><span class="n">new_credential</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="reading-the-cookie-authentication">Reading the Cookie (Authentication)<a class="headerlink" href="#reading-the-cookie-authentication" title="Permanent link">#</a></h3>
+<p>The cookie is read at the start of each session to build the <code>allowCredentials</code> list:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — getCookieValue</span>
+<span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">httpRequest</span><span class="o">.</span><span class="n">getCookies</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">cookie</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;allowList&quot;</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">Base64Util</span><span class="o">.</span><span class="n">base64urldecodeToString</span><span class="p">(</span><span class="n">cookie</span><span class="o">.</span><span class="n">getValue</span><span class="p">())</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="browser-detection">Browser Detection<a class="headerlink" href="#browser-detection" title="Permanent link">#</a></h2>
+<p>Janssen's FIDO2 server detects the user's browser and device at the server level using the
+HTTP <code>User-Agent</code> header. This data is used for metrics, risk scoring, and fallback
+strategy analysis — not for blocking authentication attempts.</p>
+<h3 id="detected-properties">Detected Properties<a class="headerlink" href="#detected-properties" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser</td>
+<td>Chrome, Firefox, Safari, Edge, Opera</td>
+</tr>
+<tr>
+<td>Operating System</td>
+<td>Windows, macOS, Linux, Android, iOS</td>
+</tr>
+<tr>
+<td>Device Type</td>
+<td>DESKTOP, MOBILE, TABLET</td>
+</tr>
+</tbody>
+</table>
+<p>Detection is performed in <code>DeviceInfoExtractor.java</code> using User-Agent string pattern matching.</p>
+<h3 id="client-side-capability-check">Client-Side Capability Check<a class="headerlink" href="#client-side-capability-check" title="Permanent link">#</a></h3>
+<p>On the client, <code>PublicKeyCredential.isConditionalMediationAvailable()</code> is the definitive
+signal for Conditional UI support — it is a static async method that resolves to <code>true</code>
+when the browser supports conditional mediation. Currently supported browsers:</p>
+<table>
+<thead>
+<tr>
+<th>Browser</th>
+<th>Minimum Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chrome / Chromium</td>
+<td>108+</td>
+</tr>
+<tr>
+<td>Safari</td>
+<td>16+</td>
+</tr>
+<tr>
+<td>Edge</td>
+<td>108+</td>
+</tr>
+<tr>
+<td>Firefox</td>
+<td>122+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Last validated:</strong> March 2026. Browser support evolves quickly — verify against
+<a href="https://passkeys.dev/device-support/">passkeys.dev/device-support/</a> for the latest
+up-to-date browser and device compatibility matrix.</p>
+</blockquote>
+<hr />
+<h2 id="fallback-strategies">Fallback Strategies<a class="headerlink" href="#fallback-strategies" title="Permanent link">#</a></h2>
+<p>When Conditional UI is unavailable or fails, Janssen provides a layered fallback hierarchy.</p>
+<h3 id="fallback-1-browser-does-not-support-conditional-ui">Fallback 1 — Browser Does Not Support Conditional UI<a class="headerlink" href="#fallback-1-browser-does-not-support-conditional-ui" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: <code>window.PublicKeyCredential</code> is <code>undefined</code>, or
+<code>await PublicKeyCredential.isConditionalMediationAvailable()</code> resolves to <code>false</code>.</p>
+<p><strong>Behavior</strong>: The <code>startAssertion()</code> call is never made. The login page stays on the
+standard username/password form. The user logs in with credentials and proceeds to
+FIDO2 step 2 (if they have a registered device).</p>
+<p><strong>User experience</strong>: The user sees only the username and password fields. There is no
+passkey autofill in the browser's UI. No error is shown.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// login.xhtml — conditional check</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">onload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">PublicKeyCredential</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">PublicKeyCredential</span><span class="p">.</span><span class="nx">isConditionalMediationAvailable</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">startAssertion</span><span class="p">();</span><span class="w">  </span><span class="c1">// Conditional UI path</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Silent fallback — standard form is used</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;PublicKeyCredential not ConditionalMediationAvailable&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Recommendation</strong>: Display a subtle informational message such as
+<em>"Sign in faster with a passkey — upgrade your browser for the best experience."</em></p>
+<hr />
+<h3 id="fallback-2-no-passkeys-registered-empty-allowlist-cookie">Fallback 2 — No Passkeys Registered (Empty allowList Cookie)<a class="headerlink" href="#fallback-2-no-passkeys-registered-empty-allowlist-cookie" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: The <code>allowList</code> cookie is absent or empty because the user has never
+registered a passkey on this device/browser.</p>
+<p><strong>Behavior</strong>: <code>allowCredentials</code> is set to an empty list. The FIDO server may return
+an error when no credentials are found. The authentication script logs the event and
+falls back to username/password.</p>
+<p><strong>What the script does</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — prepareForStep, step 1</span>
+<span class="n">allowList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCookieValue</span><span class="p">()</span>  <span class="c1"># Returns [] if no cookie</span>
+<span class="n">assertionRequest</span><span class="o">.</span><span class="n">setAllowCredentials</span><span class="p">(</span><span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="n">allowList</span><span class="p">))</span>  <span class="c1"># Empty list</span>
+</code></pre></div>
+<p><strong>User experience</strong>: The browser may not show any passkey suggestions. The user falls
+back to typing their username and password normally. In step 2, if the user has
+registered FIDO devices on the server (not in the cookie), they are prompted on
+<code>passkeys.xhtml</code> to use a security key or platform authenticator.</p>
+<p><strong>Recommendation</strong>: After a successful username/password login, prompt the user to
+register a passkey: <em>"Add a passkey to sign in faster next time."</em></p>
+<hr />
+<h3 id="fallback-3-user-cancels-the-conditional-ui-prompt">Fallback 3 — User Cancels the Conditional UI Prompt<a class="headerlink" href="#fallback-3-user-cancels-the-conditional-ui-prompt" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: The user clicks the "Remember Me" checkbox or otherwise cancels the
+in-progress Conditional UI operation.</p>
+<p><strong>Behavior</strong>: The <code>AbortController</code> signals cancellation to the WebAuthn API, which
+rejects the promise with an <code>AbortError</code>. The catch handler logs the cancellation and
+allows the standard form to remain interactive.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// login.xhtml — checkRemembeMe</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">checkRemembeMe</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#rememberme&#39;</span><span class="p">).</span><span class="nx">is</span><span class="p">(</span><span class="s1">&#39;:checked&#39;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">usrname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;loginForm:username&quot;</span><span class="p">).</span><span class="nx">value</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">chkbx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#rememberme&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">usrname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">chkbx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Aborting this Conditional UI&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">authAbortController</span><span class="p">.</span><span class="nx">abort</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// Error handler</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;AbortError&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;This operation is canceled by user.&#39;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>User experience</strong>: No visible error. The user simply types their username and password
+in the form as usual.</p>
+<hr />
+<h3 id="fallback-4-authenticator-not-registered-invalidstateerror">Fallback 4 — Authenticator Not Registered (<code>InvalidStateError</code>)<a class="headerlink" href="#fallback-4-authenticator-not-registered-invalidstateerror" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: The user selects a passkey from autofill, but that credential ID is not
+registered in the FIDO server's database (e.g., the credential was deleted server-side
+or the cookie is stale).</p>
+<p><strong>Behavior</strong>: The WebAuthn API returns an <code>InvalidStateError</code>. The error is caught and
+logged. The login form remains active.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// login.xhtml — error handler</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;InvalidStateError&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s2">&quot;This authenticator is not registered for the account. &quot;</span><span class="w"> </span><span class="o">+</span>
+<span class="w">                  </span><span class="s2">&quot;Please try again with a registered authenticator.&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>User experience</strong>: The autofill attempt silently fails. The user should be shown a
+message such as: <em>"That passkey is no longer valid. Please sign in with your password,
+then re-register your passkey."</em></p>
+<p><strong>Recommended resolution</strong>:
+1. Guide the user to sign in with username/password
+2. Navigate them to device management to remove the stale passkey
+3. Re-register a new passkey on the current device</p>
+<hr />
+<h3 id="fallback-5-no-platform-authenticator-available">Fallback 5 — No Platform Authenticator Available<a class="headerlink" href="#fallback-5-no-platform-authenticator-available" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: The device has no biometric sensor or secure enclave, or the operating
+system does not expose a platform authenticator to the browser.</p>
+<p><strong>Behavior</strong>: The browser will not show platform passkeys in autofill. Cross-platform
+authenticators (security keys) may still appear if their credential IDs are in the
+<code>allowList</code> with transport hints <code>["usb", "ble", "nfc"]</code>.</p>
+<p><strong>Detection</strong>: Check <code>authenticatorAttachment</code> in the credential response —
+<code>"platform"</code> indicates a built-in authenticator was used, <code>"cross-platform"</code> indicates
+an external security key.</p>
+<p><strong>User experience</strong>: The passkey autofill may show only security key options, or may
+not appear at all. The standard form is the fallback.</p>
+<p><strong>Recommendation</strong>: Offer cross-platform authenticators as an alternative:
+<em>"Your device doesn't support passkeys. Use a security key or sign in with your
+password instead."</em></p>
+<hr />
+<h3 id="fallback-6-biometric-unavailable-biometric-locked-or-not-enrolled">Fallback 6 — Biometric Unavailable (Biometric Locked or Not Enrolled)<a class="headerlink" href="#fallback-6-biometric-unavailable-biometric-locked-or-not-enrolled" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: The user's device has a biometric sensor, but biometric authentication is
+not enrolled, or the sensor is temporarily locked (e.g., too many failed attempts).</p>
+<p><strong>Behavior</strong>: The OS may prompt the user to enter a PIN or pattern as an alternative
+to biometrics. If no fallback PIN is configured, the authentication will fail.</p>
+<p><strong>User experience</strong>: The user may see a system-level PIN prompt. If that also fails,
+the WebAuthn operation returns <code>NotAllowedError</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// login.xhtml — generic error handler</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; : &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Recommendation</strong>: Guide users to set up a PIN on their device as a backup:
+<em>"Set up a device PIN to use passkeys even when biometrics aren't available."</em></p>
+<hr />
+<h3 id="fallback-7-security-key-issues">Fallback 7 — Security Key Issues<a class="headerlink" href="#fallback-7-security-key-issues" title="Permanent link">#</a></h3>
+<p><strong>Trigger</strong>: A hardware security key (USB/NFC/BLE) fails to respond, is not present,
+or returns an error during assertion.</p>
+<p><strong>Behavior</strong>: The browser may time out waiting for the security key, or the user may
+dismiss the security key prompt. The WebAuthn API rejects with <code>NotAllowedError</code> or
+a timeout error.</p>
+<p><strong>Authenticator transports</strong> in the <code>allowList</code> guide the browser on how to contact
+the key:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public-key&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;transports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;usb&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;nfc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ble&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>User experience</strong>: The browser prompt disappears after timeout. The login form
+remains available.</p>
+<p><strong>Recommendation</strong>: Provide a visible "Use password instead" link below the passkey
+prompt so users are never stuck. For security keys, advise:
+<em>"Make sure your security key is plugged in and press its button when prompted."</em></p>
+<hr />
+<h3 id="fallback-summary-table">Fallback Summary Table<a class="headerlink" href="#fallback-summary-table" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Trigger</th>
+<th>Fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser unsupported</td>
+<td>No WebAuthn / No Conditional UI API</td>
+<td>Standard username/password form</td>
+</tr>
+<tr>
+<td>No passkeys registered</td>
+<td>Empty <code>allowList</code> cookie</td>
+<td>Username/password → optional FIDO step</td>
+</tr>
+<tr>
+<td>User cancels</td>
+<td>AbortController / checkbox click</td>
+<td>Standard form (no error shown)</td>
+</tr>
+<tr>
+<td>Stale credential</td>
+<td><code>InvalidStateError</code></td>
+<td>Password login + re-register passkey</td>
+</tr>
+<tr>
+<td>No platform authenticator</td>
+<td>Device lacks biometrics/secure enclave</td>
+<td>Security key or password</td>
+</tr>
+<tr>
+<td>Biometric unavailable</td>
+<td>Not enrolled or locked</td>
+<td>Device PIN prompt or password</td>
+</tr>
+<tr>
+<td>Security key failure</td>
+<td>Key absent, timeout, or error</td>
+<td>Password fallback</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">#</a></h2>
+<h3 id="conditional-ui-specific">Conditional UI-Specific<a class="headerlink" href="#conditional-ui-specific" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>No username enumeration</strong>: The <code>allowList</code> cookie contains only credential IDs —
+  never usernames or email addresses. An attacker reading the cookie cannot determine
+  the account owner.</li>
+<li><strong>Cookie integrity</strong>: If the <code>allowList</code> cookie is tampered with, the FIDO server will
+  reject credentials that do not match stored public keys. The cookie does not bypass
+  server-side verification.</li>
+<li><strong>Replay protection</strong>: Each WebAuthn assertion includes a server-generated challenge
+  that is verified server-side, preventing replay attacks.</li>
+<li><strong>Origin binding</strong>: Credentials are bound to the Relying Party ID (the domain). A
+  credential registered on <code>login.example.com</code> cannot be used on <code>attacker.example.net</code>.</li>
+</ul>
+<h3 id="fallback-path-security">Fallback Path Security<a class="headerlink" href="#fallback-path-security" title="Permanent link">#</a></h3>
+<p>Each fallback reduces the security level. Consider the following mitigations:</p>
+<table>
+<thead>
+<tr>
+<th>Fallback</th>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Password login</td>
+<td>Credential stuffing, phishing</td>
+<td>Rate limiting, MFA, breach detection</td>
+</tr>
+<tr>
+<td>Stale credential</td>
+<td>Orphaned credentials accumulating</td>
+<td>Periodic cleanup, notify user</td>
+</tr>
+<tr>
+<td>Security key absent</td>
+<td>Physical key loss</td>
+<td>Require backup MFA method at enrollment</td>
+</tr>
+<tr>
+<td>Biometric bypass to PIN</td>
+<td>PIN guessing</td>
+<td>Lock after N attempts (OS-level)</td>
+</tr>
+<tr>
+<td>AbortError / cancel</td>
+<td>None (user-initiated)</td>
+<td>None required</td>
+</tr>
+</tbody>
+</table>
+<h3 id="attestation-and-authenticator-trust">Attestation and Authenticator Trust<a class="headerlink" href="#attestation-and-authenticator-trust" title="Permanent link">#</a></h3>
+<p>Janssen supports three attestation modes (configured in <code>attestationMode</code>):</p>
+<ul>
+<li><code>disabled</code>: No attestation validation — accept any authenticator</li>
+<li><code>monitor</code>: Validate if available, but do not block if attestation is absent</li>
+<li><code>enforced</code>: Require valid attestation from FIDO-certified authenticators</li>
+</ul>
+<p>For high-security deployments, use <code>enforced</code> mode with the FIDO Metadata Service (MDS3)
+to restrict authentication to certified authenticators. See the
+<a href="../vendor-metadata/">Vendor Metadata guide</a> for details.</p>
+<h3 id="abortcontroller-security">AbortController Security<a class="headerlink" href="#abortcontroller-security" title="Permanent link">#</a></h3>
+<p>The global <code>authAbortController</code> in <code>webauthn.js</code> is initialized once per page load.
+Aborting it cancels the in-progress Conditional UI request cleanly. This prevents
+the browser from holding open a long-running passkey request that could interfere with
+the standard form submission.</p>
+<hr />
+<h2 id="user-experience-guidelines">User Experience Guidelines<a class="headerlink" href="#user-experience-guidelines" title="Permanent link">#</a></h2>
+<h3 id="messaging">Messaging<a class="headerlink" href="#messaging" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Recommended Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Passkey autofill shown</td>
+<td><em>(No message needed — browser handles it)</em></td>
+</tr>
+<tr>
+<td>Browser unsupported</td>
+<td>"For faster sign-in, upgrade to a browser that supports passkeys."</td>
+</tr>
+<tr>
+<td>No passkey on device</td>
+<td>"Sign in with your password, then add a passkey for next time."</td>
+</tr>
+<tr>
+<td>Stale passkey</td>
+<td>"That passkey is no longer valid. Please use your password."</td>
+</tr>
+<tr>
+<td>After successful registration</td>
+<td>"Passkey added! You'll be able to sign in faster next time."</td>
+</tr>
+<tr>
+<td>Security key prompt</td>
+<td>"Insert your security key and press its button."</td>
+</tr>
+</tbody>
+</table>
+<h3 id="flow-design-principles">Flow Design Principles<a class="headerlink" href="#flow-design-principles" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Never block</strong>: Always offer a non-passkey alternative. The standard form must
+   remain functional regardless of Conditional UI state.</li>
+<li><strong>Silent fallback</strong>: Browser-level failures (unsupported, cancelled) should not
+   show error banners. The form simply continues to work normally.</li>
+<li><strong>Visible escape hatch</strong>: For security key prompts or biometric dialogs, provide
+   a clear "Use password instead" option.</li>
+<li><strong>Progressive registration</strong>: After a password login, invite users to register a
+   passkey — do not require it.</li>
+<li><strong>Consistent UI</strong>: The username field should always be visible. Conditional UI
+   works alongside it, not in place of it.</li>
+</ol>
+<hr />
+<h2 id="implementation-guide-for-relying-parties">Implementation Guide for Relying Parties<a class="headerlink" href="#implementation-guide-for-relying-parties" title="Permanent link">#</a></h2>
+<h3 id="step-1-registration-writing-the-allowlist-cookie">Step 1 — Registration (Writing the allowList Cookie)<a class="headerlink" href="#step-1-registration-writing-the-allowlist-cookie" title="Permanent link">#</a></h3>
+<p>When a user registers a new passkey, persist the credential to the <code>allowList</code> cookie.
+Use the <code>Fido2ExternalAuthenticator.py</code> as a reference. The key points:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># After successful attestation:</span>
+<span class="n">new_credential</span> <span class="o">=</span> <span class="n">attestationResponse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;credential&quot;</span><span class="p">)</span>
+<span class="c1"># credential contains: { &quot;id&quot;: &quot;...&quot;, &quot;type&quot;: &quot;public-key&quot;, &quot;transports&quot;: [...] }</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">persistCookie</span><span class="p">(</span><span class="n">new_credential</span><span class="p">)</span>
+</code></pre></div>
+<p>Cookie requirements:
+- <code>Secure=true</code> (HTTPS only)
+- <code>HttpOnly=true</code> (no JavaScript access)
+- <code>SameSite=Strict</code> or <code>Lax</code> (CSRF protection)
+- 7-day expiry is a reasonable default; adjust based on your security policy</p>
+<h3 id="step-2-authentication-starting-conditional-ui">Step 2 — Authentication (Starting Conditional UI)<a class="headerlink" href="#step-2-authentication-starting-conditional-ui" title="Permanent link">#</a></h3>
+<p>On the login page:</p>
+<ol>
+<li>Add <code>autocomplete="username webauthn"</code> to the username input</li>
+<li>On page load, <code>await PublicKeyCredential.isConditionalMediationAvailable()</code> — this is
+   a static async method (WebAuthn Level 3); it must be called and awaited, not just checked
+   for existence</li>
+<li>If supported, call <code>webauthn.getAssertionConditional(assertionRequest)</code> with
+   <code>mediation: "conditional"</code> and an <code>AbortController</code> signal</li>
+<li>Handle the promise result by submitting <code>tokenResponse</code> and <code>authMethod</code> to the server</li>
+</ol>
+<h3 id="step-3-server-side-verification">Step 3 — Server-Side Verification<a class="headerlink" href="#step-3-server-side-verification" title="Permanent link">#</a></h3>
+<p>The FIDO server verifies the authenticator response and returns the <code>username</code> associated
+with the credential. Log the user in using that username — do not rely on any
+client-provided username for Conditional UI flows.</p>
+<h3 id="step-4-configure-assertionrequest-correctly">Step 4 — Configure assertionRequest Correctly<a class="headerlink" href="#step-4-configure-assertionrequest-correctly" title="Permanent link">#</a></h3>
+<p>For Conditional UI, the assertion request:
+- <strong>Must</strong> set <code>rpId</code> to your domain
+- <strong>Should</strong> set <code>allowCredentials</code> from the <code>allowList</code> cookie (can be empty)
+- <strong>Should</strong> set <code>userVerification</code> to <code>"preferred"</code> or <code>"required"</code>
+- <strong>Must not</strong> set a <code>username</code> (Conditional UI is usernameless)</p>
+<p>For standard FIDO authentication (step 2 of the non-Conditional UI flow):
+- <strong>Must</strong> set <code>username</code> to identify which credentials to allow
+- <strong>Must</strong> set <code>rpId</code></p>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<h3 id="passkey-autofill-does-not-appear">Passkey Autofill Does Not Appear<a class="headerlink" href="#passkey-autofill-does-not-appear" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser version</td>
+<td>Verify Chrome 108+, Safari 16+, Edge 108+, or Firefox 122+</td>
+</tr>
+<tr>
+<td><code>autocomplete</code> attribute</td>
+<td>Confirm <code>autocomplete="username webauthn"</code> on the input</td>
+</tr>
+<tr>
+<td><code>allowList</code> cookie</td>
+<td>Open DevTools → Application → Cookies; verify <code>allowList</code> exists</td>
+</tr>
+<tr>
+<td><code>assertion_request</code></td>
+<td>Check the page source; <code>fido2_assertion_request</code> must not be <code>null</code></td>
+</tr>
+<tr>
+<td>HTTPS</td>
+<td>Conditional UI only works on HTTPS (or <code>localhost</code>)</td>
+</tr>
+<tr>
+<td><code>isConditionalMediationAvailable</code></td>
+<td>Run <code>await PublicKeyCredential.isConditionalMediationAvailable()</code> in console — must resolve to <code>true</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication-fails-after-passkey-selection">Authentication Fails After Passkey Selection<a class="headerlink" href="#authentication-fails-after-passkey-selection" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Credential exists server-side</td>
+<td>Verify via FIDO admin tools or logs</td>
+</tr>
+<tr>
+<td>Cookie is current</td>
+<td>Old cookie entries cause <code>InvalidStateError</code>; clear and re-register</td>
+</tr>
+<tr>
+<td>RP ID mismatch</td>
+<td><code>rpId</code> in assertion request must match the registered domain exactly</td>
+</tr>
+<tr>
+<td>Clock skew</td>
+<td>Server clock skew &gt; 5 minutes causes challenge validation failure</td>
+</tr>
+<tr>
+<td>Challenge reuse</td>
+<td>Each assertion options call generates a fresh challenge — do not cache</td>
+</tr>
+</tbody>
+</table>
+<h3 id="standard-login-form-broken-after-conditional-ui-abort">Standard Login Form Broken After Conditional UI Abort<a class="headerlink" href="#standard-login-form-broken-after-conditional-ui-abort" title="Permanent link">#</a></h3>
+<p>The <code>AbortController</code> is a global singleton per page load. If it has already been
+aborted, a new <code>credentials.get()</code> call using the same signal will reject immediately.</p>
+<p><strong>Resolution</strong>: After aborting, do not attempt to restart Conditional UI in the same
+page session. The standard form submit path does not use the <code>AbortController</code> and will
+work normally.</p>
+<h3 id="token_response-is-null-on-the-server"><code>token_response</code> Is Null on the Server<a class="headerlink" href="#token_response-is-null-on-the-server" title="Permanent link">#</a></h3>
+<p>This means the <code>fido2_form</code> was not submitted via the Conditional UI path. Check:
+1. That <code>document.getElementById('tokenResponse').value</code> is being set before submit
+2. That the form action points to the correct <code>postlogin.htm</code> endpoint
+3. Browser console for JavaScript errors in <code>startAssertion()</code></p>
+<h3 id="high-fallback-rate-in-metrics">High Fallback Rate in Metrics<a class="headerlink" href="#high-fallback-rate-in-metrics" title="Permanent link">#</a></h3>
+<p>If the Fido2 metrics service reports a high fallback rate, investigate:
+1. Browser compatibility — are users on unsupported browsers?
+2. Cookie persistence — are cookies being blocked or cleared?
+3. Registration success rate — are enrollments completing successfully?
+4. Server-side errors in FIDO2 logs (see <a href="../logs/">Logs guide</a>)</p>
+<hr />
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../passwordlessLoginExperience/">Passwordless Login Experience</a> — sequence diagrams
+  and quick-start guide for usernameless login</li>
+<li><a href="../config/">FIDO2 Configuration</a> — server-side configuration parameters including
+  attestation mode, hints, and algorithm support</li>
+<li><a href="../vendor-metadata/">Vendor Metadata</a> — FIDO MDS3 integration and attestation
+  validation</li>
+<li><a href="../types-of-creds/">Types of Credentials</a> — authenticator hints and credential types</li>
+<li><a href="../logs/">FIDO Logs</a> — logging configuration for FIDO2 server diagnostics</li>
+<li><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">Fido2ExternalAuthenticator.py</a> — reference implementation</li>
+<li><a href="https://passkeys.dev/device-support/">passkeys.dev Device Support</a> — live browser and
+  OS compatibility matrix</li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 26, 2026 12:02:50 UTC"><span class="timeago" datetime="2026-03-26T12:02:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 26, 2026 12:02:50 UTC">2026-03-26</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 26, 2026 12:02:50 UTC"><span class="timeago" datetime="2026-03-26T12:02:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 26, 2026 12:02:50 UTC">2026-03-26</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../js/timeago.min.js"></script>
+      
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<img referrerpolicy="no-referrer-when-downgrade"
+     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
+     width="0" height="0"/>
+
+
+  <script src="../../../assets/js/reo.js" defer></script>
+
+
+  </body>
+</html>
