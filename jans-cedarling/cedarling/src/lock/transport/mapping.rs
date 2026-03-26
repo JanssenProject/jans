@@ -100,12 +100,14 @@ impl TryFrom<CedarlingLogEntry> for LockServerLogEntry {
 
 #[cfg(test)]
 mod test {
+    use std::collections::HashSet;
+
     use super::*;
-    use crate::log::{
-        BaseLogEntry, DecisionLogEntry, Decision, DiagnosticsSummary, LogTokensInfo, PushedDataInfo,
-    };
-    use crate::log::log_strategy::LogEntryWithClientInfo;
     use crate::common::app_types::{ApplicationName, PdpID};
+    use crate::log::log_strategy::LogEntryWithClientInfo;
+    use crate::log::{
+        BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo, PushedDataInfo,
+    };
 
     /// Verifies that a real `DecisionLogEntry` (wrapped in `LogEntryWithClientInfo`)
     /// is correctly serialized, deserialized into `CedarlingLogEntry`, and then mapped
@@ -127,7 +129,7 @@ mod test {
             tokens: LogTokensInfo::empty(),
             decision_time_micro_sec: 42,
             diagnostics: DiagnosticsSummary {
-                reason: Default::default(),
+                reason: HashSet::default(),
                 errors: Vec::new(),
             },
             pushed_data: Some(PushedDataInfo {
@@ -139,8 +141,7 @@ mod test {
         let app_name = ApplicationName::from("my_test_app".to_string());
 
         // Wrap in LogEntryWithClientInfo — this is what the LockService actually receives
-        let wrapped =
-            LogEntryWithClientInfo::from_loggable(decision_entry, pdp_id, Some(app_name));
+        let wrapped = LogEntryWithClientInfo::from_loggable(decision_entry, pdp_id, Some(app_name));
 
         // Serialize exactly as LockService.log_any() does
         let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped entry");
@@ -159,7 +160,10 @@ mod test {
             cedarling_entry.principal,
             vec!["Jans::User", "Jans::Workload"]
         );
-        assert!(!cedarling_entry.pdp_id.is_empty(), "pdp_id should not be empty");
+        assert!(
+            !cedarling_entry.pdp_id.is_empty(),
+            "pdp_id should not be empty"
+        );
 
         // The extra fields should contain diagnostics, decision_time, etc.
         assert!(
@@ -167,7 +171,9 @@ mod test {
             "extra should contain diagnostics"
         );
         assert!(
-            cedarling_entry.extra.contains_key("decision_time_micro_sec"),
+            cedarling_entry
+                .extra
+                .contains_key("decision_time_micro_sec"),
             "extra should contain decision_time_micro_sec"
         );
         assert!(
@@ -193,10 +199,7 @@ mod test {
             Some("Jans::User, Jans::Workload")
         );
         // lock_client_id should be extracted from extra into client_id
-        assert_eq!(
-            lock_entry.client_id.as_deref(),
-            Some("lock-client-123")
-        );
+        assert_eq!(lock_entry.client_id.as_deref(), Some("lock-client-123"));
         // Remaining extra fields (diagnostics, decision_time, etc.) go into context_information
         let ctx = lock_entry
             .context_information
@@ -207,7 +210,7 @@ mod test {
         assert!(ctx.get("pushed_data").is_some());
     }
 
-    /// Verifies that a DecisionLogEntry with a DENY decision maps correctly.
+    /// Verifies that a [`DecisionLogEntry`] with a DENY decision maps correctly.
     #[test]
     fn deny_decision_maps_correctly() {
         let base = BaseLogEntry::new_decision(crate::log::gen_uuid7());
@@ -223,7 +226,7 @@ mod test {
             tokens: LogTokensInfo::empty(),
             decision_time_micro_sec: 100,
             diagnostics: DiagnosticsSummary {
-                reason: Default::default(),
+                reason: HashSet::default(),
                 errors: Vec::new(),
             },
             pushed_data: None,
@@ -231,14 +234,39 @@ mod test {
 
         let pdp_id = PdpID::new();
         let wrapped = LogEntryWithClientInfo::from_loggable(entry, pdp_id, None);
-        let json_str = serde_json::to_string(&wrapped).unwrap();
-        let cedarling: CedarlingLogEntry = serde_json::from_str(&json_str).unwrap();
-        let lock_entry = LockServerLogEntry::try_from(cedarling).unwrap();
+        let json_str = serde_json::to_string(&wrapped).expect("serialize wrapped DecisionLogEntry");
+        let cedarling: CedarlingLogEntry =
+            serde_json::from_str(&json_str).expect("deserialize to CedarlingLogEntry");
+        let lock_entry = LockServerLogEntry::try_from(cedarling)
+            .expect("convert CedarlingLogEntry to LockServerLogEntry");
 
         assert_eq!(lock_entry.decision_result, "DENY");
         assert_eq!(lock_entry.principal_id, None); // empty principal list
         assert_eq!(lock_entry.client_id, None); // no lock_client_id
-        assert_eq!(lock_entry.service, Some("".to_string())); // no app_name → empty string
+        assert_eq!(lock_entry.service, Some(String::new())); // no app_name → empty string
         assert_eq!(lock_entry.severity_level, None); // Decision logs have no level
+    }
+
+    #[test]
+    fn mapping_fails_when_required_field_is_empty() {
+        let cedarling = CedarlingLogEntry {
+            timestamp: "2026-03-23T12:00:00Z".to_string(),
+            log_kind: "Decision".to_string(),
+            decision: "ALLOW".to_string(),
+            action: String::new(),
+            level: None,
+            principal: vec![],
+            resource: "Jans::Resource::\"doc\"".to_string(),
+            application_id: "my_test_app".to_string(),
+            pdp_id: "pdp-1".to_string(),
+            extra: HashMap::new(),
+        };
+
+        let err = LockServerLogEntry::try_from(cedarling)
+            .expect_err("empty action must fail LockServerLogEntry mapping");
+        assert!(
+            matches!(err, MappingValidationError::MissingField),
+            "expected MissingField when a required input field is empty"
+        );
     }
 }
