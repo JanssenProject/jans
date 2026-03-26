@@ -234,6 +234,7 @@ nav:
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata: janssen-server/fido/vendor-metadata.md
     - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
     - Types of Credentials: janssen-server/fido/types-of-creds.md
   - SAML:
     - Shibboleth IDP:
@@ -470,7 +471,7 @@ nav:
     - VM Logs: janssen-server/vm-ops/logs.md
     - Kubernetes Logs: janssen-server/kubernetes-ops/logs.md
   - Debugging:
-    - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+    - Script Debugging: janssen-server/developer/scripts/interception-scripts-debug.md
     - Remote Debugging: contribute/development/remote-debugging.md
   - Health Checks:
     - Kubernetes Health Check: janssen-server/kubernetes-ops/health-check.md

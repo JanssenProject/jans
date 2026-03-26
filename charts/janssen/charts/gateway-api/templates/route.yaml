@@ -1,5 +1,8 @@
 {{- $fullName := include "gateway-api.fullname" . -}}
 {{- $namespace := .Release.Namespace -}}
+{{- $gatewayNamespace := .Values.routes.gatewayNamespace | default $namespace -}}
+{{- $httpSection := .Values.routes.httpSectionName | default "http" -}}
+{{- $httpsSection := .Values.routes.httpsSectionName | default "https" -}}
 {{- $authSvc := index .Values.global "auth-server" "authServerServiceName" -}}
 {{- $configSvc := index .Values.global "config-api" "configApiServerServiceName" -}}
 {{- $fido2Svc := .Values.global.fido2.fido2ServiceName -}}
@@ -27,6 +30,7 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gateway.name }}
+    namespace: {{ $gatewayNamespace }}
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
@@ -233,7 +237,8 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gateway.name }}
-    sectionName: https
+    namespace: {{ $gatewayNamespace }}
+    sectionName: {{ $httpsSection }}
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
@@ -321,7 +326,8 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gateway.name }}
-    sectionName: http
+    namespace: {{ $gatewayNamespace }}
+    sectionName: {{ $httpSection }}
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
@@ -419,7 +425,8 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.gateway.name }}
-    sectionName: https
+    namespace: {{ $gatewayNamespace }}
+    sectionName: {{ $httpsSection }}
   hostnames:
   - {{ .Values.global.fqdn | quote }}
   rules:
