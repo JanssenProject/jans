@@ -372,3 +372,38 @@ jobs:
           if [[ -n $images ]]; then
             cosign sign --yes -a author=JanssenProject ${images} || echo "Failed to sign images"
           fi
+      - name: Run Trivy vulnerability scanner (All-in-One only)
+        if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/all-in-one:${{ steps.prep.outputs.version }}
+          format: 'json'
+          output: 'trivy-report.json'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Generate Trivy Table Report (All-in-One only)
+        if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/all-in-one:${{ steps.prep.outputs.version }}
+          format: 'table'
+          output: 'trivy-report.txt'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+
+      - name: Sign Trivy Reports
+        if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build)
+        run: |
+          cosign sign-blob --yes --output-signature trivy-report.json.sig trivy-report.json
+          cosign sign-blob --yes --output-signature trivy-report.txt.sig trivy-report.txt
+
+      - name: Upload Scan Results to Release
+        if: matrix.docker-images == 'all-in-one' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            trivy-report.json
+            trivy-report.json.sig
+            trivy-report.txt
+            trivy-report.txt.sig
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
