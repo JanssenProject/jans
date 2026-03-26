@@ -365,8 +365,7 @@ public class ClientsResource extends ConfigBaseResource {
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
             @NotNull String jsonPatchString) throws EncryptionException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client details to be patched - inum:{}, jsonPatchString:{}", escapeLog(inum),
-                    escapeLog(jsonPatchString));
+            logger.debug("Client details to be patched - inum:{}", escapeLog(inum));
         }
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
