@@ -15691,19 +15691,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
