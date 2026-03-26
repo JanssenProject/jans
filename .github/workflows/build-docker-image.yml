@@ -135,11 +135,6 @@ jobs:
         run: |
           BUILD=true
           ALL_SERVICES="docker-jans-auth-server docker-jans-cloudtools docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter docker-jans-link docker-jans-casa docker-jans-all-in-one docker-jans-shibboleth cedarling-flask-sidecar"
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "Tag detected: ${{ github.ref }}. Forcing build for ${{ matrix.docker-images }}"
-            echo "build=${BUILD}" >> $GITHUB_OUTPUT
-            exit 0
-          fi
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             SELECTED=""
             if [[ "${{ inputs.build_all }}" == "true" ]]; then
@@ -190,6 +185,11 @@ jobs:
               echo "build=${BUILD}" >> $GITHUB_OUTPUT
             fi
           fi
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "Tag detected: ${{ github.ref }}. Forcing build for ${{ matrix.docker-images }}"
+            echo "build=${BUILD}" >> $GITHUB_OUTPUT
+            exit 0
+          fi          
 
       - name: Install dependencies
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
