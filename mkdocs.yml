@@ -234,6 +234,7 @@ nav:
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata: janssen-server/fido/vendor-metadata.md
     - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
     - Types of Credentials: janssen-server/fido/types-of-creds.md
   - SAML:
     - Shibboleth IDP:
