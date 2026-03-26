@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var bootstrapConfig string = `
 {
         "CEDARLING_APPLICATION_NAME": "TestApp",
         "CEDARLING_POLICY_STORE_ID": "a1bf93115de86de760ee0bea1d529b521489e5a11747",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "never",
         "CEDARLING_LOG_TYPE": "off",
         "CEDARLING_LOG_TTL": 60,
         "CEDARLING_LOG_LEVEL": "DEBUG",
@@ -116,107 +114,6 @@ func loadTestConfig(configUpdate func(conf map[string]any)) (map[string]any, err
 		configUpdate(config)
 	}
 	return config, nil
-}
-
-func TestAuthorizeSuccess(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   accessToken,
-			"id_token":       idToken,
-			"userinfo_token": userinfoToken,
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-
-	result, err := instance.Authorize(request)
-	if err != nil {
-		t.Fatalf("Authorization failed: %v", err)
-	}
-
-	if !result.Decision {
-		t.Errorf("Expected allow decision, got DENY")
-	}
-
-	if result.Person.Decision() != DecisionAllow {
-		t.Errorf("Expected allow decision, got DENY")
-	}
-	if !reflect.DeepEqual(result.Person.Reason(), []string{"444da5d85403f35ea76519ed1a18a33989f855bf1cf8"}) {
-		t.Errorf("Expected reason for person to be 444da5d85403f35ea76519ed1a18a33989f855bf1cf8, got %v", result.Person.Reason())
-	}
-
-	if result.Workload.Decision() != DecisionAllow {
-		t.Errorf("Expected allow decision, got %s", result.Workload.Decision().ToString())
-	}
-	if !reflect.DeepEqual(result.Workload.Reason(), []string{"840da5d85403f35ea76519ed1a18a33989f855bf1cf8"}) {
-		t.Errorf("Expected reason for workload to be 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, got %v", result.Workload.Reason())
-	}
-}
-
-func BenchmarkAuthorize(b *testing.B) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		b.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		b.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   accessToken,
-			"id_token":       idToken,
-			"userinfo_token": userinfoToken,
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-	b.ResetTimer()
-	result, err := instance.Authorize(request)
-	if err != nil {
-		b.Fatalf("Authorization failed: %v", err)
-	}
-	if !result.Decision {
-		b.Fatalf("Decision false")
-	}
 }
 
 func BenchmarkAuthorizeUnsigned(b *testing.B) {
@@ -397,46 +294,6 @@ func TestAuthorizeUnsignedSuccess(t *testing.T) {
 
 }
 
-func TestAuthorizeValidationError(t *testing.T) {
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		t.Fatalf("Failed to create Cedarling instance: %v", err)
-	}
-
-	// Invalid resource - org_id should be string but we set it to int
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  1, // Should be string
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   accessToken,
-			"id_token":       idToken,
-			"userinfo_token": userinfoToken,
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		Context:  nil,
-	}
-
-	_, err = instance.Authorize(request)
-	if err == nil {
-		t.Fatal("Expected validation error, got nil")
-	}
-}
-
 func ExampleNewCedarling() {
 	// load bootstrap config
 	config, err := loadTestConfig(nil)
@@ -457,49 +314,6 @@ func ExampleNewCedarlingWithEnv() {
 		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
 	}
 	instance.ShutDown()
-}
-
-func ExampleCedarling_Authorize() {
-	// load bootstrap configuration
-	config, err := loadTestConfig(nil)
-	if err != nil {
-		fmt.Printf("Failed to load bootstrap config: %v\n", err)
-	}
-
-	instance, err := NewCedarling(config)
-	if err != nil {
-		fmt.Printf("Failed to create Cedarling instance: %v\n", err)
-	}
-
-	resource := EntityData{
-		CedarMapping: CedarEntityMapping{
-			EntityType: "Jans::Issue",
-			ID:         "random_id",
-		},
-		Payload: map[string]any{
-			"org_id":  "some_long_id",
-			"country": "US",
-		},
-	}
-
-	request := Request{
-		Tokens: map[string]string{
-			"access_token":   "accessTokenJWT",
-			"id_token":       "idTokenJWT",
-			"userinfo_token": "userinfoTokenJWT",
-		},
-		Action:   "Jans::Action::\"Update\"",
-		Resource: resource,
-		// will be mapped to {}
-		Context: nil,
-	}
-
-	result, err := instance.Authorize(request)
-	if err != nil {
-		fmt.Printf("Authorization failed: %v\n", err)
-	}
-	fmt.Println(result.Decision)
-
 }
 
 func ExampleCedarling_AuthorizeUnsigned() {
@@ -584,17 +398,12 @@ func ExampleCedarling_GetLogsByTag() {
 // getMultiIssuerConfig returns configuration for multi-issuer tests
 func getMultiIssuerConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"CEDARLING_APPLICATION_NAME":                     "TestApp",
-		"CEDARLING_POLICY_STORE_ID":                      "a1bf93115de86de760ee0bea1d529b521489e5a11747",
-		"CEDARLING_JWT_SIG_VALIDATION":                   "disabled",
-		"CEDARLING_JWT_STATUS_VALIDATION":                "disabled",
-		"CEDARLING_ID_TOKEN_TRUST_MODE":                  "never",
-		"CEDARLING_POLICY_STORE_LOCAL_FN":                "../../test_files/policy-store-multi-issuer-test.yaml",
-		"CEDARLING_AUTHORIZATION_USE_WORKLOAD_PRINCIPAL": "false",
-		"CEDARLING_AUTHORIZATION_USE_USER_PRINCIPAL":     "false",
-		"CEDARLING_USER_AUTHZ":                           "enabled",
-		"CEDARLING_WORKLOAD_AUTHZ":                       "enabled",
-		"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED":   []string{"HS256"},
+		"CEDARLING_APPLICATION_NAME":                   "TestApp",
+		"CEDARLING_POLICY_STORE_ID":                    "a1bf93115de86de760ee0bea1d529b521489e5a11747",
+		"CEDARLING_JWT_SIG_VALIDATION":                 "disabled",
+		"CEDARLING_JWT_STATUS_VALIDATION":              "disabled",
+		"CEDARLING_POLICY_STORE_LOCAL_FN":              "../../test_files/policy-store-multi-issuer-test.yaml",
+		"CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": []string{"HS256"},
 	}
 }
 
@@ -731,5 +540,307 @@ func TestValidationGracefulDegradationInvalidToken(t *testing.T) {
 	}
 	if result.RequestID == "" {
 		t.Error("request_id should be present")
+	}
+}
+
+// TestDataAPIPushAndGetCtx tests basic push and get operations
+func TestDataAPIPushAndGetCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data without TTL
+	value := map[string]interface{}{
+		"level":   "premium",
+		"country": "US",
+	}
+	err = instance.PushDataCtx("user_profile", value, nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get data
+	resultProfile, err := instance.GetDataCtx("user_profile")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if resultProfile == nil {
+		t.Fatal("Expected data to be present")
+	}
+
+	// Test TTL expiration
+	ttlValue := map[string]interface{}{
+		"temp": "data",
+	}
+	// Push with 100ms TTL
+	d := 100 * time.Millisecond
+	err = instance.PushDataCtx("temp_key", ttlValue, &d)
+	if err != nil {
+		t.Fatalf("Failed to push data with TTL: %v", err)
+	}
+
+	// Verify data exists immediately
+	resultTemp, errTemp := instance.GetDataCtx("temp_key")
+	if errTemp != nil {
+		t.Fatalf("Failed to get data: %v", errTemp)
+	}
+	if resultTemp == nil {
+		t.Fatal("Expected data to be present immediately after push")
+	}
+
+	// Wait for TTL to expire (200ms)
+	time.Sleep(200 * time.Millisecond)
+
+	// Verify data is expired
+	resultTemp, errTemp = instance.GetDataCtx("temp_key")
+	if errTemp != nil {
+		t.Fatalf("Failed to get data: %v", errTemp)
+	}
+	if resultTemp != nil {
+		t.Fatal("Expected data to be expired after TTL")
+	}
+
+	// Verify value structure from original result
+	resultMap, ok := resultProfile.(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected result to be a map, got %T", resultProfile)
+	}
+	if resultMap["level"] != "premium" {
+		t.Errorf("Expected level to be 'premium', got %v", resultMap["level"])
+	}
+}
+
+// TestDataAPIGetDataEntryCtx tests getting data with metadata
+func TestDataAPIGetDataEntryCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data
+	err = instance.PushDataCtx("test_key", "test_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get entry with metadata
+	entry, err := instance.GetDataEntryCtx("test_key")
+	if err != nil {
+		t.Fatalf("Failed to get data entry: %v", err)
+	}
+	if entry.Key == "" {
+		t.Fatal("Expected entry to be present")
+	}
+
+	if entry.Key != "test_key" {
+		t.Errorf("Expected key to be 'test_key', got %v", entry.Key)
+	}
+	if entry.CreatedAt == "" {
+		t.Error("Expected created_at to be set")
+	}
+}
+
+// TestDataAPIRemoveDataCtx tests removing data
+func TestDataAPIRemoveDataCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push data
+	err = instance.PushDataCtx("to_remove", "value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Remove data
+	removed, err := instance.RemoveDataCtx("to_remove")
+	if err != nil {
+		t.Fatalf("Failed to remove data: %v", err)
+	}
+	if !removed {
+		t.Error("Expected remove to return true")
+	}
+
+	// Verify it's gone
+	result, err := instance.GetDataCtx("to_remove")
+	if err != nil {
+		t.Fatalf("Failed to get data: %v", err)
+	}
+	if result != nil {
+		t.Error("Expected data to be removed")
+	}
+}
+
+// TestDataAPIClearDataCtx tests clearing all data
+func TestDataAPIClearDataCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Push multiple entries
+	err = instance.PushDataCtx("key1", "value1", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+	err = instance.PushDataCtx("key2", "value2", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Clear all data
+	err = instance.ClearDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+
+	// Verify all data is gone
+	stats, err := instance.GetStatsCtx()
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+	if stats.EntryCount != 0 {
+		t.Errorf("Expected entry count to be 0, got %v", stats.EntryCount)
+	}
+}
+
+// TestDataAPIListDataCtx tests listing all data entries
+func TestDataAPIListDataCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Clear any existing data
+	err = instance.ClearDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+
+	// Push multiple entries
+	err = instance.PushDataCtx("list_key1", "value1", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+	err = instance.PushDataCtx("list_key2", "value2", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// List all entries
+	entries, err := instance.ListDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to list data: %v", err)
+	}
+
+	if len(entries) != 2 {
+		t.Errorf("Expected 2 entries, got %v", len(entries))
+	}
+}
+
+// TestDataAPIGetStatsCtx tests getting data store statistics
+func TestDataAPIGetStatsCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	// Clear and add some data
+	err = instance.ClearDataCtx()
+	if err != nil {
+		t.Fatalf("Failed to clear data: %v", err)
+	}
+	err = instance.PushDataCtx("stats_key", "stats_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data: %v", err)
+	}
+
+	// Get stats
+	stats, err := instance.GetStatsCtx()
+	if err != nil {
+		t.Fatalf("Failed to get stats: %v", err)
+	}
+
+	if stats.EntryCount != 1 {
+		t.Errorf("Expected entry count to be 1, got %v", stats.EntryCount)
+	}
+	if stats.MaxEntries == 0 {
+		t.Error("Expected max_entries to be set")
+	}
+}
+
+// TestDataAPIInstanceIsolationCtx tests that data is isolated between instances
+func TestDataAPIInstanceIsolationCtx(t *testing.T) {
+	config, err := loadTestConfig(nil)
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+
+	instance1, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create first Cedarling instance: %v", err)
+	}
+	defer instance1.ShutDown()
+
+	instance2, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create second Cedarling instance: %v", err)
+	}
+	defer instance2.ShutDown()
+
+	// Push data to instance1
+	err = instance1.PushDataCtx("isolated_key", "instance1_value", nil)
+	if err != nil {
+		t.Fatalf("Failed to push data to instance1: %v", err)
+	}
+
+	// Verify data is NOT in instance2
+	result, err := instance2.GetDataCtx("isolated_key")
+	if err != nil {
+		t.Fatalf("Failed to get data from instance2: %v", err)
+	}
+	if result != nil {
+		t.Error("Data should be isolated between instances")
+	}
+
+	// Verify data IS in instance1
+	result, err = instance1.GetDataCtx("isolated_key")
+	if err != nil {
+		t.Fatalf("Failed to get data from instance1: %v", err)
+	}
+	if result == nil {
+		t.Error("Data should be present in instance1")
 	}
 }

@@ -92,12 +92,12 @@ public class Fido2MetricsAggregationScheduler {
             Consumer<Fido2MetricsService> aggregationTask) throws JobExecutionException {
         Logger log = LoggerFactory.getLogger(Fido2MetricsAggregationScheduler.class);
         try {
-            Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
+            Fido2MetricsService metricsSvc = (Fido2MetricsService) context.getJobDetail()
                 .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
             Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
                 .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
             
-            if (metricsService == null || scheduler == null) {
+            if (metricsSvc == null || scheduler == null) {
                 return;
             }
             
@@ -107,27 +107,24 @@ public class Fido2MetricsAggregationScheduler {
             }
 
             // In cluster mode, try to start periodic lock updates
-            // If lock updates fail, we may have lost the lock - return early to prevent duplicate aggregation
             ScheduledFuture<?> updateTask = initializeClusterLockUpdates(scheduler, jobType, log);
             
-            // In cluster mode, if we couldn't start lock updates, we likely lost the lock
-            // Return early to prevent duplicate aggregation across nodes
+            // If we're in cluster mode but couldn't start lock updates (e.g. ou=node not configured),
+            // run aggregation anyway as single-node fallback instead of skipping
             if (scheduler.isClusterEnvironment && updateTask == null) {
-                log.warn("Skipping {} aggregation - failed to acquire/maintain cluster lock", jobType);
-                return;
+                log.info("FIDO2 metrics: cluster lock unavailable, proceeding with {} aggregation (single-node fallback)", jobType);
             }
             
             try {
-                aggregationTask.accept(metricsService);
+                aggregationTask.accept(metricsSvc);
             } finally {
                 if (updateTask != null) {
                     updateTask.cancel(false);
                 }
             }
         } catch (Exception e) {
-            String errorMsg = String.format("Failed to execute %s aggregation job: %s", jobType, e.getMessage());
-            log.error(errorMsg, e);
-            throw new JobExecutionException(errorMsg, e);
+            throw new JobExecutionException(
+                String.format("Failed to execute %s aggregation job: %s", jobType, e.getMessage()), e);
         }
     }
     
@@ -156,7 +153,7 @@ public class Fido2MetricsAggregationScheduler {
         } catch (Exception e) {
             log.warn("Cluster lock updates failed for {} aggregation, running in single-node mode: {}", 
                 jobType, e.getMessage());
-            log.debug("Exception during lock update initialization: {}", e.getMessage());
+            log.debug("Exception during lock update initialization", e);
             return null;
         }
     }
@@ -171,13 +168,13 @@ public class Fido2MetricsAggregationScheduler {
         private static final Logger log = LoggerFactory.getLogger(HourlyAggregationJob.class);
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
-            executeAggregationJob(context, "hourly", metricsService -> {
+            executeAggregationJob(context, "hourly", svc -> {
                 // Use UTC timezone to align with FIDO2 services
                 LocalDateTime previousHour = ZonedDateTime.now(ZoneId.of("UTC"))
                     .minusHours(1)
                     .truncatedTo(ChronoUnit.HOURS)
                     .toLocalDateTime();
-                metricsService.createHourlyAggregation(previousHour);
+                svc.createHourlyAggregation(previousHour);
                 log.info("Hourly aggregation completed for: {}", previousHour);
             });
         }
@@ -191,13 +188,13 @@ public class Fido2MetricsAggregationScheduler {
         private static final Logger log = LoggerFactory.getLogger(DailyAggregationJob.class);
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
-            executeAggregationJob(context, "daily", metricsService -> {
+            executeAggregationJob(context, "daily", svc -> {
                 // Use UTC timezone to align with FIDO2 services
                 LocalDateTime previousDay = ZonedDateTime.now(ZoneId.of("UTC"))
                     .minusDays(1)
                     .truncatedTo(ChronoUnit.DAYS)
                     .toLocalDateTime();
-                metricsService.createDailyAggregation(previousDay);
+                svc.createDailyAggregation(previousDay);
                 log.info("Daily aggregation completed for: {}", previousDay);
             });
         }
@@ -211,14 +208,14 @@ public class Fido2MetricsAggregationScheduler {
         private static final Logger log = LoggerFactory.getLogger(WeeklyAggregationJob.class);
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
-            executeAggregationJob(context, "weekly", metricsService -> {
+            executeAggregationJob(context, "weekly", svc -> {
                 // Use UTC timezone to align with FIDO2 services
                 LocalDateTime previousWeek = ZonedDateTime.now(ZoneId.of("UTC"))
                     .minusWeeks(1)
                     .with(java.time.DayOfWeek.MONDAY)
                     .truncatedTo(ChronoUnit.DAYS)
                     .toLocalDateTime();
-                metricsService.createWeeklyAggregation(previousWeek);
+                svc.createWeeklyAggregation(previousWeek);
                 log.info("Weekly aggregation completed for: {}", previousWeek);
             });
         }
@@ -232,14 +229,14 @@ public class Fido2MetricsAggregationScheduler {
         private static final Logger log = LoggerFactory.getLogger(MonthlyAggregationJob.class);
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
-            executeAggregationJob(context, "monthly", metricsService -> {
+            executeAggregationJob(context, "monthly", svc -> {
                 // Use UTC timezone to align with FIDO2 services
                 LocalDateTime previousMonth = ZonedDateTime.now(ZoneId.of("UTC"))
                     .minusMonths(1)
                     .withDayOfMonth(1)
                     .truncatedTo(ChronoUnit.DAYS)
                     .toLocalDateTime();
-                metricsService.createMonthlyAggregation(previousMonth);
+                svc.createMonthlyAggregation(previousMonth);
                 log.info("Monthly aggregation completed for: {}", previousMonth);
             });
         }
@@ -531,11 +528,8 @@ public class Fido2MetricsAggregationScheduler {
 
             quartzSchedulerManager.schedule(jobDetail, trigger);
         } catch (Exception e) {
-            log.error("Failed to register {} job: {}", jobName, e.getMessage(), e);
-            if (e instanceof IllegalStateException) {
-                throw (IllegalStateException) e;
-            }
-            throw new IllegalStateException("Failed to register " + jobName + " job", e);
+            throw new IllegalStateException(
+                "Failed to register " + jobName + " job: " + e.getMessage(), e);
         }
     }
 

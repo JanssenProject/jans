@@ -4,8 +4,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
-import io.jans.model.authzen.AccessEvaluationRequest;
-import io.jans.model.authzen.AccessEvaluationResponse;
+import io.jans.model.authzen.*;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.authzen.AccessEvaluationType;
@@ -18,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 /**
+ * External script service for AuthZEN access evaluation.
+ *
  * @author Yuriy Z
  */
 @ApplicationScoped
@@ -62,6 +63,99 @@ public class ExternalAccessEvaluationService extends ExternalScriptService {
         return AccessEvaluationResponse.FALSE;
     }
 
+    public SearchResponse<Subject> externalSearchSubject(SearchSubjectRequest request, ExecutionContext context) {
+        final CustomScriptConfiguration script = identifyScript();
+        if (script == null) {
+            log.debug("Failed to identify script for search subject");
+            return null;
+        }
+
+        context.setScript(script);
+
+        try {
+            log.trace("Executing 'searchSubject' method, script name: {}, request: {}", script.getName(), request);
+
+            ExternalScriptContext scriptContext = ExternalUpdateTokenContext.of(context);
+
+            AccessEvaluationType evaluationType = (AccessEvaluationType) script.getExternalType();
+            SearchResponse<Subject> result = evaluationType.searchSubject(request, scriptContext);
+
+            log.trace("Finished 'searchSubject' method, script name: {}, result: {}", script.getName(), result);
+
+            scriptContext.throwWebApplicationExceptionIfSet();
+            return result;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            saveScriptError(script.getCustomScript(), e);
+        }
+
+        return null;
+    }
+
+    public SearchResponse<Resource> externalSearchResource(SearchResourceRequest request, ExecutionContext context) {
+        final CustomScriptConfiguration script = identifyScript();
+        if (script == null) {
+            log.debug("Failed to identify script for search resource");
+            return null;
+        }
+
+        context.setScript(script);
+
+        try {
+            log.trace("Executing 'searchResource' method, script name: {}, request: {}", script.getName(), request);
+
+            ExternalScriptContext scriptContext = ExternalUpdateTokenContext.of(context);
+
+            AccessEvaluationType evaluationType = (AccessEvaluationType) script.getExternalType();
+            SearchResponse<Resource> result = evaluationType.searchResource(request, scriptContext);
+
+            log.trace("Finished 'searchResource' method, script name: {}, result: {}", script.getName(), result);
+
+            scriptContext.throwWebApplicationExceptionIfSet();
+            return result;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            saveScriptError(script.getCustomScript(), e);
+        }
+
+        return null;
+    }
+
+    public SearchResponse<Action> externalSearchAction(SearchActionRequest request, ExecutionContext context) {
+        final CustomScriptConfiguration script = identifyScript();
+        if (script == null) {
+            log.debug("Failed to identify script for search action");
+            return null;
+        }
+
+        context.setScript(script);
+
+        try {
+            log.trace("Executing 'searchAction' method, script name: {}, request: {}", script.getName(), request);
+
+            ExternalScriptContext scriptContext = ExternalUpdateTokenContext.of(context);
+
+            AccessEvaluationType evaluationType = (AccessEvaluationType) script.getExternalType();
+            SearchResponse<Action> result = evaluationType.searchAction(request, scriptContext);
+
+            log.trace("Finished 'searchAction' method, script name: {}, result: {}", script.getName(), result);
+
+            scriptContext.throwWebApplicationExceptionIfSet();
+            return result;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            saveScriptError(script.getCustomScript(), e);
+        }
+
+        return null;
+    }
+
     private CustomScriptConfiguration identifyScript() {
         final String scriptName = appConfiguration.getAccessEvaluationScriptName();
 
@@ -74,7 +168,7 @@ public class ExternalAccessEvaluationService extends ExternalScriptService {
                 script = scripts.get(0);
             }
         }
-        log.debug("Access evaluatoin with script {}, id {}", script != null ? script.getName() : "", script != null ? script.getInum() : "");
+        log.debug("Access evaluation with script {}, id {}", script != null ? script.getName() : "", script != null ? script.getInum() : "");
         return script;
     }
 }

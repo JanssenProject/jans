@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjre-alpine:17.0.17@sha256:3c9aff2ed178621764dedb95f56e8c881bdd092eec9033d0cad165907836ec22
+FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29eb40082e5df7c4d3452bc1b6c674d39357048
 
 # ===============
 # Alpine packages
@@ -16,7 +16,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.0.25
+ARG JETTY_VERSION=12.1.6
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -45,7 +45,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-12-18 08:31'
+ENV CN_BUILD_DATE='2026-02-27 08:34'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
@@ -63,7 +63,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-link
 
-ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
+ENV JANS_SOURCE_VERSION=1b66569673d82976da013100f5c4eaae1854547e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

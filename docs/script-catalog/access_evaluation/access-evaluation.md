@@ -8,7 +8,7 @@ tags:
 # Access Evaluation Custom Script
 
 
-The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 – draft 01](https://openid.github.io/authzen/).
+The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0](https://openid.github.io/authzen/).
 The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
 Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
 It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
@@ -16,7 +16,7 @@ enhancing interoperability and scalability in authorization processes.
 The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
 and dynamic authorization mechanisms.
 
-This script is used to control Access Evaluation Endpoint described in specification.
+This script is used to control Access Evaluation Endpoints described in specification.
 
 ## Behavior
 
@@ -27,47 +27,135 @@ if access should be granted, denied, or if additional information is needed.
 The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
 The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.
 
-During Access Evaluation request processing `Access Evaluation` custom script is executed.
+During Access Evaluation request processing the `Access Evaluation` custom script is executed.
 Name of the script must be specified by `accessEvaluationScriptName` configuration property.
 If AS can't find such script or if configuration property is not specified then server executes first script it finds on database.
 AS comes with sample demo script which shows simple example of custom validation and granting access.
 
-**Sample request**
-```
+**Sample Single Evaluation Request**
+```http
 POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
 Host: happy-example.gluu.info
 Content-Type: application/json
-Authorization: Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWFhLWY5N2YtNDU5NS04ZWExLWFlNmU1NDFmNDZjNg==
+Authorization: Basic <encoded_credentials>
 
-{"subject":{"id":"alice@acmecorp.com","type":"super_admin","properties":null},"resource":{"id":"123","type":"account","properties":null},"action":{"name":"can_read","properties":{"method":"GET"}},"context":{"properties":null}}
+{
+  "subject": {
+    "type": "super_admin",
+    "id": "alice@acmecorp.com"
+  },
+  "resource": {
+    "type": "account",
+    "id": "123"
+  },
+  "action": {
+    "name": "can_read"
+  },
+  "context": {
+    "ip_address": "192.168.1.1",
+    "time": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Sample Batch Evaluations Request**
+```http
+POST /jans-auth/restv1/access/v1/evaluations HTTP/1.1
+Host: happy-example.gluu.info
+Content-Type: application/json
+Authorization: Basic <encoded_credentials>
+
+{
+  "subject": {
+    "type": "user",
+    "id": "alice@acmecorp.com"
+  },
+  "evaluations": [
+    {"action": {"name": "read"}},
+    {"action": {"name": "write"}},
+    {"action": {"name": "delete"}}
+  ],
+  "options": {
+    "evaluations_semantic": "deny_on_first_deny"
+  }
+}
 ```
 
 
-
 ## Interface
+
 The Access Evaluation script implements the [AccessEvaluationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authzen/AccessEvaluationType.java) interface.
 This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
+
 | Method header | Method description |
 |:-----|:------|
 | `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
 | `def destroy(self, configurationAttributes)` | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method |
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
-### New methods
+### New Methods
+
 | Method header | Method description |
 |:-----|:------|
-|`def evaluation(self, context)`| Called when the request is received and contains main logic of evaluation. It must return `AccessEvaluationResponse`. |
+| `evaluate(request, context)` | Called for single evaluation requests. Must return `AccessEvaluationResponse`. |
+| `searchSubject(request, context)` | Called for subject search requests. Returns `SearchResponse<Subject>` or `null` for empty response. |
+| `searchResource(request, context)` | Called for resource search requests. Returns `SearchResponse<Resource>` or `null` for empty response. |
+| `searchAction(request, context)` | Called for action search requests. Returns `SearchResponse<Action>` or `null` for empty response. |
 
-`evaluation` method returns `AccessEvaluationResponse` which indicates to RP whether to grant access or deny it.
+### Method Details
+
+#### evaluate(request, context)
+
+The main evaluation method called when a single evaluation or batch evaluation request is received.
+
+**Parameters:**
+- `request` - `AccessEvaluationRequest` containing subject, resource, action, and context
+- `context` - `ExternalScriptContext` providing access to HTTP request and other contextual data
+
+**Returns:** `AccessEvaluationResponse` indicating the access decision (true/false) with optional context
+
+#### searchSubject(request, context)
+
+Called when a subject search request is received at `/access/v1/search/subject`.
+
+**Parameters:**
+- `request` - `SearchSubjectRequest` containing search criteria
+- `context` - Script context
+
+**Returns:** `SearchResponse<Subject>` with matching subjects, or `null` for default empty response
+
+#### searchResource(request, context)
+
+Called when a resource search request is received at `/access/v1/search/resource`.
+
+**Parameters:**
+- `request` - `SearchResourceRequest` containing search criteria
+- `context` - Script context
+
+**Returns:** `SearchResponse<Resource>` with matching resources, or `null` for default empty response
+
+#### searchAction(request, context)
+
+Called when an action search request is received at `/access/v1/search/action`.
+
+**Parameters:**
+- `request` - `SearchActionRequest` containing search criteria
+- `context` - Script context
+
+**Returns:** `SearchResponse<Action>` with matching actions, or `null` for default empty response
 
 
 ### Objects
+
 | Object name | Object description |
 |:-----|:------|
-|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
-|`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java) |
+| `customScript` | The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+| `context` | [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalScriptContext.java) |
+| `AccessEvaluationRequest` | Request containing subject, resource, action, context, evaluations (for batch), and options |
+| `AccessEvaluationResponse` | Response with decision (boolean) and optional context |
+| `SearchResponse` | Paginated response for search operations |
 
 
 ## Sample Demo Custom Script
@@ -79,10 +167,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.SimpleCustomProperty;
-import io.jans.model.authzen.AccessEvaluationRequest;
-import io.jans.model.authzen.AccessEvaluationResponse;
-import io.jans.model.authzen.AccessEvaluationResponseContext;
-import io.jans.model.authzen.Resource;
+import io.jans.model.authzen.*;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.authzen.AccessEvaluationType;
 import io.jans.service.custom.script.CustomScriptManager;
@@ -95,6 +180,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * Sample AccessEvaluation script demonstrating:
+ * - Single evaluation with custom validation
+ * - Search method stubs (return null for default empty response)
+ *
  * @author Yuriy Z
  */
 public class AccessEvaluation implements AccessEvaluationType {
@@ -162,9 +251,96 @@ public class AccessEvaluation implements AccessEvaluationType {
     public int getApiVersion() {
         return 11;
     }
-}
 
+    @Override
+    public SearchResponse<Subject> searchSubject(SearchSubjectRequest request, Object context) {
+        // Implement subject search logic here
+        // Return null to use default empty response
+        return null;
+    }
+
+    @Override
+    public SearchResponse<Resource> searchResource(SearchResourceRequest request, Object context) {
+        // Implement resource search logic here
+        // Return null to use default empty response
+        return null;
+    }
+
+    @Override
+    public SearchResponse<Action> searchAction(SearchActionRequest request, Object context) {
+        // Implement action search logic here
+        // Return null to use default empty response
+        return null;
+    }
+}
 ```
+
+
+## Search Implementation Example
+
+Here's an example of implementing a search method that returns actual results:
+
+```java
+@Override
+public SearchResponse<Subject> searchSubject(SearchSubjectRequest request, Object context) {
+    // Example: Return users who have access to the requested resource/action
+    List<Subject> subjects = new ArrayList<>();
+
+    // Query your authorization backend/database here
+    // This is just a sample - implement your actual logic
+    subjects.add(new Subject().setType("user").setId("alice@acmecorp.com"));
+    subjects.add(new Subject().setType("user").setId("bob@acmecorp.com"));
+
+    SearchResponse<Subject> response = new SearchResponse<>();
+    response.setResults(subjects);
+
+    // Set pagination info
+    PageResponse page = new PageResponse();
+    page.setCount(subjects.size());
+    page.setTotal(subjects.size());
+    response.setPage(page);
+
+    return response;
+}
+```
+
+
+## Context Object
+
+The `context` field in requests is fully dynamic and accepts any key-value pairs per AuthZEN specification:
+
+```json
+{
+  "context": {
+    "ip_address": "192.168.1.100",
+    "time": "2024-01-15T10:30:00Z",
+    "device_type": "mobile",
+    "region": "us-east-1",
+    "custom_field": "any_value"
+  }
+}
+```
+
+Access context values in your script:
+
+```java
+Context ctx = request.getContext();
+String ipAddress = (String) ctx.get("ip_address");
+String region = (String) ctx.get("region");
+```
+
+
+## Batch Evaluation Options
+
+When handling batch evaluations, the `options.evaluations_semantic` field controls processing:
+
+| Value | Behavior |
+|:------|:---------|
+| `execute_all` | Process all evaluations regardless of results (default) |
+| `deny_on_first_deny` | Stop on first deny result |
+| `permit_on_first_permit` | Stop on first permit result |
+
+The AS handles semantic logic automatically - your `evaluate()` method is called for each individual evaluation.
 
 
 ## Sample Scripts

@@ -8,10 +8,10 @@
 
 use crate::*;
 use cedarling::bindings::serde_yml;
-use cedarling::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
+use cedarling::{AuthorizeMultiIssuerRequest, EntityData, RequestUnsigned, TokenInput};
 use serde::Deserialize;
 use serde_json::json;
-use std::{collections::HashMap, sync::LazyLock};
+use std::sync::LazyLock;
 use test_utils::token_claims::generate_token_using_claims;
 use wasm_bindgen_test::*;
 
@@ -39,8 +39,6 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
         "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
             "and": [
                 {
@@ -61,7 +59,6 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
                 }
             ]
         },
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
@@ -73,8 +70,6 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
         "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_JSON.as_str(),
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
             "and": [
                 {
@@ -95,7 +90,6 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
                 }
             ]
         },
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     })
@@ -161,31 +155,19 @@ async fn test_init_conf_as_object() {
         .expect("init function should be initialized with js map");
 }
 
-/// Test execution of cedarling.
-/// Policy store and tokens data is used from python example.
+/// Test execution of cedarling with unsigned request.
+/// Policy store from python example; principals provided as entity data.
 ///
 /// Policies used:
-///    @444da5d85403f35ea76519ed1a18a33989f855bf1cf8
-///    permit(
-///        principal is Jans::Workload,
-///        action in [Jans::Action::"Read"],
-///        resource is Jans::Application
-///    )when{
-///        resource.name == "Some Application"
-///    };
-///    
-///    @840da5d85403f35ea76519ed1a18a33989f855bf1cf8
-///    permit(
-///        principal is Jans::User,
-///        action in [Jans::Action::"Read"],
-///        resource is Jans::Application
-///    )when{
-///        resource.name == "Some Application"
-///    };
-///
+///    permit(principal is Jans::Workload, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
+///    permit(principal is Jans::User, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
 #[wasm_bindgen_test]
 async fn test_run_cedarling() {
-    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    // Require only Jans::User so a single User principal that ALLOWs yields overall ALLOW
+    bootstrap_config_json["CEDARLING_PRINCIPAL_BOOLEAN_OPERATION"] = json!({
+        "and": [{"===": [{"var": "Jans::User"}, "ALLOW"]}]
+    });
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
         .expect("serde json value should be converted to JsValue");
 
@@ -196,93 +178,17 @@ async fn test_run_cedarling() {
         .await
         .expect("init function should be initialized with js map");
 
-    let request = Request {
-        tokens: HashMap::from([
-            (
-                "access_token".to_string(),
-                generate_token_using_claims(json!({
-                  "iss": "https://account.gluu.org",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "exp": 1732121460,
-                  "iat": 1731953030,
-                  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
-                  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
-                  "token_type": "Bearer",
-                  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "acr": "simple_password_auth",
-                  "x5t#S256": "",
-                  "nbf": 1731953030,
-                  "scope": [
-                    "role",
-                    "openid",
-                    "profile",
-                    "email"
-                  ],
-                  "auth_time": 1731953027,
-                  "username": "Default Admin User",
-                  "status": {
-                    "status_list": {
-                      "idx": 306,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "id_token".to_string(),
-                generate_token_using_claims(json!({
-                  "iss": "https://account.gluu.org",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "exp": 1731956630,
-                  "nbf": 1731953030,
-                  "iat": 1731953030,
-                  "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-                  "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-                  "amr": [],
-                  "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
-                  "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
-                  "jansOpenIDConnectVersion": "openidconnect-1.0",
-                  "acr": "simple_password_auth",
-                  "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-                  "auth_time": 1731953027,
-                  "grant": "authorization_code",
-                  "status": {
-                    "status_list": {
-                      "idx": 307,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "userinfo_token".to_string(),
-                generate_token_using_claims(json!({
-                  "iss": "https://account.gluu.org",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "jti": "OIn3g1SPSDSKAYDzENVoug",
-                  "email_verified": true,
-                  "role": [
-                    "CasaAdmin"
-                  ],
-                  "given_name": "Admin",
-                  "middle_name": "Admin",
-                  "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-                  "updated_at": 1731698135,
-                  "name": "Default Admin User",
-                  "nickname": "Admin",
-                  "family_name": "User",
-                  "email": "admin@jans.test",
-                  "jansAdminUIRole": [
-                    "api-admin"
-                  ]
-                })),
-            ),
-        ]),
+    let request = RequestUnsigned {
+        principals: vec![EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::User",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+        }))
+        .expect("Principal EntityData should be deserialized correctly")],
         context: json!({
-            "current_time": 1735349685, // unix time
+            "current_time": 1735349685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -308,13 +214,13 @@ async fn test_run_cedarling() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request =
-        serde_wasm_bindgen::to_value(&request).expect("Request should be converted to JsObject");
+    let js_request = serde_wasm_bindgen::to_value(&request)
+        .expect("RequestUnsigned should be converted to JsValue");
 
     let result = instance
-        .authorize(js_request)
+        .authorize_unsigned(js_request)
         .await
-        .expect("authorize request should be executed");
+        .expect("authorize_unsigned request should be executed");
 
     assert!(result.decision, "decision should be allowed")
 }
@@ -329,8 +235,6 @@ async fn test_memory_log_interface() {
         "CEDARLING_LOG_TYPE": "memory",
         "CEDARLING_LOG_TTL": 120,
         "CEDARLING_LOG_LEVEL": "INFO",
-        "CEDARLING_USER_AUTHZ": "enabled",
-        "CEDARLING_WORKLOAD_AUTHZ": "enabled",
         "CEDARLING_PRINCIPAL_BOOLEAN_OPERATION": {
             "and": [
                 {
@@ -351,7 +255,6 @@ async fn test_memory_log_interface() {
                 }
             ]
         },
-        "CEDARLING_ID_TOKEN_TRUST_MODE": "strict",
         "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["ES256"],
     });
 
@@ -365,93 +268,17 @@ async fn test_memory_log_interface() {
         .await
         .expect("init function should be initialized with js map");
 
-    let request = Request {
-        tokens: HashMap::from([
-            (
-                "access_token".to_string(),
-                generate_token_using_claims(json!({
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "code": "3e2a2012-099c-464f-890b-448160c2ab25",
-                  "iss": "https://account.gluu.org",
-                  "token_type": "Bearer",
-                  "client_id": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "acr": "simple_password_auth",
-                  "x5t#S256": "",
-                  "nbf": 1731953030,
-                  "scope": [
-                    "role",
-                    "openid",
-                    "profile",
-                    "email"
-                  ],
-                  "auth_time": 1731953027,
-                  "exp": 1732121460,
-                  "iat": 1731953030,
-                  "jti": "uZUh1hDUQo6PFkBPnwpGzg",
-                  "username": "Default Admin User",
-                  "status": {
-                    "status_list": {
-                      "idx": 306,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "id_token".to_string(),
-                generate_token_using_claims(json!({
-                  "at_hash": "bxaCT0ZQXbv4sbzjSDrNiA",
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "amr": [],
-                  "iss": "https://account.gluu.org",
-                  "nonce": "25b2b16b-32a2-42d6-8a8e-e5fa9ab888c0",
-                  "sid": "6d443734-b7a2-4ed8-9d3a-1606d2f99244",
-                  "jansOpenIDConnectVersion": "openidconnect-1.0",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "acr": "simple_password_auth",
-                  "c_hash": "V8h4sO9NzuLKawPO-3DNLA",
-                  "nbf": 1731953030,
-                  "auth_time": 1731953027,
-                  "exp": 1731956630,
-                  "grant": "authorization_code",
-                  "iat": 1731953030,
-                  "jti": "ijLZO1ooRyWrgIn7cIdNyA",
-                  "status": {
-                    "status_list": {
-                      "idx": 307,
-                      "uri": "https://jans.test/jans-auth/restv1/status_list"
-                    }
-                  }
-                })),
-            ),
-            (
-                "userinfo_token".to_string(),
-                generate_token_using_claims(json!({
-                  "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
-                  "email_verified": true,
-                  "role": [
-                    "CasaAdmin"
-                  ],
-                  "iss": "https://account.gluu.org",
-                  "given_name": "Admin",
-                  "middle_name": "Admin",
-                  "inum": "a6a70301-af49-4901-9687-0bcdcf4e34fa",
-                  "aud": "d7f71bea-c38d-4caf-a1ba-e43c74a11a62",
-                  "updated_at": 1731698135,
-                  "name": "Default Admin User",
-                  "nickname": "Admin",
-                  "family_name": "User",
-                  "jti": "OIn3g1SPSDSKAYDzENVoug",
-                  "email": "admin@jans.test",
-                  "jansAdminUIRole": [
-                    "api-admin"
-                  ]
-                })),
-            ),
-        ]),
+    let request = RequestUnsigned {
+        principals: vec![EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::User",
+                "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            },
+            "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+        }))
+        .expect("Principal EntityData should be deserialized correctly")],
         context: json!({
-            "current_time": 1735349685, // unix time
+            "current_time": 1735349685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -477,13 +304,13 @@ async fn test_memory_log_interface() {
         .expect("ResourceData should be deserialized correctly"),
     };
 
-    let js_request =
-        serde_wasm_bindgen::to_value(&request).expect("Request should be converted to JsObject");
+    let js_request = serde_wasm_bindgen::to_value(&request)
+        .expect("RequestUnsigned should be converted to JsValue");
 
     let _result = instance
-        .authorize(js_request)
+        .authorize_unsigned(js_request)
         .await
-        .expect("authorize request should be executed");
+        .expect("authorize_unsigned request should be executed");
 
     let js_log_ids = instance.get_log_ids();
     let logs_count = js_log_ids.length();
@@ -495,7 +322,21 @@ async fn test_memory_log_interface() {
             .get_log_by_id(log_id_str.as_str())
             .expect("get_log_by_id should not throw error");
 
-        assert_ne!(log_val, JsValue::NULL, "log result should be not null")
+        assert_ne!(log_val, JsValue::NULL, "log result should be not null");
+
+        // Verify log entry has expected structure
+        let log_id = Reflect::get(&log_val, &"id".into())
+            .expect("log should have id field")
+            .as_string()
+            .expect("id should be a string");
+        assert_eq!(log_id, log_id_str, "log id should match the requested id");
+
+        // Verify log has log_kind field
+        let log_kind = Reflect::get(&log_val, &"log_kind".into())
+            .expect("log should have log_kind field")
+            .as_string()
+            .expect("log_kind should be a string");
+        assert!(!log_kind.is_empty(), "log_kind should not be empty");
     }
 
     let pop_logs_result = instance.pop_logs().expect("pop_logs not throw error");
@@ -588,15 +429,6 @@ async fn test_authorize_unsigned() {
         .expect("authorize_unsigned should be executed successfully");
 
     assert!(result.decision, "Decision should be Allow");
-
-    assert!(
-        result.workload.is_none(),
-        "Workload should not be present for unsigned request"
-    );
-    assert!(
-        result.person.is_none(),
-        "Person should not be present for unsigned request"
-    );
 
     // check by principal type
     assert!(
@@ -950,4 +782,376 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
     // This should fail due to empty tokens
     let result = instance.authorize_multi_issuer(js_request).await;
     assert!(result.is_err(), "Should fail with empty token array");
+}
+
+/// Test Data API - push and get operations
+#[wasm_bindgen_test]
+async fn test_data_api_push_and_get() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    // Push data without TTL
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data_ctx("key1", value1, None)
+        .expect("push_data_ctx should succeed");
+
+    let result1 = instance
+        .get_data_ctx("key1")
+        .expect("get_data_ctx should succeed");
+    assert_ne!(result1, JsValue::NULL, "result should not be null");
+    let result_str: String =
+        serde_wasm_bindgen::from_value(result1).expect("result should be deserializable to string");
+    assert_eq!(
+        result_str, "value1",
+        "retrieved value should match pushed value"
+    );
+
+    // Push data with TTL
+    let value2 = serde_wasm_bindgen::to_value(&json!({"nested": "data"}))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data_ctx("key2", value2, Some(60))
+        .expect("push_data_ctx with TTL should succeed");
+
+    let result2 = instance
+        .get_data_ctx("key2")
+        .expect("get_data_ctx should succeed");
+    assert_ne!(result2, JsValue::NULL, "result should not be null");
+    let result_obj: serde_json::Value =
+        serde_wasm_bindgen::from_value(result2).expect("result should be deserializable to object");
+    assert_eq!(
+        result_obj,
+        json!({"nested": "data"}),
+        "retrieved value should match pushed value"
+    );
+
+    // Push array
+    let value3 = serde_wasm_bindgen::to_value(&json!([1, 2, 3]))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data_ctx("key3", value3, None)
+        .expect("push_data_ctx should succeed");
+
+    let result3 = instance
+        .get_data_ctx("key3")
+        .expect("get_data_ctx should succeed");
+    assert_ne!(result3, JsValue::NULL, "result should not be null");
+    let result_array: serde_json::Value =
+        serde_wasm_bindgen::from_value(result3).expect("result should be deserializable to array");
+    assert_eq!(
+        result_array,
+        json!([1, 2, 3]),
+        "retrieved value should match pushed value"
+    );
+}
+
+/// Test Data API - get data entry with metadata
+#[wasm_bindgen_test]
+async fn test_data_api_get_data_entry_ctx() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value = serde_wasm_bindgen::to_value(&json!({"foo": "bar"}))
+        .expect("value should be converted to JsValue");
+    instance
+        .push_data_ctx("test_key", value, None)
+        .expect("push_data_ctx should succeed");
+
+    let entry_opt = instance
+        .get_data_entry_ctx("test_key")
+        .expect("get_data_entry_ctx should succeed");
+    assert!(entry_opt.is_some(), "entry should not be null");
+    let entry = entry_opt.unwrap();
+
+    // Verify entry has expected fields
+    assert_eq!(entry.key, "test_key", "entry key should match");
+    // After one get_data_entry_ctx call, access_count should be 1
+    assert_eq!(
+        entry.access_count, 1,
+        "access_count should be 1 after one access"
+    );
+}
+
+/// Test Data API - remove data
+#[wasm_bindgen_test]
+async fn test_data_api_remove_data_ctx() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value =
+        serde_wasm_bindgen::to_value(&json!("data")).expect("value should be converted to JsValue");
+    instance
+        .push_data_ctx("to_remove", value, None)
+        .expect("push_data_ctx should succeed");
+
+    let result = instance
+        .get_data_ctx("to_remove")
+        .expect("get_data_ctx should succeed");
+    assert_ne!(result, JsValue::NULL, "data should exist before removal");
+
+    let removed = instance
+        .remove_data_ctx("to_remove")
+        .expect("remove_data_ctx should succeed");
+    assert!(
+        removed,
+        "remove_data_ctx should return true for existing key"
+    );
+
+    let result_after = instance
+        .get_data_ctx("to_remove")
+        .expect("get_data_ctx should succeed");
+    assert_eq!(
+        result_after,
+        JsValue::NULL,
+        "data should be null after removal"
+    );
+
+    // Try removing non-existent key
+    let removed_nonexistent = instance
+        .remove_data_ctx("non_existent")
+        .expect("remove_data_ctx should succeed");
+    assert!(
+        !removed_nonexistent,
+        "remove_data_ctx should return false for non-existent key"
+    );
+}
+
+/// Test Data API - clear all data
+#[wasm_bindgen_test]
+async fn test_data_api_clear_data_ctx() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    let value2 = serde_wasm_bindgen::to_value(&json!("value2"))
+        .expect("value should be converted to JsValue");
+    let value3 = serde_wasm_bindgen::to_value(&json!("value3"))
+        .expect("value should be converted to JsValue");
+
+    instance
+        .push_data_ctx("key1", value1, None)
+        .expect("push_data_ctx should succeed");
+    instance
+        .push_data_ctx("key2", value2, None)
+        .expect("push_data_ctx should succeed");
+    instance
+        .push_data_ctx("key3", value3, None)
+        .expect("push_data_ctx should succeed");
+
+    assert_ne!(
+        instance
+            .get_data_ctx("key1")
+            .expect("get_data_ctx should succeed"),
+        JsValue::NULL,
+        "key1 should exist"
+    );
+    assert_ne!(
+        instance
+            .get_data_ctx("key2")
+            .expect("get_data_ctx should succeed"),
+        JsValue::NULL,
+        "key2 should exist"
+    );
+    assert_ne!(
+        instance
+            .get_data_ctx("key3")
+            .expect("get_data_ctx should succeed"),
+        JsValue::NULL,
+        "key3 should exist"
+    );
+
+    instance
+        .clear_data_ctx()
+        .expect("clear_data_ctx should succeed");
+
+    assert_eq!(
+        instance
+            .get_data_ctx("key1")
+            .expect("get_data_ctx should succeed"),
+        JsValue::NULL,
+        "key1 should be null after clear"
+    );
+    assert_eq!(
+        instance
+            .get_data_ctx("key2")
+            .expect("get_data_ctx should succeed"),
+        JsValue::NULL,
+        "key2 should be null after clear"
+    );
+    assert_eq!(
+        instance
+            .get_data_ctx("key3")
+            .expect("get_data_ctx should succeed"),
+        JsValue::NULL,
+        "key3 should be null after clear"
+    );
+}
+
+/// Test Data API - list all data entries
+#[wasm_bindgen_test]
+async fn test_data_api_list_data_ctx() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    let value2 = serde_wasm_bindgen::to_value(&json!({"nested": "data"}))
+        .expect("value should be converted to JsValue");
+    let value3 = serde_wasm_bindgen::to_value(&json!([1, 2, 3]))
+        .expect("value should be converted to JsValue");
+
+    instance
+        .push_data_ctx("key1", value1, None)
+        .expect("push_data_ctx should succeed");
+    instance
+        .push_data_ctx("key2", value2, None)
+        .expect("push_data_ctx should succeed");
+    instance
+        .push_data_ctx("key3", value3, None)
+        .expect("push_data_ctx should succeed");
+
+    let entries = instance
+        .list_data_ctx()
+        .expect("list_data_ctx should succeed");
+    assert_eq!(entries.length(), 3, "should have 3 entries");
+
+    // Collect keys from entries
+    let mut keys = Vec::new();
+    for i in 0..entries.length() {
+        let entry_js = entries.get(i);
+        let key = Reflect::get(&entry_js, &"key".into())
+            .expect("entry should have key field")
+            .as_string()
+            .expect("key should be a string");
+        keys.push(key);
+    }
+
+    assert!(
+        keys.contains(&"key1".to_string()),
+        "entries should contain key1"
+    );
+    assert!(
+        keys.contains(&"key2".to_string()),
+        "entries should contain key2"
+    );
+    assert!(
+        keys.contains(&"key3".to_string()),
+        "entries should contain key3"
+    );
+}
+
+/// Test Data API - get statistics
+#[wasm_bindgen_test]
+async fn test_data_api_get_stats_ctx() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let stats = instance
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
+    assert_eq!(stats.entry_count, 0, "initial entry count should be 0");
+
+    let value1 = serde_wasm_bindgen::to_value(&json!("value1"))
+        .expect("value should be converted to JsValue");
+    let value2 = serde_wasm_bindgen::to_value(&json!("value2"))
+        .expect("value should be converted to JsValue");
+
+    instance
+        .push_data_ctx("key1", value1, None)
+        .expect("push_data_ctx should succeed");
+    instance
+        .push_data_ctx("key2", value2, None)
+        .expect("push_data_ctx should succeed");
+
+    let stats_after = instance
+        .get_stats_ctx()
+        .expect("get_stats_ctx should succeed");
+    assert_eq!(
+        stats_after.entry_count, 2,
+        "entry count should be 2 after pushing data"
+    );
+    // total_size_bytes should be greater than 0 after pushing data
+    assert!(
+        stats_after.total_size_bytes > 0,
+        "total_size_bytes should be greater than 0 after pushing data"
+    );
+}
+
+/// Test Data API - invalid key error
+#[wasm_bindgen_test]
+async fn test_data_api_invalid_key() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let value = serde_wasm_bindgen::to_value(&json!("value"))
+        .expect("value should be converted to JsValue");
+    let result = instance.push_data_ctx("", value, None);
+    assert!(result.is_err(), "push_data_ctx with empty key should fail");
+}
+
+/// Test that function `spawn_task` works as expected
+#[wasm_bindgen_test]
+async fn test_spawn_task() {
+    let handle = cedarling::bindings::spawn_task(async { 42 });
+    let result = handle.await_result().await;
+    assert_eq!(result, 42);
 }

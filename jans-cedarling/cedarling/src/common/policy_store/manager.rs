@@ -86,14 +86,6 @@ impl PolicyStoreManager {
         loaded: LoadedPolicyStore,
         logger: Option<&Logger>,
     ) -> Result<PolicyStore, ConversionError> {
-        // Log manifest info if available
-        if let Some(manifest) = &loaded.manifest {
-            logger.log_any(PolicyStoreLogEntry::info(format!(
-                "Converting policy store '{}' (generated: {})",
-                manifest.policy_store_id, manifest.generated_date
-            )));
-        }
-
         // 1. Convert schema
         let cedar_schema = Self::convert_schema(&loaded.schema)?;
 
@@ -145,10 +137,8 @@ impl PolicyStoreManager {
     /// - `validator_schema: ValidatorSchema`
     fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
         use super::schema_parser::ParsedSchema;
-        use cedar_policy::SchemaFragment;
-        use std::str::FromStr;
 
-        // Parse and validate schema
+        // Parse and validate schema (parses once and stores the fragment)
         let parsed_schema =
             ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
                 ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
@@ -162,16 +152,8 @@ impl PolicyStoreManager {
         // Get the Cedar schema from the parsed result
         let schema = parsed_schema.get_schema().clone();
 
-        // Convert to JSON for CedarSchemaJson and ValidatorSchema
-        // NOTE: This parses the schema content again (SchemaFragment::from_str).
-        // For large schemas, this double-parsing could be optimized by having
-        // ParsedSchema return both the validated schema and the fragment, but
-        // this is a performance consideration rather than a correctness issue.
-        let fragment = SchemaFragment::from_str(schema_content).map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to parse schema fragment: {e}"))
-        })?;
-
-        let json_string = fragment.to_json_string().map_err(|e| {
+        // Use the already-parsed fragment for JSON conversion (no re-parsing)
+        let json_string = parsed_schema.get_fragment().to_json_string().map_err(|e| {
             ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {e}"))
         })?;
 
@@ -609,7 +591,6 @@ mod tests {
     fn test_convert_to_legacy_minimal() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            manifest: None,
             schema: r#"
         namespace TestApp {
             entity User;
@@ -646,7 +627,6 @@ mod tests {
     fn test_convert_to_legacy_full() {
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
-            manifest: None,
             schema: r#"
         namespace TestApp {
             entity User;

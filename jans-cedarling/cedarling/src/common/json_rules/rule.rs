@@ -3,9 +3,12 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use datalogic_rs::Rule;
+use datalogic_rs::CompiledLogic;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::sync::Arc;
+
+use super::ENGINE;
 
 /// `JsonLogic` rule using [JsonLogic](https://jsonlogic.com/)
 /// Default implementation:
@@ -19,7 +22,7 @@ use serde_json::Value;
 /// ```
 #[derive(Debug, Clone)]
 pub struct JsonRule {
-    rule: Rule,
+    compiled: Arc<CompiledLogic>,
     value: Value,
 }
 
@@ -38,18 +41,18 @@ impl From<datalogic_rs::Error> for ParseRuleError {
 impl JsonRule {
     /// Create a new [`JsonRule`] from a JSON value.
     pub fn new(rule_value: Value) -> Result<Self, ParseRuleError> {
-        let rule = Rule::from_value(&rule_value)?;
+        let compiled = ENGINE.compile(&rule_value)?;
 
         Ok(JsonRule {
-            rule,
+            compiled,
             value: rule_value,
         })
     }
 
-    /// Get the underlying `Rule` object.
+    /// Get the underlying compiled logic.
     #[inline]
-    pub(crate) fn rule(&self) -> &Rule {
-        &self.rule
+    pub(crate) fn rule(&self) -> &CompiledLogic {
+        &self.compiled
     }
 }
 

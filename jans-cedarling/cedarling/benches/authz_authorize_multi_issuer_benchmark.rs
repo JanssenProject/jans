@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling,
-    EntityBuilderConfig, EntityData, IdTokenTrustMode, InitCedarlingError, JsonRule, JwtConfig,
-    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, TokenInput,
+    AuthorizationConfig, AuthorizeMultiIssuerRequest, BootstrapConfig, Cedarling, DataStoreConfig,
+    EntityBuilderConfig, EntityData, InitCedarlingError, JsonRule, JwtConfig, LogConfig, LogLevel,
+    LogTypeConfig, PolicyStoreConfig, TokenInput,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use jsonwebtoken::Algorithm;
@@ -33,6 +33,15 @@ fn authorize_multi_issuer(c: &mut Criterion) {
         .expect("should initialize Cedarling");
 
     let request = prepare_cedarling_request_for_multi_issuer_jwt_validation(&mock1, &mock2);
+
+    // Validate that the authorization request executes correctly before benchmarking
+    let validation_result = runtime
+        .block_on(cedarling.authorize_multi_issuer(request.clone()))
+        .expect("authorization validation should succeed");
+    assert!(
+        validation_result.decision,
+        "authorization validation should return Allow decision"
+    );
 
     c.bench_with_input(
         BenchmarkId::new("authorize_multi_issuer", "tokio runtime"),
@@ -103,18 +112,14 @@ async fn prepare_cedarling_with_jwt_validation(
             ..Default::default()
         },
         authorization_config: AuthorizationConfig {
-            use_user_principal: false,
-            use_workload_principal: false,
             principal_bool_operator: JsonRule::default(),
-            id_token_trust_mode: IdTokenTrustMode::Never,
             ..Default::default()
         },
-        entity_builder_config: EntityBuilderConfig::default()
-            .with_no_workload()
-            .with_no_user(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_base64_size: None,
         max_default_entities: None,
+        data_store_config: DataStoreConfig::default(),
     };
 
     Cedarling::new(&bootstrap_config).await

@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjdk-alpine:17.0.17@sha256:0e8ae43555ad8e2d69431c2078df256c01b625a8a3010e76b5a6baff0d165d2c
+FROM bellsoft/liberica-openjdk-alpine:17.0.18@sha256:307b95033a52c3ebcebcb883048f6ffd6c6019cf7cda06fad8febb9d1caf39a3
 
 # ===============
 # Alpine packages
@@ -16,7 +16,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.0.25
+ARG JETTY_VERSION=12.1.6
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -44,7 +44,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=0.0.0-nightly
-ENV CN_BUILD_DATE='2025-12-18 08:30'
+ENV CN_BUILD_DATE='2026-02-27 08:32'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
@@ -62,7 +62,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-scim
 
-ENV JANS_SOURCE_VERSION=a45e9fc1509abf7515f83d09825c647f4db59e4e
+ENV JANS_SOURCE_VERSION=1b66569673d82976da013100f5c4eaae1854547e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 

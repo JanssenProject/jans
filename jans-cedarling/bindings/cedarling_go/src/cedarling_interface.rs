@@ -55,7 +55,6 @@ pub trait G2RCall {
     fn new_with_env_instance(boostrap_config_raw_json: String) -> ResultInstance;
     fn drop_instance(instance_id: usize);
 
-    fn authorize(instance_id: usize, request_json: String) -> Result;
     fn authorize_unsigned(instance_id: usize, request_json: String) -> Result;
     fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result;
 
@@ -66,4 +65,13 @@ pub trait G2RCall {
     fn get_logs_by_request_id(instance_id: usize, request_id: String) -> Vec<String>;
     fn get_logs_by_request_id_and_tag(instance_id: usize, id: String, tag: String) -> Vec<String>;
     fn shut_down(instance_id: usize);
+
+    fn push_data_ctx(instance_id: usize, key: String, value_json: String, ttl_nanos: i64)
+        -> Result;
+    fn get_data_ctx(instance_id: usize, key: String) -> Result;
+    fn get_data_entry_ctx(instance_id: usize, key: String) -> Result;
+    fn remove_data_ctx(instance_id: usize, key: String) -> Result;
+    fn clear_data_ctx(instance_id: usize) -> Result;
+    fn list_data_ctx(instance_id: usize) -> Result;
+    fn get_stats_ctx(instance_id: usize) -> Result;
 }

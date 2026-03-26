@@ -5,16 +5,20 @@
 
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
-use super::super::authorization_config::IdTokenTrustMode;
 use super::super::log_config::StdOutMode;
-use super::default_values::{default_jti, default_token_cache_capacity, default_true};
+use super::default_values::{
+    default_jti, default_log_channel_capacity, default_log_max_retries,
+    default_token_cache_capacity, default_true,
+};
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{default_stdout_buffer_limit, default_stdout_timeout_millis};
 use super::feature_types::{FeatureToggle, LoggerType};
 use super::json_util::{deserialize_or_parse_string_as_json, parse_option_string};
-use crate::UnsignedRoleIdSrc;
+use crate::JwtConfig;
 use crate::common::json_rules::JsonRule;
+use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::LogLevel;
+use crate::{LockTransport, UnsignedRoleIdSrc};
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -23,13 +27,13 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
 /// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
 //
 //  All fields should be available to parse from string, because env vars always string.
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -42,10 +46,6 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub policy_store_uri: Option<String>,
-
-    /// An identifier for the policy store.
-    #[serde(rename = "CEDARLING_POLICY_STORE_ID", default)]
-    pub policy_store_id: String,
 
     /// How the Logs will be presented.
     #[serde(rename = "CEDARLING_LOG_TYPE", default)]
@@ -99,16 +99,6 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub stdout_buffer_limit: usize,
 
-    /// List of claims to map from user entity, such as ["sub", "email", "username", ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_USER_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_user_claims: Vec<String>,
-
-    /// List of claims to map from user entity, such as [ `client_id`, `rp_id`, ...]
-    #[serde(rename = "CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub decision_log_workload_claims: Vec<String>,
-
     /// Token claims that will be used for decision logging.
     /// Default is jti, but perhaps some other claim is needed.
     #[serde(
@@ -117,18 +107,17 @@ pub struct BootstrapConfigRaw {
     )]
     pub decision_log_default_jwt_id: String,
 
-    /// When `enabled`, Cedar engine authorization is queried for a User principal.
-    #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
-    pub user_authz: FeatureToggle,
-
-    /// When `enabled`, Cedar engine authorization is queried for a Workload principal.
-    #[serde(rename = "CEDARLING_WORKLOAD_AUTHZ", default)]
-    pub workload_authz: FeatureToggle,
-
-    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
-    /// making authz (authorization) decisions.
+    /// Specifies what boolean operation to use when combining per-principal
+    /// authorization decisions in `authorize_unsigned`.
+    ///
+    /// This setting only applies to [`authorize_unsigned`] — the
+    /// `authorize_multi_issuer` method does not use principals and ignores
+    /// this configuration entirely.
     ///
     /// Use [JsonLogic](https://jsonlogic.com/).
+    /// Variable names must match the full Cedar principal type identifier
+    /// (`<Namespace>::<EntityType>`) used in your schema. Values are compared
+    /// against the strings `"ALLOW"` or `"DENY"`.
     ///
     /// Default value:
     /// ```json
@@ -143,26 +132,11 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub principal_bool_operation: JsonRule,
 
-    /// Mapping name of cedar schema `TrustedIssuer` entity
-    #[serde(rename = "CEDARLING_MAPPING_TRUSTED_ISSUER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_iss: Option<String>,
-
-    /// Mapping name of cedar schema User entity
-    #[serde(rename = "CEDARLING_MAPPING_USER", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_user: Option<String>,
-
-    /// Mapping name of cedar schema Workload entity.
-    #[serde(rename = "CEDARLING_MAPPING_WORKLOAD", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub mapping_workload: Option<String>,
-
     /// Mapping name of cedar schema Role entity.
     #[serde(rename = "CEDARLING_MAPPING_ROLE", default)]
     pub mapping_role: Option<String>,
 
-    /// Mapping name of cedar schema Role entity.
+    /// Source attribute for unsigned role entity ID.
     #[serde(rename = "CEDARLING_UNSIGNED_ROLE_ID_SRC", default)]
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
 
@@ -203,7 +177,8 @@ pub struct BootstrapConfigRaw {
 
     /// Whether to check the signature of all JWT tokens.
     ///
-    /// This requires that an `iss` (Issuer) claim is present on each token.
+    /// When enabled, this requires the `iss` (Issuer) claim to be present in
+    /// all tokens and the issuer URL must use the `https` scheme.
     #[serde(rename = "CEDARLING_JWT_SIG_VALIDATION", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_sig_validation: FeatureToggle,
@@ -220,20 +195,12 @@ pub struct BootstrapConfigRaw {
     pub jwt_status_validation: FeatureToggle,
 
     /// Cedarling will only accept tokens signed with these algorithms.
-    #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
+    #[serde(
+        rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
+        default = "JwtConfig::supported_algorithms"
+    )]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
-
-    /// Varying levels of validations based on the preference of the developer.
-    ///
-    /// # Strict Mode
-    ///
-    /// Strict mode requires:
-    ///     1. `id_token` aud matches the `access_token` `client_id`;
-    ///     2. if a Userinfo token is present, the sub matches the `id_token`, and that
-    ///         the aud matches the access token `client_id`.
-    #[serde(rename = "CEDARLING_ID_TOKEN_TRUST_MODE", default)]
-    pub id_token_trust_mode: IdTokenTrustMode,
 
     /// If Enabled, the Cedarling will connect to the Lock Master for policies,
     /// and subscribe for SSE events.
@@ -284,8 +251,39 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS", default)]
     pub accept_invalid_certs: FeatureToggle,
 
-    /// Allows to limit maximum token cache TTL in seconds.
-    /// Zero means no token cache TTL limit.
+    /// Transport protocol for Lock Server communication ("grpc" or "rest").
+    #[serde(
+        rename = "CEDARLING_LOCK_TRANSPORT",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
+    pub lock_transport: LockTransport,
+
+    /// Channel capacity for buffering log entries before they are sent to the lock server.
+    /// Higher values allow more logs to be buffered in memory when the lock server is slow,
+    /// but also increase memory usage.
+    /// Default value is 100.
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_CHANNEL_CAPACITY",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default = "default_log_channel_capacity"
+    )]
+    pub lock_log_channel_capacity: usize,
+
+    /// Maximum number of retry attempts for sending logs to the lock server.
+    /// Uses exponential backoff strategy for retrying.
+    /// Default value is 5.
+    #[serde(
+        rename = "CEDARLING_LOCK_LOG_MAX_RETRIES",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default = "default_log_max_retries"
+    )]
+    pub lock_log_max_retries: u32,
+
+    /// Maximum token cache TTL in seconds.
+    /// Default is `0`, which disables the maximum TTL — the token's `exp` claim is used instead.
+    /// If the token has no `exp` claim and this is `0`, the token is not cached at all.
+    /// If the token has no `exp` claim and this is > 0, this value is used as the cache TTL.
     #[serde(rename = "CEDARLING_TOKEN_CACHE_MAX_TTL", default)]
     pub token_cache_max_ttl: usize,
     /// Maximum number of tokens the cache can store.
@@ -305,6 +303,72 @@ pub struct BootstrapConfigRaw {
         default = "default_true"
     )]
     pub token_cache_earliest_expiration_eviction: bool,
+
+    // =========================================================================
+    // Data Store Configuration
+    // =========================================================================
+    /// Maximum number of data entries in the data store (0 = unlimited).
+    /// Default: 10,000
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_ENTRIES", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_entries: Option<usize>,
+
+    /// Maximum size per data entry in bytes (0 = unlimited).
+    /// Default: 1MB (1,048,576 bytes)
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_ENTRY_SIZE", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_entry_size: Option<usize>,
+
+    /// Default TTL for data entries in seconds.
+    /// If not set, entries do not expire.
+    #[serde(rename = "CEDARLING_DATA_STORE_DEFAULT_TTL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_default_ttl: Option<u64>,
+
+    /// Maximum allowed TTL for data entries in seconds.
+    /// Default: 3600 (1 hour). Entries with TTL exceeding this value will be rejected.
+    /// Note: `0` means a zero-second max TTL (immediate expiry), not unlimited.
+    /// Omitting this property uses the default (1 hour).
+    #[serde(rename = "CEDARLING_DATA_STORE_MAX_TTL", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_max_ttl: Option<u64>,
+
+    /// Enable metrics tracking (access counts, timestamps) for data entries.
+    /// Default: true
+    #[serde(rename = "CEDARLING_DATA_STORE_ENABLE_METRICS", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_enable_metrics: Option<bool>,
+
+    /// Memory usage alert threshold as a percentage (0.0-100.0).
+    /// When capacity usage exceeds this threshold, a warning is logged.
+    /// Default: 80.0 (80%)
+    #[serde(rename = "CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD", default)]
+    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
+    pub data_store_memory_alert_threshold: Option<f64>,
+    /// Type of trusted issuer loader.
+    /// If not set, synchronous loader is used.
+    /// Can be `SYNC` or `ASYNC`.
+    ///
+    /// Sync loader means that trusted issuers will be loaded on initialization.
+    /// Async loader means that trusted issuers will be loaded in background.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_type: TrustedIssuerLoaderTypeRaw,
+    /// Number of concurrent workers to use when loading trusted issuers.
+    /// Applies to both SYNC (parallel loading during initialization) and ASYNC (parallel background loading) modes.
+    /// Minimum possible value is 1. Zero will be used as 1.
+    ///
+    /// For WASM maximum value is 6, default is 2.
+    /// For native maximum value is 1000, default is 10.
+    #[serde(
+        rename = "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trusted_issuer_loader_workers: WorkersCount,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -416,10 +480,6 @@ mod tests {
                 "Policy store URI should be None by default"
             );
             assert_eq!(
-                config.policy_store_id, "",
-                "Policy store ID should be empty by default"
-            );
-            assert_eq!(
                 config.log_type,
                 LoggerType::Off,
                 "Logger should be off by default"
@@ -430,32 +490,19 @@ mod tests {
                 "Default log level should be WARN"
             );
             assert_eq!(config.log_ttl, None, "Log TTL should be None by default");
-            assert!(
-                config.decision_log_user_claims.is_empty(),
-                "Decision log user claims should be empty by default"
-            );
-            assert!(
-                config.decision_log_workload_claims.is_empty(),
-                "Decision log workload claims should be empty by default"
-            );
             assert_eq!(
                 config.decision_log_default_jwt_id, "jti",
                 "Default JWT ID for decision logging should be 'jti'"
             );
             assert_eq!(
-                config.user_authz,
-                FeatureToggle::Disabled,
-                "User authorization should be disabled by default"
-            );
-            assert_eq!(
-                config.workload_authz,
-                FeatureToggle::Disabled,
-                "Workload authorization should be disabled by default"
-            );
-            assert_eq!(
                 config.principal_bool_operation,
                 JsonRule::default(),
                 "Default user-workload boolean operator should default"
+            );
+            assert_eq!(
+                config.lock_transport,
+                LockTransport::Rest,
+                "Default transport should be REST"
             );
         });
     }
@@ -548,6 +595,110 @@ mod tests {
 
                 assert_eq!(config.application_name, "");
                 assert_eq!(config.policy_store_uri, None);
+            },
+        );
+    }
+
+    /// Tests that environment variables for trusted issuer loader are parsed correctly.
+    #[test]
+    fn test_trusted_issuer_loader_env_vars() {
+        with_env_vars(
+            &[
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_TYPE", "ASYNC"),
+                ("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "5"),
+            ],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_type,
+                    TrustedIssuerLoaderTypeRaw::Async,
+                    "Loader type should be Async from env var"
+                );
+                assert_eq!(
+                    config.trusted_issuer_loader_workers, 5,
+                    "Worker count should be 5 from env var"
+                );
+            },
+        );
+    }
+
+    /// Tests JSON deserialization for trusted issuer loader fields.
+    #[test]
+    fn test_trusted_issuer_loader_json_deserialization() {
+        // Valid JSON values
+        let valid_cases = vec![
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "SYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 3}"#,
+                TrustedIssuerLoaderTypeRaw::Sync,
+                3,
+            ),
+            (
+                r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "ASYNC", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": 1}"#,
+                TrustedIssuerLoaderTypeRaw::Async,
+                1,
+            ),
+        ];
+
+        for (json, expected_type, expected_workers) in valid_cases {
+            let config: BootstrapConfigRaw = serde_json::from_str(json).unwrap();
+            assert_eq!(
+                config.trusted_issuer_loader_type, expected_type,
+                "Loader type mismatch for JSON: {}",
+                json
+            );
+            assert_eq!(
+                config.trusted_issuer_loader_workers, expected_workers,
+                "Worker count mismatch for JSON: {}",
+                json
+            );
+        }
+
+        // Invalid JSON values should produce errors
+        let invalid_cases = vec![
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": "INVALID"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": -1}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS": "not_a_number"}"#,
+            r#"{"CEDARLING_APPLICATION_NAME": "", "CEDARLING_TRUSTED_ISSUER_LOADER_TYPE": 123}"#,
+        ];
+
+        for json in invalid_cases {
+            let result: Result<BootstrapConfigRaw, _> = serde_json::from_str(json);
+            result.expect_err(&format!("Should fail to parse invalid JSON: {json}"));
+        }
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped minimum value
+    #[test]
+    fn test_trusted_issuer_loader_claps_min() {
+        with_env_vars(&[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", "0")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.trusted_issuer_loader_workers,
+                WorkersCount::MIN,
+                "Default worker count should be {}",
+                WorkersCount::MIN.get()
+            );
+        });
+    }
+
+    /// Tests `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS` to get clamped max value
+    #[test]
+    fn test_trusted_issuer_loader_claps_max() {
+        let max_val = (WorkersCount::MAX.get() + 100).to_string();
+
+        with_env_vars(
+            &[("CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS", max_val.as_str())],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+                assert_eq!(
+                    config.trusted_issuer_loader_workers,
+                    WorkersCount::MAX,
+                    "Default worker count should be {}",
+                    WorkersCount::MAX.get()
+                );
             },
         );
     }

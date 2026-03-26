@@ -4,6 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from typing import Optional, List, final, Dict, Any
+from enum import Enum
 
 @final
 class BootstrapConfig:
@@ -104,33 +105,6 @@ class Cedarling:
         """
         ...
 
-    def authorize(self, request: Request) -> AuthorizeResult:
-        """
-        Execute authorize request.
-
-        Args:
-            request: Request struct for authorize.
-
-        Returns:
-            AuthorizeResult: The authorization result.
-
-        Raises:
-            ProcessTokens: Error encountered while processing JWT token data.
-            ActionError: Error encountered while parsing Action to EntityUid.
-            CreateContextError: Error encountered while validating context according to the schema.
-            InvalidPrincipalError: Error encountered while creating cedar_policy::Request for principal.
-            ValidateEntitiesError: Error encountered while validating the entities to the schema.
-            EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
-            BuildContextError: Error encountered while building the request context.
-            IdTokenTrustModeError: Error encountered while running on strict id token trust mode.
-            BuildEntityError: Error encountered while building Cedar entities.
-            ExecuteRuleError: Error encountered while executing the rule for principals.
-            BuildUnsignedRoleEntityError: Error building Role entity for unsigned request.
-            RequestValidationError: Error encountered while validating the request.
-            RuntimeError: If JSON conversion of tokens or context fails.
-        """
-        ...
-
     def authorize_unsigned(self, request: RequestUnsigned) -> AuthorizeResult:
         """
         Authorize request with unsigned data.
@@ -177,7 +151,6 @@ class Cedarling:
             ValidateEntitiesError: Error encountered while validating the entities to the schema.
             EntitiesToJsonError: Error encountered while parsing all entities to json for logging.
             BuildContextError: Error encountered while building the request context.
-            IdTokenTrustModeError: Error encountered while running on strict id token trust mode.
             BuildEntityError: Error encountered while building Cedar entities.
             ExecuteRuleError: Error encountered while executing the rule for principals.
             MultiIssuerValidationError: Error encountered during multi-issuer token validation.
@@ -271,20 +244,112 @@ class Cedarling:
 
     def shut_down(self): ...
 
-@final
-class Request:
-    tokens: Dict[str, str]
-    action: str
-    resource: EntityData
-    context: Dict[str, Any]
+    def push_data_ctx(
+        self, key: str, value: Any, ttl_secs: Optional[int] = None
+    ) -> None:
+        """
+        Push a value into the data store with an optional TTL.
 
-    def __init__(
-        self,
-        tokens: Dict[str, Any],
-        action: str,
-        resource: EntityData,
-        context: Dict[str, Any],
-    ) -> None: ...
+        If the key already exists, the value will be replaced.
+        If TTL is not provided, the default TTL from configuration is used.
+
+        Args:
+            key: The key for the data entry.
+            value: The value to store. Can be any JSON-serializable Python object.
+            ttl_secs: Optional TTL in seconds (None uses default from config).
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
+
+    def get_data_ctx(self, key: str) -> Optional[Any]:
+        """
+        Get a value from the data store by key.
+
+        Returns None if the key doesn't exist or the entry has expired.
+        If metrics are enabled, increments the access count for the entry.
+
+        Args:
+            key: The key to retrieve.
+
+        Returns:
+            The value as a Python object, or None if not found.
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
+
+    def get_data_entry_ctx(self, key: str) -> Optional["DataEntry"]:
+        """
+        Get a data entry with full metadata by key.
+
+        Returns None if the key doesn't exist or the entry has expired.
+        Includes metadata like creation time, expiration, access count, and type.
+
+        Args:
+            key: The key to retrieve.
+
+        Returns:
+            A DataEntry object with metadata, or None if not found.
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
+
+    def remove_data_ctx(self, key: str) -> bool:
+        """
+        Remove a value from the data store by key.
+
+        Args:
+            key: The key to remove.
+
+        Returns:
+            True if the key existed and was removed, False otherwise.
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
+
+    def clear_data_ctx(self) -> None:
+        """
+        Clear all entries from the data store.
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
+
+    def list_data_ctx(self) -> List["DataEntry"]:
+        """
+        List all entries with their metadata.
+
+        Returns a list of DataEntry objects containing key, value, type, and timing metadata.
+
+        Returns:
+            A list of DataEntry objects.
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
+
+    def get_stats_ctx(self) -> "DataStoreStats":
+        """
+        Get statistics about the data store.
+
+        Returns current entry count, capacity limits, and configuration state.
+
+        Returns:
+            A DataStoreStats object.
+
+        Raises:
+            DataErrorCtx: If the operation fails.
+        """
+        ...
 
 @final
 class RequestUnsigned:
@@ -333,8 +398,6 @@ class EntityData:
 @final
 class AuthorizeResult:
     def is_allowed(self) -> bool: ...
-    def workload(self) -> AuthorizeResultResponse | None: ...
-    def person(self) -> AuthorizeResultResponse | None: ...
     def principal(self, principal: str) -> AuthorizeResultResponse | None: ...
     def request_id(self) -> str: ...
 
@@ -387,3 +450,93 @@ class MultiIssuerAuthorizeResult:
     def is_allowed(self) -> bool: ...
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
+
+@final
+class DataEntry:
+    """
+    A data entry in the DataStore with value and metadata.
+
+    Attributes:
+        key: The key for this entry.
+        data_type: The inferred Cedar type of the value.
+        created_at: Timestamp when this entry was created (RFC 3339 format).
+        expires_at: Timestamp when this entry expires (RFC 3339 format), or None if no TTL.
+        access_count: Number of times this entry has been accessed.
+    """
+
+    key: str
+    data_type: "CedarType"
+    created_at: str
+    expires_at: Optional[str]
+    access_count: int
+
+    def value(self) -> Any:
+        """
+        Get the value stored in this entry.
+
+        Returns:
+            The value as a Python object (dict, list, str, int, float, bool, etc.).
+        """
+        ...
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+
+@final
+class DataStoreStats:
+    """
+    Statistics about the DataStore.
+
+    Attributes:
+        entry_count: Number of entries currently stored.
+        max_entries: Maximum number of entries allowed (0 = unlimited).
+        max_entry_size: Maximum size per entry in bytes (0 = unlimited).
+        metrics_enabled: Whether metrics tracking is enabled.
+        total_size_bytes: Total size of all entries in bytes (approximate, based on JSON serialization).
+        avg_entry_size_bytes: Average size per entry in bytes (0 if no entries).
+        capacity_usage_percent: Percentage of capacity used (0.0-100.0, based on entry count).
+        memory_alert_threshold: Memory usage threshold percentage (from config).
+        memory_alert_triggered: Whether memory usage exceeds the alert threshold.
+    """
+
+    entry_count: int
+    max_entries: int
+    max_entry_size: int
+    metrics_enabled: bool
+    total_size_bytes: int
+    avg_entry_size_bytes: int
+    capacity_usage_percent: float
+    memory_alert_threshold: float
+    memory_alert_triggered: bool
+
+class CedarType(Enum):
+    """
+    Represents the type of a Cedar value based on JSON structure.
+
+    This is an enum with the following variants:
+        - String: String type
+        - Long: Long (integer) type
+        - Bool: Boolean type
+        - Set: Set (array) type
+        - Record: Record (object) type
+        - Entity: Entity reference type
+        - Ip: IP address extension type (ipaddr)
+        - Decimal: Decimal extension type
+        - DateTime: DateTime extension type
+        - Duration: Duration extension type
+    """
+
+    String = "String"
+    Long = "Long"
+    Bool = "Bool"
+    Set = "Set"
+    Record = "Record"
+    Entity = "Entity"
+    Ip = "Ip"
+    Decimal = "Decimal"
+    DateTime = "DateTime"
+    Duration = "Duration"
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: "CedarType") -> bool: ...

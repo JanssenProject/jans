@@ -67,13 +67,6 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    IdTokenTrustModeError,
-    AuthorizeError,
-    "Error encountered while running on strict id token trust mode"
-);
-
-create_exception!(
-    authorize_errors,
     BuildEntityError,
     AuthorizeError,
     "Error encountered while building Cedar entities"
@@ -128,9 +121,8 @@ impl ErrorPayload {
 macro_rules! errors_functions {
     ($($case_name:ident => $error_class:ident),*) => {
         // is used to map CedarlingAuthorizeError to python error
-        #[allow(clippy::boxed_local)]
-        pub fn authorize_error_to_py(err: Box<CedarlingAuthorizeError>) -> PyErr {
-                let err_args = ErrorPayload(*err);
+        pub fn authorize_error_to_py(err: CedarlingAuthorizeError) -> PyErr {
+                let err_args = ErrorPayload(err);
                 match err_args.0 {
                     $(CedarlingAuthorizeError::$case_name(_) => {
                         PyErr::new::<$error_class, _>(err_args)
@@ -159,7 +151,6 @@ errors_functions! {
     ValidateEntities => ValidateEntitiesError,
     EntitiesToJson => EntitiesToJsonError,
     BuildContext => BuildContextError,
-    IdTokenTrustMode => IdTokenTrustModeError,
     BuildEntity => BuildEntityError,
     ExecuteRule => ExecuteRuleError,
     BuildUnsignedRoleEntity => BuildUnsignedRoleEntityError,

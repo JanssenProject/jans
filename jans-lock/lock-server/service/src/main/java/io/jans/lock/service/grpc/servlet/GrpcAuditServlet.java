@@ -112,7 +112,7 @@ public class GrpcAuditServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ServletAdapter adapter = adapterRef.get();
         if (adapter != null) {
-            HttpServletRequest wrappedRequest = new GrpcRequestWrapper(req);
+            HttpServletRequest wrappedRequest = GrpcRequestWrapper.isGrpcRequest(req) ? new GrpcRequestWrapper(req) : req;
             adapter.doPost(wrappedRequest, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
@@ -123,7 +123,7 @@ public class GrpcAuditServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ServletAdapter adapter = adapterRef.get();
         if (adapter != null) {
-            HttpServletRequest wrappedRequest = new GrpcRequestWrapper(req);
+            HttpServletRequest wrappedRequest = GrpcRequestWrapper.isGrpcRequest(req) ? new GrpcRequestWrapper(req) : req;
             adapter.doGet(wrappedRequest, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "gRPC not initialized yet");
@@ -168,9 +168,7 @@ public class GrpcAuditServlet extends HttpServlet {
 			}
 
 			// 2. Check if it's gRPC request
-	        String contentType = request.getContentType();
-	        boolean isGrpcRequest = contentType != null && 
-	                             contentType.startsWith("application/grpc");
+	        boolean isGrpcRequest = isGrpcRequest(request);
 	        if (isGrpcRequest) {
 	        	this.isAsynRequest = true;
 	        } else {
@@ -183,7 +181,7 @@ public class GrpcAuditServlet extends HttpServlet {
 			String originalURI = request.getRequestURI();
 			String contextPath = request.getContextPath();
 
-			if (contextPath != null && !contextPath.isEmpty() && originalURI.startsWith(contextPath)) {
+			if (isGrpcRequest && contextPath != null && !contextPath.isEmpty() && originalURI.startsWith(contextPath)) {
 				this.requestURI = originalURI.substring(contextPath.length());
 				this.servletPath = this.requestURI;
 			} else {
@@ -279,6 +277,12 @@ public class GrpcAuditServlet extends HttpServlet {
 			} catch (NumberFormatException e) {
 				return -1;
 			}
+		}
+
+		public static boolean isGrpcRequest(HttpServletRequest request) {
+			String contentType = request.getContentType();
+	        boolean isGrpcRequest = contentType != null && contentType.startsWith("application/grpc");
+			return isGrpcRequest;
 		}
 	}
 }

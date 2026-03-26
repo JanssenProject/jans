@@ -35,8 +35,11 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RedirectionUriService;
 import io.jans.service.cdi.util.CdiUtil;
-import org.apache.commons.lang3.StringUtils;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -45,9 +48,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -107,6 +107,8 @@ public class JwtAuthorizationRequest {
     private Jwt nestedJwt;
 
     private final AppConfiguration appConfiguration;
+    private boolean isJws;
+    private boolean isJwe;
 
     public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException {
         try {
@@ -156,15 +158,20 @@ public class JwtAuthorizationRequest {
                 Jwe jwe = jweDecrypter.decrypt(encodedJwt);
 
                 nestedJwt = jwe.getSignedJWTPayload();
-                if (nestedJwt != null) {
-                    keyId = nestedJwt.getHeader().getKeyId();
-                    if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
-                        throw new InvalidJwtException("The Nested JWT signature is not valid");
-                    }
+                if (nestedJwt == null) {
+                    // JWE must contain a signed JWT (nested JWS) to ensure integrity of the request object.
+                    // Plain JSON payloads inside JWE are rejected to prevent signature bypass attacks.
+                    // See RFC 9101 (JAR) - request objects must be signed to provide integrity protection.
+                    throw new InvalidJwtException("JWE request object must contain a nested signed JWT (JWS). Plain JSON payloads are not allowed.");
+                }
+                keyId = nestedJwt.getHeader().getKeyId();
+                if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
+                    throw new InvalidJwtException("The Nested JWT signature is not valid");
                 }
 
                 loadHeader(jwe.getHeader().toJsonString());
                 loadPayload(jwe.getClaims().toJsonString());
+                isJwe = true;
             } else if (parts.length == 2 || parts.length == 3) {
                 String encodedHeader = parts[0];
                 String encodedClaim = parts[1];
@@ -189,6 +196,7 @@ public class JwtAuthorizationRequest {
                 }
 
                 loadPayload(payloadString);
+                isJws = true;
             } else {
                 throw new InvalidJwtException("The JWT is not well formed");
             }
@@ -618,5 +626,13 @@ public class JwtAuthorizationRequest {
                         .build());
             }
         }
+    }
+
+    public boolean isJws() {
+        return isJws;
+    }
+
+    public boolean isJwe() {
+        return isJwe;
     }
 }

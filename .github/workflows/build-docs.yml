@@ -37,14 +37,15 @@ permissions:
 jobs:
   build:
     permissions:
-      contents: write  # for Git to git push
+      contents: read
+      id-token: write  # keyless Cosign signing via Sigstore OIDC
     if: github.repository == 'JanssenProject/jans'
     name: Deploy docs
     runs-on: ubuntu-latest
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
@@ -73,7 +74,7 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
-          cp mkdocs.yml ../
+          cp mkdocs.yml CHANGELOG.md ../
 
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
@@ -96,20 +97,26 @@ jobs:
         run: |
           cp CHANGELOG.md docs/CHANGELOG.md
 
-      - name: Copy generated chart from main
-        run: |
-          helm package charts/janssen/
-          helm package charts/janssen-all-in-one/
-          cp janssen-*.tgz ../
-
       - name: Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
+
+      - name: Package and sign Helm charts with Cosign
+        run: |
+          helm package charts/janssen/
+          helm package charts/janssen-all-in-one/
+          for chart in janssen-*.tgz; do
+            cosign sign-blob --yes --bundle "${chart}.sigstore.json" "$chart"
+          done
+          cp janssen-*.tgz janssen-*.tgz.sigstore.json ../
 
       - name: Configure Git
         run: |
@@ -156,6 +163,19 @@ jobs:
 
          sudo rm -rf temp
 
+      - name: Use latest template overrides from main
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+        run: |
+          git show origin/main:docs/overrides/main.html > docs/overrides/main.html
+
+      - name: Enable Reo and Scarf tracking for versioned docs
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'published')
+        run: |
+          sed -i 's/enable_scarf_pixel: false/enable_scarf_pixel: true/' mkdocs.yml
+          sed -i 's/enable_reo_flag: false/enable_reo_flag: true/' mkdocs.yml
+          echo "Tracking flags status:"
+          grep -E 'enable_scarf_pixel|enable_reo_flag' mkdocs.yml
+
       - name: mike deploy ${{ github.event.inputs.version }}
         if: >-
           github.event_name == 'workflow_dispatch'
@@ -201,9 +221,9 @@ jobs:
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout -f gh-pages
           git pull origin gh-pages
-          mv ../janssen-*.tgz ./charts/
+          mv ../janssen-*.tgz ../janssen-*.tgz.sigstore.json ./charts/
           cd ./charts
-          git add janssen-*.tgz && git update-index --refresh
+          git add janssen-*.tgz janssen-*.tgz.sigstore.json && git update-index --refresh
           helm repo index .
           git add index.yaml && git update-index --refresh
           cd ..
@@ -226,10 +246,7 @@ jobs:
               git rm -r $folder/admin/reference/javadocs || echo "Nothing to remove"
             fi
           done
-          sed -i -e "s/placeholder-scarf-pixel-url/https:\/\/static.scarf.sh\/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9/g" ${STABLE}/overrides/main.html
-          sed -i -e "s/enable_reo_flag/True/g" ${STABLE}/overrides/main.html
-          git add ${STABLE}/overrides/main.html && git update-index --refresh
-          git diff-index --quiet HEAD -- || git commit -S -m "docs: update scarf pixel url and enable reo integration"
+          git diff-index --quiet HEAD -- || git commit -S -m "docs: update version references"
           echo "${STABLE}" > stable.txt
           git add stable.txt && git update-index --refresh
           git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"

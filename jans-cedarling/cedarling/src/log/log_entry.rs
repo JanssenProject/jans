@@ -17,7 +17,10 @@ use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
 use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
+use rand::Rng;
+use rand::{SeedableRng, rngs::StdRng};
 use smol_str::{SmolStr, ToSmolStr};
+use std::sync::{LazyLock, Mutex};
 use uuid7::Uuid;
 
 /// ISO-8601 time format for [`chrono`]
@@ -99,6 +102,10 @@ impl Indexed for LogEntry {
 impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
     }
 }
 
@@ -295,14 +302,6 @@ pub(crate) struct DecisionLogEntry {
     pub policystore_version: SmolStr,
     /// describe what principal was active on authorization request
     pub principal: Vec<SmolStr>,
-    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_USER_CLAIMS` property, that must be present in the Cedar User entity
-    #[serde(rename = "User")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user: Option<HashMap<String, serde_json::Value>>,
-    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` property, that must be present in the Cedar Workload entity
-    #[serde(rename = "Workload")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub workload: Option<HashMap<String, serde_json::Value>>,
     /// If this Cedarling has registered with a Lock Server, what is the `client_id` it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
@@ -319,6 +318,16 @@ pub(crate) struct DecisionLogEntry {
     pub tokens: LogTokensInfo,
     /// time in micro-seconds spent for decision
     pub decision_time_micro_sec: i64,
+    /// Information about pushed data that was injected into the context
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pushed_data: Option<PushedDataInfo>,
+}
+
+/// Information about pushed data injected into the authorization context
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub(crate) struct PushedDataInfo {
+    /// Keys of the data entries that were injected
+    pub keys: Vec<SmolStr>,
 }
 
 impl DecisionLogEntry {
@@ -359,6 +368,14 @@ impl Loggable for DecisionLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
     }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        self.base.get_log_kind()
+    }
+}
+
+fn get_std_rng() -> StdRng {
+    StdRng::try_from_rng(&mut rand::rngs::SysRng).expect("failed to seed StdRng from OS RNG")
 }
 
 /// Custom uuid generation function to avoid using [`std::time`] because it makes panic in WASM
@@ -370,21 +387,44 @@ pub(crate) fn gen_uuid7() -> Uuid {
     use std::sync::{LazyLock, Mutex};
     use uuid7::V7Generator;
 
-    static GLOBAL_V7_GENERATOR: LazyLock<
-        Mutex<V7Generator<uuid7::generator::with_rand08::Adapter<rand::rngs::OsRng>>>,
-    > = LazyLock::new(|| Mutex::new(V7Generator::with_rand08(rand::rngs::OsRng)));
-
-    // from docs
+    // from docs uuid7 crate
     // The rollback_allowance parameter specifies the amount of unix_ts_ms rollback that is considered significant.
     // A suggested value is 10_000 (milliseconds).
     const ROLLBACK_ALLOWANCE: u64 = 10_000;
 
-    let mut g = GLOBAL_V7_GENERATOR.lock().expect("mutex should be locked");
+    static GLOBAL_V7_GENERATOR: LazyLock<
+        Mutex<V7Generator<uuid7::generator::with_rand010::Adapter<StdRng>>>,
+    > = LazyLock::new(|| {
+        let mut g = V7Generator::with_rand010(get_std_rng());
+        g.set_rollback_allowance(ROLLBACK_ALLOWANCE);
+        Mutex::new(g)
+    });
+
+    let mut g = GLOBAL_V7_GENERATOR
+        .lock()
+        .expect("GLOBAL_V7_GENERATOR should be locked");
 
     let custom_unix_ts_ms = chrono::Utc::now().timestamp_millis();
 
     #[allow(clippy::cast_sign_loss)]
-    g.generate_or_reset_core(custom_unix_ts_ms as u64, ROLLBACK_ALLOWANCE)
+    g.generate_or_reset_with_ts(custom_unix_ts_ms as u64)
+}
+
+/// Generates a new `UUIDv4` object utilizing the random number generator inside.
+///
+/// The implementation is based on the `uuid7::uuid4` function.
+pub(crate) fn gen_uuid4() -> Uuid {
+    static RND_UUID4: LazyLock<Mutex<StdRng>> = LazyLock::new(|| Mutex::new(get_std_rng()));
+
+    let mut bytes = [0u8; 16];
+    RND_UUID4
+        .lock()
+        .expect("RND_UUID4 should be locked")
+        .fill_bytes(&mut bytes);
+
+    bytes[6] = (bytes[6] & 0x0F) | 0x40;
+    bytes[8] = (bytes[8] & 0x3F) | 0x80;
+    Uuid::from(bytes)
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -500,6 +540,10 @@ impl Indexed for BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
+    }
+
+    fn get_log_kind(&self) -> Option<LogType> {
+        Some(self.log_kind)
     }
 }
 

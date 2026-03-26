@@ -9,7 +9,7 @@ use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use tokio::runtime::Runtime;
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, IdTokenTrustMode,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
     JsonRule, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 
@@ -42,14 +42,12 @@ static BSCONFIG_LOCAL: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapCon
     },
     jwt_config: JwtConfig::new_without_validation(),
     authorization_config: AuthorizationConfig {
-        use_user_principal: true,
-        use_workload_principal: true,
         principal_bool_operator: JsonRule::default(),
-        id_token_trust_mode: IdTokenTrustMode::Never,
         ..Default::default()
     },
-    entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+    entity_builder_config: EntityBuilderConfig::default(),
     lock_config: None,
     max_base64_size: None,
     max_default_entities: None,
+    data_store_config: DataStoreConfig::default(),
 });

@@ -136,17 +136,6 @@ policy-store/
 
 Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribution.
 
-### ID Token Trust Mode
-
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
-
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
-
 ### Testing Configuration
 
 For testing scenarios, you may want to disable JWT validation. You can configure this in your bootstrap configuration:
@@ -154,9 +143,99 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```json
 {
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled"
 }
 ```
 
 For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/cedarling-properties.md).
+
+## Context Data API
+
+The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.
+
+These methods are available on the underlying UniFFI-generated `Cedarling` instance returned by `getCedarling()`.
+In Java/Kotlin bindings, `JsonValue` is represented as a plain `String`.
+
+```java
+import uniffi.cedarling_uniffi.*;
+import org.json.JSONObject;
+import java.util.List;
+
+CedarlingAdapter adapter = new CedarlingAdapter();
+adapter.loadFromJson(bootstrapJson);
+Cedarling cedarling = adapter.getCedarling();
+
+// Push data with optional TTL (in seconds)
+// The TTL parameter is a nullable Long representing seconds.
+// Pass null to use the default TTL from configuration, or pass a Long value for a custom TTL.
+String value = "{\"role\":[\"admin\",\"editor\"],\"country\":\"US\"}";
+cedarling.pushDataCtx("user:123", value, null);  // null uses default TTL
+cedarling.pushDataCtx("config:app", value, 300L);  // Custom TTL: 300 seconds (5 minutes)
+
+// Get data
+String result = cedarling.getDataCtx("user:123");
+if (result != null) {
+    JSONObject data = new JSONObject(result);
+}
+
+// Get data entry
+DataEntry entry = cedarling.getDataEntryCtx("user:123");
+if (entry != null) {
+    System.out.println("Key: " + entry.getKey());
+    System.out.println("Data type: " + entry.getDataType());
+    System.out.println("Created at: " + entry.getCreatedAt());
+}
+
+// Remove / clear / list / stats
+boolean removed = cedarling.removeDataCtx("user:123");
+cedarling.clearDataCtx();
+List<DataEntry> entries = cedarling.listDataCtx();
+DataStoreStats stats = cedarling.getStatsCtx();
+```
+
+### Using Data in Cedar Policies
+
+Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
+
+```cedar
+permit(
+    principal,
+    action == Action::"read",
+    resource
+) when {
+    context.data has principal.id &&
+    context.data[principal.id].role.contains("admin")
+};
+```
+
+The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+### Error Handling
+
+The Context Data API methods throw `DataException` with specific variants:
+
+- `DataException.InvalidKey()` - Thrown when the key is empty or invalid
+- `DataException.KeyNotFound(String key)` - Thrown when attempting to access a non-existent key
+- `DataException.StorageLimitExceeded(Long max)` - Thrown when the storage limit is exceeded
+- `DataException.TtlExceeded(Long provided, Long max)` - Thrown when the provided TTL exceeds the maximum allowed TTL
+- `DataException.ValueTooLarge(Long size, Long max)` - Thrown when the value size exceeds the maximum allowed size
+- `DataException.SerializationException(String message)` - Thrown when serialization/deserialization fails
+
+Example error handling:
+
+```java
+try {
+    cedarling.pushDataCtx("", "{\"data\":\"value\"}", null); // Empty key
+} catch (DataException.InvalidKey e) {
+    System.out.println("Invalid key provided");
+} catch (DataException.StorageLimitExceeded e) {
+    System.out.println("Storage limit exceeded: max=" + e.getMax());
+} catch (DataException.SerializationException e) {
+    System.out.println("Serialization error: " + e.getMessage());
+} catch (DataException e) {
+    System.out.println("Data operation failed: " + e);
+}
+```
+
+Note: The `CedarlingAdapter` wrapper performs additional validation and may throw `DataException.InvalidKey()` for null or empty keys, or `DataException.SerializationException()` for null values before calling the underlying Rust implementation.
+```

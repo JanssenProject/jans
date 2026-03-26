@@ -7,7 +7,9 @@
 //! It is usefull to use it with DI container
 use derive_more::derive::Display;
 use serde::Serialize;
-use uuid7::{Uuid, uuid4};
+use uuid7::Uuid;
+
+use crate::log::gen_uuid4;
 
 /// Value is used as ID for application
 /// represents a unique ID for application
@@ -18,7 +20,7 @@ pub(crate) struct PdpID(pub(crate) Uuid);
 impl PdpID {
     pub(crate) fn new() -> Self {
         // we use uuid v4 because it is generated based on random numbers.
-        PdpID(uuid4())
+        PdpID(gen_uuid4())
     }
 }
 

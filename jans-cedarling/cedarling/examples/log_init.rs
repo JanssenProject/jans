@@ -10,8 +10,8 @@
 #![cfg(not(target_family = "wasm"))]
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, EntityBuilderConfig, JsonRule, JwtConfig,
-    LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
+    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityBuilderConfig,
+    JwtConfig, LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig,
     PolicyStoreSource, log_config::StdOutLoggerMode,
 };
 use std::env;
@@ -56,16 +56,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
         jwt_config: JwtConfig::new_without_validation(),
-        authorization_config: AuthorizationConfig {
-            use_user_principal: true,
-            use_workload_principal: true,
-            principal_bool_operator: JsonRule::default(),
-            ..Default::default()
-        },
-        entity_builder_config: EntityBuilderConfig::default().with_user().with_workload(),
+        authorization_config: AuthorizationConfig::default(),
+        entity_builder_config: EntityBuilderConfig::default(),
         lock_config: None,
         max_default_entities: None,
         max_base64_size: None,
+        data_store_config: DataStoreConfig::default(),
     })
     .await?;
 

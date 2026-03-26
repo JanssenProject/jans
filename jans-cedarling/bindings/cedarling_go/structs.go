@@ -5,35 +5,6 @@ import (
 	"fmt"
 )
 
-// Represents a cedarling request
-type Request struct {
-	Tokens   map[string]string
-	Action   string
-	Resource EntityData
-	Context  any
-}
-
-func (r Request) MarshalJSON() ([]byte, error) {
-	context := r.Context
-	if context == nil {
-		context = json.RawMessage(`{}`)
-	}
-
-	aux := struct {
-		Tokens   map[string]string `json:"tokens"`
-		Action   string            `json:"action"`
-		Resource EntityData        `json:"resource"`
-		Context  any               `json:"context"`
-	}{
-		Tokens:   r.Tokens,
-		Action:   r.Action,
-		Resource: r.Resource,
-		Context:  context,
-	}
-	return json.Marshal(aux)
-
-}
-
 // Represents a cedarling principal or resource entity
 type EntityData struct {
 	CedarMapping CedarEntityMapping
@@ -79,8 +50,6 @@ func (e *EntityData) UnmarshalJSON(data []byte) error {
 
 // Represents the result of an authorization request
 type AuthorizeResult struct {
-	Workload   *CedarResponse           `json:"workload,omitempty"`
-	Person     *CedarResponse           `json:"person,omitempty"`
 	Principals map[string]CedarResponse `json:"principals"`
 	Decision   bool                     `json:"decision"`
 	RequestID  string                   `json:"request_id"`
@@ -249,4 +218,27 @@ type MultiIssuerAuthorizeResult struct {
 	Response  CedarResponse `json:"response"`
 	Decision  bool          `json:"decision"`
 	RequestID string        `json:"request_id"`
+}
+
+// DataEntry represents a single entry in the data store with metadata
+type DataEntry struct {
+	Key         string `json:"key"`
+	Value       any    `json:"value"`
+	DataType    string `json:"data_type"`
+	CreatedAt   string `json:"created_at"`
+	ExpiresAt   *string `json:"expires_at,omitempty"`
+	AccessCount uint64  `json:"access_count"`
+}
+
+// DataStoreStats represents statistics about the data store
+type DataStoreStats struct {
+	EntryCount            uint64  `json:"entry_count"`
+	MaxEntries            uint64  `json:"max_entries"`
+	MaxEntrySize          uint64  `json:"max_entry_size"`
+	MetricsEnabled        bool    `json:"metrics_enabled"`
+	TotalSizeBytes        uint64  `json:"total_size_bytes"`
+	AvgEntrySizeBytes     uint64  `json:"avg_entry_size_bytes"`
+	CapacityUsagePercent  float64 `json:"capacity_usage_percent"`
+	MemoryAlertThreshold  float64 `json:"memory_alert_threshold"`
+	MemoryAlertTriggered  bool    `json:"memory_alert_triggered"`
 }

@@ -11,10 +11,10 @@ use std::str::FromStr;
 use std::sync::LazyLock;
 
 use crate::common::json_rules::ApplyRuleError;
+use crate::log::gen_uuid4;
 use cedar_policy::{Decision, EntityUid, Response};
 use serde_json::json;
 use test_utils::assert_eq;
-use uuid7::uuid4;
 
 use crate::{AuthorizeResult, JsonRule};
 
@@ -43,43 +43,30 @@ fn get_result(
     person: Option<bool>,
     rule: &JsonRule,
 ) -> Result<AuthorizeResult, ApplyRuleError> {
-    let workload_response = workload.map(|workload| {
-        cedar_policy::Response::new(
-            if workload {
-                Decision::Allow
-            } else {
-                Decision::Deny
-            },
-            HashSet::new(),
-            Vec::new(),
-        )
-    });
-
-    let person_response = person.map(|person| {
-        cedar_policy::Response::new(
-            if person {
-                Decision::Allow
-            } else {
-                Decision::Deny
-            },
-            HashSet::new(),
-            Vec::new(),
-        )
-    });
-
-    AuthorizeResult::new(
-        rule,
-        workload
-            .is_some()
-            .then_some(&EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap()),
-        person
-            .is_some()
-            .then_some(&EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap()),
-        workload_response,
-        person_response,
-        // just randomly generated UUID
-        uuid4(),
-    )
+    let mut principal_responses = HashMap::new();
+    if let Some(w) = workload {
+        let uid = EntityUid::from_str("Jans::Workload::\"TestWorkloadPrincipal\"").unwrap();
+        principal_responses.insert(
+            uid,
+            cedar_policy::Response::new(
+                if w { Decision::Allow } else { Decision::Deny },
+                HashSet::new(),
+                Vec::new(),
+            ),
+        );
+    }
+    if let Some(p) = person {
+        let uid = EntityUid::from_str("Jans::User::\"TestUserPrincipal\"").unwrap();
+        principal_responses.insert(
+            uid,
+            cedar_policy::Response::new(
+                if p { Decision::Allow } else { Decision::Deny },
+                HashSet::new(),
+                Vec::new(),
+            ),
+        );
+    }
+    AuthorizeResult::new_for_many_principals(rule, principal_responses, gen_uuid4())
 }
 
 /// Test JSON Rule with `and` operator
@@ -349,12 +336,20 @@ fn test_using_eq_operator() {
     }))
     .unwrap();
 
-    let _ = get_result(None, Some(true), &rule)
-        .expect_err("should throw an error when workload is None because throw Nan");
+    let result =
+        get_result(None, Some(true), &rule).expect("should not throw error with missing variable");
+    assert_eq!(
+        result.decision, true,
+        "Decision should be ALLOW because user is ALLOW"
+    );
 
-    // we should get error in this case, but looks like it is not throwing error because we use OR operator and first condition is true
-    let _ = get_result(Some(true), None, &rule)
-        .expect("we don't expect error because we use OR operator and first condition is true");
+    // when workload is ALLOW and user missing, workload clause true, OR true
+    let result =
+        get_result(Some(true), None, &rule).expect("should not throw error with missing variable");
+    assert_eq!(
+        result.decision, true,
+        "Decision should be ALLOW because workload is ALLOW"
+    );
 }
 
 /// Test with only workload principal.
@@ -424,8 +419,12 @@ fn test_where_compare_op_eq_with_bool() {
     }))
     .unwrap();
 
-    let _ = get_result(Some(true), Some(true), &rule)
-        .expect_err("should fail when comparing using `==` operator with bool");
+    let result = get_result(Some(true), Some(true), &rule)
+        .expect("should not fail when comparing using `==` operator with bool");
+    assert_eq!(
+        result.decision, false,
+        "Decision should be DENY because string 'ALLOW' does not equal true"
+    );
 }
 
 #[test]
@@ -456,9 +455,8 @@ fn test_with_multiple_principals() {
         ),
     ]);
 
-    let result =
-        AuthorizeResult::new_for_many_principals(&rule, principal_responses, None, None, uuid4())
-            .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
+    let result = AuthorizeResult::new_for_many_principals(&rule, principal_responses, gen_uuid4())
+        .expect("Shouldn't fail to create an AuthorizeResult with multiple principals.");
 
     assert_eq!(result.decision, true, "Decision should be ALLOW");
 
