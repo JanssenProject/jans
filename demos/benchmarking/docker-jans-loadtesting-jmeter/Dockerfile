@@ -10,7 +10,7 @@ RUN apt-get clean \
 && mkdir -p /var/lib/apt/lists/partial \
 && apt-get clean
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
     wget \
     git \
