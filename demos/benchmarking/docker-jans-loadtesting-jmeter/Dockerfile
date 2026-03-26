@@ -10,8 +10,18 @@ RUN apt-get clean \
 && mkdir -p /var/lib/apt/lists/partial \
 && apt-get clean
 
-RUN apt-get update \
-    &&  apt-get install openjdk-8-jre-headless wget git bash python3 python3-dev lsb-core python3-setuptools cmake build-essential apt-utils python3-pip -y
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jre-headless \
+    wget \
+    git \
+    bash \
+    python3 \
+    python3-dev \
+    cmake \
+    build-essential \
+    apt-utils \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
 # ===============
 # Environmental Variables
