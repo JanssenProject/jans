@@ -23,6 +23,7 @@ import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -146,14 +147,20 @@ public class AdminUISecurityService {
             log.info("Uploading policy-store : {}", cjarDocument.getFileName());
 
             InputStream cjarStream = adminUIPolicyStore.getPolicyStore();
-            validateInputStream(cjarStream);
+            //copy into a variable so that it can be used later
+            byte[] cjarBytes = cjarStream.readAllBytes();
+
+            InputStream cjarStreamForValidation = new ByteArrayInputStream(cjarBytes);
+            InputStream cjarStreamForUpload  = new ByteArrayInputStream(cjarBytes);
+
+            validateInputStream(cjarStreamForValidation);
 
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             String policyStorePath = resolvePolicyStorePath(auiConfiguration);
 
             // Validate domain inside policy store
-            validatePolicyStoreDomain(cjarStream, auiConfiguration.getAuiWebServerHost());
+            validatePolicyStoreDomain(cjarStreamForValidation, auiConfiguration.getAuiWebServerHost());
 
             Path path = Paths.get(policyStorePath);
 
@@ -161,7 +168,7 @@ public class AdminUISecurityService {
             backupExistingPolicyStore(path);
 
             // Upload new file
-            Files.copy(cjarStream, path, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(cjarStreamForUpload, path, StandardCopyOption.REPLACE_EXISTING);
 
             log.info("Uploaded policy-store : {}", cjarDocument.getFileName());
 
