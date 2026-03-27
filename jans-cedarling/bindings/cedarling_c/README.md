@@ -256,6 +256,38 @@ ret = cedarling_get_logs_by_request_id(instance_id, "req-123", &logs);
 cedarling_free_string_array(&logs);
 ```
 
+### Trusted Issuer Loading Info
+
+When a policy store includes `trusted-issuers/` entries, you can inspect loading status:
+
+```c
+bool loaded = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "issuer_id");
+bool loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(
+    instance_id,
+    "https://issuer.example.org"
+);
+size_t total = cedarling_total_issuers(instance_id);
+size_t loaded_count = cedarling_loaded_trusted_issuers_count(instance_id);
+
+CedarlingStringArray loaded_ids;
+ret = cedarling_loaded_trusted_issuer_ids(instance_id, &loaded_ids);
+if (ret == 0) {
+    for (size_t i = 0; i < loaded_ids.COUNT; i++) {
+        printf("Loaded trusted issuer: %s\n", loaded_ids.ITEMS[i]);
+    }
+}
+cedarling_free_string_array(&loaded_ids);
+
+CedarlingStringArray failed_ids;
+ret = cedarling_failed_trusted_issuer_ids(instance_id, &failed_ids);
+if (ret == 0) {
+    for (size_t i = 0; i < failed_ids.COUNT; i++) {
+        printf("Failed trusted issuer: %s\n", failed_ids.ITEMS[i]);
+    }
+}
+cedarling_free_string_array(&failed_ids);
+```
+
 ### Cleanup
 
 ```c
@@ -302,6 +334,17 @@ cedarling_clear_last_error();
 |----------|-------------|
 | `cedarling_authorize_unsigned(instance_id, request, result)` | Authorize with custom principals |
 | `cedarling_authorize_multi_issuer(instance_id, request, result)` | Authorize with JWT tokens |
+
+### Trusted Issuer Loading Info
+
+| Function | Description |
+|----------|-------------|
+| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_id)` | Check loaded status by issuer ID |
+| `cedarling_is_trusted_issuer_loaded_by_iss(instance_id, iss_claim)` | Check loaded status by issuer `iss` claim |
+| `cedarling_total_issuers(instance_id)` | Get total number of discovered trusted issuers |
+| `cedarling_loaded_trusted_issuers_count(instance_id)` | Get number of successfully loaded trusted issuers |
+| `cedarling_loaded_trusted_issuer_ids(instance_id, result)` | Get IDs of successfully loaded trusted issuers |
+| `cedarling_failed_trusted_issuer_ids(instance_id, result)` | Get IDs of trusted issuers that failed to load |
 
 ### Context Data API
 
