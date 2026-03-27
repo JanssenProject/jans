@@ -71,7 +71,7 @@ public class AdminUIPolicyStore {
     public String toString() {
         return "AdminUIPolicyStore{" +
                 "document=" + document +
-                "policyStore=" + policyStore +
+                ", policyStore=" + policyStore +
                 '}';
     }
 }

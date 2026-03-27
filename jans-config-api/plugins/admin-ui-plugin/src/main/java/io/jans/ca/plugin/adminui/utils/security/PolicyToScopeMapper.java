@@ -35,10 +35,10 @@ public class PolicyToScopeMapper {
     /**
      * Generate a mapping from role names to their aggregated scopes by processing a policy-store ZIP and a resources JSON.
      *
-     * @param zipFile      the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
+     * @param zipFile       the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
      * @param resourcesJson JSON structure that maps resources and access types to scope lists (used to build the scope mapping cache)
-     * @return              a map where each key is a role name and the value is the set of resolved scope strings for that role
-     * @throws Exception    if building the scope cache or reading/parsing ZIP entries fails
+     * @return a map where each key is a role name and the value is the set of resolved scope strings for that role
+     * @throws Exception if building the scope cache or reading/parsing ZIP entries fails
      */
     public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) throws Exception {
         long startTime = System.currentTimeMillis();
@@ -59,18 +59,27 @@ public class PolicyToScopeMapper {
      *
      * @param resourcesJson JSON array of resource→accessType→scopes mappings
      * @return a map where keys are lower-cased resource identifiers and values are maps from access type
-     *         to an unmodifiable list of scope strings
+     * to an unmodifiable list of scope strings
      * @throws IOException if reading or traversing the provided JSON node fails
      */
     private Map<String, Map<String, List<String>>> buildScopeMappingCache(JsonNode resourcesJson) throws IOException {
         Map<String, Map<String, List<String>>> cache = new HashMap<>();
 
         for (JsonNode mapping : resourcesJson) {
-            String resource = mapping.get("resource").asText().toLowerCase();
-            String accessType = mapping.get("accessType").asText();
+            JsonNode resourceNode = mapping.get("resource");
+            JsonNode accessTypeNode = mapping.get("accessType");
+            JsonNode scopesNode = mapping.get("scopes");
+
+            if (resourceNode == null || accessTypeNode == null || scopesNode == null) {
+                log.warn("Skipping malformed mapping entry: missing required field");
+                continue;
+            }
+
+            String resource = resourceNode.asText().toLowerCase();
+            String accessType = accessTypeNode.asText();
             List<String> scopes = new ArrayList<>();
 
-            for (JsonNode scope : mapping.get("scopes")) {
+            for (JsonNode scope : scopesNode) {
                 scopes.add(scope.asText());
             }
 
@@ -84,7 +93,7 @@ public class PolicyToScopeMapper {
 
     /**
      * Scans the ZIP for JSON entity files under the "entities/" directory and builds a map of parent IDs to their child feature IDs.
-     *
+     * <p>
      * Each matching entity file is parsed and any discovered parent→feature relationships are added to the returned map; invalid or unreadable entity files are ignored (errors are logged).
      *
      * @param zipFile ZIP file containing entity JSON files under the "entities/" path
@@ -119,8 +128,8 @@ public class PolicyToScopeMapper {
      *
      * <p>Malformed entries or missing fields are skipped. IO parsing errors are logged and not rethrown.</p>
      *
-     * @param zipFile the ZIP archive containing the entry
-     * @param entry the ZIP entry pointing to an entity JSON file
+     * @param zipFile          the ZIP archive containing the entry
+     * @param entry            the ZIP entry pointing to an entity JSON file
      * @param parentToFeatures map that will be populated with parentId → list of featureIds; lists are created as
      *                         {@link java.util.concurrent.CopyOnWriteArrayList} when a parentId is first encountered
      */
@@ -134,13 +143,19 @@ public class PolicyToScopeMapper {
                 JsonNode uid = entity.get("uid");
                 if (uid == null) continue;
 
-                if (!GLUU_FLEX_ADMINUI_RESOURCES_FEATURES.equals(uid.get("type").asText())) continue;
+                JsonNode typeNode = uid.get("type");
+                if (typeNode == null || !GLUU_FLEX_ADMINUI_RESOURCES_FEATURES.equals(typeNode.asText())) continue;
 
-                String featureId = uid.get("id").asText();
+                JsonNode idNode = uid.get("id");
+                if (idNode == null) continue;
+                String featureId = idNode.asText();
 
                 JsonNode parents = entity.get("parents");
                 if (parents != null && parents.isArray() && !parents.isEmpty()) {
-                    String parentId = parents.get(0).get("id").asText();
+                    JsonNode firstParent = parents.get(0);
+                    JsonNode parentIdNode = firstParent != null ? firstParent.get("id") : null;
+                    if (parentIdNode == null) continue;
+                    String parentId = parentIdNode.asText();
                     parentToFeatures.computeIfAbsent(parentId, k -> new CopyOnWriteArrayList<>()).add(featureId);
                 }
             }
@@ -186,8 +201,8 @@ public class PolicyToScopeMapper {
      * Parses a single policy file from the given ZIP entry, extracts the role, resource, and actions,
      * resolves those into scopes, and merges the resulting scopes into the provided role-to-scopes map.
      *
-     * @param zipFile the ZIP archive containing the policy entry
-     * @param entry the ZIP entry for the policy file to process
+     * @param zipFile      the ZIP archive containing the policy entry
+     * @param entry        the ZIP entry for the policy file to process
      * @param roleToScopes a concurrent map that accumulates scopes per role; scopes for the extracted role
      *                     will be added to the existing set (created if absent)
      */
@@ -247,7 +262,7 @@ public class PolicyToScopeMapper {
      * @param pattern a compiled regex that contains at least one capturing group; the method
      *                extracts group 1 from each match
      * @param content the text to search for pattern matches
-     * @return        a list of group-1 match strings converted to upper case, in the order they were found
+     * @return a list of group-1 match strings converted to upper case, in the order they were found
      */
     private List<String> extractAllMatches(Pattern pattern, String content) {
         List<String> matches = new ArrayList<>();

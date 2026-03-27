@@ -169,7 +169,7 @@ public class AdminUISecurityService {
         } catch (ApplicationException e) {
             throw e;
         } catch (Exception e) {
-            log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
+            log.error(ErrorResponse.POLICY_STORE_UPLOAD_ERROR.getDescription(), e);
             throw new ApplicationException(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     e.getMessage()
