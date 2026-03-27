@@ -42,6 +42,11 @@ public class AppConfigResponse {
     @Schema(description = "Admin UI Default Policy Store path", accessMode = Schema.AccessMode.READ_WRITE)
     private String auiDefaultPolicyStorePath;
 
+    /**
+     * Retrieve the additional key-value parameters configured for the Admin UI.
+     *
+     * @return the list of additional parameters, or `null` if none are configured
+     */
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
     }
@@ -168,10 +173,20 @@ public class AppConfigResponse {
         return auiPolicyStoreUrl;
     }
 
+    /**
+     * Set the Admin UI policy store URL.
+     *
+     * @param auiPolicyStoreUrl the URL of the policy store used by the Admin UI
+     */
     public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
     }
 
+    /**
+     * Gets the default policy store path used by the Admin UI.
+     *
+     * @return the configured default policy store path, or `null` if not set
+     */
     public String getAuiDefaultPolicyStorePath() {
         return auiDefaultPolicyStorePath;
     }

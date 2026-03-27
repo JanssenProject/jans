@@ -630,9 +630,9 @@ public class AUIConfiguration {
     }
 
     /**
-     * Sets the default filesystem path used by Cedarling for the Admin UI policy store.
+     * Set the default filesystem path that Cedarling uses for the Admin UI policy store.
      *
-     * @param auiCedarlingDefaultPolicyStorePath the default policy store path to use, or `null` to unset
+     * @param auiCedarlingDefaultPolicyStorePath the default policy store path to use, or {@code null} to unset
      */
     public void setAuiCedarlingDefaultPolicyStorePath(String auiCedarlingDefaultPolicyStorePath) {
         this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;

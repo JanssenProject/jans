@@ -38,6 +38,14 @@ public class PolicyToScopeMapper {
     private static Map<String, Map<String, List<String>>> scopeMappingCache;
     private static Map<String, List<String>> parentToFeaturesMap;
 
+    /**
+     * Generate a mapping from role names to their aggregated scopes by processing a policy-store ZIP and a resources JSON.
+     *
+     * @param zipFile      the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
+     * @param resourcesJson JSON structure that maps resources and access types to scope lists (used to build the scope mapping cache)
+     * @return              a map where each key is a role name and the value is the set of resolved scope strings for that role
+     * @throws Exception    if building the scope cache or reading/parsing ZIP entries fails
+     */
     public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) throws Exception {
         long startTime = System.currentTimeMillis();
 
@@ -51,6 +59,18 @@ public class PolicyToScopeMapper {
         return processPolicies(zipFile);
     }
 
+    /**
+     * Builds a lookup cache mapping resource identifiers to access-type-to-scopes mappings.
+     *
+     * The provided `resourcesJson` is expected to be an array of objects where each object contains
+     * `resource` (string), `accessType` (string), and `scopes` (array of strings). Resource keys are
+     * normalized to lower-case when stored.
+     *
+     * @param resourcesJson JSON array of resource→accessType→scopes mappings
+     * @return a map where keys are lower-cased resource identifiers and values are maps from access type
+     *         to an unmodifiable list of scope strings
+     * @throws IOException if reading or traversing the provided JSON node fails
+     */
     private Map<String, Map<String, List<String>>> buildScopeMappingCache(JsonNode resourcesJson) throws IOException {
         Map<String, Map<String, List<String>>> cache = new HashMap<>();
 
@@ -71,6 +91,14 @@ public class PolicyToScopeMapper {
         return cache;
     }
 
+    /**
+     * Scans the ZIP for JSON entity files under the "entities/" directory and builds a map of parent IDs to their child feature IDs.
+     *
+     * Each matching entity file is parsed and any discovered parent→feature relationships are added to the returned map; invalid or unreadable entity files are ignored (errors are logged).
+     *
+     * @param zipFile ZIP file containing entity JSON files under the "entities/" path
+     * @return a map where keys are parent IDs and values are lists of feature IDs; empty if no relationships were found
+     */
     private Map<String, List<String>> loadEntityRelationships(ZipFile zipFile) {
         Map<String, List<String>> parentToFeatures = new HashMap<>();
 
@@ -90,6 +118,21 @@ public class PolicyToScopeMapper {
         return parentToFeatures;
     }
 
+    /**
+     * Parses a single entity JSON file from the ZIP and records feature → parent relationships into the provided map.
+     *
+     * <p>Reads the ZIP entry as JSON; if the root is an array, iterates its elements and for each element whose
+     * `uid.type` equals {@code GLUU_FLEX_ADMINUI_RESOURCES_FEATURES} extracts `uid.id` as the feature ID and,
+     * if a non-empty `parents` array exists, takes the first parent's `id` and adds the feature ID to the
+     * list stored under that parent ID in {@code parentToFeatures}.</p>
+     *
+     * <p>Malformed entries or missing fields are skipped. IO parsing errors are logged and not rethrown.</p>
+     *
+     * @param zipFile the ZIP archive containing the entry
+     * @param entry the ZIP entry pointing to an entity JSON file
+     * @param parentToFeatures map that will be populated with parentId → list of featureIds; lists are created as
+     *                         {@link java.util.concurrent.CopyOnWriteArrayList} when a parentId is first encountered
+     */
     private void processEntityEntry(ZipFile zipFile, ZipEntry entry, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             JsonNode entities = objectMapper.readTree(is);
@@ -115,6 +158,13 @@ public class PolicyToScopeMapper {
         }
     }
 
+    /**
+     * Builds a mapping from role name to the set of scopes aggregated from policy files found in the ZIP.
+     *
+     * @param zipFile the ZIP archive to scan for policy files under the "policies/" directory
+     * @return a map whose keys are role names and whose values are the sets of scopes assigned to those roles
+     * @throws IllegalStateException if no policy files (*.cedar or *.cedarpl) are present in the "policies/" folder
+     */
     private Map<String, Set<String>> processPolicies(ZipFile zipFile) {
         // Use ConcurrentHashMap with CopyOnWriteArraySet for thread-safe aggregation
         Map<String, Set<String>> roleToScopes = new ConcurrentHashMap<>();
@@ -139,6 +189,15 @@ public class PolicyToScopeMapper {
         return roleToScopes;
     }
 
+    /**
+     * Parses a single policy file from the given ZIP entry, extracts the role, resource, and actions,
+     * resolves those into scopes, and merges the resulting scopes into the provided role-to-scopes map.
+     *
+     * @param zipFile the ZIP archive containing the policy entry
+     * @param entry the ZIP entry for the policy file to process
+     * @param roleToScopes a concurrent map that accumulates scopes per role; scopes for the extracted role
+     *                     will be added to the existing set (created if absent)
+     */
     private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -176,11 +235,27 @@ public class PolicyToScopeMapper {
         }
     }
 
+    /**
+     * Extracts the first capturing-group match from the given content using the provided regex pattern.
+     *
+     * @param pattern the regular expression to apply; must contain at least one capturing group
+     * @param content the text to search for a match
+     * @return the text captured by the first capturing group, or `null` if the pattern does not match
+     */
     private String extractFirstMatch(Pattern pattern, String content) {
         Matcher matcher = pattern.matcher(content);
         return matcher.find() ? matcher.group(1) : null;
     }
 
+    /**
+     * Finds all matches of the provided regex pattern in the given content and returns the first
+     * capturing group's values converted to upper case, preserving match order.
+     *
+     * @param pattern a compiled regex that contains at least one capturing group; the method
+     *                extracts group 1 from each match
+     * @param content the text to search for pattern matches
+     * @return        a list of group-1 match strings converted to upper case, in the order they were found
+     */
     private List<String> extractAllMatches(Pattern pattern, String content) {
         List<String> matches = new ArrayList<>();
         Matcher matcher = pattern.matcher(content);
@@ -190,6 +265,17 @@ public class PolicyToScopeMapper {
         return matches;
     }
 
+    /**
+     * Resolve and aggregate authorization scopes for a given resource and list of actions.
+     *
+     * If the provided resource maps to multiple child features, scopes for each child are
+     * included. For each target resource, this looks up configured scopes for each action
+     * and returns the union of all matching scopes.
+     *
+     * @param resource the resource identifier or parent resource whose scopes should be resolved
+     * @param actions  list of action names to resolve scopes for (e.g., "READ", "WRITE")
+     * @return the set of matching scope strings for the given resource and actions (may be empty)
+     */
     private Set<String> resolveScopes(String resource, List<String> actions) {
         Set<String> scopes = new HashSet<>();
 

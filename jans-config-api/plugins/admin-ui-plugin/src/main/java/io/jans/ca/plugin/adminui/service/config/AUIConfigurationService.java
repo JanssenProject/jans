@@ -91,6 +91,15 @@ public class AUIConfigurationService extends BaseService {
         }
     }
 
+    /**
+     * Builds an AUIConfiguration populated from the given AdminConf and global AppConfiguration.
+     *
+     * Populates web and backend OIDC client settings, OIDC endpoints, UI settings, and Cedarling-related fields.
+     *
+     * @param appType the application type key to assign to the resulting configuration
+     * @param appConf the persisted AdminConf containing OIDC and UI configuration values
+     * @return an AUIConfiguration populated with values from appConf and the global AppConfiguration
+     */
     private AUIConfiguration addPropertiesToAUIConfiguration(String appType, AdminConf appConf) {
         AUIConfiguration auiConfig = new AUIConfiguration();
         AppConfiguration appConfiguration = configurationService.find();

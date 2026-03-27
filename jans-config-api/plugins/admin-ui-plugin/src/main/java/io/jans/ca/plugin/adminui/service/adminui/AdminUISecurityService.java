@@ -318,8 +318,11 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Efficiently remove duplicate permissions using streams
-     */
+         * Create a new list of role-to-permission mappings where duplicate permissions for each role are removed while preserving their original order.
+         *
+         * @param rolePermissionMappings the list of role-to-permission mappings to process; each mapping's permissions may contain duplicates
+         * @return a new list of RolePermissionMapping with duplicates removed from each mapping's permissions (iteration order preserved)
+         */
     private List<RolePermissionMapping> removeDuplicatePermissions(List<RolePermissionMapping> rolePermissionMappings) {
         return rolePermissionMappings.stream()
                 .map(entry -> {
@@ -332,6 +335,14 @@ public class AdminUISecurityService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Validates that the trusted issuer's `configuration_endpoint` host inside the provided JSON stream matches the expected domain.
+     *
+     * @param zipInputStream   an InputStream containing the JSON content of the trusted issuer (e.g., the `trusted-issuers/GluuFlexAdminUI.json` entry)
+     * @param expectedDomain   the domain expected to match the `configuration_endpoint` host
+     * @return                 `true` if the `configuration_endpoint` host equals `expectedDomain` (case-insensitive), `false` otherwise
+     * @throws ApplicationException if the input cannot be read or parsed, or if the `configuration_endpoint` value is not a valid URI
+     */
     private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain) throws ApplicationException {
         try {
             // Read JSON content

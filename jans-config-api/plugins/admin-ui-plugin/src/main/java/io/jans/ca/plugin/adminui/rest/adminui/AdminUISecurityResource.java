@@ -38,6 +38,15 @@ public class AdminUISecurityResource {
     @Inject
     AdminUISecurityService adminUISecurityService;
 
+    /**
+     * Retrieve the Admin UI policy store.
+     *
+     * <p>On success returns a response whose entity is a GenericResponse containing the policy store
+     * payload. On error returns a response whose entity is a GenericResponse with error details and
+     * an appropriate HTTP status code.
+     *
+     * @return a Response whose entity is a GenericResponse with the policy store on success or error details on failure
+     */
     @Operation(summary = "Get Admin UI policy store", description = "Get Admin UI policy store", operationId = "get-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_READ}))
@@ -71,6 +80,14 @@ public class AdminUISecurityResource {
         }
     }
 
+    /**
+     * Upload an Admin UI policy store provided as a multipart form.
+     *
+     * @param adminUIPolicyStore the multipart form representing the policy store to upload
+     * @return a JAX-RS Response whose entity is a GenericResponse describing the operation result;
+     *         on success the GenericResponse indicates the upload completed, on error it contains
+     *         an error code and message
+     */
     @Operation(summary = "Upload Admin UI Policy Store", description = "Upload Admin UI Policy Store", operationId = "upload-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
