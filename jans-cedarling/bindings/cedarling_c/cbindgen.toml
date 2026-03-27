@@ -6,7 +6,7 @@ cpp_compat = true
 style = "both"
 
 [export]
-include=["CedarlingError","CedarlingStringArray","CedarlingResult"]
+include=["CedarlingErrorCode","CedarlingStringArray","CedarlingResult"]
 exclude=[]
 
 [fn]
