@@ -9,7 +9,10 @@ use std::{
 };
 use tokio::runtime::Runtime;
 
-use cedarling::{self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage};
+use cedarling::{
+    self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage,
+    TrustedIssuerLoadingInfo,
+};
 
 mod cedarling_interface;
 use cedarling_interface::{Result, ResultInstance};
@@ -276,5 +279,35 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
             Ok(stats) => Result::success(stats),
             Err(e) => Result::error(e),
         }
+    }
+
+    fn is_trusted_issuer_loaded_by_name(instance_id: usize, issuer_id: String) -> bool {
+        let instance = get_instance_or_return!(instance_id);
+        instance.is_trusted_issuer_loaded_by_name(&issuer_id)
+    }
+
+    fn is_trusted_issuer_loaded_by_iss(instance_id: usize, iss_claim: String) -> bool {
+        let instance = get_instance_or_return!(instance_id);
+        instance.is_trusted_issuer_loaded_by_iss(&iss_claim)
+    }
+
+    fn total_issuers(instance_id: usize) -> usize {
+        let instance = get_instance_or_return!(instance_id);
+        instance.total_issuers()
+    }
+
+    fn loaded_trusted_issuers_count(instance_id: usize) -> usize {
+        let instance = get_instance_or_return!(instance_id);
+        instance.loaded_trusted_issuers_count()
+    }
+
+    fn loaded_trusted_issuer_ids(instance_id: usize) -> Vec<String> {
+        let instance = get_instance_or_return!(instance_id);
+        instance.loaded_trusted_issuer_ids().into_iter().collect()
+    }
+
+    fn failed_trusted_issuer_ids(instance_id: usize) -> Vec<String> {
+        let instance = get_instance_or_return!(instance_id);
+        instance.failed_trusted_issuer_ids().into_iter().collect()
     }
 }
