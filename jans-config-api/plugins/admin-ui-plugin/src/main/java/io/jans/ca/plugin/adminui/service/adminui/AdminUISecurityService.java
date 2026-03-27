@@ -23,9 +23,11 @@ import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +36,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Service responsible for managing Admin UI security related operations such as
@@ -150,7 +153,7 @@ public class AdminUISecurityService {
             String policyStorePath = resolvePolicyStorePath(auiConfiguration);
 
             // Validate domain inside policy store
-            validatePolicyStoreDomain(policyStorePath, auiConfiguration.getAuiWebServerHost());
+            validatePolicyStoreDomain(cjarStream, auiConfiguration.getAuiWebServerHost());
 
             Path path = Paths.get(policyStorePath);
 
@@ -226,37 +229,15 @@ public class AdminUISecurityService {
                 .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
     }
 
-    private void validatePolicyStoreDomain(String policyStorePath, String webServerHost)
-            throws ApplicationException {
+    private void validatePolicyStoreDomain(InputStream cjarStream, String webServerHost)
+            throws ApplicationException, URISyntaxException {
 
-        try (ZipFile zipFile = new ZipFile(policyStorePath)) {
-            URI uri = new URI(webServerHost);
-            ZipEntry entry = zipFile.getEntry(TRUSTED_ISSUER_FILE);
-
-            if (entry == null) {
-                throw new ApplicationException(
-                        Response.Status.BAD_REQUEST.getStatusCode(),
-                        "Trusted issuer file not found in policy store"
-                );
-            }
-
-            try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                if (!isHostnameMatching(inputStream, uri.getHost())) {
-                    log.error(ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
-                    throw new ApplicationException(
-                            Response.Status.BAD_REQUEST.getStatusCode(),
-                            ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
-                    );
-                }
-            }
-
-        } catch (ApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+        URI uri = new URI(webServerHost);
+        if (!isHostnameMatching(cjarStream, uri.getHost())) {
+            log.error(ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
-                    ErrorResponse.ERROR_IN_POLICY_STORE.getDescription()
+                    ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
             );
         }
     }
@@ -400,22 +381,74 @@ public class AdminUISecurityService {
      * @return `true` if the `configuration_endpoint` host equals `expectedDomain` (case-insensitive), `false` otherwise
      * @throws ApplicationException if the input cannot be read or parsed, or if the `configuration_endpoint` value is not a valid URI
      */
-    private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain) throws ApplicationException {
-        try {
-            // Read JSON content
-            String content = new String(zipInputStream.readAllBytes(), StandardCharsets.UTF_8);
-            // Parse JSON
-            JSONObject json = new JSONObject(content);
-            String endpoint = json.getString("configuration_endpoint");
-            // Extract domain
-            URI uri = new URI(endpoint);
-            String domain = uri.getHost();
-            log.trace("Domain of OpenID Provider: {} , Domain of trusted issuer: {}", expectedDomain, domain);
-            return domain != null && domain.equalsIgnoreCase(expectedDomain);
+    private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain)
+            throws ApplicationException {
+
+        if (zipInputStream == null || expectedDomain == null || expectedDomain.isBlank()) {
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Invalid input: zipInputStream or expectedDomain is null/empty"
+            );
+        }
+
+        try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
+            ZipEntry entry;
+
+            while ((entry = zis.getNextEntry()) != null) {
+
+                if (entry.isDirectory() || !TRUSTED_ISSUER_FILE.equals(entry.getName())) {
+                    zis.closeEntry();
+                    continue;
+                }
+
+                // Read content safely
+                String content = readEntryContent(zis);
+
+                JSONObject json = new JSONObject(content);
+
+                if (!json.has("configuration_endpoint")) {
+                    throw new ApplicationException(
+                            Response.Status.BAD_REQUEST.getStatusCode(),
+                            "Missing 'configuration_endpoint' in JSON"
+                    );
+                }
+
+                String endpoint = json.getString("configuration_endpoint");
+                URI uri = new URI(endpoint);
+                String domain = uri.getHost();
+
+                log.info("Domain of OpenID Provider: {}, Domain of trusted issuer: {}",
+                        expectedDomain, domain);
+
+                return domain != null && domain.equalsIgnoreCase(expectedDomain);
+            }
+
+            // File not found in zip
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Trusted issuer file not found in ZIP"
+            );
+
+        } catch (ApplicationException e) {
+            throw e; // rethrow
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
-            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    e.getMessage());
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Error processing ZIP: " + e.getMessage()
+            );
         }
+    }
+
+    private String readEntryContent(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[2048];
+        int len;
+
+        while ((len = is.read(buffer)) != -1) {
+            baos.write(buffer, 0, len);
+        }
+
+        return baos.toString(StandardCharsets.UTF_8);
     }
 }
