@@ -351,6 +351,61 @@ class Cedarling:
         """
         ...
 
+    def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
+        """
+        Check whether a trusted issuer was loaded by issuer identifier.
+
+        Args:
+            issuer_id: The trusted issuer identifier to check.
+
+        Returns:
+            True if the trusted issuer is loaded, otherwise False.
+        """
+        ...
+    def is_trusted_issuer_loaded_by_iss(self, iss_claim: str) -> bool:
+        """
+        Check whether a trusted issuer was loaded by `iss` claim.
+
+        Args:
+            iss_claim: The issuer claim value to check.
+
+        Returns:
+            True if the trusted issuer is loaded, otherwise False.
+        """
+        ...
+    def total_issuers(self) -> int:
+        """
+        Get the total number of trusted issuer entries discovered.
+
+        Returns:
+            int: Total trusted issuer count.
+        """
+        ...
+    def loaded_trusted_issuers_count(self) -> int:
+        """
+        Get the number of trusted issuers loaded successfully.
+
+        Returns:
+            int: Number of successfully loaded trusted issuers.
+        """
+        ...
+    def loaded_trusted_issuer_ids(self) -> List[str]:
+        """
+        Get identifiers of trusted issuers loaded successfully.
+
+        Returns:
+            List[str]: A list of trusted issuer identifiers.
+        """
+        ...
+    def failed_trusted_issuer_ids(self) -> List[str]:
+        """
+        Get identifiers of trusted issuers that failed to load.
+
+        Returns:
+            List[str]: A list of trusted issuer identifiers.
+        """
+        ...
+
 @final
 class RequestUnsigned:
     principals: List[EntityData]

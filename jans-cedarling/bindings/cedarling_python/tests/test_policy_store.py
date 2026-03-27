@@ -79,3 +79,21 @@ def test_policy_store_source_wrong_type():
         pass
     else:
         assert False, "ValueError was not raised when a policy store has an unsupported file type"
+
+
+def test_trusted_issuer_loading_info_defaults():
+    policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
+    config = load_bootstrap_config(policy_store_location)
+    instance = Cedarling(config)
+
+    assert instance.is_trusted_issuer_loaded_by_name("missing_issuer") is False
+    assert instance.is_trusted_issuer_loaded_by_iss("https://missing.example.org") is False
+
+    total = instance.total_issuers()
+    loaded = instance.loaded_trusted_issuers_count()
+    loaded_ids = instance.loaded_trusted_issuer_ids()
+
+    assert loaded <= total
+    assert len(loaded_ids) == loaded
+    for issuer_id in loaded_ids:
+        assert instance.is_trusted_issuer_loaded_by_name(issuer_id) is True
