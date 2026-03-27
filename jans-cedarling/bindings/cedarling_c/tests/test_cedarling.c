@@ -299,6 +299,80 @@ void test_authorization(){
      cedarling_drop(instance_id);
  }
  
+void test_trusted_issuer_loading_info() {
+    printf("\nTest: Trusted Issuer Loading Info\n");
+    printf("===================================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0) {
+        printf("[FAIL] Failed to create instance for trusted issuer tests\n");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+
+    uint64_t instance_id = instance_result.INSTANCE_ID;
+    cedarling_free_instance_result(&instance_result);
+
+    bool loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "missing_issuer");
+    TEST_ASSERT(loaded_by_name == false, "Trusted issuer by name returns false for missing issuer");
+
+    bool loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, "https://missing.example.org");
+    TEST_ASSERT(loaded_by_iss == false, "Trusted issuer by iss returns false for missing issuer");
+
+    size_t total = cedarling_total_issuers(instance_id);
+    size_t loaded_count = cedarling_loaded_trusted_issuers_count(instance_id);
+    TEST_ASSERT(total >= loaded_count, "Total issuers is greater than or equal to loaded count");
+
+    CedarlingStringArray loaded_ids;
+    ret = cedarling_loaded_trusted_issuer_ids(instance_id, &loaded_ids);
+    TEST_ASSERT(ret == 0, "Get loaded trusted issuer IDs executes");
+    TEST_ASSERT(loaded_ids.COUNT == loaded_count, "Loaded IDs count matches loaded trusted issuers count");
+    cedarling_free_string_array(&loaded_ids);
+
+    CedarlingStringArray failed_ids;
+    ret = cedarling_failed_trusted_issuer_ids(instance_id, &failed_ids);
+    TEST_ASSERT(ret == 0, "Get failed trusted issuer IDs executes");
+    TEST_ASSERT(total == loaded_count + failed_ids.COUNT, "Total issuers equals loaded + failed issuer counts");
+    cedarling_free_string_array(&failed_ids);
+
+    // NULL parameter handling for issuer lookup methods
+    loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(instance_id, NULL);
+    TEST_ASSERT(loaded_by_name == false, "Reject NULL issuer_id parameter");
+
+    loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, NULL);
+    TEST_ASSERT(loaded_by_iss == false, "Reject NULL iss_claim parameter");
+
+    // Invalid instance handling
+    loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(99999, "any");
+    TEST_ASSERT(loaded_by_name == false, "Invalid instance returns false for issuer-by-name lookup");
+
+    loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(99999, "https://example.org");
+    TEST_ASSERT(loaded_by_iss == false, "Invalid instance returns false for issuer-by-iss lookup");
+
+    TEST_ASSERT(cedarling_total_issuers(99999) == 0, "Invalid instance returns 0 total issuers");
+    TEST_ASSERT(cedarling_loaded_trusted_issuers_count(99999) == 0, "Invalid instance returns 0 loaded issuers");
+
+    ret = cedarling_loaded_trusted_issuer_ids(99999, &loaded_ids);
+    TEST_ASSERT(ret == 0, "Loaded trusted issuer IDs handles invalid instance gracefully");
+    TEST_ASSERT(loaded_ids.COUNT == 0, "No loaded trusted issuer IDs for invalid instance");
+    cedarling_free_string_array(&loaded_ids);
+
+    ret = cedarling_failed_trusted_issuer_ids(99999, &failed_ids);
+    TEST_ASSERT(ret == 0, "Failed trusted issuer IDs handles invalid instance gracefully");
+    TEST_ASSERT(failed_ids.COUNT == 0, "No failed trusted issuer IDs for invalid instance");
+    cedarling_free_string_array(&failed_ids);
+
+    // NULL result pointers for array-returning methods
+    ret = cedarling_loaded_trusted_issuer_ids(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL result pointer for loaded trusted issuer IDs");
+
+    ret = cedarling_failed_trusted_issuer_ids(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL result pointer for failed trusted issuer IDs");
+
+    cedarling_drop(instance_id);
+}
+
  void test_memory_management(){
      printf("\nTest: Memory Management\n");
      printf("=========================\n");
@@ -395,6 +469,8 @@ void test_authorization(){
      test_authorization();
  
      test_logging_functions();
+
+    test_trusted_issuer_loading_info();
  
      test_memory_management();
  
