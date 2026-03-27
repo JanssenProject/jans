@@ -12,9 +12,7 @@ import java.io.InputStream;
 import java.io.Serial;
 import java.io.Serializable;
 
-public class AdminUIPolicyStore implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class AdminUIPolicyStore {
 
     @NotNull
     @Valid
@@ -72,6 +70,7 @@ public class AdminUIPolicyStore implements Serializable {
     @Override
     public String toString() {
         return "AdminUIPolicyStore{" +
+                "document=" + document +
                 "policyStore=" + policyStore +
                 '}';
     }

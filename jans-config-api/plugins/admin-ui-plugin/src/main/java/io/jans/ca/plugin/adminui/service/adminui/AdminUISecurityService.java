@@ -1,7 +1,6 @@
 package io.jans.ca.plugin.adminui.service.adminui;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
@@ -33,10 +32,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 /**
  * Service responsible for managing Admin UI security related operations such as
@@ -71,8 +68,6 @@ public class AdminUISecurityService {
 
     @Inject
     PolicyToScopeMapper policyToScopeMapper;
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
 
@@ -114,100 +109,163 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Uploads a new Cedar policy store file and overwrites the existing local policy store.
+     * Uploads and overwrites the existing policy store file on the server.
      *
-     * <p>The uploaded file must:</p>
+     * <p>This method performs the following operations:
      * <ul>
-     *     <li>Not be null</li>
-     *     <li>Contain a valid file name</li>
-     *     <li>Have the <code>.cjar</code> extension</li>
+     *     <li>Validates the incoming request and file metadata</li>
+     *     <li>Ensures the uploaded file has a valid <code>.cjar</code> extension</li>
+     *     <li>Validates the input stream of the uploaded policy store</li>
+     *     <li>Resolves the configured policy store path</li>
+     *     <li>Validates the domain inside the existing policy store against the server host</li>
+     *     <li>Creates a backup of the existing policy store file (if present)</li>
+     *     <li>Uploads and replaces the policy store with the new file</li>
      * </ul>
      *
-     * <p>If a policy store already exists at the configured location, a backup is created
-     * by renaming the existing file with a <code>.bak</code> extension before overwriting.</p>
+     * @param adminUIPolicyStore the {@link AdminUIPolicyStore} containing the policy store file
+     *                           and its associated metadata
+     * @return a {@link GenericResponse} indicating success or failure of the upload operation
      *
-     * @param adminUIPolicyStore multipart form containing the uploaded policy store file
-     * @return {@link GenericResponse} indicating success or failure of the upload operation
-     * @throws ApplicationException if an unexpected server error occurs
+     * @throws ApplicationException if:
+     * <ul>
+     *     <li>The request or document is null</li>
+     *     <li>The file name is missing or does not have a <code>.cjar</code> extension</li>
+     *     <li>The input stream is invalid or empty</li>
+     *     <li>The policy store domain does not match the configured server host</li>
+     *     <li>Any error occurs during validation, backup, or file upload</li>
+     * </ul>
      */
 
     public GenericResponse uploadPolicyStore(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
-            // validation
-            if (adminUIPolicyStore == null) {
-                log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
-            }
-            Document cjarDocument = adminUIPolicyStore.getDocument();
-            if (cjarDocument == null || cjarDocument.getFileName() == null) {
-                log.error("Document details not provided.");
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
-            }
+            validateRequest(adminUIPolicyStore);
 
-            if (!cjarDocument.getFileName().endsWith(".cjar")) {
-                log.error(ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription());
-            }
-            log.info(" Upload policy-store : {} ", cjarDocument.getFileName());
+            Document cjarDocument = adminUIPolicyStore.getDocument();
+            log.info("Uploading policy-store : {}", cjarDocument.getFileName());
+
             InputStream cjarStream = adminUIPolicyStore.getPolicyStore();
-            if (cjarStream == null || cjarStream.available() <= 0) {
-                log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
-            }
+            validateInputStream(cjarStream);
 
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
-            // Resolve path for local policy store file
-            String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
-                    .filter(path -> !Strings.isNullOrEmpty(path))
-                    .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-            try (ZipFile zipFile = new ZipFile(policyStorePath)) {
-                URI uri = new URI(auiConfiguration.getAuiWebServerHost());
-                ZipEntry entry = zipFile.getEntry(TRUSTED_ISSUER_FILE);
-                try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                    if (!isHostnameMatching(inputStream, uri.getHost())) {
-                        log.error(ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
-                        throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                                ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
-                    }
-                } catch (ApplicationException e) {
-                    throw e; // Re-throw ApplicationException as is
-                } catch (Exception e) {
-                    log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
-                    throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                            ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
-                }
-            } catch (ApplicationException e) {
-                throw e; // Re-throw ApplicationException as is
-            } catch (Exception e) {
-                log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
-            }
+            String policyStorePath = resolvePolicyStorePath(auiConfiguration);
+
+            // Validate domain inside policy store
+            validatePolicyStoreDomain(policyStorePath, auiConfiguration.getAuiWebServerHost());
+
             Path path = Paths.get(policyStorePath);
-            //take backup of the last policy store if exist
-            if (Files.exists(path)) {
-                Path backupPath = Paths.get(policyStorePath + ".bak");
-                Files.move(path, backupPath, StandardCopyOption.REPLACE_EXISTING);
-            }
-            //upload the policy store on server location
-            Files.copy(cjarStream, path);
+
+            // Backup existing file
+            backupExistingPolicyStore(path);
+
+            // Upload new file
+            Files.copy(cjarStream, path, StandardCopyOption.REPLACE_EXISTING);
+
+            log.info("Uploaded policy-store : {}", cjarDocument.getFileName());
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Policy store overwritten successfully.");
 
         } catch (ApplicationException e) {
-            throw e; // Re-throw ApplicationException as is
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
             throw new ApplicationException(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     e.getMessage()
             );
+        }
+    }
+
+    private void validateRequest(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
+        if (adminUIPolicyStore == null) {
+            log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+            );
+        }
+
+        Document document = adminUIPolicyStore.getDocument();
+        if (document == null || document.getFileName() == null) {
+            log.error("Document details not provided.");
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+            );
+        }
+
+        if (!document.getFileName().endsWith(".cjar")) {
+            log.error(ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription());
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription()
+            );
+        }
+    }
+
+    private void validateInputStream(InputStream inputStream) throws ApplicationException {
+        try {
+            if (inputStream == null || inputStream.available() <= 0) {
+                log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
+                throw new ApplicationException(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+                );
+            }
+        } catch (IOException e) {
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Error in reading policy-store. Invalid input stream"
+            );
+        }
+    }
+
+    private String resolvePolicyStorePath(AUIConfiguration config) {
+        return Optional.ofNullable(config.getAuiCedarlingDefaultPolicyStorePath())
+                .filter(path -> !Strings.isNullOrEmpty(path))
+                .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+    }
+
+    private void validatePolicyStoreDomain(String policyStorePath, String webServerHost)
+            throws ApplicationException {
+
+        try (ZipFile zipFile = new ZipFile(policyStorePath)) {
+            URI uri = new URI(webServerHost);
+            ZipEntry entry = zipFile.getEntry(TRUSTED_ISSUER_FILE);
+
+            if (entry == null) {
+                throw new ApplicationException(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Trusted issuer file not found in policy store"
+                );
+            }
+
+            try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                if (!isHostnameMatching(inputStream, uri.getHost())) {
+                    log.error(ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+                    throw new ApplicationException(
+                            Response.Status.BAD_REQUEST.getStatusCode(),
+                            ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
+                    );
+                }
+            }
+
+        } catch (ApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.ERROR_IN_POLICY_STORE.getDescription()
+            );
+        }
+    }
+
+    private void backupExistingPolicyStore(Path path) throws IOException {
+        if (Files.exists(path)) {
+            Path backupPath = Paths.get(path.toString() + ".bak");
+            Files.move(path, backupPath, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
@@ -300,7 +358,7 @@ public class AdminUISecurityService {
                     role.setDeletable(true);
                     return role;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -314,7 +372,7 @@ public class AdminUISecurityService {
                     rpm.setPermissions(new ArrayList<>(entry.getValue()));
                     return rpm;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -332,7 +390,7 @@ public class AdminUISecurityService {
                     rpm.setPermissions(new ArrayList<>(new LinkedHashSet<>(entry.getPermissions())));
                     return rpm;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

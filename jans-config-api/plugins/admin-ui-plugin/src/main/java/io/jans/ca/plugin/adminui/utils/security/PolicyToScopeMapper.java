@@ -8,10 +8,8 @@ import java.util.regex.*;
 import java.util.zip.*;
 
 import com.fasterxml.jackson.databind.*;
-import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 @Singleton
@@ -34,10 +32,6 @@ public class PolicyToScopeMapper {
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
 
-    // Cache for scope mappings
-    private static Map<String, Map<String, List<String>>> scopeMappingCache;
-    private static Map<String, List<String>> parentToFeaturesMap;
-
     /**
      * Generate a mapping from role names to their aggregated scopes by processing a policy-store ZIP and a resources JSON.
      *
@@ -48,20 +42,17 @@ public class PolicyToScopeMapper {
      */
     public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) throws Exception {
         long startTime = System.currentTimeMillis();
-
-        // Load scope mappings once and cache them
-        scopeMappingCache = buildScopeMappingCache(resourcesJson);
-
+        // Build mappings locally for this invocation
+        Map<String, Map<String, List<String>>> scopeMapping = buildScopeMappingCache(resourcesJson);
         // Load entity relationships
-        parentToFeaturesMap = loadEntityRelationships(zipFile);
+        Map<String, List<String>> parentToFeatures = loadEntityRelationships(zipFile);
 
         log.trace("Total processing time for generating role-to-scope mapping from the policy-store: {} ms", System.currentTimeMillis() - startTime);
-        return processPolicies(zipFile);
+        return processPolicies(zipFile, scopeMapping, parentToFeatures);
     }
 
     /**
      * Builds a lookup cache mapping resource identifiers to access-type-to-scopes mappings.
-     *
      * The provided `resourcesJson` is expected to be an array of objects where each object contains
      * `resource` (string), `accessType` (string), and `scopes` (array of strings). Resource keys are
      * normalized to lower-case when stored.
@@ -148,7 +139,7 @@ public class PolicyToScopeMapper {
                 String featureId = uid.get("id").asText();
 
                 JsonNode parents = entity.get("parents");
-                if (parents != null && parents.isArray() && parents.size() > 0) {
+                if (parents != null && parents.isArray() && !parents.isEmpty()) {
                     String parentId = parents.get(0).get("id").asText();
                     parentToFeatures.computeIfAbsent(parentId, k -> new CopyOnWriteArrayList<>()).add(featureId);
                 }
@@ -161,11 +152,13 @@ public class PolicyToScopeMapper {
     /**
      * Builds a mapping from role name to the set of scopes aggregated from policy files found in the ZIP.
      *
-     * @param zipFile the ZIP archive to scan for policy files under the "policies/" directory
+     * @param zipFile          the ZIP archive to scan for policy files under the "policies/" directory
+     * @param scopeMapping
+     * @param parentToFeatures
      * @return a map whose keys are role names and whose values are the sets of scopes assigned to those roles
      * @throws IllegalStateException if no policy files (*.cedar or *.cedarpl) are present in the "policies/" folder
      */
-    private Map<String, Set<String>> processPolicies(ZipFile zipFile) {
+    private Map<String, Set<String>> processPolicies(ZipFile zipFile, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         // Use ConcurrentHashMap with CopyOnWriteArraySet for thread-safe aggregation
         Map<String, Set<String>> roleToScopes = new ConcurrentHashMap<>();
 
@@ -183,7 +176,7 @@ public class PolicyToScopeMapper {
 
         // Process policies in parallel for better performance
         policyEntries.parallelStream().forEach(entry ->
-                processPolicyEntry(zipFile, entry, roleToScopes)
+                processPolicyEntry(zipFile, entry, roleToScopes, scopeMapping, parentToFeatures)
         );
 
         return roleToScopes;
@@ -198,7 +191,7 @@ public class PolicyToScopeMapper {
      * @param roleToScopes a concurrent map that accumulates scopes per role; scopes for the extracted role
      *                     will be added to the existing set (created if absent)
      */
-    private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes) {
+    private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
@@ -220,7 +213,7 @@ public class PolicyToScopeMapper {
                 return;
             }
 
-            Set<String> scopes = resolveScopes(resource, actions);
+            Set<String> scopes = resolveScopes(resource, actions, scopeMapping, parentToFeatures);
 
             if (!scopes.isEmpty()) {
                 // This automatically aggregates scopes for the same role across multiple files
@@ -267,23 +260,25 @@ public class PolicyToScopeMapper {
 
     /**
      * Resolve and aggregate authorization scopes for a given resource and list of actions.
-     *
+     * <p>
      * If the provided resource maps to multiple child features, scopes for each child are
      * included. For each target resource, this looks up configured scopes for each action
      * and returns the union of all matching scopes.
      *
-     * @param resource the resource identifier or parent resource whose scopes should be resolved
-     * @param actions  list of action names to resolve scopes for (e.g., "READ", "WRITE")
+     * @param resource         the resource identifier or parent resource whose scopes should be resolved
+     * @param actions          list of action names to resolve scopes for (e.g., "READ", "WRITE")
+     * @param scopeMapping
+     * @param parentToFeatures
      * @return the set of matching scope strings for the given resource and actions (may be empty)
      */
-    private Set<String> resolveScopes(String resource, List<String> actions) {
+    private Set<String> resolveScopes(String resource, List<String> actions, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         Set<String> scopes = new HashSet<>();
 
         // Get all features to process (either single resource or multiple from parent)
-        List<String> targetResources = parentToFeaturesMap.getOrDefault(resource, List.of(resource));
+        List<String> targetResources = parentToFeatures.getOrDefault(resource, List.of(resource));
 
         for (String targetResource : targetResources) {
-            Map<String, List<String>> resourceScopes = scopeMappingCache.get(targetResource.toLowerCase());
+            Map<String, List<String>> resourceScopes = scopeMapping.get(targetResource.toLowerCase());
 
             if (resourceScopes != null) {
                 for (String action : actions) {
