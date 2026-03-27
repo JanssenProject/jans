@@ -5,13 +5,11 @@
 
 //! gRPC transport implementation for Lock Server communication.
 
-use std::collections::HashMap;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 
 use async_trait::async_trait;
 use prost_types::Timestamp;
-use serde::Deserialize;
 #[cfg(not(target_arch = "wasm32"))]
 use tonic::transport::{Channel, ClientTlsConfig};
 use tonic::{Request, metadata::MetadataValue};
@@ -22,7 +20,10 @@ use crate::{
     lock::{
         LockLogEntry,
         proto::{BulkLogRequest, LogEntry, audit_service_client::AuditServiceClient},
-        transport::{AuditTransport, SerializedLogEntry, TransportError, TransportResult},
+        transport::{
+            AuditTransport, SerializedLogEntry, TransportError, TransportResult,
+            mapping::{CedarlingLogEntry, LockServerLogEntry},
+        },
     },
     log::{LogWriter, Logger},
 };
@@ -30,37 +31,6 @@ use crate::{
 #[cfg(not(target_arch = "wasm32"))]
 /// Duration to wait for each gRPC request
 const GRPC_REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
-
-/// JSON structure matching the serialized log entries
-#[derive(Debug, Deserialize)]
-struct JsonLogEntry {
-    #[serde(default)]
-    creation_date: Option<i64>,
-    #[serde(default)]
-    event_time: Option<i64>,
-    #[serde(default)]
-    service: String,
-    #[serde(default)]
-    node_name: String,
-    #[serde(default)]
-    event_type: String,
-    #[serde(default)]
-    severity_level: String,
-    #[serde(default)]
-    action: String,
-    #[serde(default)]
-    decision_result: String,
-    #[serde(default)]
-    requested_resource: String,
-    #[serde(default)]
-    principal_id: String,
-    #[serde(default)]
-    client_id: String,
-    #[serde(default)]
-    jti: String,
-    #[serde(default)]
-    context_information: HashMap<String, String>,
-}
 
 pub(crate) struct GrpcTransport {
     #[cfg(not(target_arch = "wasm32"))]
@@ -107,19 +77,17 @@ impl AuditTransport for GrpcTransport {
             return Ok(());
         }
 
-        let mut skipped = 0usize;
         let proto_entries: Vec<_> = entries
             .iter()
             .filter_map(|v| {
-                if let Ok(entry) = serde_json::from_str::<JsonLogEntry>(v) {
-                    Some(json_to_proto(entry))
-                } else {
-                    skipped += 1;
-                    None
-                }
+                serde_json::from_str::<CedarlingLogEntry>(v)
+                    .ok()
+                    .and_then(|entry| LockServerLogEntry::try_from(entry).ok())
+                    .map(json_to_proto)
             })
             .collect();
 
+        let skipped = entries.len() - proto_entries.len();
         if skipped > 0 {
             self.logger.log_any(LockLogEntry::warn(format!(
                 "skipped {skipped} entries because they were malformed"
@@ -153,37 +121,39 @@ impl AuditTransport for GrpcTransport {
     }
 }
 
-/// Convert a [`JsonLogEntry`] to a protobuf [`LogEntry`]
-///
-/// The current implementation assumes [`JsonLogEntry`] carries only whole-second
-/// timestamps (Unix epoch seconds) in `creation_date` and `event_time`. Therefore,
-/// [`Timestamp::nanos`] is set to 0 for both fields.
-///
-/// If future changes introduce sub-second precision in `JsonLogEntry` (e.g., by
-/// adding separate nanosecond fields or encoding fractional seconds), the conversion
-/// should be updated to preserve those nanoseconds instead of hardcoding 0.
-fn json_to_proto(json_entry: JsonLogEntry) -> LogEntry {
+/// Converts a [`LockServerLogEntry`] into a [`LogEntry`]
+fn json_to_proto(entry: LockServerLogEntry) -> LogEntry {
     LogEntry {
-        creation_date: json_entry.creation_date.map(|secs| Timestamp {
-            seconds: secs,
-            nanos: 0,
-        }),
-        event_time: json_entry.event_time.map(|secs| Timestamp {
-            seconds: secs,
-            nanos: 0,
-        }),
-        service: json_entry.service,
-        node_name: json_entry.node_name,
-        event_type: json_entry.event_type,
-        severity_level: json_entry.severity_level,
-        action: json_entry.action,
-        decision_result: json_entry.decision_result,
-        requested_resource: json_entry.requested_resource,
-        principal_id: json_entry.principal_id,
-        client_id: json_entry.client_id,
-        jti: json_entry.jti,
-        context_information: json_entry.context_information,
+        creation_date: parse_timestamp(&entry.creation_date),
+        event_time: parse_timestamp(&entry.event_time),
+        service: entry.service.unwrap_or_default(),
+        node_name: entry.node_name,
+        event_type: entry.event_type,
+        severity_level: entry.severity_level.unwrap_or_default(),
+        action: entry.action,
+        decision_result: entry.decision_result,
+        requested_resource: entry.requested_resource,
+        principal_id: entry.principal_id.unwrap_or_default(),
+        client_id: entry.client_id.unwrap_or_default(),
+        jti: String::new(),
+        context_information: entry
+            .context_information
+            .and_then(|v| v.as_object().cloned())
+            .unwrap_or_default()
+            .into_iter()
+            .map(|(k, v)| (k, v.as_str().map_or_else(|| v.to_string(), str::to_owned)))
+            .collect(),
     }
+}
+
+// Parse a RFC3339 timestamp string into a protobuf Timestamp
+fn parse_timestamp(s: &str) -> Option<Timestamp> {
+    chrono::DateTime::parse_from_rfc3339(s)
+        .ok()
+        .map(|dt| Timestamp {
+            seconds: dt.timestamp(),
+            nanos: dt.timestamp_subsec_nanos().cast_signed(),
+        })
 }
 
 #[cfg(test)]
@@ -304,72 +274,71 @@ mod test {
         use test_utils::assert_eq;
 
         let json_str = r#"{
-            "creation_date": 1771092901,
-            "event_time": 1771092951,
-            "service": "test-service",
-            "node_name": "node-1",
-            "event_type": "access",
-            "severity_level": "INFO",
-            "action": "read",
-            "decision_result": "ALLOW",
-            "requested_resource": "/api/resource",
-            "principal_id": "user-123",
-            "client_id": "client-456",
-            "jti": "jti-789",
-            "context_information": {
-                "ip": "127.0.0.1",
-                "user_agent": "test-agent"
-            }
+            "timestamp": "2026-03-23T11:50:37.504Z",
+            "log_kind": "Decision",
+            "level": "INFO",
+            "action": "Jans::Action::\"Read\"",
+            "decision": "ALLOW",
+            "principal": ["Jans::User::\"some_user\""],
+            "resource": "Jans::Issue::\"random_id\"",
+            "application_id": "test_app",
+            "pdp_id": "12a8a3be-6593-4215-a42b-bbf5c4f5defa",
+            "lock_client_id": "client-456"
         }"#;
 
-        let json_entry: JsonLogEntry = serde_json::from_str(json_str).unwrap();
-        let proto_entry = json_to_proto(json_entry);
+        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date,
             Some(Timestamp {
-                seconds: 1_771_092_901,
-                nanos: 0
+                seconds: 1_774_266_637,
+                nanos: 504_000_000
             })
         );
         assert_eq!(
             proto_entry.event_time,
             Some(Timestamp {
-                seconds: 1_771_092_951,
-                nanos: 0,
+                seconds: 1_774_266_637,
+                nanos: 504_000_000,
             })
         );
-        assert_eq!(proto_entry.service, "test-service");
-        assert_eq!(proto_entry.node_name, "node-1");
-        assert_eq!(proto_entry.event_type, "access");
+        assert_eq!(proto_entry.service, "test_app");
+        assert_eq!(
+            proto_entry.node_name,
+            "12a8a3be-6593-4215-a42b-bbf5c4f5defa"
+        );
+        assert_eq!(proto_entry.event_type, "Decision");
         assert_eq!(proto_entry.decision_result, "ALLOW");
         assert_eq!(proto_entry.severity_level, "INFO");
-        assert_eq!(proto_entry.action, "read");
-        assert_eq!(proto_entry.requested_resource, "/api/resource");
-        assert_eq!(proto_entry.principal_id, "user-123");
+        assert_eq!(proto_entry.action, "Jans::Action::\"Read\"");
+        assert_eq!(proto_entry.requested_resource, "Jans::Issue::\"random_id\"");
+        assert_eq!(proto_entry.principal_id, "Jans::User::\"some_user\"");
         assert_eq!(proto_entry.client_id, "client-456");
-        assert_eq!(proto_entry.jti, "jti-789");
-        assert_eq!(proto_entry.context_information.len(), 2);
-        assert_eq!(
-            proto_entry.context_information.get("ip"),
-            Some(&"127.0.0.1".to_string())
-        );
+        assert_eq!(proto_entry.jti, "");
     }
 
     #[test]
     fn test_partial_json_entry() {
         let json_str = r#"{
-            "service": "minimal-service",
-            "event_type": "test"
+            "timestamp": "2026-03-23T11:50:37.504Z",
+            "application_id": "minimal-service",
+            "pdp_id": "node-1",
+            "log_kind": "Decision",
+            "decision": "ALLOW",
+            "action": "Test::Action",
+            "resource": "Test::Resource"
         }"#;
 
-        let json_entry: JsonLogEntry = serde_json::from_str(json_str).unwrap();
-        let proto_entry = json_to_proto(json_entry);
+        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(proto_entry.service, "minimal-service");
-        assert_eq!(proto_entry.event_type, "test");
-        assert_eq!(proto_entry.node_name, "");
-        assert!(proto_entry.creation_date.is_none());
+        assert_eq!(proto_entry.event_type, "Decision");
+        assert_eq!(proto_entry.node_name, "node-1");
+        assert!(proto_entry.creation_date.is_some());
     }
 
     #[tokio::test]
@@ -379,22 +348,15 @@ mod test {
 
         let entries = vec![
             r#"{
-                "creation_date": 1771092901,
-                "event_time": 1771092951,
-                "service": "test-service",
-                "node_name": "node-1",
-                "event_type": "authorization",
-                "severity_level": "INFO",
-                "action": "permit",
-                "decision_result": "allowed",
-                "requested_resource": "/api/resource",
-                "principal_id": "user-123",
-                "client_id": "client-456",
-                "jti": "token-789",
-                "context_information": {
-                    "ip": "127.0.0.1",
-                    "user_agent": "test"
-                }
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "log_kind": "Decision",
+                "level": "INFO",
+                "action": "Jans::Action::\"Read\"",
+                "decision": "ALLOW",
+                "principal": ["Jans::User::\"some_user\""],
+                "resource": "Jans::Issue::\"random_id\"",
+                "application_id": "test_app",
+                "pdp_id": "12a8a3be-6593-4215-a42b-bbf5c4f5defa"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -408,8 +370,11 @@ mod test {
         // Verify the server received the logs
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
-        assert_eq!(received[0].service, "test-service");
-        assert_eq!(received[0].node_name, "node-1");
+        assert_eq!(received[0].service, "test_app");
+        assert_eq!(
+            received[0].node_name,
+            "12a8a3be-6593-4215-a42b-bbf5c4f5defa"
+        );
     }
 
     #[tokio::test]
@@ -450,9 +415,13 @@ mod test {
 
         let entries = vec![
             r#"{
-                "service": "test",
-                "node_name": "node",
-                "event_type": "test"
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "application_id": "test",
+                "pdp_id": "node",
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -470,61 +439,31 @@ mod test {
     }
 
     #[tokio::test]
-    async fn test_send_logs_multiple_entries() {
-        let (addr, mut rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
-
-        let entries = vec![
-            r#"{
-                "service": "service-1",
-                "node_name": "node-1",
-                "event_type": "event-1"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-            r#"{
-                "service": "service-2",
-                "node_name": "node-2",
-                "event_type": "event-2"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-            r#"{
-                "service": "service-3",
-                "node_name": "node-3",
-                "event_type": "event-3"
-            }"#
-            .to_string()
-            .into_boxed_str(),
-        ];
-
-        transport
-            .send_logs(&entries)
-            .await
-            .expect("logs should be sent successfully");
-
-        let received = rx.try_recv().unwrap();
-        assert_eq!(received.len(), 3);
-    }
-
-    #[tokio::test]
     async fn test_send_logs_partial_malformed() {
         let (addr, mut rx) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
             r#"{
-                "service": "valid-service-1",
-                "node_name": "node-1",
-                "event_type": "event-1"
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "application_id": "valid-service-1",
+                "pdp_id": "node-1",
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
             "not valid json".to_string().into_boxed_str(),
             r#"{
-                "service": "valid-service-2",
-                "node_name": "node-2",
-                "event_type": "event-2"
+                "timestamp": "2026-03-23T11:50:37.506Z",
+                "application_id": "valid-service-2",
+                "pdp_id": "node-2",
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -542,28 +481,76 @@ mod test {
     }
 
     #[tokio::test]
+    async fn test_send_logs_multiple_entries() {
+        let (addr, mut rx) = start_mock_server(false).await;
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+
+        let entries = vec![
+            r#"{
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "application_id": "service-1",
+                "pdp_id": "node-1",
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
+            }"#
+            .to_string()
+            .into_boxed_str(),
+            r#"{
+                "timestamp": "2026-03-23T11:50:37.505Z",
+                "application_id": "service-2",
+                "pdp_id": "node-2",
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
+            }"#
+            .to_string()
+            .into_boxed_str(),
+            r#"{
+                "timestamp": "2026-03-23T11:50:37.506Z",
+                "application_id": "service-3",
+                "pdp_id": "node-3",
+                "log_kind": "Decision",
+                "decision": "ALLOW",
+                "action": "Test::Action",
+                "resource": "Test::Resource"
+            }"#
+            .to_string()
+            .into_boxed_str(),
+        ];
+
+        transport
+            .send_logs(&entries)
+            .await
+            .expect("logs should be sent successfully");
+
+        let received = rx.try_recv().unwrap();
+        assert_eq!(received.len(), 3);
+        assert_eq!(received[0].service, "service-1");
+        assert_eq!(received[1].service, "service-2");
+        assert_eq!(received[2].service, "service-3");
+    }
+
+    #[tokio::test]
     async fn test_send_logs_with_all_fields() {
         let (addr, mut rx) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
         let entries = vec![
             r#"{
-                "creation_date": 1000,
-                "event_time": 2000,
-                "service": "full-service",
-                "node_name": "full-node",
-                "event_type": "full-event",
-                "severity_level": "ERROR",
-                "action": "deny",
-                "decision_result": "forbidden",
-                "requested_resource": "/secret",
-                "principal_id": "admin",
-                "client_id": "admin-client",
-                "jti": "jwt-id",
-                "context_information": {
-                    "key1": "value1",
-                    "key2": "value2"
-                }
+                "timestamp": "2026-03-23T11:50:37.504Z",
+                "log_kind": "Decision",
+                "level": "ERROR",
+                "action": "Jans::Action::\"Deny\"",
+                "decision": "DENY",
+                "principal": ["Jans::User::\"admin\""],
+                "resource": "Jans::Issue::\"secret\"",
+                "application_id": "full-service",
+                "pdp_id": "full-node",
+                "lock_client_id": "admin-client",
+                "extra_field": "extra_value"
             }"#
             .to_string()
             .into_boxed_str(),
@@ -578,20 +565,16 @@ mod test {
         assert_eq!(received.len(), 1);
         let entry = &received[0];
 
-        assert_eq!(entry.creation_date.as_ref().unwrap().seconds, 1000);
-        assert_eq!(entry.event_time.as_ref().unwrap().seconds, 2000);
         assert_eq!(entry.service, "full-service");
         assert_eq!(entry.node_name, "full-node");
-        assert_eq!(entry.event_type, "full-event");
+        assert_eq!(entry.event_type, "Decision");
         assert_eq!(entry.severity_level, "ERROR");
-        assert_eq!(entry.action, "deny");
-        assert_eq!(entry.decision_result, "forbidden");
-        assert_eq!(entry.requested_resource, "/secret");
-        assert_eq!(entry.principal_id, "admin");
+        assert_eq!(entry.action, "Jans::Action::\"Deny\"");
+        assert_eq!(entry.decision_result, "DENY");
+        assert_eq!(entry.requested_resource, "Jans::Issue::\"secret\"");
+        assert_eq!(entry.principal_id, "Jans::User::\"admin\"");
         assert_eq!(entry.client_id, "admin-client");
-        assert_eq!(entry.jti, "jwt-id");
-        assert_eq!(entry.context_information.len(), 2);
-        assert_eq!(entry.context_information.get("key1").unwrap(), "value1");
+        assert_eq!(entry.jti, "");
     }
 
     #[tokio::test]
@@ -599,7 +582,19 @@ mod test {
         let (addr, mut rx) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        let entries = vec![r#"{ "service": "minimal" }"#.to_string().into_boxed_str()];
+        let entries = vec![
+            r#"{
+            "timestamp": "2026-03-23T11:50:37.504Z",
+            "application_id": "minimal",
+            "pdp_id": "test-pdp",
+            "log_kind": "Decision",
+            "decision": "ALLOW",
+            "action": "Test::Action",
+            "resource": "Test::Resource"
+        }"#
+            .to_string()
+            .into_boxed_str(),
+        ];
 
         transport
             .send_logs(&entries)
@@ -609,7 +604,7 @@ mod test {
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "minimal");
-        assert_eq!(received[0].node_name, "");
+        assert_eq!(received[0].node_name, "test-pdp");
     }
 
     #[tokio::test]
@@ -620,9 +615,15 @@ mod test {
         let entries: Vec<_> = (0..100)
             .map(|i| {
                 json!({
-                    "service": format!("service-{i}"),
-                    "node_name": "node",
-                    "event_type": "test"
+                    "timestamp": "2026-03-23T11:50:37.504Z",
+                    "log_kind": "System",
+                    "level": "INFO",
+                    "action": "Test",
+                    "decision": "ALLOW",
+                    "principal": ["Jans::User"],
+                    "resource": "Jans::Issue",
+                    "application_id": format!("service-{i}"),
+                    "pdp_id": "node"
                 })
                 .to_string()
                 .into_boxed_str()
@@ -641,15 +642,20 @@ mod test {
     #[test]
     fn test_negative_timestamp_handling() {
         let json_str = r#"{
-            "creation_date": -86400,
-            "event_time": -3600,
-            "service": "test-service",
-            "node_name": "node-1",
-            "event_type": "access"
+            "timestamp": "1969-12-31T00:00:00Z",
+            "log_kind": "System",
+            "level": "INFO",
+            "action": "Test",
+            "decision": "ALLOW",
+            "principal": [],
+            "resource": "Jans::Issue",
+            "application_id": "test-service",
+            "pdp_id": "node-1"
         }"#;
 
-        let json_entry: JsonLogEntry = serde_json::from_str(json_str).unwrap();
-        let proto_entry = json_to_proto(json_entry);
+        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date,
@@ -661,7 +667,7 @@ mod test {
         assert_eq!(
             proto_entry.event_time,
             Some(Timestamp {
-                seconds: -3600,
+                seconds: -86400,
                 nanos: 0,
             })
         );
@@ -670,13 +676,18 @@ mod test {
     #[test]
     fn test_large_negative_timestamp() {
         let json_str = r#"{
-            "creation_date": -2208988800,
-            "event_time": -631152000,
-            "service": "historical-service"
+            "timestamp": "1900-01-01T00:00:00Z",
+            "log_kind": "Decision",
+            "action": "Test",
+            "decision": "ALLOW",
+            "resource": "Test::Resource",
+            "application_id": "historical-service",
+            "pdp_id": "node-1"
         }"#;
 
-        let json_entry: JsonLogEntry = serde_json::from_str(json_str).unwrap();
-        let proto_entry = json_to_proto(json_entry);
+        let json_entry: CedarlingLogEntry = serde_json::from_str(json_str).unwrap();
+        let lock_entry = LockServerLogEntry::try_from(json_entry).unwrap();
+        let proto_entry = json_to_proto(lock_entry);
 
         assert_eq!(
             proto_entry.creation_date.as_ref().unwrap().seconds,
@@ -684,7 +695,7 @@ mod test {
         );
         assert_eq!(
             proto_entry.event_time.as_ref().unwrap().seconds,
-            -631_152_000
+            -2_208_988_800
         );
     }
 }
