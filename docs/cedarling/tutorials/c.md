@@ -179,8 +179,7 @@ const char* request = "{"
     "],"
     "\"action\": \"Jans::Action::\\\"Update\\\"\","
     "\"resource\": {"
-    "    \"type\": \"Jans::Issue\","
-    "    \"id\": \"random_id\","
+    "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"random_id\"},"
     "    \"org_id\": \"some_long_id\""
     "},"
     "\"context\": {}"
@@ -214,15 +213,15 @@ Use `cedarling_authorize_unsigned` when you have custom principals (not derived 
 const char* request = "{"
     "\"principals\": ["
     "    {"
-    "        \"cedar_mapping\": {\"entity_type\": \"Jans::User\", \"id\": \"user123\"},"
-    "        \"payload\": {\"role\": [\"admin\"], \"country\": \"US\", \"sub\": \"user123\"}"
+    "        \"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"user123\"},"
+    "        \"is_ok\": true"
     "    }"
     "],"
-    "\"action\": \"Jans::Action::\\\"Update\\\"\","
+    "\"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\","
     "\"resource\": {"
-    "    \"type\": \"Jans::Issue\","
-    "    \"id\": \"random_id\","
-    "    \"org_id\": \"some_long_id\""
+    "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"random_id\"},"
+    "    \"org_id\": \"some_long_id\","
+    "    \"country\": \"US\""
     "},"
     "\"context\": {}"
 "}";
@@ -422,21 +421,28 @@ cedarling_clear_last_error();
 
 ## Memory Management
 
-All data returned by Cedarling functions must be freed using the appropriate free function:
+Cedarling returns both borrowed and owned pointers:
+
+- Borrowed pointers (do **not** free): `cedarling_version()` and `cedarling_get_last_error()`.
+- Owned allocations (must free): `CedarlingResult`, `CedarlingInstanceResult`, `CedarlingStringArray`, and standalone owned strings returned from owned containers.
+
+Use the matching free function for owned values:
 
 ```c
-// Free a CedarlingResult
+// Owned CedarlingResult
 cedarling_free_result(&result);
 
-// Free a CedarlingInstanceResult
+// Owned CedarlingInstanceResult
 cedarling_free_instance_result(&instance_result);
 
-// Free a CedarlingStringArray
+// Owned CedarlingStringArray
 cedarling_free_string_array(&array);
 
-// Free a single string (rarely needed)
+// Owned standalone C string
 cedarling_free_string(str);
 ```
+
+In short: only free memory allocated by Cedarling for owned return values. Never free the borrowed pointers returned by `cedarling_version` and `cedarling_get_last_error`.
 
 ## Complete Example
 
@@ -485,11 +491,11 @@ int main() {
     // Authorize
     const char* request = "{"
         "\"principals\": [{"
-        "    \"cedar_mapping\": {\"entity_type\": \"Jans::User\", \"id\": \"user1\"},"
-        "    \"payload\": {\"role\": [\"admin\"]}"
+        "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"user1\"},"
+        "    \"is_ok\": true"
         "}],"
-        "\"action\": \"Jans::Action::\\\"Read\\\"\","
-        "\"resource\": {\"type\": \"Jans::Resource\", \"id\": \"res1\"},"
+        "\"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\","
+        "\"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"res1\"}, \"org_id\": \"org1\", \"country\": \"US\"},"
         "\"context\": {}"
     "}";
 
