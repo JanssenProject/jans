@@ -125,15 +125,14 @@ public class AdminUISecurityService {
      * @param adminUIPolicyStore the {@link AdminUIPolicyStore} containing the policy store file
      *                           and its associated metadata
      * @return a {@link GenericResponse} indicating success or failure of the upload operation
-     *
      * @throws ApplicationException if:
-     * <ul>
-     *     <li>The request or document is null</li>
-     *     <li>The file name is missing or does not have a <code>.cjar</code> extension</li>
-     *     <li>The input stream is invalid or empty</li>
-     *     <li>The policy store domain does not match the configured server host</li>
-     *     <li>Any error occurs during validation, backup, or file upload</li>
-     * </ul>
+     *                              <ul>
+     *                                  <li>The request or document is null</li>
+     *                                  <li>The file name is missing or does not have a <code>.cjar</code> extension</li>
+     *                                  <li>The input stream is invalid or empty</li>
+     *                                  <li>The policy store domain does not match the configured server host</li>
+     *                                  <li>Any error occurs during validation, backup, or file upload</li>
+     *                              </ul>
      */
 
     public GenericResponse uploadPolicyStore(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
@@ -310,32 +309,32 @@ public class AdminUISecurityService {
             String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
                     .filter(path -> !Strings.isNullOrEmpty(path))
                     .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-
+            Map<String, Set<String>> principalsToScopesMap;
             try (ZipFile zipFile = new ZipFile(policyStorePath)) {
-                Map<String, Set<String>> principalsToScopesMap = policyToScopeMapper.processZipFile(zipFile, resourceScopesJson);
-
-                // Validate mapping results
-                if (principalsToScopesMap.isEmpty()) {
-                    log.warn("No role-to-scope mappings found during synchronization");
-                }
-
-                List<AdminRole> roles = createAdminRoles(principalsToScopesMap.keySet());
-                List<RolePermissionMapping> rolePermissionMappings = createRolePermissionMappings(principalsToScopesMap);
-
-                // Remove duplicate permissions efficiently
-                List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
-
-                // Update services
-                adminUIService.resetRoles(roles);
-                adminUIService.resetPermissionsToRole(updatedMappings);
-
-                return CommonUtils.createGenericResponse(true, 200,
-                        "Sync of role-to-scope mappings from the policy store completed successfully.");
+                principalsToScopesMap = policyToScopeMapper.processZipFile(zipFile, resourceScopesJson);
             } catch (Exception e) {
                 log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                         ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
             }
+
+            // Validate mapping results
+            if (principalsToScopesMap.isEmpty()) {
+                log.warn("No role-to-scope mappings found during synchronization");
+            }
+
+            List<AdminRole> roles = createAdminRoles(principalsToScopesMap.keySet());
+            List<RolePermissionMapping> rolePermissionMappings = createRolePermissionMappings(principalsToScopesMap);
+
+            // Remove duplicate permissions efficiently
+            List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
+
+            // Update services
+            adminUIService.resetRoles(roles);
+            adminUIService.resetPermissionsToRole(updatedMappings);
+
+            return CommonUtils.createGenericResponse(true, 200,
+                    "Sync of role-to-scope mappings from the policy store completed successfully.");
 
         } catch (ApplicationException e) {
             throw e; // Re-throw ApplicationException as is
@@ -376,11 +375,11 @@ public class AdminUISecurityService {
     }
 
     /**
-         * Create a new list of role-to-permission mappings where duplicate permissions for each role are removed while preserving their original order.
-         *
-         * @param rolePermissionMappings the list of role-to-permission mappings to process; each mapping's permissions may contain duplicates
-         * @return a new list of RolePermissionMapping with duplicates removed from each mapping's permissions (iteration order preserved)
-         */
+     * Create a new list of role-to-permission mappings where duplicate permissions for each role are removed while preserving their original order.
+     *
+     * @param rolePermissionMappings the list of role-to-permission mappings to process; each mapping's permissions may contain duplicates
+     * @return a new list of RolePermissionMapping with duplicates removed from each mapping's permissions (iteration order preserved)
+     */
     private List<RolePermissionMapping> removeDuplicatePermissions(List<RolePermissionMapping> rolePermissionMappings) {
         return rolePermissionMappings.stream()
                 .map(entry -> {
@@ -396,9 +395,9 @@ public class AdminUISecurityService {
     /**
      * Validates that the trusted issuer's `configuration_endpoint` host inside the provided JSON stream matches the expected domain.
      *
-     * @param zipInputStream   an InputStream containing the JSON content of the trusted issuer (e.g., the `trusted-issuers/GluuFlexAdminUI.json` entry)
-     * @param expectedDomain   the domain expected to match the `configuration_endpoint` host
-     * @return                 `true` if the `configuration_endpoint` host equals `expectedDomain` (case-insensitive), `false` otherwise
+     * @param zipInputStream an InputStream containing the JSON content of the trusted issuer (e.g., the `trusted-issuers/GluuFlexAdminUI.json` entry)
+     * @param expectedDomain the domain expected to match the `configuration_endpoint` host
+     * @return `true` if the `configuration_endpoint` host equals `expectedDomain` (case-insensitive), `false` otherwise
      * @throws ApplicationException if the input cannot be read or parsed, or if the `configuration_endpoint` value is not a valid URI
      */
     private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain) throws ApplicationException {
@@ -411,7 +410,7 @@ public class AdminUISecurityService {
             // Extract domain
             URI uri = new URI(endpoint);
             String domain = uri.getHost();
-            log.trace("Domain of OpenID Provider: {} , Domain of trusted issuer: {}",  expectedDomain, domain);
+            log.trace("Domain of OpenID Provider: {} , Domain of trusted issuer: {}", expectedDomain, domain);
             return domain != null && domain.equalsIgnoreCase(expectedDomain);
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);

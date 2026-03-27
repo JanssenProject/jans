@@ -38,9 +38,8 @@ public class PolicyToScopeMapper {
      * @param zipFile       the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
      * @param resourcesJson JSON structure that maps resources and access types to scope lists (used to build the scope mapping cache)
      * @return a map where each key is a role name and the value is the set of resolved scope strings for that role
-     * @throws Exception if building the scope cache or reading/parsing ZIP entries fails
      */
-    public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) throws Exception {
+    public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) {
         long startTime = System.currentTimeMillis();
         // Build mappings locally for this invocation
         Map<String, Map<String, List<String>>> scopeMapping = buildScopeMappingCache(resourcesJson);
@@ -60,9 +59,8 @@ public class PolicyToScopeMapper {
      * @param resourcesJson JSON array of resource→accessType→scopes mappings
      * @return a map where keys are lower-cased resource identifiers and values are maps from access type
      * to an unmodifiable list of scope strings
-     * @throws IOException if reading or traversing the provided JSON node fails
      */
-    private Map<String, Map<String, List<String>>> buildScopeMappingCache(JsonNode resourcesJson) throws IOException {
+    private Map<String, Map<String, List<String>>> buildScopeMappingCache(JsonNode resourcesJson) {
         Map<String, Map<String, List<String>>> cache = new HashMap<>();
 
         for (JsonNode mapping : resourcesJson) {
