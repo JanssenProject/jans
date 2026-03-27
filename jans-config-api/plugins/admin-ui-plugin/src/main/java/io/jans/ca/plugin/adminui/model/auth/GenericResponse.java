@@ -1,5 +1,6 @@
 package io.jans.ca.plugin.adminui.model.auth;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class GenericResponse {
@@ -21,6 +22,7 @@ public class GenericResponse {
     }
 
     private JsonNode responseObject;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private byte[] responseBytes;
 
     /**

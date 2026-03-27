@@ -164,6 +164,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+            <!-- Java 16+ required for java.util.zip features used in PolicyToScopeMapper -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
