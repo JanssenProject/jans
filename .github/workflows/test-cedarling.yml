@@ -249,13 +249,12 @@ jobs:
       with:
         workspaces: jans-cedarling
     - name: Install cbindgen
-      run: cargo install cbindgen --version 0.29.0
+      run: cargo install cbindgen --version 0.29.0 --locked
     - name: Build Rust C library
       working-directory: jans-cedarling/bindings/cedarling_c
       run: |
         cargo build --release -p cedarling_c
-        mkdir -p target/include
-        cbindgen --crate cedarling_c --output target/include/cedarling_c.h
+        test -f target/include/cedarling_c.h || (echo "header missing" && exit 1)
     - name: Build and run C tests
       working-directory: jans-cedarling/bindings/cedarling_c
       run: |

@@ -9,8 +9,10 @@ INCLUDES = -I../target/include
 
 # Detect OS for library linking
 UNAME_S := $(shell uname -s)
+STATIC_EXTRA_LIBS = -lpthread -lm
 ifeq ($(UNAME_S),Linux)
     LDFLAGS += -ldl -lpthread -lm
+    STATIC_EXTRA_LIBS += -ldl
 endif
 ifeq ($(UNAME_S),Darwin)
     LDFLAGS += -lpthread -lm
@@ -48,6 +50,6 @@ run-multi-issuer: authorize_multi_issuer
 
 # Static linking version
 static: basic_example.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o basic_example_static $< $(STATIC_LIB) -ldl -lpthread -lm
+	$(CC) $(CFLAGS) $(INCLUDES) -o basic_example_static $< $(STATIC_LIB) $(STATIC_EXTRA_LIBS)
 
 .PHONY: run run-unsigned run-multi-issuer static

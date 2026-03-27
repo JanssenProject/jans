@@ -7,8 +7,10 @@ INCLUDES = -I../target/include
 
 # Detect OS for library linking
 UNAME_S := $(shell uname -s)
+STATIC_EXTRA_LIBS = -lpthread -lm
 ifeq ($(UNAME_S),Linux)
     LDFLAGS += -ldl -lpthread -lm
+    STATIC_EXTRA_LIBS += -ldl
 endif
 ifeq ($(UNAME_S),Darwin)
     LDFLAGS += -lpthread -lm
@@ -34,6 +36,6 @@ run: test_cedarling
 
 # Static linking version
 static: test_cedarling.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o test_cedarling_static $< ../../../target/release/libcedarling_c.a -ldl -lpthread -lm
+	$(CC) $(CFLAGS) $(INCLUDES) -o test_cedarling_static $< ../../../target/release/libcedarling_c.a $(STATIC_EXTRA_LIBS)
 
 .PHONY: run static

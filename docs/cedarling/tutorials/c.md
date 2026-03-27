@@ -533,3 +533,4 @@ All functions in the Cedarling C library are thread-safe. Multiple threads can s
 - Explore [Cedar Policy Language](../reference/cedarling-policy-store.md) for writing authorization policies
 - Learn about [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for JWT-based authorization
 - Review [Configuration Properties](../reference/cedarling-properties.md) for all available options
+

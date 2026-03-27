@@ -651,6 +651,15 @@ pub extern "C" fn cedarling_version() -> *const c_char {
     concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char
 }
 
+/// # Safety
+/// Global library cleanup helper.
+///
+/// This function only clears thread-local last-error state and performs no unsafe memory access.
+/// It is thread-safe and idempotent: it can be called multiple times with the same effect.
+/// There are no preconditions; call it at process shutdown or whenever you want to reset error state.
+///
+/// # Postconditions
+/// The calling thread's `cedarling_get_last_error()` value is reset to null until a new error is set.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_cleanup() {
     // Perform any necessary cleanup

@@ -195,7 +195,7 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
     CedarlingInstanceResult::success(instance_id)
 }
 
-/// Drop a Cedarling Insatnce
+/// Drop a Cedarling Instance
 pub fn drop_instance(instance_id: u64) -> bool {
     clear_last_error();
     match runtime_ref() {

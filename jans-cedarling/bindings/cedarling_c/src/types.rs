@@ -7,7 +7,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::ptr;
 
-/// Error codes returend by cedarling functions.
+/// Error codes returned by cedarling functions.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CedarlingErrorCode {
@@ -182,9 +182,20 @@ pub fn set_last_error(message: &str) {
     });
 }
 
+/// Returns a borrowed pointer to the current thread's last error string.
+///
+/// Pointer is valid only until the next Cedarling library call, because most
+/// operations clear and may replace thread-local error storage at entry.
+/// C callers should copy this string immediately if it must outlive the next
+/// Cedarling API call.
+///
+/// Internally this returns `*mut c_char` for convenience with existing call sites,
+/// while the public C API exposes `*const c_char` for const-safety.
 pub fn get_last_error() -> *mut c_char {
     LAST_ERROR.with(|last_error| {
         if let Some(ref c_string) = *last_error.borrow() {
+            // Cast to mutable pointer is for internal compatibility only; callers
+            // must treat this memory as read-only.
             c_string.as_ptr() as *mut c_char
         } else {
             ptr::null_mut()
