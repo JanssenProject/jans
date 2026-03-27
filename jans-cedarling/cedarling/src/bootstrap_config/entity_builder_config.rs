@@ -7,8 +7,6 @@ use crate::BootstrapConfigRaw;
 use derive_more::Deref;
 use serde::{Deserialize, Serialize};
 
-const DEFAULT_USER_ENTITY_NAME: &str = "Jans::User";
-const DEFAULT_WORKLOAD_ENTITY_NAME: &str = "Jans::Workload";
 const DEFAULT_ROLE_ENTITY_NAME: &str = "Jans::Role";
 const DEFAULT_UNSIGNED_ROLE_ID_SRC: &str = "role";
 
@@ -20,36 +18,10 @@ pub(crate) const DEFAULT_ENTITY_TYPE_NAME: &str = "Token";
 /// Bootstrap Configurations for the JWT to Cedar entity mappings
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EntityBuilderConfig {
-    /// The names of the buildable Cedar entity type names
-    pub entity_names: EntityNames,
+    /// The name of the Cedar Role entity type
+    pub role_entity_name: String,
     /// The attribute to use when creating Role entities in the unsigned interface
     pub unsigned_role_id_src: UnsignedRoleIdSrc,
-}
-
-/// Raw entity builder config
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EntityBuilderConfigRaw {
-    /// The attribute to use when creating Role entities in the unsigned interface
-    pub unsigned_role_id_src: UnsignedRoleIdSrc,
-    /// Mapping name of cedar schema User entity
-    pub mapping_user: Option<String>,
-    /// Mapping name of cedar schema Workload entity
-    pub mapping_workload: Option<String>,
-    /// Mapping name of cedar schema Role entity
-    pub mapping_role: Option<String>,
-    /// Mapping name of cedar schema Issuer entity
-    pub mapping_iss: Option<String>,
-}
-
-/// Entity names
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EntityNames {
-    /// The entity type name of the `User` entity
-    pub user: String,
-    /// The entity type name of the `Workload` entity
-    pub workload: String,
-    /// The entity type name of the `Role` entity
-    pub role: String,
 }
 
 /// Unsigned role ID source
@@ -65,46 +37,20 @@ impl Default for UnsignedRoleIdSrc {
 impl Default for EntityBuilderConfig {
     fn default() -> Self {
         Self {
-            entity_names: EntityNames {
-                user: DEFAULT_USER_ENTITY_NAME.to_string(),
-                workload: DEFAULT_WORKLOAD_ENTITY_NAME.to_string(),
-                role: DEFAULT_ROLE_ENTITY_NAME.to_string(),
-            },
+            role_entity_name: DEFAULT_ROLE_ENTITY_NAME.to_string(),
             unsigned_role_id_src: UnsignedRoleIdSrc(DEFAULT_UNSIGNED_ROLE_ID_SRC.to_string()),
-        }
-    }
-}
-
-impl From<EntityBuilderConfigRaw> for EntityBuilderConfig {
-    fn from(raw: EntityBuilderConfigRaw) -> Self {
-        let entity_names = EntityNames {
-            user: raw
-                .mapping_user
-                .unwrap_or_else(|| DEFAULT_USER_ENTITY_NAME.to_string()),
-            workload: raw
-                .mapping_workload
-                .unwrap_or_else(|| DEFAULT_WORKLOAD_ENTITY_NAME.to_string()),
-            role: raw
-                .mapping_role
-                .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
-        };
-
-        Self {
-            entity_names,
-            unsigned_role_id_src: raw.unsigned_role_id_src,
         }
     }
 }
 
 impl From<&BootstrapConfigRaw> for EntityBuilderConfig {
     fn from(raw: &BootstrapConfigRaw) -> Self {
-        let raw_entity = EntityBuilderConfigRaw {
+        Self {
+            role_entity_name: raw
+                .mapping_role
+                .clone()
+                .unwrap_or_else(|| DEFAULT_ROLE_ENTITY_NAME.to_string()),
             unsigned_role_id_src: raw.unsigned_role_id_src.clone(),
-            mapping_user: raw.mapping_user.clone(),
-            mapping_workload: raw.mapping_workload.clone(),
-            mapping_role: raw.mapping_role.clone(),
-            mapping_iss: raw.mapping_iss.clone(),
-        };
-        EntityBuilderConfig::from(raw_entity)
+        }
     }
 }
