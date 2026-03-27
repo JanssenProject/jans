@@ -151,7 +151,7 @@ public class AdminUISecurityService {
             byte[] cjarBytes = cjarStream.readAllBytes();
 
             InputStream cjarStreamForValidation = new ByteArrayInputStream(cjarBytes);
-            InputStream cjarStreamForUpload  = new ByteArrayInputStream(cjarBytes);
+            InputStream cjarStreamForUpload = new ByteArrayInputStream(cjarBytes);
 
             validateInputStream(cjarStreamForValidation);
 
@@ -166,11 +166,17 @@ public class AdminUISecurityService {
 
             // Backup existing file
             backupExistingPolicyStore(path);
+            try {
+                // Upload new file
+                Files.copy(cjarStreamForUpload, path, StandardCopyOption.REPLACE_EXISTING);
 
-            // Upload new file
-            Files.copy(cjarStreamForUpload, path, StandardCopyOption.REPLACE_EXISTING);
-
-            log.info("Uploaded policy-store : {}", cjarDocument.getFileName());
+                log.info("Uploaded policy-store : {}", cjarDocument.getFileName());
+            } catch(Exception e) {
+                restoreFromBackup(path);
+                throw new ApplicationException(
+                        Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                        e.getMessage());
+            }
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Policy store overwritten successfully.");
@@ -253,6 +259,18 @@ public class AdminUISecurityService {
         if (Files.exists(path)) {
             Path backupPath = Paths.get(path.toString() + ".bak");
             Files.move(path, backupPath, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private void restoreFromBackup(Path path) {
+        try {
+            Path backupPath = Paths.get(path.toString() + ".bak");
+            if (Files.exists(backupPath)) {
+                Files.move(backupPath, path, StandardCopyOption.REPLACE_EXISTING);
+                log.info("Restored policy store from backup");
+            }
+        } catch (IOException e) {
+            log.error("Failed to restore policy store from backup", e);
         }
     }
 
