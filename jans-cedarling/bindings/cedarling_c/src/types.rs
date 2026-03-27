@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2025, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -37,7 +35,7 @@ pub struct CedarlingResult {
     /// Error code (0=Success))
     pub error_code: CedarlingErrorCode,
     /// Data pointer (null if error)
-    pub data: *mut char,
+    pub data: *mut c_char,
     /// Error message (null if success)
     pub error_message: *mut c_char,
 }
@@ -71,7 +69,7 @@ impl CedarlingResult {
 
         CedarlingResult {
             error_code: CedarlingErrorCode::Success,
-            data: c_string.into_raw() as *mut char,
+            data: c_string.into_raw(),
             error_message: ptr::null_mut(),
         }
     }

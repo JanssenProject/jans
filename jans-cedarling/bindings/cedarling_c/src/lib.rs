@@ -1,9 +1,7 @@
-/*
- * This software is available under the Apache-2.0 license.
- * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
- *
- * Copyright (c) 2025, Gluu, Inc.
- */
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
 
 #![cfg(not(target_arch = "wasm32"))]
 
@@ -26,12 +24,6 @@ pub extern "C" fn cedarling_init() -> c_int {
 /// # Safety
 /// Create a new Cedarling instance
 ///
-/// # Arguments
-/// * `config_json` - JSON string containing the configuration for the Cedarling instance
-/// * `result` - Pointer to a CedarlingInstanceResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_new(
     config_json: *const c_char,
@@ -56,12 +48,6 @@ pub unsafe extern "C" fn cedarling_new(
 /// # Safety
 /// Create a new Cedarling instance with environment variables support
 ///
-/// # Arguments
-/// * `config_json` - Optional JSON string containing the configuration for the Cedarling instance (can be null)
-/// * `result` - Pointer to a CedarlingInstanceResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_new_with_env(
     config_json: *const c_char,
@@ -89,8 +75,6 @@ pub unsafe extern "C" fn cedarling_new_with_env(
 /// # Safety
 /// Drop a cedarling instance
 ///
-/// # Arguments
-/// * `instance_id` - ID of the instance to be dropped
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_drop(instance_id: u64) {
     drop_instance(instance_id);
@@ -98,13 +82,6 @@ pub unsafe extern "C" fn cedarling_drop(instance_id: u64) {
 /// # Safety
 /// Authorize an unsigned request
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to use for authorization
-/// * `request_json` - JSON string containing the request to be authorized
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_authorize_unsigned(
     instance_id: u64,
@@ -131,13 +108,6 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
 /// # Safety
 /// Authorize a multi-issuer request
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to use for authorization
-/// * `request_json` - JSON string containing the multi-issuer request
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
     instance_id: u64,
@@ -166,14 +136,6 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
 /// # Safety
 /// Push context data
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `key` - Key for the context data
-/// * `value_json` - JSON string containing the value
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_push(
     instance_id: u64,
@@ -209,13 +171,6 @@ pub unsafe extern "C" fn cedarling_context_push(
 /// # Safety
 /// Get context data by key
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `key` - Key for the context data
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_get(
     instance_id: u64,
@@ -242,13 +197,6 @@ pub unsafe extern "C" fn cedarling_context_get(
 /// # Safety
 /// Remove context data by key
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `key` - Key for the context data to remove
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_remove(
     instance_id: u64,
@@ -275,12 +223,6 @@ pub unsafe extern "C" fn cedarling_context_remove(
 /// # Safety
 /// Clear all context data
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_clear(
     instance_id: u64,
@@ -298,12 +240,6 @@ pub unsafe extern "C" fn cedarling_context_clear(
 /// # Safety
 /// List all context entries with metadata
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `result` - Pointer to a CedarlingResult structure to store the result (JSON array of entries)
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_list(
     instance_id: u64,
@@ -321,12 +257,6 @@ pub unsafe extern "C" fn cedarling_context_list(
 /// # Safety
 /// Get context stats
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `result` - Pointer to a CedarlingResult structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_context_stats(
     instance_id: u64,
@@ -344,14 +274,8 @@ pub unsafe extern "C" fn cedarling_context_stats(
 /// # Safety
 /// Pop all logs from an instance
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to pop logs from
-/// * `result` - Pointer to a CedarlingStringArray structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
-unsafe extern "C" fn cedarling_pop_logs(
+pub unsafe extern "C" fn cedarling_pop_logs(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
@@ -362,17 +286,14 @@ unsafe extern "C" fn cedarling_pop_logs(
     let logs = pop_logs(instance_id);
 
     unsafe { *result = logs };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get a log by ID
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to get the log from
-/// * `log_id` - ID of the log to retrieve
-/// * `result` - Pointer to a CedarlingStringArray structure to store the result
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_log_by_id(
     instance_id: u64,
@@ -386,7 +307,7 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
     let id_str = match c_string_to_string(log_id) {
         Ok(s) => s,
         Err(code) => unsafe {
-            *result = CedarlingResult::error(code, "Invalid request JSON string");
+            *result = CedarlingResult::error(code, "Invalid log_id C string");
             return code as c_int;
         },
     };
@@ -399,12 +320,6 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
 /// # Safety
 /// Get all log IDs
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to get the log IDs from
-/// * `result` - Pointer to a CedarlingStringArray structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_log_ids(
     instance_id: u64,
@@ -417,18 +332,14 @@ pub unsafe extern "C" fn cedarling_get_log_ids(
     let log_ids = get_log_ids(instance_id);
 
     unsafe { *result = log_ids };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get logs by tag
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to get the log IDs from
-/// * `tag` - C string containing the tag to filter logs by
-/// * `result` - Pointer to a CedarlingStringArray structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     instance_id: u64,
@@ -453,18 +364,14 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     let logs = get_logs_by_tag(instance_id, &tag_str);
 
     unsafe { *result = logs };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get logs by request ID
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to get the log IDs from
-/// * `request_id` - request ID to filter logs by
-/// * `result` - Pointer to a CedarlingStringArray structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     instance_id: u64,
@@ -489,19 +396,14 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     let logs = get_logs_by_request_id(instance_id, &request_id_str);
 
     unsafe { *result = logs };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get logs by request ID and tag
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to get the log IDs from
-/// * `request_id` - request ID to filter logs by
-/// * `tag` - C string containing the tag to filter logs by
-/// * `result` - Pointer to a CedarlingStringArray structure to store the result
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     instance_id: u64,
@@ -538,29 +440,30 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     let logs = get_logs_by_request_id_and_tag(instance_id, &request_id_str, &tag_str);
 
     unsafe { *result = logs };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 
 /// # Safety
 /// Check whether a trusted issuer was loaded by issuer identifier
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `issuer_id` - Trusted issuer identifier to check
-///
-/// # Returns
-/// * `true` if loaded, `false` otherwise
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
     instance_id: u64,
     issuer_id: *const c_char,
 ) -> bool {
     if issuer_id.is_null() {
+        set_last_error("null issuer_id");
         return false;
     }
     let issuer_id_str = match c_string_to_string(issuer_id) {
         Ok(s) => s,
-        Err(_) => return false,
+        Err(_) => {
+            set_last_error("invalid issuer_id C string");
+            return false;
+        },
     };
     is_trusted_issuer_loaded_by_name(instance_id, &issuer_id_str)
 }
@@ -568,23 +471,21 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
 /// # Safety
 /// Check whether a trusted issuer was loaded by `iss` claim
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `iss_claim` - Issuer claim value to check
-///
-/// # Returns
-/// * `true` if loaded, `false` otherwise
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
     instance_id: u64,
     iss_claim: *const c_char,
 ) -> bool {
     if iss_claim.is_null() {
+        set_last_error("null iss_claim");
         return false;
     }
     let iss_claim_str = match c_string_to_string(iss_claim) {
         Ok(s) => s,
-        Err(_) => return false,
+        Err(_) => {
+            set_last_error("invalid iss_claim C string");
+            return false;
+        },
     };
     is_trusted_issuer_loaded_by_iss(instance_id, &iss_claim_str)
 }
@@ -592,11 +493,6 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
 /// # Safety
 /// Get total number of trusted issuers discovered
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-///
-/// # Returns
-/// * Number of trusted issuers
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64) -> usize {
     total_issuers(instance_id)
@@ -605,11 +501,6 @@ pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64) -> usize {
 /// # Safety
 /// Get number of trusted issuers loaded successfully
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-///
-/// # Returns
-/// * Number of loaded trusted issuers
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(instance_id: u64) -> usize {
     loaded_trusted_issuers_count(instance_id)
@@ -618,12 +509,6 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(instance_id: u64
 /// # Safety
 /// Get trusted issuer IDs loaded successfully
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `result` - Pointer to a CedarlingStringArray to store trusted issuer IDs
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
     instance_id: u64,
@@ -634,18 +519,15 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
     }
     let ids = loaded_trusted_issuer_ids(instance_id);
     unsafe { *result = ids };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 
 /// # Safety
 /// Get trusted issuer IDs that failed to load
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance
-/// * `result` - Pointer to a CedarlingStringArray to store trusted issuer IDs
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
     instance_id: u64,
@@ -656,17 +538,15 @@ pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
     }
     let ids = failed_trusted_issuer_ids(instance_id);
     unsafe { *result = ids };
+    if !get_last_error().is_null() {
+        return CedarlingErrorCode::InstanceNotFound as c_int;
+    }
     CedarlingErrorCode::Success as c_int
 }
 
 /// # Safety
 /// Shutdown a Cedarling instance
 ///
-/// # Arguments
-/// * `instance_id` - ID of the Cedarling instance to be shut down
-///
-/// # Returns
-/// * 0 on success, error code on failure
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
     shutdown_instance(instance_id) as c_int
@@ -674,8 +554,6 @@ pub unsafe extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
 /// # Safety
 /// Free a string returned by Cedarling functions
 ///
-/// # Arguments
-/// * `str_ptr` - Pointer to the string to be freed
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
     if !str_ptr.is_null() {
@@ -688,8 +566,6 @@ pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
 /// # Safety
 /// Free a string array returned by Cedarling functions
 ///
-/// # Arguments
-/// * `array` - Pointer to the CedarlingStringArray to be freed
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingStringArray) {
     if array.is_null() {
@@ -715,8 +591,6 @@ pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingString
 /// # Safety
 /// Free a CedarlingResult structure
 ///
-/// # Arguments
-/// * `result` - Pointer to the CedarlingResult structure to be freed
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
     if result.is_null() {
@@ -727,7 +601,7 @@ pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
         let result_ref = &*result;
         if !result_ref.data.is_null() {
             // Convert the raw pointer back to a CString and drop it
-            let _ = std::ffi::CString::from_raw(result_ref.data as *mut i8);
+            let _ = std::ffi::CString::from_raw(result_ref.data);
         }
         if !result_ref.error_message.is_null() {
             // Convert the raw pointer back to a CString and drop it
@@ -739,8 +613,6 @@ pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
 /// # Safety
 /// Free a CedarlingInstanceResult structure
 ///
-/// # Arguments
-/// * `result` - Pointer to the CedarlingInstanceResult structure to be freed
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingInstanceResult) {
     if result.is_null() {
@@ -759,8 +631,6 @@ pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingIn
 /// # Safety
 /// Get the last error message
 ///
-/// # Returns
-/// * Pointer to the last error message string (do not free this pointer)
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_get_last_error() -> *const c_char {
     get_last_error()
@@ -776,8 +646,6 @@ pub extern "C" fn cedarling_clear_last_error() {
 /// # Safety
 /// Get the Cedarling library version
 ///
-/// # Returns
-/// * Pointer to a C string containing the version (do not free this pointer)
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_version() -> *const c_char {
     concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char
