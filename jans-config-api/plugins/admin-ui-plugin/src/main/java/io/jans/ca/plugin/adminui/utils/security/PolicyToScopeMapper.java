@@ -8,8 +8,10 @@ import java.util.regex.*;
 import java.util.zip.*;
 
 import com.fasterxml.jackson.databind.*;
+import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 @Singleton
@@ -69,7 +71,7 @@ public class PolicyToScopeMapper {
         return cache;
     }
 
-    private Map<String, List<String>> loadEntityRelationships(ZipFile zipFile) throws IOException {
+    private Map<String, List<String>> loadEntityRelationships(ZipFile zipFile) {
         Map<String, List<String>> parentToFeatures = new HashMap<>();
 
         zipFile.stream()
@@ -109,7 +111,7 @@ public class PolicyToScopeMapper {
                 }
             }
         } catch (IOException e) {
-            log.trace("Error parsing entity: {} - {}", entry.getName(), e.getMessage());
+            log.error("Error parsing entity: {} - {}", entry.getName(), e.getMessage());
         }
     }
 

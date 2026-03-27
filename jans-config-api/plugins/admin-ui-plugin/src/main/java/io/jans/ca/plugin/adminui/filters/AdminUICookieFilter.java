@@ -10,7 +10,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
-import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
 import io.jans.ca.plugin.adminui.service.adminui.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
@@ -309,7 +308,6 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         config.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         config.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
         config.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
-        config.setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint.fromString(appConf.getMainSettings().getUiConfig().getCedarlingPolicyStoreRetrievalPoint()));
         config.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
 
         // Assign fully-constructed object last

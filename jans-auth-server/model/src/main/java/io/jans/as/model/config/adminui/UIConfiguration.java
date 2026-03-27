@@ -6,7 +6,6 @@ public class UIConfiguration {
     private String cedarlingLogType;
     private String auiPolicyStoreUrl;
     private String auiDefaultPolicyStorePath;
-    private String cedarlingPolicyStoreRetrievalPoint;
 
     public UIConfiguration() {
         //Do not remove
@@ -42,14 +41,6 @@ public class UIConfiguration {
 
     public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
-    }
-
-    public String getCedarlingPolicyStoreRetrievalPoint() {
-        return cedarlingPolicyStoreRetrievalPoint;
-    }
-
-    public void setCedarlingPolicyStoreRetrievalPoint(String cedarlingPolicyStoreRetrievalPoint) {
-        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
     }
 
     public String getAuiDefaultPolicyStorePath() {

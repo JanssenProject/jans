@@ -43,7 +43,6 @@ public class AUIConfiguration {
     private CedarlingLogType cedarlingLogType;
     private String auiCedarlingPolicyStoreUrl;
     private String auiCedarlingDefaultPolicyStorePath;
-    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint = CedarlingPolicyStrRetrievalPoint.DEFAULT;
 
     /**
      * Retrieves the additional key-value parameters configured for the Admin UI.
@@ -640,26 +639,6 @@ public class AUIConfiguration {
     }
 
     /**
-     * Returns the configured Cedarling policy store retrieval point.
-     *
-     * @return the current CedarlingPolicyStrRetrievalPoint; never null — defaults to {@code CedarlingPolicyStrRetrievalPoint.DEFAULT} when not explicitly set.
-     */
-    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
-        return cedarlingPolicyStoreRetrievalPoint;
-    }
-
-    /**
-     * Set the cedarling policy store retrieval point for this configuration.
-     *
-     * @param cedarlingPolicyStoreRetrievalPoint the retrieval point to set; if `null`, the value will be set to {@link CedarlingPolicyStrRetrievalPoint#DEFAULT}
-     */
-    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
-        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint != null
-                ? cedarlingPolicyStoreRetrievalPoint
-                : CedarlingPolicyStrRetrievalPoint.DEFAULT;
-    }
-
-    /**
      * Produce a string representation of this AUIConfiguration containing all configuration fields and their current values.
      *
      * @return a string containing each field name and its current value for this configuration instance
@@ -697,8 +676,7 @@ public class AUIConfiguration {
                 ", additionalParameters=" + additionalParameters +
                 ", cedarlingLogType=" + cedarlingLogType +
                 ", auiCedarlingPolicyStoreUrl='" + auiCedarlingPolicyStoreUrl + '\'' +
-                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath + '\'' +
-                ", cedarlingPolicyStoreRetrievalPoint=" + cedarlingPolicyStoreRetrievalPoint +
+                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath +
                 '}';
     }
 }

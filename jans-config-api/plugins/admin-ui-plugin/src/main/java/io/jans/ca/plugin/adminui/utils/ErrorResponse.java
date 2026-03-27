@@ -77,6 +77,7 @@ public enum ErrorResponse {
     POLICY_STORE_UPLOAD_ERROR("Error in uploading policy-store"),
     BAD_REQUEST_IN_POLICY_STORE_UPLOAD("Bad Request: No Policy Store file provided"),
     UNSUPPORTED_POLICY_STORE_EXTENSION("Bad Request: The Policy Store extension is not .cjar and is not supported"),
+    POLICY_STORE_DOMAIN_NOT_MATCHING("The hostname of the configuration_endpoint in policy-store does not matches with hostname of OpenID Provider."),
     ERROR_IN_POLICY_STORE("Bad Request: Error in reading Policy Store file")
     ;
 

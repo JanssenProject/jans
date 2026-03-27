@@ -21,16 +21,22 @@ import io.jans.service.document.store.model.Document;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Service responsible for managing Admin UI security related operations such as
@@ -67,6 +73,8 @@ public class AdminUISecurityService {
     PolicyToScopeMapper policyToScopeMapper;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
 
     /**
      * Retrieves the current policy store from the configured local file system path.
@@ -157,6 +165,29 @@ public class AdminUISecurityService {
             String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
                     .filter(path -> !Strings.isNullOrEmpty(path))
                     .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
+            try (ZipFile zipFile = new ZipFile(policyStorePath)) {
+                URI uri = new URI(auiConfiguration.getAuiWebServerHost());
+                ZipEntry entry = zipFile.getEntry(TRUSTED_ISSUER_FILE);
+                try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                    if (!isHostnameMatching(inputStream, uri.getHost())) {
+                        log.error(ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+                        throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                                ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+                    }
+                } catch (ApplicationException e) {
+                    throw e; // Re-throw ApplicationException as is
+                } catch (Exception e) {
+                    log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+                    throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                            ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
+                }
+            } catch (ApplicationException e) {
+                throw e; // Re-throw ApplicationException as is
+            } catch (Exception e) {
+                log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
+            }
             Path path = Paths.get(policyStorePath);
             //take backup of the last policy store if exist
             if (Files.exists(path)) {
@@ -299,5 +330,24 @@ public class AdminUISecurityService {
                     return rpm;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain) throws ApplicationException {
+        try {
+            // Read JSON content
+            String content = new String(zipInputStream.readAllBytes(), StandardCharsets.UTF_8);
+            // Parse JSON
+            JSONObject json = new JSONObject(content);
+            String endpoint = json.getString("configuration_endpoint");
+            // Extract domain
+            URI uri = new URI(endpoint);
+            String domain = uri.getHost();
+            log.trace("Domain of OpenID Provider: {} , Domain of trusted issuer: {}",  expectedDomain, domain);
+            return domain != null && domain.equalsIgnoreCase(expectedDomain);
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    e.getMessage());
+        }
     }
 }

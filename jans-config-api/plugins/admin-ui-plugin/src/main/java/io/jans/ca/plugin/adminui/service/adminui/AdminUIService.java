@@ -56,7 +56,6 @@ public class AdminUIService {
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
             appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
             appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
-            appConfigResponse.setCedarlingPolicyStoreRetrievalPoint(auiConfiguration.getCedarlingPolicyStoreRetrievalPoint());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -91,10 +90,6 @@ public class AdminUIService {
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiPolicyStoreUrl())) {
                 adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
                 auiConfigurationService.getAUIConfiguration().setAuiCedarlingPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
-            }
-            if (appConfigResponse.getCedarlingPolicyStoreRetrievalPoint() != null) {
-                adminConf.getMainSettings().getUiConfig().setCedarlingPolicyStoreRetrievalPoint(appConfigResponse.getCedarlingPolicyStoreRetrievalPoint().toString());
-                auiConfigurationService.getAUIConfiguration().setCedarlingPolicyStoreRetrievalPoint(appConfigResponse.getCedarlingPolicyStoreRetrievalPoint());
             }
             if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
                 adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
