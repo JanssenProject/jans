@@ -266,3 +266,33 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 
 	return stats, nil
 }
+
+// IsTrustedIssuerLoadedByName returns true if the trusted issuer with the given id finished loading successfully.
+func (c *Cedarling) IsTrustedIssuerLoadedByName(issuerID string) bool {
+	return internal.CallIsTrustedIssuerLoadedByName(c.instance_id, issuerID)
+}
+
+// IsTrustedIssuerLoadedByIss returns true if the trusted issuer for the given JWT iss claim finished loading successfully.
+func (c *Cedarling) IsTrustedIssuerLoadedByIss(issClaim string) bool {
+	return internal.CallIsTrustedIssuerLoadedByIss(c.instance_id, issClaim)
+}
+
+// TotalIssuers returns the number of trusted issuers configured in the policy store.
+func (c *Cedarling) TotalIssuers() uint {
+	return internal.CallTotalIssuers(c.instance_id)
+}
+
+// LoadedTrustedIssuersCount returns how many trusted issuers loaded successfully.
+func (c *Cedarling) LoadedTrustedIssuersCount() uint {
+	return internal.CallLoadedTrustedIssuersCount(c.instance_id)
+}
+
+// LoadedTrustedIssuerIds returns ids of successfully loaded trusted issuers.
+func (c *Cedarling) LoadedTrustedIssuerIds() []string {
+	return internal.CallLoadedTrustedIssuerIds(c.instance_id)
+}
+
+// FailedTrustedIssuerIds returns ids of trusted issuers that failed to load.
+func (c *Cedarling) FailedTrustedIssuerIds() []string {
+	return internal.CallFailedTrustedIssuerIds(c.instance_id)
+}

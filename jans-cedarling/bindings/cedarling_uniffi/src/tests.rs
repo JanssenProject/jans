@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::Cedarling;
+use crate::CedarlingError;
 use crate::{EntityData, JsonValue};
 use serde_json::json;
 use std::sync::Arc;
@@ -77,6 +78,19 @@ fn create_test_cedarling() -> Cedarling {
         "../../bindings/cedarling_uniffi/test_files/bootstrap.json",
     ))
     .expect("Error in initializing Cedarling")
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_rejects_invalid() {
+    let config =
+        std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable");
+    let result = Cedarling::load_from_json_with_archive_bytes(config, vec![0x00, 0x01, 0x02, 0x03]);
+    assert!(
+        matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
+        "invalid archive bytes should yield InitializationFailed, is_ok={}",
+        result.is_ok()
+    );
 }
 
 #[test]
@@ -368,4 +382,37 @@ fn test_data_api_invalid_key() {
 
     let result = cedarling.push_data_ctx("".to_string(), JsonValue(r#""value""#.to_string()), None);
     result.expect_err("push_data_ctx with empty key should fail");
+}
+
+#[test]
+fn test_trusted_issuer_loading_info_defaults() {
+    let cedarling = create_test_cedarling();
+
+    assert!(
+        !cedarling.is_trusted_issuer_loaded_by_name("missing_issuer"),
+        "unknown issuer id should not be loaded"
+    );
+    assert!(
+        !cedarling.is_trusted_issuer_loaded_by_iss("https://missing.example.org"),
+        "unknown issuer iss should not be loaded"
+    );
+
+    let total = cedarling.total_issuers();
+    let loaded = cedarling.loaded_trusted_issuers_count();
+    let loaded_ids = cedarling.loaded_trusted_issuer_ids();
+    assert!(
+        loaded <= total,
+        "loaded count {loaded} should not exceed total {total}"
+    );
+    assert_eq!(
+        loaded_ids.len() as i64,
+        loaded,
+        "loaded ids length should match loaded_trusted_issuers_count"
+    );
+    for id in &loaded_ids {
+        assert!(
+            cedarling.is_trusted_issuer_loaded_by_name(id),
+            "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
+        );
+    }
 }

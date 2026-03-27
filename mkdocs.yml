@@ -64,7 +64,6 @@ nav:
     - Casa Quick Start: casa/administration/quick-start.md
     - Cedarling Quick Start: cedarling/quick-start/cedarling-quick-start.md
   - Terminology:
-    - Cedarling Terms: cedarling/reference/cedarling-terms.md
     - Learning Reference: janssen-server/reference/learning-reference.md
 
 # ====================
@@ -235,6 +234,7 @@ nav:
     - Configuration: janssen-server/fido/config.md
     - Vendor Metadata: janssen-server/fido/vendor-metadata.md
     - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
+    - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
     - Types of Credentials: janssen-server/fido/types-of-creds.md
   - SAML:
     - Shibboleth IDP:
@@ -283,7 +283,6 @@ nav:
       - Properties: cedarling/reference/cedarling-properties.md
       - Boolean Operations: cedarling/reference/cedarling-principal-boolean-operations.md
       - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
-      - JWT Mapping: cedarling/reference/cedarling-jwt-mapping.md
       - Entities: cedarling/reference/cedarling-entities.md
       - Logs: cedarling/reference/cedarling-logs.md
       - Lock Server: cedarling/reference/cedarling-lock-server.md
@@ -473,7 +472,7 @@ nav:
     - VM Logs: janssen-server/vm-ops/logs.md
     - Kubernetes Logs: janssen-server/kubernetes-ops/logs.md
   - Debugging:
-    - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+    - Script Debugging: janssen-server/developer/scripts/interception-scripts-debug.md
     - Remote Debugging: contribute/development/remote-debugging.md
   - Health Checks:
     - Kubernetes Health Check: janssen-server/kubernetes-ops/health-check.md

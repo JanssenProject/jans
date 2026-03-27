@@ -302,14 +302,6 @@ pub(crate) struct DecisionLogEntry {
     pub policystore_version: SmolStr,
     /// describe what principal was active on authorization request
     pub principal: Vec<SmolStr>,
-    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_USER_CLAIMS` property, that must be present in the Cedar User entity
-    #[serde(rename = "User")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user: Option<HashMap<String, serde_json::Value>>,
-    /// A list of claims, specified by the `CEDARLING_DECISION_LOG_WORKLOAD_CLAIMS` property, that must be present in the Cedar Workload entity
-    #[serde(rename = "Workload")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub workload: Option<HashMap<String, serde_json::Value>>,
     /// If this Cedarling has registered with a Lock Server, what is the `client_id` it received
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lock_client_id: Option<String>,
