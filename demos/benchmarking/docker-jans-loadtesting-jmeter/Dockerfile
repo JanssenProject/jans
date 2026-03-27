@@ -10,7 +10,9 @@ RUN apt-get clean \
 && mkdir -p /var/lib/apt/lists/partial \
 && apt-get clean
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+    && mkdir -p /usr/share/man/man1 /usr/share/man/man2 \
+    && apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
     wget \
     git \
@@ -21,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     apt-utils \
     python3-pip \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # ===============
