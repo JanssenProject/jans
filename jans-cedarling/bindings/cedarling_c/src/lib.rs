@@ -542,6 +542,124 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
 }
 
 /// # Safety
+/// Check whether a trusted issuer was loaded by issuer identifier
+///
+/// # Arguments
+/// * `instance_id` - ID of the Cedarling instance
+/// * `issuer_id` - Trusted issuer identifier to check
+///
+/// # Returns
+/// * `true` if loaded, `false` otherwise
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
+    instance_id: u64,
+    issuer_id: *const c_char,
+) -> bool {
+    if issuer_id.is_null() {
+        return false;
+    }
+    let issuer_id_str = match c_string_to_string(issuer_id) {
+        Ok(s) => s,
+        Err(_) => return false,
+    };
+    is_trusted_issuer_loaded_by_name(instance_id, &issuer_id_str)
+}
+
+/// # Safety
+/// Check whether a trusted issuer was loaded by `iss` claim
+///
+/// # Arguments
+/// * `instance_id` - ID of the Cedarling instance
+/// * `iss_claim` - Issuer claim value to check
+///
+/// # Returns
+/// * `true` if loaded, `false` otherwise
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
+    instance_id: u64,
+    iss_claim: *const c_char,
+) -> bool {
+    if iss_claim.is_null() {
+        return false;
+    }
+    let iss_claim_str = match c_string_to_string(iss_claim) {
+        Ok(s) => s,
+        Err(_) => return false,
+    };
+    is_trusted_issuer_loaded_by_iss(instance_id, &iss_claim_str)
+}
+
+/// # Safety
+/// Get total number of trusted issuers discovered
+///
+/// # Arguments
+/// * `instance_id` - ID of the Cedarling instance
+///
+/// # Returns
+/// * Number of trusted issuers
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64) -> usize {
+    total_issuers(instance_id)
+}
+
+/// # Safety
+/// Get number of trusted issuers loaded successfully
+///
+/// # Arguments
+/// * `instance_id` - ID of the Cedarling instance
+///
+/// # Returns
+/// * Number of loaded trusted issuers
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(instance_id: u64) -> usize {
+    loaded_trusted_issuers_count(instance_id)
+}
+
+/// # Safety
+/// Get trusted issuer IDs loaded successfully
+///
+/// # Arguments
+/// * `instance_id` - ID of the Cedarling instance
+/// * `result` - Pointer to a CedarlingStringArray to store trusted issuer IDs
+///
+/// # Returns
+/// * 0 on success, error code on failure
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
+    instance_id: u64,
+    result: *mut CedarlingStringArray,
+) -> c_int {
+    if result.is_null() {
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    let ids = loaded_trusted_issuer_ids(instance_id);
+    unsafe { *result = ids };
+    CedarlingErrorCode::Success as c_int
+}
+
+/// # Safety
+/// Get trusted issuer IDs that failed to load
+///
+/// # Arguments
+/// * `instance_id` - ID of the Cedarling instance
+/// * `result` - Pointer to a CedarlingStringArray to store trusted issuer IDs
+///
+/// # Returns
+/// * 0 on success, error code on failure
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
+    instance_id: u64,
+    result: *mut CedarlingStringArray,
+) -> c_int {
+    if result.is_null() {
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    let ids = failed_trusted_issuer_ids(instance_id);
+    unsafe { *result = ids };
+    CedarlingErrorCode::Success as c_int
+}
+
+/// # Safety
 /// Shutdown a Cedarling instance
 ///
 /// # Arguments
