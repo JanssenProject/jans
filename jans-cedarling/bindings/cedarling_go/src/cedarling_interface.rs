@@ -55,7 +55,6 @@ pub trait G2RCall {
     fn new_with_env_instance(boostrap_config_raw_json: String) -> ResultInstance;
     fn drop_instance(instance_id: usize);
 
-    fn authorize(instance_id: usize, request_json: String) -> Result;
     fn authorize_unsigned(instance_id: usize, request_json: String) -> Result;
     fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result;
 
@@ -75,4 +74,11 @@ pub trait G2RCall {
     fn clear_data_ctx(instance_id: usize) -> Result;
     fn list_data_ctx(instance_id: usize) -> Result;
     fn get_stats_ctx(instance_id: usize) -> Result;
+
+    fn is_trusted_issuer_loaded_by_name(instance_id: usize, issuer_id: String) -> bool;
+    fn is_trusted_issuer_loaded_by_iss(instance_id: usize, iss_claim: String) -> bool;
+    fn total_issuers(instance_id: usize) -> usize;
+    fn loaded_trusted_issuers_count(instance_id: usize) -> usize;
+    fn loaded_trusted_issuer_ids(instance_id: usize) -> Vec<String>;
+    fn failed_trusted_issuer_ids(instance_id: usize) -> Vec<String>;
 }

@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +71,7 @@ public class BaseResource {
     private static final String TOKEN_DELIMITER = ",";
     private static final String FIELD_VALUE_SEPARATOR = "=";
     private static final List<String> FIELD_VALUE_SEPARATOR_ARR = FilterOperator.getAllOperatorSign();
+    public static final String DEFAULT_SEARCH_PATTERN = "^.*$";
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -288,6 +290,18 @@ public class BaseResource {
             rootCause = rootCause.getCause();
         }
         return rootCause;
+    }
+    
+    public String getRegexPattern(String pattern) {
+        String searchPattern = DEFAULT_SEARCH_PATTERN;
+        if (StringUtils.isNotBlank(pattern)) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("^.*");
+            stringBuilder.append(Pattern.quote(pattern));
+            stringBuilder.append(".*$");
+            searchPattern = stringBuilder.toString();
+        }
+        return searchPattern;
     }
 
 }

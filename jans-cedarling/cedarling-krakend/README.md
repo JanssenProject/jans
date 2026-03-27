@@ -150,9 +150,7 @@ The `namespace` field in the configuration needs to be the cedar namespace you u
    ```
    CEDARLING_APPLICATION_NAME=Gateway
    CEDARLING_POLICY_STORE_URI=<Your policy store URI>
-   CEDARLING_WORKLOAD_AUTHZ=enabled
    CEDARLING_PRINCIPAL_BOOLEAN_OPERATION={\"===\":[{\"var\":\"Jans::Workload\"},\"ALLOW\"]}
-       CEDARLING_ID_TOKEN_TRUST_MODE=never
    ```
 
 5. Run the KrakenD server: `krakend run -c krakend.json`

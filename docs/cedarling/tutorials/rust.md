@@ -144,22 +144,23 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 Cedarling provides two main interfaces for performing authorization checks: **Token-Based Authorization** and **Unsigned Authorization**. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.
 
-- [**Token-Based Authorization**](#token-based-authorization) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
+- [**Token-Based Authorization**](#token-based-authorization-multi-issuer) is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.
 
-#### Token-Based Authorization
+#### Token-Based Authorization (Multi-Issuer)
 
-To perform an authorization check, follow these steps:
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities.
 
 **1. Prepare tokens**
 
 ```rust
-let access_token = "your_access_token_here".to_string();
-let id_token = "your_id_token_here".to_string();
-let userinfo_token = "your_userinfo_token_here".to_string();
-```
+use cedarling::TokenInput;
 
-Your _principals_ will be built from these tokens.
+let tokens = vec![
+    TokenInput::new("Jans::Access_token".to_string(), access_token_jwt),
+    TokenInput::new("Jans::Id_token".to_string(), id_token_jwt),
+];
+```
 
 **2. Define the resource**
 
@@ -168,16 +169,16 @@ use std::collections::HashMap;
 use serde_json::json;
 
 let resource = EntityData {
-  cedar_entity_mapping: CedarEntityMapping {
+  cedar_mapping: CedarEntityMapping {
     entity_type: "Jans::Application".to_string(),
     id: "app_id_001".to_string(),
   },
-  payload: HashMap::from_iter([
+  attributes: HashMap::from_iter([
     ("protocol".to_string(), json!("https")),
     ("host".to_string(), json!("example.com")),
     ("path".to_string(), json!("/admin-dashboard")),
   ]),
-}
+};
 ```
 
 **3. Define the action**
@@ -186,51 +187,35 @@ let resource = EntityData {
 let action = r#"Jans::Action::"Read""#.to_string();
 ```
 
-**4. Define Context**
+**4. Define Context (optional)**
 
 ```rust
-use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::json;
 
-let context = json!({
-    "current_time": SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
-    "device_health": ["Healthy"],
-    "fraud_indicators": ["Allowed"],
-    "geolocation": ["America"],
-    "network": "127.0.0.1",
-    "network_type": "Local",
-    "operating_system": "Linux",
-    "user_agent": "Linux"
-});
+let context = json!({});
 ```
 
-**5. Build the request**
+**5. Build and execute the request**
 
 ```rust
-use std::collections::HashMap;
+use cedarling::AuthorizeMultiIssuerRequest;
 
-let request = Request {
-    tokens: HashMap::from([
-        ("access_token".to_string(), access_token),
-        ("id_token".to_string(), id_token),
-        ("userinfo_token".to_string(), userinfo_token),
-    ]),
+let request = AuthorizeMultiIssuerRequest {
+    tokens,
     action,
     resource,
-    context,
+    context: Some(context),
 };
-```
 
-**6. Authorize**
-
-```rust
-let result = cedarling.authorize(request).await?;
+let result = cedarling.authorize_multi_issuer(request).await?;
 
 match result.decision {
     true => println!("Access granted"),
-    false => println!("Access denied: {:?}", result.diagnostics),
+    false => println!("Access denied"),
 }
 ```
+
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -245,21 +230,21 @@ use serde_json::json;
 
 let principals = vec![
   EntityData {
-    cedar_entity_mapping: CedarEntityMapping {
+    cedar_mapping: CedarEntityMapping {
       entity_type: "Jans::Workload".to_string(),
       id: "some_workload_id".to_string(),
     },
-    payload: HashMap::from_iter([
+    attributes: HashMap::from_iter([
       ("client_id".to_string(), json!("some_client_id")),
     ]),
   },
   EntityData {
-    cedar_entity_mapping: CedarEntityMapping {
+    cedar_mapping: CedarEntityMapping {
       entity_type: "Jans::User".to_string(),
       id: "random_user_id".to_string(),
     },
-    payload: HashMap::from_iter([
-      ("roles".to_string(), json!(["admin", "manager"])),
+    attributes: HashMap::from_iter([
+      ("role".to_string(), json!(["admin", "manager"])),
     ]),
   },
 ]
@@ -274,11 +259,11 @@ use std::collections::HashMap;
 use serde_json::json;
 
 let resource = EntityData {
-  cedar_entity_mapping: CedarEntityMapping {
+  cedar_mapping: CedarEntityMapping {
     entity_type: "Jans::Application".to_string(),
     id: "app_id_001".to_string(),
   },
-  payload: HashMap::from_iter([
+  attributes: HashMap::from_iter([
     ("protocol".to_string(), json!("https")),
     ("host".to_string(), json!("example.com")),
     ("path".to_string(), json!("/admin-dashboard")),
@@ -351,7 +336,7 @@ let logs = cedarling.pop_logs();
 println!("{:#?}", logs);
 ```
 
-For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#log-retrieval).
+For more detailed logging capabilities, see the [Cedarling Rust Developer Guide](../developer/cedarling-rust.md).
 
 ## Example
 
@@ -365,6 +350,6 @@ Please refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#
 ## See Also
 
 - [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
-- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-tbac-using-cedarling)
-- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#authorization-using-the-cedarling)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
 - [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)

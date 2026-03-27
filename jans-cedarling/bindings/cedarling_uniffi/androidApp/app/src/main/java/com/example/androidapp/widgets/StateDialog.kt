@@ -33,13 +33,14 @@ fun StateDialog(
                 Text("Authorization Result:", style = MaterialTheme.typography.titleMedium)
                 Text("${result?.decision ?: "N/A"}", modifier = Modifier.padding(4.dp))
 
-                result?.person?.let {
-                    Text("Person:", style = MaterialTheme.typography.titleMedium)
-                    JsonTreeView(toJsonString(it))
-                }
-                result?.workload?.let {
-                    Text("Workload:", style = MaterialTheme.typography.titleMedium)
-                    JsonTreeView(toJsonString(it))
+                result?.principals?.let { principals ->
+                    Text("Principals (${principals.size}):", style = MaterialTheme.typography.titleMedium)
+                    principals.keys.sorted().forEach { key ->
+                        principals[key]?.let { response ->
+                            Text("$key:", style = MaterialTheme.typography.titleSmall)
+                            JsonTreeView(toJsonString(response))
+                        }
+                    }
                 }
                 Text("Logs:", style = MaterialTheme.typography.titleMedium)
                 logs?.forEach { log ->
