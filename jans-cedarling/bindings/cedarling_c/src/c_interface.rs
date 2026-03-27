@@ -10,7 +10,10 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, LazyLock, Mutex};
 use tokio::runtime::Runtime;
 
-use cedarling::{self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage};
+use cedarling::{
+    self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage,
+    TrustedIssuerLoadingInfo,
+};
 
 use crate::types::*;
 
@@ -531,6 +534,92 @@ pub fn get_logs_by_request_id_and_tag(
     let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
 
     CedarlingStringArray::new(log_strings)
+}
+
+/// Check whether a trusted issuer was loaded by issuer identifier
+pub fn is_trusted_issuer_loaded_by_name(instance_id: u64, issuer_id: &str) -> bool {
+    clear_last_error();
+    let instance = match CEDARLING_RUNTIME.get_instance(instance_id) {
+        Some(instance) => instance,
+        None => {
+            set_last_error("Instance not found");
+            return false;
+        },
+    };
+    instance.is_trusted_issuer_loaded_by_name(issuer_id)
+}
+
+/// Check whether a trusted issuer was loaded by `iss` claim
+pub fn is_trusted_issuer_loaded_by_iss(instance_id: u64, iss_claim: &str) -> bool {
+    clear_last_error();
+    let instance = match CEDARLING_RUNTIME.get_instance(instance_id) {
+        Some(instance) => instance,
+        None => {
+            set_last_error("Instance not found");
+            return false;
+        },
+    };
+    instance.is_trusted_issuer_loaded_by_iss(iss_claim)
+}
+
+/// Get total trusted issuers discovered
+pub fn total_issuers(instance_id: u64) -> usize {
+    clear_last_error();
+    let instance = match CEDARLING_RUNTIME.get_instance(instance_id) {
+        Some(instance) => instance,
+        None => {
+            set_last_error("Instance not found");
+            return 0;
+        },
+    };
+    instance.total_issuers()
+}
+
+/// Get number of trusted issuers loaded successfully
+pub fn loaded_trusted_issuers_count(instance_id: u64) -> usize {
+    clear_last_error();
+    let instance = match CEDARLING_RUNTIME.get_instance(instance_id) {
+        Some(instance) => instance,
+        None => {
+            set_last_error("Instance not found");
+            return 0;
+        },
+    };
+    instance.loaded_trusted_issuers_count()
+}
+
+/// Get trusted issuer IDs loaded successfully
+pub fn loaded_trusted_issuer_ids(instance_id: u64) -> CedarlingStringArray {
+    clear_last_error();
+    let instance = match CEDARLING_RUNTIME.get_instance(instance_id) {
+        Some(instance) => instance,
+        None => {
+            set_last_error("Instance not found");
+            return CedarlingStringArray {
+                items: std::ptr::null_mut(),
+                count: 0,
+            };
+        },
+    };
+    let ids: Vec<String> = instance.loaded_trusted_issuer_ids().into_iter().collect();
+    CedarlingStringArray::new(ids)
+}
+
+/// Get trusted issuer IDs that failed to load
+pub fn failed_trusted_issuer_ids(instance_id: u64) -> CedarlingStringArray {
+    clear_last_error();
+    let instance = match CEDARLING_RUNTIME.get_instance(instance_id) {
+        Some(instance) => instance,
+        None => {
+            set_last_error("Instance not found");
+            return CedarlingStringArray {
+                items: std::ptr::null_mut(),
+                count: 0,
+            };
+        },
+    };
+    let ids: Vec<String> = instance.failed_trusted_issuer_ids().into_iter().collect();
+    CedarlingStringArray::new(ids)
 }
 
 /// Shutdown an instance
