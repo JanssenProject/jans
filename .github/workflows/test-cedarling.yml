@@ -249,7 +249,7 @@ jobs:
       with:
         workspaces: jans-cedarling
     - name: Install cbindgen
-      run: cargo install cbindgen
+      run: cargo install cbindgen --version 0.29.0
     - name: Build Rust C library
       working-directory: jans-cedarling/bindings/cedarling_c
       run: |
