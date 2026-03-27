@@ -2,8 +2,10 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O2
-LDFLAGS = -L../../../target/release -Wl,-rpath=../../../target/release -lcedarling_c
-INCLUDES = -I../include
+LIBDIR = ../../../target/release
+STATIC_LIB = $(LIBDIR)/libcedarling_c.a
+LDFLAGS = -L$(LIBDIR) -Wl,-rpath=$(LIBDIR) -lcedarling_c
+INCLUDES = -I../target/include
 
 # Detect OS for library linking
 UNAME_S := $(shell uname -s)
@@ -11,7 +13,7 @@ ifeq ($(UNAME_S),Linux)
     LDFLAGS += -ldl -lpthread -lm
 endif
 ifeq ($(UNAME_S),Darwin)
-    LDFLAGS += -ldl -lpthread -lm
+    LDFLAGS += -lpthread -lm
 endif
 
 # Source files
@@ -46,6 +48,6 @@ run-multi-issuer: authorize_multi_issuer
 
 # Static linking version
 static: basic_example.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o basic_example_static $< ../../libcedarling_c.a -ldl -lpthread -lm
+	$(CC) $(CFLAGS) $(INCLUDES) -o basic_example_static $< $(STATIC_LIB) -ldl -lpthread -lm
 
 .PHONY: run run-unsigned run-multi-issuer static
