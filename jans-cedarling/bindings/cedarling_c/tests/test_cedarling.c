@@ -174,6 +174,8 @@ void test_authorization(){
         // Note: The overall decision depends on principal_bool_operator config (not exposed to C)
         // Default operator requires Jans::Workload AND Jans::User, so decision will be false
         // when using TestPrincipal1. We verify the individual principal got "allow".
+        TEST_ASSERT(strstr(result_str, "\"decision\":false") != NULL,
+                   "Top-level decision should be false for this test policy setup");
         TEST_ASSERT(strstr(result_str, "\"decision\":\"allow\"") != NULL,
                    "Individual principal decision should be allow");
         TEST_ASSERT(strstr(result_str, "principals") != NULL,
@@ -265,34 +267,35 @@ void test_authorization(){
      }
  
      // Test with invalid instance ID
-     ret=cedarling_get_log_ids(99999, &logs);
-     TEST_ASSERT(ret==0,"Reject invalid instance ID for get log IDs");
+    ret=cedarling_get_log_ids(99999, &logs);
+    TEST_ASSERT(ret!=0,"Reject invalid instance ID for get log IDs");
      TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
-     ret=cedarling_pop_logs(99999, &logs);
-     TEST_ASSERT(ret==0,"Reject invalid instance ID for pop logs");
+    ret=cedarling_pop_logs(99999, &logs);
+    TEST_ASSERT(ret!=0,"Reject invalid instance ID for pop logs");
      TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
-     ret=cedarling_get_logs_by_tag(99999, "test_tag", &logs);
-     TEST_ASSERT(ret==0,"Reject invalid instance ID for get logs by tag");
+    ret=cedarling_get_logs_by_tag(99999, "test_tag", &logs);
+    TEST_ASSERT(ret!=0,"Reject invalid instance ID for get logs by tag");
      TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
-     ret=cedarling_get_logs_by_request_id(99999, "test_request_id", &logs);
-     TEST_ASSERT(ret==0,"Reject invalid instance ID for get logs by request ID");
+    ret=cedarling_get_logs_by_request_id(99999, "test_request_id", &logs);
+    TEST_ASSERT(ret!=0,"Reject invalid instance ID for get logs by request ID");
      TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
-     ret=cedarling_get_logs_by_request_id_and_tag(99999, "test_request_id", "test_tag", &logs);
-     TEST_ASSERT(ret==0,"Reject invalid instance ID for get logs by request ID and tag");
+    ret=cedarling_get_logs_by_request_id_and_tag(99999, "test_request_id", "test_tag", &logs);
+    TEST_ASSERT(ret!=0,"Reject invalid instance ID for get logs by request ID and tag");
      TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
      ret=cedarling_get_log_by_id(99999, "test_log_id", &log_result);
      TEST_ASSERT(ret!=0,"Reject invalid instance ID for get log by ID");
-     TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
+    TEST_ASSERT(log_result.DATA == NULL, "No log data for invalid instance");
+    TEST_ASSERT(log_result.ERROR_MESSAGE != NULL, "Error message provided for invalid instance");
      cedarling_free_result(&log_result);
  
      // Clean up
@@ -354,12 +357,12 @@ void test_trusted_issuer_loading_info() {
     TEST_ASSERT(cedarling_loaded_trusted_issuers_count(99999) == 0, "Invalid instance returns 0 loaded issuers");
 
     ret = cedarling_loaded_trusted_issuer_ids(99999, &loaded_ids);
-    TEST_ASSERT(ret == 0, "Loaded trusted issuer IDs handles invalid instance gracefully");
+    TEST_ASSERT(ret != 0, "Loaded trusted issuer IDs rejects invalid instance");
     TEST_ASSERT(loaded_ids.COUNT == 0, "No loaded trusted issuer IDs for invalid instance");
     cedarling_free_string_array(&loaded_ids);
 
     ret = cedarling_failed_trusted_issuer_ids(99999, &failed_ids);
-    TEST_ASSERT(ret == 0, "Failed trusted issuer IDs handles invalid instance gracefully");
+    TEST_ASSERT(ret != 0, "Failed trusted issuer IDs rejects invalid instance");
     TEST_ASSERT(failed_ids.COUNT == 0, "No failed trusted issuer IDs for invalid instance");
     cedarling_free_string_array(&failed_ids);
 
@@ -449,8 +452,8 @@ void test_trusted_issuer_loading_info() {
  
      // Try to use dropped instance (should fail gracefully)
      CedarlingStringArray logs;
-     ret=cedarling_get_log_ids(instance_id, &logs);
-     TEST_ASSERT(ret==0,"Dropped instance handled gracefully");
+    ret=cedarling_get_log_ids(instance_id, &logs);
+    TEST_ASSERT(ret!=0,"Dropped instance reports not found");
      TEST_ASSERT(logs.COUNT == 0, "No logs from dropped instance");
      cedarling_free_string_array(&logs);
  
