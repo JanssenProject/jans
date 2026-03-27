@@ -12,6 +12,7 @@ use async_trait::async_trait;
 
 #[cfg(feature = "grpc")]
 pub(super) mod grpc;
+pub(super) mod mapping;
 pub(super) mod rest;
 
 /// Audit log entry to be sent to the Lock Server.

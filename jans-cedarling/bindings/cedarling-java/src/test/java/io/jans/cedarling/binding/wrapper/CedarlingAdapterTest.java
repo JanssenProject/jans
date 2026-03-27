@@ -57,7 +57,7 @@ public class CedarlingAdapterTest {
     }
 
     @Test(dependsOnMethods = {"testAuthorizeUnsigned"})
-    public void testGetLogById() throws LogException {
+    public void testGetLogById() throws Exception {
         // Ensure we have logs from testAuthorizeUnsigned
         String action = AppUtils.readFile(ACTION_FILE_PATH);
         String resourceJson = AppUtils.readFile(RESOURCE_FILE_PATH);
@@ -242,5 +242,23 @@ public class CedarlingAdapterTest {
         JSONObject value = new JSONObject();
         value.put("data", "value");
         adapter.pushDataCtx("", value);
+    }
+
+    @Test
+    public void testTrustedIssuerLoadingInfoDefaults() {
+        assertFalse(adapter.isTrustedIssuerLoadedByName("missing_issuer"));
+        assertFalse(adapter.isTrustedIssuerLoadedByIss("https://missing.example.org"));
+
+        long total = adapter.totalIssuers();
+        long loaded = adapter.loadedTrustedIssuersCount();
+        assertTrue(loaded <= total, "loaded count should not exceed total");
+
+        List<String> loadedIds = adapter.loadedTrustedIssuerIds();
+        assertEquals(loadedIds.size(), loaded, "loaded ids size should match loaded count");
+        for (String id : loadedIds) {
+            assertTrue(
+                    adapter.isTrustedIssuerLoadedByName(id),
+                    "loaded id should satisfy isTrustedIssuerLoadedByName");
+        }
     }
 }
