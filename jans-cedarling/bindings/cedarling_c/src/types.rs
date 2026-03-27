@@ -124,13 +124,17 @@ impl CedarlingStringArray {
         for s in strings.clone() {
             match CString::new(s) {
                 Ok(c_str) => c_strings.push(c_str.into_raw()),
-                Err(_) => {
+                Err(e) => {
                     // Clean up previously allocated strings
                     for ptr in c_strings {
                         unsafe {
                             let _ = CString::from_raw(ptr);
                         }; // Convert back to CString to free memory
                     }
+                    set_last_error(&format!(
+                        "CedarlingStringArray::new failed: CString::new error: {}",
+                        e
+                    ));
                     return CedarlingStringArray {
                         items: ptr::null_mut(),
                         count: 0,
