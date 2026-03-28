@@ -73,6 +73,8 @@ public class AdminUISecurityService {
     @Inject
     PolicyToScopeMapper policyToScopeMapper;
 
+    private static final long MAX_ENTRY_SIZE = 3_000_000; // 3 MB
+
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
 
     /**
@@ -146,9 +148,9 @@ public class AdminUISecurityService {
             Document cjarDocument = adminUIPolicyStore.getDocument();
             log.info("Uploading policy-store : {}", cjarDocument.getFileName());
 
-            InputStream cjarStream = adminUIPolicyStore.getPolicyStore();
+            InputStream originalStream = adminUIPolicyStore.getPolicyStore();
             //copy into a variable so that it can be used later
-            byte[] cjarBytes = cjarStream.readAllBytes();
+            byte[] cjarBytes = originalStream.readAllBytes();
 
             InputStream cjarStreamForValidation = new ByteArrayInputStream(cjarBytes);
             InputStream cjarStreamForUpload = new ByteArrayInputStream(cjarBytes);
@@ -172,6 +174,7 @@ public class AdminUISecurityService {
 
                 log.info("Uploaded policy-store : {}", cjarDocument.getFileName());
             } catch(Exception e) {
+                log.error("Upload failed. Restoring backup...", e);
                 restoreFromBackup(path);
                 throw new ApplicationException(
                         Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
@@ -406,6 +409,7 @@ public class AdminUISecurityService {
      * @return `true` if the `configuration_endpoint` host equals `expectedDomain` (case-insensitive), `false` otherwise
      * @throws ApplicationException if the input cannot be read or parsed, or if the `configuration_endpoint` value is not a valid URI
      */
+
     private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain)
             throws ApplicationException {
 
@@ -415,19 +419,23 @@ public class AdminUISecurityService {
                     "Invalid input: zipInputStream or expectedDomain is null/empty"
             );
         }
-
         try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
             ZipEntry entry;
 
             while ((entry = zis.getNextEntry()) != null) {
-
-                if (entry.isDirectory() || !TRUSTED_ISSUER_FILE.equals(entry.getName())) {
+                String entryName = entry.getName();
+                // Basic validation
+                if (entry.isDirectory() || entryName == null ||
+                        entryName.contains("..") || entryName.startsWith("/")) {
                     zis.closeEntry();
                     continue;
                 }
-
-                // Read content safely
-                String content = readEntryContent(zis);
+                if (!TRUSTED_ISSUER_FILE.equals(entryName)) {
+                    zis.closeEntry();
+                    continue;
+                }
+                // Read safely with limit
+                String content = readEntryContentSafely(zis);
 
                 JSONObject json = new JSONObject(content);
 
@@ -437,7 +445,6 @@ public class AdminUISecurityService {
                             "Missing 'configuration_endpoint' in JSON"
                     );
                 }
-
                 String endpoint = json.getString("configuration_endpoint");
                 URI uri = new URI(endpoint);
                 String domain = uri.getHost();
@@ -447,15 +454,12 @@ public class AdminUISecurityService {
 
                 return domain != null && domain.equalsIgnoreCase(expectedDomain);
             }
-
-            // File not found in zip
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     "Trusted issuer file not found in ZIP"
             );
-
         } catch (ApplicationException e) {
-            throw e; // rethrow
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
             throw new ApplicationException(
@@ -465,15 +469,19 @@ public class AdminUISecurityService {
         }
     }
 
-    private String readEntryContent(InputStream is) throws IOException {
+    private String readEntryContentSafely(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[2048];
+        byte[] buffer = new byte[4096];
         int len;
+        long totalRead = 0;
 
         while ((len = is.read(buffer)) != -1) {
+            totalRead += len;
+            if (totalRead > MAX_ENTRY_SIZE) {
+                throw new IOException("ZIP entry too large (possible ZIP bomb)");
+            }
             baos.write(buffer, 0, len);
         }
-
         return baos.toString(StandardCharsets.UTF_8);
     }
 }
