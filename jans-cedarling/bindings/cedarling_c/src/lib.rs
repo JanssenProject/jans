@@ -14,7 +14,7 @@ mod types;
 use c_interface::*;
 use types::*;
 /// # Safety
-/// Intialize the Cedarling library
+/// Initialize the Cedarling library
 /// This Function should be called before any other functions
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_init() -> c_int {

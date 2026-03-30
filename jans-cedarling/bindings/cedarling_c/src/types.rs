@@ -23,16 +23,14 @@ pub enum CedarlingErrorCode {
     AuthorizationError = 4,
     /// Configuration error
     ConfigurationError = 5,
-    /// Memory allocation error
-    MemoryError = 6,
     /// Internal error
-    Internal = 7,
+    Internal = 6,
 }
 
 /// Result structure for operations that return data
 #[repr(C)]
 pub struct CedarlingResult {
-    /// Error code (0=Success))
+    /// Error code (0=Success)
     pub error_code: CedarlingErrorCode,
     /// Data pointer (null if error)
     pub data: *mut c_char,
@@ -40,7 +38,7 @@ pub struct CedarlingResult {
     pub error_message: *mut c_char,
 }
 
-///Structure for returning arrays of strings
+/// Structure for returning arrays of strings
 #[repr(C)]
 pub struct CedarlingStringArray {
     /// Array of string pointers
@@ -52,7 +50,7 @@ pub struct CedarlingStringArray {
 /// Structure for instance creation results
 #[repr(C)]
 pub struct CedarlingInstanceResult {
-    /// Error code (0=Success))
+    /// Error code (0=Success)
     pub error_code: CedarlingErrorCode,
     /// Instance ID (0 if error)
     pub instance_id: u64,
@@ -119,9 +117,10 @@ impl CedarlingStringArray {
                 count: 0,
             };
         }
-        let mut c_strings: Vec<*mut c_char> = Vec::with_capacity(strings.len());
+        let count = strings.len();
+        let mut c_strings: Vec<*mut c_char> = Vec::with_capacity(count);
 
-        for s in strings.clone() {
+        for s in strings {
             match CString::new(s) {
                 Ok(c_str) => c_strings.push(c_str.into_raw()),
                 Err(e) => {
@@ -146,7 +145,7 @@ impl CedarlingStringArray {
         std::mem::forget(c_strings); // Prevent Deallocation
         Self {
             items: items_ptr,
-            count: strings.len(),
+            count,
         }
     }
 }
@@ -161,14 +160,6 @@ pub fn c_string_to_string(c_str: *const c_char) -> Result<String, CedarlingError
             Ok(s) => Ok(s.to_string()),
             Err(_) => Err(CedarlingErrorCode::InvalidArgument),
         }
-    }
-}
-
-#[allow(unused)]
-pub fn string_to_c_string(s: &str) -> *mut c_char {
-    match CString::new(s) {
-        Ok(c_string) => c_string.into_raw(),
-        Err(_) => ptr::null_mut(),
     }
 }
 

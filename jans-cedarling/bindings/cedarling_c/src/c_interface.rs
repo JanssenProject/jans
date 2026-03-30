@@ -27,7 +27,7 @@ static CEDARLING_RUNTIME: LazyLock<Result<CedarlingRuntime, String>> = LazyLock:
 
 fn get_instance_id() -> u64 {
     static INSTANCE_ID: AtomicU64 = AtomicU64::new(1);
-    INSTANCE_ID.fetch_add(1, Ordering::SeqCst)
+    INSTANCE_ID.fetch_add(1, Ordering::Relaxed)
 }
 
 /// Runtime manager for Cedarling instances
