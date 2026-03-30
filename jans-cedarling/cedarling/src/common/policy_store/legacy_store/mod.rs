@@ -1,3 +1,15 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+//! Legacy JSON/YAML deserialization types for policy stores.
+//!
+//! These types provide backward-compatible deserialization from the Agama Lab
+//! Policy Designer JSON/YAML format. They are fully independent from the
+//! internal representation types so that changes to `PolicyStore` do not
+//! affect legacy format parsing.
+
 #[cfg(test)]
 mod test;
 

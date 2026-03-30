@@ -62,13 +62,15 @@ impl TrustedIssuer {
 
 #[cfg(test)]
 mod test {
+    use std::collections::HashMap;
+
+    use serde_json::json;
+    use url::Url;
+
     use super::super::build_iss_entity::build_iss_entity;
     use super::super::test::*;
     use crate::common::policy_store::TrustedIssuer;
     use crate::entity_builder::schema::MappingSchema;
-    use serde_json::json;
-    use std::collections::HashMap;
-    use url::Url;
 
     fn test_trusted_issuer() -> TrustedIssuer {
         TrustedIssuer::new(
