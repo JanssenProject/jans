@@ -397,7 +397,7 @@ jobs:
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
       - name: Sign Trivy Reports
-        if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build)
+        if: matrix.docker-images == 'all-in-one' && (steps.build_docker_image.outputs.build && steps.prep.outputs.build && (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly'))
         run: |
           cosign sign-blob --yes \
             --bundle trivy-report.json.bundle \
@@ -406,15 +406,7 @@ jobs:
           cosign sign-blob --yes \
             --bundle trivy-report.txt.bundle \
             trivy-report.txt
-
-      - name: Upload Scan Results to Release
-        if: matrix.docker-images == 'all-in-one' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            trivy-report.json
-            trivy-report.json.bundle
-            trivy-report.txt
-            trivy-report.txt.bundle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          gh release upload "${{ github.event.release.tag_name }}" *.json *.bundle --clobber || {
+          echo "gh release upload failed (assets may already exist), continuing..."
+        }
