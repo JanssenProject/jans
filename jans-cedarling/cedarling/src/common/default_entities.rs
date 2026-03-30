@@ -10,7 +10,6 @@ use cedar_policy::EntityTypeName;
 use cedar_policy::EntityUid;
 use cedar_policy::ExpressionConstructionError;
 use cedar_policy::RestrictedExpression;
-use serde::de::{Deserialize, Deserializer, Error};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -189,18 +188,6 @@ pub(super) fn parse_default_entities_with_warns(
     }
 }
 
-impl<'de> Deserialize<'de> for DefaultEntitiesWithWarns {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let option_raw_data: Option<HashMap<String, Value>> =
-            Deserialize::deserialize(deserializer)
-                .map_err(|err| D::Error::custom(format!("expect to be JSON object: {err}")))?;
-
-        parse_default_entities_with_warns(option_raw_data).map_err(D::Error::custom)
-    }
-}
 
 #[derive(Debug, thiserror::Error)]
 #[error("failed to parse default entity, id: \"{entry_id}\" error: {error}")]
