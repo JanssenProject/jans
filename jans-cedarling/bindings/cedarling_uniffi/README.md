@@ -487,3 +487,16 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+## Trusted Issuer Loading Info
+
+UniFFI `Cedarling` exposes trusted issuer loading status methods:
+
+- `isTrustedIssuerLoadedByName(issuerId: String): Boolean`
+- `isTrustedIssuerLoadedByIss(issClaim: String): Boolean`
+- `totalIssuers(): Long`
+- `loadedTrustedIssuersCount(): Long`
+- `loadedTrustedIssuerIds(): List<String>`
+- `failedTrustedIssuerIds(): List<String>`
+
+Use these APIs to inspect trusted issuer loading outcomes when your policy store contains `trusted-issuers/` definitions.
