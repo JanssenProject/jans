@@ -195,6 +195,13 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
     };
 
     let instance_id = runtime.add_instance(instance);
+    if instance_id == 0 {
+        return CedarlingInstanceResult::error(
+            CedarlingErrorCode::Internal,
+            "Internal lock failure while adding instance",
+        );
+    }
+
     CedarlingInstanceResult::success(instance_id)
 }
 
