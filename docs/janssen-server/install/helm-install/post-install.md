@@ -72,4 +72,4 @@ kubectl get secrets -n jans | grep tls
 
 - [Kubernetes Operations](../../kubernetes-ops/README.md) - Day-2 operations
 - [Config API](../../config-guide/config-tools/config-api/README.md) - REST API configuration
-- [Monitoring](../../reference/monitoring.md) - Set up monitoring
+- [Monitoring](../../config-guide/config-tools/config-api/monitoring.md) - Set up monitoring

@@ -13,7 +13,6 @@ use http_utils::{Backoff, HttpRequestError, Sender};
 use serde::{Deserialize, Deserializer, de};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-#[allow(dead_code)]
 pub(super) struct LockConfig {
     pub version: String,
     #[serde(rename = "issuer", deserialize_with = "host_to_oidc")]
@@ -25,7 +24,6 @@ pub(super) struct LockConfig {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Default)]
-#[allow(dead_code)]
 pub(super) struct AuditEndpoints {
     #[serde(
         rename = "log_endpoint",
@@ -48,7 +46,6 @@ pub(super) struct AuditEndpoints {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Default)]
-#[allow(dead_code)]
 pub(super) struct ConfigEndpoints {
     #[serde(rename = "config_endpoint", default)]
     pub config: Option<Url>,

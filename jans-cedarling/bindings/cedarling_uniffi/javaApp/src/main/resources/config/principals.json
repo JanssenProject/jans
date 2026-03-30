@@ -1,0 +1,16 @@
+[
+  {
+    "cedar_entity_mapping": {
+      "entity_type": "Jans::TestPrincipal1",
+      "id": "principal-1"
+    },
+    "is_ok": true
+  },
+  {
+    "cedar_entity_mapping": {
+      "entity_type": "Jans::TestPrincipal2",
+      "id": "principal-2"
+    },
+    "is_ok": true
+  }
+]

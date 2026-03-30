@@ -14,7 +14,7 @@ use std::num::NonZeroUsize;
 use std::path::Path;
 use std::str::FromStr;
 
-use super::authorization_config::{AuthorizationConfig, IdTokenTrustMode};
+use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
@@ -43,10 +43,6 @@ impl BootstrapConfig {
 
     /// Construct an instance from [`BootstrapConfigRaw`]
     pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, BootstrapConfigLoadingError> {
-        if !raw.workload_authz.is_enabled() && !raw.user_authz.is_enabled() {
-            return Err(BootstrapConfigLoadingError::BothPrincipalsDisabled);
-        }
-
         let lock_config = raw.lock.is_enabled().then(|| raw.try_into()).transpose()?;
 
         // Decode LogCofig
@@ -56,7 +52,6 @@ impl BootstrapConfig {
         };
 
         // Decode policy store
-        let validate_checksum = raw.policy_store_validate_checksum;
         let policy_store_config = match (
             raw.local_policy_store.clone(),
             raw.policy_store_uri.clone(),
@@ -67,7 +62,6 @@ impl BootstrapConfig {
             // Case: get the policy store from a JSON string
             (Some(policy_store), None, None) => PolicyStoreConfig {
                 source: PolicyStoreSource::Json(policy_store),
-                validate_checksum,
             },
             // Case: get the policy store from a URI (auto-detect .cjar archives)
             (None, Some(policy_store_uri), None) => {
@@ -76,10 +70,7 @@ impl BootstrapConfig {
                 } else {
                     PolicyStoreSource::LockServer(policy_store_uri)
                 };
-                PolicyStoreConfig {
-                    source,
-                    validate_checksum,
-                }
+                PolicyStoreConfig { source }
             },
             // Case: get the policy store from a local file or directory
             (None, None, Some(raw_path)) => {
@@ -103,10 +94,7 @@ impl BootstrapConfig {
                         )?,
                     }
                 };
-                PolicyStoreConfig {
-                    source,
-                    validate_checksum,
-                }
+                PolicyStoreConfig { source }
             },
             // Case: multiple polict stores were set
             _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores)?,
@@ -138,13 +126,8 @@ impl BootstrapConfig {
         };
 
         let authorization_config = AuthorizationConfig {
-            use_user_principal: raw.user_authz.is_enabled(),
-            use_workload_principal: raw.workload_authz.is_enabled(),
             principal_bool_operator: raw.principal_bool_operation.clone(),
-            decision_log_user_claims: raw.decision_log_user_claims.clone(),
-            decision_log_workload_claims: raw.decision_log_workload_claims.clone(),
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
-            id_token_trust_mode: raw.id_token_trust_mode.clone(),
         };
 
         // Build `DataStoreConfig` from raw config, using defaults if not specified

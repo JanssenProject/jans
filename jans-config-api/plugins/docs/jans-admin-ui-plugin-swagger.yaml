@@ -757,13 +757,18 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly
-  /admin-ui/security/setRemotePolicyStoreAsDefault:
     put:
       tags:
       - Admin UI - Cedarling
-      summary: Set remote policy store as default policy store of Admin UI
-      description: Set remote policy store as default policy store of Admin UI
-      operationId: set-remote-policy-store-as-default
+      summary: Upload Admin UI Policy Store
+      description: Upload Admin UI Policy Store
+      operationId: upload-adminui-policy-store
+      requestBody:
+        description: String multipart form.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/AdminUIPolicyStore"
       responses:
         "200":
           description: Ok
@@ -1761,6 +1766,9 @@ components:
           format: int32
         responseObject:
           $ref: "#/components/schemas/JsonNode"
+        responseBytes:
+          type: string
+          format: byte
     JsonNode:
       type: object
     RolePermissionMapping:
@@ -1847,20 +1855,53 @@ components:
         auiDefaultPolicyStorePath:
           type: string
           description: Admin UI Default Policy Store path
-        cedarlingPolicyStoreRetrievalPoint:
-          type: string
-          description: "Specifies the policy store retrieval point for Admin UI. Set\
-            \ to `default` to use the local default policy store, or `remote` to retrieve\
-            \ policies from the configured remote policy store URL."
-          enum:
-          - default
-          - remote
     KeyValuePair:
       type: object
       properties:
         key:
           type: string
         value:
+          type: string
+    AdminUIPolicyStore:
+      required:
+      - document
+      - policyStore
+      type: object
+      properties:
+        document:
+          $ref: "#/components/schemas/Document"
+        policyStore:
+          type: string
+          format: binary
+    Document:
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        fileName:
+          type: string
+        filePath:
+          type: string
+        description:
+          type: string
+        document:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        service:
+          type: string
+        level:
+          type: integer
+          format: int32
+        revision:
+          type: integer
+          format: int32
+        enabled:
+          type: boolean
+        baseDn:
           type: string
     LicenseRequest:
       type: object

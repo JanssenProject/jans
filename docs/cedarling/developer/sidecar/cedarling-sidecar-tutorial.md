@@ -25,8 +25,8 @@ participant Gateway
 participant Sidecar
 
 User->Gateway: GET /protected\nAuthorization: Bearer ...
-Gateway->Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"access_token": "..."} }}
-Sidecar->Sidecar: cedarling.authorize(access_token)
+Gateway->Sidecar: POST /cedarling/evaluation\n{"subject": {"type": "JWT", "id": "cedarling", "properties": {"tokens": []} }}
+Sidecar->Sidecar: cedarling.authorize_multi_issuer(tokens)
 
 alt ALLOW
     Sidecar->Gateway: {"decision": true}
@@ -47,14 +47,14 @@ end
 {
   "subject": {
     "type": "token_bundle",
-    "id": <SHA256 hash of the properties dictionary>,
+    "id": "",
     "properties": {
-      "access_token": ""
+      "tokens": []
     }
   },
   "resource": {
     "type": "Request",
-    "id": <SHA256 hash of the properties dictionary>,
+    "id": "",
     "properties": {
       "cedar_entity_mapping": {
         "entity_type": "Jans::HTTP_Request",
@@ -93,32 +93,44 @@ To begin using Cedarling, you need to set up a policy store. We'll use this [Aga
    ![image](../../../assets/cedarling-select-repo.png)
 3. After initialization, create a policy store named `gatewayDemo`.
    ![image](../../../assets/cedarling-policy-store-name.png)
-4. Open the policy store and navigate to Policies.
-5. Click `Add Policy`, select `Text Editor`.
-   ![image](../../../assets/cedarling-add-policy.png)
-6. Paste the following Cedar policy:
+4. Open the policy store and navigate to `Schema`
+5. Under `Common Types`, find `TokensContext`. Open it and add the following:
 
-   ```bash
-   @id("allow_one")
-   permit(
-     principal is Jans::Workload,
-     action == Jans::Action::"GET",
-     resource is Jans::HTTP_Request
-   )
-   when {
-     principal has access_token.scope &&
-     principal.access_token.scope.contains("openid")
-   };
+    - Attribute name: `jans_access_token`
+    - Type: `EntityOrCommon`
+    - Entity name: `Access_token`
+    - Mandatory: No
+
+6. Save your schema channges
+7. Navigate to Policies.
+8. Click `Add Policy`
+9. Paste the following Cedar policy:
+
+    ```bash
+    @id("allow_one")
+    permit(
+      principal,
+      action,
+      resource is Jans::HTTP_Request
+    )
+    when {
+      context has tokens.jans_access_token &&
+      context.tokens.jans_access_token.hasTag("scope") &&
+      context.tokens.jans_access_token.getTag("scope").contains("openid")
+    };
    ```
 
-7. Click `Save`. Agama Lab will validate your policy.
-8. Next, click on `Trusted Issuers` and add the following issuer:
+10. Name it `add_one` and click `Save`. Agama Lab will validate your policy.
+11. Next, click on `Trusted Issuers` and add the following issuer:
 
-   - Name: `Gluu`
-   - Description: `Gluu`
-   - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
-   - Copy the URL for your policy store; you'll need it for the sidecar setup.
-     ![image](../../../assets/cedarling-copylink.png)
+    - Name: `Jans`
+    - Description: `Jans`
+    - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
+    - Base Schema: `Jans`
+    - Save your changes
+
+12. Click on `Release`, choose `pre-release` and give it a version number.
+13. Navigate to the releases section of your Github repository, find your pre-release and copy the URL to the CJAR asset. 
 
 ## Deploy Cedarling Sidecar
 
@@ -126,10 +138,7 @@ To begin using Cedarling, you need to set up a policy store. We'll use this [Aga
 
 Create a file named `bootstrap.json`. You may use the [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file.
 
-- Set `CEDARLING_POLICY_STORE_URI` to the URL you copied from Agama Lab.
-- Set `CEDARLING_USER_AUTHZ` to "disabled"
-- Set `CEDARLING_MAPPING_WORKLOAD` to `Jans::Workload`
-- Set `CEDARLING_ID_TOKEN_TRUST_MODE` to "never"
+- Set `CEDARLING_POLICY_STORE_URI` to the URL you copied.
 
 Pull the Docker image:
 
@@ -144,7 +153,6 @@ docker run -d \
   -e APP_MODE='development' \
   -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
   -e SIDECAR_DEBUG_RESPONSE=True \
-  -e DISABLE_HASH_CHECK=False \
   --mount type=bind,src=</absolute/path/to/bootstrap.json>,dst=/bootstrap.json \
   -p 5000:5000\
   ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
@@ -179,7 +187,6 @@ poetry run pip install cedarling_python-0.0.0-cp310-cp310-manylinux_2_31_x86_64.
 APP_MODE=development
 CEDARLING_BOOTSTRAP_CONFIG_FILE=../secrets/bootstrap.json
 SIDECAR_DEBUG_RESPONSE=False
-DISABLE_HASH_CHECK=False
 ```
 
 - Run the sidecar: `poetry run flask run`
@@ -211,13 +218,6 @@ pip install flask requests
 from flask import Flask, abort, request
 import requests
 import json
-from hashlib import sha256
-
-def generate_hash(input) -> str:
-    encoded_str = json.dumps(input).encode("utf-8")
-    digest = sha256(encoded_str).hexdigest()
-    return digest
-
 
 app = Flask(__name__)
 
@@ -227,11 +227,11 @@ def protected():
     if token is None:
         abort(403)
     token_jwt = token.split(" ")[1]
-    print(token_jwt)
     subject_properties = {
-        "access_token": token_jwt
+        "tokens": [
+          {"mapping": "Jans::Access_token", "payload": token_jwt}
+        ]
     }
-    subject_hash = generate_hash(subject_properties)
     resource_properties = {
         "cedar_entity_mapping": {
             "entity_type": "Jans::HTTP_Request",
@@ -244,16 +244,15 @@ def protected():
             "path": "/protected"
         }
     }
-    resource_hash = generate_hash(resource_properties)
     payload = {
         "subject": {
             "type": "token_bundle",
-            "id": subject_hash,
+            "id": "",
             "properties": subject_properties 
         },
         "resource": {
             "type": "type",
-            "id": resource_hash,
+            "id": "",
             "properties": resource_properties 
         },
         "action": {
@@ -394,6 +393,13 @@ json should be similar to the one below:
         "required": false
       }
     }
+  },
+  "tags": {
+    "type": "Set",
+    "element": {
+    "type": "EntityOrCommon",
+      "name": "String"
+    }
   }
 }
 ```
@@ -403,13 +409,14 @@ Let's make the corresponding changes in the policy.
 ```cedar
 @id("allow_one")
 permit(
-  principal is Jans::Workload,
-  action == Jans::Action::"GET",
+  principal,
+  action,
   resource is Jans::HTTP_Request
 )
 when {
-  principal has access_token.acr &&
-  principal.acr == "simple_password_auth"
+  context has tokens.jans_access_token &&
+  context.tokens.jans_access_token.hasTag("acr") &&
+  context.tokens.jans_access_token.getTag("acr").contains("simple_password_auth")
 };
 ```
 

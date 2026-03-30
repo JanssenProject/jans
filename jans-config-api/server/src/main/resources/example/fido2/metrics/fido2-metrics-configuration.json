@@ -1,0 +1,14 @@
+{
+    "metricsEnabled": true,
+    "supportedAggregationTypes": [
+        "HOURLY",
+        "DAILY",
+        "WEEKLY",
+        "MONTHLY"
+    ],
+    "retentionDays": 90,
+    "performanceMetrics": true,
+    "deviceInfoCollection": true,
+    "aggregationEnabled": true,
+    "errorCategorization": true
+}

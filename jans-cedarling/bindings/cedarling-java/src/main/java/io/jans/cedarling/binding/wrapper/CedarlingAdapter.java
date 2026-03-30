@@ -19,14 +19,6 @@ public class CedarlingAdapter implements AutoCloseable {
         this.cedarling = Cedarling.Companion.loadFromFile(path);
     }
 
-    public AuthorizeResult authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context)
-            throws AuthorizeException, EntityException {
-        // Build EntityData from resource JSON
-        EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-
-        return this.cedarling.authorize(tokens, action, resourceObj, context.toString());
-    }
-
     public AuthorizeResult authorizeUnsigned(List<EntityData> principals, String action, JSONObject resource, JSONObject context)
             throws AuthorizeException, EntityException {
         // Build EntityData from resource JSON
@@ -212,5 +204,29 @@ public class CedarlingAdapter implements AutoCloseable {
 
     public Cedarling getCedarling() {
         return cedarling;
+    }
+
+    public boolean isTrustedIssuerLoadedByName(String issuerId) {
+        return cedarling.isTrustedIssuerLoadedByName(issuerId);
+    }
+
+    public boolean isTrustedIssuerLoadedByIss(String issClaim) {
+        return cedarling.isTrustedIssuerLoadedByIss(issClaim);
+    }
+
+    public long totalIssuers() {
+        return cedarling.totalIssuers();
+    }
+
+    public long loadedTrustedIssuersCount() {
+        return cedarling.loadedTrustedIssuersCount();
+    }
+
+    public List<String> loadedTrustedIssuerIds() {
+        return cedarling.loadedTrustedIssuerIds();
+    }
+
+    public List<String> failedTrustedIssuerIds() {
+        return cedarling.failedTrustedIssuerIds();
     }
 }

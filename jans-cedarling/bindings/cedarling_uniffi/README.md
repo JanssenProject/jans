@@ -160,7 +160,7 @@ cp ./target/release/{build_file} ./bindings/cedarling_uniffi/javaApp/src/main/re
  mvn exec:java -Dexec.mainClass="org.example.Main"
 ```
 
-The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization with sample tokens, resource and context inputs and call log interface to print authorization logs on console. The sample `tokens`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
+The method will execute the steps for Cedarling initialization with a sample bootstrap configuration, run authorization using `authorizeUnsigned` with sample principals, resource and context inputs, and call the log interface to print authorization logs on the console. The sample `principals`, `resource` and `context` input files used by the sample application are present at `./bindings/cedarling_uniffi/javaApp/src/main/resources/config`.
 
 ## Configuration
 
@@ -215,16 +215,50 @@ Policy stores can be packaged as `.cjar` files (ZIP archives) for easy distribut
 - Works across all platforms
 - Supports integrity validation via manifest
 
-### ID Token Trust Mode
+### Initializing Cedarling (UniFFI)
 
-The `CEDARLING_ID_TOKEN_TRUST_MODE` property controls how ID tokens are validated:
+Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`) so these constructors match your checkout. Exact method names and argument labels are in the generated `cedarling_uniffi.kt` / `cedarling_uniffi.swift`; the table below is a rough map from the Rust API:
 
-- **`strict`** (default): Enforces strict validation rules
-  - ID token `aud` must match access token `client_id`
-  - If userinfo token is present, its `sub` must match the ID token `sub`
-- **`never`**: Disables ID token validation (useful for testing)
-- **`always`**: Always validates ID tokens when present
-- **`ifpresent`**: Validates ID tokens only if they are provided
+| Rust constructor | Kotlin (typical) | Swift (typical) |
+| --- | --- | --- |
+| `load_from_json` | `Cedarling.loadFromJson(...)` | `Cedarling.loadFromJson(config:)` |
+| `load_from_file` | `Cedarling.loadFromFile(...)` | `Cedarling.loadFromFile(path:)` |
+| `load_from_json_with_archive_bytes` | `Cedarling.loadFromJsonWithArchiveBytes(...)` | `Cedarling.loadFromJsonWithArchiveBytes(config:archiveBytes:)` |
+
+- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL`), same as core Cedarling bootstrap rules.
+- **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
+- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+
+**Kotlin (Android assets):**
+
+```kotlin
+val bootstrapJson =
+    assets.open("bootstrap.json").bufferedReader().use { it.readText() }
+val archiveBytes = assets.open("policy-store.cjar").readBytes()
+val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, archiveBytes)
+```
+
+**Swift (bundle resources):**
+
+```swift
+let bootstrapUrl = Bundle.main.url(forResource: "bootstrap", withExtension: "json")!
+let cjarUrl = Bundle.main.url(forResource: "policy-store", withExtension: "cjar")!
+let bootstrapJson = try String(contentsOf: bootstrapUrl)
+let archiveBytes = try Data(contentsOf: cjarUrl)
+let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
+    config: bootstrapJson,
+    archiveBytes: archiveBytes
+)
+```
+
+### Authorization APIs
+
+The UniFFI binding exposes two authorization methods:
+
+- **`authorizeUnsigned`**: Pass a list of principal entity data, action, resource, and context. Use when you have principal attributes (e.g. from your app or session) and no JWTs.
+- **`authorizeMultiIssuer`**: Pass a list of token inputs (mapping + JWT payload), action, resource, and optional context. Use when you have multiple JWTs from different issuers.
+
+`AuthorizeResult` contains `principals` (per-principal decisions), `decision`, and `requestId` (for log correlation). The legacy token-based `authorize` API has been removed.
 
 ### Testing Configuration
 
@@ -233,8 +267,7 @@ For testing scenarios, you may want to disable JWT validation. You can configure
 ```json
 {
   "CEDARLING_JWT_SIG_VALIDATION": "disabled",
-  "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-  "CEDARLING_ID_TOKEN_TRUST_MODE": "never"
+  "CEDARLING_JWT_STATUS_VALIDATION": "disabled"
 }
 ```
 
@@ -454,3 +487,16 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+## Trusted Issuer Loading Info
+
+UniFFI `Cedarling` exposes trusted issuer loading status methods:
+
+- `isTrustedIssuerLoadedByName(issuerId: String): Boolean`
+- `isTrustedIssuerLoadedByIss(issClaim: String): Boolean`
+- `totalIssuers(): Long`
+- `loadedTrustedIssuersCount(): Long`
+- `loadedTrustedIssuerIds(): List<String>`
+- `failedTrustedIssuerIds(): List<String>`
+
+Use these APIs to inspect trusted issuer loading outcomes when your policy store contains `trusted-issuers/` definitions.

@@ -134,6 +134,10 @@ mod fallback {
             // These must always be logged.
             Some(LogLevel::TRACE)
         }
+
+        fn get_log_kind(&self) -> Option<crate::log::LogType> {
+            None
+        }
     }
 
     /// Fetch the correct logger. That takes some work, and it's done on every

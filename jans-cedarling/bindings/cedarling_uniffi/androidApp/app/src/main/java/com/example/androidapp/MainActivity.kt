@@ -31,6 +31,7 @@ import com.example.androidapp.widgets.RadioButtonGroup
 import com.example.androidapp.widgets.StateDialog
 import uniffi.cedarling_uniffi.*;
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 
 class MainActivity : ComponentActivity() {
@@ -121,19 +122,22 @@ fun CardListScreen() {
                 Cedarling.loadFromJson(it);
             };
 
-            val nullableTokensMap: Map<String, String>? = tokens?.let { jsonToMapWithStringType(it) };
-            val tokensMap: Map<String, String> = nullableTokensMap.orEmpty();
-
             val nonNullableAction: String = action.orEmpty()
-
             val nonNullableResource: String = resource.orEmpty();
-            val nonNullableConext: String = context.orEmpty();
-            val jsonContext: JsonValue = nonNullableConext;
-            val result: AuthorizeResult? = instance?.authorize(tokensMap,
-                nonNullableAction,
-                EntityData.fromJson(nonNullableResource),
-                jsonContext
-            );
+            val nonNullableContext: String = context.orEmpty();
+            val jsonContext: JsonValue = nonNullableContext;
+
+            val principalsList: List<EntityData>? = readJsonFromAssets(contextApplication, "principals.json")?.let { principalsStr ->
+                JsonParser.parseString(principalsStr).asJsonArray.map { element ->
+                    EntityData.fromJson(element.toString())
+                }
+            };
+
+            val result: AuthorizeResult? = instance?.let { inst ->
+                principalsList?.let { principals ->
+                    inst.authorizeUnsigned(principals, nonNullableAction, EntityData.fromJson(nonNullableResource), jsonContext)
+                }
+            };
 
             val logs: List<String>? = instance?.getLogsByRequestIdAndTag(result?.requestId.orEmpty(), logType)
             StateDialog(

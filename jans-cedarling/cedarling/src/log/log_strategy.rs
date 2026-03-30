@@ -163,6 +163,10 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
     fn get_log_level(&self) -> Option<super::LogLevel> {
         self.entry.get_log_level()
     }
+
+    fn get_log_kind(&self) -> Option<super::LogType> {
+        self.entry.get_log_kind()
+    }
 }
 
 // Implementation of LogWriter

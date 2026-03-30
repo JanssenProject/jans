@@ -4,7 +4,7 @@ struct ContentView: View {
     @State private var showModal = false
     @State private var bootstrapConfig: [String: Any] = Helper.dictionaryFromFile(filename: "bootstrap")
     @State private var tokens: [String: String] = Helper.dictionaryFromFile(filename: "tokens")
-    @State private var action: String = "Jans::Action::\"Update\""
+    @State private var action: String = "Jans::Action::\"UpdateTestPrincipal\""
     @State private var resource: [String: Any] = Helper.dictionaryFromFile(filename: "resource")
     @State private var context: [String: Any] = Helper.dictionaryFromFile(filename: "context")
     @State private var resultMessage = ""
@@ -98,8 +98,21 @@ struct ContentView: View {
             let contextStr = Helper.dictionaryToString(context)
             let contextJson = JsonValue(contextStr)
             
-            let result = try instance.authorize(
-                tokens: tokens,
+            // Load principals from bundled JSON
+            guard let principalsUrl = Bundle.main.path(forResource: "principals", ofType: "json"),
+                  let principalsData = try? Data(contentsOf: URL(fileURLWithPath: principalsUrl)),
+                  let principalsArray = try? JSONSerialization.jsonObject(with: principalsData) as? [[String: Any]] else {
+                resultMessage = "Failed to load principals.json"
+                return
+            }
+            let principals: [EntityData] = try principalsArray.map { dict in
+                let jsonData = try JSONSerialization.data(withJSONObject: dict)
+                let jsonStr = String(data: jsonData, encoding: .utf8) ?? "{}"
+                return try EntityData.fromJson(jsonString: jsonStr)
+            }
+            
+            let result = try instance.authorizeUnsigned(
+                principals: principals,
                 action: action,
                 resource: resourceEntity,
                 context: contextJson
@@ -110,23 +123,16 @@ struct ContentView: View {
                 tag: selectedLogTypeOption
             )
             
-            // Safely unwrap `person` and `workload`
-            guard let person = result.person,
-                  let workload = result.workload,
-                  let personJSON = Helper.toJSONString(CodableResponse(from: person)),
-                  let workloadJSON = Helper.toJSONString(CodableResponse(from: workload)) else {
-                resultMessage = "Authorization succeeded, but failed to serialize person or workload"
-                return
-            }
-            
-            // Update UI-related state
+            // Update UI with decision and principals (no person/workload)
             resultMessage = "Authorization Result: \(result.decision)"
             modelTextField = resultMessage
+            let principalsKeys = Array(result.principals.keys).sorted().joined(separator: ", ")
             modelJsonField = """
-            [{
-                "person": \(personJSON),
-                "workload": \(workloadJSON)
-            }]
+            {
+                "decision": \(result.decision),
+                "requestId": "\(result.requestId)",
+                "principalTypes": "\(principalsKeys)"
+            }
             """
             modelJsonLogField = Helper.processLogs(logs: logs)
             

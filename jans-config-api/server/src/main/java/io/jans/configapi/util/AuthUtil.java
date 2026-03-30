@@ -1,7 +1,6 @@
 package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
-import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.ScopeType;
@@ -414,18 +413,6 @@ public class AuthUtil {
 
     public boolean isValidDn(String dn, boolean strictNameChecking) {
         return DN.isValidDN(dn, strictNameChecking);
-    }
-
-    public RevokeSessionResponse revokeSession(final String url, final String token, final String userId) {
-        log.debug("Revoke session Request - url:{}, token:{}, userId:{}", url, token, userId);
-
-        RevokeSessionResponse revokeSessionResponse = AuthClientFactory.revokeSession(url, token, userId);
-        log.debug("revokeSessionResponse:{}", revokeSessionResponse);
-        if (revokeSessionResponse != null) {
-            log.debug("revokeSessionResponse.getEntity():{}, revokeSessionResponse.getStatus():{} ",
-                    revokeSessionResponse.getEntity(), revokeSessionResponse.getStatus());
-        }
-        return revokeSessionResponse;
     }
 
     public List<String> getAllScopeList(Map<ProtectionScopeType, List<String>> scopeMap) {

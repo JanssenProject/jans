@@ -17,17 +17,11 @@ async fn get_cedarling_for_multi_issuer_tests() -> Cedarling {
 
     get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
-        |config| {
+        |_config| {
             // for debugging purposes set log level to DEBUG and log to stdout
             // config.log_config.log_level = crate::LogLevel::DEBUG;
             // config.log_config.log_type =
             //     crate::LogTypeConfig::StdOut(crate::log::StdOutLoggerMode::Immediate);
-            // Disable workload and user entity building for multi-issuer tests
-            // since the policies work with token entities in context, not principal entities
-            config.entity_builder_config.build_workload = false;
-            config.entity_builder_config.build_user = false;
-            config.authorization_config.use_workload_principal = false;
-            config.authorization_config.use_user_principal = false;
         },
     )
     .await

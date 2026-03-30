@@ -26,23 +26,23 @@ get_max_ram_percentage() {
     fi
 }
 
-run_kc_sync() {
-    app_config_file=${SCHEDULER_HOME}/conf/config.properties
-    log_config_file=${SCHEDULER_HOME}/conf/logback.xml
-    scheduler_version=${CN_VERSION}
+# run_kc_sync() {
+#     app_config_file=${SCHEDULER_HOME}/conf/config.properties
+#     log_config_file=${SCHEDULER_HOME}/conf/logback.xml
+#     scheduler_version=${CN_VERSION}
 
-    python3 "$basedir/kc.py"
+#     python3 "$basedir/kc.py"
 
-    exec java \
-        -Dapp.config="${app_config_file}" \
-        -Dlogback.configurationFile="${log_config_file}" \
-        -Dapp.version="${scheduler_version}" \
-        -Dapp.home="${SCHEDULER_HOME}" \
-        $(get_max_ram_percentage) \
-        $(get_java_options) \
-        -cp "${SCHEDULER_HOME}/lib/*" \
-        io.jans.kc.scheduler.App
-}
+#     exec java \
+#         -Dapp.config="${app_config_file}" \
+#         -Dlogback.configurationFile="${log_config_file}" \
+#         -Dapp.version="${scheduler_version}" \
+#         -Dapp.home="${SCHEDULER_HOME}" \
+#         $(get_max_ram_percentage) \
+#         $(get_java_options) \
+#         -cp "${SCHEDULER_HOME}/lib/*" \
+#         io.jans.kc.scheduler.App
+# }
 
 # =======
 # cleaner
@@ -73,7 +73,6 @@ Usage: cloudtools [OPTIONS] COMMAND [ARGS]...
 Commands:
   certmanager   Manage cert and crypto keys
   cleanup       Cleanup expired entries in persistence
-  kc-sync       Sync config between jans-config-api and Keycloak
 EOF
 }
 
@@ -91,7 +90,8 @@ case $top_cmd in
         run_cleanup "$@"
         ;;
     "kc-sync")
-        run_kc_sync
+        echo "kc-sync is temporarily disabled until the SAML component is available" >&2
+        exit 1
         ;;
     *)
         show_help

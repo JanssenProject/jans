@@ -3,6 +3,7 @@ import time
 
 import click
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -26,7 +27,7 @@ def cleanup(limit):
     manager = get_manager()
     client = SqlClient(manager)
 
-    logger.info(f"Running cleanup process (up to {limit} entries)")
+    logger.info("Running cleanup process (up to %s entries)", limit)
     start_time = time.time()
 
     with client.engine.connect() as conn:
@@ -41,12 +42,12 @@ def cleanup(limit):
                     else:  # likely postgres
                         query = f"DELETE FROM {client.quoted_id(table)} WHERE doc_id IN (SELECT doc_id FROM {client.quoted_id(table)} WHERE del = :deleted AND exp < NOW() LIMIT {limit})"  # nosec: B608
                     conn.execute(text(query), {"deleted": True})
-                    logger.info(f"Cleanup expired entries in {table}")
-                except Exception as exc:
-                    logger.warning(f"Unable to cleanup expired entries in {table}; reason={exc}")
+                    logger.info("Cleanup expired entries in %s", table)
+                except SQLAlchemyError as exc:
+                    logger.warning("Unable to cleanup expired entries in %s; reason=%s", table, exc)
 
     finish_time = time.time()
-    logger.info(f"Cleanup process finished after {(finish_time - start_time):0.2f} seconds")
+    logger.info("Cleanup process finished after %0.2f seconds", finish_time - start_time)
 
 
 if __name__ == "__main__":
