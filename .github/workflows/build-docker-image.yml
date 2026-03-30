@@ -407,6 +407,4 @@ jobs:
             --bundle trivy-report.txt.bundle \
             trivy-report.txt
           
-          gh release upload "${{ github.event.release.tag_name }}" *.json *.bundle --clobber || {
-          echo "gh release upload failed (assets may already exist), continuing..."
-        }
+          gh release upload "${{ github.event.release.tag_name }}" *.json *.bundle --clobber || echo "gh release upload failed (assets may already exist), continuing..."
