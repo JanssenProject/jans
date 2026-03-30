@@ -54,15 +54,22 @@ impl CedarlingRuntime {
         instance_id
     }
 
-    fn drop_instance(&self, instance_id: u64) -> bool {
+    fn drop_instance(&self, instance_id: u64) -> CedarlingErrorCode {
         match self.instances.lock() {
-            Ok(mut guard) => guard.remove(&instance_id).is_some(),
+            Ok(mut guard) => {
+                if guard.remove(&instance_id).is_some() {
+                    CedarlingErrorCode::Success
+                } else {
+                    set_last_error("Instance not found");
+                    CedarlingErrorCode::InstanceNotFound
+                }
+            },
             Err(e) => {
                 set_last_error(&format!(
                     "Internal lock failure while dropping instance: {}",
                     e
                 ));
-                false
+                CedarlingErrorCode::Internal
             },
         }
     }
@@ -206,11 +213,11 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
 }
 
 /// Drop a Cedarling Instance
-pub fn drop_instance(instance_id: u64) -> bool {
+pub fn drop_instance(instance_id: u64) -> CedarlingErrorCode {
     clear_last_error();
     match runtime_ref() {
         Ok(runtime) => runtime.drop_instance(instance_id),
-        Err(_) => false,
+        Err(code) => code,
     }
 }
 

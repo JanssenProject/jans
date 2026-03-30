@@ -92,8 +92,8 @@ pub unsafe extern "C" fn cedarling_new_with_env(
 /// Drop a cedarling instance
 ///
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn cedarling_drop(instance_id: u64) {
-    drop_instance(instance_id);
+pub unsafe extern "C" fn cedarling_drop(instance_id: u64) -> c_int {
+    drop_instance(instance_id) as c_int
 }
 /// # Safety
 /// Authorize an unsigned request
