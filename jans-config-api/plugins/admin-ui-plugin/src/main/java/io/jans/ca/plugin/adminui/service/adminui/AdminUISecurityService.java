@@ -35,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -366,7 +367,7 @@ public class AdminUISecurityService {
                     role.setDeletable(true);
                     return role;
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -380,7 +381,7 @@ public class AdminUISecurityService {
                     rpm.setPermissions(new ArrayList<>(entry.getValue()));
                     return rpm;
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -398,7 +399,7 @@ public class AdminUISecurityService {
                     rpm.setPermissions(new ArrayList<>(new LinkedHashSet<>(entry.getPermissions())));
                     return rpm;
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -478,7 +479,7 @@ public class AdminUISecurityService {
         while ((len = is.read(buffer)) != -1) {
             totalRead += len;
             if (totalRead > MAX_ENTRY_SIZE) {
-                throw new IOException("ZIP entry too large (possible ZIP bomb)");
+                throw new IOException("ZIP entry too large (possible ZIP bomb greater than 3 MB)");
             }
             baos.write(buffer, 0, len);
         }
