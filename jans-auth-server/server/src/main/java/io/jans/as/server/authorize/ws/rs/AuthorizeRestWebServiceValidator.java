@@ -76,6 +76,9 @@ public class AuthorizeRestWebServiceValidator {
     @Inject
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     public Client validateClient(String clientId, String state) {
         return validateClient(clientId, state, false);
     }
@@ -97,7 +100,17 @@ public class AuthorizeRestWebServiceValidator {
         }
 
         try {
-            final Client client = clientService.getClient(clientId);
+            final Client client;
+
+            // Check if client_id is a CIMD URL (Client ID Metadata Document)
+            if (clientIdMetadataService.isCimdClientId(clientId)) {
+                log.debug("Processing CIMD client_id: {}", clientId);
+                client = clientIdMetadataService.getClient(clientId);
+            } else {
+                // Traditional client lookup from database
+                client = clientService.getClient(clientId);
+            }
+
             if (client == null) {
                 log.debug("Unable to find client by id {}.", clientId);
                 throw new WebApplicationException(Response
