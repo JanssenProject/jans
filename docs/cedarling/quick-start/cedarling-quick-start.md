@@ -26,7 +26,7 @@ To see Cedarling authorization in action, we need 3 things:
 
 For the first prerequisite, we will use a ready demo policy.
 
-For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md). Janssen Tarp is an easy to install browser plug-in that comes with an embedded Cedarling instance (WASM). Janssen Tarp also provides a user interface to build authorization and authentication requests for testing purposes.
+For `2` and `3`, we will use [Janssen Tarp](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md). Janssen Tarp is an easy-to-install browser plug-in that comes with an embedded Cedarling instance (WASM). Janssen Tarp also provides a user interface to build authorization and authentication requests for testing purposes.
 
 ## Implement RBAC using signed tokens (TBAC)
 
