@@ -91,15 +91,15 @@ int main() {
 
     if (result != 0) {
         printf("   Failed to create instance (error code: %d)\n", result);
-        if (instance_result.ERROR_MESSAGE) {
-            printf("   Error: %s\n", instance_result.ERROR_MESSAGE);
+        if (instance_result.error_message) {
+            printf("   Error: %s\n", instance_result.error_message);
             cedarling_free_instance_result(&instance_result);
         }
         print_error("cedarling_new");
         return 1;
     }
 
-    uint64_t instance_id = instance_result.INSTANCE_ID;
+    uint64_t instance_id = instance_result.instance_id;
     printf("   Instance created successfully (ID: %llu)\n\n", (unsigned long long)instance_id);
     cedarling_free_instance_result(&instance_result);
 
@@ -112,8 +112,8 @@ int main() {
 
     if (result != 0) {
         printf("   Authorization failed (error code: %d)\n", result);
-        if (auth_result.ERROR_MESSAGE) {
-            printf("   Error: %s\n", auth_result.ERROR_MESSAGE);
+        if (auth_result.error_message) {
+            printf("   Error: %s\n", auth_result.error_message);
         }
         print_error("cedarling_authorize_multi_issuer");
         cedarling_free_result(&auth_result);
@@ -122,7 +122,7 @@ int main() {
     }
 
     printf("   Authorization completed successfully\n");
-    char* response = (char*)auth_result.DATA;
+    char* response = (char*)auth_result.data;
     printf("   Response: %.200s%s\n\n", response, strlen(response) > 200 ? "..." : "");
 
     // Check the decision
@@ -140,13 +140,13 @@ int main() {
     result = cedarling_pop_logs(instance_id, &logs);
 
     if (result == 0) {
-        printf("   Retrieved %zu log entries\n", logs.COUNT);
-        for (size_t i = 0; i < logs.COUNT && i < 5; i++) {
-            printf("   Log %zu: %.100s%s\n", i + 1, logs.ITEMS[i], 
-                   strlen(logs.ITEMS[i]) > 100 ? "..." : "");
+        printf("   Retrieved %zu log entries\n", logs.count);
+        for (size_t i = 0; i < logs.count && i < 5; i++) {
+            printf("   Log %zu: %.100s%s\n", i + 1, logs.items[i], 
+                   strlen(logs.items[i]) > 100 ? "..." : "");
         }
-        if (logs.COUNT > 5) {
-            printf("   ... and %zu more\n", logs.COUNT - 5);
+        if (logs.count > 5) {
+            printf("   ... and %zu more\n", logs.count - 5);
         }
         cedarling_free_string_array(&logs);
     } else {

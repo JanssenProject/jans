@@ -89,15 +89,15 @@ int main() {
 
     if (result != 0) {
         printf("   Failed to create instance (error code: %d)\n", result);
-        if (instance_result.ERROR_MESSAGE) {
-            printf("   Error: %s\n", instance_result.ERROR_MESSAGE);
+        if (instance_result.error_message) {
+            printf("   Error: %s\n", instance_result.error_message);
             cedarling_free_instance_result(&instance_result);
         }
         print_error("cedarling_new");
         return 1;
     }
 
-    uint64_t instance_id = instance_result.INSTANCE_ID;
+    uint64_t instance_id = instance_result.instance_id;
     printf("   Instance created successfully (ID: %llu)\n\n", (unsigned long long)instance_id);
 
     // Free the instance result
@@ -111,8 +111,8 @@ int main() {
     if (result != 0) {
         printf("   Authorization failed (error code: %d)\n", result);
 
-        if (auth_result.ERROR_MESSAGE) {
-            printf("   Error: %s\n", auth_result.ERROR_MESSAGE);
+        if (auth_result.error_message) {
+            printf("   Error: %s\n", auth_result.error_message);
             print_error("cedarling_authorize_unsigned");
         }
         cedarling_free_result(&auth_result);
@@ -121,7 +121,7 @@ int main() {
     }
 
     printf("   Authorization completed successfully\n");
-    printf("   Response: %s\n\n", auth_result.DATA ? (char*)auth_result.DATA : "null");
+    printf("   Response: %s\n\n", auth_result.data ? (char*)auth_result.data : "null");
 
     // Free authorization result
     cedarling_free_result(&auth_result);
@@ -133,9 +133,9 @@ int main() {
     result = cedarling_pop_logs(instance_id, &logs);
 
     if (result == 0) {
-        printf("   Retrieved %zu log entries\n", logs.COUNT);
-        for (size_t i = 0; i < logs.COUNT; i++) {
-            printf("   Log %zu: %.100s%s\n", i + 1, logs.ITEMS[i], strlen(logs.ITEMS[i]) > 100 ? "..." : "");
+        printf("   Retrieved %zu log entries\n", logs.count);
+        for (size_t i = 0; i < logs.count; i++) {
+            printf("   Log %zu: %.100s%s\n", i + 1, logs.items[i], strlen(logs.items[i]) > 100 ? "..." : "");
         }
         cedarling_free_string_array(&logs);
     } else {
@@ -150,12 +150,12 @@ int main() {
     result = cedarling_get_log_ids(instance_id, &log_ids);
 
     if (result == 0) {
-        printf("   Retrieved %zu log IDs\n", log_ids.COUNT);
-        for (size_t i = 0; i < log_ids.COUNT && i < 5; i++) {
-            printf("   ID %zu: %s\n", i + 1, log_ids.ITEMS[i]);
+        printf("   Retrieved %zu log IDs\n", log_ids.count);
+        for (size_t i = 0; i < log_ids.count && i < 5; i++) {
+            printf("   ID %zu: %s\n", i + 1, log_ids.items[i]);
         }
-        if (log_ids.COUNT > 5) {
-            printf("   ... and %zu more\n", log_ids.COUNT - 5);
+        if (log_ids.count > 5) {
+            printf("   ... and %zu more\n", log_ids.count - 5);
         }
 
         cedarling_free_string_array(&log_ids);

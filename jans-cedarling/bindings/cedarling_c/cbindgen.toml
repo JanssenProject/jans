@@ -1,6 +1,7 @@
 language="C"
 header="/* Cedarling C Bindings - Auto generated header file*/"
 include_version = true
+include_guard = "CEDARLING_C_H"
 namespace = "Cedarling"
 cpp_compat = true
 style = "both"
@@ -12,11 +13,11 @@ exclude=[]
 [fn]
 postfix = ""
 args="horizontal"
-rename_args="GeckoCase"
+rename_args="SnakeCase"
 
 
 [struct]
-rename_fields = "ScreamingSnakeCase"
+rename_fields = "SnakeCase"
 must_use="CedarlingResult"
 
 [enum]

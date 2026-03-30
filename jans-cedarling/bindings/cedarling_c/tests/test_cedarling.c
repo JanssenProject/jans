@@ -64,17 +64,17 @@ const char* TEST_CONFIG = "{\n"
      int ret = cedarling_new(TEST_CONFIG,&result);
  
      TEST_ASSERT(ret==0,"Create instance with valid config");
-     TEST_ASSERT(result.INSTANCE_ID>0,"Instance ID is valid");
-     TEST_ASSERT(result.ERROR_MESSAGE==NULL,"No error message on success");
+    TEST_ASSERT(result.instance_id>0,"Instance ID is valid");
+    TEST_ASSERT(result.error_message==NULL,"No error message on success");
  
-     uint64_t instance_id=result.INSTANCE_ID;
+    uint64_t instance_id=result.instance_id;
      cedarling_free_instance_result(&result);
  
      // Test invalid configuration
      ret = cedarling_new("{invalid json}",&result);
      TEST_ASSERT(ret!=0,"Reject invalid JSON config");
-     TEST_ASSERT(result.INSTANCE_ID==0,"No Instance ID on error");
-     TEST_ASSERT(result.ERROR_MESSAGE!=NULL,"Error message on provided");
+    TEST_ASSERT(result.instance_id==0,"No Instance ID on error");
+    TEST_ASSERT(result.error_message!=NULL,"Error message on provided");
  
      cedarling_free_instance_result(&result);
  
@@ -99,10 +99,10 @@ const char* TEST_CONFIG = "{\n"
      int ret=cedarling_new_with_env(NULL,&result);
      // This might fail if environment variables are not set, which is expected
      if(ret==0){
-         TEST_ASSERT(result.INSTANCE_ID>0,"Instance created from environment");
-         cedarling_drop(result.INSTANCE_ID);
+        TEST_ASSERT(result.instance_id>0,"Instance created from environment");
+        cedarling_drop(result.instance_id);
      }else{
-         TEST_ASSERT(result.ERROR_MESSAGE!=NULL,"Error message for env failure");
+        TEST_ASSERT(result.error_message!=NULL,"Error message for env failure");
          printf(" Note: Environment creation failed (expected if env vars not set)\n");
      }
      cedarling_free_instance_result(&result);
@@ -111,7 +111,7 @@ const char* TEST_CONFIG = "{\n"
      ret=cedarling_new_with_env(TEST_CONFIG,&result);
      TEST_ASSERT(ret==0,"Create instance with JSON config");
      if(ret==0){
-         cedarling_drop(result.INSTANCE_ID);
+        cedarling_drop(result.instance_id);
      }
      cedarling_free_instance_result(&result);
  }
@@ -129,7 +129,7 @@ void test_authorization(){
         return;
     }
 
-    uint64_t instance_id=instance_result.INSTANCE_ID;
+   uint64_t instance_id=instance_result.instance_id;
     cedarling_free_instance_result(&instance_result);
 
     // Test valid unsigned authorization request with TestPrincipal1
@@ -164,10 +164,10 @@ void test_authorization(){
     // Test the authorization result
     TEST_ASSERT(ret==0,"Authorization request executed successfully");
     if(ret==0){
-        TEST_ASSERT(auth_result.DATA!=NULL,"Authorization result data provided");
+       TEST_ASSERT(auth_result.data!=NULL,"Authorization result data provided");
         
         // Cast uint32_t* to char* for string operations
-        char* result_str = (char*)auth_result.DATA;
+       char* result_str = (char*)auth_result.data;
         printf(" Authorization result: %.200s...\n", result_str);
         
         // Verify the response structure contains expected fields
@@ -181,14 +181,14 @@ void test_authorization(){
         TEST_ASSERT(strstr(result_str, "principals") != NULL,
                    "Response should contain principals field");
     }else{
-        printf(" Authorization error: %s\n", auth_result.ERROR_MESSAGE ? auth_result.ERROR_MESSAGE : "unknown");
+       printf(" Authorization error: %s\n", auth_result.error_message ? auth_result.error_message : "unknown");
     }
     cedarling_free_result(&auth_result);
 
     // Test invalid JSON request
     ret=cedarling_authorize_unsigned(instance_id,"{Invalid Json}",&auth_result);
     TEST_ASSERT(ret!=0,"Reject invalid JSON request");
-    TEST_ASSERT(auth_result.ERROR_MESSAGE!=NULL,"Error message for invalid JSON");
+    TEST_ASSERT(auth_result.error_message!=NULL,"Error message for invalid JSON");
     cedarling_free_result(&auth_result);
 
     // Test NULL parameters
@@ -218,23 +218,23 @@ void test_authorization(){
          cedarling_free_instance_result(&instance_result);
          return;
      }
-     uint64_t instance_id=instance_result.INSTANCE_ID;
+    uint64_t instance_id=instance_result.instance_id;
      cedarling_free_instance_result(&instance_result);
  
      // Test get log IDs
      CedarlingStringArray log_ids;
      ret=cedarling_get_log_ids(instance_id,&log_ids);
      TEST_ASSERT(ret==0,"Get log IDs function executes");
-     // TEST_ASSERT(log_ids.COUNT >= 0, "Log IDs count is valid");
-     printf(" Found %zu log IDs\n", log_ids.COUNT);
+    // TEST_ASSERT(log_ids.count >= 0, "Log IDs count is valid");
+    printf(" Found %zu log IDs\n", log_ids.count);
      cedarling_free_string_array(&log_ids);
  
      // Test pop logs
      CedarlingStringArray logs;
      ret=cedarling_pop_logs(instance_id,&logs);
      TEST_ASSERT(ret==0,"Pop logs function executes");
-     // TEST_ASSERT(logs.COUNT >= 0, "Logs count is valid");
-     printf(" Found %zu logs\n", logs.COUNT);
+    // TEST_ASSERT(logs.count >= 0, "Logs count is valid");
+    printf(" Found %zu logs\n", logs.count);
      cedarling_free_string_array(&logs);
  
      // Test get logs by Tag
@@ -257,45 +257,45 @@ void test_authorization(){
      ret=cedarling_get_log_by_id(instance_id, "test_log_id", &log_result);
      TEST_ASSERT(ret==0,"Get log by ID function executes");
      if(ret==0){
-         TEST_ASSERT(log_result.DATA != NULL, "Log data is not NULL");
-         printf(" Log data: %.200s...\n", (char*)log_result.DATA);
+        TEST_ASSERT(log_result.data != NULL, "Log data is not NULL");
+        printf(" Log data: %.200s...\n", (char*)log_result.data);
          cedarling_free_result(&log_result);
      }else{
-         TEST_ASSERT(log_result.ERROR_MESSAGE != NULL, "Error message provided on failure");
-         printf(" Get log by ID error: %s\n", log_result.ERROR_MESSAGE);
+        TEST_ASSERT(log_result.error_message != NULL, "Error message provided on failure");
+        printf(" Get log by ID error: %s\n", log_result.error_message);
          cedarling_free_result(&log_result);
      }
  
      // Test with invalid instance ID
     ret=cedarling_get_log_ids(99999, &logs);
     TEST_ASSERT(ret!=0,"Reject invalid instance ID for get log IDs");
-     TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
+    TEST_ASSERT(logs.count == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
     ret=cedarling_pop_logs(99999, &logs);
     TEST_ASSERT(ret!=0,"Reject invalid instance ID for pop logs");
-     TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
+    TEST_ASSERT(logs.count == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
     ret=cedarling_get_logs_by_tag(99999, "test_tag", &logs);
     TEST_ASSERT(ret!=0,"Reject invalid instance ID for get logs by tag");
-     TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
+    TEST_ASSERT(logs.count == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
     ret=cedarling_get_logs_by_request_id(99999, "test_request_id", &logs);
     TEST_ASSERT(ret!=0,"Reject invalid instance ID for get logs by request ID");
-     TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
+    TEST_ASSERT(logs.count == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
     ret=cedarling_get_logs_by_request_id_and_tag(99999, "test_request_id", "test_tag", &logs);
     TEST_ASSERT(ret!=0,"Reject invalid instance ID for get logs by request ID and tag");
-     TEST_ASSERT(logs.COUNT == 0, "No log IDs for invalid instance");
+    TEST_ASSERT(logs.count == 0, "No log IDs for invalid instance");
      cedarling_free_string_array(&logs);
  
      ret=cedarling_get_log_by_id(99999, "test_log_id", &log_result);
      TEST_ASSERT(ret!=0,"Reject invalid instance ID for get log by ID");
-    TEST_ASSERT(log_result.DATA == NULL, "No log data for invalid instance");
-    TEST_ASSERT(log_result.ERROR_MESSAGE != NULL, "Error message provided for invalid instance");
+   TEST_ASSERT(log_result.data == NULL, "No log data for invalid instance");
+   TEST_ASSERT(log_result.error_message != NULL, "Error message provided for invalid instance");
      cedarling_free_result(&log_result);
  
      // Clean up
@@ -314,7 +314,7 @@ void test_trusted_issuer_loading_info() {
         return;
     }
 
-    uint64_t instance_id = instance_result.INSTANCE_ID;
+   uint64_t instance_id = instance_result.instance_id;
     cedarling_free_instance_result(&instance_result);
 
     bool loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "missing_issuer");
@@ -330,13 +330,13 @@ void test_trusted_issuer_loading_info() {
     CedarlingStringArray loaded_ids;
     ret = cedarling_loaded_trusted_issuer_ids(instance_id, &loaded_ids);
     TEST_ASSERT(ret == 0, "Get loaded trusted issuer IDs executes");
-    TEST_ASSERT(loaded_ids.COUNT == loaded_count, "Loaded IDs count matches loaded trusted issuers count");
+   TEST_ASSERT(loaded_ids.count == loaded_count, "Loaded IDs count matches loaded trusted issuers count");
     cedarling_free_string_array(&loaded_ids);
 
     CedarlingStringArray failed_ids;
     ret = cedarling_failed_trusted_issuer_ids(instance_id, &failed_ids);
     TEST_ASSERT(ret == 0, "Get failed trusted issuer IDs executes");
-    TEST_ASSERT(total == loaded_count + failed_ids.COUNT, "Total issuers equals loaded + failed issuer counts");
+   TEST_ASSERT(total == loaded_count + failed_ids.count, "Total issuers equals loaded + failed issuer counts");
     cedarling_free_string_array(&failed_ids);
 
     // NULL parameter handling for issuer lookup methods
@@ -358,12 +358,12 @@ void test_trusted_issuer_loading_info() {
 
     ret = cedarling_loaded_trusted_issuer_ids(99999, &loaded_ids);
     TEST_ASSERT(ret != 0, "Loaded trusted issuer IDs rejects invalid instance");
-    TEST_ASSERT(loaded_ids.COUNT == 0, "No loaded trusted issuer IDs for invalid instance");
+   TEST_ASSERT(loaded_ids.count == 0, "No loaded trusted issuer IDs for invalid instance");
     cedarling_free_string_array(&loaded_ids);
 
     ret = cedarling_failed_trusted_issuer_ids(99999, &failed_ids);
     TEST_ASSERT(ret != 0, "Failed trusted issuer IDs rejects invalid instance");
-    TEST_ASSERT(failed_ids.COUNT == 0, "No failed trusted issuer IDs for invalid instance");
+   TEST_ASSERT(failed_ids.count == 0, "No failed trusted issuer IDs for invalid instance");
     cedarling_free_string_array(&failed_ids);
 
     // NULL result pointers for array-returning methods
@@ -439,7 +439,7 @@ void test_trusted_issuer_loading_info() {
          return;
      }
  
-     uint64_t instance_id = result.INSTANCE_ID;
+    uint64_t instance_id = result.instance_id;
      cedarling_free_instance_result(&result);
  
      // Shutdown the instance
@@ -454,7 +454,7 @@ void test_trusted_issuer_loading_info() {
      CedarlingStringArray logs;
     ret=cedarling_get_log_ids(instance_id, &logs);
     TEST_ASSERT(ret!=0,"Dropped instance reports not found");
-     TEST_ASSERT(logs.COUNT == 0, "No logs from dropped instance");
+    TEST_ASSERT(logs.count == 0, "No logs from dropped instance");
      cedarling_free_string_array(&logs);
  
  }
