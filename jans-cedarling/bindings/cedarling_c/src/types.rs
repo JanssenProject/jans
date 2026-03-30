@@ -110,12 +110,14 @@ impl CedarlingInstanceResult {
 }
 
 impl CedarlingStringArray {
-    pub fn new(strings: Vec<String>) -> Self {
+    /// Build a string array for FFI. On interior NUL bytes, sets last error and
+    /// returns [`CedarlingErrorCode::Internal`].
+    pub fn try_new(strings: Vec<String>) -> Result<Self, CedarlingErrorCode> {
         if strings.is_empty() {
-            return CedarlingStringArray {
+            return Ok(CedarlingStringArray {
                 items: ptr::null_mut(),
                 count: 0,
-            };
+            });
         }
         let count = strings.len();
         let mut c_strings: Vec<*mut c_char> = Vec::with_capacity(count);
@@ -124,29 +126,32 @@ impl CedarlingStringArray {
             match CString::new(s) {
                 Ok(c_str) => c_strings.push(c_str.into_raw()),
                 Err(e) => {
-                    // Clean up previously allocated strings
                     for ptr in c_strings {
                         unsafe {
                             let _ = CString::from_raw(ptr);
-                        }; // Convert back to CString to free memory
+                        }
                     }
                     set_last_error(&format!(
-                        "CedarlingStringArray::new failed: CString::new error: {}",
+                        "CedarlingStringArray::try_new failed: CString::new error: {}",
                         e
                     ));
-                    return CedarlingStringArray {
-                        items: ptr::null_mut(),
-                        count: 0,
-                    };
+                    return Err(CedarlingErrorCode::Internal);
                 },
             };
         }
         let items_ptr = c_strings.as_mut_ptr();
-        std::mem::forget(c_strings); // Prevent Deallocation
-        Self {
+        std::mem::forget(c_strings);
+        Ok(CedarlingStringArray {
             items: items_ptr,
             count,
-        }
+        })
+    }
+
+    pub fn new(strings: Vec<String>) -> Self {
+        Self::try_new(strings).unwrap_or_else(|_| CedarlingStringArray {
+            items: ptr::null_mut(),
+            count: 0,
+        })
     }
 }
 

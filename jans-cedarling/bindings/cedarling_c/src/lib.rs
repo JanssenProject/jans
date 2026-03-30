@@ -363,13 +363,20 @@ pub unsafe extern "C" fn cedarling_pop_logs(
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
-    let logs = pop_logs(instance_id);
-
-    unsafe { *result = logs };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    clear_last_error();
+    match pop_logs(instance_id) {
+        Ok(logs) => unsafe {
+            *result = logs;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get a log by ID
@@ -421,13 +428,20 @@ pub unsafe extern "C" fn cedarling_get_log_ids(
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
-    let log_ids = get_log_ids(instance_id);
-
-    unsafe { *result = log_ids };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    clear_last_error();
+    match get_log_ids(instance_id) {
+        Ok(log_ids) => unsafe {
+            *result = log_ids;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get logs by tag
@@ -466,13 +480,19 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
         },
     };
 
-    let logs = get_logs_by_tag(instance_id, &tag_str);
-
-    unsafe { *result = logs };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    match get_logs_by_tag(instance_id, &tag_str) {
+        Ok(logs) => unsafe {
+            *result = logs;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get logs by request ID
@@ -511,13 +531,19 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
         },
     };
 
-    let logs = get_logs_by_request_id(instance_id, &request_id_str);
-
-    unsafe { *result = logs };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    match get_logs_by_request_id(instance_id, &request_id_str) {
+        Ok(logs) => unsafe {
+            *result = logs;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 /// # Safety
 /// Get logs by request ID and tag
@@ -579,13 +605,19 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
         },
     };
 
-    let logs = get_logs_by_request_id_and_tag(instance_id, &request_id_str, &tag_str);
-
-    unsafe { *result = logs };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    match get_logs_by_request_id_and_tag(instance_id, &request_id_str, &tag_str) {
+        Ok(logs) => unsafe {
+            *result = logs;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 
 /// # Safety
@@ -663,12 +695,20 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
         set_last_error("null result pointer");
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
-    let ids = loaded_trusted_issuer_ids(instance_id);
-    unsafe { *result = ids };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    clear_last_error();
+    match loaded_trusted_issuer_ids(instance_id) {
+        Ok(ids) => unsafe {
+            *result = ids;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 
 /// # Safety
@@ -684,12 +724,20 @@ pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
         set_last_error("null result pointer");
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
-    let ids = failed_trusted_issuer_ids(instance_id);
-    unsafe { *result = ids };
-    if !get_last_error().is_null() {
-        return CedarlingErrorCode::InstanceNotFound as c_int;
+    clear_last_error();
+    match failed_trusted_issuer_ids(instance_id) {
+        Ok(ids) => unsafe {
+            *result = ids;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+            code as c_int
+        },
     }
-    CedarlingErrorCode::Success as c_int
 }
 
 /// # Safety

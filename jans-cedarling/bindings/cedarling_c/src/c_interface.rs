@@ -572,42 +572,29 @@ pub fn context_stats(instance_id: u64) -> CedarlingResult {
 }
 
 /// Pop all logs from the instance
-pub fn pop_logs(instance_id: u64) -> CedarlingStringArray {
+pub fn pop_logs(instance_id: u64) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
 
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let logs = instance.pop_logs();
 
     let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
 
-    CedarlingStringArray::new(log_strings)
+    CedarlingStringArray::try_new(log_strings)
 }
 
 /// Get a log by ID
@@ -644,116 +631,83 @@ pub fn get_log_by_id(instance_id: u64, log_id: &str) -> CedarlingResult {
 }
 
 /// Get all log IDs
-pub fn get_log_ids(instance_id: u64) -> CedarlingStringArray {
+pub fn get_log_ids(instance_id: u64) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
 
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let logs = instance.get_log_ids();
 
     let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
 
-    CedarlingStringArray::new(log_strings)
+    CedarlingStringArray::try_new(log_strings)
 }
 
 /// Get logs by tag
-pub fn get_logs_by_tag(instance_id: u64, tag: &str) -> CedarlingStringArray {
+pub fn get_logs_by_tag(
+    instance_id: u64,
+    tag: &str,
+) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let logs = instance.get_logs_by_tag(tag);
 
     let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
 
-    CedarlingStringArray::new(log_strings)
+    CedarlingStringArray::try_new(log_strings)
 }
 
 /// Get logs by request ID
-pub fn get_logs_by_request_id(instance_id: u64, request_id: &str) -> CedarlingStringArray {
+pub fn get_logs_by_request_id(
+    instance_id: u64,
+    request_id: &str,
+) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let logs = instance.get_logs_by_request_id(request_id);
 
     let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
 
-    CedarlingStringArray::new(log_strings)
+    CedarlingStringArray::try_new(log_strings)
 }
 
 /// Get logs by request ID and tag
@@ -761,39 +715,26 @@ pub fn get_logs_by_request_id_and_tag(
     instance_id: u64,
     request_id: &str,
     tag: &str,
-) -> CedarlingStringArray {
+) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let logs = instance.get_logs_by_request_id_and_tag(request_id, tag);
 
     let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
 
-    CedarlingStringArray::new(log_strings)
+    CedarlingStringArray::try_new(log_strings)
 }
 
 /// Check whether a trusted issuer was loaded by issuer identifier
@@ -889,70 +830,48 @@ pub fn loaded_trusted_issuers_count(instance_id: u64) -> usize {
 }
 
 /// Get trusted issuer IDs loaded successfully
-pub fn loaded_trusted_issuer_ids(instance_id: u64) -> CedarlingStringArray {
+pub fn loaded_trusted_issuer_ids(
+    instance_id: u64,
+) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let ids: Vec<String> = instance.loaded_trusted_issuer_ids().into_iter().collect();
-    CedarlingStringArray::new(ids)
+    CedarlingStringArray::try_new(ids)
 }
 
 /// Get trusted issuer IDs that failed to load
-pub fn failed_trusted_issuer_ids(instance_id: u64) -> CedarlingStringArray {
+pub fn failed_trusted_issuer_ids(
+    instance_id: u64,
+) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
-            set_last_error("InstanceNotFound: Instance not found");
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
+            let error_msg = "Instance not found";
+            set_last_error(error_msg);
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return CedarlingStringArray {
-                items: std::ptr::null_mut(),
-                count: 0,
-            };
-        },
+        Err(code) => return Err(code),
     };
     let ids: Vec<String> = instance.failed_trusted_issuer_ids().into_iter().collect();
-    CedarlingStringArray::new(ids)
+    CedarlingStringArray::try_new(ids)
 }
 
 /// Shutdown an instance
