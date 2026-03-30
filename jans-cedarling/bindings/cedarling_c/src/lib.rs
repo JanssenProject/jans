@@ -30,8 +30,18 @@ pub unsafe extern "C" fn cedarling_new(
     result: *mut CedarlingInstanceResult,
 ) -> c_int {
     clear_last_error();
-    if config_json.is_null() || result.is_null() {
-        set_last_error("null config_json or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if config_json.is_null() {
+        set_last_error("null config_json pointer");
+        unsafe {
+            *result = CedarlingInstanceResult::error(
+                CedarlingErrorCode::InvalidArgument,
+                "null config_json pointer",
+            );
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -95,8 +105,16 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
-    if request_json.is_null() || result.is_null() {
-        set_last_error("null request_json or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if request_json.is_null() {
+        set_last_error("null request_json pointer");
+        unsafe {
+            *result =
+                CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null request_json pointer");
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -123,8 +141,16 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
-    if request_json.is_null() || result.is_null() {
-        set_last_error("null request_json or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if request_json.is_null() {
+        set_last_error("null request_json pointer");
+        unsafe {
+            *result =
+                CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null request_json pointer");
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -155,8 +181,23 @@ pub unsafe extern "C" fn cedarling_context_push(
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
-    if key.is_null() || value_json.is_null() || result.is_null() {
-        set_last_error("null key, value_json, or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if key.is_null() {
+        set_last_error("null key pointer");
+        unsafe {
+            *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+        }
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if value_json.is_null() {
+        set_last_error("null value_json pointer");
+        unsafe {
+            *result =
+                CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null value_json pointer");
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -191,8 +232,15 @@ pub unsafe extern "C" fn cedarling_context_get(
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
-    if key.is_null() || result.is_null() {
-        set_last_error("null key or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if key.is_null() {
+        set_last_error("null key pointer");
+        unsafe {
+            *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -219,8 +267,15 @@ pub unsafe extern "C" fn cedarling_context_remove(
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
-    if key.is_null() || result.is_null() {
-        set_last_error("null key or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if key.is_null() {
+        set_last_error("null key pointer");
+        unsafe {
+            *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -326,8 +381,15 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
-    if log_id.is_null() || result.is_null() {
-        set_last_error("null log_id or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if log_id.is_null() {
+        set_last_error("null log_id pointer");
+        unsafe {
+            *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null log_id pointer");
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -377,8 +439,18 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     result: *mut CedarlingStringArray,
 ) -> c_int {
     clear_last_error();
-    if tag.is_null() || result.is_null() {
-        set_last_error("null tag or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if tag.is_null() {
+        set_last_error("null tag pointer");
+        unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -412,8 +484,18 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     result: *mut CedarlingStringArray,
 ) -> c_int {
     clear_last_error();
-    if request_id.is_null() || result.is_null() {
-        set_last_error("null request_id or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if request_id.is_null() {
+        set_last_error("null request_id pointer");
+        unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
@@ -448,8 +530,28 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     result: *mut CedarlingStringArray,
 ) -> c_int {
     clear_last_error();
-    if request_id.is_null() || tag.is_null() || result.is_null() {
-        set_last_error("null request_id, tag, or result pointer");
+    if result.is_null() {
+        set_last_error("null result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if request_id.is_null() {
+        set_last_error("null request_id pointer");
+        unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+        }
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    if tag.is_null() {
+        set_last_error("null tag pointer");
+        unsafe {
+            *result = CedarlingStringArray {
+                items: ptr::null_mut(),
+                count: 0,
+            };
+        }
         return CedarlingErrorCode::InvalidArgument as c_int;
     }
 
