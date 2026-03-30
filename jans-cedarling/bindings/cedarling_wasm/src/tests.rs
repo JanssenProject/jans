@@ -1148,6 +1148,51 @@ async fn test_data_api_invalid_key() {
     assert!(result.is_err(), "push_data_ctx with empty key should fail");
 }
 
+#[wasm_bindgen_test]
+async fn test_trusted_issuer_loading_info_defaults() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    assert!(
+        !instance.is_trusted_issuer_loaded_by_name("missing_issuer"),
+        "unknown issuer id should not be loaded"
+    );
+    assert!(
+        !instance.is_trusted_issuer_loaded_by_iss("https://missing.example.org"),
+        "unknown issuer iss should not be loaded"
+    );
+
+    let total = instance.total_issuers();
+    let loaded = instance.loaded_trusted_issuers_count();
+    assert!(
+        loaded <= total,
+        "loaded count {loaded} should not exceed total {total}"
+    );
+
+    let loaded_ids = instance.loaded_trusted_issuer_ids();
+    assert_eq!(
+        loaded_ids.length() as usize,
+        loaded,
+        "loaded ids length should match loaded_trusted_issuers_count"
+    );
+    for i in 0..loaded_ids.length() {
+        let id = loaded_ids
+            .get(i)
+            .as_string()
+            .expect("loaded trusted issuer id should be a string");
+        assert!(
+            instance.is_trusted_issuer_loaded_by_name(&id),
+            "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
+        );
+    }
+}
+
 /// Test that function `spawn_task` works as expected
 #[wasm_bindgen_test]
 async fn test_spawn_task() {
