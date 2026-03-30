@@ -219,7 +219,7 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
       [
           {
             "mapping": "Jans::Userinfo_token",
-            "payload": "<token from step 5>"
+            "payload": "<token from step 6>"
           }
       ]
       ```
