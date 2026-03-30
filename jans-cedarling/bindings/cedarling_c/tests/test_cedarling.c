@@ -252,19 +252,25 @@ void test_authorization(){
      TEST_ASSERT(ret==0,"Get logs by request ID and tag function executes");
      cedarling_free_string_array(&logs);
  
-     // Test get log by ID
+     // Test get log by ID — unknown id is an error, not empty success
      CedarlingResult log_result;
-     ret=cedarling_get_log_by_id(instance_id, "test_log_id", &log_result);
-     TEST_ASSERT(ret==0,"Get log by ID function executes");
-     if(ret==0){
-        TEST_ASSERT(log_result.data != NULL, "Log data is not NULL");
-        printf(" Log data: %.200s...\n", (char*)log_result.data);
-         cedarling_free_result(&log_result);
-     }else{
-        TEST_ASSERT(log_result.error_message != NULL, "Error message provided on failure");
-        printf(" Get log by ID error: %s\n", log_result.error_message);
+     ret = cedarling_get_log_by_id(instance_id, "nonexistent_log_id_xyz", &log_result);
+     TEST_ASSERT(ret != 0, "Get log by ID returns error for unknown id");
+     TEST_ASSERT(log_result.data == NULL, "No log data for unknown id");
+     TEST_ASSERT(log_result.error_message != NULL, "Error message for unknown id");
+     cedarling_free_result(&log_result);
+
+     // If any logs remain, get by id succeeds for a real id
+     ret = cedarling_get_log_ids(instance_id, &log_ids);
+     TEST_ASSERT(ret == 0, "Get log IDs for get_log_by_id success path");
+     if (log_ids.count > 0 && log_ids.items != NULL && log_ids.items[0] != NULL) {
+         ret = cedarling_get_log_by_id(instance_id, log_ids.items[0], &log_result);
+         TEST_ASSERT(ret == 0, "Get log by ID with real id succeeds");
+         TEST_ASSERT(log_result.data != NULL, "Log data is not NULL for real id");
+         printf(" Log data: %.200s...\n", (char*)log_result.data);
          cedarling_free_result(&log_result);
      }
+     cedarling_free_string_array(&log_ids);
  
      // Test with invalid instance ID
     ret=cedarling_get_log_ids(99999, &logs);

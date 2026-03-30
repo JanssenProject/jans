@@ -623,11 +623,14 @@ pub fn get_log_by_id(instance_id: u64, log_id: &str) -> CedarlingResult {
         },
     };
 
-    let log = instance.get_log_by_id(log_id);
-
-    let log_string = log.iter().map(|l| l.to_string()).collect::<String>();
-
-    CedarlingResult::success(log_string)
+    match instance.get_log_by_id(log_id) {
+        Some(log) => CedarlingResult::success(log.to_string()),
+        None => {
+            let error_msg = "Log not found";
+            set_last_error(error_msg);
+            CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg)
+        },
+    }
 }
 
 /// Get all log IDs
