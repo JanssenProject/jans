@@ -69,6 +69,7 @@ impl Cedarling {
 
     /// Returns metadata for all policies whose scope constraints are compatible
     /// with the given principals, actions, and resources.
+    #[allow(clippy::needless_pass_by_value)] // consistent with the async API signatures
     pub fn get_matching_policies_unsigned(
         &self,
         principals: Vec<EntityData>,
@@ -82,6 +83,7 @@ impl Cedarling {
 
     /// Returns metadata for all policies whose scope constraints are compatible
     /// with the given token-derived principals, actions, and resources.
+    #[allow(clippy::needless_pass_by_value)] // consistent with the async API signatures
     pub fn get_matching_policies_multi_issuer(
         &self,
         tokens: Vec<TokenInput>,

@@ -540,7 +540,7 @@ impl PoliciesContainer {
                     && matches_action(policy, action_uids)
                     && matches_resource(policy, resource_entity_type_names)
             })
-            .map(|policy| PolicyMetadata::from_policy(policy))
+            .map(PolicyMetadata::from_policy)
             .collect()
     }
 }
@@ -575,10 +575,10 @@ fn matches_principal(policy: &Policy, principal_types: &HashSet<EntityTypeName>)
     match policy.principal_constraint() {
         PrincipalConstraint::Any => true,
         PrincipalConstraint::Eq(euid) | PrincipalConstraint::In(euid) => {
-            principal_types.contains(&euid.type_name())
+            principal_types.contains(euid.type_name())
         },
-        PrincipalConstraint::Is(type_name) => principal_types.contains(&type_name),
-        PrincipalConstraint::IsIn(type_name, _) => principal_types.contains(&type_name),
+        PrincipalConstraint::Is(type_name)
+        | PrincipalConstraint::IsIn(type_name, _) => principal_types.contains(&type_name),
     }
 }
 
@@ -597,10 +597,10 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
     match policy.resource_constraint() {
         ResourceConstraint::Any => true,
         ResourceConstraint::Eq(euid) | ResourceConstraint::In(euid) => {
-            resource_types.contains(&euid.type_name())
+            resource_types.contains(euid.type_name())
         },
-        ResourceConstraint::Is(type_name) => resource_types.contains(&type_name),
-        ResourceConstraint::IsIn(type_name, _) => resource_types.contains(&type_name),
+        ResourceConstraint::Is(type_name)
+        | ResourceConstraint::IsIn(type_name, _) => resource_types.contains(&type_name),
     }
 }
 
@@ -797,7 +797,7 @@ mod policy_metadata_tests {
         let mut policy_set = PolicySet::new();
         for (id, src) in policies {
             let policy =
-                Policy::parse(Some(PolicyId::new(id)), src.to_string()).expect("bad policy");
+                Policy::parse(Some(PolicyId::new(id)), *src).expect("bad policy");
             policy_set.add(policy).expect("duplicate policy id");
         }
         PoliciesContainer::new_empty(policy_set)
@@ -821,7 +821,7 @@ mod policy_metadata_tests {
     fn matches_all_policies_with_any_constraints() {
         let container = make_container(&[(
             "open",
-            r#"permit(principal, action, resource);"#,
+            "permit(principal, action, resource);",
         )]);
 
         let result = container.get_matching_policies(
@@ -862,11 +862,11 @@ mod policy_metadata_tests {
         let container = make_container(&[
             (
                 "workload_policy",
-                r#"permit(principal is Jans::Workload, action, resource);"#,
+                "permit(principal is Jans::Workload, action, resource);",
             ),
             (
                 "user_policy",
-                r#"permit(principal is Jans::User, action, resource);"#,
+                "permit(principal is Jans::User, action, resource);",
             ),
         ]);
 
@@ -885,11 +885,11 @@ mod policy_metadata_tests {
         let container = make_container(&[
             (
                 "issue_policy",
-                r#"permit(principal, action, resource is Jans::Issue);"#,
+                "permit(principal, action, resource is Jans::Issue);",
             ),
             (
                 "doc_policy",
-                r#"permit(principal, action, resource is Jans::Document);"#,
+                "permit(principal, action, resource is Jans::Document);",
             ),
         ]);
 
@@ -1005,7 +1005,7 @@ mod policy_metadata_tests {
     fn source_is_recoverable() {
         let container = make_container(&[(
             "p",
-            r#"permit(principal, action, resource);"#,
+            "permit(principal, action, resource);",
         )]);
 
         let result = container.get_matching_policies(
@@ -1021,7 +1021,7 @@ mod policy_metadata_tests {
     #[test]
     fn empty_inputs_return_only_any_policies() {
         let container = make_container(&[
-            ("any_policy", r#"permit(principal, action, resource);"#),
+            ("any_policy", "permit(principal, action, resource);"),
             (
                 "specific_policy",
                 r#"permit(
@@ -1048,11 +1048,11 @@ mod policy_metadata_tests {
         let container = make_container(&[
             (
                 "workload_policy",
-                r#"permit(principal is Jans::Workload, action, resource);"#,
+                "permit(principal is Jans::Workload, action, resource);",
             ),
             (
                 "user_policy",
-                r#"permit(principal is Jans::User, action, resource);"#,
+                "permit(principal is Jans::User, action, resource);",
             ),
         ]);
 
