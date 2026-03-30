@@ -597,9 +597,8 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
 }
 
 pub(crate) fn parse_cedar_version(value: impl serde::Serialize) -> Result<Version, String> {
-    let s = match serde_json::to_value(&value) {
-        Ok(serde_json::Value::String(s)) => s,
-        _ => return Err("cedar_version must be a string".to_string()),
+    let Ok(serde_json::Value::String(s)) = serde_json::to_value(&value) else {
+        return Err("cedar_version must be a string".to_string());
     };
     let s = s.strip_prefix('v').unwrap_or(&s);
     Version::parse(s).map_err(|e| format!("error parsing cedar version :{e}"))

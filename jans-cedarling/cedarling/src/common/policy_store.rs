@@ -274,6 +274,6 @@ impl PoliciesContainer {
 
     /// Get policy description based on id of policy
     pub fn get_policy_description(&self, id: &str) -> Option<&str> {
-        self.descriptions.get(id).map(|v| v.as_str())
+        self.descriptions.get(id).map(String::as_str)
     }
 }
