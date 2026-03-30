@@ -13,14 +13,20 @@ Read [this article](./docs/DetailBuildSteps.md) for detail steps.
 
 ### Building
 
-1. Run below command to build and import binding into iOS project.
+1. Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator
+
+```bash
+rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
+```
+
+2. Run below command to build and import binding into iOS project.
 
 ```bash
 make ios
 ```
-2. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework from `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
+3. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework from `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/build/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
-3. Run iOS project (./bindings/cedarling_uniffi/iOSApp) on simulator.
+4. Run iOS project (./bindings/cedarling_uniffi/iOSApp) on simulator.
 
 ## Android
 

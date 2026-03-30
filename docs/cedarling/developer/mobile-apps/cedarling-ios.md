@@ -15,14 +15,21 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
     cd /path/of/jans/jans-cedarling/bindings/cedarling_uniffi
    ```
 
-2. Run below command to build and import binding into iOS project:
+2. Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator
+
+   ```bash
+   rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
+   ```
+
+3. Run below command to build and import binding into iOS project:
+
    ```bash
    make ios
    ```
    
-3. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/output/cedarling_uniffi.swift` files into your project (drag and drop should work).
+4. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/build/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
-4. Run iOS project on simulator.
+5. Run iOS project on simulator.
 
 We have included [a sample iOS app](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_uniffi/iOSApp) using Cedarling UniFFI binding for making authorisation decisions. Here is a demonstration video of its working.
 
