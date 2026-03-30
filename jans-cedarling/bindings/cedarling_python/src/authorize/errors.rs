@@ -109,9 +109,9 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    ActionParsingError,
+    IdentifierParsingError,
     AuthorizeError,
-    "Error encountered while parsing an entity or action identifier"
+    "Error encountered while parsing an entity type name or action identifier"
 );
 
 #[pyclass]
@@ -164,7 +164,7 @@ errors_functions! {
     MultiIssuerValidation => MultiIssuerValidationError,
     MultiIssuerEntity => MultiIssuerEntityError,
     RequestValidation => RequestValidationError,
-    ActionParsing => ActionParsingError
+    IdentifierParsing => IdentifierParsingError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -525,7 +525,7 @@ impl Authz {
             .keys()
             .map(|mapping| {
                 cedar_policy::EntityTypeName::from_str(mapping)
-                    .map_err(|e| AuthorizeError::ActionParsing(e.into()))
+                    .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
             })
             .collect::<Result<_, _>>()?;
 
@@ -548,7 +548,7 @@ fn entity_data_to_type_names(
         .iter()
         .map(|e| {
             cedar_policy::EntityTypeName::from_str(&e.cedar_mapping.entity_type)
-                .map_err(|e| AuthorizeError::ActionParsing(e.into()))
+                .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
         })
         .collect()
 }
