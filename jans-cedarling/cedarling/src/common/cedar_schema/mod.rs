@@ -86,7 +86,7 @@ mod tests {
         static POLICY_STORE_RAW: &str =
             include_str!("../../../../test_files/policy-store_blobby.json");
         let policy_result = serde_json::from_str::<LegacyPolicyStore>(POLICY_STORE_RAW);
-        let err = policy_result.unwrap_err();
+        let err = policy_result.expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
         assert!(msg.contains("missing required field 'name' in policy store entry"));
     }
@@ -96,7 +96,7 @@ mod tests {
         static POLICY_STORE_RAW: &str =
             include_str!("../../../../test_files/policy-store_schema_err_base64.json");
         let policy_result = serde_json::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW);
-        let err = policy_result.unwrap_err();
+        let err = policy_result.expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
         assert!(msg.contains("missing required field 'name' in policy store entry"));
     }
@@ -107,7 +107,7 @@ mod tests {
             include_str!("../../../../test_files/policy-store_schema_err.yaml");
         let policy_result =
             serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
-        let err = policy_result.unwrap_err();
+        let err = policy_result.expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
         assert!(msg.contains("missing required field 'name' in policy store entry"));
     }
@@ -118,7 +118,7 @@ mod tests {
             include_str!("../../../../test_files/policy-store_schema_err_cedar_mistake.yaml");
         let policy_result =
             serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
-        let err_msg = policy_result.unwrap_err().to_string();
+        let err_msg = policy_result.expect_err("expected parsing to fail due to missing required field 'name'").to_string();
         assert_eq!(
             err_msg,
             "error parsing policy store 'a1bf93115de86de760ee0bea1d529b521489e5a11747': missing required field 'name' in policy store entry"
