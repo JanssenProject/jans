@@ -34,36 +34,31 @@ mod tests {
     fn test_read_ok() {
         static POLICY_STORE_RAW: &str =
             include_str!("../../../../test_files/policy-store_ok.yaml");
-        let policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW);
-        assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
+        serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+            .expect("failed to deserialize policy-store_ok.yaml into LegacyAgamaPolicyStore");
     }
 
     #[test]
     fn test_agama_ok() {
         static POLICY_STORE_RAW: &str = include_str!("../../../../test_files/agama-store.yaml");
-        let policy_result = serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW);
-        assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
+        serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+            .expect("failed to deserialize agama-store.yaml into LegacyAgamaPolicyStore");
     }
 
     #[test]
     fn test_readable_json_ok() {
         static POLICY_STORE_RAW: &str =
             include_str!("../../../../test_files/policy-store_readable.json");
-        let policy_result = serde_json::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW);
-        assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
+        serde_json::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
+            .expect("failed to deserialize policy-store_readable.json into LegacyAgamaPolicyStore");
     }
 
     #[test]
     fn test_readable_yaml_ok() {
         static YAML_POLICY_STORE: &str =
             include_str!("../../../../test_files/policy-store_readable.yaml");
-        let yaml_policy_result =
-            serde_yml::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE);
-        assert!(
-            yaml_policy_result.is_ok(),
-            "{:?}",
-            yaml_policy_result.unwrap_err()
-        );
+        serde_yml::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE)
+            .expect("failed to deserialize policy-store_readable.yaml into LegacyAgamaPolicyStore");
     }
 
     #[test]
@@ -76,7 +71,7 @@ mod tests {
         let yaml_policy_result =
             serde_yml::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE);
         let json_policy_result =
-            serde_yml::from_str::<LegacyAgamaPolicyStore>(JSON_POLICY_STORE);
+            serde_json::from_str::<LegacyAgamaPolicyStore>(JSON_POLICY_STORE);
 
         assert_eq!(yaml_policy_result.unwrap(), json_policy_result.unwrap());
     }
@@ -88,7 +83,7 @@ mod tests {
         let policy_result = serde_json::from_str::<LegacyPolicyStore>(POLICY_STORE_RAW);
         let err = policy_result.expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
-        assert!(msg.contains("missing required field 'name' in policy store entry"));
+        assert!(msg.contains("missing required field 'name' in policy store entry"), "expected error to mention 'missing required field name' but got: {msg}");
     }
 
     #[test]
@@ -98,7 +93,7 @@ mod tests {
         let policy_result = serde_json::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW);
         let err = policy_result.expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
-        assert!(msg.contains("missing required field 'name' in policy store entry"));
+        assert!(msg.contains("missing required field 'name' in policy store entry"), "expected error to mention 'missing required field name' but got: {msg}");
     }
 
     #[test]
@@ -109,7 +104,7 @@ mod tests {
             serde_yml::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW_YAML);
         let err = policy_result.expect_err("expected parsing to fail due to missing required field 'name'");
         let msg = err.to_string();
-        assert!(msg.contains("missing required field 'name' in policy store entry"));
+        assert!(msg.contains("missing required field 'name' in policy store entry"), "expected error to mention 'missing required field name' but got: {msg}");
     }
 
     #[test]

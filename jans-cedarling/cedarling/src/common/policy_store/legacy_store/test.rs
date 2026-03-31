@@ -40,7 +40,7 @@ fn test_policy_store_deserialization_success() {
         "cedar_schema": BASE64_STANDARD.encode(schema),
     });
 
-    serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str()).unwrap();
+    serde_json::from_str::<LegacyPolicyStore>(policy_store_json.to_string().as_str()).expect("failed to deserialize LegacyPolicyStore from policy_store_json");
 }
 
 #[test]
