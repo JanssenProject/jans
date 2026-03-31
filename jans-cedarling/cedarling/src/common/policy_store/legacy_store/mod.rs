@@ -574,17 +574,11 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
             .as_object()
             .ok_or_else(|| de::Error::custom("policy store must be a JSON object"))?;
 
-        let cedar_version = obj.get("cedar_version").ok_or_else(|| {
-            de::Error::custom("missing required field 'cedar_version' in policy store")
-        })?;
-
         let policy_stores = obj.get("policy_stores").ok_or_else(|| {
             de::Error::custom("missing required field 'policy_stores' in policy store")
         })?;
 
         let mut store = LegacyAgamaPolicyStore {
-            cedar_version: parse_cedar_version(cedar_version)
-                .map_err(|e| de::Error::custom(format!("invalid cedar_version format: {e}")))?,
             policy_stores: HashMap::new(),
         };
 
@@ -601,14 +595,6 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
 
         Ok(store)
     }
-}
-
-pub(crate) fn parse_cedar_version(value: impl serde::Serialize) -> Result<Version, String> {
-    let Ok(serde_json::Value::String(s)) = serde_json::to_value(&value) else {
-        return Err("cedar_version must be a string".to_string());
-    };
-    let s = s.strip_prefix('v').unwrap_or(&s);
-    Version::parse(s).map_err(|e| format!("error parsing cedar version: {e}"))
 }
 
 fn parse_maybe_cedar_version(value: &serde_json::Value) -> Result<Option<Version>, String> {
