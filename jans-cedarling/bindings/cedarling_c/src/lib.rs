@@ -964,7 +964,7 @@ pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingIn
 /// Get the last error message
 ///
 #[unsafe(no_mangle)]
-pub extern "C" fn cedarling_get_last_error() -> *const c_char {
+pub extern "C" fn cedarling_get_last_error() -> *mut c_char {
     get_last_error()
 }
 

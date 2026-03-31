@@ -310,10 +310,11 @@ cedarling_cleanup();
 ### Error Handling
 
 ```c
-// Get the last error message
-const char* error = cedarling_get_last_error();
+// Get the last error message (owned; caller must free)
+char* error = cedarling_get_last_error();
 if (error) {
     printf("Last error: %s\n", error);
+    cedarling_free_string(error);
 }
 
 // Clear the last error
@@ -387,7 +388,7 @@ cedarling_clear_last_error();
 
 | Function | Description |
 |----------|-------------|
-| `cedarling_get_last_error()` | Get last error message |
+| `cedarling_get_last_error()` | Get last error message (caller must free with `cedarling_free_string`) |
 | `cedarling_clear_last_error()` | Clear last error |
 
 ## Configuration

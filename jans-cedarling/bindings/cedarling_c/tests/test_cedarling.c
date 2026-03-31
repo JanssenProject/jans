@@ -34,9 +34,10 @@ const char* TEST_CONFIG = "{\n"
      printf(" [PASS] %s\n", message);\
  }else{\
      printf(" [FAIL] %s\n", message);\
-     const char* error = cedarling_get_last_error();\
+    char* error = cedarling_get_last_error();\
      if (error) {\
          printf(" Error: %s\n", error);\
+        cedarling_free_string(error);\
      }\
  }} while(0);
  
@@ -447,7 +448,7 @@ void test_trusted_issuer_loading_info() {
      printf("======================\n");
  
      cedarling_clear_last_error();
-     const char* error = cedarling_get_last_error();
+    char* error = cedarling_get_last_error();
      TEST_ASSERT(error == NULL, "No error after clear");
  
      // Trigger an error
@@ -455,8 +456,11 @@ void test_trusted_issuer_loading_info() {
      cedarling_new("{invalid}",&result);
      error=cedarling_get_last_error();
      TEST_ASSERT(error != NULL, "Error message set after failure");
-     TEST_ASSERT(strlen(error) > 0, "Error message is not empty");
-     printf(" Error message: %s\n", error);
+    if (error) {
+        TEST_ASSERT(strlen(error) > 0, "Error message is not empty");
+        printf(" Error message: %s\n", error);
+        cedarling_free_string(error);
+    }
  
      cedarling_free_instance_result(&result);
  

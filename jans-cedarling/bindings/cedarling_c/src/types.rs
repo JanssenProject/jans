@@ -182,21 +182,18 @@ pub fn set_last_error(message: &str) {
     });
 }
 
-/// Returns a borrowed pointer to the current thread's last error string.
+/// Returns a newly allocated copy of the current thread's last error string.
 ///
-/// Pointer is valid only until the next Cedarling library call, because most
-/// operations clear and may replace thread-local error storage at entry.
-/// C callers should copy this string immediately if it must outlive the next
-/// Cedarling API call.
-///
-/// Internally this returns `*mut c_char` for convenience with existing call sites,
-/// while the public C API exposes `*const c_char` for const-safety.
+/// The caller owns the returned pointer and must free it with
+/// `cedarling_free_string`. Returns null if no error is currently stored or
+/// if allocation fails.
 pub fn get_last_error() -> *mut c_char {
     LAST_ERROR.with(|last_error| {
         if let Some(ref c_string) = *last_error.borrow() {
-            // Cast to mutable pointer is for internal compatibility only; callers
-            // must treat this memory as read-only.
-            c_string.as_ptr() as *mut c_char
+            match CString::new(c_string.as_bytes()) {
+                Ok(copy) => copy.into_raw(),
+                Err(_) => ptr::null_mut(),
+            }
         } else {
             ptr::null_mut()
         }

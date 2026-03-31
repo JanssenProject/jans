@@ -61,9 +61,10 @@ const char* REQUEST_JSON = "{\n"
     "}";
 
 void print_error(const char* operation) {
-    const char* error_msg = cedarling_get_last_error();
+    char* error_msg = cedarling_get_last_error();
     if (error_msg) {
         printf("Error in %s: %s\n", operation, error_msg);
+        cedarling_free_string(error_msg);
     } else {
         printf("Error in %s: Unknown error\n", operation);
     }
