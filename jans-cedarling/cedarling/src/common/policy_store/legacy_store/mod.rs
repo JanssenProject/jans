@@ -326,7 +326,19 @@ impl PartialEq for LegacyPoliciesContainer {
             .policies()
             .map(|p| (p.id().clone(), p))
             .collect();
-        self_policies == other_policies
+
+        let self_descriptions: BTreeMap<_, _> = self
+            .raw_policy_info
+            .iter()
+            .map(|(id, raw)| (id, &raw.description))
+            .collect();
+        let other_descriptions: BTreeMap<_, _> = other
+            .raw_policy_info
+            .iter()
+            .map(|(id, raw)| (id, &raw.description))
+            .collect();
+
+        self_policies == other_policies && self_descriptions == other_descriptions
     }
 }
 
