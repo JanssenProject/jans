@@ -548,8 +548,6 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct LegacyAgamaPolicyStore {
-    #[allow(dead_code)]
-    pub cedar_version: Version,
     pub policy_stores: HashMap<String, LegacyPolicyStore>,
 }
 
