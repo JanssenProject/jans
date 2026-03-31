@@ -100,7 +100,6 @@ jobs:
       packages: write
       id-token: write
       pull-requests: read
-      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -397,6 +396,8 @@ jobs:
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
       - name: Sign Trivy Reports
         if: matrix.docker-images == 'all-in-one' && steps.build_docker_image.outputs.build
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
           cosign sign-blob --yes \
             --bundle trivy-report.json.bundle \
