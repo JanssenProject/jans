@@ -43,7 +43,6 @@ public class AUIConfiguration {
     private CedarlingLogType cedarlingLogType;
     private String auiCedarlingPolicyStoreUrl;
     private String auiCedarlingDefaultPolicyStorePath;
-    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint = CedarlingPolicyStrRetrievalPoint.DEFAULT;
 
     /**
      * Retrieves the additional key-value parameters configured for the Admin UI.
@@ -631,32 +630,12 @@ public class AUIConfiguration {
     }
 
     /**
-     * Sets the default filesystem path used by Cedarling for the Admin UI policy store.
+     * Set the default filesystem path that Cedarling uses for the Admin UI policy store.
      *
-     * @param auiCedarlingDefaultPolicyStorePath the default policy store path to use, or `null` to unset
+     * @param auiCedarlingDefaultPolicyStorePath the default policy store path to use, or {@code null} to unset
      */
     public void setAuiCedarlingDefaultPolicyStorePath(String auiCedarlingDefaultPolicyStorePath) {
         this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;
-    }
-
-    /**
-     * Returns the configured Cedarling policy store retrieval point.
-     *
-     * @return the current CedarlingPolicyStrRetrievalPoint; never null — defaults to {@code CedarlingPolicyStrRetrievalPoint.DEFAULT} when not explicitly set.
-     */
-    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
-        return cedarlingPolicyStoreRetrievalPoint;
-    }
-
-    /**
-     * Set the cedarling policy store retrieval point for this configuration.
-     *
-     * @param cedarlingPolicyStoreRetrievalPoint the retrieval point to set; if `null`, the value will be set to {@link CedarlingPolicyStrRetrievalPoint#DEFAULT}
-     */
-    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
-        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint != null
-                ? cedarlingPolicyStoreRetrievalPoint
-                : CedarlingPolicyStrRetrievalPoint.DEFAULT;
     }
 
     /**
@@ -697,8 +676,7 @@ public class AUIConfiguration {
                 ", additionalParameters=" + additionalParameters +
                 ", cedarlingLogType=" + cedarlingLogType +
                 ", auiCedarlingPolicyStoreUrl='" + auiCedarlingPolicyStoreUrl + '\'' +
-                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath + '\'' +
-                ", cedarlingPolicyStoreRetrievalPoint=" + cedarlingPolicyStoreRetrievalPoint +
+                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath +
                 '}';
     }
 }

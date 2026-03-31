@@ -52,22 +52,19 @@ public class Jackson {
     }
 
     public static <T> T applyPatch(String patchAsString, T obj) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj);
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
         return applyPatch(jsonPatch, obj);
     }
 
     public static boolean isFieldPresent(String patchAsString, String fieldName) {
-        LOG.debug("Check if FieldPresent patchAsString:{} contains fieldName:{}", patchAsString, fieldName);
+        LOG.debug("Check if FieldPresent contains fieldName:{}", fieldName);
         boolean isPresent = false;
         if (patchAsString == null || fieldName == null) {
-            LOG.warn("isFieldPresent called with null parameter - patchAsString: {}, fieldName: {}", patchAsString,
-                    fieldName);
+            LOG.warn("isFieldPresent called with null parameter - fieldName: {}", fieldName);
             return isPresent;
         }
         try {
             JsonNode jsonNode = Jackson.asJsonNode(patchAsString);
-            LOG.debug("patchAsString jsonNode:{}", jsonNode);
             List<String> keys = new ArrayList<>();
             if (jsonNode.isArray()) {
                 for (JsonNode operationNode : jsonNode) {
@@ -89,12 +86,10 @@ public class Jackson {
     }
 
     public static JsonPatch getJsonPatch(String patchAsString) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - patchAsString:{}", patchAsString);
         return JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
     }
 
     public static <T> T applyJsonPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, IOException {
-        LOG.debug("Patch details - jsonPatch:{}, obj:{}", jsonPatch, obj);
         return applyPatch(jsonPatch, obj);
     }
 

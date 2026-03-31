@@ -157,7 +157,7 @@ class ClientRegistration(ClientRegistrationType):
         return False
 ```
 
-* *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](../../jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
+* *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
 
 Next, create a JSON file named `script_schema.json` with the following content:
 
@@ -200,7 +200,7 @@ Next, create a JSON file named `script_schema.json` with the following content:
 }
 ```
 
-* *you can also find a copy of this schema in [jans/jans-cedarling/lock-server-script/script_schema.json](../../jans-cedarling/lock-server-script/script_schema.json)*.
+* *you can also find a copy of this schema in [jans/jans-cedarling/lock-server-script/script_schema.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json)*.
 
 > Note:
 >
