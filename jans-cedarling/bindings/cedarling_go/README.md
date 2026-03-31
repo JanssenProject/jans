@@ -368,6 +368,19 @@ permit(
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
 
+### Trusted Issuer Loading Info
+
+When trusted issuers are configured in the policy store, you can query loading status:
+
+```go
+loadedByName := instance.IsTrustedIssuerLoadedByName("issuer_id")
+loadedByIss := instance.IsTrustedIssuerLoadedByIss("https://issuer.example.org")
+totalIssuers := instance.TotalIssuers()
+loadedCount := instance.LoadedTrustedIssuersCount()
+loadedIDs := instance.LoadedTrustedIssuerIds()
+failedIDs := instance.FailedTrustedIssuerIds()
+```
+
 ## Configuration
 
 ### Policy Store Sources

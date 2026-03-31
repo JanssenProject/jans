@@ -205,4 +205,28 @@ public class CedarlingAdapter implements AutoCloseable {
     public Cedarling getCedarling() {
         return cedarling;
     }
+
+    public boolean isTrustedIssuerLoadedByName(String issuerId) {
+        return cedarling.isTrustedIssuerLoadedByName(issuerId);
+    }
+
+    public boolean isTrustedIssuerLoadedByIss(String issClaim) {
+        return cedarling.isTrustedIssuerLoadedByIss(issClaim);
+    }
+
+    public long totalIssuers() {
+        return cedarling.totalIssuers();
+    }
+
+    public long loadedTrustedIssuersCount() {
+        return cedarling.loadedTrustedIssuersCount();
+    }
+
+    public List<String> loadedTrustedIssuerIds() {
+        return cedarling.loadedTrustedIssuerIds();
+    }
+
+    public List<String> failedTrustedIssuerIds() {
+        return cedarling.failedTrustedIssuerIds();
+    }
 }
