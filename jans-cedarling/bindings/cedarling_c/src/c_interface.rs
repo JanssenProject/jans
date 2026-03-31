@@ -5,25 +5,18 @@
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, LazyLock, Mutex};
+use std::sync::{LazyLock, Mutex};
 use std::time::Duration;
-use tokio::runtime::Runtime;
 
 use cedarling::{
-    self as base, BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage,
-    TrustedIssuerLoadingInfo,
+    BootstrapConfig, BootstrapConfigRaw, DataApi, LogStorage, TrustedIssuerLoadingInfo, blocking,
 };
 
 use crate::types::*;
 
-/// Global runtime for async operations
-static CEDARLING_RUNTIME: LazyLock<Result<CedarlingRuntime, String>> = LazyLock::new(|| {
-    Runtime::new()
-        .map(|rt| CedarlingRuntime {
-            runtime: Arc::new(rt),
-            instances: Mutex::new(HashMap::new()),
-        })
-        .map_err(|e| format!("Internal runtime initialization failure: {}", e))
+/// Global registry of per-thread blocking [`cedarling::blocking::Cedarling`] instances.
+static CEDARLING_RUNTIME: LazyLock<CedarlingRuntime> = LazyLock::new(|| CedarlingRuntime {
+    instances: Mutex::new(HashMap::new()),
 });
 
 fn get_instance_id() -> u64 {
@@ -31,18 +24,17 @@ fn get_instance_id() -> u64 {
     INSTANCE_ID.fetch_add(1, Ordering::Relaxed)
 }
 
-/// Runtime manager for Cedarling instances
+/// Registry for Cedarling instances (each [`blocking::Cedarling`] owns its Tokio runtime).
 struct CedarlingRuntime {
-    runtime: Arc<Runtime>,
-    instances: Mutex<HashMap<u64, Arc<base::Cedarling>>>,
+    instances: Mutex<HashMap<u64, blocking::Cedarling>>,
 }
 
 impl CedarlingRuntime {
-    fn add_instance(&self, instance: base::Cedarling) -> u64 {
+    fn add_instance(&self, instance: blocking::Cedarling) -> u64 {
         let instance_id = get_instance_id();
         match self.instances.lock() {
             Ok(mut guard) => {
-                guard.insert(instance_id, Arc::new(instance));
+                guard.insert(instance_id, instance);
             },
             Err(e) => {
                 set_last_error(&format!(
@@ -78,7 +70,7 @@ impl CedarlingRuntime {
     fn get_instance(
         &self,
         instance_id: u64,
-    ) -> Result<Option<Arc<base::Cedarling>>, CedarlingErrorCode> {
+    ) -> Result<Option<blocking::Cedarling>, CedarlingErrorCode> {
         match self.instances.lock() {
             Ok(guard) => Ok(guard.get(&instance_id).cloned()),
             Err(e) => {
@@ -94,7 +86,7 @@ impl CedarlingRuntime {
     fn shutdown_and_clear_all_instances(&self) -> CedarlingErrorCode {
         let instances = match self.instances.lock() {
             Ok(mut guard) => {
-                let instances: Vec<Arc<base::Cedarling>> = guard.values().cloned().collect();
+                let instances: Vec<blocking::Cedarling> = guard.values().cloned().collect();
                 guard.clear();
                 instances
             },
@@ -108,39 +100,28 @@ impl CedarlingRuntime {
         };
 
         for instance in instances {
-            self.runtime.block_on(instance.shut_down());
+            instance.shut_down();
         }
 
         CedarlingErrorCode::Success
     }
 }
 
-fn runtime_ref() -> Result<&'static CedarlingRuntime, CedarlingErrorCode> {
-    match &*CEDARLING_RUNTIME {
-        Ok(runtime) => Ok(runtime),
-        Err(msg) => {
-            set_last_error(msg);
-            Err(CedarlingErrorCode::Internal)
-        },
-    }
+fn runtime_ref() -> &'static CedarlingRuntime {
+    &*CEDARLING_RUNTIME
 }
 
 /// Force runtime initialization so startup failures surface at `cedarling_init`.
 pub fn initialize_runtime() -> CedarlingErrorCode {
     clear_last_error();
-    match runtime_ref() {
-        Ok(_) => CedarlingErrorCode::Success,
-        Err(code) => code,
-    }
+    let _ = &*CEDARLING_RUNTIME;
+    CedarlingErrorCode::Success
 }
 
 /// Shutdown and remove all runtime instances.
 pub fn cleanup_runtime() -> CedarlingErrorCode {
     clear_last_error();
-    match runtime_ref() {
-        Ok(runtime) => runtime.shutdown_and_clear_all_instances(),
-        Err(code) => code,
-    }
+    runtime_ref().shutdown_and_clear_all_instances()
 }
 
 /// Create a new cedarling instance
@@ -169,20 +150,9 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
         },
     };
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingInstanceResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
-    let instance = match runtime
-        .runtime
-        .block_on(base::Cedarling::new(&bootstrap_config))
-    {
+    let instance = match blocking::Cedarling::new(&bootstrap_config) {
         Ok(instance) => instance,
         Err(e) => {
             let error_msg = format!("Failed to create Cedarling instance: {}", e);
@@ -220,20 +190,9 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
         None => None,
     };
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingInstanceResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
-    let instance = match runtime
-        .runtime
-        .block_on(base::Cedarling::new_with_env(bootstrap_config_raw))
-    {
+    let instance = match blocking::Cedarling::new_with_env(bootstrap_config_raw) {
         Ok(instance) => instance,
         Err(e) => {
             let error_msg = format!("Failed to create Cedarling instance: {}", e);
@@ -257,25 +216,14 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
 /// Drop a Cedarling Instance
 pub fn drop_instance(instance_id: u64) -> CedarlingErrorCode {
     clear_last_error();
-    match runtime_ref() {
-        Ok(runtime) => runtime.drop_instance(instance_id),
-        Err(code) => code,
-    }
+    runtime_ref().drop_instance(instance_id)
 }
 
 /// Authorize an unsigned request
 pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -299,10 +247,7 @@ pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResu
         },
     };
 
-    match runtime
-        .runtime
-        .block_on(instance.authorize_unsigned(request))
-    {
+    match instance.authorize_unsigned(request) {
         Ok(response) => match serde_json::to_string(&response) {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
@@ -323,15 +268,7 @@ pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResu
 pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -355,10 +292,7 @@ pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> Cedarling
         },
     };
 
-    match runtime
-        .runtime
-        .block_on(instance.authorize_multi_issuer(request))
-    {
+    match instance.authorize_multi_issuer(request) {
         Ok(response) => match serde_json::to_string(&response) {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
@@ -386,15 +320,7 @@ pub fn context_push(
 ) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -437,15 +363,7 @@ pub fn context_push(
 pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -481,15 +399,7 @@ pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
 pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -520,15 +430,7 @@ pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
 pub fn context_clear(instance_id: u64) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -556,15 +458,7 @@ pub fn context_clear(instance_id: u64) -> CedarlingResult {
 pub fn context_list(instance_id: u64) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -599,15 +493,7 @@ pub fn context_list(instance_id: u64) -> CedarlingResult {
 pub fn context_stats(instance_id: u64) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -642,10 +528,7 @@ pub fn context_stats(instance_id: u64) -> CedarlingResult {
 pub fn pop_logs(instance_id: u64) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -668,15 +551,7 @@ pub fn pop_logs(instance_id: u64) -> Result<CedarlingStringArray, CedarlingError
 pub fn get_log_by_id(instance_id: u64, log_id: &str) -> CedarlingResult {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::Internal,
-                "Internal runtime initialization failure",
-            );
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -704,10 +579,7 @@ pub fn get_log_by_id(instance_id: u64, log_id: &str) -> CedarlingResult {
 pub fn get_log_ids(instance_id: u64) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -732,10 +604,7 @@ pub fn get_logs_by_tag(
     tag: &str,
 ) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -759,10 +628,7 @@ pub fn get_logs_by_request_id(
     request_id: &str,
 ) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -787,10 +653,7 @@ pub fn get_logs_by_request_id_and_tag(
     tag: &str,
 ) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
@@ -813,10 +676,7 @@ pub fn is_trusted_issuer_loaded_by_name(
     issuer_id: &str,
 ) -> Result<bool, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
@@ -834,10 +694,7 @@ pub fn is_trusted_issuer_loaded_by_iss(
     iss_claim: &str,
 ) -> Result<bool, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
@@ -852,10 +709,7 @@ pub fn is_trusted_issuer_loaded_by_iss(
 /// Get total trusted issuers discovered
 pub fn total_issuers(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
@@ -870,10 +724,7 @@ pub fn total_issuers(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
 /// Get number of trusted issuers loaded successfully
 pub fn loaded_trusted_issuers_count(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
@@ -890,10 +741,7 @@ pub fn loaded_trusted_issuer_ids(
     instance_id: u64,
 ) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
@@ -912,10 +760,7 @@ pub fn failed_trusted_issuer_ids(
     instance_id: u64,
 ) -> Result<CedarlingStringArray, CedarlingErrorCode> {
     clear_last_error();
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(code) => return Err(code),
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -934,12 +779,7 @@ pub fn failed_trusted_issuer_ids(
 pub fn shutdown_instance(instance_id: u64) -> CedarlingErrorCode {
     clear_last_error();
 
-    let runtime = match runtime_ref() {
-        Ok(runtime) => runtime,
-        Err(_) => {
-            return CedarlingErrorCode::Internal;
-        },
-    };
+    let runtime = runtime_ref();
 
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
@@ -952,7 +792,7 @@ pub fn shutdown_instance(instance_id: u64) -> CedarlingErrorCode {
         },
     };
 
-    runtime.runtime.block_on(instance.shut_down());
+    instance.shut_down();
 
     // Remove from the runtime map so further API calls fail with InstanceNotFound.
     match runtime.drop_instance(instance_id) {

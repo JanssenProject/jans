@@ -12,8 +12,7 @@ crate-type = ["cdylib", "staticlib"]
 libc = "0.2.174"
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
-tokio = { workspace = true, features = ["full"] }
-cedarling={path = "../../cedarling"}
+cedarling = { path = "../../cedarling", features = ["blocking"] }
 
 
 [build-dependencies]
