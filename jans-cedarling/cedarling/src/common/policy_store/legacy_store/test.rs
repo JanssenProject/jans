@@ -157,13 +157,13 @@ fn test_broken_policy_parsing_error_in_policy_store() {
 #[test]
 fn test_valid_version() {
     let valid_version = json!("1.2.3");
-    assert!(parse_maybe_cedar_version(&valid_version).is_ok());
+    parse_maybe_cedar_version(&valid_version).expect("expected valid Cedar version '1.2.3' to parse");
 }
 
 #[test]
 fn test_valid_version_with_v() {
     let valid_version_with_v = json!("v1.2.3");
-    assert!(parse_maybe_cedar_version(&valid_version_with_v).is_ok());
+    parse_maybe_cedar_version(&valid_version_with_v).expect("expected valid Cedar version 'v1.2.3' to parse");
 }
 
 #[test]
