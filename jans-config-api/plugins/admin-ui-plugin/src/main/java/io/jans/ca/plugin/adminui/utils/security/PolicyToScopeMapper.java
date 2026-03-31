@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
+import java.util.stream.Collectors;
 import java.util.zip.*;
 
 import com.fasterxml.jackson.databind.*;
@@ -179,7 +180,7 @@ public class PolicyToScopeMapper {
                 .filter(entry -> !entry.isDirectory())
                 .filter(entry -> entry.getName().startsWith("policies/"))
                 .filter(entry -> entry.getName().endsWith(".cedar") || entry.getName().endsWith(".cedarpl"))
-                .toList();
+                .collect(Collectors.toList());
 
         if (policyEntries.isEmpty()) {
             throw new IllegalStateException("No policy files found in policies folder");
