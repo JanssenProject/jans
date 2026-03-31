@@ -858,17 +858,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#which-authorization-method-should-i-use" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Which authorization method should I use?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#implement-rbac-using-signed-tokens-tbac" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1534,17 +1523,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#which-authorization-method-should-i-use" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Which authorization method should I use?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#implement-rbac-using-signed-tokens-tbac" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1801,67 +1779,22 @@
 
 
 <h1 id="authorization-using-the-cedarling">Authorization Using The Cedarling<a class="headerlink" href="#authorization-using-the-cedarling" title="Permanent link">#</a></h1>
-<p>This quick start guide shows how to test authorization of a user action
-using the Cedarling. We cover two authorization approaches:</p>
+<p>This quick start guide shows how to test authorization of a user action using the Cedarling. We cover two authorization approaches:</p>
 <ol>
 <li><strong><a href="#implement-rbac-using-signed-tokens-tbac">RBAC using signed tokens (TBAC)</a></strong> — the recommended starting point for most production deployments. Uses <code>authorize_multi_issuer</code> to validate real JWT tokens from trusted identity providers.</li>
 <li><strong><a href="#implement-rbac-using-application-asserted-identity">RBAC using application-asserted identity</a></strong> — uses <code>authorize_unsigned</code> for scenarios where the application has already verified the principal. Useful for testing, custom auth flows, or service-to-service calls.</li>
 </ol>
-<p>Not sure which to choose? See the <a href="#which-authorization-method-should-i-use">decision guide below</a>.</p>
-<p>To see authorization using Cedarling in action, we need 3 things:</p>
+<p>Not sure which to choose? See the <a href="../../reference/cedarling-authz/#which-authorization-method-should-i-use">decision guide</a>.</p>
+<p>To see Cedarling authorization in action, we need 3 things:</p>
 <ol>
-<li>An authorization policy</li>
+<li>A <a href="../../reference/cedarling-policy-store/">policy store</a></li>
 <li>A request for user action</li>
 <li>A running instance of the Cedarling</li>
 </ol>
-<p>For <code>1</code> above, we will use a ready demo policy.</p>
-<p>For <code>2</code> and <code>3</code>, we will use <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md">Janssen Tarp</a>. Janssen Tarp is an easy to install browser plug-in that comes with embedded Cedarling instance (WASM). Janssen Tarp also provides user interface to build authorization and authentication requests for testing purpose.</p>
-<h2 id="which-authorization-method-should-i-use">Which authorization method should I use?<a class="headerlink" href="#which-authorization-method-should-i-use" title="Permanent link">#</a></h2>
-<table>
-<thead>
-<tr>
-<th></th>
-<th><code>authorize_multi_issuer</code></th>
-<th><code>authorize_unsigned</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>When to use</strong></td>
-<td>You have JWT tokens from trusted IDPs and want Cedarling to validate them</td>
-<td>Your application has already authenticated the principal and wants to pass raw entity data directly</td>
-</tr>
-<tr>
-<td><strong>JWT validation</strong></td>
-<td>Yes — full signature, expiration, and status validation</td>
-<td>No — accepts raw entity data as-is</td>
-</tr>
-<tr>
-<td><strong>Principal source</strong></td>
-<td>Derived from JWT token claims</td>
-<td>Supplied directly by the application</td>
-</tr>
-<tr>
-<td><strong>Typical scenarios</strong></td>
-<td>Production apps with OIDC/OAuth IDPs, federation, API gateways, multi-issuer environments</td>
-<td>Custom auth flows, testing, service-to-service with upstream verification, local development</td>
-</tr>
-<tr>
-<td><strong>Security model</strong></td>
-<td>Higher — Cedarling independently verifies token authenticity</td>
-<td>Lower — trusts the calling application to have verified the principal</td>
-</tr>
-<tr>
-<td><strong>Recommended for</strong></td>
-<td>Most production deployments</td>
-<td>Prototyping, or when authentication is handled externally</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Recommendation:</strong> Start with <code>authorize_multi_issuer</code> if you have an identity provider that issues JWTs. Use <code>authorize_unsigned</code> only when you have a specific reason not to pass tokens to Cedarling.</p>
-<hr />
+<p>For the first prerequisite, we will use a ready demo policy.</p>
+<p>For <code>2</code> and <code>3</code>, we will use <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md">Janssen Tarp</a>. Janssen Tarp is an easy-to-install browser plug-in that comes with an embedded Cedarling instance (WASM). Janssen Tarp also provides a user interface to build authorization and authentication requests for testing purposes.</p>
 <h2 id="implement-rbac-using-signed-tokens-tbac">Implement RBAC using signed tokens (TBAC)<a class="headerlink" href="#implement-rbac-using-signed-tokens-tbac" title="Permanent link">#</a></h2>
-<p>In this guide, we will use <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">Token-Based Access Control (TBAC)</a> to
+<p>In this guide, we will use <a href="../../#proof-based-authorization-token-based-access-control-tbac">Token-Based Access Control (TBAC)</a> to
 implement role-based access control (RBAC). This is the recommended approach for most production deployments since it includes actual JWT validation against trusted issuers.</p>
 <p>For better understanding of the TBAC flow, see the diagram below.</p>
 <details>
@@ -1892,7 +1825,7 @@ implement role-based access control (RBAC). This is the recommended approach for
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
 <ul>
 <li>Install the Janssen Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md">on Chrome or Firefox</a>.</li>
-<li>Instance of Janssen Server or any other IDP with following configuration
+<li>An instance of Janssen Server or any other IDP with following configuration
   in place.<ul>
 <li>Allow dynamic client registration</li>
 <li>Allow registered clients to request the <code>role</code> scope</li>
@@ -1902,22 +1835,31 @@ implement role-based access control (RBAC). This is the recommended approach for
 </li>
 </ul>
 <h3 id="step-1-create-cedar-policy-and-schema">Step-1: Create Cedar Policy and Schema<a class="headerlink" href="#step-1-create-cedar-policy-and-schema" title="Permanent link">#</a></h3>
-<p>For this guide, we have created a policy store in the
-<a href="https://github.com/JanssenProject/CedarlingQuickstart">demo GitHub repository</a>, under the <a href="https://github.com/JanssenProject/CedarlingQuickstart/tree/main/tarpDemo"><code>tarpDemo</code></a> directory.</p>
-<p>The policy store has two policies relevant to this guide. The first grants access to all actions and all resources to the users with the <code>Teacher</code> role. The second allows only <code>Read</code> permission to students with the <code>Student</code> role to any resource. The two policies are as follows:</p>
-<div class="highlight"><pre><span></span><code>@id(&quot;allow_teacher&quot;)
+<p>For this guide, we have created a policy store in the <a href="https://github.com/JanssenProject/CedarlingQuickstart">demo GitHub repository</a>.</p>
+<p>The policy store <code>tarpDemo</code> has many demo policies. We will focus on two: <code>allow_teacher_secretdocument</code> and <code>allow_student_read</code>. The first grants access to all actions and resources of type <code>SecretDocument</code> to the users with the <code>Teacher</code> role. The second allows only <code>Read</code> permission to students with the <code>Student</code> role to any resource. The two policies are as follows:</p>
+<div class="highlight"><pre><span></span><code>@id(&quot;allow_teacher_secretdocument&quot;)
 permit(
-  principal in Jans::Role::&quot;Teacher&quot;,
+  principal,
   action,
-  resource
-);
+  resource is Jans::SecretDocument
+)
+when {
+  context has tokens.jans_userinfo_token &amp;&amp;
+  context.tokens.jans_userinfo_token.hasTag(&quot;role&quot;) &amp;&amp;
+  context.tokens.jans_userinfo_token.getTag(&quot;role&quot;).contains(&quot;Teacher&quot;)
+};
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>@id(&quot;allow_student_read&quot;)
-permit(
-  principal in Jans::Role::&quot;Student&quot;,
+permit (
+  principal,
   action in [Jans::Action::&quot;Read&quot;],
   resource
 )
+when {
+  context has tokens.jans_userinfo_token &amp;&amp;
+  context.tokens.jans_userinfo_token.hasTag(&quot;role&quot;) &amp;&amp;
+  context.tokens.jans_userinfo_token.getTag(&quot;role&quot;).contains(&quot;Student&quot;)
+};
 </code></pre></div>
 <h3 id="step-2-update-the-idp-information">Step-2 Update the IDP information<a class="headerlink" href="#step-2-update-the-idp-information" title="Permanent link">#</a></h3>
 <p>The policy store in the demo repository has information about the IDP that
@@ -1961,23 +1903,19 @@ the steps below to make changes to the policy that we are using above.</p>
 <li><a href="https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/">Install Agama Lab app and allow access to forked repository</a></li>
 <li>Open the <a href="https://cloud.gluu.org/agama-lab/dashboard/policy_store">Agama Lab policy designer</a>.</li>
 <li>Click on <code>Change Repository</code>.</li>
-<li>Select the option <code>Manually Type Repository URL</code>.</li>
-<li>Paste the URL of your forked repository, then click the <code>Select</code> button.</li>
+<li>Select the repository you want to use.</li>
 <li>This will open the dashboard with two policy stores listed. Open the policy store named <code>tarpDemo</code>.</li>
-<li>Now you can update the policy and schema using the
+<li>Now you can update the policy, trusted issuers and schema using the
   <a href="https://help.gluu.org/kb/article/34/authorization-policy-designer">policy designer</a></li>
 </ul>
 </details>
 <h3 id="step-3-configure-tarp-with-the-policy-store">Step-3: Configure Tarp with the policy store<a class="headerlink" href="#step-3-configure-tarp-with-the-policy-store" title="Permanent link">#</a></h3>
-<p>We will now add the policy store details in the Janssen Tarp that is
-installed in the browser. The Cedarling instance embedded in the Tarp will
-use the policy from the store (from <a href="#step-1-create-cedar-policy-and-schema">step-1</a>)
-to evaluate the authorization request.</p>
+<p>We will now add the policy store details in the Janssen Tarp that is installed in the browser. The embedded Cedarling will use the policy from the store (from <a href="#step-1-create-cedar-policy-and-schema">step-1</a>) to evaluate the authorization request.</p>
 <ol>
-<li>Open Tarp installed in the Chrome browser</li>
+<li>Open the Janssen Tarp installed in the browser</li>
 <li>Click <code>Add Client</code>. Use details below to add a new client.<ul>
 <li>Issuer: The hostname of your IDP</li>
-<li>Expiry: The day after today</li>
+<li>Expiry: Any date in the future </li>
 <li>Scopes: <code>openid</code>, <code>profile</code>, <code>role</code></li>
 </ul>
 </li>
@@ -1987,23 +1925,28 @@ to evaluate the authorization request.</p>
 <p>Select <code>JSON</code> configuration type and Paste the config as given below.
    Remember to replace <code>&lt;Policy Store URI&gt;</code> with
    the URI of your policy store:
-   <div class="highlight"><pre><span></span><code><span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;Policy Store URI&gt;&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span>
-<span class="w">        </span><span class="p">]</span>
-<span class="w">      </span><span class="p">}</span>
-</code></pre></div>
-   !!! note
-       <code>CEDARLING_JWT_STATUS_VALIDATION</code> is disabled here because most quick-start setups don't have a token status list endpoint configured. In production, enable it for full token revocation checking.</p>
+   <div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;Policy Store URI&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>CEDARLING_JWT_STATUS_VALIDATION</code> is disabled here because most quick-start setups don't have a token status list endpoint configured. In production, enable it for full token revocation checking.</p>
+</div>
 </li>
 <li>
-<p>Click <code>Save</code> to initialize Cedarling.</p>
+<p>Click on ✓ and <code>Save</code> to initialize Cedarling.</p>
 </li>
 </ol>
 <p>This will start the embedded Cedarling instance in the Tarp.</p>
@@ -2014,6 +1957,7 @@ to evaluate the authorization request.</p>
 <li>
 <p>Use the following inputs to fill the form:</p>
 <ul>
+<li>Additional Params: Leave empty</li>
 <li>ACR: <code>basic</code></li>
 <li>Scopes: <code>openid</code>, <code>profile</code>, <code>role</code></li>
 <li>Check the <code>Display access and ID token after authentication</code> checkbox</li>
@@ -2024,13 +1968,21 @@ to evaluate the authorization request.</p>
 </li>
 <li>Login using username and password of a user who has the <code>Teacher</code> role assigned in the IDP</li>
 <li>Click <code>Allow</code> on the consent screen</li>
-<li>If the authentication is successful, Tarp will show you a page with token details</li>
-<li>Move to <code>Cedarling</code> tab and select <code>Cedarling Signed Authz Form</code> tab</li>
+<li>If the authentication is successful, Tarp will show you a page with token details.</li>
+<li>Move to <code>Cedarling</code> tab and select <code>Cedarling Multi-Issuer Authz Form</code> tab</li>
 <li>Use the details below as an input to this form:<ul>
-<li>Principal: select all 3 tokens. In TBAC approach here, we are passing tokens (i.e signed JWTs) in place of JSON string.</li>
+<li>Select <code>Userinfo token</code> and click on <code>Add selected tokens to mapping</code></li>
+<li>Edit the <code>mapping</code> field in the generated dictionary and set it to <code>Jans::Userinfo_token</code>. The overall dictionary should be in this format:
+    <div class="highlight"><span class="filename">Token Mapping</span><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJra...&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></li>
 <li>Action: <code>Jans::Action::"Write"</code></li>
 <li>Resource:
-    <div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
@@ -2040,7 +1992,7 @@ to evaluate the authorization request.</p>
 <li>Leave the <code>context</code> as default</li>
 </ul>
 </li>
-<li>Click <code>Cedarling Authz Request</code>
+<li>Click <code>Run authorization</code>
    <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="err">...</span>
 <span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -2052,28 +2004,69 @@ to evaluate the authorization request.</p>
 <p>To test the negative case, we will do the following:</p>
 <ol>
 <li>Modify the user in the IDP to have the <code>Student</code> role instead of <code>Teacher</code></li>
-<li>Logout from the Cedarling if you are logged in and rerun the authorization flow with the same parameters to obtain new tokens</li>
-<li>Run signed authorization using the same inputs</li>
+<li>Logout from the Cedarling if you are logged in</li>
+<li>In Tarp, under <code>Authentication flow</code> tab, click the lightning icon to begin authentication</li>
+<li>
+<p>Use the following inputs to fill the form:</p>
+<ul>
+<li>Additional Params: Leave empty</li>
+<li>ACR: <code>basic</code></li>
+<li>Scopes: <code>openid</code>, <code>profile</code>, <code>role</code></li>
+<li>Check the <code>Display access and ID token after authentication</code> checkbox</li>
+</ul>
+</li>
+<li>
+<p>Click the <code>Trigger auth flow</code> button</p>
+</li>
+<li>Login using username and password of a user who has the <code>Student</code> role assigned in the IDP</li>
+<li>Click <code>Allow</code> on the consent screen</li>
+<li>If the authentication is successful, Tarp will show you a page with token details.</li>
+<li>Move to the <code>Cedarling</code> tab and select <code>Cedarling Multi-Issuer Authz Form</code> tab</li>
+<li>Use the details below as an input to this form:<ul>
+<li>Select <code>Userinfo token</code> and click on <code>Add selected tokens to mapping</code></li>
+<li>Edit the <code>mapping</code> field in the generated dictionary and set it to <code>Jans::Userinfo_token</code>. The overall dictionary should be in this format:
+    <div class="highlight"><span class="filename">Token Mapping</span><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJra...&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></li>
+<li>Action: <code>Jans::Action::"Write"</code></li>
+<li>Resource:
+    <div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></li>
+<li>Leave the <code>context</code> as default</li>
+</ul>
+</li>
+<li>Click <code>Run authorization</code>
+   <div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019d41cf-a1c7-7880-8842-a2e0a21ba024&quot;</span>
+<span class="p">}</span>
+</code></pre></div></li>
 <li>The top-level <code>decision: false</code> confirms failed authorization. The first policy in the store allowed full access to users in the <code>Teacher</code> role, but the second policy only allowed <code>Read</code> access, which fails since our request was <code>Write</code> access.</li>
 <li>Repeat the authorization with action <code>Jans::Action::"Read"</code> to confirm that the user has <code>Read</code> access but not <code>Write</code> access</li>
 </ol>
 <hr />
 <h2 id="implement-rbac-using-application-asserted-identity">Implement RBAC using application-asserted identity<a class="headerlink" href="#implement-rbac-using-application-asserted-identity" title="Permanent link">#</a></h2>
-<p>In this section, we will see how to implement role-based access control
-using the Cedarling when
-the information about the principal is supplied by the host application. We can
-call this approach <a href="../../#token-based-access-control-tbac-v-application-asserted-identity">the application-asserted identity approach</a>.</p>
+<p>In this section, we will see how to implement role-based access control using the Cedarling when the information about the principal is supplied by the host application.</p>
 <p>This method uses <code>authorize_unsigned</code> — no JWT validation is performed. Use this when your application has already authenticated the principal through other means, or for testing and prototyping.</p>
 <h3 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">#</a></h3>
 <ul>
 <li>Install the Janssen Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md">on Chrome or Firefox</a>.</li>
 </ul>
 <h3 id="step-1-create-the-cedar-policy-and-schema">Step-1: Create the Cedar Policy and Schema<a class="headerlink" href="#step-1-create-the-cedar-policy-and-schema" title="Permanent link">#</a></h3>
-<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em>. To aid in this quick start guide, we have already created a
-<a href="https://github.com/JanssenProject/CedarlingQuickstart/tree/main/tarpUnsignedDemo">policy store</a> in the
-<a href="https://github.com/JanssenProject/CedarlingQuickstart/tree/main">quick start GitHub repository</a>, under the <code>tarpUnsignedDemo</code> directory.
+<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To aid in this quick start guide, we have already created a <a href="https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar">policy store</a> at
+<a href="https://github.com/JanssenProject/CedarlingQuickstart/tree/main">quick start GitHub repository</a>.
 We will use this policy store to allow/deny the incoming authorization request.</p>
-<p>Since Tarp runs in a WASM environment, the policy store must be loaded via URL as a <code>.cjar</code> archive (a ZIP of the directory contents). To create one:</p>
+<p>Since Tarp runs in a WASM environment, the policy store must be loaded via URL as a <code>.cjar</code> archive (a ZIP of the directory contents). To create your own:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tarpUnsignedDemo<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../tarpUnsignedDemo.cjar<span class="w"> </span>.
 </code></pre></div>
 <p>Host the <code>.cjar</code> file somewhere accessible (e.g., GitHub release, web server, cloud storage) and use its URL as the <code>&lt;Policy Store URI&gt;</code> in <a href="#step-2-configure-tarp">Step-2</a>.</p>
@@ -2094,11 +2087,12 @@ using above.</p>
 <li><a href="https://gluu.org/agama/how-to-integrate-agama%e2%80%90lab-github-app-with-your-github-account/">Install Agama Lab app and allow access to forked repository</a></li>
 <li>Open the <a href="https://cloud.gluu.org/agama-lab/dashboard/policy_store">Agama Lab policy designer</a>.</li>
 <li>Click on <code>Change Repository</code>.</li>
-<li>Select the option <code>Manually Type Repository URL</code>.</li>
-<li>Paste the URL of your forked repository, then click the <code>Select</code> button.</li>
+<li>Select your forked repository.</li>
 <li>This will open the dashboard with two policy stores listed. Open the policy store named <code>tarpUnsignedDemo</code>.</li>
 <li>Now you can update the policy and schema using the
   <a href="https://help.gluu.org/kb/article/34/authorization-policy-designer">policy designer</a></li>
+<li>After making your changes, release the policy store using Agama Lab to create a CJAR archive. </li>
+<li>Go to the releases section of your fork, find your release and copy the URL to the <code>.cjar</code> file.</li>
 </ul>
 </details>
 <h3 id="step-2-configure-tarp">Step-2: Configure Tarp<a class="headerlink" href="#step-2-configure-tarp" title="Permanent link">#</a></h3>
@@ -2108,12 +2102,15 @@ use the policy stored in the store (from <a href="#step-1-create-the-cedar-polic
 <ol>
 <li>Open the Janssen Tarp installed in the browser</li>
 <li>Navigate to the <code>Cedarling</code> tab and click on <code>Add Configurations</code></li>
-<li>Paste the following configuration parameters as JSON. Make sure to update the <code>&lt;Policy Store URI&gt;</code> value to point to your policy store
+<li>
+<p>Paste the following configuration parameters as JSON. Make sure to update the <code>&lt;Policy Store URI&gt;</code> value to point to your policy store CJAR archive.
    <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;Policy Store URI&gt;&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_USER_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_WORKLOAD_AUTHZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_PRINCIPAL_BOOLEAN_OPERATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;===&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
@@ -2121,12 +2118,19 @@ use the policy stored in the store (from <a href="#step-1-create-the-cedar-polic
 <span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_STATUS_VALIDATION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span>
-<span class="w">    </span><span class="p">]</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;CEDARLING_POLICY_STORE_VALIDATE_CHECKSUM&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
-</code></pre></div>
-   <code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code> controls how per-principal decisions are combined in <code>authorize_unsigned</code>. Here it checks only the <code>Jans::User</code> principal. See <a href="../../reference/cedarling-principal-boolean-operations/">Principal Boolean Operations</a> for details.</li>
-<li>Click <code>Save</code> to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
-initialization.</li>
+</code></pre></div></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>CEDARLING_PRINCIPAL_BOOLEAN_OPERATION</code> controls how per-principal decisions are combined in <code>authorize_unsigned</code>. Here it checks only the <code>Jans::User</code> principal. See <a href="../../reference/cedarling-principal-boolean-operations/">Principal Boolean Operations</a> for details.</p>
+</div>
+</li>
+<li>
+<p>Click on ✓ and <code>Save</code> to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
+initialization.</p>
+</li>
 </ol>
 <p>The Cedarling is ready to receive and evaluate authorization requests at this
 stage.</p>
@@ -2135,38 +2139,38 @@ stage.</p>
 <li>Go to Tarp's <code>Cedarling</code> tab, click on <code>Cedarling Unsigned Authz Form</code></li>
 <li>Input the following in respective input boxes:</li>
 </ol>
-<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="w">    </span><span class="p">[</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;Teacher&quot;</span>
-<span class="w">        </span><span class="p">]</span>
-<span class="w">      </span><span class="p">}</span>
+<div class="highlight"><span class="filename">Principal</span><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_sub&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;Teacher&quot;</span>
 <span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Actions</span><pre><span></span><code><span class="err">Ja</span><span class="kc">ns</span><span class="p">::</span><span class="err">Ac</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">::</span><span class="s2">&quot;Read&quot;</span>
 </code></pre></div>
-<div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
+<div class="highlight"><span class="filename">Resource</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;cedar_entity_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::SecretDocument&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_id&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Leave the <code>Context</code> blank.</p>
 <p>The request is ready to be sent. Click <code>Cedarling Authz Request</code> to send the
 request to the embedded Cedarling. After evaluation of the authorization
 request, the Cedarling will respond with a JSON payload. Similar to what is
 shown below.</p>
-<div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019602e5-b148-7d0b-9d15-9d000c0d370b&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="err">...</span>
-<span class="w">    </span><span class="p">}</span>
+<div class="highlight"><span class="filename">Sample Response</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019602e5-b148-7d0b-9d15-9d000c0d370b&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>The top-level <code>decision: true</code> confirms successful authorization.</p>
 <p>Let's check a scenario where authorization is denied. Remove the role from the
@@ -2211,7 +2215,7 @@ shown below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 23, 2026 16:03:28 UTC"><span class="timeago" datetime="2026-03-23T16:03:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 23, 2026 16:03:28 UTC">2026-03-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 31, 2026 09:57:44 UTC"><span class="timeago" datetime="2026-03-31T09:57:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 31, 2026 09:57:44 UTC">2026-03-31</span>
   </span>
 
     
