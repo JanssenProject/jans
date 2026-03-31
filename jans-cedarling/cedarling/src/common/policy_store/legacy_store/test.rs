@@ -8,7 +8,7 @@ use std::str::FromStr;
 use base64::prelude::*;
 use serde_json::json;
 
-use super::{LegacyAgamaPolicyStore, LegacyPolicyStore, ParsePolicySetMessage, parse_cedar_version};
+use super::{LegacyAgamaPolicyStore, LegacyPolicyStore, ParsePolicySetMessage, parse_maybe_cedar_version};
 
 /// Tests successful deserialization of a valid policy store JSON.
 #[test]
@@ -156,20 +156,20 @@ fn test_broken_policy_parsing_error_in_policy_store() {
 
 #[test]
 fn test_valid_version() {
-    let valid_version = "1.2.3".to_string();
-    assert!(parse_cedar_version(valid_version).is_ok());
+    let valid_version = json!("1.2.3");
+    assert!(parse_maybe_cedar_version(&valid_version).is_ok());
 }
 
 #[test]
 fn test_valid_version_with_v() {
-    let valid_version_with_v = "v1.2.3".to_string();
-    assert!(parse_cedar_version(valid_version_with_v).is_ok());
+    let valid_version_with_v = json!("v1.2.3");
+    assert!(parse_maybe_cedar_version(&valid_version_with_v).is_ok());
 }
 
 #[test]
 fn test_invalid_version_format() {
-    let invalid_version = "1.2".to_string();
-    let err = parse_cedar_version(invalid_version)
+    let invalid_version = json!("1.2");
+    let err = parse_maybe_cedar_version(&invalid_version)
         .expect_err("Expected error for incomplete version format (missing patch)");
     assert!(
         err.contains("error parsing cedar version"),
@@ -179,8 +179,8 @@ fn test_invalid_version_format() {
 
 #[test]
 fn test_invalid_version_part() {
-    let invalid_version = "1.two.3".to_string();
-    let err = parse_cedar_version(invalid_version)
+    let invalid_version = json!("1.two.3");
+    let err = parse_maybe_cedar_version(&invalid_version)
         .expect_err("Expected error for non-numeric version part");
     assert!(
         err.contains("error parsing cedar version"),
@@ -190,8 +190,8 @@ fn test_invalid_version_part() {
 
 #[test]
 fn test_invalid_version_format_with_v() {
-    let invalid_version_with_v = "v1.2".to_string();
-    let err = parse_cedar_version(invalid_version_with_v)
+    let invalid_version_with_v = json!("v1.2");
+    let err = parse_maybe_cedar_version(&invalid_version_with_v)
         .expect_err("Expected error for incomplete version format with v prefix");
     assert!(
         err.contains("error parsing cedar version"),
@@ -201,27 +201,7 @@ fn test_invalid_version_format_with_v() {
 
 #[test]
 fn test_missing_required_fields() {
-    let json = json!({
-        "policy_stores": {
-            "test": {
-                "name": "test",
-                "schema": "test",
-                "policies": {}
-            }
-        }
-    });
-
-    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
-    let err = result.expect_err("Expected error for missing cedar_version field");
-    assert!(
-        err.to_string()
-            .contains("missing required field 'cedar_version' in policy store"),
-        "Error should mention missing cedar_version, got: {err}"
-    );
-
-    let json = json!({
-        "cedar_version": "v4.0.0",
-    });
+    let json = json!({});
 
     let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for missing policy_stores field");
@@ -290,26 +270,6 @@ fn test_invalid_policy_store_entry() {
     );
 }
 
-#[test]
-fn test_invalid_cedar_version() {
-    let json = json!({
-        "cedar_version": "invalid",
-        "policy_stores": {
-            "test": {
-                "name": "test",
-                "schema": "test",
-                "policies": {}
-            }
-        }
-    });
-
-    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
-    let err = result.expect_err("Expected error for invalid cedar_version format");
-    assert!(
-        err.to_string().contains("invalid cedar_version format"),
-        "Error should mention invalid cedar_version format, got: {err}"
-    );
-}
 
 #[test]
 fn test_invalid_schema_format() {
