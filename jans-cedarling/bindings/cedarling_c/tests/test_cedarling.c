@@ -206,6 +206,130 @@ void test_authorization(){
     // Clean up
     cedarling_drop(instance_id);
 }
+
+void test_context_data_api(void) {
+    printf("\nTest: Context Data API\n");
+    printf("======================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0) {
+        printf("[FAIL] Failed to create instance for context data tests\n");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    CedarlingResult r;
+
+    ret = cedarling_context_push(instance_id, "c_test_key", "{\"x\":42}", 3600, &r);
+    TEST_ASSERT(ret == 0, "context_push succeeds with TTL");
+    TEST_ASSERT(r.data != NULL, "context_push returns data pointer");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_push(instance_id, "c_test_key", "not json", 0, &r);
+    TEST_ASSERT(ret != 0, "context_push rejects invalid value JSON");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_get(instance_id, "c_test_key", &r);
+    TEST_ASSERT(ret == 0, "context_get succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strstr((char*)r.data, "42") != NULL, "context_get JSON contains pushed value");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_get(instance_id, "no_such_context_key", &r);
+    TEST_ASSERT(ret == 0, "context_get missing key returns success code");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strcmp((char*)r.data, "null") == 0, "context_get missing key returns null JSON");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_list(instance_id, &r);
+    TEST_ASSERT(ret == 0, "context_list succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strstr((char*)r.data, "c_test_key") != NULL, "context_list JSON includes key");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_stats(instance_id, &r);
+    TEST_ASSERT(ret == 0, "context_stats succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strstr((char*)r.data, "entry_count") != NULL, "context_stats JSON has entry_count");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_remove(instance_id, "c_test_key", &r);
+    TEST_ASSERT(ret == 0, "context_remove succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strstr((char*)r.data, "true") != NULL, "context_remove reports removed");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_remove(instance_id, "c_test_key", &r);
+    TEST_ASSERT(ret == 0, "context_remove on missing key still succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strstr((char*)r.data, "false") != NULL, "context_remove reports not removed");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_push(instance_id, "k2", "{}", 0, &r);
+    TEST_ASSERT(ret == 0, "context_push for clear test");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_clear(instance_id, &r);
+    TEST_ASSERT(ret == 0, "context_clear succeeds");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_list(instance_id, &r);
+    TEST_ASSERT(ret == 0, "context_list after clear succeeds");
+    if (ret == 0 && r.data != NULL) {
+        TEST_ASSERT(strcmp((char*)r.data, "[]") == 0, "context_list is empty array after clear");
+    }
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_push(instance_id, "k", "{}", 0, NULL);
+    TEST_ASSERT(ret != 0, "context_push rejects NULL result");
+
+    ret = cedarling_context_get(instance_id, "k", NULL);
+    TEST_ASSERT(ret != 0, "context_get rejects NULL result");
+
+    ret = cedarling_context_remove(instance_id, "k", NULL);
+    TEST_ASSERT(ret != 0, "context_remove rejects NULL result");
+
+    ret = cedarling_context_clear(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "context_clear rejects NULL result");
+
+    ret = cedarling_context_list(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "context_list rejects NULL result");
+
+    ret = cedarling_context_stats(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "context_stats rejects NULL result");
+
+    ret = cedarling_context_push(instance_id, NULL, "{}", 0, &r);
+    TEST_ASSERT(ret != 0, "context_push rejects NULL key");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_push(instance_id, "k", NULL, 0, &r);
+    TEST_ASSERT(ret != 0, "context_push rejects NULL value_json");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_get(instance_id, NULL, &r);
+    TEST_ASSERT(ret != 0, "context_get rejects NULL key");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_remove(instance_id, NULL, &r);
+    TEST_ASSERT(ret != 0, "context_remove rejects NULL key");
+    cedarling_free_result(&r);
+
+    ret = cedarling_context_push(99999, "k", "{}", 0, &r);
+    TEST_ASSERT(ret != 0, "context_push rejects invalid instance id");
+    cedarling_free_result(&r);
+
+    cedarling_drop(instance_id);
+}
  
  void test_logging_functions(){
      printf("\nTest: Logging Functions\n");
@@ -514,9 +638,11 @@ void test_trusted_issuer_loading_info() {
  
      test_instance_with_env();
  
-     test_authorization();
- 
-     test_logging_functions();
+    test_authorization();
+
+    test_context_data_api();
+
+    test_logging_functions();
 
     test_trusted_issuer_loading_info();
  
