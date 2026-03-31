@@ -24,7 +24,7 @@ fn get_instance_id() -> u64 {
     INSTANCE_ID.fetch_add(1, Ordering::Relaxed)
 }
 
-/// Registry for Cedarling instances (each [`blocking::Cedarling`] owns its Tokio runtime).
+/// Registry for blocking Cedarling instances, keyed by unique instance ID.
 struct CedarlingRuntime {
     instances: Mutex<HashMap<u64, blocking::Cedarling>>,
 }
@@ -108,13 +108,14 @@ impl CedarlingRuntime {
 }
 
 fn runtime_ref() -> &'static CedarlingRuntime {
-    &*CEDARLING_RUNTIME
+    &CEDARLING_RUNTIME
 }
 
 /// Force runtime initialization so startup failures surface at `cedarling_init`.
 pub fn initialize_runtime() -> CedarlingErrorCode {
     clear_last_error();
-    let _ = &*CEDARLING_RUNTIME;
+    #[allow(clippy::explicit_auto_deref)]
+    let _ = &*CEDARLING_RUNTIME; // explicit deref forces LazyLock initialization
     CedarlingErrorCode::Success
 }
 
@@ -570,7 +571,7 @@ pub fn get_log_by_id(instance_id: u64, log_id: &str) -> CedarlingResult {
         None => {
             let error_msg = "Log not found";
             set_last_error(error_msg);
-            CedarlingResult::error(CedarlingErrorCode::InstanceNotFound, error_msg)
+            CedarlingResult::error(CedarlingErrorCode::KeyNotFound, error_msg)
         },
     }
 }

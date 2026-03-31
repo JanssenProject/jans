@@ -25,6 +25,8 @@ pub enum CedarlingErrorCode {
     ConfigurationError = 5,
     /// Internal error
     Internal = 6,
+    /// Requested key or id does not exist (e.g. unknown log id)
+    KeyNotFound = 7,
 }
 
 /// Result structure for operations that return data
@@ -144,13 +146,6 @@ impl CedarlingStringArray {
         Ok(CedarlingStringArray {
             items: items_ptr,
             count,
-        })
-    }
-
-    pub fn new(strings: Vec<String>) -> Self {
-        Self::try_new(strings).unwrap_or_else(|_| CedarlingStringArray {
-            items: ptr::null_mut(),
-            count: 0,
         })
     }
 }

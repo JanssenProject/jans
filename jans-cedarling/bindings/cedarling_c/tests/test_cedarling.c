@@ -167,8 +167,7 @@ void test_authorization(){
     if(ret==0){
        TEST_ASSERT(auth_result.data!=NULL,"Authorization result data provided");
         
-        // Cast uint32_t* to char* for string operations
-       char* result_str = (char*)auth_result.data;
+       char* result_str = auth_result.data;
         printf(" Authorization result: %.200s...\n", result_str);
         
         // Verify the response structure contains expected fields
@@ -383,6 +382,7 @@ void test_context_data_api(void) {
      TEST_ASSERT(ret != 0, "Get log by ID returns error for unknown id");
      TEST_ASSERT(log_result.data == NULL, "No log data for unknown id");
      TEST_ASSERT(log_result.error_message != NULL, "Error message for unknown id");
+     TEST_ASSERT(log_result.error_code == KEY_NOT_FOUND, "Unknown log id uses KeyNotFound, not InstanceNotFound");
      cedarling_free_result(&log_result);
 
      // If any logs remain, get by id succeeds for a real id
@@ -427,6 +427,7 @@ void test_context_data_api(void) {
      TEST_ASSERT(ret!=0,"Reject invalid instance ID for get log by ID");
    TEST_ASSERT(log_result.data == NULL, "No log data for invalid instance");
    TEST_ASSERT(log_result.error_message != NULL, "Error message provided for invalid instance");
+     TEST_ASSERT(log_result.error_code == INSTANCE_NOT_FOUND, "Invalid instance uses InstanceNotFound");
      cedarling_free_result(&log_result);
  
      // Clean up
@@ -611,13 +612,13 @@ void test_trusted_issuer_loading_info() {
     uint64_t instance_id = result.instance_id;
      cedarling_free_instance_result(&result);
  
-     // Shutdown the instance
+     // Shutdown the instance (also removes it from the registry)
      ret = cedarling_shutdown(instance_id);
      TEST_ASSERT(ret == 0, "Shutdown instance successfully");
  
-     // Drop the instance
-     cedarling_drop(instance_id);
-     TEST_ASSERT(1,"Drop instance (should not crash)");
+     // Drop after shutdown should return InstanceNotFound since shutdown already removed it
+     ret = cedarling_drop(instance_id);
+     TEST_ASSERT(ret == INSTANCE_NOT_FOUND, "Drop after shutdown returns InstanceNotFound");
  
      // Try to use dropped instance (should fail gracefully)
      CedarlingStringArray logs;

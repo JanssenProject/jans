@@ -303,7 +303,7 @@ cedarling_shutdown(instance_id);
 // Drop the instance
 cedarling_drop(instance_id);
 
-// Global cleanup
+// Global cleanup: shuts down and drops *all* instances, then clears last-error on this thread
 cedarling_cleanup();
 ```
 
@@ -332,7 +332,7 @@ cedarling_clear_last_error();
 | `cedarling_new_with_env(config, result)` | Create instance with environment variable support |
 | `cedarling_drop(instance_id)` | Drop an instance |
 | `cedarling_shutdown(instance_id)` | Shutdown an instance |
-| `cedarling_cleanup()` | Global cleanup |
+| `cedarling_cleanup()` | Shut down all instances and clear this thread’s last error |
 | `cedarling_version()` | Get library version |
 
 ### Authorization

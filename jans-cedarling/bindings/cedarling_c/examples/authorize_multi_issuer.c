@@ -158,7 +158,6 @@ int main() {
     // Shutdown and cleanup
     printf("6. Shutting down...\n");
     cedarling_shutdown(instance_id);
-    cedarling_drop(instance_id);
     cedarling_cleanup();
     printf("   Cleanup completed\n\n");
 

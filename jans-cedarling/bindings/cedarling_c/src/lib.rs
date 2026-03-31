@@ -37,8 +37,7 @@ macro_rules! ffi_guard_void {
 
 macro_rules! ffi_guard_ptr_mut {
     ($body:block) => {
-        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> *mut c_char { $body }))
-        {
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> *mut c_char { $body })) {
             Ok(v) => v,
             Err(_) => {
                 set_last_error("internal panic caught at FFI boundary");
@@ -50,9 +49,8 @@ macro_rules! ffi_guard_ptr_mut {
 
 macro_rules! ffi_guard_ptr_const {
     ($body:block) => {
-        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(
-            || -> *const c_char { $body },
-        )) {
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> *const c_char { $body }))
+        {
             Ok(v) => v,
             Err(_) => {
                 set_last_error("internal panic caught at FFI boundary");
@@ -69,9 +67,7 @@ macro_rules! ffi_guard_ptr_const {
 /// This Function should be called before any other functions
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_init() -> c_int {
-    ffi_guard_int!({
-        initialize_runtime() as c_int
-    })
+    ffi_guard_int!({ initialize_runtime() as c_int })
 }
 /// # Safety
 /// Caller must pass valid pointers for any non-null pointer arguments.
@@ -155,9 +151,7 @@ pub unsafe extern "C" fn cedarling_new_with_env(
 ///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_drop(instance_id: u64) -> c_int {
-    ffi_guard_int!({
-        drop_instance(instance_id) as c_int
-    })
+    ffi_guard_int!({ drop_instance(instance_id) as c_int })
 }
 /// # Safety
 /// Caller must pass valid pointers for any non-null pointer arguments.
@@ -179,8 +173,10 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
         if request_json.is_null() {
             set_last_error("null request_json pointer");
             unsafe {
-                *result =
-                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null request_json pointer");
+                *result = CedarlingResult::error(
+                    CedarlingErrorCode::InvalidArgument,
+                    "null request_json pointer",
+                );
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
@@ -188,6 +184,7 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
         let request_str = match c_string_to_string(request_json) {
             Ok(s) => s,
             Err(code) => unsafe {
+                set_last_error("Invalid request JSON string");
                 *result = CedarlingResult::error(code, "Invalid request JSON string");
                 return code as c_int;
             },
@@ -219,8 +216,10 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
         if request_json.is_null() {
             set_last_error("null request_json pointer");
             unsafe {
-                *result =
-                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null request_json pointer");
+                *result = CedarlingResult::error(
+                    CedarlingErrorCode::InvalidArgument,
+                    "null request_json pointer",
+                );
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
@@ -264,15 +263,18 @@ pub unsafe extern "C" fn cedarling_context_push(
         if key.is_null() {
             set_last_error("null key pointer");
             unsafe {
-                *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+                *result =
+                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
         if value_json.is_null() {
             set_last_error("null value_json pointer");
             unsafe {
-                *result =
-                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null value_json pointer");
+                *result = CedarlingResult::error(
+                    CedarlingErrorCode::InvalidArgument,
+                    "null value_json pointer",
+                );
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
@@ -280,6 +282,7 @@ pub unsafe extern "C" fn cedarling_context_push(
         let key_str = match c_string_to_string(key) {
             Ok(s) => s,
             Err(code) => unsafe {
+                set_last_error("Invalid key string");
                 *result = CedarlingResult::error(code, "Invalid key string");
                 return code as c_int;
             },
@@ -288,6 +291,7 @@ pub unsafe extern "C" fn cedarling_context_push(
         let value_str = match c_string_to_string(value_json) {
             Ok(s) => s,
             Err(code) => unsafe {
+                set_last_error("Invalid value JSON string");
                 *result = CedarlingResult::error(code, "Invalid value JSON string");
                 return code as c_int;
             },
@@ -319,7 +323,8 @@ pub unsafe extern "C" fn cedarling_context_get(
         if key.is_null() {
             set_last_error("null key pointer");
             unsafe {
-                *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+                *result =
+                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
@@ -327,6 +332,7 @@ pub unsafe extern "C" fn cedarling_context_get(
         let key_str = match c_string_to_string(key) {
             Ok(s) => s,
             Err(code) => unsafe {
+                set_last_error("Invalid key string");
                 *result = CedarlingResult::error(code, "Invalid key string");
                 return code as c_int;
             },
@@ -358,7 +364,8 @@ pub unsafe extern "C" fn cedarling_context_remove(
         if key.is_null() {
             set_last_error("null key pointer");
             unsafe {
-                *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
+                *result =
+                    CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null key pointer");
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
@@ -366,6 +373,7 @@ pub unsafe extern "C" fn cedarling_context_remove(
         let key_str = match c_string_to_string(key) {
             Ok(s) => s,
             Err(code) => unsafe {
+                set_last_error("Invalid key string");
                 *result = CedarlingResult::error(code, "Invalid key string");
                 return code as c_int;
             },
@@ -499,7 +507,10 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
         if log_id.is_null() {
             set_last_error("null log_id pointer");
             unsafe {
-                *result = CedarlingResult::error(CedarlingErrorCode::InvalidArgument, "null log_id pointer");
+                *result = CedarlingResult::error(
+                    CedarlingErrorCode::InvalidArgument,
+                    "null log_id pointer",
+                );
             }
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
@@ -892,25 +903,27 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    if result.is_null() {
+    ffi_guard_int!({
+        if result.is_null() {
+            clear_last_error();
+            set_last_error("null result pointer");
+            return CedarlingErrorCode::InvalidArgument as c_int;
+        }
         clear_last_error();
-        set_last_error("null result pointer");
-        return CedarlingErrorCode::InvalidArgument as c_int;
-    }
-    clear_last_error();
-    match loaded_trusted_issuer_ids(instance_id) {
-        Ok(ids) => unsafe {
-            *result = ids;
-            CedarlingErrorCode::Success as c_int
-        },
-        Err(code) => unsafe {
-            *result = CedarlingStringArray {
-                items: ptr::null_mut(),
-                count: 0,
-            };
-            code as c_int
-        },
-    }
+        match loaded_trusted_issuer_ids(instance_id) {
+            Ok(ids) => unsafe {
+                *result = ids;
+                CedarlingErrorCode::Success as c_int
+            },
+            Err(code) => unsafe {
+                *result = CedarlingStringArray {
+                    items: ptr::null_mut(),
+                    count: 0,
+                };
+                code as c_int
+            },
+        }
+    })
 }
 
 /// # Safety
@@ -953,9 +966,7 @@ pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
 ///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
-    ffi_guard_int!({
-        shutdown_instance(instance_id) as c_int
-    })
+    ffi_guard_int!({ shutdown_instance(instance_id) as c_int })
 }
 /// # Safety
 /// Caller must pass valid pointers for any non-null pointer arguments.
@@ -1076,16 +1087,14 @@ pub extern "C" fn cedarling_clear_last_error() {
     ffi_guard_void!({ clear_last_error() })
 }
 
-/// # Safety
-/// Caller must pass valid pointers for any non-null pointer arguments.
-/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
-/// Get the Cedarling library version
+/// Returns the Cedarling library version as a NUL-terminated static string.
 ///
+/// The returned pointer refers to read-only memory embedded in the library binary.
+/// It is valid for the lifetime of the process and **must not** be passed to
+/// `cedarling_free_string` or any other deallocation function.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_version() -> *const c_char {
-    ffi_guard_ptr_const!({
-        concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char
-    })
+    ffi_guard_ptr_const!({ concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char })
 }
 
 /// # Safety
@@ -1093,12 +1102,13 @@ pub extern "C" fn cedarling_version() -> *const c_char {
 /// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Global library cleanup helper.
 ///
-/// This function only clears thread-local last-error state and performs no unsafe memory access.
-/// It is thread-safe and idempotent: it can be called multiple times with the same effect.
-/// There are no preconditions; call it at process shutdown or whenever you want to reset error state.
+/// Shuts down and removes **all** Cedarling instances held by the library, then clears this
+/// thread's last-error string. Safe to call from any thread; repeated calls are idempotent beyond
+/// the first full teardown.
 ///
 /// # Postconditions
-/// The calling thread's `cedarling_get_last_error()` value is reset to null until a new error is set.
+/// No instances remain registered; the calling thread's `cedarling_get_last_error()` reads as
+/// null until a new error is set.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_cleanup() {
     ffi_guard_void!({
