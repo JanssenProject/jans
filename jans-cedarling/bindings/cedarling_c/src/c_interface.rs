@@ -798,7 +798,12 @@ pub fn shutdown_instance(instance_id: u64) -> CedarlingErrorCode {
     // Remove from the runtime map so further API calls fail with InstanceNotFound.
     match runtime.drop_instance(instance_id) {
         CedarlingErrorCode::Success => CedarlingErrorCode::Success,
-        CedarlingErrorCode::InstanceNotFound => CedarlingErrorCode::Success,
+        CedarlingErrorCode::InstanceNotFound => {
+            // drop_instance sets last_error internally; clear it since the
+            // instance was already shut down and this is still a success.
+            clear_last_error();
+            CedarlingErrorCode::Success
+        },
         code => code,
     }
 }

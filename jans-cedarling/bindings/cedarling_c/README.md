@@ -90,12 +90,12 @@ const char* config = "{"
 CedarlingInstanceResult result;
 int ret = cedarling_new(config, &result);
 if (ret != 0) {
-    printf("Error: %s\n", result.ERROR_MESSAGE);
+    printf("Error: %s\n", result.error_message);
     cedarling_free_instance_result(&result);
     return 1;
 }
 
-uint64_t instance_id = result.INSTANCE_ID;
+uint64_t instance_id = result.instance_id;
 cedarling_free_instance_result(&result);
 ```
 
@@ -124,10 +124,9 @@ CedarlingResult auth_result;
 ret = cedarling_authorize_unsigned(instance_id, request, &auth_result);
 
 if (ret == 0) {
-    printf("Authorization result: %s\n", (char*)auth_result.DATA);
-    // Parse the JSON result to check decision
+    printf("Authorization result: %s\n", (char*)auth_result.data);
 } else {
-    printf("Error: %s\n", auth_result.ERROR_MESSAGE);
+    printf("Error: %s\n", auth_result.error_message);
 }
 cedarling_free_result(&auth_result);
 ```
@@ -144,8 +143,8 @@ const char* request = "{"
     "],"
     "\"action\": \"Jans::Action::\\\"Update\\\"\","
     "\"resource\": {"
-    "    \"type\": \"Jans::Issue\","
-    "    \"id\": \"random_id\""
+    "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"random_id\"},"
+    "    \"org_id\": \"some_long_id\""
     "},"
     "\"context\": {}"
 "}";
@@ -154,9 +153,9 @@ CedarlingResult auth_result;
 ret = cedarling_authorize_multi_issuer(instance_id, request, &auth_result);
 
 if (ret == 0) {
-    printf("Authorization result: %s\n", (char*)auth_result.DATA);
+    printf("Authorization result: %s\n", (char*)auth_result.data);
 } else {
-    printf("Error: %s\n", auth_result.ERROR_MESSAGE);
+    printf("Error: %s\n", auth_result.error_message);
 }
 cedarling_free_result(&auth_result);
 ```
@@ -172,7 +171,7 @@ const char* value = "{\"role\": [\"admin\", \"editor\"], \"level\": 5}";
 CedarlingResult push_result;
 ret = cedarling_context_push(instance_id, "user:123", value, 300, &push_result);
 if (ret != 0) {
-    printf("Error: %s\n", push_result.ERROR_MESSAGE);
+    printf("Error: %s\n", push_result.error_message);
 }
 cedarling_free_result(&push_result);
 ```
@@ -183,7 +182,7 @@ cedarling_free_result(&push_result);
 CedarlingResult get_result;
 ret = cedarling_context_get(instance_id, "user:123", &get_result);
 if (ret == 0) {
-    printf("Value: %s\n", (char*)get_result.DATA);  // Returns JSON or "null"
+    printf("Value: %s\n", (char*)get_result.data);  // Returns JSON or "null"
 }
 cedarling_free_result(&get_result);
 ```
@@ -194,7 +193,7 @@ cedarling_free_result(&get_result);
 CedarlingResult remove_result;
 ret = cedarling_context_remove(instance_id, "user:123", &remove_result);
 if (ret == 0) {
-    printf("Removed: %s\n", (char*)remove_result.DATA);  // {"removed": true/false}
+    printf("Removed: %s\n", (char*)remove_result.data);  // {"removed": true/false}
 }
 cedarling_free_result(&remove_result);
 ```
@@ -213,7 +212,7 @@ cedarling_free_result(&clear_result);
 CedarlingResult list_result;
 ret = cedarling_context_list(instance_id, &list_result);
 if (ret == 0) {
-    printf("Entries: %s\n", (char*)list_result.DATA);  // JSON array of entries
+    printf("Entries: %s\n", (char*)list_result.data);  // JSON array of entries
 }
 cedarling_free_result(&list_result);
 ```
@@ -224,7 +223,7 @@ cedarling_free_result(&list_result);
 CedarlingResult stats_result;
 ret = cedarling_context_stats(instance_id, &stats_result);
 if (ret == 0) {
-    printf("Stats: %s\n", (char*)stats_result.DATA);
+    printf("Stats: %s\n", (char*)stats_result.data);
 }
 cedarling_free_result(&stats_result);
 ```
@@ -237,8 +236,8 @@ Retrieve logs stored in memory:
 // Get all logs and clear the buffer
 CedarlingStringArray logs;
 ret = cedarling_pop_logs(instance_id, &logs);
-for (size_t i = 0; i < logs.COUNT; i++) {
-    printf("Log: %s\n", logs.ITEMS[i]);
+for (size_t i = 0; i < logs.count; i++) {
+    printf("Log: %s\n", logs.items[i]);
 }
 cedarling_free_string_array(&logs);
 
@@ -278,8 +277,8 @@ ret = cedarling_loaded_trusted_issuers_count(instance_id, &loaded_count);
 CedarlingStringArray loaded_ids;
 ret = cedarling_loaded_trusted_issuer_ids(instance_id, &loaded_ids);
 if (ret == 0) {
-    for (size_t i = 0; i < loaded_ids.COUNT; i++) {
-        printf("Loaded trusted issuer: %s\n", loaded_ids.ITEMS[i]);
+    for (size_t i = 0; i < loaded_ids.count; i++) {
+        printf("Loaded trusted issuer: %s\n", loaded_ids.items[i]);
     }
 }
 cedarling_free_string_array(&loaded_ids);
@@ -287,8 +286,8 @@ cedarling_free_string_array(&loaded_ids);
 CedarlingStringArray failed_ids;
 ret = cedarling_failed_trusted_issuer_ids(instance_id, &failed_ids);
 if (ret == 0) {
-    for (size_t i = 0; i < failed_ids.COUNT; i++) {
-        printf("Failed trusted issuer: %s\n", failed_ids.ITEMS[i]);
+    for (size_t i = 0; i < failed_ids.count; i++) {
+        printf("Failed trusted issuer: %s\n", failed_ids.items[i]);
     }
 }
 cedarling_free_string_array(&failed_ids);
@@ -297,13 +296,10 @@ cedarling_free_string_array(&failed_ids);
 ### Cleanup
 
 ```c
-// Shutdown the instance
+// Shutdown the instance (also removes it from the registry)
 cedarling_shutdown(instance_id);
 
-// Drop the instance
-cedarling_drop(instance_id);
-
-// Global cleanup: shuts down and drops *all* instances, then clears last-error on this thread
+// Global cleanup: shuts down and drops *all* remaining instances, then clears last-error on this thread
 cedarling_cleanup();
 ```
 

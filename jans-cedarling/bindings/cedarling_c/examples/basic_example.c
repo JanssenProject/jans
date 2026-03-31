@@ -167,7 +167,7 @@ int main() {
 
     printf("\n");
 
-    // Shutdown the instance
+    // Shutdown the instance (also removes it from the registry)
     printf("7. Shutting down instance...\n");
     result = cedarling_shutdown(instance_id);
 
@@ -178,13 +178,8 @@ int main() {
         print_error("cedarling_shutdown");
     }
 
-    // Drop the instance
-    printf("8. Dropping instance...\n");
-    cedarling_drop(instance_id);
-    printf("   Instance dropped\n\n");
-
-    // Cleanup
-    printf("9. Cleaning up...\n");
+    // Global cleanup
+    printf("8. Cleaning up...\n");
     cedarling_cleanup();
     printf("   Cleanup completed\n\n");
 
