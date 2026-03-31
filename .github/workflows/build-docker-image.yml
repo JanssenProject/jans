@@ -408,4 +408,4 @@ jobs:
                 gh release upload "nightly" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber || echo "Failed to upload Trivy reports to nightly release"
             else
                 gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
-            fi˚
+            fi
