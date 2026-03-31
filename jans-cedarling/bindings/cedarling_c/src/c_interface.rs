@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, LazyLock, Mutex};
+use std::time::Duration;
 use tokio::runtime::Runtime;
 
 use cedarling::{
@@ -336,7 +337,12 @@ pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> Cedarling
 // Context Data API functions
 
 /// Push context data
-pub fn context_push(instance_id: u64, key: &str, value_json: &str) -> CedarlingResult {
+pub fn context_push(
+    instance_id: u64,
+    key: &str,
+    value_json: &str,
+    ttl_secs: i64,
+) -> CedarlingResult {
     clear_last_error();
 
     let runtime = match runtime_ref() {
@@ -370,7 +376,13 @@ pub fn context_push(instance_id: u64, key: &str, value_json: &str) -> CedarlingR
         },
     };
 
-    match instance.push_data_ctx(key, value, None) {
+    let ttl = if ttl_secs > 0 {
+        Some(Duration::from_secs(ttl_secs as u64))
+    } else {
+        None
+    };
+
+    match instance.push_data_ctx(key, value, ttl) {
         Ok(()) => CedarlingResult::success("{}".to_string()),
         Err(e) => {
             let error_msg = format!("Failed to push data: {}", e);

@@ -170,7 +170,7 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 ```c
 const char* value = "{\"role\": [\"admin\", \"editor\"], \"level\": 5}";
 CedarlingResult push_result;
-ret = cedarling_context_push(instance_id, "user:123", value, &push_result);
+ret = cedarling_context_push(instance_id, "user:123", value, 300, &push_result);
 if (ret != 0) {
     printf("Error: %s\n", push_result.ERROR_MESSAGE);
 }
@@ -356,7 +356,7 @@ cedarling_clear_last_error();
 
 | Function | Description |
 |----------|-------------|
-| `cedarling_context_push(instance_id, key, value, result)` | Push data into context |
+| `cedarling_context_push(instance_id, key, value, ttl_secs, result)` | Push data into context with optional TTL (`<=0` means default/no override) |
 | `cedarling_context_get(instance_id, key, result)` | Get data by key |
 | `cedarling_context_remove(instance_id, key, result)` | Remove data by key |
 | `cedarling_context_clear(instance_id, result)` | Clear all data |

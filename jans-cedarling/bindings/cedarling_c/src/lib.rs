@@ -178,6 +178,7 @@ pub unsafe extern "C" fn cedarling_context_push(
     instance_id: u64,
     key: *const c_char,
     value_json: *const c_char,
+    ttl_secs: i64,
     result: *mut CedarlingResult,
 ) -> c_int {
     clear_last_error();
@@ -217,7 +218,7 @@ pub unsafe extern "C" fn cedarling_context_push(
         },
     };
 
-    let push_result = context_push(instance_id, &key_str, &value_str);
+    let push_result = context_push(instance_id, &key_str, &value_str, ttl_secs);
     unsafe { *result = push_result };
     unsafe { (*result).error_code as c_int }
 }
