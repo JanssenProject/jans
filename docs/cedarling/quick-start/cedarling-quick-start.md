@@ -167,7 +167,7 @@ We will now add the policy store details in the Janssen Tarp that is installed i
 1. Open the Janssen Tarp installed in the browser
 2. Click `Add Client`. Use details below to add a new client.
     - Issuer: The hostname of your IDP
-    - Expiry: The day after today
+    - Expiry: Any date in the future 
     - Scopes: `openid`, `profile`, `role`
 3. Click `Register` to register a new client on your IDP.
 4. Go to `Cedarling` tab and click `Add Configurations`
@@ -194,7 +194,7 @@ We will now add the policy store details in the Janssen Tarp that is installed i
     !!! note
         `CEDARLING_JWT_STATUS_VALIDATION` is disabled here because most quick-start setups don't have a token status list endpoint configured. In production, enable it for full token revocation checking.
 
-6. Click `Save` to initialize Cedarling.
+6. Click on ✓ and `Save` to initialize Cedarling.
 
 This will start the embedded Cedarling instance in the Tarp.
 
@@ -203,26 +203,28 @@ This will start the embedded Cedarling instance in the Tarp.
 Since we are implementing TBAC, we have to authenticate the user first to get the tokens.
 
 1. In Tarp, under `Authentication flow` tab, click the lightning icon to begin authentication
-2. Use the following inputs to fill the form:
+1. Use the following inputs to fill the form:
+      - Additional Params: Leave empty
       - ACR: `basic`
       - Scopes: `openid`, `profile`, `role`
       - Check the `Display access and ID token after authentication` checkbox
 
-3. Click the `Trigger auth flow` button
-4. Login using username and password of a user who has the `Teacher` role assigned in the IDP
-5. Click `Allow` on the consent screen
-6. If the authentication is successful, Tarp will show you a page with token details. Store the userinfo token string.
-7. Move to `Cedarling` tab and select `Cedarling Multi-Issuer Authz Form` tab
-8. Use the details below as an input to this form:
-      - Issuer-to-token mapping: For the policies we want only userinfo token is sufficient:
-      ```json title="Token Mapping"
-      [
+1. Click the `Trigger auth flow` button
+1. Login using username and password of a user who has the `Teacher` role assigned in the IDP
+1. Click `Allow` on the consent screen
+1. If the authentication is successful, Tarp will show you a page with token details.
+1. Move to `Cedarling` tab and select `Cedarling Multi-Issuer Authz Form` tab
+1. Use the details below as an input to this form:
+      - Select `Userinfo token` and click on `Add selected tokens to mapping`
+      - Edit the `mapping` field in the generated dictionary and set it to `Jans::Userinfo_token`. The overall dictionary should be in this format:
+        ```json title="Token Mapping"
+        [
           {
             "mapping": "Jans::Userinfo_token",
-            "payload": "<token from step 6>"
+            "payload": "eyJra..."
           }
-      ]
-      ```
+        ]
+        ```
       - Action: `Jans::Action::"Write"`
       - Resource:
         ```json title="Resource"
@@ -234,7 +236,7 @@ Since we are implementing TBAC, we have to authenticate the user first to get th
         }
         ```
       - Leave the `context` as default
-9. Click `Cedarling Authz Request`
+1. Click `Run authorization`
    ```json title="Sample Response"
    {
      ...
@@ -248,16 +250,57 @@ The top-level `decision: true` confirms successful authorization.
 To test the negative case, we will do the following:
 
 1. Modify the user in the IDP to have the `Student` role instead of `Teacher`
-2. Logout from the Cedarling if you are logged in and rerun the authorization flow with the same parameters to obtain new tokens
-3. Run signed authorization using the same inputs
-4. The top-level `decision: false` confirms failed authorization. The first policy in the store allowed full access to users in the `Teacher` role, but the second policy only allowed `Read` access, which fails since our request was `Write` access.
-5. Repeat the authorization with action `Jans::Action::"Read"` to confirm that the user has `Read` access but not `Write` access
+1. Logout from the Cedarling if you are logged in
+1. In Tarp, under `Authentication flow` tab, click the lightning icon to begin authentication
+1. Use the following inputs to fill the form:
+      - Additional Params: Leave empty
+      - ACR: `basic`
+      - Scopes: `openid`, `profile`, `role`
+      - Check the `Display access and ID token after authentication` checkbox
+
+1. Click the `Trigger auth flow` button
+1. Login using username and password of a user who has the `Student` role assigned in the IDP
+1. Click `Allow` on the consent screen
+1. If the authentication is successful, Tarp will show you a page with token details.
+1. Move to the `Cedarling` tab and select `Cedarling Multi-Issuer Authz Form` tab
+1. Use the details below as an input to this form:
+      - Select `Userinfo token` and click on `Add selected tokens to mapping`
+      - Edit the `mapping` field in the generated dictionary and set it to `Jans::Userinfo_token`. The overall dictionary should be in this format:
+        ```json title="Token Mapping"
+        [
+          {
+            "mapping": "Jans::Userinfo_token",
+            "payload": "eyJra..."
+          }
+        ]
+        ```
+      - Action: `Jans::Action::"Write"`
+      - Resource:
+        ```json title="Resource"
+        {
+          "cedar_entity_mapping": {
+            "entity_type": "Jans::SecretDocument",
+            "id": "some_id"
+          }
+        }
+        ```
+      - Leave the `context` as default
+1. Click `Run authorization`
+   ```json title="Sample Response"
+   {
+     ...
+     "decision": false,
+     "request_id": "019d41cf-a1c7-7880-8842-a2e0a21ba024"
+   }
+   ```
+1. The top-level `decision: false` confirms failed authorization. The first policy in the store allowed full access to users in the `Teacher` role, but the second policy only allowed `Read` access, which fails since our request was `Write` access.
+1. Repeat the authorization with action `Jans::Action::"Read"` to confirm that the user has `Read` access but not `Write` access
 
 ---
 
 ## Implement RBAC using application-asserted identity
 
-In this section, we will see how to implement role-based access control using the Cedarling when the information about the principal is supplied by the host application. 
+In this section, we will see how to implement role-based access control using the Cedarling when the information about the principal is supplied by the host application.
 
 This method uses `authorize_unsigned` — no JWT validation is performed. Use this when your application has already authenticated the principal through other means, or for testing and prototyping.
 
@@ -334,7 +377,7 @@ use the policy stored in the store (from [Step-1](#step-1-create-the-cedar-polic
     !!! note
         `CEDARLING_PRINCIPAL_BOOLEAN_OPERATION` controls how per-principal decisions are combined in `authorize_unsigned`. Here it checks only the `Jans::User` principal. See [Principal Boolean Operations](../reference/cedarling-principal-boolean-operations.md) for details.
 
-4. Click `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
+4. Click on ✓ and `Save` to initialize the Cedarling. The Cedarling will fetch and validate your policy store during the
 initialization.
 
 The Cedarling is ready to receive and evaluate authorization requests at this
