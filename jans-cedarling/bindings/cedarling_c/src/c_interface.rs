@@ -102,6 +102,15 @@ fn runtime_ref() -> Result<&'static CedarlingRuntime, CedarlingErrorCode> {
     }
 }
 
+/// Force runtime initialization so startup failures surface at `cedarling_init`.
+pub fn initialize_runtime() -> CedarlingErrorCode {
+    clear_last_error();
+    match runtime_ref() {
+        Ok(_) => CedarlingErrorCode::Success,
+        Err(code) => code,
+    }
+}
+
 /// Create a new cedarling instance
 pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
     clear_last_error();

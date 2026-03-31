@@ -18,8 +18,13 @@ use types::*;
 /// This Function should be called before any other functions
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_init() -> c_int {
-    // Initialize any global state if needed
-    0 // Success
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(initialize_runtime)) {
+        Ok(code) => code as c_int,
+        Err(_) => {
+            set_last_error("panic during runtime initialization");
+            CedarlingErrorCode::Internal as c_int
+        },
+    }
 }
 /// # Safety
 /// Create a new Cedarling instance
