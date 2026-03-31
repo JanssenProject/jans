@@ -138,12 +138,12 @@ int main() {
     int ret = cedarling_new(config, &instance_result);
     
     if (ret != 0) {
-        printf("Failed to create instance: %s\n", instance_result.ERROR_MESSAGE);
+        printf("Failed to create instance: %s\n", instance_result.error_message);
         cedarling_free_instance_result(&instance_result);
         return 1;
     }
 
-    uint64_t instance_id = instance_result.INSTANCE_ID;
+    uint64_t instance_id = instance_result.instance_id;
     printf("Instance created with ID: %llu\n", (unsigned long long)instance_id);
     cedarling_free_instance_result(&instance_result);
 
@@ -152,6 +152,7 @@ int main() {
     // Cleanup
     cedarling_shutdown(instance_id);
     cedarling_drop(instance_id);
+    // Shuts down all library-held instances and clears this thread's last error
     cedarling_cleanup();
 
     return 0;
@@ -193,10 +194,10 @@ CedarlingResult auth_result;
 int ret = cedarling_authorize_multi_issuer(instance_id, request, &auth_result);
 
 if (ret == 0) {
-    printf("Authorization result: %s\n", (char*)auth_result.DATA);
+    printf("Authorization result: %s\n", (char*)auth_result.data);
     // Parse JSON result to check decision
 } else {
-    printf("Authorization error: %s\n", auth_result.ERROR_MESSAGE);
+    printf("Authorization error: %s\n", auth_result.error_message);
 }
 cedarling_free_result(&auth_result);
 ```
@@ -234,7 +235,7 @@ CedarlingResult auth_result;
 int ret = cedarling_authorize_unsigned(instance_id, request, &auth_result);
 
 if (ret == 0) {
-    char* result_str = (char*)auth_result.DATA;
+    char* result_str = (char*)auth_result.data;
     printf("Authorization result: %s\n", result_str);
     
     // Check if decision is true
@@ -244,7 +245,7 @@ if (ret == 0) {
         printf("Access denied\n");
     }
 } else {
-    printf("Authorization error: %s\n", auth_result.ERROR_MESSAGE);
+    printf("Authorization error: %s\n", auth_result.error_message);
 }
 cedarling_free_result(&auth_result);
 ```
@@ -257,12 +258,14 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
 Store data in the context for use in policy evaluation:
 
+TTL is given in seconds; use `<= 0` when you do not want to override the store default.
+
 ```c
 const char* value = "{\"role\": [\"admin\", \"editor\"], \"level\": 5}";
 CedarlingResult push_result;
-int ret = cedarling_context_push(instance_id, "user:123", value, &push_result);
+int ret = cedarling_context_push(instance_id, "user:123", value, 300, &push_result);
 if (ret != 0) {
-    printf("Error pushing data: %s\n", push_result.ERROR_MESSAGE);
+    printf("Error pushing data: %s\n", push_result.error_message);
 }
 cedarling_free_result(&push_result);
 ```
@@ -275,7 +278,7 @@ Retrieve stored data by key:
 CedarlingResult get_result;
 int ret = cedarling_context_get(instance_id, "user:123", &get_result);
 if (ret == 0) {
-    char* value = (char*)get_result.DATA;
+    char* value = (char*)get_result.data;
     if (strcmp(value, "null") != 0) {
         printf("Value: %s\n", value);
     } else {
@@ -293,7 +296,7 @@ Remove a specific entry:
 CedarlingResult remove_result;
 int ret = cedarling_context_remove(instance_id, "user:123", &remove_result);
 if (ret == 0) {
-    printf("Remove result: %s\n", (char*)remove_result.DATA);  // {"removed": true/false}
+    printf("Remove result: %s\n", (char*)remove_result.data);  // {"removed": true/false}
 }
 cedarling_free_result(&remove_result);
 ```
@@ -316,7 +319,7 @@ List all entries with their metadata:
 CedarlingResult list_result;
 int ret = cedarling_context_list(instance_id, &list_result);
 if (ret == 0) {
-    printf("Entries: %s\n", (char*)list_result.DATA);  // JSON array
+    printf("Entries: %s\n", (char*)list_result.data);  // JSON array
 }
 cedarling_free_result(&list_result);
 ```
@@ -329,7 +332,7 @@ Get statistics about the data store:
 CedarlingResult stats_result;
 int ret = cedarling_context_stats(instance_id, &stats_result);
 if (ret == 0) {
-    printf("Stats: %s\n", (char*)stats_result.DATA);
+    printf("Stats: %s\n", (char*)stats_result.data);
 }
 cedarling_free_result(&stats_result);
 ```
@@ -357,9 +360,9 @@ Retrieve logs stored in memory:
 CedarlingStringArray logs;
 int ret = cedarling_pop_logs(instance_id, &logs);
 if (ret == 0) {
-    printf("Retrieved %zu logs\n", logs.COUNT);
-    for (size_t i = 0; i < logs.COUNT; i++) {
-        printf("Log %zu: %s\n", i + 1, logs.ITEMS[i]);
+    printf("Retrieved %zu logs\n", logs.count);
+    for (size_t i = 0; i < logs.count; i++) {
+        printf("Log %zu: %s\n", i + 1, logs.items[i]);
     }
     cedarling_free_string_array(&logs);
 }
@@ -368,7 +371,7 @@ if (ret == 0) {
 CedarlingStringArray log_ids;
 ret = cedarling_get_log_ids(instance_id, &log_ids);
 if (ret == 0) {
-    printf("Found %zu log IDs\n", log_ids.COUNT);
+    printf("Found %zu log IDs\n", log_ids.count);
     cedarling_free_string_array(&log_ids);
 }
 
@@ -386,7 +389,9 @@ cedarling_free_string_array(&request_logs);
 CedarlingResult log_result;
 ret = cedarling_get_log_by_id(instance_id, "log-id-here", &log_result);
 if (ret == 0) {
-    printf("Log: %s\n", (char*)log_result.DATA);
+    printf("Log: %s\n", (char*)log_result.data);
+} else if (log_result.error_code == KEY_NOT_FOUND) {
+    /* Log id does not exist (instance was valid) */
 }
 cedarling_free_result(&log_result);
 ```
@@ -396,10 +401,11 @@ cedarling_free_result(&log_result);
 All functions return an error code (0 for success, non-zero for failure). Additional error information is available through:
 
 ```c
-// Get the last error message
-const char* error = cedarling_get_last_error();
+// Last error string is owned by the caller — free with cedarling_free_string
+char* error = cedarling_get_last_error();
 if (error) {
     printf("Last error: %s\n", error);
+    cedarling_free_string(error);
 }
 
 // Clear the last error
@@ -407,6 +413,8 @@ cedarling_clear_last_error();
 ```
 
 ### Error Codes
+
+Values match the `CedarlingErrorCode` enum in `cedarling_c.h` (names are `SCREAMING_SNAKE_CASE` in C).
 
 | Code | Name | Description |
 |------|------|-------------|
@@ -416,17 +424,15 @@ cedarling_clear_last_error();
 | 3 | JsonError | JSON parsing error |
 | 4 | AuthorizationError | Authorization error |
 | 5 | ConfigurationError | Configuration error |
-| 6 | MemoryError | Memory allocation error |
-| 7 | Internal | Internal error |
+| 6 | Internal | Internal error |
+| 7 | KeyNotFound | Requested key or id does not exist (e.g. unknown log id) |
 
 ## Memory Management
 
-Cedarling returns both borrowed and owned pointers:
+- **Do not free** the pointer from `cedarling_version()`: it points at static data for the library version string.
+- **Must free** the pointer from `cedarling_get_last_error()` with `cedarling_free_string()` when non-null (each call returns a fresh copy).
 
-- Borrowed pointers (do **not** free): `cedarling_version()` and `cedarling_get_last_error()`.
-- Owned allocations (must free): `CedarlingResult`, `CedarlingInstanceResult`, `CedarlingStringArray`, and standalone owned strings returned from owned containers.
-
-Use the matching free function for owned values:
+Free struct payloads with the matching API after use:
 
 ```c
 // Owned CedarlingResult
@@ -438,11 +444,9 @@ cedarling_free_instance_result(&instance_result);
 // Owned CedarlingStringArray
 cedarling_free_string_array(&array);
 
-// Owned standalone C string
+// Owned standalone C string (e.g. from cedarling_get_last_error)
 cedarling_free_string(str);
 ```
-
-In short: only free memory allocated by Cedarling for owned return values. Never free the borrowed pointers returned by `cedarling_version` and `cedarling_get_last_error`.
 
 ## Complete Example
 
@@ -474,18 +478,18 @@ int main() {
     // Create instance
     CedarlingInstanceResult instance_result;
     if (cedarling_new(config, &instance_result) != 0) {
-        printf("Error: %s\n", instance_result.ERROR_MESSAGE);
+        printf("Error: %s\n", instance_result.error_message);
         cedarling_free_instance_result(&instance_result);
         return 1;
     }
     
-    uint64_t instance_id = instance_result.INSTANCE_ID;
+    uint64_t instance_id = instance_result.instance_id;
     cedarling_free_instance_result(&instance_result);
 
     // Push context data
     CedarlingResult push_result;
-    cedarling_context_push(instance_id, "app:config", 
-        "{\"feature_flags\": {\"premium\": true}}", &push_result);
+    cedarling_context_push(instance_id, "app:config",
+        "{\"feature_flags\": {\"premium\": true}}", 0, &push_result);
     cedarling_free_result(&push_result);
 
     // Authorize
@@ -501,23 +505,23 @@ int main() {
 
     CedarlingResult auth_result;
     if (cedarling_authorize_unsigned(instance_id, request, &auth_result) == 0) {
-        printf("Authorization: %s\n", (char*)auth_result.DATA);
+        printf("Authorization: %s\n", (char*)auth_result.data);
     } else {
-        printf("Authorization error: %s\n", auth_result.ERROR_MESSAGE);
+        printf("Authorization error: %s\n", auth_result.error_message);
     }
     cedarling_free_result(&auth_result);
 
     // Get logs
     CedarlingStringArray logs;
     if (cedarling_pop_logs(instance_id, &logs) == 0) {
-        printf("Logs: %zu entries\n", logs.COUNT);
+        printf("Logs: %zu entries\n", logs.count);
         cedarling_free_string_array(&logs);
     }
 
     // Cleanup
     cedarling_shutdown(instance_id);
     cedarling_drop(instance_id);
-    cedarling_cleanup();
+    cedarling_cleanup();  /* all instances + this thread's last error */
 
     printf("Done!\n");
     return 0;
