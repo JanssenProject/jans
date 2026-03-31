@@ -90,6 +90,29 @@ impl CedarlingRuntime {
             },
         }
     }
+
+    fn shutdown_and_clear_all_instances(&self) -> CedarlingErrorCode {
+        let instances = match self.instances.lock() {
+            Ok(mut guard) => {
+                let instances: Vec<Arc<base::Cedarling>> = guard.values().cloned().collect();
+                guard.clear();
+                instances
+            },
+            Err(e) => {
+                set_last_error(&format!(
+                    "Internal lock failure while clearing instances: {}",
+                    e
+                ));
+                return CedarlingErrorCode::Internal;
+            },
+        };
+
+        for instance in instances {
+            self.runtime.block_on(instance.shut_down());
+        }
+
+        CedarlingErrorCode::Success
+    }
 }
 
 fn runtime_ref() -> Result<&'static CedarlingRuntime, CedarlingErrorCode> {
@@ -107,6 +130,15 @@ pub fn initialize_runtime() -> CedarlingErrorCode {
     clear_last_error();
     match runtime_ref() {
         Ok(_) => CedarlingErrorCode::Success,
+        Err(code) => code,
+    }
+}
+
+/// Shutdown and remove all runtime instances.
+pub fn cleanup_runtime() -> CedarlingErrorCode {
+    clear_last_error();
+    match runtime_ref() {
+        Ok(runtime) => runtime.shutdown_and_clear_all_instances(),
         Err(code) => code,
     }
 }

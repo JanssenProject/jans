@@ -934,6 +934,7 @@ pub extern "C" fn cedarling_version() -> *const c_char {
 /// The calling thread's `cedarling_get_last_error()` value is reset to null until a new error is set.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_cleanup() {
-    // Perform any necessary cleanup
+    let _ = cleanup_runtime();
+    // Keep historical behavior: reset caller-visible last error state.
     clear_last_error();
 }
