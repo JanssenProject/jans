@@ -50,9 +50,9 @@ pub use authz::request::{
     AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
-pub use common::policy_store::PolicyMetadata;
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
+pub use common::policy_store::PolicyMetadata;
 use init::ServiceFactory;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -206,8 +206,7 @@ impl Cedarling {
     ///
     /// This performs scope-level filtering only (principal/action/resource constraints).
     /// Policies with `when`/`unless` conditions may still not apply at evaluation time.
-    #[allow(clippy::unused_async)]
-    pub async fn get_matching_policies_unsigned(
+    pub fn get_matching_policies_unsigned(
         &self,
         principals: Vec<EntityData>,
         actions: Vec<String>,
@@ -221,8 +220,7 @@ impl Cedarling {
     /// with the given token-derived principals, actions, and resources.
     ///
     /// Tokens are validated and their mapping types used as principal entity types.
-    #[allow(clippy::unused_async)]
-    pub async fn get_matching_policies_multi_issuer(
+    pub fn get_matching_policies_multi_issuer(
         &self,
         tokens: Vec<TokenInput>,
         actions: Vec<String>,
