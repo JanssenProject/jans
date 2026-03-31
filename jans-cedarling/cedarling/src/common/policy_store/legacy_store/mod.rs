@@ -604,7 +604,7 @@ fn parse_maybe_cedar_version(value: &serde_json::Value) -> Result<Option<Version
             let s = s.strip_prefix('v').unwrap_or(s);
             Version::parse(s)
                 .map(Some)
-                .map_err(|e| format!("error parsing cedar version :{e}"))
+                .map_err(|e| format!("error parsing cedar version: {e}"))
         },
         _ => Err("cedar_version must be a string or null".to_string()),
     }
