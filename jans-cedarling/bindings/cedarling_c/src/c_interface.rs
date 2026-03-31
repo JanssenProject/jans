@@ -755,95 +755,81 @@ pub fn get_logs_by_request_id_and_tag(
 }
 
 /// Check whether a trusted issuer was loaded by issuer identifier
-pub fn is_trusted_issuer_loaded_by_name(instance_id: u64, issuer_id: &str) -> bool {
+pub fn is_trusted_issuer_loaded_by_name(
+    instance_id: u64,
+    issuer_id: &str,
+) -> Result<bool, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return false;
-        },
+        Err(code) => return Err(code),
     };
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
             set_last_error("Instance not found");
-            return false;
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return false;
-        },
+        Err(code) => return Err(code),
     };
-    instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    Ok(instance.is_trusted_issuer_loaded_by_name(issuer_id))
 }
 
 /// Check whether a trusted issuer was loaded by `iss` claim
-pub fn is_trusted_issuer_loaded_by_iss(instance_id: u64, iss_claim: &str) -> bool {
+pub fn is_trusted_issuer_loaded_by_iss(
+    instance_id: u64,
+    iss_claim: &str,
+) -> Result<bool, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return false;
-        },
+        Err(code) => return Err(code),
     };
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
             set_last_error("Instance not found");
-            return false;
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return false;
-        },
+        Err(code) => return Err(code),
     };
-    instance.is_trusted_issuer_loaded_by_iss(iss_claim)
+    Ok(instance.is_trusted_issuer_loaded_by_iss(iss_claim))
 }
 
 /// Get total trusted issuers discovered
-pub fn total_issuers(instance_id: u64) -> usize {
+pub fn total_issuers(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return 0;
-        },
+        Err(code) => return Err(code),
     };
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
             set_last_error("Instance not found");
-            return 0;
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return 0;
-        },
+        Err(code) => return Err(code),
     };
-    instance.total_issuers()
+    Ok(instance.total_issuers())
 }
 
 /// Get number of trusted issuers loaded successfully
-pub fn loaded_trusted_issuers_count(instance_id: u64) -> usize {
+pub fn loaded_trusted_issuers_count(instance_id: u64) -> Result<usize, CedarlingErrorCode> {
     clear_last_error();
     let runtime = match runtime_ref() {
         Ok(runtime) => runtime,
-        Err(_) => {
-            return 0;
-        },
+        Err(code) => return Err(code),
     };
     let instance = match runtime.get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
             set_last_error("Instance not found");
-            return 0;
+            return Err(CedarlingErrorCode::InstanceNotFound);
         },
-        Err(_) => {
-            // last_error already set by get_instance
-            return 0;
-        },
+        Err(code) => return Err(code),
     };
-    instance.loaded_trusted_issuers_count()
+    Ok(instance.loaded_trusted_issuers_count())
 }
 
 /// Get trusted issuer IDs loaded successfully

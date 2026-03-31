@@ -261,13 +261,19 @@ cedarling_free_string_array(&logs);
 When a policy store includes `trusted-issuers/` entries, you can inspect loading status:
 
 ```c
-bool loaded = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "issuer_id");
-bool loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(
+bool loaded = false;
+bool loaded_by_iss = false;
+size_t total = 0;
+size_t loaded_count = 0;
+
+ret = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "issuer_id", &loaded);
+ret = cedarling_is_trusted_issuer_loaded_by_iss(
     instance_id,
-    "https://issuer.example.org"
+    "https://issuer.example.org",
+    &loaded_by_iss
 );
-size_t total = cedarling_total_issuers(instance_id);
-size_t loaded_count = cedarling_loaded_trusted_issuers_count(instance_id);
+ret = cedarling_total_issuers(instance_id, &total);
+ret = cedarling_loaded_trusted_issuers_count(instance_id, &loaded_count);
 
 CedarlingStringArray loaded_ids;
 ret = cedarling_loaded_trusted_issuer_ids(instance_id, &loaded_ids);
@@ -339,10 +345,10 @@ cedarling_clear_last_error();
 
 | Function | Description |
 |----------|-------------|
-| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_id)` | Check loaded status by issuer ID |
-| `cedarling_is_trusted_issuer_loaded_by_iss(instance_id, iss_claim)` | Check loaded status by issuer `iss` claim |
-| `cedarling_total_issuers(instance_id)` | Get total number of discovered trusted issuers |
-| `cedarling_loaded_trusted_issuers_count(instance_id)` | Get number of successfully loaded trusted issuers |
+| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_id, out_result)` | Check loaded status by issuer ID |
+| `cedarling_is_trusted_issuer_loaded_by_iss(instance_id, iss_claim, out_result)` | Check loaded status by issuer `iss` claim |
+| `cedarling_total_issuers(instance_id, out_count)` | Get total number of discovered trusted issuers |
+| `cedarling_loaded_trusted_issuers_count(instance_id, out_count)` | Get number of successfully loaded trusted issuers |
 | `cedarling_loaded_trusted_issuer_ids(instance_id, result)` | Get IDs of successfully loaded trusted issuers |
 | `cedarling_failed_trusted_issuer_ids(instance_id, result)` | Get IDs of trusted issuers that failed to load |
 

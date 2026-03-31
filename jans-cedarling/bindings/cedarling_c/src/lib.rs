@@ -627,20 +627,36 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
 pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
     instance_id: u64,
     issuer_id: *const c_char,
-) -> bool {
+    out_result: *mut bool,
+) -> c_int {
     clear_last_error();
+    if out_result.is_null() {
+        set_last_error("null out_result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
     if issuer_id.is_null() {
         set_last_error("null issuer_id");
-        return false;
+        unsafe { *out_result = false };
+        return CedarlingErrorCode::InvalidArgument as c_int;
     }
     let issuer_id_str = match c_string_to_string(issuer_id) {
         Ok(s) => s,
         Err(_) => {
             set_last_error("invalid issuer_id C string");
-            return false;
+            unsafe { *out_result = false };
+            return CedarlingErrorCode::InvalidArgument as c_int;
         },
     };
-    is_trusted_issuer_loaded_by_name(instance_id, &issuer_id_str)
+    match is_trusted_issuer_loaded_by_name(instance_id, &issuer_id_str) {
+        Ok(loaded) => unsafe {
+            *out_result = loaded;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *out_result = false;
+            code as c_int
+        },
+    }
 }
 
 /// # Safety
@@ -650,36 +666,83 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
 pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
     instance_id: u64,
     iss_claim: *const c_char,
-) -> bool {
+    out_result: *mut bool,
+) -> c_int {
     clear_last_error();
+    if out_result.is_null() {
+        set_last_error("null out_result pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
     if iss_claim.is_null() {
         set_last_error("null iss_claim");
-        return false;
+        unsafe { *out_result = false };
+        return CedarlingErrorCode::InvalidArgument as c_int;
     }
     let iss_claim_str = match c_string_to_string(iss_claim) {
         Ok(s) => s,
         Err(_) => {
             set_last_error("invalid iss_claim C string");
-            return false;
+            unsafe { *out_result = false };
+            return CedarlingErrorCode::InvalidArgument as c_int;
         },
     };
-    is_trusted_issuer_loaded_by_iss(instance_id, &iss_claim_str)
+    match is_trusted_issuer_loaded_by_iss(instance_id, &iss_claim_str) {
+        Ok(loaded) => unsafe {
+            *out_result = loaded;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *out_result = false;
+            code as c_int
+        },
+    }
 }
 
 /// # Safety
 /// Get total number of trusted issuers discovered
 ///
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64) -> usize {
-    total_issuers(instance_id)
+pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64, out_count: *mut usize) -> c_int {
+    clear_last_error();
+    if out_count.is_null() {
+        set_last_error("null out_count pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    match total_issuers(instance_id) {
+        Ok(count) => unsafe {
+            *out_count = count;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *out_count = 0;
+            code as c_int
+        },
+    }
 }
 
 /// # Safety
 /// Get number of trusted issuers loaded successfully
 ///
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(instance_id: u64) -> usize {
-    loaded_trusted_issuers_count(instance_id)
+pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(
+    instance_id: u64,
+    out_count: *mut usize,
+) -> c_int {
+    clear_last_error();
+    if out_count.is_null() {
+        set_last_error("null out_count pointer");
+        return CedarlingErrorCode::InvalidArgument as c_int;
+    }
+    match loaded_trusted_issuers_count(instance_id) {
+        Ok(count) => unsafe {
+            *out_count = count;
+            CedarlingErrorCode::Success as c_int
+        },
+        Err(code) => unsafe {
+            *out_count = 0;
+            code as c_int
+        },
+    }
 }
 
 /// # Safety

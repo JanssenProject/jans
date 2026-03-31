@@ -323,14 +323,22 @@ void test_trusted_issuer_loading_info() {
    uint64_t instance_id = instance_result.instance_id;
     cedarling_free_instance_result(&instance_result);
 
-    bool loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "missing_issuer");
+    bool loaded_by_name = true;
+    ret = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "missing_issuer", &loaded_by_name);
+    TEST_ASSERT(ret == 0, "Trusted issuer by name call succeeds");
     TEST_ASSERT(loaded_by_name == false, "Trusted issuer by name returns false for missing issuer");
 
-    bool loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, "https://missing.example.org");
+    bool loaded_by_iss = true;
+    ret = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, "https://missing.example.org", &loaded_by_iss);
+    TEST_ASSERT(ret == 0, "Trusted issuer by iss call succeeds");
     TEST_ASSERT(loaded_by_iss == false, "Trusted issuer by iss returns false for missing issuer");
 
-    size_t total = cedarling_total_issuers(instance_id);
-    size_t loaded_count = cedarling_loaded_trusted_issuers_count(instance_id);
+    size_t total = 0;
+    size_t loaded_count = 0;
+    ret = cedarling_total_issuers(instance_id, &total);
+    TEST_ASSERT(ret == 0, "Total issuers call succeeds");
+    ret = cedarling_loaded_trusted_issuers_count(instance_id, &loaded_count);
+    TEST_ASSERT(ret == 0, "Loaded trusted issuers count call succeeds");
     TEST_ASSERT(total >= loaded_count, "Total issuers is greater than or equal to loaded count");
 
     CedarlingStringArray loaded_ids;
@@ -346,21 +354,48 @@ void test_trusted_issuer_loading_info() {
     cedarling_free_string_array(&failed_ids);
 
     // NULL parameter handling for issuer lookup methods
-    loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(instance_id, NULL);
-    TEST_ASSERT(loaded_by_name == false, "Reject NULL issuer_id parameter");
+    loaded_by_name = true;
+    ret = cedarling_is_trusted_issuer_loaded_by_name(instance_id, NULL, &loaded_by_name);
+    TEST_ASSERT(ret != 0, "Reject NULL issuer_id parameter");
+    TEST_ASSERT(loaded_by_name == false, "Output reset on NULL issuer_id");
 
-    loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, NULL);
-    TEST_ASSERT(loaded_by_iss == false, "Reject NULL iss_claim parameter");
+    loaded_by_iss = true;
+    ret = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, NULL, &loaded_by_iss);
+    TEST_ASSERT(ret != 0, "Reject NULL iss_claim parameter");
+    TEST_ASSERT(loaded_by_iss == false, "Output reset on NULL iss_claim");
 
     // Invalid instance handling
-    loaded_by_name = cedarling_is_trusted_issuer_loaded_by_name(99999, "any");
+    loaded_by_name = true;
+    ret = cedarling_is_trusted_issuer_loaded_by_name(99999, "any", &loaded_by_name);
+    TEST_ASSERT(ret != 0, "Invalid instance is rejected for issuer-by-name lookup");
     TEST_ASSERT(loaded_by_name == false, "Invalid instance returns false for issuer-by-name lookup");
 
-    loaded_by_iss = cedarling_is_trusted_issuer_loaded_by_iss(99999, "https://example.org");
+    loaded_by_iss = true;
+    ret = cedarling_is_trusted_issuer_loaded_by_iss(99999, "https://example.org", &loaded_by_iss);
+    TEST_ASSERT(ret != 0, "Invalid instance is rejected for issuer-by-iss lookup");
     TEST_ASSERT(loaded_by_iss == false, "Invalid instance returns false for issuer-by-iss lookup");
 
-    TEST_ASSERT(cedarling_total_issuers(99999) == 0, "Invalid instance returns 0 total issuers");
-    TEST_ASSERT(cedarling_loaded_trusted_issuers_count(99999) == 0, "Invalid instance returns 0 loaded issuers");
+    total = 999;
+    ret = cedarling_total_issuers(99999, &total);
+    TEST_ASSERT(ret != 0, "Invalid instance rejects total issuers");
+    TEST_ASSERT(total == 0, "Invalid instance resets total issuers output to 0");
+
+    loaded_count = 999;
+    ret = cedarling_loaded_trusted_issuers_count(99999, &loaded_count);
+    TEST_ASSERT(ret != 0, "Invalid instance rejects loaded issuers count");
+    TEST_ASSERT(loaded_count == 0, "Invalid instance resets loaded issuers count output to 0");
+
+    ret = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "any", NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL out_result for issuer-by-name lookup");
+
+    ret = cedarling_is_trusted_issuer_loaded_by_iss(instance_id, "https://example.org", NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL out_result for issuer-by-iss lookup");
+
+    ret = cedarling_total_issuers(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL out_count for total issuers");
+
+    ret = cedarling_loaded_trusted_issuers_count(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL out_count for loaded issuers count");
 
     ret = cedarling_loaded_trusted_issuer_ids(99999, &loaded_ids);
     TEST_ASSERT(ret != 0, "Loaded trusted issuer IDs rejects invalid instance");
