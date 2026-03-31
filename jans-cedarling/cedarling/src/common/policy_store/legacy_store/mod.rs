@@ -105,7 +105,7 @@ where
 {
     let url_str = String::deserialize(deserializer)?;
     Url::parse(&url_str).map_err(|_| {
-        de::Error::custom("the `\"openid_configuration_endpoint\"` is not a valid url")
+        de::Error::custom("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url")
     })
 }
 

@@ -414,7 +414,7 @@ fn test_invalid_trusted_issuers_format() {
     let err = result.expect_err("Expected error for invalid openid_configuration_endpoint URL");
     assert!(
         err.to_string()
-            .contains("the `\"openid_configuration_endpoint\"` is not a valid url"),
+            .contains("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url"),
         "Error should mention invalid URL, got: {err}"
     );
 }
