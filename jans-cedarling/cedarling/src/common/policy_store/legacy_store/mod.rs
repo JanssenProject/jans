@@ -598,7 +598,7 @@ pub(crate) fn parse_cedar_version(value: impl serde::Serialize) -> Result<Versio
         return Err("cedar_version must be a string".to_string());
     };
     let s = s.strip_prefix('v').unwrap_or(&s);
-    Version::parse(s).map_err(|e| format!("error parsing cedar version :{e}"))
+    Version::parse(s).map_err(|e| format!("error parsing cedar version: {e}"))
 }
 
 fn parse_maybe_cedar_version(value: &serde_json::Value) -> Result<Option<Version>, String> {
