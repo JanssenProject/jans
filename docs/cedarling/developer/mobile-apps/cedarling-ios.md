@@ -27,6 +27,8 @@ Cedarling UniFFI binding exposes its `init`, `authz` and `log` interfaces to dif
    make ios
    ```
    
+Use `make ios BUILD_TYPE=release` or `make ios BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
+   
 4. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/build/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
 5. Run iOS project on simulator.

@@ -1,9 +1,16 @@
 # Makefile for Cedarling UniFFI (iOS + Android)
 
+#######################################
+# All
+#######################################
+
+all: ios android java
+
+.PHONY: build clean ios ios-build ios-bindings ios-xcframework ios-setup android android-build android-bindings android-setup all
+
 # Variables
 LIB_NAME=cedarling_uniffi
 TARGET_DIR=../../target
-RELEASE_DIR=$(TARGET_DIR)/release
 IOS_OUT=ios/Mobile.xcframework
 BINDINGS_DIR=build
 ANDROID_JNI=androidApp/app/src/main/jniLibs
@@ -23,8 +30,10 @@ endif
 
 #Check BUILD_TYPE
 ifeq ($(BUILD_TYPE),release)
+	TARGET_SUBDIR = release
     CARGO_FLAGS = --release
 else
+	TARGET_SUBDIR = debug
     CARGO_FLAGS =
 endif
 
@@ -58,12 +67,12 @@ clean:
 #######################################
 
 ios-build: build
-	cargo build --release --target=aarch64-apple-ios-sim
-	cargo build --release --target=aarch64-apple-ios
+	cargo build $(CARGO_FLAGS) --target=aarch64-apple-ios-sim
+	cargo build $(CARGO_FLAGS) --target=aarch64-apple-ios
 
 ios-bindings:
 	cargo run --bin uniffi-bindgen generate \
-		--library ./$(RELEASE_DIR)/$(LIB_FILE) \
+		--library $(TARGET_DIR)/$(TARGET_SUBDIR)/$(LIB_FILE) \
 		--language swift \
 		--out-dir ./$(BINDINGS_DIR)
 
@@ -74,8 +83,8 @@ ios-xcframework:
     fi
 	mv $(BINDINGS_DIR)/cedarling_uniffiFFI.modulemap $(BINDINGS_DIR)/module.modulemap
 	xcodebuild -create-xcframework \
-		-library ../../target/aarch64-apple-ios-sim/release/lib$(LIB_NAME).a -headers ./$(BINDINGS_DIR) \
-		-library ../../target/aarch64-apple-ios/release/lib$(LIB_NAME).a -headers ./$(BINDINGS_DIR) \
+		-library $(TARGET_DIR)/aarch64-apple-ios-sim/$(TARGET_SUBDIR)/lib$(LIB_NAME).a -headers ./$(BINDINGS_DIR) \
+		-library $(TARGET_DIR)/aarch64-apple-ios/$(TARGET_SUBDIR)/lib$(LIB_NAME).a -headers ./$(BINDINGS_DIR) \
 		-output "$(IOS_OUT)"
 
 ios:
@@ -96,11 +105,6 @@ android-setup:
 		echo "cargo-ndk not found. Installing..."; \
 		cargo install cargo-ndk || exit 1; \
 	}
-	rustup target add \
-		aarch64-linux-android \
-		armv7-linux-androideabi \
-		i686-linux-android \
-		x86_64-linux-android
 
 android-build:
 	$(MAKE) android-setup
@@ -115,23 +119,15 @@ android-build:
 		-t arm64-v8a \
 		-t x86 \
 		-t x86_64 \
-		build -p $(LIB_NAME) --release
+		build -p $(LIB_NAME) $(CARGO_FLAGS)
 
 android-bindings:
 	cargo run --bin uniffi-bindgen generate \
-		--library ./$(RELEASE_DIR)/$(LIB_FILE) \
+		--library $(TARGET_DIR)/$(TARGET_SUBDIR)/$(LIB_FILE) \
 		--language kotlin \
 		--out-dir ./$(ANDROID_KOTLIN_OUT)
 
 android: build android-build android-bindings
-
-#######################################
-# All
-#######################################
-
-all: ios android java
-
-.PHONY: build clean ios ios-build ios-bindings ios-xcframework ios-setup android android-build android-bindings android-setup all
 
 #######################################
 # Kotlin Binding for Java (Maven)
@@ -144,11 +140,11 @@ java-build: build
 
 java-bindings:
 	cargo run --bin uniffi-bindgen generate \
-		--library $(RELEASE_DIR)/$(LIB_FILE) \
+		--library $(TARGET_DIR)/$(TARGET_SUBDIR)/$(LIB_FILE) \
 		--language kotlin \
 		--out-dir ./$(JAVA_KOTLIN_OUT)
 
 java-copy-lib:
-	cp $(RELEASE_DIR)/$(LIB_FILE) ./$(JAVA_RESOURCES)
+	cp $(TARGET_DIR)/$(TARGET_SUBDIR)/$(LIB_FILE) ./$(JAVA_RESOURCES)
 
 java: java-build java-bindings java-copy-lib

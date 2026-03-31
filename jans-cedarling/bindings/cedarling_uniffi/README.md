@@ -24,6 +24,8 @@ rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
 ```bash
 make ios
 ```
+Use `make ios BUILD_TYPE=release` or `make ios BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
+
 3. Open `./bindings/cedarling_uniffi/iOSApp` in Xcode. Import both the XCFramework from `./bindings/ios/Mobile.xcframework` and the Swift file bindings `./bindings/build/cedarling_uniffi.swift` files into your project (drag and drop should work).
 
 4. Run iOS project (./bindings/cedarling_uniffi/iOSApp) on simulator.
@@ -37,13 +39,25 @@ make ios
 
 ### Building
 
-1. Run below command to build and import binding into Android project.
+1. Ask toolchain manager to install support for compiling Rust code for aarch64-linux, armv7-linux, i686-linux and x86_64-linux.
+
+```bash
+	rustup target add \
+		aarch64-linux-android \
+		armv7-linux-androideabi \
+		i686-linux-android \
+		x86_64-linux-android
+```
+
+2. Run below command to build and import binding into Android project.
 
 ```bash
 make android
 ```
 
-2. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
+Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
+
+3. Open the `./bindings/cedarling_uniffi/androidApp` project on Android Studio and run the project on simulator.
 
 ## Kotlin Binding
 
@@ -62,6 +76,8 @@ Here we delve into the process of generating the Kotlin binding for cedarling an
 ```bash
 make java
 ```
+
+Use `make java BUILD_TYPE=release` or `make java BUILD_TYPE=debug` to build in `release` or `debug` mode. If `BUILD_TYPE` is not specified, the `release` profile is used by default.
 
 2. Change directory to sample Java project (`./bindings/cedarling_uniffi/javaApp`) and run below command to run the main method of a Maven project from the terminal.
 
