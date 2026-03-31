@@ -396,7 +396,7 @@ jobs:
           output: 'trivy-report.txt'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
       - name: Sign Trivy Reports
-        if: matrix.docker-images == 'all-in-one' && steps.build_docker_image.outputs.build && (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
+        if: matrix.docker-images == 'all-in-one' && steps.build_docker_image.outputs.build
         run: |
           cosign sign-blob --yes \
             --bundle trivy-report.json.bundle \
@@ -404,4 +404,8 @@ jobs:
           cosign sign-blob --yes \
             --bundle trivy-report.txt.bundle \
             trivy-report.txt
-          gh release upload "${{ github.event.release.tag_name }}" *.json *.bundle --clobber || echo "gh release upload failed (assets may already exist), continuing..."
+            if [[ -z "${{ github.event.release.tag_name }}" ]]; then
+                gh release upload "nightly" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber || echo "Failed to upload Trivy reports to nightly release"
+            else
+                gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
+            fi˚
