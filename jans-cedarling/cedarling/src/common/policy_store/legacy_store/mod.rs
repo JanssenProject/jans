@@ -24,6 +24,7 @@ use serde::de::{self, Error};
 use serde::{Deserialize, Deserializer};
 use url::Url;
 
+use crate::common::PartitionResult;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
     DefaultEntitiesWithWarns, parse_default_entities_with_warns,
@@ -400,22 +401,6 @@ where
         },
     }
 }
-
-trait PartitionResult<T, E>: Iterator<Item = Result<T, E>> + Sized {
-    fn partition_result(self) -> (Vec<T>, Vec<E>) {
-        let mut ok = Vec::new();
-        let mut errs = Vec::new();
-        for r in self {
-            match r {
-                Ok(v) => ok.push(v),
-                Err(e) => errs.push(e),
-            }
-        }
-        (ok, errs)
-    }
-}
-
-impl<T, E, I> PartitionResult<T, E> for I where I: Iterator<Item = Result<T, E>> {}
 
 impl From<LegacyPoliciesContainer> for super::PoliciesContainer {
     fn from(v: LegacyPoliciesContainer) -> Self {
