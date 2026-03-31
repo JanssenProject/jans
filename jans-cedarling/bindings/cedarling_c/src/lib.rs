@@ -14,6 +14,8 @@ mod types;
 use c_interface::*;
 use types::*;
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Initialize the Cedarling library
 /// This Function should be called before any other functions
 #[unsafe(no_mangle)]
@@ -27,6 +29,8 @@ pub extern "C" fn cedarling_init() -> c_int {
     }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Create a new Cedarling instance
 ///
 #[unsafe(no_mangle)]
@@ -64,6 +68,8 @@ pub unsafe extern "C" fn cedarling_new(
     unsafe { (*result).error_code as c_int }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Create a new Cedarling instance with environment variables support
 ///
 #[unsafe(no_mangle)]
@@ -94,6 +100,8 @@ pub unsafe extern "C" fn cedarling_new_with_env(
     unsafe { (*result).error_code as c_int }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Drop a cedarling instance
 ///
 #[unsafe(no_mangle)]
@@ -101,6 +109,8 @@ pub unsafe extern "C" fn cedarling_drop(instance_id: u64) -> c_int {
     drop_instance(instance_id) as c_int
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Authorize an unsigned request
 ///
 #[unsafe(no_mangle)]
@@ -137,6 +147,8 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Authorize a multi-issuer request
 ///
 #[unsafe(no_mangle)]
@@ -176,6 +188,8 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
 // Context Data API functions
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Push context data
 ///
 #[unsafe(no_mangle)]
@@ -229,6 +243,8 @@ pub unsafe extern "C" fn cedarling_context_push(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get context data by key
 ///
 #[unsafe(no_mangle)]
@@ -264,6 +280,8 @@ pub unsafe extern "C" fn cedarling_context_get(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Remove context data by key
 ///
 #[unsafe(no_mangle)]
@@ -299,6 +317,8 @@ pub unsafe extern "C" fn cedarling_context_remove(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Clear all context data
 ///
 #[unsafe(no_mangle)]
@@ -318,6 +338,8 @@ pub unsafe extern "C" fn cedarling_context_clear(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// List all context entries with metadata
 ///
 #[unsafe(no_mangle)]
@@ -337,6 +359,8 @@ pub unsafe extern "C" fn cedarling_context_list(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get context stats
 ///
 #[unsafe(no_mangle)]
@@ -356,6 +380,8 @@ pub unsafe extern "C" fn cedarling_context_stats(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Pop all logs from an instance
 ///
 #[unsafe(no_mangle)]
@@ -385,6 +411,8 @@ pub unsafe extern "C" fn cedarling_pop_logs(
     }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get a log by ID
 ///
 #[unsafe(no_mangle)]
@@ -421,6 +449,8 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
     unsafe { (*result).error_code as c_int }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get all log IDs
 ///
 #[unsafe(no_mangle)]
@@ -450,6 +480,8 @@ pub unsafe extern "C" fn cedarling_get_log_ids(
     }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get logs by tag
 ///
 #[unsafe(no_mangle)]
@@ -501,6 +533,8 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get logs by request ID
 ///
 #[unsafe(no_mangle)]
@@ -552,6 +586,8 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get logs by request ID and tag
 ///
 #[unsafe(no_mangle)]
@@ -627,6 +663,8 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Check whether a trusted issuer was loaded by issuer identifier
 ///
 #[unsafe(no_mangle)]
@@ -666,6 +704,8 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Check whether a trusted issuer was loaded by `iss` claim
 ///
 #[unsafe(no_mangle)]
@@ -705,6 +745,8 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get total number of trusted issuers discovered
 ///
 #[unsafe(no_mangle)]
@@ -727,6 +769,8 @@ pub unsafe extern "C" fn cedarling_total_issuers(instance_id: u64, out_count: *m
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get number of trusted issuers loaded successfully
 ///
 #[unsafe(no_mangle)]
@@ -752,6 +796,8 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuers_count(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get trusted issuer IDs loaded successfully
 ///
 #[unsafe(no_mangle)]
@@ -781,6 +827,8 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get trusted issuer IDs that failed to load
 ///
 #[unsafe(no_mangle)]
@@ -810,6 +858,8 @@ pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Shutdown a Cedarling instance
 ///
 #[unsafe(no_mangle)]
@@ -817,6 +867,8 @@ pub unsafe extern "C" fn cedarling_shutdown(instance_id: u64) -> c_int {
     shutdown_instance(instance_id) as c_int
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Free a string returned by Cedarling functions
 ///
 #[unsafe(no_mangle)]
@@ -829,6 +881,8 @@ pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
     }
 }
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Free a string array returned by Cedarling functions
 ///
 #[unsafe(no_mangle)]
@@ -857,6 +911,8 @@ pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingString
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Free a CedarlingResult structure
 ///
 #[unsafe(no_mangle)]
@@ -881,6 +937,8 @@ pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Free a CedarlingInstanceResult structure
 ///
 #[unsafe(no_mangle)]
@@ -901,6 +959,8 @@ pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingIn
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get the last error message
 ///
 #[unsafe(no_mangle)]
@@ -909,6 +969,8 @@ pub extern "C" fn cedarling_get_last_error() -> *const c_char {
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Clear last error message
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_clear_last_error() {
@@ -916,6 +978,8 @@ pub extern "C" fn cedarling_clear_last_error() {
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Get the Cedarling library version
 ///
 #[unsafe(no_mangle)]
@@ -924,6 +988,8 @@ pub extern "C" fn cedarling_version() -> *const c_char {
 }
 
 /// # Safety
+/// Caller must pass valid pointers for any non-null pointer arguments.
+/// Any owned pointers returned by this API must be released with the matching `cedarling_free_*` function.
 /// Global library cleanup helper.
 ///
 /// This function only clears thread-local last-error state and performs no unsafe memory access.
