@@ -93,7 +93,7 @@ RUN pip3 install --no-cache-dir --break-system-packages -r /app/requirements.txt
 RUN mkdir -p /app/scripts /app/templates /app/static
 COPY scripts /app/scripts/
 COPY templates /app/templates/
-COPY static /app/static/
+#COPY static /app/static/
 RUN chmod +x /app/scripts/*.py
 
 # ==================
