@@ -57,13 +57,13 @@ ENV CN_BUILD_DATE='2025-02-02 00:00'
 ARG CN_REQUIRE_WAR_DOWNLOAD=true
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-shibboleth-idp-webapp/${CN_VERSION}/jans-shibboleth-idp-webapp-${CN_VERSION}.war
 
-RUN mkdir -p ${SHIBBOLETH_HOME}/war \
-    && if [ "${CN_REQUIRE_WAR_DOWNLOAD}" = "true" ]; then \
-         wget -q --tries=3 ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war \
-         && test -s ${SHIBBOLETH_HOME}/war/idp.war; \
-       else \
-         wget -q ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war || echo "WAR not available, will be built locally"; \
-       fi
+#RUN mkdir -p ${SHIBBOLETH_HOME}/war \
+#   && if [ "${CN_REQUIRE_WAR_DOWNLOAD}" = "true" ]; then \
+#       wget -q --tries=3 ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war \
+#         && test -s ${SHIBBOLETH_HOME}/war/idp.war; \
+#      else \
+#       wget -q ${CN_SOURCE_URL} -O ${SHIBBOLETH_HOME}/war/idp.war || echo "WAR not available, will be built locally"; \
+#    fi
 
 # Download Janssen pycloudlib (pinned to specific ref for reproducibility)
 ARG JANS_PYCLOUDLIB_REF=main
