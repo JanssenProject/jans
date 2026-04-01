@@ -191,7 +191,6 @@ spec:
 {{- end }}
 
 {{- /* Auth Server: Redirect (HTTP -> HTTPS) */}}
-{{- if index .Values.global "auth-server" "ingress" "authServerEnabled" }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
