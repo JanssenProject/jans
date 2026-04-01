@@ -121,29 +121,29 @@ public class CedarlingAuthorizationService {
 	}
 	
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
-		try {
-			if (log.isDebugEnabled()) {
-				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
-						tokens, action, resource, context);
-			}
-			AuthorizeResult res = cedarlingAdapter.authorize(/*tokens/* null, action, resource, context);
-			
-			if (res == null) {
-				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
-						tokens, action, resource, context);
-				return false;
-			}
-
-			String requestId = res.getRequestId();
-			if (log.isDebugEnabled()) {
-				log.debug("Authorization workload decision {} for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
-						res.getDecision(), requestId, tokens, action, resource, context);
-			}
-
-			return res.getDecision();
-		} catch (Exception ex) {
-			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
-		}
+//		try {
+//			if (log.isDebugEnabled()) {
+//				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
+//						tokens, action, resource, context);
+//			}
+//			AuthorizeResult res = cedarlingAdapter.authorize(/*tokens/* null, action, resource, context);
+//			
+//			if (res == null) {
+//				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
+//						tokens, action, resource, context);
+//				return false;
+//			}
+//
+//			String requestId = res.getRequestId();
+//			if (log.isDebugEnabled()) {
+//				log.debug("Authorization workload decision {} for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
+//						res.getDecision(), requestId, tokens, action, resource, context);
+//			}
+//
+//			return res.getDecision();
+//		} catch (Exception ex) {
+//			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
+//		}
 		
 		return false;
 	}
