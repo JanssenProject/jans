@@ -71,26 +71,26 @@ impl Cedarling {
     /// with the given principals, actions, and resources.
     pub fn get_matching_policies_unsigned(
         &self,
-        principals: Vec<EntityData>,
-        actions: Vec<String>,
-        resources: Vec<EntityData>,
+        principals: &[EntityData],
+        actions: &[String],
+        resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.instance
             .authz
-            .get_matching_policies_unsigned(&principals, &actions, &resources)
+            .get_matching_policies_unsigned(principals, actions, resources)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
     /// with the given token-derived principals, actions, and resources.
     pub fn get_matching_policies_multi_issuer(
         &self,
-        tokens: Vec<TokenInput>,
-        actions: Vec<String>,
-        resources: Vec<EntityData>,
+        tokens: &[TokenInput],
+        actions: &[String],
+        resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
         self.instance
             .authz
-            .get_matching_policies_multi_issuer(&tokens, &actions, &resources)
+            .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
