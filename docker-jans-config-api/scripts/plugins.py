@@ -119,10 +119,7 @@ class AdminUiPlugin:
             src_archive_path = "/opt/jans/jetty/jans-config-api/custom/config/adminUI/policy-store.cjar"
             tmp_archive_path = os.path.join(tmp_dir, "policy-store.cjar")
 
-            with ZipFile(src_archive_path, "r") as src_archive:
-                # create temporary archive and preserve the original compression
-                tmp_archive = ZipFile(tmp_archive_path, "w", compression=src_archive.compression)
-
+            with ZipFile(src_archive_path, "r") as src_archive, ZipFile(tmp_archive_path, "w", compression=src_archive.compression) as tmp_archive:
                 for item in src_archive.infolist():
                     if item.filename == policy_file:
                         policy_file_found = True
@@ -132,9 +129,6 @@ class AdminUiPlugin:
                         data = src_archive.read(item.filename)
                     # copy item and preserve the original compression
                     tmp_archive.writestr(item, data, compress_type=item.compress_type)
-
-                # make sure descriptor is closed
-                tmp_archive.close()
 
             if not policy_file_found:
                 logger.warning("The policy file %s is not found in %s. Policy for Flex admin-ui may not be applied properly.", policy_file, src_archive_path)
