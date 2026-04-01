@@ -83,8 +83,8 @@ RUN apk del .build-deps \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir --break-system-packages -r /app/requirements.txt \
-    && rm -rf /app/requirements.txt
+#RUN pip3 install --no-cache-dir --break-system-packages -r /app/requirements.txt \
+#    && rm -rf /app/requirements.txt
 
 # ========
 # Scripts
