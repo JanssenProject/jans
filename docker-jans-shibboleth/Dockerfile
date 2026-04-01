@@ -66,13 +66,13 @@ ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-shibboleth-idp-weba
 #    fi
 
 # Download Janssen pycloudlib (pinned to specific ref for reproducibility)
-ARG JANS_PYCLOUDLIB_REF=main
-RUN wget -q https://github.com/JanssenProject/jans/archive/refs/heads/${JANS_PYCLOUDLIB_REF}.tar.gz -O /tmp/jans.tar.gz \
-    && mkdir -p /tmp/jans \
-    && tar -xf /tmp/jans.tar.gz -C /tmp/jans --strip-components=1 \
-    && cd /tmp/jans/jans-pycloudlib \
-    && python3 -m pip install --no-cache-dir --break-system-packages . \
-    && rm -rf /tmp/jans.tar.gz /tmp/jans
+#ARG JANS_PYCLOUDLIB_REF=main
+#RUN wget -q https://github.com/JanssenProject/jans/archive/refs/heads/${JANS_PYCLOUDLIB_REF}.tar.gz -O /tmp/jans.tar.gz \
+#   && mkdir -p /tmp/jans \
+#    && tar -xf /tmp/jans.tar.gz -C /tmp/jans --strip-components=1 \
+#    && cd /tmp/jans/jans-pycloudlib \
+#    && python3 -m pip install --no-cache-dir --break-system-packages . \
+#    && rm -rf /tmp/jans.tar.gz /tmp/jans
 
 # Cleanup
 RUN apk del .build-deps \
