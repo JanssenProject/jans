@@ -1222,6 +1222,45 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#policy-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Introspection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Introspection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policymetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyMetadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Rust)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authz-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2103,6 +2142,45 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#policy-introspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Introspection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Introspection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policymetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyMetadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Rust)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authz-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2499,6 +2577,71 @@ These are described below.</p>
 <p>Runs multi-issuer authorization against the provided <code>AuthorizeMultiIssuerRequest</code> object. Validates multiple JWT tokens from different issuers and evaluates policies based on token entities.</p>
 </li>
 </ul>
+<h3 id="policy-introspection">Policy Introspection<a class="headerlink" href="#policy-introspection" title="Permanent link">#</a></h3>
+<p>These methods return metadata about policies that are potentially applicable to a given authorization request, <strong>without executing authorization</strong>. This is useful for admin tooling, policy auditing, and debugging.</p>
+<p>Both methods perform scope-level filtering only (principal/action/resource constraints). Policies with <code>when</code>/<code>unless</code> conditions may still not apply at evaluation time — the returned set is a superset of truly applicable policies.</p>
+<ul>
+<li>
+<p><code>get_matching_policies_unsigned(principals, actions, resources)</code></p>
+<p>Returns metadata for all policies whose scope constraints are compatible with the given principals, actions, and resources.</p>
+</li>
+<li>
+<p><code>principals</code>: Array of <code>EntityData</code> objects — their <code>entity_type</code> is matched against policy principal constraints</p>
+</li>
+<li><code>actions</code>: Array of action strings (e.g., <code>Jans::Action::"Read"</code>) — matched against policy action constraints</li>
+<li><code>resources</code>: Array of <code>EntityData</code> objects — their <code>entity_type</code> is matched against policy resource constraints</li>
+</ul>
+<p>Returns a list of <code>PolicyMetadata</code> objects.</p>
+<ul>
+<li>
+<p><code>get_matching_policies_multi_issuer(tokens, actions, resources)</code></p>
+<p>Returns metadata for all policies whose scope constraints are compatible with the given token-derived principals, actions, and resources. Tokens are validated and their mapping types are used as principal entity types.</p>
+</li>
+<li>
+<p><code>tokens</code>: Array of <code>TokenInput</code> objects — their <code>mapping</code> field is used as the principal entity type</p>
+</li>
+<li><code>actions</code>: Array of action strings</li>
+<li><code>resources</code>: Array of <code>EntityData</code> objects</li>
+</ul>
+<p>Returns a list of <code>PolicyMetadata</code> objects.</p>
+<h4 id="policymetadata">PolicyMetadata<a class="headerlink" href="#policymetadata" title="Permanent link">#</a></h4>
+<p>Each returned <code>PolicyMetadata</code> object contains:</p>
+<ul>
+<li><code>id</code>: The policy ID (string)</li>
+<li><code>annotations</code>: Key-value pairs from Cedar policy annotations (<code>@key("value")</code>), returned as a map of strings</li>
+<li><code>source</code>: The Cedar policy source code in human-readable Cedar syntax</li>
+</ul>
+<h4 id="example-rust">Example (Rust)<a class="headerlink" href="#example-rust" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">Cedarling</span><span class="p">,</span><span class="w"> </span><span class="n">EntityData</span><span class="p">,</span><span class="w"> </span><span class="n">CedarEntityMapping</span><span class="p">,</span><span class="w"> </span><span class="n">PolicyMetadata</span><span class="p">};</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">principals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::User&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user1&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
+<span class="p">}];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">actions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="s">r#&quot;Jans::Action::&quot;Read&quot;&quot;#</span><span class="p">.</span><span class="n">to_string</span><span class="p">()];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">resources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="n">EntityData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cedar_mapping</span><span class="p">:</span><span class="w"> </span><span class="nc">CedarEntityMapping</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">entity_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Jans::Document&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;doc1&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">attributes</span><span class="p">:</span><span class="w"> </span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">(),</span>
+<span class="p">}];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span>
+<span class="w">    </span><span class="p">.</span><span class="n">get_matching_policies_unsigned</span><span class="p">(</span><span class="n">principals</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="n">resources</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="k">await</span>
+<span class="w">    </span><span class="p">.</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;failed to get matching policies&quot;</span><span class="p">);</span>
+
+<span class="k">for</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">&amp;</span><span class="n">policies</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Policy: {} (annotations: {:?})&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">annotations</span><span class="p">);</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Source:</span><span class="se">\n</span><span class="s">{}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">source</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
 <h3 id="authz-result">Authz Result<a class="headerlink" href="#authz-result" title="Permanent link">#</a></h3>
 <p>The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.</p>
 <h4 id="authorizeresult-for-authorize_unsigned">AuthorizeResult (for <code>authorize_unsigned</code>)<a class="headerlink" href="#authorizeresult-for-authorize_unsigned" title="Permanent link">#</a></h4>
@@ -2767,7 +2910,7 @@ These are described below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 24, 2026 12:51:50 UTC"><span class="timeago" datetime="2026-03-24T12:51:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 24, 2026 12:51:50 UTC">2026-03-24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 1, 2026 17:16:27 UTC"><span class="timeago" datetime="2026-04-01T17:16:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 1, 2026 17:16:27 UTC">2026-04-01</span>
   </span>
 
     

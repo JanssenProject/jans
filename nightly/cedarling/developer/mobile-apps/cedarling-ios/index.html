@@ -1976,44 +1976,26 @@
 <h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p>Clone the jans monorepo and change directory to <code>/path/of/jans/jans-cedarling</code>.
+<p>Clone the jans monorepo and change directory to <code>/path/of/jans/jans-cedarling/bindings/cedarling_uniffi</code>.
    <div class="highlight"><pre><span></span><code><span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JanssenProject/jans.git
-<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/path/of/jans/jans-cedarling
+<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/path/of/jans/jans-cedarling/bindings/cedarling_uniffi
 </code></pre></div></p>
 </li>
 <li>
-<p>Build the library:
-   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
+<p>Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>target<span class="w"> </span>add<span class="w"> </span>aarch64-apple-darwin<span class="w"> </span>aarch64-apple-ios-sim<span class="w"> </span>aarch64-apple-ios
 </code></pre></div>
-   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</p>
-</li>
-<li>
-<p>Generate the bindings for Swift by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
-   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>run<span class="w"> </span>--bin<span class="w"> </span>uniffi-bindgen<span class="w"> </span>generate<span class="w"> </span>--library<span class="w"> </span>./target/release/<span class="o">{</span>build_file<span class="o">}</span><span class="w"> </span>--language<span class="w"> </span>swift<span class="w"> </span>--out-dir<span class="w"> </span>./bindings/cedarling_uniffi/output
-</code></pre></div></p>
-</li>
-<li>
-<p>Building the iOS binaries and adding these targets to Rust.
-   <div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>target<span class="w"> </span>add<span class="w"> </span>aarch64-apple-ios-sim<span class="w"> </span>aarch64-apple-ios
-</code></pre></div></p>
-</li>
-<li>
-<p>Build the library for Swift.
-   <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios-sim
-cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--target<span class="o">=</span>aarch64-apple-ios
+<ol>
+<li>Run below command to build and import binding into iOS project:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>make<span class="w"> </span>ios
 </code></pre></div>
-   You should have two binaries <code>target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a</code> and <code>target/aarch64-apple-ios/release/libcedarling_uniffi.a</code>.</p>
-</li>
+<p>Use <code>make ios BUILD_TYPE=release</code> or <code>make ios BUILD_TYPE=debug</code> to build in <code>release</code> or <code>debug</code> mode. If <code>BUILD_TYPE</code> is not specified, the <code>release</code> profile is used by default.</p>
+<ol>
 <li>
-<p>The XCFramework will allow us to import the library with zero effort in Xcode. First, we need to rename the file ./bindings/cedarling_uniffi/output/cedarling_uniffiFFI.modulemap to ./bindings/cedarling_uniffi/output/module.modulemap. Then, we can create the XCFramework:
-   <div class="highlight"><pre><span></span><code>xcodebuild<span class="w"> </span>-create-xcframework<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios-sim/release/libcedarling_uniffi.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>-library<span class="w"> </span>./target/aarch64-apple-ios/release/libcedarling_uniffi.a<span class="w"> </span>-headers<span class="w"> </span>./bindings/cedarling_uniffi/output<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>-output<span class="w"> </span><span class="s2">&quot;ios/Mobile.xcframework&quot;</span>
-</code></pre></div></p>
-</li>
-<li>
-<p>Open <code>./jans-cedarling/bindings/cedarling_uniffi/iOSApp</code> in Xcode. Import both the XCFramework Mobile.xcframework and the Swift file bindings <code>bindings/output/cedarling_uniffi.swift</code> files into your project (drag and drop should work).</p>
+<p>Open <code>./bindings/cedarling_uniffi/iOSApp</code> in Xcode. Import both the XCFramework <code>./bindings/ios/Mobile.xcframework</code> and the Swift file bindings <code>./bindings/build/cedarling_uniffi.swift</code> files into your project (drag and drop should work).</p>
 </li>
 <li>
 <p>Run iOS project on simulator.</p>
@@ -2043,7 +2025,7 @@ cargo<span class="w"> </span>build<span class="w"> </span>--release<span class="
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 1, 2026 09:54:21 UTC"><span class="timeago" datetime="2026-04-01T09:54:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 1, 2026 09:54:21 UTC">2026-04-01</span>
   </span>
 
     

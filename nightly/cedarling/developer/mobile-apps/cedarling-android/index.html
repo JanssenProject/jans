@@ -1975,46 +1975,22 @@
 </ul>
 <h2 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h2>
 <ol>
-<li>
-<p>Build the library:
-    <div class="highlight"><pre><span></span><code>cargo<span class="w"> </span>build<span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span>cedarling_uniffi
+<li>Ask toolchain manager to install support for compiling Rust code for aarch64-linux, armv7-linux, i686-linux and x86_64-linux.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="w">    </span>rustup<span class="w"> </span>target<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>aarch64-linux-android<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>armv7-linux-androideabi<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>i686-linux-android<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>x86_64-linux-android
 </code></pre></div>
-   In <code>target/release</code>, you should find the <code>libcedarling_uniffi.dylib</code> (if Mac OS), <code>libcedarling_uniffi.so</code> (if Linux OS), or <code>libcedarling_uniffi.dll</code> (if Windows OS) file, depending on the operating system you are using.</p>
-</li>
-<li>
-<p>Set up cargo-ndk for cross-compiling:
-    <div class="highlight"><pre><span></span><code>cargo install cargo-ndk
-</code></pre></div></p>
-</li>
-<li>
-<p>Add targets for Android:
-    <div class="highlight"><pre><span></span><code>rustup target add \
-        aarch64-linux-android \
-        armv7-linux-androideabi \
-        i686-linux-android \
-        x86_64-linux-android
-</code></pre></div></p>
-</li>
-<li>
-<p>Compile the dynamic libraries in ./app/src/main/jniLibs (next to java and res directories) in the sample <code>androidApp</code> project.
-    <div class="highlight"><pre><span></span><code>cargo ndk -o ./bindings/cedarling_uniffi/androidApp/app/src/main/jniLibs \
-        --manifest-path ./Cargo.toml \
-        -t armeabi-v7a \
-        -t arm64-v8a \
-        -t x86 \
-        -t x86_64 \
-        build \
-        -p cedarling_uniffi --release
-</code></pre></div></p>
-</li>
-<li>
-<p>Generate the bindings for Kotlin by running the command below. Replace <code>{build_file}</code> with <code>libcedarling_uniffi.dylib</code>, <code>libcedarling_uniffi.so</code>, or <code>libcedarling_uniffi.dll</code>, depending on which file is generated in <code>target/release</code>.
-    <div class="highlight"><pre><span></span><code>cargo run --bin uniffi-bindgen generate --library ./target/release/{build_file} --language kotlin --out-dir ./bindings/cedarling_uniffi/androidApp/app/src/main/java/com/example/androidapp/cedarling/uniffi
-</code></pre></div></p>
-</li>
-<li>
-<p>We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the <code>androidApp</code> project on Android Studio and run the project on simulator.</p>
-</li>
+<ol>
+<li>Run below command to build and import binding into Android project.
+    <div class="highlight"><pre><span></span><code>make<span class="w"> </span>android
+</code></pre></div></li>
+</ol>
+<p>Use <code>make android BUILD_TYPE=release</code> or <code>make android BUILD_TYPE=debug</code> to build in <code>release</code> or <code>debug</code> mode. If <code>BUILD_TYPE</code> is not specified, the <code>release</code> profile is used by default.</p>
+<ol>
+<li>We have included a sample android app using Cedarling UniFFI binding for making authorisation decisions. Open the <code>./bindings/cedarling_uniffi/androidApp</code> project on Android Studio and run the project on simulator.</li>
 </ol>
 <div style="position: relative; padding-bottom: 104.75728155339806%; height: 0;"><iframe src="https://www.loom.com/embed/463de78bd3174f2ca7d2b2f2fb2915cd?sid=01bd3481-857f-4981-9414-e81852fa3079" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
 
@@ -2039,7 +2015,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 1, 2025 12:28:23 UTC"><span class="timeago" datetime="2025-09-01T12:28:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 1, 2025 12:28:23 UTC">2025-09-01</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 1, 2026 09:54:21 UTC"><span class="timeago" datetime="2026-04-01T09:54:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 1, 2026 09:54:21 UTC">2026-04-01</span>
   </span>
 
     
