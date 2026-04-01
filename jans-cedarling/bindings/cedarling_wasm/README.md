@@ -240,6 +240,15 @@ export class Cedarling {
    * ```
    */
   get_stats_ctx(): DataStoreStats;
+  /**
+   * Trusted issuer loading status helpers.
+   */
+  is_trusted_issuer_loaded_by_name(issuer_id: string): boolean;
+  is_trusted_issuer_loaded_by_iss(iss_claim: string): boolean;
+  total_issuers(): number;
+  loaded_trusted_issuers_count(): number;
+  loaded_trusted_issuer_ids(): Array<string>;
+  failed_trusted_issuer_ids(): Array<string>;
 }
 
 /**
@@ -587,3 +596,16 @@ permit(
 ```
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
+
+## Trusted Issuer Loading Info
+
+When a policy store contains `trusted-issuers/` entries, you can inspect loading status:
+
+```javascript
+const loaded = cedarling.is_trusted_issuer_loaded_by_name("issuer_id");
+const loadedByIss = cedarling.is_trusted_issuer_loaded_by_iss("https://issuer.example.org");
+const total = cedarling.total_issuers();
+const loadedCount = cedarling.loaded_trusted_issuers_count();
+const loadedIds = cedarling.loaded_trusted_issuer_ids();
+const failedIds = cedarling.failed_trusted_issuer_ids();
+```

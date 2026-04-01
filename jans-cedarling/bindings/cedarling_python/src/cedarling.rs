@@ -19,6 +19,7 @@ use crate::context_data_api::data_entry::DataEntry;
 use crate::context_data_api::data_store_stats::DataStoreStats;
 use crate::context_data_api::errors::data_error_to_py;
 use cedarling::DataApi;
+use cedarling::TrustedIssuerLoadingInfo;
 use serde_pyobject::{from_pyobject, to_pyobject};
 use std::time::Duration;
 
@@ -367,6 +368,36 @@ impl Cedarling {
             .get_stats_ctx()
             .map(|stats| stats.into())
             .map_err(data_error_to_py)
+    }
+
+    /// Returns true if trusted issuer with the given policy-store id is loaded.
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    }
+
+    /// Returns true if trusted issuer with the given iss claim is loaded.
+    fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_iss(iss_claim)
+    }
+
+    /// Returns total number of configured trusted issuers.
+    fn total_issuers(&self) -> usize {
+        self.inner.total_issuers()
+    }
+
+    /// Returns number of successfully loaded trusted issuers.
+    fn loaded_trusted_issuers_count(&self) -> usize {
+        self.inner.loaded_trusted_issuers_count()
+    }
+
+    /// Returns ids of successfully loaded trusted issuers.
+    fn loaded_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.loaded_trusted_issuer_ids().into_iter().collect()
+    }
+
+    /// Returns ids of trusted issuers that failed to load.
+    fn failed_trusted_issuer_ids(&self) -> Vec<String> {
+        self.inner.failed_trusted_issuer_ids().into_iter().collect()
     }
 }
 

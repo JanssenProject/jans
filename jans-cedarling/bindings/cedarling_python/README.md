@@ -314,6 +314,21 @@ permit(
 
 The data is injected into the evaluation context before policy evaluation, allowing policies to make decisions based on dynamically pushed data.
 
+## Trusted Issuer Loading Info
+
+`Cedarling` exposes trusted issuer loading status APIs:
+
+```python
+loaded_by_name = instance.is_trusted_issuer_loaded_by_name("issuer_id")
+loaded_by_iss = instance.is_trusted_issuer_loaded_by_iss("https://issuer.example.org")
+total = instance.total_issuers()
+loaded_count = instance.loaded_trusted_issuers_count()
+loaded_ids = instance.loaded_trusted_issuer_ids()
+failed_ids = instance.failed_trusted_issuer_ids()
+```
+
+These values are meaningful when your policy store defines a `trusted-issuers/` section.
+
 ## Building the Python Library
 
 If you only want to build the library without installing it in the Python environment, follow these steps:

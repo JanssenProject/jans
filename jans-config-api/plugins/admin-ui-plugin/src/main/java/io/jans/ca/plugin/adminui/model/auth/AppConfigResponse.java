@@ -3,7 +3,6 @@ package io.jans.ca.plugin.adminui.model.auth;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.as.model.config.adminui.KeyValuePair;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
-import io.jans.configapi.core.model.adminui.CedarlingPolicyStrRetrievalPoint;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -42,9 +41,12 @@ public class AppConfigResponse {
     private String auiPolicyStoreUrl;
     @Schema(description = "Admin UI Default Policy Store path", accessMode = Schema.AccessMode.READ_WRITE)
     private String auiDefaultPolicyStorePath;
-    @Schema(description = "Specifies the policy store retrieval point for Admin UI. Set to `default` to use the local default policy store, or `remote` to retrieve policies from the configured remote policy store URL.", accessMode = Schema.AccessMode.READ_WRITE)
-    private CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint;
 
+    /**
+     * Retrieve the additional key-value parameters configured for the Admin UI.
+     *
+     * @return the list of additional parameters, or `null` if none are configured
+     */
     public List<KeyValuePair> getAdditionalParameters() {
         return additionalParameters;
     }
@@ -171,18 +173,20 @@ public class AppConfigResponse {
         return auiPolicyStoreUrl;
     }
 
+    /**
+     * Set the Admin UI policy store URL.
+     *
+     * @param auiPolicyStoreUrl the URL of the policy store used by the Admin UI
+     */
     public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
         this.auiPolicyStoreUrl = auiPolicyStoreUrl;
     }
 
-    public CedarlingPolicyStrRetrievalPoint getCedarlingPolicyStoreRetrievalPoint() {
-        return cedarlingPolicyStoreRetrievalPoint;
-    }
-
-    public void setCedarlingPolicyStoreRetrievalPoint(CedarlingPolicyStrRetrievalPoint cedarlingPolicyStoreRetrievalPoint) {
-        this.cedarlingPolicyStoreRetrievalPoint = cedarlingPolicyStoreRetrievalPoint;
-    }
-
+    /**
+     * Gets the default policy store path used by the Admin UI.
+     *
+     * @return the configured default policy store path, or `null` if not set
+     */
     public String getAuiDefaultPolicyStorePath() {
         return auiDefaultPolicyStorePath;
     }
