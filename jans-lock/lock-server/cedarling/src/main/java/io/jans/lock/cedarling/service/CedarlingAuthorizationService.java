@@ -126,7 +126,7 @@ public class CedarlingAuthorizationService {
 				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
 						tokens, action, resource, context);
 			}
-			AuthorizeResult res = cedarlingAdapter.authorize(tokens, action, resource, context);
+			AuthorizeResult res = cedarlingAdapter.authorize(/*tokens/* null, action, resource, context);
 			
 			if (res == null) {
 				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
