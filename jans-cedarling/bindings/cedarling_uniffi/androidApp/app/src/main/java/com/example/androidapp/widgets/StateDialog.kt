@@ -1,6 +1,5 @@
 package com.example.androidapp.widgets
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -14,12 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.androidapp.utils.toJsonString
 import com.example.androidapp.views.JsonTreeView
-import uniffi.cedarling_uniffi.AuthorizeResult
+import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult
 
 
 @Composable
 fun StateDialog(
-    result: AuthorizeResult?,
+    result: MultiIssuerAuthorizeResult?,
     logs: List<String>?,
     onDismiss: () -> Unit
 ) {
@@ -33,14 +32,9 @@ fun StateDialog(
                 Text("Authorization Result:", style = MaterialTheme.typography.titleMedium)
                 Text("${result?.decision ?: "N/A"}", modifier = Modifier.padding(4.dp))
 
-                result?.principals?.let { principals ->
-                    Text("Principals (${principals.size}):", style = MaterialTheme.typography.titleMedium)
-                    principals.keys.sorted().forEach { key ->
-                        principals[key]?.let { response ->
-                            Text("$key:", style = MaterialTheme.typography.titleSmall)
-                            JsonTreeView(toJsonString(response))
-                        }
-                    }
+                result?.response?.diagnostics?.let { diagnostics ->
+                    Text("Diagnostics:", style = MaterialTheme.typography.titleMedium)
+                    JsonTreeView(toJsonString(diagnostics))
                 }
                 Text("Logs:", style = MaterialTheme.typography.titleMedium)
                 logs?.forEach { log ->
