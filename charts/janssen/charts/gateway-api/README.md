@@ -24,7 +24,7 @@ Kubernetes: `>=v1.23.0-0`
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| additionalConfig | object | `{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{},"traefik":{}}` | Additional configuration for Specific Gateway API implementation |
+| additionalConfig | object | `{"airlock":{"createLbService":false},"cilium":{"ipPoolBlocks":[]},"envoy":{"createGatewayClass":false},"istio":{},"kgateway":{},"nginx":{"enableGrpcRewriteSnippets":false},"traefik":{}}` | Additional configuration for Specific Gateway API implementation |
 | additionalConfig.airlock | object | `{"createLbService":false}` | Configuration for Airlock Microgateway |
 | additionalConfig.airlock.createLbService | bool | `false` | Create LoadBalancer service using GatewayParameters (by default airlock-microgateway doesn't create the service). See https://docs.airlock.com/microgateway/latest/index/api/crds/gateway-parameters/v1alpha1/ for details. The GatewayParameters will be attached to gateway.infrastructure.parametersRef only if it's empty. |
 | additionalConfig.cilium | object | `{"ipPoolBlocks":[]}` | Configuration for Cilium. |
@@ -33,13 +33,15 @@ Kubernetes: `>=v1.23.0-0`
 | additionalConfig.envoy.createGatewayClass | bool | `false` | Create GatewayClass named `envoy` (by default Envoy doesn't create gatewayclass). The `envoy` name can be set as value of `gateway.className` attribute. |
 | additionalConfig.istio | object | `{}` | Configuration for Istio. |
 | additionalConfig.kgateway | object | `{}` | Configuration for kgateway. |
-| additionalConfig.nginx | object | `{}` | Configuration for NGINX Fabric. |
+| additionalConfig.nginx | object | `{"enableGrpcRewriteSnippets":false}` | Configuration for NGINX Fabric. |
+| additionalConfig.nginx.enableGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to proxy gRPC requests to /jans-auth. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup |
 | additionalConfig.traefik | object | `{}` | Configuration for Traefik. |
 | fullnameOverride | string | `""` |  |
-| gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
+| gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","enabled":true,"httpPort":80,"httpsPort":443,"infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
 | gateway.annotations | object | `{}` | Specific annotations for the Gateway resource |
 | gateway.attachLbIp | bool | `false` | Attach global.lbIp to Gateway spec.addresses with IPAddress type (enable this if loadbalancer doesn't assign IP address to Gateway automatically) |
 | gateway.className | string | `"nginx"` | Set the gatewayClassName corresponding to your installed controller. |
+| gateway.enabled | bool | `true` | Enable Gateway API and create a Gateway resource (if disabled, you will have to create and manage the Gateway resource externally). |
 | gateway.httpPort | int | `80` | Gateway http port number |
 | gateway.httpsPort | int | `443` | Gateway https port number |
 | gateway.infrastructure | object | `{"annotations":{},"labels":{},"parametersRef":{}}` | Gateway spec.infrastructure |
@@ -50,6 +52,8 @@ Kubernetes: `>=v1.23.0-0`
 | gateway.name | string | `"jans-gateway"` | The name of the Gateway resource to be created |
 | gateway.tlsSecretName | string | `"tls-certificate"` | Secret containing the TLS certificate for the Gateway |
 | nameOverride | string | `""` |  |
-| routes | object | `{"annotations":{},"labels":{}}` | Configuration for HTTPRoute and its related resources |
+| routes | object | `{"annotations":{},"gatewayNamespace":"","httpSectionName":"http","httpsSectionName":"https","labels":{}}` | Configuration for HTTPRoute and its related resources |
 | routes.annotations | object | `{}` | Specific annotations for the HTTPRoute resource |
+| routes.gatewayNamespace | string | `""` | Namespace where the Gateway resource resides. Set this ONLY if the Gateway is externally managed in a different namespace than this Helm release. If set, ensure the target namespace exists and your Gateway controller has the required cross-namespace RBAC permissions. |
+| routes.httpSectionName | string | `"http"` | Only set the httpSectionName and httpsSectionName if it doesn't work with the default values, according to your installed controller (e.g. some controller may require the listener name to be `default`). |
 | routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |

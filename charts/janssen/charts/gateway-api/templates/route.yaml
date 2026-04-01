@@ -41,6 +41,12 @@ spec:
     - path:
         type: Exact
         value: /.well-known/openid-configuration
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/.well-known/openid-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -57,7 +63,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /device_authorization.htm
+          replaceFullPath: /jans-auth/device_authorization.htm
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -69,6 +75,12 @@ spec:
     - path:
         type: Exact
         value: /firebase-messaging-sw.js
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/firebase-messaging-sw.js
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -85,7 +97,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /restv1/uma2-configuration
+          replaceFullPath: /jans-auth/restv1/uma2-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -97,6 +109,12 @@ spec:
     - path:
         type: Exact
         value: /.well-known/webfinger
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/.well-known/webfinger
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -108,6 +126,12 @@ spec:
     - path:
         type: Exact
         value: /.well-known/simple-web-discovery
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/.well-known/simple-web-discovery
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -124,7 +148,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /restv1/fido-configuration
+          replaceFullPath: /jans-auth/restv1/fido-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -192,7 +216,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /api/v1/configuration
+          replaceFullPath: /jans-auth/api/v1/configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -209,7 +233,7 @@ spec:
       urlRewrite:
         path:
           type: ReplaceFullPath
-          replaceFullPath: /restv1/authzen-configuration
+          replaceFullPath: /jans-auth/restv1/authzen-configuration
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -249,12 +273,6 @@ spec:
     - path:
         type: PathPrefix
         value: /jans-auth
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplacePrefixMatch
-          replacePrefixMatch: /
     backendRefs:
     - name: {{ $authSvc }}
       port: 8080
@@ -404,8 +422,7 @@ spec:
 {{- /* These endpoints use gRPC                                 */}}
 {{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
-{{- if or (eq .Values.gateway.className "istio") (eq .Values.gateway.className "airlock-microgateway") }}
-{{- /* Use HTTPRoute in istio to avoid routes being overriden by another route type */}}
+{{- if ne .Values.gateway.className "nginx" }}
 kind: HTTPRoute
 {{- else }}
 kind: GRPCRoute
@@ -432,12 +449,17 @@ spec:
   rules:
   {{- /* 1. Lock Server Audit */}}
   {{- /* List all routable methods explicitly to satisfy different gateway implementation */}}
-  {{- if or (eq .Values.gateway.className "istio") (eq .Values.gateway.className "airlock-microgateway") }}
-  {{- /* HTTPRoute matches for istio */}}
+  {{- if ne .Values.gateway.className "nginx" }}
   - matches:
     - path:
         type: PathPrefix
         value: /io.jans.lock.audit.AuditService
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /jans-auth/io.jans.lock.audit.AuditService
     backendRefs:
     - name: {{ $authSvc }}-grpc
       port: 50051
@@ -461,6 +483,14 @@ spec:
     - method:
         service: io.jans.lock.audit.AuditService
         method: ProcessBulkTelemetry
+    {{- if and (eq .Values.gateway.className "nginx") (.Values.additionalConfig.nginx.enableGrpcRewriteSnippets) }}
+    filters:
+    - type: ExtensionRef
+      extensionRef:
+        group: gateway.nginx.org
+        kind: SnippetsFilter
+        name: {{ .Release.Name }}-nginx-grpc-rewrite
+    {{- end }}
     backendRefs:
     - name: {{ $authSvc }}-grpc
       port: 50051

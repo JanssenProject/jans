@@ -44,7 +44,11 @@ routes:
 # -- Additional configuration for Specific Gateway API implementation
 additionalConfig:
   # -- Configuration for NGINX Fabric.
-  nginx: {}
+  nginx:
+    # -- Enable URL rewrite to proxy gRPC requests to /jans-auth.
+    # Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500).
+    # See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup
+    enableGrpcRewriteSnippets: false
   # -- Configuration for Traefik.
   traefik: {}
   # -- Configuration for Istio.
