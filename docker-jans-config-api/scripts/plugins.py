@@ -131,7 +131,7 @@ class AdminUiPlugin:
                     tmp_archive.writestr(item, data, compress_type=item.compress_type)
 
             if not policy_file_found:
-                logger.warning("The policy file %s is not found in %s. Policy for Flex admin-ui may not be applied properly.", policy_file, src_archive_path)
+                raise FileNotFoundError(f"The required policy file {policy_file} is not found in {src_archive_path} archive.")
 
             # replace the original archive
             shutil.move(tmp_archive_path, src_archive_path)
