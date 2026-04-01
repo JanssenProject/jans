@@ -13,10 +13,10 @@ import InputLabel from '@mui/material/InputLabel';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
-import Utils from './Utils';
+import Utils from '../../../options/Utils';
 import Stack from '@mui/material/Stack';
 
-export default function CedarlingUnsignedAuthz({ data }) {
+export default function UnsignedAuthzForm({ data }) {
     const [logType, setLogType] = React.useState('Decision');
     const [authzResult, setAuthzResult] = React.useState("");
     const [authzLogs, setAuthzLogs] = React.useState("");

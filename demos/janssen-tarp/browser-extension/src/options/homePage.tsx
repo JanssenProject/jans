@@ -6,11 +6,11 @@ import Box from '@mui/material/Box';
 import Password from '@mui/icons-material/Password';
 import LockPerson from '@mui/icons-material/LockPerson';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import OIDCClients from './oidcClients';
+import OIDCClients from '../features/authentication/components/OIDCClients';
 import CedarlingMgmt from './cedarling';
 import Grid from '@mui/material/Grid';
 import Utils from './Utils';
-import UserDetails from './userDetails'
+import UserDetails from '../features/authentication/components/UserDetails'
 import {AIAgent} from '../ai/agentUI/index'
 
 interface TabPanelProps {
@@ -61,27 +61,49 @@ export default function HomePage({ data, notifyOnDataChange }) {
     setValue(newValue);
   };
 
+  const isLoggedIn = !Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0;
+
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ maxWidth: "lg", bgcolor: 'background.paper' }}>
+    <Container maxWidth="lg" disableGutters>
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          px: 2,
+        }}
+      >
         <Tabs
           value={value}
           onChange={handleChange}
           variant="scrollable"
-          scrollButtons
+          scrollButtons="auto"
           allowScrollButtonsMobile
-          aria-label="scrollable force tabs example"
-          TabIndicatorProps={{ sx: { bgcolor: "#148514" } }}
+          aria-label="main navigation tabs"
+          sx={{
+            '& .MuiTab-root': {
+              minHeight: 56,
+              gap: 0.5,
+            },
+            '& .Mui-selected': {
+              color: 'primary.main',
+            },
+            '& .MuiTabs-indicator': {
+              height: 3,
+              borderRadius: '3px 3px 0 0',
+              bgcolor: 'primary.main',
+            },
+          }}
         >
-          {(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0) ?
-            <Tab label="User Details" icon={<Password />} /> :
-            <Tab label="Authentication Flow" icon={<Password />} />}
-          <Tab label="Cedarling" icon={<LockPerson />} />
-          <Tab label="AI Agent" icon={<SmartToyOutlinedIcon />} />
+          {isLoggedIn ?
+            <Tab label="User Details" icon={<Password />} iconPosition="start" {...a11yProps(0)} /> :
+            <Tab label="Authentication" icon={<Password />} iconPosition="start" {...a11yProps(0)} />}
+          <Tab label="Cedarling" icon={<LockPerson />} iconPosition="start" {...a11yProps(1)} />
+          <Tab label="AI Agent" icon={<SmartToyOutlinedIcon />} iconPosition="start" {...a11yProps(2)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        {(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0) ?
+        {isLoggedIn ?
           <UserDetails
             data={data.loginDetails}
             notifyOnDataChange={notifyOnDataChange}
@@ -96,7 +118,7 @@ export default function HomePage({ data, notifyOnDataChange }) {
           <Grid size={{xs:12}}>
             <CedarlingMgmt
               data={data}
-              isLoggedIn={(!Utils.isEmpty(data.loginDetails) && Object.keys(data.loginDetails).length !== 0)}
+              isLoggedIn={isLoggedIn}
               notifyOnDataChange={notifyOnDataChange}
             />
           </Grid>

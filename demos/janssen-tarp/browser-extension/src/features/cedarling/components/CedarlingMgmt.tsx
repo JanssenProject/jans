@@ -1,7 +1,7 @@
 import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
@@ -9,35 +9,24 @@ import Edit from '@mui/icons-material/Edit';
 import { pink, green } from '@mui/material/colors';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import AddIcon from '@mui/icons-material/Add';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import AddCedarlingConfig from './addCedarlingConfig';
-import CedarlingUnsignedAuthz from './cedarlingUnsignedAuthz';
-import CedarlingSignedAuthz from './cedarlingSignedAuthz';
-import CedarlingMultiIssuerAuthz from './cedarlingMultiIssuerAuthz';
+import AddCedarlingConfig from './AddCedarlingConfig';
+import UnsignedAuthzForm from './UnsignedAuthzForm';
+import SignedAuthzForm from './SignedAuthzForm';
+import MultiIssuerAuthzForm from './MultiIssuerAuthzForm';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import HelpDrawer from './helpDrawer'
+import HelpDrawer from '../../../options/helpDrawer'
 import Alert from '@mui/material/Alert';
 import { JsonEditor } from 'json-edit-react'
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.primary.dark,
-        color: theme.palette.common.white,
-        fontWeight: 700,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}));
+import StyledTableCell from '../../../shared/components/StyledTableCell';
 
 function Row(props: { row: any, notifyOnDataChange }) {
     const { row, notifyOnDataChange } = props;
@@ -103,7 +92,7 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
     const [screenType, setScreenType] = React.useState("config");
     const [cedarlingConfig, setCedarlingConfig] = React.useState([]);
 
-    React.useEffect(() => { 
+    React.useEffect(() => {
         setCedarlingConfig(data?.cedarlingConfig)
     }, [data])
 
@@ -174,11 +163,11 @@ export default function CedarlingMgmt({ data, notifyOnDataChange, isLoggedIn }) 
                             (
                                 <>
                                     {screenType === 'unsignedAuthz' &&
-                                        <CedarlingUnsignedAuthz data={data} />}
+                                        <UnsignedAuthzForm data={data} />}
                                     {screenType === 'multiIssuerAuthz' &&
-                                        <CedarlingMultiIssuerAuthz data={data} />}
+                                        <MultiIssuerAuthzForm data={data} />}
                                     {(screenType === 'signedAuthz' && isLoggedIn)&&
-                                        <CedarlingSignedAuthz data={data} />}
+                                        <SignedAuthzForm data={data} />}
                                 </>
                             )
                         }

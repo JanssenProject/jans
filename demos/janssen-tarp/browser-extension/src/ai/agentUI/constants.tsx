@@ -2,7 +2,7 @@ import React from 'react';
 import OpenAIIcon from '@mui/icons-material/Cloud';
 import GeminiIcon from '@mui/icons-material/SmartToy';
 import DeepSeekIcon from '@mui/icons-material/TravelExplore';
-import { LLMProvider } from './types';
+import { LLMProvider, ConnectionStatus, AlertSeverity } from './types';
 
 export const LLM_PROVIDERS: LLMProvider[] = [
   { 
@@ -62,3 +62,29 @@ export const DEFAULT_MODEL = 'gpt-4o-mini';
 export const DEFAULT_PROVIDER = 'openai';
 export const DEFAULT_MCP_URL = 'http://localhost:3001';
 
+export function getProviderColor(provider: string): string {
+  switch (provider) {
+    case 'openai': return '#2196f3';
+    case 'gemini': return '#ff9800';
+    case 'deepseek': return '#4caf50';
+    default: return '#2196f3';
+  }
+}
+
+export function getConnectionStatusSeverity(status: ConnectionStatus): AlertSeverity {
+  switch (status) {
+    case 'connected': return 'success';
+    case 'connecting': return 'warning';
+    case 'disconnected': return 'error';
+    default: return 'info';
+  }
+}
+
+export function getConnectionStatusText(status: ConnectionStatus): string {
+  switch (status) {
+    case 'connected': return 'Connected';
+    case 'connecting': return 'Connecting...';
+    case 'disconnected': return 'Disconnected';
+    default: return 'Unknown';
+  }
+}

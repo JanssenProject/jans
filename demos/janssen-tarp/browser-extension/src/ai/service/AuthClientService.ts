@@ -1,5 +1,5 @@
 
-import { ILooseObject } from '../../options/ILooseObject';
+import { ILooseObject } from '../../shared/types';
 
 export default class AuthClientService {
 
@@ -25,10 +25,12 @@ export default class AuthClientService {
   }
 
   public async saveClientInTarpStorage(registrationResp: ILooseObject): Promise<void> {
-    if (!registrationResp?.structuredContent?.registration_client_uri) {
+    const structured = registrationResp?.structuredContent as ILooseObject | undefined;
+    const registrationClientUri = structured?.registration_client_uri as string | undefined;
+    if (!registrationClientUri) {
       throw new Error("Invalid registration response");
     }
-    const issuer = new URL(registrationResp?.structuredContent?.registration_client_uri).origin;
+    const issuer = new URL(registrationClientUri).origin;
     const discoveryRes = await fetch(`${issuer}/.well-known/openid-configuration`);
     if (!discoveryRes.ok) throw new Error("Failed to fetch OIDC metadata");
 
@@ -47,17 +49,17 @@ export default class AuthClientService {
 
         clientArr.push({
           'opHost': issuer,
-          'clientId': registrationResp?.structuredContent?.client_id,
-          'clientSecret': registrationResp?.structuredContent?.client_secret,
-          'scope': registrationResp?.structuredContent?.scope,
-          'redirectUris': registrationResp?.structuredContent?.redirect_uris,
+          'clientId': structured?.client_id,
+          'clientSecret': structured?.client_secret,
+          'scope': structured?.scope,
+          'redirectUris': structured?.redirect_uris,
           'authorizationEndpoint': discoveryMetadata?.authorization_endpoint,
           'tokenEndpoint': discoveryMetadata?.token_endpoint,
           'userinfoEndpoint': discoveryMetadata?.userinfo_endpoint,
           'acrValuesSupported': discoveryMetadata?.acr_values_supported,
           'endSessionEndpoint': discoveryMetadata?.end_session_endpoint,
-          'responseType': registrationResp?.structuredContent?.response_types,
-          'postLogoutRedirectUris': registrationResp?.structuredContent?.post_logout_redirect_uris,
+          'responseType': structured?.response_types,
+          'postLogoutRedirectUris': structured?.post_logout_redirect_uris,
           'expireAt': undefined,
           'showClientExpiry': false
 

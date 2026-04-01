@@ -8,6 +8,9 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { v4 as uuidv4 } from 'uuid';
 import CircularProgress from "@mui/material/CircularProgress";
+import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -16,7 +19,7 @@ import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Stack from '@mui/material/Stack';
 import axios from 'axios';
 import Alert, { AlertColor } from '@mui/material/Alert';
-import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from './types';
+import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from '../../../shared/types';
 
 export default function RegisterClient({ isOpen, handleDialog }) {
   const [open, setOpen] = React.useState(isOpen);
@@ -31,6 +34,15 @@ export default function RegisterClient({ isOpen, handleDialog }) {
 
   const REGISTRATION_ERROR = 'Error in registration. Check web console for logs.'
   const filter = createFilterOptions();
+
+  const labelWithTooltip = (label: string, tooltip: string) => (
+    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+      {label}
+      <Tooltip title={tooltip} placement="top" arrow>
+        <InfoOutlinedIcon sx={{ fontSize: 18, opacity: 0.75 }} />
+      </Tooltip>
+    </Box>
+  );
 
   React.useEffect(() => {
     if (isOpen) {
@@ -386,7 +398,10 @@ export default function RegisterClient({ isOpen, handleDialog }) {
               margin="dense"
               id="issuer"
               name="issuer"
-              label="Issuer"
+              label={labelWithTooltip(
+                "Issuer",
+                "Your OpenID Provider base URL (or its /.well-known/openid-configuration). We’ll discover endpoints and register a new client."
+              )}
               type="text"
               fullWidth
               variant="outlined"
@@ -397,7 +412,11 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             />
             <LocalizationProvider dateAdapter={AdapterMoment}>
               <DemoContainer components={['DateTimePicker']}>
-                <DateTimePicker label="Client Expiry Date"
+                <DateTimePicker
+                  label={labelWithTooltip(
+                    "Client Expiry Date",
+                    "Optional. If set, the client will be marked as expired after this date/time."
+                  )}
                   disablePast
                   onChange={(newValue) => setExpireAt(newValue)}
                 />
@@ -455,7 +474,13 @@ export default function RegisterClient({ isOpen, handleDialog }) {
               renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
               freeSolo
               renderInput={(params) => (
-                <TextField {...params} label="Scopes" />
+                <TextField
+                  {...params}
+                  label={labelWithTooltip(
+                    "Scopes",
+                    "Requested OAuth/OIDC scopes for this client (e.g. openid, profile, email). You can also type a custom scope and press Enter to add it."
+                  )}
+                />
               )}
             />
           </Stack>

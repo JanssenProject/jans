@@ -15,8 +15,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Stack from '@mui/material/Stack';
 import initWasm, { init, Cedarling, AuthorizeResult } from '@janssenproject/cedarling_wasm';
-import Utils from './Utils';
-const CedarlingSignedAuthz = ({ data }) => {
+import Utils from '../../../options/Utils';
+const SignedAuthzForm = ({ data }) => {
     const [formFields, setFormFields] = useState({ action: "", context: {}, resource: {} });
     const [tokenSelection, setTokenSelection] = useState({ accessToken: false, userInfo: false, idToken: false });
     const [cedarlingBootstrapPresent, setCedarlingBootstrapPresent] = React.useState(false);
@@ -86,7 +86,7 @@ const CedarlingSignedAuthz = ({ data }) => {
             context: formFields.context,
             resource: formFields.resource,
         };
-        
+
         chrome.storage.local.set({ authzRequest: reqObj });
         return reqObj;
     };
@@ -259,4 +259,4 @@ const CedarlingSignedAuthz = ({ data }) => {
     )
 };
 
-export default CedarlingSignedAuthz;
+export default SignedAuthzForm;
