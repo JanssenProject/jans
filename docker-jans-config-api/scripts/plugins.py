@@ -111,20 +111,33 @@ class AdminUiPlugin:
     def configure_policy_store(self):
         logger.info("Configuring admin-ui policy store")
 
+        hostname = self.manager.config.get("hostname")
+        policy_file = "trusted-issuers/GluuFlexAdminUI.json"
+        policy_file_found = False
+
         with TemporaryDirectory() as tmp_dir:
-            hostname = self.manager.config.get("hostname")
-            policy_file = "trusted-issuers/GluuFlexAdminUI.json"
             src_archive_path = "/opt/jans/jetty/jans-config-api/custom/config/adminUI/policy-store.cjar"
             tmp_archive_path = os.path.join(tmp_dir, "policy-store.cjar")
 
-            with ZipFile(src_archive_path, "r") as src_archive, ZipFile(tmp_archive_path, "w") as tmp_archive:
+            with ZipFile(src_archive_path, "r") as src_archive:
+                # create temporary archive and preserve the original compression
+                tmp_archive = ZipFile(tmp_archive_path, "w", compression=src_archive.compression)
+
                 for item in src_archive.infolist():
                     if item.filename == policy_file:
+                        policy_file_found = True
                         policy = src_archive.read(item.filename).decode()
                         data = policy.replace("your-openid-provider.server", hostname).encode()
                     else:
                         data = src_archive.read(item.filename)
-                    tmp_archive.writestr(item, data)
+                    # copy item and preserve the original compression
+                    tmp_archive.writestr(item, data, compress_type=item.compress_type)
+
+                # make sure descriptor is closed
+                tmp_archive.close()
+
+            if not policy_file_found:
+                logger.warning("The policy file %s is not found in %s. Policy for Flex admin-ui may not be applied properly.", policy_file, src_archive_path)
 
             # replace the original archive
             shutil.move(tmp_archive_path, src_archive_path)
