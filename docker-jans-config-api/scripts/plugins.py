@@ -1,7 +1,9 @@
 import logging.config
 import os
 import shutil
+from tempfile import TemporaryDirectory
 from urllib.parse import urlparse
+from zipfile import ZipFile
 
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_server_certificate
@@ -59,7 +61,7 @@ class AdminUiPlugin:
     def setup(self):
         logger.info("Configuring admin-ui plugin")
         self.import_token_server_cert()
-        self.render_policy_store()
+        self.configure_policy_store()
 
     def import_token_server_cert(self):
         cert_file = os.environ.get("CN_TOKEN_SERVER_CERT_FILE", "/etc/certs/token_server.crt")
@@ -106,24 +108,23 @@ class AdminUiPlugin:
         # download the cert (if possible)
         get_server_certificate(host, port, cert_file)
 
-    def render_policy_store(self):
-        logger.info("Rendering admin-ui policy store")
+    def configure_policy_store(self):
+        logger.info("Configuring admin-ui policy store")
 
-        ctx = {
-            "hostname": self.manager.config.get("hostname"),
-        }
-        src = "/app/templates/jans-config-api/adminui-policy-store.json"
-        dst = "/opt/jans/jetty/jans-config-api/custom/config/adminUI/policy-store.json"
+        with TemporaryDirectory() as tmp_dir:
+            hostname = self.manager.config.get("hostname")
+            policy_file = "trusted-issuers/GluuFlexAdminUI.json"
+            src_archive_path = "/opt/jans/jetty/jans-config-api/custom/config/adminUI/policy-store.cjar"
+            tmp_archive_path = os.path.join(tmp_dir, "policy-store.cjar")
 
-        try:
-            with open(src) as f:
-                tmpl = f.read()
+            with ZipFile(src_archive_path, "r") as src_archive, ZipFile(tmp_archive_path, "w") as tmp_archive:
+                for item in src_archive.infolist():
+                    if item.filename == policy_file:
+                        policy = src_archive.read(item.filename).decode()
+                        data = policy.replace("your-openid-provider.server", hostname).encode()
+                    else:
+                        data = src_archive.read(item.filename)
+                    tmp_archive.writestr(item, data)
 
-            with open(dst, "w") as f:
-                f.write(tmpl % ctx)
-        except FileNotFoundError:
-            logger.exception("Unable to find template for policy store file at %s", src)
-            raise
-        except IOError:
-            logger.exception("Unable to render policy store file at %s", dst)
-            raise
+            # replace the original archive
+            shutil.move(tmp_archive_path, src_archive_path)

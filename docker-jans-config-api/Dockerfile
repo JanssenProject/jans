@@ -75,7 +75,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ENV JANS_SOURCE_VERSION=1b66569673d82976da013100f5c4eaae1854547e
+ENV JANS_SOURCE_VERSION=0710555e6e1314b6c08b2b1f2bfed615d9104816
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -114,14 +114,11 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
 WORKDIR /
 
 # add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
-# commit hash from GluuFlexAdminUIPolicyStore
-ARG AUI_POLICY_VERSION=320707351b6cdd53de986f278da5c91e8f772552
-# policy store filename
-ARG AUI_POLICY_FILE=2fb50e468d9dfefa142d1fce4fa9747efbd3a0f08de5.json
+ARG AUI_POLICY_VERSION=v2.0.0
+ARG AUI_POLICY_FILE=admin_ui_2_0.cjar
 
-# download policy store file and replace placeholder with parametrized variable
-RUN wget -nv https://raw.githubusercontent.com/GluuFederation/GluuFlexAdminUIPolicyStore/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O /app/templates/jans-config-api/adminui-policy-store.json \
-    && sed -i 's/your-openid-provider.server/%(hostname)s/g' /app/templates/jans-config-api/adminui-policy-store.json
+RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
+    && wget -nv https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore/releases/download/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O ${JETTY_BASE}/jans-config-api/custom/config/adminUI/policy-store.cjar
 
 # ======
 # Python
@@ -241,7 +238,6 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
 # ===========
 
 RUN mkdir -p /etc/certs \
-    ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/etc/jetty/security \
